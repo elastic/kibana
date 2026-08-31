@@ -36,11 +36,11 @@ export class WorkplaceAIServerlessPlugin
 
   public start(
     core: CoreStart,
-    { serverless }: WorkplaceAIServerlessPluginStartDeps
+    { navigation }: WorkplaceAIServerlessPluginStartDeps
   ): WorkplaceAIServerlessPluginStart {
     const navigationTree$ = of(createNavigationTree(core));
 
-    serverless.initNavigation('workplaceai', navigationTree$);
+    navigation.initNavigation('workplaceai', navigationTree$);
 
     return {};
   }

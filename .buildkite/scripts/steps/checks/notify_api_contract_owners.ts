@@ -10,99 +10,158 @@
 import { readFileSync, existsSync } from 'fs';
 import { upsertComment } from '#pipeline-utils';
 
+// Mirrors StabilityTier in @kbn/api-contracts. Kept as a local type because the
+// notifier only reads the JSON report
+type Tier = 'stable' | 'tech_preview' | 'experimental';
+
 export interface ImpactEntry {
   path: string;
   method?: string;
   reason: string;
   oasdiffId?: string;
   source?: string;
-  terraformResource: string;
-  owners: string[];
+  tier: Tier;
+  since?: string;
 }
 
 interface ImpactReport {
-  impactedChanges: ImpactEntry[];
+  entries: ImpactEntry[];
 }
 
-const COMMENT_CONTEXT = 'api-contracts-tf-breaking';
+// Kept stable so CI reruns on in-flight PRs update the existing comment in place
+// rather than posting a duplicate alongside the old one.
+const COMMENT_CONTEXT = 'api-contracts-breaking';
 
 const ALLOWLIST_PATH = 'packages/kbn-api-contracts/allowlist.json';
 const README_PATH = 'packages/kbn-api-contracts/README.md';
 
-export const buildCommentBody = (entries: ImpactEntry[]): string => {
-  const allOwners = [...new Set(entries.flatMap((e) => e.owners || []))];
-  const ownerMentions = allOwners.length > 0 ? allOwners.join(' ') : '_unknown_';
+const TIER_LABEL: Record<Tier, string> = {
+  stable: 'Stable (GA)',
+  tech_preview: 'Technical Preview',
+  experimental: 'Experimental',
+};
 
-  const escapeCell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+const escapeCell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
+const renderTable = (entries: ImpactEntry[]): string => {
   const rows = entries
     .map((e) => {
       const method = e.method ? ` \`${e.method.toUpperCase()}\`` : '';
       const oasdiffId = e.oasdiffId ? `\`${escapeCell(e.oasdiffId)}\`` : '';
       const source = e.source ? `\`${escapeCell(e.source)}\`` : '';
-      return `| \`${e.path}\`${method} | ${escapeCell(e.terraformResource)} | ${escapeCell(
-        e.reason
-      )} | ${oasdiffId} | ${source} | ${(e.owners || []).join(', ')} |`;
+      return `| \`${e.path}\`${method} | ${escapeCell(e.reason)} | ${oasdiffId} | ${source} |`;
     })
     .join('\n');
 
-  return `## API Contract Breaking Changes — Terraform Provider Impact
+  return `| Endpoint | Reason | oasdiffId | Source |
+|----------|--------|-----------|--------|
+${rows}`;
+};
 
-cc ${ownerMentions}
+const renderTierSection = (tier: Tier, entries: ImpactEntry[]): string => {
+  if (entries.length === 0) {
+    return '';
+  }
+  return `### ${TIER_LABEL[tier]} (${entries.length})
 
-The following breaking change(s) affect APIs consumed by the [Elastic Terraform Provider](https://github.com/elastic/terraform-provider-elasticstack).
+${renderTable(entries)}
+`;
+};
 
-| Endpoint | Terraform Resource | Reason | oasdiffId | Source | Owners |
-|----------|--------------------|--------|-----------|--------|--------|
-${rows}
+const renderExperimentalSection = (entries: ImpactEntry[]): string => {
+  if (entries.length === 0) {
+    return '';
+  }
+  return `### Experimental — informational, not blocking merge (${entries.length})
 
+Experimental APIs are allowed to introduce breaking changes. These are listed for visibility only and do not fail this check.
+
+${renderTable(entries)}
+`;
+};
+
+export const buildCommentBody = (entries: ImpactEntry[]): string => {
+  const gatingSections = [
+    renderTierSection(
+      'stable',
+      entries.filter((e) => e.tier === 'stable')
+    ),
+    renderTierSection(
+      'tech_preview',
+      entries.filter((e) => e.tier === 'tech_preview')
+    ),
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const experimentalSection = renderExperimentalSection(
+    entries.filter((e) => e.tier === 'experimental')
+  );
+
+  const sections = [gatingSections, experimentalSection].filter(Boolean).join('\n');
+
+  return `## API Contract Breaking Changes
+
+The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental changes are informational.
+
+${sections}
 ### What to do
 
 1. **Fix the breaking change** if it was unintentional.
-2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with members in the \`#kibana-oas-terraform\` Slack channel. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
+2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
 
-See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for details on the allowlist schema and workflow.`;
+See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;
 };
 
-async function main() {
-  const reportPaths = process.argv.slice(2);
+const isImpactReport = (report: unknown): report is ImpactReport =>
+  typeof report === 'object' &&
+  report !== null &&
+  Array.isArray((report as { entries?: unknown }).entries);
 
-  const allEntries: ImpactEntry[] = [];
-  for (const reportPath of reportPaths) {
-    if (!existsSync(reportPath)) {
-      continue;
-    }
-    try {
-      const report: ImpactReport = JSON.parse(readFileSync(reportPath, 'utf-8'));
-      if (!Array.isArray(report.impactedChanges)) {
-        console.error(`Report at ${reportPath} has no impactedChanges array, skipping`);
-        continue;
-      }
-      allEntries.push(...report.impactedChanges);
-    } catch {
-      console.error(`Failed to parse report at ${reportPath}, skipping`);
-    }
-  }
-
-  if (allEntries.length === 0) {
-    console.log('No TF-impacting breaking changes to report');
-    return;
-  }
-
-  const deduped = Array.from(
+// The same change appearing in both the stack and serverless specs collapses to
+// one row, keyed by endpoint + change identity.
+const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
+  Array.from(
     new Map(
-      allEntries.map((e) => [
+      entries.map((e) => [
         `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}`,
         e,
       ])
     ).values()
   );
 
-  const body = buildCommentBody(deduped);
+async function main() {
+  const reportPaths = process.argv.slice(2);
+
+  const entries: ImpactEntry[] = [];
+
+  for (const reportPath of reportPaths) {
+    if (!existsSync(reportPath)) {
+      continue;
+    }
+    let report: unknown;
+    try {
+      report = JSON.parse(readFileSync(reportPath, 'utf-8'));
+    } catch {
+      console.error(`Failed to parse report at ${reportPath}, skipping`);
+      continue;
+    }
+    if (isImpactReport(report)) {
+      entries.push(...report.entries);
+    } else {
+      console.error(`Report at ${reportPath} has no recognized shape, skipping`);
+    }
+  }
+
+  if (entries.length === 0) {
+    console.log('No breaking changes to report');
+    return;
+  }
+
   console.log('Posting PR comment notifying API owners...');
 
   await upsertComment({
-    commentBody: body,
+    commentBody: buildCommentBody(dedupeByChange(entries)),
     commentContext: COMMENT_CONTEXT,
     clearPrevious: true,
   });

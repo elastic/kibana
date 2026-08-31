@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,15 +26,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQuery } from '@kbn/react-query';
-import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
 import { GeneratedOnLabel } from './generated_on_label';
 import * as i18n from './translations';
-import { renderTextWithEntities } from './shared_lead_components';
+import { renderTextWithEntity } from './shared_lead_components';
 import { MAX_RECENT_LEADS, THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
 
 interface ThreatHuntingLeadsFlyoutProps {
@@ -52,33 +48,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
   const [searchQuery, setSearchQuery] = useState('');
 
   const { fetchLeads } = useEntityAnalyticsRoutes();
-  const { share } = useKibana().services;
-  const spaceId = useSpaceId();
-
-  const handleViewLeadsArchiveIndex = useCallback(async () => {
-    const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
-    if (!discoverLocator || !spaceId) return;
-
-    // Scope the data view to this space's leads indices only. The underlying indices are
-    // per-space (see getLeadsIndexName), so a `-*` wildcard would span every space's leads
-    // and is only guarded by raw ES index privileges, not Kibana space isolation.
-    const spaceLeadsIndexPattern = [
-      getLeadsIndexName(spaceId, 'adhoc'),
-      getLeadsIndexName(spaceId, 'scheduled'),
-    ].join(',');
-
-    const url = await discoverLocator.getRedirectUrl({
-      dataViewSpec: {
-        id: `entity-analytics-threat-hunting-leads-archive-${spaceId}`,
-        title: spaceLeadsIndexPattern,
-        allowHidden: true,
-      },
-    });
-
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
-  }, [share, spaceId]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['hunting-leads-flyout'],
@@ -103,7 +72,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
       (lead) =>
         lead.title.toLowerCase().includes(query) ||
         lead.byline.toLowerCase().includes(query) ||
-        lead.entities.some((e) => e.name.toLowerCase().includes(query))
+        lead.entity.name.toLowerCase().includes(query)
     );
   }, [leads, searchQuery]);
 
@@ -134,29 +103,14 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         <EuiText size="s" color="subdued">
           {i18n.ALL_HUNTING_LEADS_DESCRIPTION}
         </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-          {lastRunTimestamp && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="leadsFlyoutGeneratedTimestamp">
-                <GeneratedOnLabel timestamp={lastRunTimestamp} />
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="external"
-              flush="left"
-              iconSide="right"
-              onClick={handleViewLeadsArchiveIndex}
-              isDisabled={!spaceId}
-              data-test-subj="viewLeadsArchiveIndexButton"
-            >
-              {i18n.VIEW_LEADS_ARCHIVE_INDEX}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {lastRunTimestamp && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued" data-test-subj="leadsFlyoutGeneratedTimestamp">
+              <GeneratedOnLabel timestamp={lastRunTimestamp} />
+            </EuiText>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -215,8 +169,8 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
   const fontSizeM = useEuiFontSize('m');
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const renderedByline = useMemo(
-    () => renderTextWithEntities(lead.byline, lead.entities, THREAT_HUNTING_LEADS_SCOPE_ID),
-    [lead.byline, lead.entities]
+    () => renderTextWithEntity(lead.byline, lead.entity, THREAT_HUNTING_LEADS_SCOPE_ID),
+    [lead.byline, lead.entity]
   );
   return (
     <EuiPanel

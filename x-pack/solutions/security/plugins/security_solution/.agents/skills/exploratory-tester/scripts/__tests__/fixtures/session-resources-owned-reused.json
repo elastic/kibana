@@ -1,0 +1,34 @@
+{
+  "session_id": "abc12345",
+  "environment": {
+    "type": "stateful-classic",
+    "url": "http://localhost:5601",
+    "es_url": "http://localhost:9220"
+  },
+  "credentials": {
+    "username": "elastic",
+    "password": "changeme"
+  },
+  "session_resources": [
+    {
+      "kind": "kibana_space",
+      "id": "exploratory-testing-abc12345-flow-1",
+      "owned": true,
+      "marker": "exploratory-tester:abc12345",
+      "endpoint": "/api/spaces/space/exploratory-testing-abc12345-flow-1"
+    },
+    {
+      "kind": "kibana_space",
+      "id": "exploratory-testing-abc12345-flow-2",
+      "owned": false,
+      "marker": null,
+      "endpoint": "/api/spaces/space/exploratory-testing-abc12345-flow-2"
+    }
+  ],
+  "created_flow_spaces": [
+    "exploratory-testing-abc12345-flow-1"
+  ],
+  "reused_flow_spaces": [
+    "exploratory-testing-abc12345-flow-2"
+  ]
+}

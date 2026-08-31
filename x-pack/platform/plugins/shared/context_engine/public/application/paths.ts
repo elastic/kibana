@@ -7,8 +7,8 @@
 
 export const CONTEXT_ENGINE_PATHS = {
   landing: '/',
-  create: '/create',
-  detail: '/indexes/:id',
+  create: '/ai_index/create',
+  detail: '/ai_index/:id',
 } as const;
 
-export const getAiIndexDetailPath = (id: string): string => `/indexes/${id}`;
+export const getAiIndexDetailPath = (id: string): string => `/ai_index/${id}`;

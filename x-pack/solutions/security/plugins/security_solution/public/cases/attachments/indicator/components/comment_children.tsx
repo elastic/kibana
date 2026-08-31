@@ -16,6 +16,7 @@ import { useStyles } from './styles';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import type { IndicatorAttachmentMetadata } from '..';
 
 export const INDICATOR_NAME_TEST_ID = 'tiCasesIndicatorName';
@@ -51,7 +52,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
   const open = useCallback(() => {
     if (enableNewFlyout) {
       if (indicator) {
-        openIocFlyout({ indicator });
+        openIocFlyout({ indicator, origin: FLYOUT_ORIGIN.CASE_ATTACHMENT });
       }
     } else {
       openFlyout({

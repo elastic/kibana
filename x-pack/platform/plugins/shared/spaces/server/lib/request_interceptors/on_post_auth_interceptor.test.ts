@@ -12,7 +12,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { OnPostAuthHandler } from '@kbn/core-http-server';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
@@ -25,8 +25,8 @@ const flushMicrotasks = async () => {
   await new Promise<void>((resolve) => setImmediate(resolve));
 };
 
-const space = (id: string, overrides: Partial<Space> = {}): Space => ({
-  id,
+const space = (id: string, overrides: Partial<Omit<Space, 'id'>> = {}): Space => ({
+  id: asSpaceId(id),
   name: id,
   disabledFeatures: [],
   ...overrides,
@@ -36,6 +36,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   let postAuthHandler: OnPostAuthHandler;
   let getSpacesService: jest.Mock;
   let getCurrent: jest.Mock;
+  let getCurrentProfileId: jest.Mock;
   let update: jest.Mock;
   let getAll: jest.Mock;
   let getSpaceId: jest.Mock;
@@ -44,6 +45,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
 
   const setup = () => {
     getCurrent = jest.fn();
+    getCurrentProfileId = jest.fn();
     update = jest.fn().mockResolvedValue(undefined);
     getAll = jest.fn();
     getSpaceId = jest.fn();
@@ -51,6 +53,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
     const coreStart = coreMock.createStart();
     coreStart.userProfile = {
       getCurrent,
+      getCurrentProfileId,
       bulkGet: jest.fn(),
       suggest: jest.fn(),
       update,
@@ -210,7 +213,30 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   });
 
   describe('GET /spaces/enter', () => {
-    it('updates lastSelectedSpaceId when user opted in', async () => {
+    it('sets rememberSelectedSpace to true by default for a user that has the value unset and persists the current space id', async () => {
+      getSpaceId.mockReturnValue('foo');
+      getCurrent.mockResolvedValue({
+        uid: 'uid-1',
+        data: {
+          userSettings: {},
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        path: ENTER_SPACE_PATH,
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+      await flushMicrotasks();
+
+      expect(update).toHaveBeenCalledWith('uid-1', {
+        userSettings: { lastSelectedSpaceId: 'foo', rememberSelectedSpace: true },
+      });
+      expect(toolkit.next).toHaveBeenCalled();
+    });
+
+    it('it updates lastSelectedSpaceId when user is denoted as opted in', async () => {
       getSpaceId.mockReturnValue('foo');
       getCurrent.mockResolvedValue({
         uid: 'uid-1',

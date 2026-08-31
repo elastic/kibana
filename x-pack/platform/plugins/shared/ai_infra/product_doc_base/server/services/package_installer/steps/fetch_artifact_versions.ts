@@ -7,6 +7,7 @@
 
 import {
   DocumentationProduct,
+  getSecurityLabsArtifactName,
   parseArtifactName,
   parseSecurityLabsArtifactName,
   type ProductName,
@@ -19,6 +20,11 @@ import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
 import { getFetchOptions } from '../../proxy';
 import { LATEST_PRODUCT_VERSION } from '../../../../common/consts';
 type ArtifactAvailableVersions = Record<ProductName | 'openapi', string[]>;
+
+const normalizeArtifactKey = (artifactName: string): string => {
+  const withExtension = artifactName.endsWith('.zip') ? artifactName : `${artifactName}.zip`;
+  return withExtension.toLowerCase();
+};
 
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
@@ -105,14 +111,20 @@ interface ListBucketResponse {
 }
 
 /**
- * Fetches available Security Labs artifact versions from the repository.
+ * Fetches available Security Labs artifact versions for a specific inference ID.
+ *
+ * Only versions whose exact downloadable filename matches
+ * `getSecurityLabsArtifactName({ version, inferenceId })` are returned, so a newer
+ * Jina-only publish cannot poison ELSER "latest" selection (and vice versa).
  */
 export const fetchSecurityLabsVersions = async ({
   artifactRepositoryUrl,
   artifactRepositoryProxyUrl,
+  inferenceId,
 }: {
   artifactRepositoryUrl: string;
   artifactRepositoryProxyUrl?: string;
+  inferenceId: string;
 }): Promise<string[]> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -143,7 +155,15 @@ export const fetchSecurityLabsVersions = async ({
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
         const parsed = parseSecurityLabsArtifactName(artifactName);
-        if (parsed) {
+        if (!parsed) {
+          return;
+        }
+
+        const expectedName = getSecurityLabsArtifactName({
+          version: parsed.version,
+          inferenceId,
+        });
+        if (normalizeArtifactKey(artifactName) === expectedName) {
           versions.push(parsed.version);
         }
       });

@@ -71,7 +71,7 @@ function ZoomButton({
         }
       `}
     >
-      <EuiIcon type={iconType} />
+      <EuiIcon type={iconType} aria-hidden={true} />
     </button>
   );
 }
@@ -121,7 +121,7 @@ export function CanvasZoomControls() {
         disabled={!canZoomOut}
       />
       <ZoomButton
-        iconType="crosshairs"
+        iconType="crosshair"
         dataTestSubj="streamsCanvasFitToScreen"
         label={i18n.translate('xpack.streams.canvas.fitToScreen', {
           defaultMessage: 'Fit to screen',

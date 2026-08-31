@@ -25,13 +25,8 @@ export class CasesPage {
   public readonly commentTextArea: Locator;
   // Read-only chrome badge (rendered for users without write privileges)
   public readonly readOnlyBadge: Locator;
-  // "Kibana feature privileges required" page rendered when the user has no
-  // cases privileges at all.
-  public readonly noFeaturePermissions: Locator;
   // In-app "Privileges required" prompt rendered in place (not a redirect) when
-  // a user lacks the privilege for a specific cases route such as create. This
-  // is distinct from `noFeaturePermissions`, which is the Kibana 403 page shown
-  // when the user has no cases feature privilege at all.
+  // a user lacks the privilege for a specific cases route such as create.
   public readonly noPrivilegesPrompt: Locator;
   // Single case view
   public readonly caseViewTitle: Locator;
@@ -49,8 +44,14 @@ export class CasesPage {
     );
     this.createCaseButton = this.page.testSubj.locator('createNewCaseBtn');
     this.createCaseForm = this.page.testSubj.locator('case-creation-form-steps');
-    this.readOnlyBadge = this.page.testSubj.locator('headerBadge');
-    this.noFeaturePermissions = this.page.testSubj.locator('noFeaturePermissions');
+    // Classic chrome renders the legacy `chrome.setBadge()` read-only badge in the
+    // header (`headerBadge`); the Chrome Next AppHeader (serverless / cases redesign)
+    // renders it next to the page title as `appHeaderBadge`. Stateful renders both at
+    // once, so take the first match rather than requiring a unique one.
+    this.readOnlyBadge = this.page
+      .locator('[data-test-subj="headerBadge"],[data-test-subj="appHeaderBadge"]')
+      // eslint-disable-next-line playwright/no-nth-methods -- the two badges are equivalent; either one proves the read-only state
+      .first();
     this.noPrivilegesPrompt = this.page.getByRole('heading', { name: 'Privileges required' });
     this.caseViewTitle = this.page.locator(
       '[data-test-subj="case-view-title"],[data-test-subj="appHeaderTitle"]'

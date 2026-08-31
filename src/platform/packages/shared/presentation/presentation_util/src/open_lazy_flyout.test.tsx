@@ -32,7 +32,6 @@ const props = {
   flyoutProps: {
     'data-test-subj': 'lazyFlyoutTest',
   },
-  triggerId: 'testTrigger',
 };
 
 describe('openLazyFlyout', () => {
@@ -178,14 +177,38 @@ describe('openLazyFlyout', () => {
       }).not.toThrow();
     });
 
-    it('returns focus to the triggerId element when provided', () => {
+    it('uses the provided return focus callback', () => {
       const trigger = document.createElement('button');
-      trigger.id = 'myTrigger';
       document.body.appendChild(trigger);
 
-      openLazyFlyout({ core, loadContent, flyoutProps: { triggerId: 'myTrigger' } });
+      openLazyFlyout({
+        core,
+        loadContent,
+        returnFocus: () => trigger.focus(),
+      });
 
       getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('defers return focus until the next animation frame', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'myTrigger';
+      trigger.disabled = true;
+      document.body.appendChild(trigger);
+
+      openLazyFlyout({
+        core,
+        loadContent,
+        returnFocus: () => trigger.focus(),
+      });
+
+      getOnClose()();
+      expect(document.activeElement).not.toBe(trigger);
+
+      trigger.disabled = false;
       jest.runAllTimers();
 
       expect(document.activeElement).toBe(trigger);

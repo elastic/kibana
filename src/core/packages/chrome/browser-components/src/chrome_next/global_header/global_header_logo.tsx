@@ -42,7 +42,7 @@ export const ChromeNextGlobalHeaderLogo = React.memo(() => {
     <a
       href={homeHref}
       aria-label={LOGO_ARIA_LABEL}
-      data-test-subj="chromeNextGlobalHeaderLogo"
+      data-test-subj="nav-header-logo"
       css={logoLinkStyles}
       style={styleVars}
     >

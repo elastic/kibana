@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { CreateSLOInput } from '@kbn/slo-schema';
+import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -22,7 +23,8 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
   function createApmSloInput(
     name: string,
     service: string,
-    environment: string = 'production'
+    environment: string = 'production',
+    groupBy: CreateSLOInput['groupBy'] = '*'
   ): CreateSLOInput {
     return {
       name,
@@ -42,7 +44,71 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       timeWindow: { duration: '7d', type: 'rolling' },
       objective: { target: 0.99 },
       tags: ['test'],
-      groupBy: '*',
+      groupBy,
+    };
+  }
+
+  // `sloApi.create` only returns `{ id }`, so summary instance docs must be built
+  // with concrete metadata (notably `slo.indicator.type`, which the SLO find and
+  // grouped-stats queries filter on) rather than reading fields off the create response.
+  const APM_SUMMARY_INDICATOR = {
+    type: 'sli.apm.transactionDuration',
+    params: {
+      service: '*',
+      environment: 'production',
+      transactionType: 'request',
+      transactionName: '',
+      threshold: 500,
+      index: 'metrics-apm*',
+    },
+  };
+
+  function createGroupedApmSummaryDoc({
+    sloId,
+    instanceServiceName,
+    name,
+    now,
+  }: {
+    sloId: string;
+    instanceServiceName: string;
+    name: string;
+    now: string;
+  }) {
+    return {
+      slo: {
+        id: sloId,
+        instanceId: instanceServiceName,
+        revision: 1,
+        name,
+        description: 'Test APM SLO',
+        indicator: APM_SUMMARY_INDICATOR,
+        timeWindow: { duration: '7d', type: 'rolling' },
+        budgetingMethod: 'occurrences',
+        objective: { target: 0.99 },
+        tags: ['test'],
+        groupBy: ['service.name'],
+        groupings: { 'service.name': instanceServiceName },
+      },
+      service: { name: null, environment: null },
+      transaction: { name: null, type: null },
+      monitor: { config_id: null, name: null },
+      observer: { geo: { name: null }, name: null },
+      goodEvents: 100,
+      totalEvents: 100,
+      sliValue: 1,
+      errorBudgetInitial: 0.01,
+      errorBudgetConsumed: 0,
+      errorBudgetRemaining: 1,
+      errorBudgetEstimated: false,
+      statusCode: 1,
+      status: 'HEALTHY',
+      isTempDoc: false,
+      spaceId: 'default',
+      summaryUpdatedAt: now,
+      latestSliTimestamp: now,
+      fiveMinuteBurnRate: { totalEvents: 0, goodEvents: 0, value: 0 },
+      oneHourBurnRate: { totalEvents: 0, goodEvents: 0, value: 0 },
+      oneDayBurnRate: { totalEvents: 0, goodEvents: 0, value: 0 },
     };
   }
 
@@ -281,6 +347,96 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       expect(response.body.activeAlerts).to.eql({});
 
       await sloApi.delete(createdSlo.id, adminRoleAuthc);
+    });
+
+    it('returns grouped-by-service.name SLO instances for the matching service', async () => {
+      const es = getService('es');
+      const groupedServiceA = 'grouped-service-a';
+      const groupedServiceB = 'grouped-service-b';
+      const now = new Date().toISOString();
+
+      const createdSlo = await sloApi.create(
+        createApmSloInput('Grouped APM SLO', '*', 'production', ['service.name']),
+        adminRoleAuthc
+      );
+
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: SUMMARY_DESTINATION_INDEX_NAME } },
+          createGroupedApmSummaryDoc({
+            sloId: createdSlo.id,
+            instanceServiceName: groupedServiceA,
+            name: 'Grouped APM SLO',
+            now,
+          }),
+          { index: { _index: SUMMARY_DESTINATION_INDEX_NAME } },
+          createGroupedApmSummaryDoc({
+            sloId: createdSlo.id,
+            instanceServiceName: groupedServiceB,
+            name: 'Grouped APM SLO',
+            now,
+          }),
+        ],
+      });
+
+      const serviceAResponse = await getServiceSlos({ serviceName: groupedServiceA });
+      const serviceBResponse = await getServiceSlos({ serviceName: groupedServiceB });
+
+      expect(serviceAResponse.status).to.be(200);
+      expect(serviceAResponse.body.results.length).to.be(1);
+      expect(serviceAResponse.body.results[0].id).to.be(createdSlo.id);
+      expect(serviceAResponse.body.results[0].instanceId).to.be(groupedServiceA);
+      expect(serviceAResponse.body.statusCounts.healthy).to.be(1);
+
+      expect(serviceBResponse.status).to.be(200);
+      expect(serviceBResponse.body.results.length).to.be(1);
+      expect(serviceBResponse.body.results[0].id).to.be(createdSlo.id);
+      expect(serviceBResponse.body.results[0].instanceId).to.be(groupedServiceB);
+      expect(serviceBResponse.body.statusCounts.healthy).to.be(1);
+
+      await sloApi.delete(createdSlo.id, adminRoleAuthc);
+    });
+
+    it('returns both an ungrouped exact-service SLO and a grouped-by-service.name instance for the same service', async () => {
+      const es = getService('es');
+      const sharedServiceName = 'shared-service-both';
+      const now = new Date().toISOString();
+
+      // Ungrouped SLO pinned to the exact service (groupBy '*').
+      const ungroupedSlo = await sloApi.create(
+        createApmSloInput('Ungrouped exact-service SLO', sharedServiceName),
+        adminRoleAuthc
+      );
+
+      // Grouped-by-service.name SLO (service '*') with a summary instance for the same service.
+      const groupedSlo = await sloApi.create(
+        createApmSloInput('Grouped APM SLO shared', '*', 'production', ['service.name']),
+        adminRoleAuthc
+      );
+
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: SUMMARY_DESTINATION_INDEX_NAME } },
+          createGroupedApmSummaryDoc({
+            sloId: groupedSlo.id,
+            instanceServiceName: sharedServiceName,
+            name: 'Grouped APM SLO shared',
+            now,
+          }),
+        ],
+      });
+
+      const response = await getServiceSlos({ serviceName: sharedServiceName });
+
+      expect(response.status).to.be(200);
+      const returnedIds = response.body.results.map((slo: { id: string }) => slo.id);
+      expect(returnedIds).to.contain(ungroupedSlo.id);
+      expect(returnedIds).to.contain(groupedSlo.id);
+
+      await sloApi.delete(ungroupedSlo.id, adminRoleAuthc);
+      await sloApi.delete(groupedSlo.id, adminRoleAuthc);
     });
   });
 }

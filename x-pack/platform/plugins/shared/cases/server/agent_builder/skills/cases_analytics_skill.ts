@@ -57,7 +57,7 @@ The indices are named \`.cases\` / \`.cases-activity\` / \`.cases-attachments\` 
 
 | Index | Grain | Key fields |
 |-------|-------|-----------|
-| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\` |
+| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.assignees.username\`, \`case.assignees.full_name\`, \`case.assignees.email\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\` |
 | \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
 | \`.cases-attachments\` | one doc per comment/attachment | \`case.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
 
@@ -113,9 +113,11 @@ FROM .cases
 
 \`FIELD_EXTRACT\` is a **Technical Preview** function. It reads numeric and keyword sub-keys from the flattened \`case.extended_fields\`, but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Case Analytics\` data view (see "KQL / the Case Analytics data view"), whose typed runtime field \`case.<name>_as_<type>\` reads the same values.
 
-## Resolving user UIDs to names
+## Resolving assignee UIDs to names
 
-Assignees are stored as **profile UIDs only** — \`case.assignees.uid\` (and \`action.assignees_changed\` on the activity stream). No tool resolves them and there is no user directory index to join. But every \`.cases-activity\` row carries the **acting** user's identity (\`actor.profile_uid\` + \`actor.full_name\` + \`actor.username\`), so you can build a best-effort UID→name directory from the activity stream and use it to label UIDs:
+Assignees carry identity inline on \`.cases\`: \`case.assignees.username\`, \`case.assignees.full_name\` and \`case.assignees.email\` alongside \`case.assignees.uid\`. **Prefer these fields** — label assignees with \`case.assignees.full_name\` (fall back to \`username\`, then \`uid\`), no join or helper query needed.
+
+These fields are **forward-only**: they are populated when the case was created/updated after the identity rollout and the profile resolved. Legacy cases, unresolved UIDs, and deployments where population is still disabled leave them \`null\` — for those, and for \`action.assignees_changed\` on the activity stream (still UID-only), fall back to the activity-derived UID→name directory below.
 
 \`\`\`esql
 FROM .cases-activity
@@ -126,14 +128,14 @@ FROM .cases-activity
 | KEEP uid, actor.full_name, actor.username
 \`\`\`
 
-Run this as a helper query, then map the UIDs in your result (e.g. \`case.assignees.uid\`) to names. Key points:
+Run this as a helper query, then map any UIDs left unresolved by the inline fields to names. Key points:
 - **Best-effort coverage** — the directory only knows users who have *performed* a case action. A user who was assigned but never acted won't appear; show their UID and say the display name isn't available rather than guessing.
 - **Renamed users** — a user whose name/username changed may appear on more than one row; the most recent (top, by \`latest\`) is current.
 - **DLS-scoped** — you only see actors in the owners/spaces you can read, so the directory is naturally limited to authorized names.
 - **Not a \`LOOKUP JOIN\`** — \`.cases-activity\` is a fact index (not lookup-mode), so it can't be a join target. Build the directory table first, then annotate in a second step.
 - **Reporters need no resolution** — \`case.created_by\` / \`case.updated_by\` / \`case.closed_by\` already carry \`username\` / \`full_name\` / \`email\`.
 
-For a dashboard (where the two-step annotate isn't available), surface the same directory query as its own table/Lens panel so it acts as a UID→name key alongside the UID-keyed charts.
+For a dashboard, prefer the inline \`case.assignees.full_name\`; where UIDs remain (legacy docs, \`action.assignees_changed\`), surface the directory query as its own table/Lens panel so it acts as a UID→name key alongside the UID-keyed charts.
 
 ## Building visualizations
 
@@ -200,7 +202,7 @@ FROM .cases
 | STATS open_cases = COUNT(*) BY case.assignees.uid
 | SORT open_cases DESC
 \`\`\`
-Note: \`case.assignees.uid\` is a profile UID. Label it with the activity-derived UID→name directory (helper below) — best-effort, covering users who've performed an action; otherwise show the UID. Reporters (\`case.created_by\` / \`case.updated_by\` / \`case.closed_by\`) already carry \`username\` / \`full_name\` / \`email\`.
+Note: prefer the inline identity fields for labels — group/label by \`case.assignees.full_name\` (fall back to \`case.assignees.username\`, then \`case.assignees.uid\`). These are forward-only, so for legacy docs / unresolved UIDs (and for \`action.assignees_changed\`) fall back to the activity-derived UID→name directory (helper below) — best-effort, covering users who've performed an action; otherwise show the UID. Reporters (\`case.created_by\` / \`case.updated_by\` / \`case.closed_by\`) already carry \`username\` / \`full_name\` / \`email\`.
 
 ## User UID → name directory (helper for labeling assignee UIDs)
 \`\`\`esql
@@ -211,7 +213,7 @@ FROM .cases-activity
 | RENAME actor.profile_uid AS uid
 | KEEP uid, actor.full_name, actor.username
 \`\`\`
-Best-effort: only users who have performed an action appear. Use it to label \`case.assignees.uid\` / \`action.assignees_changed\`; fall back to the UID when absent (a renamed user's most recent row, by \`latest\`, is current). \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
+Best-effort: only users who have performed an action appear. Prefer the inline \`case.assignees.{full_name,username}\` fields first; use this directory only for UIDs they leave \`null\` (legacy/unresolved docs) and for \`action.assignees_changed\`, falling back to the UID when still absent (a renamed user's most recent row, by \`latest\`, is current). \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
     },
     {
       relativePath: './analytics',

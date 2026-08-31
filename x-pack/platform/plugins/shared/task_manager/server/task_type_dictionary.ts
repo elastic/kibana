@@ -7,7 +7,13 @@
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import type { TaskDefinition, TaskRunCreatorFunction, TaskPriority, TaskCost } from './task';
+import type {
+  TaskDefinition,
+  TaskRunCreatorFunction,
+  TaskPriority,
+  TaskCost,
+  TaskTypeGroup,
+} from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
@@ -49,6 +55,9 @@ export const REMOVED_TYPES: string[] = [
   'streams_onboarding',
   'streams_features_identification',
   'streams_significant_events_queries_generation',
+
+  // Legacy streams description generation task replaced by the synchronous suggestion API
+  'streams_description_generation',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [
@@ -117,6 +126,7 @@ export interface TaskRegisterDefinition {
   >;
 
   paramsSchema?: ObjectType;
+  taskTypeGroup?: TaskTypeGroup;
 }
 
 /**

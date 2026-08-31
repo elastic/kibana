@@ -5,24 +5,27 @@ React APIs for Kibana app headers during the Chrome Next migration.
 Chrome Next uses one shared header view with two placement models:
 
 - App-owned inline rendering, where the page renders `AppHeader` in its own React tree.
-- Chrome-owned rendering, where the app registers `AppHeaderConfig` and Chrome renders the layout
-  top-bar slot.
+- Chrome-owned rendering, where the app registers `ChromeAppHeaderConfig` and Chrome renders the
+  layout top-bar slot.
 
-Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
-the page cannot safely own the header placement yet.
+Prefer inline rendering when the page owns its header placement. Use Chrome-owned registration when
+Chrome must own the top-bar slot, including apps with sticky or shared top-nav constraints such as
+Discover, Dashboard, and Lens.
+
+Presentation (shell, title, tabs, badges, menu rendering, stories) lives in private
+`@kbn/ui-app-header`. This package is the stable plugin facade: it keeps registration semantics,
+Chrome-connected adapters, and the public `@kbn/app-header` imports.
 
 ## Folder layout
 
-Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
-files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
-graduates to its own folder only when it gains real complexity of its own — an internal component
-split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
-until they earn a folder; don't pre-folder simple slots.
+Connected adapters and Chrome hooks live in `src/app_header/`. Presentation components live in
+`@kbn/ui-app-header`. Do not import the UI package from plugins.
 
 ## Which API should I use?
 
 Use `AppHeader` when the page can render its header inline. This is the preferred model for pages
-that own their title, back target, tabs, badges, and app menu locally.
+that own their title, back target, tabs, badges, and app menu locally. Use `AppHeaderLoading` in
+the same slot while that content is not ready yet.
 
 Use `ChromeAppHeaderRegistration` when Chrome should own the top-bar slot. This keeps migration
 small for pages with sticky or shared top-nav constraints while still using the shared header view.
@@ -33,11 +36,108 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
 
+## Migrating route headers
+
+Use `AppHeader` instead of `EuiPageHeader`, `EuiPageTemplate.Header`, or
+`KibanaPageTemplate.Header` for top-level application route headers. `EuiPageHeader` and
+`EuiPageTemplate.Header` remain appropriate for nested content and other UI that is not the route
+header. `KibanaPageTemplate.Header` and the `KibanaPageTemplate` `pageHeader` prop are deprecated;
+do not add new consumers.
+
+See the [AppHeader migration guide](https://github.com/elastic/kibana/issues/283673) for migration
+steps, examples, and tracking.
+
+Keep title and back visible at the top while route content scrolls. They replace always-visible
+breadcrumbs. Scroll to verify; see [Sticky positioning](#sticky-positioning) if they move away.
+
+## Back navigation
+
+The header chevron is "up", not history. It points at the page's single IA parent — the same
+destination for a given route, regardless of how the user arrived. Browser Back remains the only
+history control. Do not use `history.back()`, and do not infer origin from history or
+`document.referrer`.
+
+The one exception is a satellite page: the route was opened to act on a foreign object or flow and
+received an explicit origin (state or param such as `referrer` or an embeddable transfer). That
+origin replaces the IA parent. Without it, the page uses its normal parent, or no back.
+
+Pass one target with a `label` that names the destination — the parent page ("Component templates")
+or the satellite origin ("Dashboard"):
+
+```tsx
+<AppHeader back={{ href: '/app/my-app', label: 'My app' }} title="Details" />
+```
+
+Kibana handles same-origin `href` values as SPA navigation, so an `onClick` that navigates to the
+same URL is unnecessary. If the handler replaces navigation, call `event.preventDefault()`.
+
+Omit `back` on top-level pages that are already side-nav destinations. Do not copy the classic
+breadcrumb trail into `back` (categories, current page, selected tabs). Do not point at the current
+URL or a sibling tab — tabs live on `AppHeader.tabs`. Do not pass a cross-space or cross-deployment
+href. Do not pass an array of targets; the popover exists only for the breadcrumb-derived fallback.
+
+Use `onClick` when returning to a satellite origin needs more than navigation (for example
+`transferBackToEditor`). Keep a real `href` as the fallback.
+
+As a temporary compatibility fix, if an unmigrated page already owns an in-page back (for example
+`EuiPageHeader` breadcrumbs or a custom back control) and would also get a Chrome Next compatibility
+back from breadcrumbs, mount:
+
+```tsx
+<>
+  <SuppressChromeBackButton />
+  <EuiPageHeader breadcrumbs={[...]} ... />
+</>
+```
+
+`SuppressChromeBackButton` is inert outside Chrome Next project style. Prefer a full `AppHeader`
+migration over long-lived suppression.
+
+Tri-state `back` lives only on chrome registration (`ChromeAppHeaderConfig` via
+`ChromeAppHeaderRegistration` / `chrome.next.appHeader.set`). The rendered `AppHeader` component
+does not accept `false`:
+
+- value — explicit chrome back (no breadcrumb fallback)
+- `false` — intentional no chrome back; suppresses the breadcrumb-derived fallback
+- omitted — allow the compatibility fallback to derive back from project breadcrumbs
+
+Do not register `{ back: false }` separately from another app-header config on the same route —
+`set` replaces the whole config. Prefer combining fields on one registration, or use
+`SuppressChromeBackButton` when suppression is the only registration.
+
 ## Discover tabs
 
 Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its UnifiedTabs bar beside
 the title. This is a Discover-specific layout exception; other apps should use the structured
-`tabs` or `badges` props on `AppHeader`.
+`tabs` or `badges` props on `AppHeader`. The public header components discard undeclared props, so
+this internal title slot cannot be forced through a type suppression. When the tabs bar is present,
+it owns the bottom separator and title actions remain visible without hovering.
+
+## Loading skeleton
+
+When the page title and menu are not ready yet, mount `AppHeaderLoading` instead of gating the
+whole page behind a spinner. It claims the same inline slot as `AppHeader` and skeletons both
+regions with defaults that match a typical title + overflow + primary header:
+
+```tsx
+<AppHeaderLoading />
+```
+
+`back` still renders when provided. Once data arrives, replace it with the real `AppHeader`.
+
+The fully supported swap is a **single-row** header: title (optional back) plus the app menu.
+`AppHeaderLoading` does not skeleton tabs, description, metadata, or title actions. Swapping from
+the loading placeholder to a multi-row `AppHeader` will change the header height.
+
+The menu skeleton can be customized later if the loaded header will not look like the default
+(for example two icon buttons and no primary). `buttonCount` is clamped to AppMenu's
+`APP_MENU_ITEM_LIMIT` (3); the primary action is separate and does not count toward that limit.
+The menu uses the same responsive collapsed / minimal / expanded layouts as `AppMenu`.
+
+```tsx
+<AppHeaderLoading menu={{ buttonCount: 2, hasPrimary: false }} />
+<AppHeaderLoading back={{ href: '/app/my-app', label: 'My app' }} />
+```
 
 ## Editable titles
 
@@ -60,11 +160,53 @@ Pass a title object when the page title can be renamed from the header:
 The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
 saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
+## Description and metadata
+
+Use `description` only when short explanatory text materially helps users understand the page. It
+accepts a string:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description="Query and analyze data stored across multiple Elasticsearch clusters."
+/>
+```
+
+To add a URL rendered with the fixed label "Learn more", use the object form:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description={{
+    text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+    learnMoreUrl: documentationUrl,
+  }}
+/>
+```
+
+Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
+structured entity facts such as status, owner, or creation time. Documentation links that are not
+part of a necessary description belong in the app menu via `docLink`.
+
+## Strict props
+
+The public types are the contract: strings, callbacks, known unions. A type assertion can still
+pass a React node as a `label`, or extra keys that get spread into EUI. Either path paints custom
+UI and the header stops looking like one component.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
+If a layout cannot be expressed with the public API, extend the API. The deprecated
+`renderCustomBadge` hatch is the only supported custom-UI path today.
+
+Menu item text is coerced the same way in `@kbn/ui-app-menu`.
+
 ## Title size
 
-The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
-metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
-is no size knob to set.
+The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —
+there is no size knob to set.
 
 ## Spacing
 
@@ -120,10 +262,23 @@ standard modes and 48px in `'compact'`.
 
 ## Sticky positioning
 
-`sticky` defaults to `true` and should normally be omitted. Use `sticky={false}` only when the
-full-page layout has its own mechanism that keeps the app header sticky within the correct scrolling
-container. Rendering an inline or full-width header is not by itself a reason to disable sticky
-positioning.
+In Chrome Next project layout, title and back replace always-visible breadcrumbs and must remain at
+the top while the page scrolls.
+
+- Inline `AppHeader`: omit `sticky` (defaults to `true`) to use CSS `position: sticky`.
+- `ChromeAppHeaderRegistration`: Chrome pins the header in the layout top-bar and renders the view
+  with `sticky={false}`.
+- Set `sticky={false}` only when the surrounding layout already pins the header in the correct
+  scroll container.
+
+`sticky={false}` does not make the header full-width. `flush` and bleed modes control inset.
+
+CSS sticky fails when:
+
+- A wrapper is only as tall as the header, so sticky is confined to that containing block.
+- An `overflow: hidden`, `auto`, or `scroll` ancestor sits between the header and the page scroller.
+
+Scroll the page. If title or back moves away, the migration is not done.
 
 ## Testing
 
@@ -182,20 +337,16 @@ await openAppMenuOverflow();
 expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 ```
 
-## Chrome Next flag and runtime checks
+## Runtime checks
 
-Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
-decide which layout slots are active.
-
-App-facing React code usually should not read the flag directly. `ChromeAppHeaderRegistration`
-registers only when Chrome Next is enabled and the active chrome style is project:
+`ChromeAppHeaderRegistration` registers only when the active chrome style is project:
 
 ```ts
-chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+chrome.getChromeStyle() === 'project';
 ```
 
-When this condition is false, registration is a no-op and the existing classic/project Chrome paths
-continue to own the header area.
+When this condition is false, registration is a no-op and classic Chrome continues to own the header
+area.
 
 ## Migration guidance
 
@@ -205,7 +356,7 @@ different buckets while the migration is in progress:
 | Bucket | Preferred API | When to use |
 |---|---|---|
 | Inline-ready | `AppHeader` | The page can colocate header state with its React tree. |
-| Chrome-owned transitional | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot while the route keeps existing layout constraints. |
+| Chrome-owned | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot because the route has sticky, shared top-nav, or layout constraints. |
 | Fallback-only | Legacy Chrome state | Temporary safety net for routes that have not explicitly migrated. |
 
 ### Fallback-only
@@ -218,5 +369,16 @@ Chrome can still render a minimal app header as a fallback by deriving:
 - Badges from legacy badge state.
 
 This is a compatibility fallback, not a migration target. If breadcrumbs are missing, stale, or point
-to the wrong parent, the fallback back button inherits the same problem. Move routes in this bucket
-to explicit `AppHeader` or `ChromeAppHeaderRegistration` configuration.
+to the wrong parent, the fallback back button inherits the same problem. The fallback may emit an
+array of ancestors and render a popover; that array form is deprecated for explicit `back` — pass
+one `{ href, label }` instead. Move routes in this bucket to `AppHeader`. Existing apps with
+approved Chrome-owned placement should provide explicit `ChromeAppHeaderRegistration` configuration
+instead of relying on fallback state.
+
+The legacy menu, badge, and breadcrumb-extension setters that feed this fallback are deprecated. Keep
+existing calls until their route migrates, but do not add new consumers.
+
+Do not use project breadcrumb overrides to configure app-header back navigation. The
+`ChromeSetBreadcrumbsParams.project` and serverless `setBreadcrumbs` paths remain only to protect
+fallback-only routes during migration and can be deprecated independently of `chrome.setBreadcrumbs`,
+which still owns visible breadcrumbs in classic Chrome.

@@ -115,7 +115,7 @@ describe('getResultCountsForActions', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         allow_no_indices: true,
-        index: 'logs-osquery_manager.action.responses-production',
+        index: ['logs-osquery_manager.action.responses-production'],
         ignore_unavailable: true,
       })
     );
@@ -130,8 +130,24 @@ describe('getResultCountsForActions', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index:
-          'logs-osquery_manager.action.responses-prod,logs-osquery_manager.action.responses-default',
+        index: [
+          'logs-osquery_manager.action.responses-prod',
+          'logs-osquery_manager.action.responses-default',
+        ],
+      })
+    );
+  });
+
+  it('targets the broad results index when no integration namespaces are resolved', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1'], 'default');
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: ['logs-osquery_manager.action.responses*'],
       })
     );
   });
@@ -145,8 +161,10 @@ describe('getResultCountsForActions', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index:
-          'logs-osquery_manager.action.responses-default,*:logs-osquery_manager.action.responses-default',
+        index: [
+          'logs-osquery_manager.action.responses-default',
+          '*:logs-osquery_manager.action.responses-default',
+        ],
       })
     );
   });

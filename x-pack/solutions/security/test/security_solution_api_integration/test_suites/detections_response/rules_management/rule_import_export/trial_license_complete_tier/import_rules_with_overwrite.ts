@@ -9,11 +9,17 @@ import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { combineToNdJson, getCustomQueryRuleParams, fetchRule } from '../../../utils';
+import {
+  combineToNdJson,
+  getCustomQueryRuleParams,
+  fetchRule,
+  importRulesWithSuccess,
+} from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI import_rules with rule overwrite set to "true"', () => {
@@ -77,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('overwrites an existing rule', async () => {
-      await createRule(
+      const existing = await createRule(
         supertest,
         log,
         getCustomQueryRuleParams({
@@ -109,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const importedRule = await fetchRule(supertest, { ruleId: 'existing-rule' });
 
+      expect(importedRule.id).toBe(existing.id);
       expect(importedRule.name).toBe('Imported rule');
     });
 
@@ -186,6 +193,70 @@ export default ({ getService }: FtrProviderContext): void => {
           throttle: expect.anything(),
         })
       );
+    });
+
+    it('enables a disabled rule when overwriting with enabled true', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-enable-rule',
+          name: 'Disabled before overwrite',
+          enabled: false,
+        })
+      );
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-enable-rule',
+            name: 'Enabled after overwrite',
+            enabled: true,
+          }),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-enable-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.enabled).toBe(true);
+      expect(body.name).toBe('Enabled after overwrite');
+    });
+
+    it('disables an enabled rule when overwriting with enabled false', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-disable-rule',
+          name: 'Enabled before overwrite',
+          enabled: true,
+        })
+      );
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-disable-rule',
+            name: 'Disabled after overwrite',
+            enabled: false,
+          }),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-disable-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.enabled).toBe(false);
+      expect(body.name).toBe('Disabled after overwrite');
     });
   });
 };

@@ -72,6 +72,18 @@
       ],
       "wait_for_completion": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "max_docs": "",
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      },
+      "slice": {
+        "field": "",
+        "id": "",
+        "max": ""
+      },
+      "sort": ""
+    },
     "methods": [
       "POST"
     ],

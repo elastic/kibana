@@ -8,14 +8,18 @@
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { ToolType } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import { useToolTypes } from '../../../../hooks/tools/use_tool_type_info';
 import type { ToolFormData } from '../types/tool_form_types';
-import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
+import {
+  getToolTypeConfig,
+  getEditableToolTypes,
+  getToolTypeDefaultValues,
+} from '../registry/tools_form_registry';
 import { ToolFormMode } from '../tool_form';
 
 const TECH_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.tools.techPreviewBadgeLabel', {
@@ -28,6 +32,8 @@ export interface TypeProps {
 
 export const TypeSection = ({ mode }: TypeProps) => {
   const {
+    getValues,
+    reset: formReset,
     formState: { errors },
     control,
   } = useFormContext<ToolFormData>();
@@ -67,6 +73,20 @@ export const TypeSection = ({ mode }: TypeProps) => {
     }));
   }, [serverToolTypes, toolTypesLoading]);
 
+  const onToolTypeChange = useCallback(
+    (value: ToolType) => {
+      const { toolId, description, labels } = getValues();
+      formReset({
+        ...getToolTypeDefaultValues(value),
+        // Maintain common values between type changes
+        toolId,
+        description,
+        labels,
+      });
+    },
+    [formReset, getValues]
+  );
+
   return (
     <ToolFormSection
       title={i18nMessages.configuration.documentation.title}
@@ -81,12 +101,12 @@ export const TypeSection = ({ mode }: TypeProps) => {
         <Controller
           control={control}
           name="type"
-          render={({ field: { value, onChange } }) => (
+          render={({ field: { value } }) => (
             <EuiSuperSelect
               data-test-subj="agentBuilderToolTypeSelect"
               options={editableToolTypes}
               valueOfSelected={value}
-              onChange={onChange}
+              onChange={onToolTypeChange}
               disabled={mode === ToolFormMode.Edit}
               fullWidth
             />

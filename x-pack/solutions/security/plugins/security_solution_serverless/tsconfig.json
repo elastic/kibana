@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
@@ -55,5 +56,6 @@
     "@kbn/usage-api-plugin",
     "@kbn/workflows-management-plugin",
     "@kbn/navigation-plugin",
+    "@kbn/scout-security",
   ]
 }

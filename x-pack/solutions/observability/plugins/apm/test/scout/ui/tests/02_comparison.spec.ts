@@ -19,42 +19,46 @@ const PAGES = [
 // `observability:enableComparisonByDefault` is a global advanced setting that this
 // suite flips per test. It lives in the sequential lane (workers: 1) so its writes
 // can't race the `01_home` suite, and resets the value afterwards.
-test.describe('Comparison feature flag', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test.afterAll(async ({ uiSettings }) => {
-    await uiSettings.unset('observability:enableComparisonByDefault');
-  });
-
-  for (const { name, path } of PAGES) {
-    test(`shows comparison enabled on the ${name} page`, async ({
-      page,
-      uiSettings,
-      pageObjects: { navigationPage },
-    }) => {
-      await uiSettings.set({ 'observability:enableComparisonByDefault': true });
-      await navigationPage.gotoApm(path);
-      await expect(page.locator('input#comparison[type="checkbox"]')).toBeChecked({
-        timeout: EXTENDED_TIMEOUT,
-      });
-      await expect(page.getByTestId('comparisonSelect')).toBeEnabled();
+test.describe(
+  'Comparison feature flag',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
     });
-  }
 
-  for (const { name, path } of PAGES) {
-    test(`shows comparison disabled on the ${name} page`, async ({
-      page,
-      uiSettings,
-      pageObjects: { navigationPage },
-    }) => {
-      await uiSettings.set({ 'observability:enableComparisonByDefault': false });
-      await navigationPage.gotoApm(path);
-      await expect(page.locator('input#comparison[type="checkbox"]')).not.toBeChecked({
-        timeout: EXTENDED_TIMEOUT,
-      });
-      await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
+    test.afterAll(async ({ uiSettings }) => {
+      await uiSettings.unset('observability:enableComparisonByDefault');
     });
+
+    for (const { name, path } of PAGES) {
+      test(`shows comparison enabled on the ${name} page`, async ({
+        page,
+        uiSettings,
+        pageObjects: { navigationPage },
+      }) => {
+        await uiSettings.set({ 'observability:enableComparisonByDefault': true });
+        await navigationPage.gotoApm(path);
+        await expect(page.locator('input#comparison[type="checkbox"]')).toBeChecked({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByTestId('comparisonSelect')).toBeEnabled();
+      });
+    }
+
+    for (const { name, path } of PAGES) {
+      test(`shows comparison disabled on the ${name} page`, async ({
+        page,
+        uiSettings,
+        pageObjects: { navigationPage },
+      }) => {
+        await uiSettings.set({ 'observability:enableComparisonByDefault': false });
+        await navigationPage.gotoApm(path);
+        await expect(page.locator('input#comparison[type="checkbox"]')).not.toBeChecked({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
+      });
+    }
   }
-});
+);

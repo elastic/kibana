@@ -14,12 +14,34 @@ import {
 } from './significant_events_alerting_context';
 
 describe('canQueryBeRuleBacked', () => {
-  it('allows MATCH queries to be rule-backed', () => {
-    expect(canQueryBeRuleBacked('match')).toBe(true);
+  it('allows filter-only MATCH queries to be rule-backed', () => {
+    expect(
+      canQueryBeRuleBacked({
+        type: 'match',
+        esql: { query: 'FROM logs-* | WHERE level == "error"' },
+      })
+    ).toBe(true);
   });
 
   it('does not allow STATS queries until rule-on-rule provisioning', () => {
-    expect(canQueryBeRuleBacked('stats')).toBe(false);
+    expect(
+      canQueryBeRuleBacked({
+        type: 'stats',
+        esql: {
+          query:
+            'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value',
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('does not allow MATCH queries that are not filter-only', () => {
+    expect(
+      canQueryBeRuleBacked({
+        type: 'match',
+        esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
+      })
+    ).toBe(false);
   });
 });
 
@@ -33,6 +55,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
 
     expect(context.alertsReader).toBe(ALERTS_READER_V2);
     expect(context.rulesClient).toBeInstanceOf(RulesAdapterV2);
+    expect(context.alertingV2RulesClient).toBe(v2Client);
   });
 
   it('caches context resolution within a request via the resolver factory', async () => {

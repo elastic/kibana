@@ -69,6 +69,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
       [newName],
       [tagName],
       (hasCompleted) => onTagsUpdated([newName], [tagName], hasCompleted),
+      undefined,
       i18n.translate('xpack.fleet.renameAgentTags.successNotificationTitle', {
         defaultMessage: 'Tag renamed',
       }),
@@ -85,6 +86,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
       [],
       [tagName],
       (hasCompleted) => onTagsUpdated([], [tagName], hasCompleted),
+      undefined,
       i18n.translate('xpack.fleet.deleteAgentTags.successNotificationTitle', {
         defaultMessage: 'Tag deleted',
       }),
@@ -110,6 +112,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
             })}
             color="text"
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
               setTagOptionsButton(event.currentTarget);
               setTagOptionsVisible(!tagOptionsVisible);
             }}

@@ -21,6 +21,8 @@ import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -36,7 +38,7 @@ export interface RunWorkflowResult {
 export async function runWorkflow({
   workflowRunId,
   spaceId,
-  taskAbortController,
+  signal,
   logger,
   config,
   fakeRequest,
@@ -44,10 +46,12 @@ export async function runWorkflow({
   workflowsExecutionEngine,
   meteringService,
   internalResumeWorkflowExecution,
+  workflowExecutionRepository,
+  stepExecutionRepository,
 }: {
   workflowRunId: string;
   spaceId: string;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
@@ -55,6 +59,8 @@ export async function runWorkflow({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
 }): Promise<RunWorkflowResult | void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -66,6 +72,8 @@ export async function runWorkflow({
       logger,
       config,
       dependencies,
+      workflowExecutionRepository,
+      stepExecutionRepository,
       fakeRequest,
       workflowsExecutionEngine
     );
@@ -94,9 +102,9 @@ export async function runWorkflow({
     nodesFactory,
     workflowExecutionGraph,
     workflowTaskManager,
-    workflowExecutionRepository,
     esClient,
     telemetryClient,
+    workflowExecutionCursor,
   } = setupResult;
 
   const execution = workflowExecutionState.getWorkflowExecution();
@@ -132,7 +140,7 @@ export async function runWorkflow({
   }
 
   const triggeredBy = execution.triggeredBy;
-  const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(execution);
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
     await workflowExecutionRepository.updateWorkflowExecution({
@@ -181,6 +189,7 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       stepIoService,
@@ -191,7 +200,7 @@ export async function runWorkflow({
       esClient,
       fakeRequest,
       coreStart: dependencies.coreStart,
-      taskAbortController,
+      signal,
       workflowTaskManager,
     });
     loopSpan?.setOutcome('success');

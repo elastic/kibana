@@ -69,6 +69,7 @@ export function createAddSwimlanePanelAction(
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
+        returnFocus: context.returnFocus,
         flyoutProps: {
           focusedPanelId: context.embeddable.uuid,
         },

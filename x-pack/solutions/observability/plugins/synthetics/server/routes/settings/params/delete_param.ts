@@ -90,7 +90,7 @@ export async function getExistingParamsInfo(
   const spaces = Array.from(
     new Set(
       existingParam.saved_objects.reduce((acc, obj) => {
-        return acc.concat(obj.namespaces ?? []);
+        return acc.concat(isSavedObjectErrorResult(obj) ? [] : obj.namespaces ?? []);
       }, [] as string[])
     )
   );

@@ -6,7 +6,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useNavigation } from '../hooks/use_navigation';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
@@ -20,9 +20,10 @@ export const CreateAiIndexButton = () => {
       data-test-subj="contextCreateAiIndexButton"
       href={createContextEngineUrl(CONTEXT_ENGINE_PATHS.create)}
     >
-      {i18n.translate('xpack.contextEngine.createAiIndexButton', {
-        defaultMessage: 'Create AI Index',
-      })}
+      <FormattedMessage
+        id="xpack.contextEngine.createAiIndexButton"
+        defaultMessage="Create AI Index"
+      />
     </EuiButton>
   );
 };

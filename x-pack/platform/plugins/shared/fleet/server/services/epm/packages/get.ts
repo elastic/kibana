@@ -805,16 +805,21 @@ export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  failOnUnexpectedError?: boolean;
 }) {
-  const { savedObjectsClient, pkgName, logger } = options;
+  const { savedObjectsClient, pkgName, logger, failOnUnexpectedError } = options;
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
       // Not being installed is an expected condition (e.g. fetching input schema for a package
       // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
-      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        logger?.error(e);
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return undefined;
       }
+      if (failOnUnexpectedError) {
+        throw e;
+      }
+      logger?.error(e);
       return undefined;
     });
 
@@ -1031,16 +1036,12 @@ export async function getAgentTemplateAssetsMap({
 export async function getPackageKnowledgeBase(options: {
   esClient: ElasticsearchClient;
   pkgName: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { esClient, pkgName, abortController } = options;
+  const { esClient, pkgName, signal } = options;
 
   try {
-    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
-      esClient,
-      pkgName,
-      abortController
-    );
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName, signal);
 
     if (knowledgeBaseItems.length === 0) {
       return undefined;

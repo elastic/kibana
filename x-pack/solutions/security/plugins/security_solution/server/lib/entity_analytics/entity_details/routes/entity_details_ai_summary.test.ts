@@ -55,6 +55,10 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockReportEvent: jest.Mock;
+  const mockCurrentUser = {
+    username: 'test-user',
+    profile_uid: 'u_test_user',
+  };
 
   beforeEach(() => {
     server = serverMock.create();
@@ -69,9 +73,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     // Mocks must be configured on the raw context before convertContext wraps it —
     // mutating the converted context.core does not propagate through to the route.
     // Authenticated user (getCurrentUser is already a jest.Mock on the core mock).
-    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
-      username: 'test-user',
-    });
+    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(mockCurrentUser);
 
     // getSpaceId already returns 'default'. Use a stable analytics mock so the telemetry
     // assertions can inspect reportEvent regardless of how many times getAnalytics is called.
@@ -154,6 +156,26 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['Ai_summary.generated_by']).toBe('test-user');
   });
 
+  it('persists Ai_summary.author_profile_uid from the authenticated user profile_uid', async () => {
+    const request = buildRequest();
+    await server.inject(request, context);
+
+    const [docs] = mockBulkAppendMetadata.mock.calls[0];
+    expect(docs[0]['Ai_summary.author_profile_uid']).toBe(mockCurrentUser.profile_uid);
+  });
+
+  it('omits Ai_summary.author_profile_uid when the authenticated user has no profile_uid', async () => {
+    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      username: 'test-user',
+    });
+
+    const request = buildRequest();
+    await server.inject(request, context);
+
+    const [docs] = mockBulkAppendMetadata.mock.calls[0];
+    expect(docs[0]['Ai_summary.author_profile_uid']).toBeUndefined();
+  });
+
   it('sets entity.id and entity.type from the request body', async () => {
     const request = buildRequest();
     await server.inject(request, context);
@@ -231,6 +253,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
     expect(docs[0]['Ai_summary.generated_by']).toBe('unknown');
+    expect(docs[0]['Ai_summary.author_profile_uid']).toBeUndefined();
   });
 
   it('caps highlights and recommendedActions in the persisted document', async () => {

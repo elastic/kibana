@@ -20,4 +20,4 @@ export const ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG =
 export const isWorkflowsEnabled = (
   featureFlags: Pick<CoreStart['featureFlags'], 'getBooleanValue'>
 ): Promise<boolean> =>
-  featureFlags.getBooleanValue(ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG, false);
+  featureFlags.getBooleanValue(ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG, true);

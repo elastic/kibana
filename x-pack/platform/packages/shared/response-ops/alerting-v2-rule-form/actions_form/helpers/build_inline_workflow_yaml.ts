@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '@kbn/workflows';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
@@ -59,7 +63,20 @@ export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): stri
     name: `${definition.label} notification`,
     enabled: true,
     tags: [INLINE_WORKFLOW_TAG],
-    triggers: [{ type: 'manual' }],
+    triggers: [
+      {
+        type: 'manual',
+        inputs: {
+          type: 'object',
+          properties: {
+            payload: {
+              $ref: `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`,
+            },
+          },
+          required: ['payload'],
+        },
+      },
+    ],
     steps: [
       {
         name: 'notify',

@@ -13,6 +13,7 @@ import {
   UpdateEvaluationDatasetRequestParams,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -20,6 +21,12 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { DatasetAlreadyExistsError } from '../../storage/datasets/dataset_already_exists_error';
+import {
+  redactSpaceIds,
+  resolveTargetSpaces,
+  withoutSpaceIds,
+} from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerUpdateDatasetRoute = ({
@@ -27,6 +34,9 @@ export const registerUpdateDatasetRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
+  getAccessibleSpaceIds,
+  checkManageEvalsPrivileges,
 }: RouteDependencies) => {
   router.versioned
     .put({
@@ -63,7 +73,7 @@ export const registerUpdateDatasetRoute = ({
               remoteId: destination,
               request,
               method: 'PUT',
-              body: request.body,
+              body: withoutSpaceIds(request.body),
             });
 
             if (forwarded.statusCode === 200) {
@@ -80,11 +90,54 @@ export const registerUpdateDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
-          const { description } = request.body;
+          const { description, tags, maturity, space_ids: requestedSpaceIds } = request.body;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
+
+          let targetSpaceIds: string[] | undefined;
+          if (requestedSpaceIds) {
+            const existing = await datasetClient.getMetadata(datasetId);
+            if (!existing) {
+              return response.notFound({
+                body: { message: `Evaluation dataset not found: ${datasetId}` },
+              });
+            }
+
+            const targetSpaces = await resolveTargetSpaces({
+              request,
+              activeSpaceId,
+              requestedSpaceIds,
+              currentSpaceIds: existing.space_ids,
+              getAccessibleSpaceIds,
+              checkManageEvalsPrivileges,
+            });
+
+            if (!targetSpaces.authorized) {
+              return response.customError({
+                statusCode: targetSpaces.statusCode,
+                body: { message: targetSpaces.message },
+              });
+            }
+
+            // Dropping the active space here would make the dataset vanish
+            // mid-edit. Leaving a space is a delete, where the confirmation is.
+            if (!targetSpaces.spaceIds.includes(activeSpaceId)) {
+              return response.badRequest({
+                body: {
+                  message: `A dataset cannot be removed from the current space by updating it; delete it from this space instead.`,
+                },
+              });
+            }
+
+            targetSpaceIds = targetSpaces.spaceIds;
+          }
+
           const updatedDataset = await datasetClient.update(datasetId, {
             description,
+            tags,
+            maturity,
+            spaceIds: targetSpaceIds,
           });
 
           if (!updatedDataset) {
@@ -98,6 +151,12 @@ export const registerUpdateDatasetRoute = ({
               id: updatedDataset.id,
               name: updatedDataset.name,
               description: updatedDataset.description,
+              tags: updatedDataset.tags,
+              maturity: updatedDataset.maturity,
+              space_ids: redactSpaceIds(
+                updatedDataset.space_ids,
+                getAccessibleSpaceIds ? await getAccessibleSpaceIds(request) : undefined
+              ),
               created_at: updatedDataset.created_at,
               updated_at: updatedDataset.updated_at,
             },
@@ -111,7 +170,12 @@ export const registerUpdateDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to update evaluation dataset: ${error}`);
+          if (error instanceof DatasetAlreadyExistsError) {
+            return response.conflict({ body: { message: error.message } });
+          }
+
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to update evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to update evaluation dataset' },

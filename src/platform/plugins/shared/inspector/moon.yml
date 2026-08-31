@@ -32,6 +32,9 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/shared-ux-utility'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

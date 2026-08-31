@@ -8,17 +8,32 @@
  */
 
 import React from 'react';
+import { cloneDeep } from 'lodash';
 import { from } from 'rxjs';
 import { take } from 'rxjs';
 import { render, act as renderAct, renderHook, act } from '@testing-library/react';
 
-import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { LIGHT_THEME, DARK_THEME, type Theme } from '@elastic/charts';
 
 import { ThemeService } from './theme';
+import { applyNumericFontFamily, ELASTIC_UI_NUMERIC_FONT_FAMILY } from './helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const createTheme$Mock = (mode: boolean) => {
   return from([{ darkMode: mode, name: 'borealis' }]);
+};
+
+// Mirrors the derivation applied by `ThemeService` so tests can assert against the
+// expected base theme without relying on mutating the shared @elastic/charts singletons.
+const buildExpectedTheme = (base: Theme): Theme => {
+  const theme = cloneDeep(base);
+  applyNumericFontFamily(theme);
+  const { fill } = theme.axes.tickLabel;
+  theme.axes.axisTitle.fill = fill;
+  theme.axes.axisTitle.fontWeight = 500;
+  theme.axes.axisPanelTitle.fill = fill;
+  theme.axes.axisPanelTitle.fontWeight = 500;
+  return theme;
 };
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
@@ -58,7 +73,18 @@ describe('ThemeService', () => {
       const themeService = new ThemeService();
       themeService.init(setUpMockTheme);
 
-      expect(await themeService.chartsBaseTheme$.pipe(take(1)).toPromise()).toEqual(LIGHT_THEME);
+      expect(await themeService.chartsBaseTheme$.pipe(take(1)).toPromise()).toEqual(
+        buildExpectedTheme(LIGHT_THEME)
+      );
+    });
+
+    it('does not mutate the shared @elastic/charts base theme singleton', async () => {
+      setUpMockTheme.theme$ = createTheme$Mock(false);
+      const themeService = new ThemeService();
+      themeService.init(setUpMockTheme);
+      await themeService.chartsBaseTheme$.pipe(take(1)).toPromise();
+
+      expect(LIGHT_THEME.axes.tickLabel.fontFamily).not.toContain(ELASTIC_UI_NUMERIC_FONT_FAMILY);
     });
 
     describe('in dark mode', () => {
@@ -69,7 +95,7 @@ describe('ThemeService', () => {
         themeService.init(setUpMockTheme);
         const result = await themeService.chartsBaseTheme$.pipe(take(1)).toPromise();
 
-        expect(result).toEqual(DARK_THEME);
+        expect(result).toEqual(buildExpectedTheme(DARK_THEME));
       });
     });
   });
@@ -82,19 +108,19 @@ describe('ThemeService', () => {
       const { useChartsBaseTheme } = themeService;
 
       const { result } = renderHook(() => useChartsBaseTheme());
-      expect(result.current).toStrictEqual(LIGHT_THEME);
+      expect(result.current).toStrictEqual(buildExpectedTheme(LIGHT_THEME));
 
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(true);
         themeService.init(setUpMockTheme);
       });
-      expect(result.current).toStrictEqual(DARK_THEME);
+      expect(result.current).toStrictEqual(buildExpectedTheme(DARK_THEME));
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(false);
         themeService.init(setUpMockTheme);
       });
       // act(() => darkMode$.next(false));
-      expect(result.current).toStrictEqual(LIGHT_THEME);
+      expect(result.current).toStrictEqual(buildExpectedTheme(LIGHT_THEME));
     });
 
     it('should not rerender when emitting the same value', () => {

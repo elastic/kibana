@@ -121,6 +121,7 @@ export function registerGetIlmPoliciesRoute({
         const policies: IlmPolicyForFlyout[] = Object.entries(policiesByName).map(
           ([name, policyEntry]) => {
             const phases = policyEntry.policy?.phases;
+            const isManaged = policyEntry.policy?._meta?.managed === true;
 
             return {
               name,
@@ -132,6 +133,7 @@ export function registerGetIlmPoliciesRoute({
                 delete: toPhaseForFlyout(phases?.delete),
               },
               serializedPolicy: toSerializedPolicy(name, policyEntry),
+              ...(isManaged ? { isManaged: true } : {}),
             };
           }
         );

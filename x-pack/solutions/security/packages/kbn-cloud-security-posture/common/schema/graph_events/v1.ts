@@ -9,9 +9,13 @@ import { schema } from '@kbn/config-schema';
 import {
   COUNTRY_CODES_MAX_SIZE,
   DETAIL_PAGE_SIZE_MAX,
+  ENTITY_IDS_MAX_SIZE,
+  ES_DOCUMENT_ID_MAX_LENGTH,
+  INDEX_PATTERN_MAX_LENGTH,
   INDEX_PATTERN_REGEX,
   INDEX_PATTERNS_MAX_SIZE,
   IPS_MAX_SIZE,
+  TIMESTAMP_STRING_MAX_LENGTH,
 } from '../graph/v1';
 
 // ============================================
@@ -46,13 +50,20 @@ export const eventsRequestSchema = schema.object({
     size: schema.number({ min: 1, max: DETAIL_PAGE_SIZE_MAX }),
   }),
   query: schema.object({
-    eventIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 5000 }),
-    start: schema.oneOf([schema.number(), schema.string()]),
-    end: schema.oneOf([schema.number(), schema.string()]),
+    eventIds: schema.arrayOf(schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }), {
+      minSize: 1,
+      maxSize: ENTITY_IDS_MAX_SIZE,
+    }),
+    start: schema.oneOf([
+      schema.number(),
+      schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
+    ]),
+    end: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
     indexPatterns: schema.maybe(
       schema.arrayOf(
         schema.string({
           minLength: 1,
+          maxLength: INDEX_PATTERN_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;

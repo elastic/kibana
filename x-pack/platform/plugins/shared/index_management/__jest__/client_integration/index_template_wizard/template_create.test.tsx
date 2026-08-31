@@ -335,14 +335,6 @@ describe('<TemplateCreate />', () => {
 
         await waitFor(() => expect(getFieldsListItems()).toHaveLength(1));
       }, 16000);
-
-      describe('plugin parameters', () => {
-        test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
-          // The mappings editor exposes stable tab test subjects.
-          fireEvent.click(screen.getByTestId('advancedOptionsTab'));
-          expect(screen.queryByTestId('sizeEnabledToggle')).not.toBeInTheDocument();
-        });
-      });
     });
 
     describe('aliases (step 5)', () => {
@@ -369,70 +361,6 @@ describe('<TemplateCreate />', () => {
         expect(await screen.findByText('Invalid JSON format.')).toBeInTheDocument();
       }, 10000);
     });
-  });
-
-  // Isolated test for mapper-size plugin (needs different mock setup)
-  describe('mapper-size plugin', () => {
-    test('should render the _size parameter if the mapper size plugin is installed', async () => {
-      httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
-
-      // Navigate to mappings step
-      await completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-      await completeStepTwo();
-      await completeStepThree('{}');
-
-      // Navigate to advanced tab
-      fireEvent.click(screen.getByTestId('advancedOptionsTab'));
-
-      expect(screen.getByTestId('sizeEnabledToggle')).toBeInTheDocument();
-    }, 10000);
-  });
-
-  describe('logistics (step 1)', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
-    });
-
-    it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {
-      // Logistics
-      await completeStepOne({ name: 'my_logs_template', indexPatterns: ['logs-*-*'] });
-      // Component templates
-      await completeStepTwo();
-      // Index settings
-      await completeStepThree('{}');
-      // Mappings
-      await completeStepFour();
-      // Aliases
-      await completeStepFive();
-
-      fireEvent.click(screen.getByTestId('nextButton'));
-
-      await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/index_templates`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: 'my_logs_template',
-              indexPatterns: ['logs-*-*'],
-              allowAutoCreate: 'NO_OVERWRITE',
-              indexMode: 'logsdb',
-              _kbnMeta: {
-                type: 'default',
-                hasDatastream: false,
-                isLegacy: false,
-              },
-              template: {},
-            }),
-          })
-        );
-      });
-    }, 10000);
   });
 
   describe('review (step 6)', () => {
@@ -510,7 +438,7 @@ describe('<TemplateCreate />', () => {
       expect(descriptions.length).toBeGreaterThan(0);
       for (const description of descriptions) {
         expect(description).toHaveTextContent(
-          'All new indices that you create will use this template. Edit index patterns.'
+          'All new indices that you create will use this template.'
         );
       }
     }, 20000);

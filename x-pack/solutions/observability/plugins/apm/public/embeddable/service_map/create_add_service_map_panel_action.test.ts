@@ -121,15 +121,17 @@ describe('createAddServiceMapPanelAction', () => {
 
   it('opens configuration flyout when executed', async () => {
     const embeddable = { addNewPanel: jest.fn() };
+    const returnFocus = jest.fn();
     mockApiIsPresentationContainer.mockReturnValue(true);
     const action = createAddServiceMapPanelAction(mockDeps);
 
-    await action.execute({ embeddable } as never);
+    await action.execute({ embeddable, returnFocus } as never);
 
     expect(mockOpenLazyFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         core: mockCoreStart,
         parentApi: embeddable,
+        returnFocus,
         loadContent: expect.any(Function),
       })
     );

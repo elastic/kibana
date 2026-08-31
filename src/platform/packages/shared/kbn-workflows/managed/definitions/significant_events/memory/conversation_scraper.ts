@@ -15,8 +15,8 @@ export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
 
 export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  pluginId: 'significant_events',
-  version: 3,
+  pluginId: 'significantEvents',
+  version: 4,
   billable: false,
   yaml: CONVERSATION_SCRAPER_YAML,
   management: {

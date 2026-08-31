@@ -15,9 +15,9 @@ export const RELAY_APP_CONNECTION_SO_TYPE = 'relay-app-connection';
  * deployment-level (not per-space), so a fixed id + `agnostic` namespace is used.
  *
  * No secrets are stored here: the managed ES API key secret is handed to the Relay
- * during install (relay-service#78), and Kibana -> Relay calls authenticate at the
- * transport layer (mTLS proxy, identity from XFCC). Only the key *id* is kept so the
- * key can be invalidated on disconnect.
+ * during install, and Kibana -> Relay calls authenticate at the transport layer
+ * (mTLS proxy, identity from XFCC). Only the key *id* is kept so it can be
+ * invalidated on disconnect.
  */
 export const RELAY_APP_CONNECTION_SO_ID = 'relay-app-connection';
 
@@ -34,9 +34,7 @@ const relayAppConnectionAttributesV1 = schema.object({
   // Claim id issued at install start; required by the Relay's claim poll
   // (`parseClaimInstallInput` on relay main mandates `claim_id` in the body).
   claimId: schema.maybe(schema.string()),
-  // Which external app this connection is for (e.g. 'slack'). The document id is
-  // still a fixed singleton, so this only labels today's one connection — it does
-  // not yet support multiple concurrent app connections per deployment.
+  // Which external app this connection is for (e.g. 'slack').
   surface: schema.maybe(schema.string()),
   // Relay-side tenant identifier for this binding.
   tenantKey: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),

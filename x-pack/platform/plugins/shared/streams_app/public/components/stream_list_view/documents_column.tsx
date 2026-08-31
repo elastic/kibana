@@ -84,7 +84,7 @@ export function DocumentsColumn({
       iconColor="danger"
     />
   ) : (
-    <EuiIcon type="chartLine" size="m" />
+    <EuiIcon type="chartLine" size="m" aria-hidden={true} />
   );
 
   const cellAriaLabel = hasData

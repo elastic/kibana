@@ -6,7 +6,14 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
+import {
+  BENCHMARK_VERSION_MAX_LENGTH,
+  DEFAULT_BENCHMARK_RULES_PER_PAGE,
+  RULE_FIELD_NAME_MAX_LENGTH,
+  RULE_NUMBER_MAX_LENGTH,
+  RULE_SEARCH_MAX_LENGTH,
+  RULE_SECTION_MAX_LENGTH,
+} from './v3';
 
 export type {
   cspBenchmarkRuleMetadataSchema,
@@ -33,7 +40,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ maxLength: RULE_SEARCH_MAX_LENGTH })),
 
   /**
    * The page of objects to return
@@ -49,7 +56,9 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
-  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+  fields: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: RULE_FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
+  ),
 
   /**
    *  The fields to perform the parsed query against.
@@ -104,18 +113,30 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * benchmark version
    */
-  benchmarkVersion: schema.maybe(schema.string()),
+  benchmarkVersion: schema.maybe(schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH })),
 
   /**
    * rule section
    */
   // maxSize is set to 100 as there are limited sections per benchmark
   section: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
+    schema.oneOf([
+      schema.string({ maxLength: RULE_SECTION_MAX_LENGTH }),
+      schema.arrayOf(schema.string({ maxLength: RULE_SECTION_MAX_LENGTH }), {
+        minSize: 1,
+        maxSize: 100,
+      }),
+    ])
   ),
   // maxSize is set to 100 as there are limited rules per benchmark
   ruleNumber: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
+    schema.oneOf([
+      schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }),
+      schema.arrayOf(schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }), {
+        minSize: 1,
+        maxSize: 100,
+      }),
+    ])
   ),
 });
 

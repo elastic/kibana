@@ -8,6 +8,7 @@
  */
 
 import { parse as yamlParse } from 'yaml';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
@@ -88,8 +89,57 @@ describe('eval_pipeline', () => {
       expect(shouldRunEvals('evals:agent-builder,models:eis/openai-gpt-5.4')).toBe(true);
     });
 
+    it('maps `models:judge:openrouter/<provider>-<model>` to an openrouter-* connector id', () => {
+      const yaml = getEvalPipeline(
+        'evals:agent-builder,models:openrouter/openai-gpt-5.4,models:judge:openrouter/anthropic-claude-sonnet-4.6'
+      ) as string;
+
+      expect(yaml).toContain('EVAL_CONNECTOR_ID: "openrouter-anthropic-claude-sonnet-4-6"');
+    });
+
     it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {
       expect(getEvalTriggerStep('evals:agent-builder,models:gpt 5')).toBeNull();
+    });
+  });
+
+  describe('the skip label (`evals:skip-<suite-id>`)', () => {
+    it('drops a suite whose skip label is present, even alongside its selection label', () => {
+      expect(shouldRunEvals('evals:smoke-tests,evals:skip-smoke-tests')).toBe(false);
+      expect(getEvalTriggerStep('evals:smoke-tests,evals:skip-smoke-tests')).toBeNull();
+      expect(getEvalPipeline('evals:smoke-tests,evals:skip-smoke-tests')).toBeNull();
+    });
+
+    it('short-circuits before reading suite metadata when only a skip label is present', () => {
+      // A skip label selects nothing, so it must not defeat the early bail that keeps every
+      // kibana-pull-request generation from spawning a `git ls-tree` per suite.
+      expect(shouldRunEvals('evals:skip-smoke-tests')).toBe(false);
+      expect(readFileSync).not.toHaveBeenCalled();
+    });
+
+    it('leaves the other selected suites running', () => {
+      const labels =
+        'evals:smoke-tests,evals:agent-builder,models:eis/openai-gpt-5.4,evals:skip-smoke-tests';
+
+      expect(getEvalTriggerStep(labels)).not.toBeNull();
+
+      const yaml = getEvalPipeline(labels) as string;
+      expect(yaml).toContain('kbn-evals-agent-builder');
+      expect(yaml).not.toContain('kbn-evals-smoke-tests');
+    });
+
+    it('drops a skipped suite from `evals:all` too', () => {
+      const yaml = getEvalPipeline(
+        'evals:all,models:eis/openai-gpt-5.4,evals:skip-smoke-tests'
+      ) as string;
+
+      expect(yaml).toContain('kbn-evals-agent-builder');
+      expect(yaml).not.toContain('kbn-evals-smoke-tests');
+    });
+
+    it('is forwarded to the child so it re-derives the same selection', () => {
+      expect(getForwardablePrLabels('evals:smoke-tests,evals:skip-smoke-tests')).toBe(
+        'evals:smoke-tests,evals:skip-smoke-tests'
+      );
     });
   });
 
@@ -196,6 +246,14 @@ describe('eval_pipeline', () => {
       expect(yaml).not.toContain("exit_status: '-1'");
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
+    });
+  });
+
+  describe('getEvalPipeline agent disk', () => {
+    it('requests an explicit boot disk so ES stays above its merge disk watermark', () => {
+      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain(`diskSizeGb: ${DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb}`);
     });
   });
 });

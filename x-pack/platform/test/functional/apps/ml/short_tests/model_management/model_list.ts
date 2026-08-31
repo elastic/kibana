@@ -534,6 +534,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
         await ml.commonUI.waitForRefreshButtonEnabled();
+        await ml.trainedModelsTable.waitForModelsToLoad();
 
         await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
         await ml.trainedModelsFlyout.open();
@@ -554,6 +555,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should list Elser and E5 panels contents correctly', async () => {
+        await ml.testExecution.logTestStep('should switch to the Click to Download tab');
+        await ml.trainedModelsFlyout.changeTab('clickToDownload');
+
         await ml.testExecution.logTestStep('should display the Elser header copy');
         await ml.trainedModelsFlyout.assertElserModelHeaderCopy();
 

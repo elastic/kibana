@@ -6,9 +6,9 @@ paths:
   /api/detection_engine/attacks/search:
     post:
       x-labels: [serverless, ess]
-      x-internal: true
       operationId: SearchAttacks
       x-codegen-enabled: true
+      x-state: added in 9.5.0
       summary: Find and/or aggregate attack discovery alerts
       description: Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
       tags:
@@ -36,6 +36,32 @@ paths:
                 type: object
                 additionalProperties: true
                 description: Elasticsearch search response
+              examples:
+                success:
+                  value:
+                    took: 1
+                    timed_out: false
+                    _shards:
+                      total: 1
+                      successful: 1
+                      skipped: 0
+                      failed: 0
+                    hits:
+                      total:
+                        value: 1
+                        relation: eq
+                      max_score: 1
+                      hits:
+                        - _index: '.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001'
+                          _id: '80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1'
+                          _score: 1
+                          _source:
+                            '@timestamp': '2025-06-23T15:16:52.984Z'
+                            kibana.alert.workflow_status: open
+                            kibana.alert.attack_discovery.title_with_replacements: 'Widespread Malware Campaign via Compromised Account'
+                            kibana.alert.attack_discovery.alert_ids:
+                              - ee183cf525d7e9d0f47d1b2bb928d760a0f53756ffa61edcf0672f71c986ac21
+                              - 46ebac989ca72439b14b57d32102543c17d5f33e0f6532d8a5c148949d8ff7b5
         400:
           description: Invalid input data response
           content:
@@ -44,15 +70,32 @@ paths:
                 oneOf:
                   - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Failed to parse search request: unknown query clause in bool filter'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

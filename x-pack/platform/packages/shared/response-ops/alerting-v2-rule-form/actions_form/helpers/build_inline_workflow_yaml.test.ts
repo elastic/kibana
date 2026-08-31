@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '@kbn/workflows';
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
 import {
@@ -12,6 +16,19 @@ import {
   InvalidInlineWorkflowError,
   stepTypeFromConnectorType,
 } from './build_inline_workflow_yaml';
+
+const EXPECTED_TRIGGER = {
+  type: 'manual',
+  inputs: {
+    type: 'object',
+    properties: {
+      payload: {
+        $ref: `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`,
+      },
+    },
+    required: ['payload'],
+  },
+};
 
 describe('buildInlineWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
@@ -26,7 +43,7 @@ describe('buildInlineWorkflowYaml', () => {
     const parsed = parse(yaml);
     expect(parsed.enabled).toBe(true);
     expect(parsed.tags).toEqual([INLINE_WORKFLOW_TAG]);
-    expect(parsed.triggers).toEqual([{ type: 'manual' }]);
+    expect(parsed.triggers).toEqual([EXPECTED_TRIGGER]);
     expect(parsed.steps).toHaveLength(1);
     expect(parsed.steps[0]).toMatchObject({
       name: 'notify',

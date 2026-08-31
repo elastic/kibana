@@ -19,7 +19,12 @@ interface ModeDefinition {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedTabs } = getPageObjects(['common', 'discover', 'unifiedTabs']);
+  const { common, discover, share, unifiedTabs } = getPageObjects([
+    'common',
+    'discover',
+    'share',
+    'unifiedTabs',
+  ]);
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
@@ -168,10 +173,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openProfileStateDocView = async () => {
-    await dataGrid.clickRowToggle({
-      rowIndex: 0,
-      defaultTabId: 'doc_view_profile_state_example',
-    });
+    const profileStateTabId = 'doc_view_profile_state_example';
+
+    if (await dataGrid.isShowingDocViewer()) {
+      await dataGrid.clickDocViewerTab(profileStateTabId);
+    } else {
+      await dataGrid.clickRowToggle({
+        rowIndex: 0,
+        defaultTabId: profileStateTabId,
+      });
+    }
   };
 
   const waitForPersistentProfileStateInStorage = async (expectedValue: string) => {
@@ -347,6 +358,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.waitUntilTabIsLoaded();
           await expectProfileStateControls({
             timestampColor: 'accent',
+            rowControlColor: 'warning',
+            boxColor: 'danger',
+          });
+          await expectProfileUrlBoxColor('danger');
+        });
+
+        it('restores persistent and URL profile state from a shared locator', async () => {
+          await mode.loadDefaultProfile();
+          await openProfileStateDocView();
+          await changeTimestampColor('danger');
+          await changeRowControlColor('warning');
+          await changeBoxColor('danger');
+
+          await share.clickShareTopNavButton();
+          const sharedUrl = await share.getSharedUrl();
+
+          await browser.clearSessionStorage();
+          await browser.clearLocalStorage();
+          await browser.get(sharedUrl, false);
+          await discover.waitUntilTabIsLoaded();
+          await openProfileStateDocView();
+
+          await expectProfileStateControls({
+            timestampColor: 'hollow',
             rowControlColor: 'warning',
             boxColor: 'danger',
           });

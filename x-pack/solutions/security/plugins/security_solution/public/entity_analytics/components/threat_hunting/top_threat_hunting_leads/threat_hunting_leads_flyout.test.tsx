@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { ThreatHuntingLeadsFlyout } from './threat_hunting_leads_flyout';
@@ -29,26 +29,22 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
-const mockGetRedirectUrl = jest.fn().mockResolvedValue('https://kibana.test/app/discover#/');
-const mockLocatorsGet = jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
-    services: {
-      share: {
-        url: {
-          locators: {
-            get: mockLocatorsGet,
-          },
-        },
-      },
-    },
+    services: {},
   }),
   useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
   useTimeZone: jest.fn(() => 'UTC'),
-}));
-
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(() => 'default'),
 }));
 
 const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery as jest.Mock;
@@ -60,7 +56,7 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   title: 'Test Lead',
   byline: 'Test byline',
   description: 'Test description',
-  entities: [{ type: 'user', name: 'jsmith' }],
+  entity: { type: 'user', name: 'jsmith', id: 'user:jsmith' },
   tags: ['tag1'],
   priority: 8,
   chatRecommendations: ['Check logs'],
@@ -69,6 +65,8 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   status: 'active' as const,
   observations: [],
   sourceType: 'adhoc' as const,
+  topRelatedEntities: [],
+  relatedEntityCounts: {},
   ...overrides,
 });
 
@@ -191,7 +189,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
           createApiLead({
             id: 'lead-badge',
             byline: 'User jsmith on host server-01',
-            entities: [{ type: 'user', name: 'jsmith' }],
+            entity: { type: 'user', name: 'jsmith', id: 'user:jsmith' },
           }),
         ],
         total: 1,
@@ -209,49 +207,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
         id: 'user-panel',
         params: {
           userName: 'jsmith',
-          // No real entity id on this lead, so it falls back to `type:name`.
           entityId: 'user:jsmith',
-          contextID: 'entity-analytics-threat-hunting-leads',
-          scopeId: 'entity-analytics-threat-hunting-leads',
-        },
-      },
-    });
-    expect(onSelectLead).not.toHaveBeenCalled();
-  });
-
-  it('opens the entity flyout using the real entity id (EUID) when the lead entity carries one', () => {
-    const onSelectLead = jest.fn();
-    mockUseQuery.mockReturnValue({
-      data: {
-        leads: [
-          createApiLead({
-            id: 'lead-euid',
-            byline: 'Host 8c67cb16-b7f2-4052-82f9-6edb87bb63ef triggered an alert',
-            entities: [
-              {
-                type: 'host',
-                name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-                id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-              },
-            ],
-          }),
-        ],
-        total: 1,
-      },
-      isLoading: false,
-    });
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} onSelectLead={onSelectLead} />);
-
-    fireEvent.click(screen.getByTestId('leadEntityBadge-8c67cb16-b7f2-4052-82f9-6edb87bb63ef'));
-
-    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'host-panel',
-        params: {
-          hostName: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          entityId: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
           contextID: 'entity-analytics-threat-hunting-leads',
           scopeId: 'entity-analytics-threat-hunting-leads',
         },
@@ -325,45 +281,5 @@ describe('ThreatHuntingLeadsFlyout', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
     expect(screen.queryByTestId('leadsFlyoutGeneratedTimestamp')).not.toBeInTheDocument();
-  });
-
-  it('opens the leads archive index in Discover when the link is clicked', async () => {
-    const openSpy = jest.spyOn(window, 'open').mockImplementation();
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('viewLeadsArchiveIndexButton'));
-
-    expect(mockLocatorsGet).toHaveBeenCalledWith('DISCOVER_APP_LOCATOR');
-    await waitFor(() => expect(mockGetRedirectUrl).toHaveBeenCalled());
-    expect(mockGetRedirectUrl).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dataViewSpec: expect.objectContaining({
-          id: 'entity-analytics-threat-hunting-leads-archive-default',
-          title:
-            '.entity_analytics.entity-leads-adhoc.entity-default,.entity_analytics.entity-leads-scheduled.entity-default',
-          allowHidden: true,
-        }),
-      })
-    );
-    await waitFor(() =>
-      expect(openSpy).toHaveBeenCalledWith(
-        'https://kibana.test/app/discover#/',
-        '_blank',
-        'noopener,noreferrer'
-      )
-    );
-
-    openSpy.mockRestore();
-  });
-
-  it('disables the leads archive index link while the space id has not resolved yet', () => {
-    const mockUseSpaceId = jest.requireMock('../../../../common/hooks/use_space_id')
-      .useSpaceId as jest.Mock;
-    mockUseSpaceId.mockReturnValueOnce(undefined);
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
-
-    expect(screen.getByTestId('viewLeadsArchiveIndexButton')).toBeDisabled();
   });
 });

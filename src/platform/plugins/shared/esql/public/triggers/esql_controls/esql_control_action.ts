@@ -49,6 +49,7 @@ interface Context {
   parentApi?: unknown;
   triggerSource?: ControlTriggerSource;
   controlId?: string;
+  returnFocus?: () => void;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -87,6 +88,7 @@ export class CreateESQLControlAction implements Action<Context> {
     parentApi,
     triggerSource,
     controlId,
+    returnFocus,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -115,6 +117,7 @@ export class CreateESQLControlAction implements Action<Context> {
     openLazyFlyout({
       core: this.core,
       parentApi,
+      returnFocus,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
         const { loadESQLControlFlyout } = await import('./esql_control_helpers');
         return await loadESQLControlFlyout({
@@ -140,7 +143,6 @@ export class CreateESQLControlAction implements Action<Context> {
         focusedPanelId: controlId,
         isResizable: true,
         maxWidth: 800,
-        triggerId: 'dashboard-controls-menu-button',
         // When `onCancelControl` is present (i.e. flyout opened from the ES|QL editor),
         // use the local onClose as the onClose handler to ensure proper nested flyout closing behavior.
         // In other scenarios (opened directly from the dashboard), we keep the default close behavior.

@@ -42,14 +42,14 @@ export async function syncIlmPolicy({
   packageName,
   namespace,
   ilmPolicy,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   namespace: string;
   ilmPolicy: string | undefined;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<SyncIlmPolicySummary> {
   const logger = appContextService.getLogger();
   const summary: SyncIlmPolicySummary = {
@@ -87,7 +87,7 @@ export async function syncIlmPolicy({
       dataStreams,
       namespace,
       summary,
-      abortController,
+      signal,
     });
   } else {
     await syncSetIlmPolicy({
@@ -99,7 +99,7 @@ export async function syncIlmPolicy({
       namespace,
       ilmPolicy,
       summary,
-      abortController,
+      signal,
     });
   }
 

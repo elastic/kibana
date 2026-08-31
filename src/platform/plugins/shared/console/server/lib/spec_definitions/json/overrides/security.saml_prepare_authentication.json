@@ -1,8 +1,0 @@
-{
-  "security.saml_prepare_authentication": {
-    "data_autocomplete_rules": {
-      "acs": "",
-      "realm": ""
-    }
-  }
-}

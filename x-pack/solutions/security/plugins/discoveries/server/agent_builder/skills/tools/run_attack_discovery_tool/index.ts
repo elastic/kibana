@@ -19,6 +19,7 @@ import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAlertsIndexForSpace } from '../../../../lib/get_alerts_index_for_space';
+import { isWorkflowsEnabledForSpace } from '../../../../lib/is_workflows_enabled_for_space';
 import type { DiscoveriesPluginStartDeps } from '../../../../types';
 import { checkManagedWorkflowIntegrity } from '../../../../managed_workflows/check_managed_workflow_integrity';
 import { resolveConnectorDetails } from '../../../../workflows/helpers/resolve_connector_details';
@@ -191,7 +192,18 @@ export const getRunAttackDiscoveryTool = ({
     } = args;
 
     try {
-      const { pluginsStart } = await getStartServices();
+      const { coreStart, pluginsStart } = await getStartServices();
+
+      if (
+        !(await isWorkflowsEnabledForSpace({
+          featureFlags: coreStart.featureFlags,
+          uiSettingsClient: coreStart.uiSettings.asScopedToClient(context.savedObjectsClient),
+        }))
+      ) {
+        return {
+          results: [buildErrorResult('Attack Discovery workflows are not enabled for this space.')],
+        };
+      }
 
       // Resolve the space the same way `executeGenerationWorkflow` does for its
       // authorization guard, so the alerts index is bounded to the caller's own

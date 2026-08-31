@@ -9,7 +9,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { UserAvatarTip, UserToolTip } from '@kbn/user-profile-components';
+import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
 import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';
 import { EuiCommentList, EuiComment, useEuiTheme } from '@elastic/eui';
 import { PanelWithCodeBlock } from './panel_with_code_block';
@@ -37,9 +37,7 @@ export const ToolTipDemo: FunctionComponent = () => {
     <PanelWithCodeBlock title="Tooltip" code={code}>
       <EuiCommentList>
         <EuiComment
-          timelineAvatar={
-            <UserAvatarTip user={userProfile.user} avatar={userProfile.data.avatar} />
-          }
+          timelineAvatar={<UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} />}
           username={
             <UserToolTip position="top" user={userProfile.user} avatar={userProfile.data.avatar}>
               <strong>{userProfile.user.full_name}</strong>
@@ -52,10 +50,10 @@ export const ToolTipDemo: FunctionComponent = () => {
   );
 };
 
-const code = `import { UserToolTip, UserAvatarTip } from '@kbn/user-profile-components';
+const code = `import { UserToolTip, UserAvatar } from '@kbn/user-profile-components';
 
 <UserToolTip user={userProfile.user} avatar={userProfile.data.avatar}>
   <!-- An inline element to trigger the tooltip -->
 </UserToolTip>
 
-<UserAvatarTip user={userProfile.user} avatar={userProfile.data.avatar} />`;
+<UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} />`;

@@ -11,6 +11,7 @@ import { useGetAgentsQuery, useGetPackageInfoByKeyQuery, useFleetStatus } from '
 import { usePollingIncomingData } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
 import { createIntegrationsTestRendererMock } from '../../mock';
 import { KibanaSavedObjectType } from '../../../common/types/models';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE } from '../../constants';
 
@@ -96,6 +97,22 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
     });
 
+    it('resolves enrollment when agent is enrolled via a version-specific policy variant', async () => {
+      // Agents on version-specific policies carry a policy_id like "test-policy-id#9.2".
+      // The kuery must use the fallback helper so these agents are matched.
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: { data: { items: [{ status: 'online', policy_id: 'test-policy-id#9.2' }] } },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
+
+      await waitFor(() => {
+        expect(getByText('Step 1 is complete')).toBeInTheDocument();
+        expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
+      });
+    });
+
     it('sets step 1 complete and step 2 loading when agent is online', async () => {
       mockUseGetAgentsQuery.mockReturnValue({
         data: { data: { items: [{ status: 'online' }] } },
@@ -106,7 +123,13 @@ describe('AgentlessEnrollmentFlyout', () => {
 
       await waitFor(() => {
         expect(mockUseGetAgentsQuery).toHaveBeenCalledWith(
-          { kuery: `${AGENTS_PREFIX}.policy_id: "test-policy-id"` },
+          {
+            kuery: buildPolicyBaseIdWithFallbackKuery(
+              'test-policy-id',
+              `${AGENTS_PREFIX}.policy_base_id`,
+              `${AGENTS_PREFIX}.policy_id`
+            ),
+          },
           expect.objectContaining({ refetchInterval: expect.any(Number) })
         );
         expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();

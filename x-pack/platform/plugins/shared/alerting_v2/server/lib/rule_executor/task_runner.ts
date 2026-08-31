@@ -21,7 +21,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController' | 'executionUuid'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
@@ -30,16 +30,12 @@ export class RuleExecutorTaskRunner {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({
-    taskInstance,
-    abortController,
-    executionUuid,
-  }: TaskRunParams): Promise<RunResult> {
-    const input = this.createRuleExecutionInput(taskInstance, abortController, executionUuid);
+  public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
+    const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
 
     const result = await this.pipeline.execute(input);
 
-    return this.buildRunResult(result, taskInstance);
+    return this.buildRunResult(result, input.logger, taskInstance);
   }
 
   /**
@@ -47,18 +43,25 @@ export class RuleExecutorTaskRunner {
    */
   private createRuleExecutionInput(
     taskInstance: TaskRunParams['taskInstance'],
-    abortController: AbortController,
+    signal: AbortSignal,
     executionUuid: string
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
+    const logger = this.logger.forSubsystem('ruleExecutor').withLabels({
+      rule_id: params.ruleId,
+      space_id: params.spaceId,
+      task_id: taskInstance.id,
+      execution_id: executionUuid,
+    });
 
     return {
       ruleId: params.ruleId,
       spaceId: params.spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
+      abortSignal: signal,
       executionUuid,
-      abortSignal: abortController.signal,
+      logger,
     };
   }
 
@@ -79,6 +82,7 @@ export class RuleExecutorTaskRunner {
    */
   private buildRunResult(
     result: RuleExecutionPipelineResult,
+    logger: LoggerServiceContract,
     taskInstance: TaskRunParams['taskInstance']
   ): RunResult {
     if (result.completed) {
@@ -86,10 +90,7 @@ export class RuleExecutorTaskRunner {
     }
 
     if (result.haltReason === 'rule_deleted') {
-      const params = taskInstance.params as RuleExecutorTaskParams;
-      this.logger.debug({
-        message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
-      });
+      logger.debug({ message: 'Rule no longer exists; task will be removed' });
       throwUnrecoverableError(new Error('Rule no longer exists'));
     }
 

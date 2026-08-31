@@ -33,6 +33,16 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
+  }),
+}));
+
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',
   moduleId: 'risk_analysis',
@@ -50,7 +60,7 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   title: 'Multi-Tactic Attack',
   byline: 'User admin@example.com on host server-01',
   description: 'Evidence chain and investigation guide',
-  entities: [{ type: 'user', name: 'admin@example.com' }],
+  entity: { type: 'user', name: 'admin@example.com', id: 'user:admin@example.com' },
   tags: ['malware', 'lateral-movement'],
   priority: 8,
   chatRecommendations: ['What happened?', 'Show timeline'],
@@ -59,6 +69,8 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   status: 'active',
   observations: [createMockObservation()],
   sourceType: 'adhoc',
+  topRelatedEntities: [],
+  relatedEntityCounts: {},
   ...overrides,
 });
 
@@ -319,7 +331,7 @@ describe('TopThreatHuntingLeads', () => {
     const lead = createMockLead({
       id: 'lead-badge',
       byline: 'User admin@example.com on host server-01',
-      entities: [{ type: 'user', name: 'admin@example.com' }],
+      entity: { type: 'user', name: 'admin@example.com', id: 'user:admin@example.com' },
     });
 
     render(
@@ -339,48 +351,7 @@ describe('TopThreatHuntingLeads', () => {
         id: 'user-panel',
         params: {
           userName: 'admin@example.com',
-          // No real entity id on this lead, so it falls back to `type:name`.
           entityId: 'user:admin@example.com',
-          contextID: 'entity-analytics-threat-hunting-leads',
-          scopeId: 'entity-analytics-threat-hunting-leads',
-        },
-      },
-    });
-    expect(onLeadClick).not.toHaveBeenCalled();
-  });
-
-  it('opens the entity flyout using the real entity id (EUID) when the lead entity carries one, instead of the display name', () => {
-    const onLeadClick = jest.fn();
-    const lead = createMockLead({
-      id: 'lead-euid',
-      byline: 'Host 8c67cb16-b7f2-4052-82f9-6edb87bb63ef triggered an alert',
-      entities: [
-        {
-          type: 'host',
-          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-        },
-      ],
-    });
-
-    render(
-      <TopThreatHuntingLeads
-        {...defaultProps}
-        leads={[lead]}
-        totalCount={1}
-        onLeadClick={onLeadClick}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('leadEntityBadge-8c67cb16-b7f2-4052-82f9-6edb87bb63ef'));
-
-    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'host-panel',
-        params: {
-          hostName: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          entityId: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
           contextID: 'entity-analytics-threat-hunting-leads',
           scopeId: 'entity-analytics-threat-hunting-leads',
         },
@@ -394,7 +365,7 @@ describe('TopThreatHuntingLeads', () => {
     const lead = createMockLead({
       id: 'lead-generic',
       byline: 'Service payment-api on host server-01',
-      entities: [{ type: 'generic', name: 'payment-api' }],
+      entity: { type: 'generic', name: 'payment-api', id: 'generic:payment-api' },
     });
 
     render(

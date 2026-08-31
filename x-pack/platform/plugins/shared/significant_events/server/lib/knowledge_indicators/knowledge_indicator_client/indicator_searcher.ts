@@ -22,11 +22,15 @@ import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXCLUDED } from '../e
 import {
   DESCRIPTION,
   FEATURE_SUBTYPE,
+  FEATURE_SLUG,
   FEATURE_TYPE,
   ID,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
   QUERY_ESQL,
+  QUERY_RULE_BACKED,
+  QUERY_RULE_ID,
+  QUERY_TYPE,
   SEARCH_EMBEDDING,
   STREAM_NAME,
   TAGS,
@@ -74,7 +78,7 @@ const combineKeywordClauses = (clauses: KeywordClause[]): KeywordExpressions => 
   const score = clauses
     .map(
       ({ condition: clause, boost }) =>
-        `CASE(${BasicPrettyPrinter.expression(clause)}, ${boost}, 0.0)`
+        `CASE(${BasicPrettyPrinter.expression(clause)}, ${boost.toFixed(1)}, 0.0)`
     )
     .join(' + ');
 
@@ -111,6 +115,12 @@ export class IndicatorSearcher {
       searchMode?: SearchMode;
       limit?: number;
       includeExcluded?: boolean;
+      featureTypes?: string[];
+      featureIds?: string[];
+      queryTypes?: string[];
+      queryIds?: string[];
+      ruleIds?: string[];
+      ruleUnbacked?: RuleUnbackedFilter;
     } = {}
   ): Promise<{ hits: KnowledgeIndicator[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -128,7 +138,13 @@ export class IndicatorSearcher {
   async findFeatures(
     streams: string | string[],
     query: string,
-    options: { searchMode?: SearchMode; limit?: number; includeExcluded?: boolean } = {}
+    options: {
+      searchMode?: SearchMode;
+      limit?: number;
+      includeExcluded?: boolean;
+      featureTypes?: string[];
+      featureIds?: string[];
+    } = {}
   ): Promise<{ hits: Feature[] }> {
     const { hits } = await this.findIndicators(streams, query, {
       ...options,
@@ -142,41 +158,90 @@ export class IndicatorSearcher {
   async findQueries(
     streams: string | string[],
     query: string,
-    filters?: { ruleUnbacked?: RuleUnbackedFilter },
+    filters?: {
+      ruleUnbacked?: RuleUnbackedFilter;
+      queryTypes?: string[];
+      queryIds?: string[];
+      ruleIds?: string[];
+    },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
     const { hits } = await this.findIndicators(streams, query, {
       types: [KI_TYPE_QUERY],
       searchMode,
+      queryTypes: filters?.queryTypes,
+      queryIds: filters?.queryIds,
+      ruleIds: filters?.ruleIds,
+      ruleUnbacked: filters?.ruleUnbacked,
     });
     const queryLinks = hits.flatMap((h) => (h.type === 'query' ? [h.query] : []));
-    if (!filters?.ruleUnbacked || filters.ruleUnbacked === 'include') {
-      return queryLinks;
-    }
-    if (filters.ruleUnbacked === 'only') {
-      return queryLinks.filter((q) => !q.rule_backed);
-    }
-    return queryLinks.filter((q) => q.rule_backed);
+    return queryLinks;
   }
 
   private async executeFindIndicators(
     mode: SearchMode,
     streamNames: string[],
     queryText: string,
-    options: { types?: KnowledgeIndicatorType[]; limit?: number; includeExcluded?: boolean }
+    options: {
+      types?: KnowledgeIndicatorType[];
+      limit?: number;
+      includeExcluded?: boolean;
+      featureTypes?: string[];
+      featureIds?: string[];
+      queryTypes?: string[];
+      queryIds?: string[];
+      ruleIds?: string[];
+      ruleUnbacked?: RuleUnbackedFilter;
+    }
   ): Promise<{ hits: KnowledgeIndicator[] }> {
-    // Phase 1: ES|QL latest-per-group reduction.
-    const where = combineWhere(
-      inPredicate(STREAM_NAME, streamNames),
-      inPredicate(TYPE, options.types ?? [])
-    );
+    const hasFeatureKind = options.types?.length === 1 && options.types[0] === KI_TYPE_FEATURE;
+    const hasQueryKind = options.types?.length === 1 && options.types[0] === KI_TYPE_QUERY;
+
     // Default: drop tombstones and excluded revisions. Queries don't write
     // `excluded`, so the filter is a no-op for them. `includeExcluded`
     // relaxes back to drop-tombstones-only.
+    const featureTypesFilter =
+      hasFeatureKind && options.featureTypes?.length
+        ? inPredicate(FEATURE_TYPE, options.featureTypes)
+        : undefined;
+    const featureIdsFilter =
+      hasFeatureKind && options.featureIds?.length
+        ? inPredicate(FEATURE_SLUG, options.featureIds)
+        : undefined;
+    const queryIdsFilter =
+      hasQueryKind && options.queryIds?.length ? inPredicate(ID, options.queryIds) : undefined;
+    const queryTypesFilter =
+      hasQueryKind && options.queryTypes?.length
+        ? inPredicate(QUERY_TYPE, options.queryTypes)
+        : undefined;
+    const ruleIdsFilter =
+      hasQueryKind && options.ruleIds?.length
+        ? inPredicate(QUERY_RULE_ID, options.ruleIds)
+        : undefined;
+    const ruleBackedFilter =
+      hasQueryKind && options.ruleUnbacked === 'exclude'
+        ? esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
+        : hasQueryKind && options.ruleUnbacked === 'only'
+        ? esql.exp`${esql.col(QUERY_RULE_BACKED)} == false`
+        : undefined;
+
+    // Phase 1: ES|QL latest-per-group reduction.
+    const where = combineWhere(
+      inPredicate(STREAM_NAME, streamNames),
+      inPredicate(TYPE, options.types ?? []),
+      featureTypesFilter,
+      featureIdsFilter,
+      queryTypesFilter,
+      queryIdsFilter,
+      ruleIdsFilter
+    );
+
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
-      options.includeExcluded ? undefined : IS_NOT_EXCLUDED
+      options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
+      ruleBackedFilter
     );
+
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     const docById = new Map(docs.map((d) => [`${d['stream.name']}:${d.type}:${d.id}`, d]));
 

@@ -143,8 +143,6 @@ The full route repository is assembled in `server/routes/index.ts` by spreading 
 | `GET /api/streams/{name}/_doc_counts` | Get document counts per stream |
 | `GET /api/streams/{name}/_query` | Get a query stream definition |
 | `PUT /api/streams/{name}/_query` | Create or update a query stream (creates `$.`-prefixed ES\|QL view) |
-| `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries. Deprecated, pending removal (use the internal query endpoints). |
-| `GET/POST /api/queries/*` | Query management |
 | `GET/PUT /api/content/*` | Content pack import/export |
 | `GET/POST/DELETE /api/attachments/*` | Asset attachments (dashboards, rules) |
 
@@ -233,23 +231,20 @@ streams/
 │   ├── routes/
 │   │   ├── create_server_route.ts  # Route factory with telemetry + error mapping
 │   │   ├── streams/           # Public API routes (/api/streams/*)
+│   │   ├── attachments/       # Attachment routes
+│   │   ├── content/           # Content pack routes
 │   │   └── internal/          # Internal API routes (/internal/streams/*)
+│   │       ├── attachments/
+│   │       ├── connectors/
 │   │       └── streams/
 │   │           ├── crud/          # List, detail, resolve index
 │   │           ├── schema/        # Field mapping management
 │   │           ├── lifecycle/     # Retention configuration
 │   │           ├── processing/    # Processing pipeline management
-│   │           ├── management/    # Enable/disable, fork, resync
+│   │           ├── management/    # Enable/disable, fork, resync, suggestions
 │   │           ├── ingest/        # Bulk ingest endpoint
-│   │           ├── features/      # Feature identification
-│   │           ├── systems/       # System identification
-│   │           ├── queries/       # Query management
-│   │           ├── insights/      # Insights discovery
-│   │           ├── significant_events/  # Significant events
-│   │           ├── prompts/       # AI prompt configuration
-│   │           ├── failure_store/  # Failure store access
-│   │           ├── onboarding/    # Onboarding flows
-│   │           └── tasks/         # Background task management
+│   │           ├── failure_store/ # Failure store access
+│   │           └── time_series/   # Time series data
 │   └── lib/
 │       ├── streams/
 │       │   ├── service.ts         # StreamsService (creates scoped clients)
@@ -261,21 +256,19 @@ streams/
 │       │   │   └── streams/           # WiredStream, ClassicStream state types
 │       │   ├── storage/           # StreamsStorageClient for .kibana_streams
 │       │   ├── attachments/       # Dashboard/SLO/rule linking
-│       │   ├── assets/query/      # Query storage and linking
-│       │   ├── feature/           # Feature identification service
-│       │   ├── system/            # System identification service
 │       │   ├── component_templates/
 │       │   ├── data_streams/
+│       │   ├── errors/
 │       │   ├── esql_views/
+│       │   ├── failure_store/
 │       │   ├── index_templates/
 │       │   ├── ingest_pipelines/
 │       │   ├── lifecycle/
+│       │   ├── resolvers/
 │       │   └── helpers/
 │       ├── content/           # Content pack import/export
-│       ├── rules/             # ES|QL alerting rule type
-│       ├── tasks/             # Background task definitions
-│       │   └── task_definitions/  # Description gen, system ID, features, insights
-│       ├── significant_events/  # Significant event generation
+│       ├── pattern_extraction/  # Log pattern extraction
+│       ├── prompts/           # AI prompt override configuration
 │       └── telemetry/         # EBT and usage collection
 └── test/scout/                # Scout API tests
 ```
@@ -319,7 +312,6 @@ Key services and their clients:
 - `SystemService` → `SystemClient`
 - `ContentService` → `ContentClient`
 - `QueryService` → `QueryClient`
-- `TaskService` → `TaskClient`
 
 #### State Management (Server)
 
@@ -334,11 +326,14 @@ This ensures that all Elasticsearch objects stay in sync with stream definitions
 #### Feature Flags
 
 Features behind flags are registered as `uiSettings` in `feature_flags.ts`:
-- `observability:streams:enableSignificantEvents`
-- `observability:streams:enableSignificantEventsDiscovery`
-- `observability:streams:enableContentPacks`
-- `observability:streams:enableAttachments`
-- `observability:streams:enableQueryStreams`
+- `observability:streamsEnableContentPacks`
+- `observability:streamsEnableQueryStreams`
+- `observability:streamsEnableWiredStreamViews`
+- `observability:streamsEnableDraftStreams`
+- `observability:streamsEnableCanvas`
+
+Significant events is **not** gated here — it lives in the `significant_events` plugin behind the
+`streams.significantEventsAvailable` feature flag (`significant_events/common/feature_flags.ts`).
 
 ## streams_app Plugin Architecture
 
@@ -363,22 +358,15 @@ streams_app/
 │   │   ├── app_root/          # Providers, router, breadcrumbs, tour
 │   │   ├── stream_list_view/  # Stream list + tree table
 │   │   ├── stream_root/       # Stream detail wrapper
-│   │   ├── data_management/   # Core management tabs
-│   │   │   ├── stream_detail_routing/      # Partitioning / routing rules
-│   │   │   ├── stream_detail_enrichment/   # Processing pipeline (Streamlang)
-│   │   │   │   ├── state_management/       # XState machines
-│   │   │   │   │   ├── stream_enrichment_state_machine/
-│   │   │   │   │   ├── simulation_state_machine/
-│   │   │   │   │   ├── interactive_mode_machine/
-│   │   │   │   │   ├── steps_state_machine/
-│   │   │   │   │   └── yaml_mode_machine/
-│   │   │   │   └── steps/blocks/action/    # Processor editors
-│   │   │   ├── stream_detail_schema_editor/
-│   │   │   ├── stream_detail_lifecycle/    # Retention, downsampling, failure store
-│   │   │   └── shared/                     # Condition editor, condition display
-│   │   ├── stream_detail_systems/          # Systems + features + description
-│   │   ├── stream_detail_significant_events_view/
-│   │   ├── significant_events_discovery/   # Discovery page
+│   │   ├── stream_management/
+│   │   │   └── data_management/   # Core management tabs
+│   │   │       ├── stream_detail_management/
+│   │   │       ├── stream_detail_routing/      # Partitioning / routing rules
+│   │   │       ├── stream_detail_enrichment/   # Processing pipeline (Streamlang)
+│   │   │       ├── stream_detail_schema_editor/
+│   │   │       ├── stream_detail_lifecycle/    # Retention, downsampling, failure store
+│   │   │       ├── stream_detail_canvas/
+│   │   │       └── shared/                     # Condition editor, condition display
 │   │   └── query_streams/                  # Query stream creation
 │   └── telemetry/
 ├── server/                    # Minimal server plugin
@@ -390,12 +378,11 @@ streams_app/
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `StreamListView` | Stream list with tree table |
-| `/_discovery/{tab}` | `SignificantEventsDiscoveryPage` | Discovery: streams, features, queries, insights |
 | `/{key}/management/{tab}` | `StreamDetailManagement` | Tabbed management (differs by stream type) |
 
-Management tabs for **wired streams**: partitioning, processing, schema, retention, advanced, significant events, data quality, attachments.
+Management tabs for **wired streams**: overview, partitioning, processing, schema, lifecycle, data quality, attachments, canvas.
 
-Management tabs for **classic streams**: processing, advanced, data quality, retention, significant events, schema, attachments.
+Management tabs for **classic streams**: overview, lifecycle, partitioning, processing, data quality, schema, attachments, canvas.
 
 ### Key UI Patterns
 
@@ -493,20 +480,24 @@ yarn test:jest x-pack/platform/plugins/shared/streams/server/lib/streams/
 
 ### Integration Tests (Scout)
 
-Scout tests for the streams_app use Playwright:
+Scout tests for the streams_app use Playwright. They are split into one
+namespace per feature area, each with its own config at
+`test/scout/<namespace>/ui/playwright.config.ts` — see
+[the suite README](../streams_app/test/scout/README.md) for the namespace list
+and how to pick one. The examples below use `routing`:
 
 ```bash
 # Start server (ESS)
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run UI tests
-node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 For serverless:
 ```bash
 node scripts/scout.js start-server --arch serverless --domain observability_complete
-node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Streamlang integration tests:

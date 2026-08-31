@@ -9,14 +9,12 @@ import { z } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { parseIndexPatterns } from '@kbn/streams-schema';
 import {
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { createServerRoute } from '../../../create_server_route';
@@ -31,7 +29,6 @@ import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabl
 import {
   classifyStreams,
   filterEligibleStreams,
-  parseExcludePatterns,
   type StreamCandidate,
   type StreamClassificationResult,
 } from './classify_streams';
@@ -43,13 +40,11 @@ export interface EligibleStreamsResponse {
   candidates: StreamCandidate[];
   alreadyRunning: StreamClassificationResult['alreadyRunning'];
   upToDate: StreamCandidate[];
-  excluded: string[];
   unsupported: string[];
   skipped: StreamCandidate[];
   settings: {
     enabled: boolean;
     intervalHours: number;
-    excludePatterns: string[];
   };
   connectorId: string;
   timeRange: {
@@ -77,7 +72,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List streams eligible for KI extraction',
     description:
-      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and workflow execution state.',
+      'Classifies streams into eligible candidates, already-running, up-to-date, unsupported, and skipped buckets based on extraction settings and workflow execution state.',
   },
   security: {
     authz: {
@@ -90,7 +85,6 @@ const eligibleStreamsRoute = createServerRoute({
         maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
         extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
         lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
-        excludedStreamPatterns: z.string().max(MAX_TEXT_LENGTH).optional(),
       })
       .optional(),
   }),
@@ -121,14 +115,9 @@ const eligibleStreamsRoute = createServerRoute({
       throw new StatusError('Continuous KI extraction is disabled', 400);
     }
 
-    const [intervalHoursSetting, excludedStreamPatterns] = await Promise.all([
-      globalUiSettingsClient.get<number>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
-      ),
-      globalUiSettingsClient.get<string>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS
-      ),
-    ]);
+    const intervalHoursSetting = await globalUiSettingsClient.get<number>(
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
+    );
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
@@ -158,12 +147,9 @@ const eligibleStreamsRoute = createServerRoute({
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
-
-    const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
+    const { alreadyRunning, candidates, upToDate, unsupported } = classifyStreams({
       allStreams: eligibleStreams,
       executions,
-      excludedStreamPatterns: resolvedExcludedPatterns,
       intervalHours,
     });
 
@@ -178,13 +164,11 @@ const eligibleStreamsRoute = createServerRoute({
       candidates: toSchedule,
       alreadyRunning,
       upToDate,
-      excluded,
       unsupported,
       skipped,
       settings: {
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
-        excludePatterns: parseExcludePatterns(excludedStreamPatterns),
       },
       connectorId,
       timeRange: {

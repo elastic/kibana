@@ -34,6 +34,7 @@ const APM_AGENT_SECTIONS = [
   'PHP',
 ];
 
+// Stateful-only: classic Kibana Home `#/tutorial/apm` does not exist on serverless.
 test.describe('APM tutorial', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsViewer();

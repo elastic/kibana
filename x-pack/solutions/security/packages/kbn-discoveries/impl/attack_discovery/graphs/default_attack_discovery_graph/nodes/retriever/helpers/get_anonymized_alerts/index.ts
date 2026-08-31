@@ -52,7 +52,31 @@ export const getAnonymizedAlerts = async ({
     start,
   });
 
-  const result = await esClient.search<SearchResponse>(query);
+  // Exact-id re-fetch (skill mode): when the caller passes an `ids` filter it has
+  // already selected the precise documents to fetch (the gate-curated alerts). The
+  // shared builder unconditionally ANDs an open/acknowledged status clause and a
+  // `@timestamp` range (defaulting to now-24h) onto every query, which would drop
+  // curated alerts that are older than that window or not open/acknowledged. Override
+  // just the query clause with a plain `ids` query so those documents resolve exactly,
+  // regardless of age or status. The rest of the request (index/size/fields/_source/
+  // sort) is preserved so anonymization is unchanged. Only the id re-fetch passes an
+  // `ids` filter, so no other retrieval path is affected.
+  const rawIds =
+    filter != null && typeof filter === 'object' && 'ids' in filter
+      ? (filter as Record<string, unknown>).ids
+      : undefined;
+  const idsValues =
+    rawIds != null &&
+    typeof rawIds === 'object' &&
+    'values' in rawIds &&
+    Array.isArray((rawIds as { values?: unknown }).values)
+      ? (rawIds as { values: string[] }).values
+      : undefined;
+
+  const searchRequest =
+    idsValues != null ? { ...query, query: { ids: { values: idsValues } } } : query;
+
+  const result = await esClient.search<SearchResponse>(searchRequest);
 
   // Accumulate replacements locally so we can, for example use the same
   // replacement for a hostname when we see it in multiple alerts:

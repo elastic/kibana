@@ -90,5 +90,5 @@ export const getInstallPkgRouteOptions = ({
     onCancelUrl: currentPath,
   };
 
-  return [PLUGIN_ID, { path, state }];
+  return [INTEGRATIONS_PLUGIN_ID, { path, state }];
 };

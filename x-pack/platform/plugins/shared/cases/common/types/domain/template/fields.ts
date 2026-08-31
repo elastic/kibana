@@ -256,6 +256,17 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * field" (do not inherit the library default; the field stays empty), whereas an absent
  * `metadata.default` inherits the library field's default. This is what the v1→v2 template
  * migration emits for a legacy template custom field whose value was explicitly cleared.
+ *
+ * `display` and `validation` are optional per-template overrides (e.g. `show_when`,
+ * `required_when`). `display` fully replaces the library field's own `display` when present
+ * (its only key is `show_when`). `validation` is instead merged onto the library field's own
+ * `validation` — a template that only wants to change requiredness keeps the library's format
+ * constraints (`pattern`/`min`/`max`/etc.), though the `required`/`required_when`/
+ * `required_on_close` family is swapped as a unit rather than merged key-by-key (see
+ * `mergeValidationOverride`). Without declaring `display`/`validation` here at all, they would be
+ * silently stripped by Zod when a `$ref` entry authored a local `display`/`validation` block,
+ * which is what made conditional visibility appear to be broken for `$ref` fields (see
+ * `applyRefFieldOverride`).
  */
 export const RefFieldSchema = z.object({
   name: z.string().optional(),
@@ -274,6 +285,8 @@ export const RefFieldSchema = z.object({
         .optional(),
     })
     .optional(),
+  display: DisplaySchema.optional(),
+  validation: ValidationSchema.optional(),
 });
 
 export type RefField = z.infer<typeof RefFieldSchema>;
@@ -297,10 +310,11 @@ export const MarkdownFieldSchema = BaseFieldSchema.extend({
 });
 
 /**
- * This can be used to parse `fields` section in the YAML `definition` of the template.
- * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ * Union of all inline (control-based) field definitions — every concrete field shape that can be
+ * authored directly, excluding library references (`$ref`). This is the schema for a standalone
+ * field-library definition, which stores concrete fields, never references to other fields.
  */
-export const FieldSchema = z.union([
+export const InlineFieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
@@ -311,8 +325,13 @@ export const FieldSchema = z.union([
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
   MarkdownFieldSchema,
-  RefFieldSchema,
 ]);
+
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ */
+export const FieldSchema = z.union([...InlineFieldSchema.options, RefFieldSchema]);
 
 export type Field = z.infer<typeof FieldSchema>;
 

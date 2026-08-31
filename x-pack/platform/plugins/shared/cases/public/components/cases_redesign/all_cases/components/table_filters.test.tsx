@@ -39,8 +39,8 @@ const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useCasesToastMock = useCasesToast as jest.Mock;
 const MORE_FILTERS_TEST_ID = 'options-filter-popover-button-more-filters';
 const onFilterChanged = jest.fn();
-/** Extra toolbar buttons: More filters, Columns, view toggle (×2), date range (×2), refresh. */
-const EXTRA_TOOLBAR_BUTTON_COUNT = 7;
+/** The filter pills share their row with only the "More filters" (edit-filters) button. */
+const EXTRA_TOOLBAR_BUTTON_COUNT = 1;
 const showInfoToast = jest.fn();
 
 const props: CasesTableFiltersProps = {
@@ -722,7 +722,7 @@ describe('CasesTableFilters ', () => {
 
       await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
 
-      const filterBar = await screen.findByTestId('cases-table-filters');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
       const allFilters = within(filterBar).getAllByRole('button');
       const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'Toggle'];
       orderedFilterLabels.forEach((label, index) => {
@@ -776,7 +776,7 @@ describe('CasesTableFilters ', () => {
       expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
       await userEvent.click(screen.getByRole('option', { name: 'Status' }));
 
-      const filterBar = await screen.findByTestId('cases-table-filters');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
       const allFilters = within(filterBar).getAllByRole('button');
       const orderedFilterLabels = ['Severity', 'Tags', 'Categories'];
       orderedFilterLabels.forEach((label, index) => {
@@ -865,7 +865,7 @@ describe('CasesTableFilters ', () => {
 
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      const filterBar = await screen.findByTestId('cases-table-filters');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -895,7 +895,7 @@ describe('CasesTableFilters ', () => {
 
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      const filterBar = await screen.findByTestId('cases-table-filters');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -951,7 +951,7 @@ describe('CasesTableFilters ', () => {
     it('when a filter is active and is not last in the list, it should move the filter to last position after deactivating and activating', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      const filterBar = await screen.findByTestId('cases-table-filters');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
       let allFilters = within(filterBar).getAllByRole('button');
       let orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories'];
       orderedFilterLabels.forEach((label, index) => {
@@ -986,7 +986,7 @@ describe('CasesTableFilters ', () => {
 
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      const filterBar = await screen.findByTestId('cases-table-filters');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -1104,7 +1104,8 @@ describe('CasesTableFilters ', () => {
 
       await waitForComponentToUpdate();
 
-      const totalFilters = await screen.findAllByRole('button');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
+      const totalFilters = within(filterBar).getAllByRole('button');
       expect(totalFilters.length).toBe(filters.length + EXTRA_TOOLBAR_BUTTON_COUNT);
 
       for (const filter of filters) {
@@ -1151,7 +1152,8 @@ describe('CasesTableFilters ', () => {
 
       await waitForComponentToUpdate();
 
-      const totalFilters = await screen.findAllByRole('button');
+      const filterBar = await screen.findByTestId('cases-table-filters-pills-row');
+      const totalFilters = within(filterBar).getAllByRole('button');
       expect(totalFilters.length).toBe(filters.length + EXTRA_TOOLBAR_BUTTON_COUNT);
 
       for (const filter of filters) {

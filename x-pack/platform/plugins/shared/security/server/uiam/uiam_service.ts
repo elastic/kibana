@@ -11,7 +11,11 @@ import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientLogo,
@@ -30,6 +34,7 @@ import type {
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -51,6 +56,23 @@ export interface GrantUiamApiKeyRequestBody {
       resource: string[];
     };
   };
+}
+
+/**
+ * Options that control how the grant request itself is authenticated to UIAM.
+ */
+export interface GrantUiamApiKeyOptions {
+  /**
+   * Whether to present Kibana's own client authentication (the shared secret header and, when
+   * configured, the mTLS client certificate) alongside the granting credential. UIAM authenticates
+   * the credential and Kibana independently, and requires the two to agree: an internal API key or
+   * a session token must arrive with client authentication, while an external (organization) API
+   * key must arrive without it, so that internal credentials that leak cannot be replayed through
+   * customer-facing code paths. Presenting the wrong combination fails the grant.
+   *
+   * Defaults to `true`, which is correct for everything except an external API key.
+   */
+  includeClientAuthentication?: boolean;
 }
 
 /**
@@ -128,6 +150,18 @@ interface UiamErrorDetails {
 }
 
 /**
+ * Telemetry `oauthErrorType` for an OAuth token exchange that Kibana itself rejected
+ * as opposed to a failure reported by UIAM.
+ */
+const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
+
+/**
+ * Telemetry `oauthErrorType` for an OAuth token exchange failure that carries no
+ * recognizable classification.
+ */
+const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -150,6 +184,14 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    */
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
+
+  /**
+   * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
+   * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
+   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
+   * to `credential` so it authorizes that credential only.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
 
   /**
    * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
@@ -176,11 +218,13 @@ export interface UiamServicePublic {
    * Grants an API key using the UIAM service.
    * @param authorization The HTTP authorization header containing scheme and credentials.
    * @param params The parameters for creating the API key (name and optional expiration).
+   * @param options The options that control how the grant request itself is authenticated to UIAM.
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
-    params: GrantUiamAPIKeyParams
+    params: GrantUiamAPIKeyParams,
+    options?: GrantUiamApiKeyOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -253,15 +297,24 @@ export interface UiamServicePublic {
   ): Promise<OAuthClientResponse>;
 
   /**
+   * Permanently deletes an OAuth client, and all of its connections, via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client to delete.
+   */
+  deleteOAuthClient(accessToken: string, clientId: string): Promise<void>;
+
+  /**
    * Lists OAuth connections via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse>;
 
   /**
@@ -293,6 +346,14 @@ export interface UiamServicePublic {
   ): Promise<OAuthConnectionResponse>;
 
   /**
+   * Permanently deletes an OAuth connection via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to delete.
+   */
+  deleteOAuthConnection(accessToken: string, clientId: string, connectionId: string): Promise<void>;
+
+  /**
    * Resolves one or more user IDs into basic user information via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param userIds The user IDs to resolve.
@@ -316,6 +377,7 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  #dispatcherWithoutClientCertificate: Agent | undefined;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -351,6 +413,18 @@ export class UiamService implements UiamServicePublic {
     return {
       authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
       [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+    };
+  }
+
+  /**
+   * See {@link UiamServicePublic.getInternalCallerAttestationHeaders}.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string> {
+    return {
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+        this.#config.sharedSecret,
+        credential
+      ),
     };
   }
 
@@ -432,6 +506,7 @@ export class UiamService implements UiamServicePublic {
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
 
+    const startTime = performance.now();
     try {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
@@ -439,7 +514,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -450,12 +524,22 @@ export class UiamService implements UiamServicePublic {
       const audience = response.credentials?.oauth?.audience;
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
-          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
+          { oauthErrorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'success',
+      });
+
       return response.token;
     } catch (err) {
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'failure',
+        ...UiamService.#getOAuthTokenExchangeErrorAttributes(err),
+      });
+
       this.#logger.error(
         () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
@@ -467,7 +551,11 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
+  async grantApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: GrantUiamAPIKeyParams,
+    { includeClientAuthentication = true }: GrantUiamApiKeyOptions = {}
+  ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
     );
@@ -487,20 +575,24 @@ export class UiamService implements UiamServicePublic {
           },
         },
       };
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify(body),
+        dispatcher: includeClientAuthentication
+          ? this.#dispatcher
+          : this.#getDispatcherWithoutClientCertificate(),
+      };
 
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: authorization.toString(),
-          },
-          body: JSON.stringify(body),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, requestOptions)
       );
 
       this.#logger.debug(`Successfully granted API key with id ${response.id}`);
@@ -737,12 +829,45 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.deleteOAuthClient}.
+   */
+  async deleteOAuthClient(accessToken: string, clientId: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to delete OAuth client: ${clientId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(clientId)}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully deleted OAuth client: ${clientId}`);
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to delete OAuth client ${clientId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
    * See {@link UiamServicePublic.listOAuthConnections}.
    */
   async listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth connections.');
@@ -753,6 +878,9 @@ export class UiamService implements UiamServicePublic {
       }
       if (connectionId) {
         url.searchParams.set('connection_id', connectionId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(
@@ -861,6 +989,47 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.deleteOAuthConnection}.
+   */
+  async deleteOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string
+  ): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to delete OAuth connection: ${connectionId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(
+            clientId
+          )}/connections/${encodeURIComponent(connectionId)}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully deleted OAuth connection: ${connectionId}`);
+    } catch (err) {
+      this.#logger.error(
+        () =>
+          `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+            err
+          )}`
+      );
+      throw err;
+    }
+  }
+
+  /**
    * See {@link UiamServicePublic.resolveUsers}.
    */
   async resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse> {
@@ -920,15 +1089,22 @@ export class UiamService implements UiamServicePublic {
 
   /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
+   *
+   * @param includeClientCertificate Whether to present Kibana's own mTLS client certificate. Server
+   * verification is unaffected either way.
    */
-  #createFetchDispatcher() {
+  #createFetchDispatcher(includeClientCertificate = true) {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
 
     const readFile = (file: string) => readFileSync(file, 'utf8');
 
     // Read client certificate and key for mTLS from PEM files.
-    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
-    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
+    const cert =
+      includeClientCertificate && this.#config.ssl.certificate
+        ? readFile(this.#config.ssl.certificate)
+        : undefined;
+    const key =
+      includeClientCertificate && this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
@@ -959,6 +1135,20 @@ export class UiamService implements UiamServicePublic {
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
       },
     });
+  }
+
+  /**
+   * Returns the dispatcher for the rare request that must not present Kibana's own mTLS client
+   * certificate, created on first use since virtually every request presents it. Without a
+   * certificate configured there is nothing to withhold, so the main dispatcher (and its connection
+   * pool) is reused.
+   */
+  #getDispatcherWithoutClientCertificate() {
+    if (!this.#config.ssl.certificate) {
+      return this.#dispatcher;
+    }
+
+    return (this.#dispatcherWithoutClientCertificate ??= this.#createFetchDispatcher(false));
   }
 
   /**
@@ -997,5 +1187,21 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getOAuthTokenExchangeErrorAttributes(err: unknown): {
+    oauthErrorType: string;
+    oauthErrorCode: string | undefined;
+  } {
+    if (!Boom.isBoom(err)) {
+      return { oauthErrorType: OAUTH_UNKNOWN_ERROR_TYPE, oauthErrorCode: undefined };
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+
+    return {
+      oauthErrorType: err.data?.oauthErrorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE,
+      oauthErrorCode: payload?.error?.code,
+    };
   }
 }

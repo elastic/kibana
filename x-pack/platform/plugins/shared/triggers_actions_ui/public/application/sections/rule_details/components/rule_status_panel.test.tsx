@@ -112,6 +112,27 @@ describe('rule status panel', () => {
     expect(screen.queryByTestId('ruleStatusDropdownBadge')).not.toBeInTheDocument();
   });
 
+  it('renders the last response status stat', async () => {
+    const rule = mockRule({
+      executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
+    });
+    render(
+      <IntlProvider locale="en">
+        <RuleStatusPanelWithProvider
+          {...mockAPIs}
+          rule={rule}
+          isEditable
+          healthColor="primary"
+          statusMessage="Ok"
+          requestRefresh={requestRefresh}
+        />
+      </IntlProvider>
+    );
+
+    const lastResponseStat = screen.getByTestId('ruleStatusLastResponseStat');
+    expect(lastResponseStat).toHaveTextContent('Last response');
+  });
+
   it('renders the disabled status as plain text', async () => {
     const rule = mockRule({ enabled: false });
     render(

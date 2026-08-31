@@ -16,7 +16,7 @@ import type {
 } from '../types';
 import { APIRoutes } from '../types';
 
-import { ROUTE_VERSIONS } from '../../common';
+import { ROUTE_VERSIONS, PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 import { defineSavedPlaygroundRoutes } from './saved_playgrounds';
 
 describe('Search Playground - Playgrounds API', () => {
@@ -258,37 +258,9 @@ describe('Search Playground - Playgrounds API', () => {
         });
       });
       it('should handle 404s from so client', async () => {
-        mockSOClient.get.mockResolvedValue({
-          error: {
-            statusCode: 404,
-          },
-        });
-
-        await expect(
-          mockRouter.callRoute({
-            params: {
-              id: '1',
-            },
-          })
-        ).resolves.toEqual(undefined);
-
-        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
-          body: {
-            message: '1 playground not found',
-          },
-        });
-      });
-      it('should reformat other errors from so client', async () => {
-        mockSOClient.get.mockResolvedValue({
-          error: {
-            statusCode: 401,
-            message: 'Unauthorized',
-            error: 'some error message',
-            metadata: {
-              foo: 'bar',
-            },
-          },
-        });
+        mockSOClient.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(PLAYGROUND_SAVED_OBJECT_TYPE, '1')
+        );
 
         await expect(
           mockRouter.callRoute({
@@ -299,13 +271,9 @@ describe('Search Playground - Playgrounds API', () => {
         ).resolves.toEqual(undefined);
 
         expect(mockRouter.response.customError).toHaveBeenCalledWith({
-          statusCode: 401,
+          statusCode: 404,
           body: {
-            message: 'Unauthorized',
-            attributes: {
-              error: 'some error message',
-              foo: 'bar',
-            },
+            message: `Saved object [${PLAYGROUND_SAVED_OBJECT_TYPE}/1] not found`,
           },
         });
       });
@@ -410,40 +378,6 @@ describe('Search Playground - Playgrounds API', () => {
           headers: { 'content-type': 'application/json' },
         });
       });
-      it('handles errors from the saved objects client', async () => {
-        mockSOClient.create.mockResolvedValue({
-          error: {
-            statusCode: 401,
-            message: 'Unauthorized',
-            error: 'some error message',
-            metadata: {
-              foo: 'bar',
-            },
-          },
-        });
-
-        await expect(
-          mockRouter.callRoute({
-            body: {
-              name: 'Playground 1',
-              indices: ['index1'],
-              queryFields: { index1: ['field1'] },
-              elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1"]}}}}}`,
-            },
-          })
-        ).resolves.toEqual(undefined);
-
-        expect(mockRouter.response.customError).toHaveBeenCalledWith({
-          statusCode: 401,
-          body: {
-            message: 'Unauthorized',
-            attributes: {
-              error: 'some error message',
-              foo: 'bar',
-            },
-          },
-        });
-      });
       it('handles thrown errors from the saved objects client', async () => {
         mockSOClient.create.mockRejectedValue(
           SavedObjectsErrorHelpers.decorateForbiddenError(new Error('Forbidden'))
@@ -522,42 +456,6 @@ describe('Search Playground - Playgrounds API', () => {
           elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1"]}}}}}`,
         });
         expect(mockRouter.response.ok).toHaveBeenCalledWith();
-      });
-      it('handles errors from the saved objects client', async () => {
-        mockSOClient.update.mockResolvedValue({
-          error: {
-            statusCode: 401,
-            message: 'Unauthorized',
-            error: 'some error message',
-            metadata: {
-              foo: 'bar',
-            },
-          },
-        });
-
-        await expect(
-          mockRouter.callRoute({
-            params: {
-              id: '1',
-            },
-            body: {
-              name: 'Updated Playground',
-              indices: ['index1'],
-              queryFields: { index1: ['field1'] },
-              elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1"]}}}}}`,
-            },
-          })
-        ).resolves.toEqual(undefined);
-        expect(mockRouter.response.customError).toHaveBeenCalledWith({
-          statusCode: 401,
-          body: {
-            message: 'Unauthorized',
-            attributes: {
-              error: 'some error message',
-              foo: 'bar',
-            },
-          },
-        });
       });
       it('handles saved object client errors', async () => {
         mockSOClient.update.mockRejectedValue(

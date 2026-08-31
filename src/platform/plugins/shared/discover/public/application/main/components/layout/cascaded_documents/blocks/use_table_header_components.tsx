@@ -25,10 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import type { ESQLDataGroupNode } from './types';
 
 interface UseTableHeaderProps {
-  viewModeToggle: React.ReactElement | undefined;
+  renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle'];
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
 }
 
@@ -178,7 +179,7 @@ export function useGetGroupBySelectorRenderer({
 }
 
 export function useEsqlDataCascadeHeaderComponent({
-  viewModeToggle,
+  renderViewModeToggle,
   cascadeGroupingChangeHandler,
 }: UseTableHeaderProps) {
   const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
@@ -191,21 +192,12 @@ export function useEsqlDataCascadeHeaderComponent({
     ({ currentSelectedColumns, availableColumns }) => {
       return (
         <EuiFlexGroup
-          justifyContent={viewModeToggle ? 'spaceBetween' : 'flexEnd'}
+          justifyContent={renderViewModeToggle ? 'spaceBetween' : 'flexEnd'}
           alignItems="center"
           responsive={false}
         >
-          {viewModeToggle && (
-            <EuiFlexItem>
-              {React.cloneElement(viewModeToggle!, {
-                hitCounterLabel: i18n.translate('discover.dataCascade.header.resultLabel', {
-                  defaultMessage: 'group',
-                }),
-                hitCounterPluralLabel: i18n.translate('discover.dataCascade.header.resultsLabel', {
-                  defaultMessage: 'groups',
-                }),
-              })}
-            </EuiFlexItem>
+          {renderViewModeToggle && (
+            <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
             {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
@@ -213,6 +205,6 @@ export function useEsqlDataCascadeHeaderComponent({
         </EuiFlexGroup>
       );
     },
-    [groupBySelectorRenderer, viewModeToggle]
+    [groupBySelectorRenderer, renderViewModeToggle]
   );
 }

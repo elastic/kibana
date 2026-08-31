@@ -69,4 +69,9 @@ export const createDataSourceFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createFlyout.saveButton', {
       defaultMessage: 'Save',
     }),
+
+  learnMore: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.learnMore', {
+      defaultMessage: 'Learn more',
+    }),
 };

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EvaluationExperimentDatasetExample } from '@kbn/evals-common';
-import { ExampleScoresTable } from '.';
+import { ExampleScoresTable, getVerdictBadgeColor } from '.';
 
 const buildScore = ({
   timestamp,
@@ -19,6 +19,7 @@ const buildScore = ({
   evaluatorExplanation,
   evaluatorMetadata,
   evaluatorTraceId,
+  evaluatorModelId = 'evaluator-model-1',
   repetitionIndex,
   exampleInput,
   taskOutput,
@@ -31,6 +32,7 @@ const buildScore = ({
   evaluatorExplanation?: string | null;
   evaluatorMetadata?: Record<string, unknown> | null;
   evaluatorTraceId?: string | null;
+  evaluatorModelId?: string;
   repetitionIndex: number;
   exampleInput?: Record<string, unknown> | null;
   taskOutput?: Record<string, unknown> | null;
@@ -62,12 +64,40 @@ const buildScore = ({
     metadata: evaluatorMetadata,
     trace_id: evaluatorTraceId,
     model: {
-      id: 'evaluator-model-1',
+      id: evaluatorModelId,
     },
   },
   metadata: {
     total_repetitions: 1,
   },
+});
+
+const buildMixedJudgeExample = (): EvaluationExperimentDatasetExample => ({
+  example_id: 'example-mixed-judges',
+  example_index: 0,
+  scores: [
+    buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'correctness.factuality',
+      evaluatorScore: 0.71,
+      evaluatorModelId: 'openai-gpt-5.6-luna',
+      repetitionIndex: 0,
+    }),
+    buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'correctness.relevance',
+      evaluatorScore: 0.5,
+      evaluatorModelId: 'openai-gpt-5.6-luna',
+      repetitionIndex: 0,
+    }),
+    buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'groundedness',
+      evaluatorScore: 1,
+      evaluatorModelId: 'google-gemini-3.5-flash',
+      repetitionIndex: 0,
+    }),
+  ],
 });
 
 describe('ExampleScoresTable', () => {
@@ -100,15 +130,9 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
-    expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-0000000000000001')).toBeInTheDocument();
 
     const pagination = screen.getByRole('navigation', {
       name: 'Select repetition for example example-id-0000000000000001',
@@ -164,16 +188,122 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(
       screen.queryByRole('navigation', {
         name: 'Select repetition for example example-id-single-repetition',
       })
     ).not.toBeInTheDocument();
-    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-single-repetition')).toBeInTheDocument();
+  });
+
+  describe('multi-score evaluators', () => {
+    it('groups sub-scores under the evaluator name instead of repeating it on each row', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.getByText('correctness')).toBeInTheDocument();
+      expect(screen.getByText('factuality:')).toBeInTheDocument();
+      expect(screen.getByText('relevance:')).toBeInTheDocument();
+      expect(screen.queryByText('correctness.factuality:')).not.toBeInTheDocument();
+    });
+
+    it('keeps a single-score evaluator on one row without a heading', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.getAllByText('groundedness:')).toHaveLength(1);
+      expect(screen.queryByText('groundedness')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('judge model', () => {
+    it('labels each evaluator once rather than every sub-score', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.getAllByText('judged by openai-gpt-5.6-luna')).toHaveLength(1);
+      expect(screen.getAllByText('judged by google-gemini-3.5-flash')).toHaveLength(1);
+    });
+
+    it('stays quiet when every evaluator shares one judge', () => {
+      const example = buildMixedJudgeExample();
+      render(
+        <ExampleScoresTable
+          examples={[
+            {
+              ...example,
+              scores: example.scores.map((score) => ({
+                ...score,
+                evaluator: { ...score.evaluator, model: { id: 'openai-gpt-5.6-luna' } },
+              })),
+            },
+          ]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByText(/openai-gpt-5\.6-luna/)).not.toBeInTheDocument();
+    });
+
+    it('labels sub-scores individually when one evaluator mixes judges', () => {
+      const example = buildMixedJudgeExample();
+      const [factuality, relevance, groundedness] = example.scores;
+      render(
+        <ExampleScoresTable
+          examples={[
+            {
+              ...example,
+              scores: [
+                factuality,
+                {
+                  ...relevance,
+                  evaluator: { ...relevance.evaluator, model: { id: 'anthropic-claude-9' } },
+                },
+                groundedness,
+              ],
+            },
+          ]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('judged by openai-gpt-5.6-luna')).toBeInTheDocument();
+      expect(screen.getByText('judged by anthropic-claude-9')).toBeInTheDocument();
+      expect(screen.getByText('judged by google-gemini-3.5-flash')).toBeInTheDocument();
+    });
+
+    it('stays quiet for code evaluators that carry no judge', () => {
+      render(
+        <ExampleScoresTable
+          examples={[
+            {
+              example_id: 'example-code-only',
+              example_index: 0,
+              scores: [
+                buildScore({
+                  timestamp: '2026-03-02T12:00:00.000Z',
+                  evaluatorName: 'latency',
+                  evaluatorScore: 4.19,
+                  repetitionIndex: 0,
+                }),
+                buildScore({
+                  timestamp: '2026-03-02T12:00:00.000Z',
+                  evaluatorName: 'input_tokens',
+                  evaluatorScore: 32670,
+                  repetitionIndex: 0,
+                }),
+              ].map((score) => ({
+                ...score,
+                evaluator: { ...score.evaluator, model: undefined },
+              })),
+            },
+          ]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('latency:')).toBeInTheDocument();
+      expect(screen.queryByText(/judged by/)).not.toBeInTheDocument();
+    });
   });
 
   it('renders evaluator label as a badge when present', () => {
@@ -193,13 +323,52 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('Factuality:')).toBeInTheDocument();
     expect(screen.getByText('0.80')).toBeInTheDocument();
     expect(screen.getByText('ACCURATE')).toBeInTheDocument();
+  });
+
+  describe('getVerdictBadgeColor', () => {
+    it('colors by score, so a label containing a positive word cannot turn a failure green', () => {
+      expect(getVerdictBadgeColor('correctness-analysis', 0)).toEqual('danger');
+      expect(getVerdictBadgeColor('groundedness-analysis', 0.2)).toEqual('danger');
+      expect(getVerdictBadgeColor('incomplete-rule-assignment', 0)).toEqual('danger');
+      expect(getVerdictBadgeColor('correctness-analysis', 1)).toEqual('success');
+      expect(getVerdictBadgeColor('accurate', 0.6)).toEqual('warning');
+    });
+
+    it('classifies label-only verdicts by keyword, negated forms first', () => {
+      expect(getVerdictBadgeColor('incorrect', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('inaccurate', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('ungrounded', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('no-match', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('not correct', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('not-grounded', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('unmatched', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('correct', null)).toEqual('success');
+      expect(getVerdictBadgeColor('in-scope', null)).toEqual('success');
+      expect(getVerdictBadgeColor('partial-match', null)).toEqual('warning');
+      expect(getVerdictBadgeColor('something-bespoke', null)).toEqual('hollow');
+    });
+
+    it('leaves measurements uncolored, since they are not scored out of one', () => {
+      // Latency in seconds and token counts would otherwise clear the 0.8 pass threshold.
+      expect(getVerdictBadgeColor('ms', 4.2)).toEqual('hollow');
+      expect(getVerdictBadgeColor('tokens', 40118)).toEqual('hollow');
+      expect(getVerdictBadgeColor('drift', -3)).toEqual('hollow');
+      // A label still classifies the verdict when the score itself says nothing.
+      expect(getVerdictBadgeColor('incorrect', 12)).toEqual('danger');
+    });
+
+    it('keeps neutral sentinels gray whatever the score says', () => {
+      expect(getVerdictBadgeColor('unavailable', 0)).toEqual('default');
+      expect(getVerdictBadgeColor('not-applicable', 1)).toEqual('default');
+      expect(getVerdictBadgeColor('N/A', 0)).toEqual('default');
+      // An evaluator that could not judge is neither a pass nor a failure.
+      expect(getVerdictBadgeColor('fixture-error', null)).toEqual('default');
+    });
   });
 
   it('shows explanation and metadata when accordion is expanded', () => {
@@ -220,9 +389,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('Relevance:')).toBeInTheDocument();
     expect(screen.getByText('0.90')).toBeInTheDocument();
@@ -255,13 +422,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
     const accordion = screen.getByLabelText('Toggle details for evaluator Criteria');
     const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
@@ -291,9 +452,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('SimpleScore:')).toBeInTheDocument();
     expect(screen.getByText('1.00')).toBeInTheDocument();

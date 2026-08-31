@@ -77,6 +77,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
         get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
         add_queries: { calls: 0, failures: 0, latency_ms: 0 },
       },
+      reasoningDiagnostics: { externalContentToolContinuations: 0 },
     });
   });
 
@@ -88,6 +89,35 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.additionalToolCallbacks).toBeUndefined();
     expect(args.maxSteps).toBeUndefined();
     expect(args.systemPrompt).toBe('SYSTEM');
+  });
+
+  it('forwards reasoning diagnostics from the shared agent', async () => {
+    generateSignificantEventsMock.mockResolvedValueOnce({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      toolUsage: {
+        get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
+        add_queries: { calls: 0, failures: 0, latency_ms: 0 },
+      },
+      reasoningDiagnostics: { externalContentToolContinuations: 4 },
+    });
+
+    const result = await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      buildDeps()
+    );
+
+    expect(result.reasoningDiagnostics).toEqual({ externalContentToolContinuations: 4 });
+  });
+
+  it('forwards maxDurationMs to the shared agent', async () => {
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM', maxDurationMs: 300000 },
+      buildDeps()
+    );
+
+    const args = generateSignificantEventsMock.mock.calls[0][0];
+    expect(args.maxDurationMs).toBe(300000);
   });
 
   it('forwards the SCS tools, appends the prompt snippet, and raises the step budget', async () => {
@@ -127,5 +157,27 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     );
     expect(args.systemPrompt).toContain('MEMORY_SNIPPET');
     expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
+  });
+
+  it('forwards Significant Event context tools and appends the prompt snippet', async () => {
+    const kiExtractionContextTools = {
+      tools: {
+        significant_event_search: {
+          description: 'search events',
+          schema: { type: 'object' as const, properties: {} },
+        },
+      },
+      callbacks: { significant_event_search: jest.fn() },
+      promptSnippet: 'SIGEVENT_CONTEXT_SNIPPET',
+    };
+
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      buildDeps({ kiExtractionContextTools })
+    );
+
+    const args = generateSignificantEventsMock.mock.calls[0][0];
+    expect(Object.keys(args.additionalTools ?? {})).toEqual(['significant_event_search']);
+    expect(args.systemPrompt).toContain('SIGEVENT_CONTEXT_SNIPPET');
   });
 });

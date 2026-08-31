@@ -15,7 +15,7 @@ import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_detail
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { getAlertHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
@@ -64,6 +64,7 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
             documentId: alertId,
             indexName: index,
             renderCellActions: casesCellActionRenderer,
+            origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
             title: getAlertHistoryTitle(ruleName),
           });
         } else {

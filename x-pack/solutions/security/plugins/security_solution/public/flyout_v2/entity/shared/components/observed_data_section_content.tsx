@@ -45,6 +45,8 @@ export interface ObservedDataSectionProps {
   scopeId: string;
   /** Query id registered with the inspect button. */
   queryId: string;
+  /** When true, omits the "Max anomaly score by job" row and skips anomaly data fetching. Defaults to false*/
+  hideAnomalies: boolean;
 }
 
 const resolveEntityAnomalyConfig = ({
@@ -89,7 +91,15 @@ const resolveEntityAnomalyConfig = ({
 };
 
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
-  const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
+  const {
+    entityType,
+    observedData,
+    identityFields,
+    entityRecord,
+    contextID,
+    scopeId,
+    hideAnomalies = false,
+  } = props;
 
   const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
@@ -120,7 +130,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     }),
     startDate: from,
     endDate: to,
-    skip: isInitializing,
+    skip: isInitializing || !!hideAnomalies,
     jobIds,
     aggregationInterval: 'auto',
   });
@@ -139,10 +149,12 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
   );
 
   const hostFields = useObservedHostFields(
-    observedDataWithAnomalies as ObservedEntityData<HostItem>
+    observedDataWithAnomalies as ObservedEntityData<HostItem>,
+    hideAnomalies
   );
   const userFields = useObservedUserFields(
-    observedDataWithAnomalies as ObservedEntityData<UserItem>
+    observedDataWithAnomalies as ObservedEntityData<UserItem>,
+    hideAnomalies
   );
   const observedFields = entityType === EntityType.host ? hostFields : userFields;
 

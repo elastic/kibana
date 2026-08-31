@@ -91,10 +91,11 @@ test.describe(
       page,
     }) => {
       const nav = pageObjects.navigation;
+      const chrome = pageObjects.chrome;
 
       await browserAuth.loginWithCustomRole(MINIMAL_NAV_ROLE);
       await page.goto(kbnUrl.app('home', { space: SPACE_A.id }));
-      await page.testSubj.locator('kbnChromeNav-primaryNavigation').waitFor({ state: 'visible' });
+      await chrome.primaryNavigation.waitFor({ state: 'visible' });
 
       // Hide Discover and save — applyCustomization awaits the PUT response
       // before returning, so the customization is persisted before we reload.
@@ -105,15 +106,13 @@ test.describe(
       // Reload and re-assert. The discover link should remain hidden from the
       // primary nav, confirming the customization was persisted server-side.
       await page.reload();
-      const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
-      await primaryNav.waitFor({ state: 'visible' });
+      await chrome.primaryNavigation.waitFor({ state: 'visible' });
 
       // Discover is no longer in the primary nav.
-      await expect(primaryNav.locator('[data-test-subj~="nav-item-id-discover"]')).toBeHidden();
+      await expect(chrome.navItemInPrimaryById('discover')).toBeHidden();
 
       // Dashboards remains visible in the primary nav after the reload.
-      const dashboardsItem = primaryNav.locator('[data-test-subj~="nav-item-id-dashboards"]');
-      await expect(dashboardsItem).toBeVisible();
+      await expect(chrome.navItemInPrimaryById('dashboards')).toBeVisible();
     });
   }
 );

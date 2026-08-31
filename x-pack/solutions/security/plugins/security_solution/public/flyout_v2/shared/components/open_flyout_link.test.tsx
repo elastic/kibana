@@ -10,9 +10,10 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { OpenFlyoutLink } from './open_flyout_link';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent, buildFlyoutDescriptorFromField } from '../utils/build_flyout_content';
 import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { FlyoutSessionContextProvider } from '../../session_context';
+import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
 jest.mock('../utils/build_flyout_content');
 jest.mock('../utils/build_flyout_nav_title', () => ({
@@ -23,6 +24,15 @@ jest.mock('./flyout_provider', () => ({
 }));
 jest.mock('../hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: true }),
+}));
+
+const mockWriteOnOpen = jest.fn();
+const mockBuildOnClose = jest.fn(() => jest.fn());
+jest.mock('../url_state/flyout_v2_url_writer', () => ({
+  useFlyoutV2UrlWriter: jest.fn(() => ({
+    writeOnOpen: mockWriteOnOpen,
+    buildOnClose: mockBuildOnClose,
+  })),
 }));
 
 const mockOpenSystemFlyout = jest.fn();
@@ -44,6 +54,7 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 const buildFlyoutContentMock = buildFlyoutContent as jest.Mock;
+const buildFlyoutDescriptorFromFieldMock = buildFlyoutDescriptorFromField as jest.Mock;
 const buildFlyoutNavTitleMock = buildFlyoutNavTitle as jest.Mock;
 
 const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFlyoutLink>> = {}) =>
@@ -58,11 +69,20 @@ const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFly
 describe('<OpenFlyoutLink />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    mockBuildOnClose.mockReturnValue(jest.fn());
   });
 
   describe('when the field is supported', () => {
+    const mockDescriptor = {
+      kind: FLYOUT_DESCRIPTOR_KIND.network,
+      ip: '10.0.0.1',
+      flowTarget: 'source',
+    };
+
     beforeEach(() => {
       buildFlyoutContentMock.mockReturnValue(<div data-test-subj="mockFlyoutContent" />);
+      buildFlyoutDescriptorFromFieldMock.mockReturnValue(mockDescriptor);
     });
 
     it('should render a link with the value as text when no children are provided', () => {
@@ -163,11 +183,40 @@ describe('<OpenFlyoutLink />', () => {
       expect(buildFlyoutNavTitleMock).toHaveBeenCalled();
       expect(mockOpenSystemFlyout.mock.calls[0][1].title).toMatch(/^NAV:/);
     });
+
+    it('calls writeOnOpen with the descriptor on click', () => {
+      const { getByTestId } = renderOpenFlyoutLink();
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(mockDescriptor, 'start');
+    });
+
+    it('calls writeOnOpen with mode "inherit" when session is "inherit"', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <FlyoutSessionContextProvider value={{ session: 'inherit' }}>
+            <OpenFlyoutLink field="source.ip" value="10.0.0.1" />
+          </FlyoutSessionContextProvider>
+        </TestProviders>
+      );
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(mockDescriptor, 'inherit');
+    });
+
+    it('passes an onClose callback to openSystemFlyout when descriptor is present', () => {
+      const { getByTestId } = renderOpenFlyoutLink();
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+      expect(mockOpenSystemFlyout.mock.calls[0][1].onClose).toBeDefined();
+    });
   });
 
   describe('when the field is not supported', () => {
     beforeEach(() => {
       buildFlyoutContentMock.mockReturnValue(null);
+      buildFlyoutDescriptorFromFieldMock.mockReturnValue(null);
     });
 
     it('should render children as fallback', () => {

@@ -27,7 +27,7 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
   method?: ValueSuggestionsMethod;
-  querySuggestionKey?: 'rules' | 'cases' | 'alerts' | 'endpoints' | 'action_policies';
+  querySuggestionKey?: 'rules' | 'cases' | 'alerts' | 'endpoints' | 'alerting/v2';
 }
 
 const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {

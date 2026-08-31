@@ -8,14 +8,12 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
   StreamEndpointLatencyProps,
-  StreamsDescriptionGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
   StreamsAgentToolEventCreateProps,
 } from './types';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_STATE_ERROR_EVENT,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
@@ -63,10 +61,6 @@ export class EbtTelemetryClient {
     };
 
     this.analytics.reportEvent(STREAMS_STATE_ERROR_EVENT, errorData);
-  }
-
-  public trackDescriptionGenerated(params: StreamsDescriptionGeneratedProps) {
-    this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
   }
 
   public trackProcessingPipelineSuggested(params: StreamsProcessingPipelineSuggestedProps) {

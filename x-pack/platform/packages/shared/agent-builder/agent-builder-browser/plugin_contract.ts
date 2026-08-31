@@ -19,6 +19,7 @@ import type {
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
+import type { ConversationTemplateServiceStartContract } from './templates';
 
 /**
  * Props for the embeddable conversation component.
@@ -145,6 +146,14 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
+ * Options passed when opening conversation details.
+ */
+export interface OpenConversationDetailsOptions {
+  conversationId: string;
+  onClose?: () => void;
+}
+
+/**
  * Handle to control a conversation sidebar programmatically.
  */
 export interface ConversationSidebarRef {
@@ -186,6 +195,11 @@ export interface AgentBuilderPluginStart {
    * Renderer service contract, can be used to register and retrieve renderer UI definitions.
    */
   renderers: RendererServiceStartContract;
+  /**
+   * Conversation template service contract, can be used to register and retrieve
+   * per-template UI definitions (reusable tabs, and which tabs each template shows).
+   */
+  conversationTemplates: ConversationTemplateServiceStartContract;
   /**
    * Tool service contract, can be used to list or execute tools.
    */
@@ -233,6 +247,13 @@ export interface AgentBuilderPluginStart {
    * @param attachment - The attachment to add
    */
   addAttachment: (attachment: AttachmentInput) => void;
+  /**
+   * Removes a staged attachment from the active conversation sidebar by its id.
+   * If no sidebar is open or the id is not found, the call is a no-op.
+   *
+   * @param attachmentId - The id of the attachment to remove
+   */
+  removeAttachment: (attachmentId: string) => void;
   /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.
@@ -284,4 +305,5 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

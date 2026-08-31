@@ -11,7 +11,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import Fs from 'fs/promises';
 import Path from 'path';
+import { getCurrentTraceId } from '@kbn/evals';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
+import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
 import type {
   AttackDiscoveryTaskInput,
   AttackDiscoveryTaskOutput,
@@ -62,7 +64,7 @@ const generateInsights = async ({
   alerts: string[];
   combinedMaybePartialResults?: string;
   continuePrompt?: string;
-}): Promise<{ insights: AttackDiscovery[] }> => {
+}): Promise<{ insights: AttackDiscovery[]; traceId?: string }> => {
   const response = await executeUntilValid({
     prompt: AttackDiscoveryGenerationPrompt,
     inferenceClient,
@@ -88,21 +90,58 @@ const generateInsights = async ({
     throw new Error('No tool call found in LLM response');
   }
 
-  return toolCall.function.arguments as { insights: AttackDiscovery[] };
+  return {
+    ...(toolCall.function.arguments as { insights: AttackDiscovery[] }),
+    traceId: getCurrentTraceId() ?? undefined,
+  };
 };
 
 export const runAttackDiscovery = async ({
   inferenceClient,
   attackDiscoveryClient,
+  generateApiClient,
   input,
   log,
 }: {
   inferenceClient: BoundInferenceClient;
   attackDiscoveryClient: AttackDiscoveryClient;
+  generateApiClient?: AttackDiscoveryGenerateApiClient;
   input: AttackDiscoveryTaskInput;
   log: ToolingLog;
 }): Promise<AttackDiscoveryTaskOutput> => {
   try {
+    if (input.mode === 'generateApi') {
+      if (!generateApiClient) {
+        throw new Error(
+          'generateApi mode requires an AttackDiscoveryGenerateApiClient — pass generateApiClient in the task config'
+        );
+      }
+
+      const result = await generateApiClient.generate({
+        connectorId: input.connectorId,
+        actionTypeId: input.actionTypeId,
+        modelId: input.modelId,
+        alertsIndexPattern: input.alertsIndexPattern,
+        size: input.size,
+        start: input.start,
+        end: input.end,
+      });
+
+      const traceId = getCurrentTraceId() ?? undefined;
+
+      return {
+        insights: result.discoveries.length > 0 ? result.discoveries : null,
+        errors: result.error ? [result.error] : undefined,
+        traceId,
+        raw: {
+          execution_uuid: result.executionUuid,
+          status: result.status,
+          alerts_context_count: result.alertsContextCount,
+          latency_ms: result.latencyMs,
+        },
+      };
+    }
+
     if (input.mode === 'bundledAlerts') {
       const prompt = await loadDefaultPrompt();
       const res = await generateInsights({
@@ -111,7 +150,7 @@ export const runAttackDiscovery = async ({
         prompt,
         alerts: toAlertStrings(input.anonymizedAlerts),
       });
-      return { insights: res.insights };
+      return { insights: res.insights, traceId: res.traceId };
     }
 
     if (input.mode === 'searchAlerts') {
@@ -131,7 +170,11 @@ export const runAttackDiscovery = async ({
         alerts: toAlertStrings(alerts),
       });
 
-      return { insights: res.insights, raw: { fetchedAlerts: alerts.length } };
+      return {
+        insights: res.insights,
+        raw: { fetchedAlerts: alerts.length },
+        traceId: res.traceId,
+      };
     }
 
     const prompt = input.prompt ?? (await loadDefaultPrompt());
@@ -149,7 +192,7 @@ export const runAttackDiscovery = async ({
       continuePrompt: combinedMaybePartialResults.length > 0 ? continuePrompt : undefined,
     });
 
-    return { insights: res.insights };
+    return { insights: res.insights, traceId: res.traceId };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error(new Error(`runAttackDiscovery failed: ${message}`, { cause: e as Error }));

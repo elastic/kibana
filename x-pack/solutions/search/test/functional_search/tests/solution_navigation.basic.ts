@@ -59,37 +59,30 @@ export default function searchSolutionNavigation({
 
       const sideNavTestCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
-        breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
         {
           link: { deepLinkId: 'discover' },
-          breadcrumbs: ['Discover'],
           pageTestSubject: 'noDataViewsPrompt',
         },
         {
           link: { deepLinkId: 'dashboards' },
-          breadcrumbs: ['Dashboards'],
           pageTestSubject: 'noDataViewsPrompt',
         },
         {
           link: { navId: 'agent_builder' },
-          breadcrumbs: [],
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },
-          breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },
-          breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'dev_tools' },
-          breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
       ];
@@ -98,9 +91,6 @@ export default function searchSolutionNavigation({
         await solutionNavigation.sidenav.clickLink(testCase.link);
         await testSubjects.existOrFail(testCase.pageTestSubject);
         await solutionNavigation.sidenav.expectLinkActive(testCase.link);
-        for (const breadcrumb of testCase.breadcrumbs) {
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
-        }
       }
 
       await expectNoPageReload();

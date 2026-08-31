@@ -7,16 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/code-editor';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { compressToEncodedURIComponent } from 'lz-string';
 import {
   getDevToolsCapabilities,
@@ -112,23 +106,18 @@ export function TileRequestTab(props: Props) {
     );
   } catch (e) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorMessage', {
           defaultMessage: 'Unable to create Elasticsearch vector tile search request',
         })}
-        color="warning"
-        iconType="question"
-      >
-        <p>
-          {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
-            defaultMessage: `Could not convert tile request, ''{tileUrl}'', to Elasticesarch vector tile search request, error: {error}`,
-            values: {
-              tileUrl: props.tileRequest.tileUrl,
-              error: e.message,
-            },
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
+          defaultMessage: `Could not convert tile request, ''{tileUrl}'', to Elasticesarch vector tile search request, error: {error}`,
+          values: {
+            tileUrl: props.tileRequest.tileUrl,
+            error: e.message,
+          },
+        })}
+      />
     );
   }
 }

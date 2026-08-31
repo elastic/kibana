@@ -8,11 +8,11 @@
  */
 
 import {
-  METRICS_GRID_SETTINGS_DEFAULTS,
   SIMPLE_AGGREGATION_OPTIONS,
   HISTOGRAM_PERCENTILE_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
 } from './constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 
 describe('grid_settings constants', () => {
   it('exposes defaults matching the pre-existing hardcoded aggregation behavior', () => {

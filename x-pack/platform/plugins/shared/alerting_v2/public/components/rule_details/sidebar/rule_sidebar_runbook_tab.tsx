@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiMarkdownFormat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { useRule } from '../rule_context';
 
 export const RuleSidebarRunbookTab: React.FC = () => {
@@ -38,6 +39,8 @@ export const RuleSidebarRunbookTab: React.FC = () => {
   }
 
   return (
-    <EuiMarkdownFormat data-test-subj="sidebarRunbookContent">{runbook.value}</EuiMarkdownFormat>
+    <EuiMarkdownFormat data-test-subj="sidebarRunbookContent">
+      {getRunbookContent(runbook)}
+    </EuiMarkdownFormat>
   );
 };

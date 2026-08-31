@@ -12,6 +12,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
+  clearChangeHistory,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -19,10 +20,9 @@ import {
   getCustomQueryRuleParams,
   installPrebuiltRules,
   performUpgradePrebuiltRules,
+  refreshChangeHistory,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
-
-const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -30,28 +30,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const refreshHistory = async () => {
-    await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
-  };
-
-  const clearHistory = async () => {
-    try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
-    } catch {
-      // Change history index may not exist yet
-    }
-  };
-
   describe('@ess @skipInServerless rule restore from changes history', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await clearHistory();
+      await clearChangeHistory(es);
     });
 
     it('restores a custom rule to a previous state', async () => {
@@ -65,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: historyBody } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -86,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.rule.name).toBe('original name');
       expect(body.rule.id).toBe(rule.id);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: body2 } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -110,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .patchRule({ body: { rule_id: 'prebuilt-restore-customized', name: 'customized name' } })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: historyBody } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -130,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.rule.name).not.toBe('customized name');
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: body2 } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -158,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .readRule({ query: { rule_id: 'prebuilt-restore-pure' } })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: historyBody } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -178,7 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.rule.version).toBe(1);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: body2 } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -193,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .createRule({ body: getCustomQueryRuleParams() })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: historyBody } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -221,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: historyBody } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -301,7 +284,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .createRule({ body: getCustomQueryRuleParams() })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
 
@@ -322,7 +305,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .createRule({ body: getCustomQueryRuleParams() })
         .expect(200);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: historyBody } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -339,7 +322,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.rule.id).toBe(rule.id);
 
-      await refreshHistory();
+      await refreshChangeHistory(es);
 
       const { body: body2 } = await detectionsApi
         .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -358,7 +341,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // capture the stale revision
         const staleRevision = rule.revision;
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body: historyBody } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -394,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body: historyBody } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -425,7 +408,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .createRule({ body: getCustomQueryRuleParams() })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body: historyBody } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -454,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body: historyBody } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -489,7 +472,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .createRule({ body: getCustomQueryRuleParams({ rule_id: 'restore-conflict-rule-id' }) })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body: historyBody } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -530,7 +513,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .createRule({ body: getCustomQueryRuleParams() })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body: historyBody } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })

@@ -54,10 +54,8 @@ import {
 import { AuthorizationAuditLogger } from '../authorization';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
-import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
-import type { CasesServices } from './types';
+import type { CasesServices, CasesClientSource } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
@@ -81,8 +79,6 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
@@ -157,10 +153,12 @@ export class CasesClientFactory {
     request,
     scopedClusterClient,
     savedObjectsService,
+    clientSource,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    clientSource: CasesClientSource;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -213,8 +211,6 @@ export class CasesClientFactory {
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
@@ -226,6 +222,7 @@ export class CasesClientFactory {
       casesEventBus: this.options.casesEventBus,
       request,
       closeReasonValidator: boundCloseReasonValidator,
+      clientSource,
     });
   }
 
@@ -278,6 +275,7 @@ export class CasesClientFactory {
 
     const fieldDefinitionsService = new FieldDefinitionsService({
       unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
     });
 
     const templatesService = new TemplatesService({
@@ -323,7 +321,13 @@ export class CasesClientFactory {
     return {
       templatesService,
       fieldDefinitionsService,
-      alertsService: new AlertService(esClient, this.logger, alertsClient),
+      alertsService: new AlertService(
+        esClient,
+        this.logger,
+        alertsClient,
+        this.options.casesEventBus,
+        request
+      ),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),

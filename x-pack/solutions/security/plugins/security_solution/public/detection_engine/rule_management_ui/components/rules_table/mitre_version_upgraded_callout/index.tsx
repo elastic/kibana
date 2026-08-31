@@ -83,7 +83,7 @@ export const MitreVersionUpgradedCallout = React.memo(() => {
               ),
               learnMoreLink: (
                 <EuiLink
-                  href={docLinks.links.siem.mitreCoverage}
+                  href={docLinks.links.siem.remapMitreAttack}
                   target="_blank"
                   data-test-subj="mitreVersionUpgradedCalloutLearnMoreLink"
                 >

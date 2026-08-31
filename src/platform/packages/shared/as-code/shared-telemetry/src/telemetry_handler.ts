@@ -11,9 +11,30 @@ import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+export const ELASTIC_AGENTIC_USER_AGENT = 'elastic-agentic';
+export const AGENTIC_COUNTER_TYPE = 'agentic';
+
+const isAgenticRequest = (request: KibanaRequest): boolean => {
+  const userAgent = [request.headers['user-agent'] ?? ''].flat();
+  return userAgent.some((v) => v.toLowerCase().includes(ELASTIC_AGENTIC_USER_AGENT));
+};
+
+/**
+ * Wraps a route handler with API usage telemetry. Skips counting for
+ * Kibana-internal requests (x-elastic-internal-origin: kibana) and routes
+ * without a registered routePath.
+ *
+ * @param request - The incoming Kibana request.
+ * @param options - Telemetry options.
+ * @param options.usageCounter - Counter to increment on each tracked request.
+ * @param options.trackAgentic - When true, also increments the counter with
+ *   `counterType: AGENTIC_COUNTER_TYPE` for requests whose User-Agent contains
+ *   the {@link ELASTIC_AGENTIC_USER_AGENT} string.
+ * @param handler - The route handler to execute.
+ */
 export async function telemetryHandler<TResponse extends IKibanaResponse>(
   request: KibanaRequest,
-  usageCounter: UsageCounter | undefined,
+  options: { usageCounter?: UsageCounter; trackAgentic?: boolean },
   handler: () => Promise<TResponse> | TResponse
 ): Promise<TResponse> {
   const handlerResponse = await handler();
@@ -22,13 +43,20 @@ export async function telemetryHandler<TResponse extends IKibanaResponse>(
   const isKibanaOrigin = typeof origin === 'string' && origin.toLocaleLowerCase() === 'kibana';
   const routePath = request.route.routePath;
 
-  if (!usageCounter || isKibanaOrigin || !routePath) {
+  if (isKibanaOrigin || !routePath) {
     return handlerResponse;
   }
 
-  usageCounter.incrementCounter({
-    counterName: `${request.route.method} ${routePath} ${handlerResponse.status}`,
-  });
+  const { usageCounter, trackAgentic } = options ?? {};
+  const counterName = `${request.route.method} ${routePath} ${handlerResponse.status}`;
+
+  if (usageCounter) {
+    usageCounter.incrementCounter({ counterName });
+
+    if (trackAgentic && isAgenticRequest(request)) {
+      usageCounter.incrementCounter({ counterName, counterType: AGENTIC_COUNTER_TYPE });
+    }
+  }
 
   return handlerResponse;
 }

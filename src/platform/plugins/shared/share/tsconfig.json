@@ -19,8 +19,6 @@
     "@kbn/core-custom-branding-browser",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/react-kibana-context-theme",
-    "@kbn/core-analytics-browser",
-    "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-browser",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/react-kibana-mount",
@@ -37,7 +35,8 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/licensing-types",
     "@kbn/es-query",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,5 +1,8 @@
 {
-  "sha1": "5cbec8da79ff7f9ac5fd6a2de5cb701d84349511",
+  "sha1": "ced47ddfa9cfe6cbc92c73894a2a76996867826e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "83ee0201f304e1d-f77aa9e072947e6",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/data_frame_analytics/bm_classification_source_count.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/data_frame_analytics/egs_regression_source_count.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     },
     {
@@ -36,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/data_frame_analytics/ihp_outlier_source_count.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     },
     {
@@ -50,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 35,
-        "column": 10
+        "line": 30,
+        "column": 11
       }
     },
     {
@@ -64,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 42,
+        "column": 15
       }
     },
     {
@@ -78,8 +81,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 57,
+        "column": 56
       }
     },
     {
@@ -92,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 86,
-        "column": 10
+        "line": 73,
+        "column": 50
       }
     },
     {
@@ -106,8 +109,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 102,
-        "column": 10
+        "line": 88,
+        "column": 43
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -140,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 52,
+        "column": 9
       }
     },
     {
@@ -157,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 69,
+        "column": 11
       }
     },
     {
@@ -174,8 +177,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 88,
+        "column": 64
       }
     },
     {
@@ -191,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 110,
+        "column": 20
       }
     },
     {
@@ -208,8 +211,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 57,
+        "column": 26
       }
     },
     {
@@ -225,8 +228,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 72,
+        "column": 9
       }
     },
     {
@@ -242,8 +245,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 91,
+        "column": 15
       }
     },
     {
@@ -259,8 +262,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 106,
+        "column": 18
       }
     },
     {
@@ -276,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 81,
+        "column": 18
       }
     },
     {
@@ -293,8 +296,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 127,
+        "column": 21
       }
     },
     {
@@ -310,8 +313,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 138,
+        "column": 25
       }
     },
     {
@@ -328,7 +331,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
         "line": 43,
-        "column": 12
+        "column": 61
       }
     },
     {
@@ -344,8 +347,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 53,
+        "column": 20
       }
     },
     {
@@ -361,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 63,
+        "column": 27
       }
     },
     {
@@ -378,8 +381,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 75,
+        "column": 27
       }
     },
     {
@@ -395,8 +398,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 88,
+        "column": 13
       }
     },
     {
@@ -412,8 +415,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 62,
-        "column": 12
+        "line": 66,
+        "column": 25
       }
     },
     {
@@ -429,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 78,
-        "column": 12
+        "line": 80,
+        "column": 42
       }
     },
     {
@@ -446,8 +449,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 106,
-        "column": 12
+        "line": 96,
+        "column": 50
       }
     },
     {
@@ -463,8 +466,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 134,
-        "column": 12
+        "line": 115,
+        "column": 25
       }
     }
   ]

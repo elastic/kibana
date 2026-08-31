@@ -34,6 +34,7 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
@@ -124,7 +125,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                         )}
                       </EuiSplitButton.ActionPrimary>
                       <EuiSplitButton.ActionSecondary
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         aria-label={i18n.translate(
                           'xpack.genAiSettings.agentBuilderTracing.dashboardMenuAriaLabel',
                           { defaultMessage: 'More dashboard options' }
@@ -234,16 +235,11 @@ export const AgentBuilderTracingSection: React.FC = () => {
                       <br />
                       <FormattedMessage
                         id="xpack.genAiSettings.agentBuilderTracing.indices"
-                        defaultMessage="Traces are stored in {index1} and {index2}"
+                        defaultMessage="Traces are stored in {index1}"
                         values={{
                           index1: (
                             <code css={{ color: euiTheme.colors.subduedText }}>
                               traces-agent_builder.otel-*
-                            </code>
-                          ),
-                          index2: (
-                            <code css={{ color: euiTheme.colors.subduedText }}>
-                              logs-agent_builder.otel-*
                             </code>
                           ),
                         }}
@@ -341,6 +337,15 @@ export const AgentBuilderTracingSection: React.FC = () => {
                         isSavingEnabled={!!canEditAdvancedSettings}
                         onFieldChange={handleFieldChange}
                         unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]}
+                      />
+                    )}
+
+                    {fields[AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID]}
                       />
                     )}
                   </EuiAccordion>

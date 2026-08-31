@@ -45,7 +45,7 @@ export const labels = {
       ),
       secretWarning: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.secretWarning', {
         defaultMessage:
-          "Here's your confidential MCP client. We won't show it again, make sure to copy or download it now.",
+          "Here's your confidential MCP client secret. We won't show it again, make sure to copy or download it now.",
       }),
       copySecret: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.copySecret', {
         defaultMessage: 'Copy client secret',

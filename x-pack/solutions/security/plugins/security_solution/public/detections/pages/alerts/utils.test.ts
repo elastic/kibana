@@ -7,7 +7,8 @@
 
 import { encode } from '@kbn/rison';
 import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
-import { resolveFlyoutParams } from './utils';
+import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { resolveFlyoutParams, resolveFlyoutV2Params } from './utils';
 
 describe('resolveFlyoutParams', () => {
   it('preserves existing flyout query string', () => {
@@ -25,5 +26,19 @@ describe('resolveFlyoutParams', () => {
       preview: [],
     });
     expect(resolveFlyoutParams({ index: '.idx', alertId: 'a1' }, null)).toBe(expected);
+  });
+});
+
+describe('resolveFlyoutV2Params', () => {
+  it('preserves existing flyoutV2 query string', () => {
+    const existing = '!((kind:document,documentId:a1,indexName:.idx))';
+    expect(resolveFlyoutV2Params({ index: '.idx', alertId: 'a1' }, existing)).toBe(existing);
+  });
+
+  it('encodes a document descriptor when no current params', () => {
+    const expected = encodeFlyoutV2UrlParam([
+      { kind: 'document', documentId: 'a1', indexName: '.idx' },
+    ]);
+    expect(resolveFlyoutV2Params({ index: '.idx', alertId: 'a1' }, null)).toBe(expected);
   });
 });

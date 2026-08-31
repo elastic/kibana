@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { TimeRangeMetadata } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -14,10 +14,12 @@ export type TimeRangeMetadataResponse = TimeRangeMetadata;
 
 export const timeRangeMetadataRoute = defineRoute<TimeRangeMetadataResponse>()({
   endpoint: 'GET /internal/apm/time_range_metadata',
-  params: z.object({
-    query: z
-      .object({ useSpanName: BooleanFromString.default(false) })
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({ useSpanName: BooleanFromString.default(false) })
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

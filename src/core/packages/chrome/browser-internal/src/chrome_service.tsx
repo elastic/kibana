@@ -23,9 +23,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
@@ -65,7 +63,6 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
-  featureFlags: FeatureFlagsStart;
 }
 
 /** @internal */
@@ -107,7 +104,6 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
-    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -120,8 +116,6 @@ export class ChromeService {
       kibanaVersion: this.params.kibanaVersion,
       headerBanner$: state.headerBanner.$,
       isVisible$: state.visibility.isVisible$,
-      chromeStyle$: state.style.chromeStyle.$,
-      actionMenu$: application.currentActionMenu$,
       stop$: this.stop$,
     });
     handleEuiFullScreenChanges({
@@ -164,7 +158,6 @@ export class ChromeService {
       },
       logger: this.logger,
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
-      isNextChrome: isNextChrome(featureFlags),
     });
 
     const sidebar = this.sidebar.start();
@@ -188,10 +181,10 @@ export class ChromeService {
         projectNavigation,
       },
       sidebar,
-      featureFlags,
       componentDeps: {
         basePath: http.basePath,
         legacyActionMenu$: application.currentActionMenu$,
+        capabilities: application.capabilities,
       },
     });
 

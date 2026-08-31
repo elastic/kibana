@@ -90,6 +90,15 @@ export class ToastsService extends FtrService {
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
       }
+      try {
+        // A dismissed toast stays in the DOM during its fade-out animation, and a toast that
+        // is already auto-fading cannot be clicked (the click above is swallowed). In both
+        // cases the element is still attached when this returns, so wait for it to actually
+        // detach; otherwise a following `assertCount(0)` re-finds it and the caller loops.
+        await this.find.waitForElementStale(toastElement, 5000);
+      } catch (err) {
+        // ignore, assertCount handles any toast that is genuinely still present
+      }
     }
   }
 

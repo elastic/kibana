@@ -8,22 +8,25 @@
 import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { RuleCatalog } from '../state';
 import type {
   ActionGroup,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  Rule,
-  RuleId,
 } from '../types';
 
 @injectable()
 export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [], rules } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { matched = [], rules = RuleCatalog.empty() } = state;
 
     const groups = buildActionGroups(matched, rules);
 
@@ -33,13 +36,13 @@ export class BuildGroupsStep implements DispatcherStep {
 
 export function buildActionGroups(
   matched: readonly MatchedPair[],
-  rules?: Map<RuleId, Rule>
+  rules: RuleCatalog = RuleCatalog.empty()
 ): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
   for (const { episode, policy } of matched) {
     let groupKey: Record<string, unknown>;
-    switch (policy.groupingMode ?? 'per_episode') {
+    switch (policy.groupingMode) {
       case 'per_episode':
         groupKey = {
           groupHash: episode.group_hash,
@@ -75,9 +78,10 @@ export function buildActionGroups(
 
     const group = groupMap.get(actionGroupId)!;
     group.episodes.push(episode);
-    const rule = rules?.get(episode.rule_id);
-    if (rule) {
-      group.rules[episode.rule_id] = { name: rule.name };
+    const ruleId = episode.rule_id;
+    const rule = rules.forEpisode(episode);
+    if (rule && ruleId != null) {
+      group.rules[ruleId] = { name: rule.name };
     }
   }
 

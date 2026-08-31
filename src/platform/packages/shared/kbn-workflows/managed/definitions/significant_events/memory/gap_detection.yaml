@@ -33,8 +33,9 @@ steps:
     plugin-id: "significant_events_memory_gap_detection"
     aggregate-by: "significant_events"
     create-conversation: true
+    public-conversation: true
+    timeout: 1800s
     with:
-      timeout: 1800s
       message: |
         First, call the load_skill tool with skill path skills/platform/streams/streams-gap-detection.
         Wait for the skill to load before calling any other tools.

@@ -101,9 +101,49 @@ describe('ContextSwitcher', () => {
     await waitForEuiPopoverOpen();
     expect(trigger).toHaveAttribute('aria-pressed', 'true');
     await user.click(screen.getByTestId('space-obs'));
-    expect(onSelect).toHaveBeenCalledWith('obs');
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.any(Object));
     await waitForEuiPopoverClose();
     expect(trigger).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('keeps popover open for cmd/ctrl click', async () => {
+    const user = userEvent.setup();
+    const onSelect = jest.fn();
+    const props = buildProps();
+    props.spaces.onSelect = onSelect;
+
+    render(<ContextSwitcher {...props} />);
+
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    await user.click(trigger);
+    await waitForEuiPopoverOpen();
+
+    await user.keyboard('{Meta>}');
+    await user.click(screen.getByTestId('space-obs'));
+    await user.keyboard('{/Meta}');
+
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.objectContaining({ metaKey: true }));
+    expect(trigger).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps popover open for shift click', async () => {
+    const user = userEvent.setup();
+    const onSelect = jest.fn();
+    const props = buildProps();
+    props.spaces.onSelect = onSelect;
+
+    render(<ContextSwitcher {...props} />);
+
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    await user.click(trigger);
+    await waitForEuiPopoverOpen();
+
+    await user.keyboard('{Shift>}');
+    await user.click(screen.getByTestId('space-obs'));
+    await user.keyboard('{/Shift}');
+
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.objectContaining({ shiftKey: true }));
+    expect(trigger).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('displays environment label when environmentContext is provided with single space', () => {

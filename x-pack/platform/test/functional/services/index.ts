@@ -16,7 +16,6 @@ import { CanvasElementProvider } from './canvas_element';
 import { CasesServiceProvider } from './cases';
 import { DataStreamProvider } from './data_stream';
 import { GrokDebuggerProvider } from './grok_debugger';
-import { LensServiceProvider } from './lens';
 import { MachineLearningProvider } from './ml';
 import { PipelineEditorProvider } from './pipeline_editor';
 import { PipelineListProvider } from './pipeline_list';
@@ -114,5 +113,4 @@ export const services = {
   monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
   monitoringAlerts: MonitoringAlertsProvider,
-  lens: LensServiceProvider,
 };

@@ -103,8 +103,12 @@ export const useObservedHost = (
   return useMemo((): ObservedHostResult => {
     if (useEntityStoreObservedData && entityFromStore) {
       return {
-        // merge with entity store record
-        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}),
+        // merge with entity store record; deduplicate arrays because both sources
+        // derive from the same events and would otherwise duplicate scalar fields
+        // like host.ip and host.mac.
+        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}, {
+          arrayMerge: (target, source) => [...new Set([...target, ...source])],
+        }),
         isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,

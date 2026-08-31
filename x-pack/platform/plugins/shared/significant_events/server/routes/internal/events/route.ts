@@ -6,13 +6,18 @@
  */
 
 import {
-  significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  CHANGE_POINT_TYPES,
   severitySchema,
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  type ChangePointType,
   type Detection,
+  type InvestigationRunStatus,
   type SignificantEvent,
-  type Discovery,
+  type SignificantEventResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -21,35 +26,52 @@ import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
+import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-// Detections carry `change_point_type`; processed-marker docs do not.
-const isLifecycleDetection = (hit: Detection): boolean => hit.change_point_type != null;
+const hasChangePointType = (hit: Detection): boolean => hit.change_point_type != null;
 
-const collectEmbeddedDetections = (discoveries: Discovery[]) => {
+const parseChangePointType = (value: string | undefined): ChangePointType | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  return CHANGE_POINT_TYPES.includes(value as ChangePointType)
+    ? (value as ChangePointType)
+    : undefined;
+};
+
+const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   const seen = new Set<string>();
   const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
 
-  for (const discovery of discoveries) {
-    for (const signal of discovery.signals ?? []) {
+  for (const event of events) {
+    for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') continue;
       const { detection_id, rule_name, change_point_type } = signal.metadata;
       const streamName = signal.stream_name;
-      if (!detection_id || seen.has(detection_id)) continue;
+      const parsedChangePointType = parseChangePointType(change_point_type);
+      if (
+        !detection_id ||
+        !rule_name ||
+        !streamName ||
+        !parsedChangePointType ||
+        seen.has(detection_id)
+      ) {
+        continue;
+      }
       seen.add(detection_id);
-      // The embedded discovery detection types `change_point_type` as a free-form string
-      // (agent output); narrow to the schema enum for the lifecycle response.
       result.push({
         detection_id,
         rule_name,
         stream_name: streamName,
-        change_point_type: change_point_type as LifecycleDetection['change_point_type'],
+        change_point_type: parsedChangePointType,
       });
     }
   }
@@ -76,10 +98,14 @@ const eventsSearchRoute = createServerRoute({
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       status: z
-        .union([significantEventStatusSchema, z.array(significantEventStatusSchema).max(3)])
+        .union([
+          significantEventStatusSchema,
+          z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+        ])
         .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
+      event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
     }),
   }),
@@ -88,75 +114,32 @@ const eventsSearchRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<PaginatedResponse<SignificantEvent>> => {
+  }): Promise<PaginatedResponse<SignificantEventResponse>> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { status, stream, search, severity, ...rest } = params.query;
+    const {
+      status,
+      stream,
+      search,
+      severity,
+      from,
+      to,
+      event_id: eventId,
+      ...rest
+    } = params.query ?? {};
 
     return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,
+      from,
+      to,
       status: toArray(status),
       stream: toArray(stream),
       severity: toArray(severity),
       search: search || undefined,
+      ...(eventId ? { eventIds: [eventId] } : {}),
     });
-  },
-});
-
-const eventsHistoryRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/events/{id}/history',
-  options: {
-    access: 'internal',
-    summary: 'Get event history',
-    description: 'Get all historical versions of a significant event entity.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getEventClient().findByEventUuid(params.path.id);
-  },
-});
-
-const eventsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/events',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create events',
-    description: 'Create event entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(significantEventSchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getEventClient().bulkCreate(params.body);
   },
 });
 
@@ -166,7 +149,7 @@ const eventsLifecycleRoute = createServerRoute({
     access: 'internal',
     summary: 'Get event lifecycle',
     description:
-      'Get the full lifecycle chain for a significant event: detections, discoveries, and event versions.',
+      'Get the full lifecycle chain for a significant event: detections and event versions.',
   },
   security: {
     authz: {
@@ -184,29 +167,27 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
-      await getScopedClients({ request });
+    const { getEventClient, getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
-      return { detections: [], discoveries: [], events: [] };
+      return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
+    const { hits: events } = await getEventClient().findByEventId(eventId);
+    if (events.length === 0) {
+      return { detections: [], events: [] };
+    }
 
-    const [{ hits: events }, { hits: discoveries }] = await Promise.all([
-      getEventClient().findByEventId(eventId),
-      getDiscoveryClient().findByEventId(eventId),
-    ]);
-
-    const embedded = collectEmbeddedDetections(discoveries);
+    const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
-      embedded.map((e) => e.detection_id).filter(Boolean)
+      embedded.map((e) => e.detection_id)
     );
     const hitsByDetectionId = new Map(
-      allDetectionHits.filter(isLifecycleDetection).map((h) => [h.detection_id, h])
+      allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
 
     const detections: LifecycleDetection[] = embedded.flatMap(
@@ -216,26 +197,34 @@ const eventsLifecycleRoute = createServerRoute({
           return [];
         }
 
+        const hitChangePointType = parseChangePointType(hit.change_point_type);
+        if (!hitChangePointType) {
+          return [];
+        }
+
         return [
           {
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
+            rule_uuid: hit.rule_uuid,
             stream_name: hit.stream_name ?? stream_name,
-            change_point_type: change_point_type ?? hit.change_point_type,
+            change_point_type: hitChangePointType,
             '@timestamp': hit['@timestamp'],
           },
         ];
       }
     );
 
-    return { detections, discoveries, events };
+    return { detections, events };
   },
 });
 
 /**
  * Used by the managed investigation workflow (`investigation_workflow.yaml`). Keep the endpoint
- * path and body shape (`significantEventInvestigationSchema`) in sync with its
- * `attach_pending_to_significant_event` / `attach_to_significant_event` `kibana.request` steps.
+ * path and body shape in sync with its `attach_pending_to_significant_event` /
+ * `attach_to_significant_event` `kibana.request` steps. The optional `severity`/`summary`/`status`
+ * let the terminal attach also apply the investigation's reassessed fields in the same
+ * append-only version, so a completed investigation and its field updates are a single write.
  */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
@@ -243,7 +232,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     access: 'internal',
     summary: 'Attach investigation to event',
     description:
-      'Record an investigation run against a significant event (pending, success, or failed).',
+      'Record an investigation run against a significant event (pending, success, or failed), optionally applying reassessed severity/summary/status in the same version.',
   },
   security: {
     authz: {
@@ -254,17 +243,24 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema,
+    body: significantEventInvestigationSchema.extend({
+      severity: severitySchema.optional(),
+      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+      status: significantEventStatusSchema.optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
+    const { severity, summary, status, ...investigation } = params.body;
+
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
       eventUuid: params.path.id,
-      investigation: params.body,
+      investigation,
+      reassessedFields: { severity, summary, status },
     });
   },
 });
@@ -293,10 +289,12 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { hits } = await getEventClient().findByEventUuid(params.path.id);
     if (hits.length === 0) {
@@ -304,9 +302,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     }
 
     const executionId = await triggerInvestigationWorkflow({
-      workflowsManagement: server.workflowsManagement,
-      agentBuilder: server.agentBuilder,
-      spaces: server.spaces,
+      nightshiftInvestigations: server.nightshiftInvestigations,
       request,
       logger,
       event: hits[0],
@@ -356,12 +352,52 @@ const eventsUpdateRoute = createServerRoute({
   },
 });
 
+const investigationStatusesRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/investigations/_status',
+  options: {
+    access: 'internal',
+    summary: 'Resolve the outcome of investigation runs',
+    description:
+      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      workflow_execution_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(1000),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    getSpaceId,
+  }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
+    const { licensing } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const statuses = await resolveInvestigationStatuses({
+      workflowsManagement: server.workflowsManagement,
+      spaceId: await getSpaceId(request),
+      workflowExecutionIds: params.body.workflow_execution_ids,
+      logger,
+    });
+
+    return { statuses };
+  },
+});
+
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
-  ...eventsHistoryRoute,
   ...eventsLifecycleRoute,
-  ...eventsBulkCreateRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
+  ...investigationStatusesRoute,
 };

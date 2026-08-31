@@ -137,8 +137,7 @@ export function initializeLayoutManager(
         const sectionId = layout.panels[uuid].grid.sectionId;
         return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapseed, it does not render
       }).length;
-      const expectedChildCount =
-        renderedPanelCount + (viewMode === 'print' ? 0 : Object.keys(layout.pinnedPanels).length);
+      const expectedChildCount = renderedPanelCount + Object.keys(layout.pinnedPanels).length;
 
       const currentChildCount = Object.keys(children).filter((uuid) => {
         const sectionId = layout.panels[uuid]?.grid.sectionId; // uuid might reference a pinned panel

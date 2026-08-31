@@ -74,6 +74,7 @@ export type {
   ConverseStep,
 } from './src/utils/agent_builder_client';
 export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
+export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
@@ -148,6 +149,7 @@ export {
   type TraceBasedEvaluatorConfig,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  createChatCallsEvaluator,
   createToolCallsEvaluator,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';

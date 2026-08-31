@@ -86,12 +86,15 @@ import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
+  registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
+  registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -149,7 +152,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
+      registerWorkflowSteps(workflowsExtensions);
+      registerSecurityWorkflowTriggers(workflowsExtensions);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -300,11 +304,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerUnified(getIndicatorAttachment());
-    cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
-    cases.attachmentFramework.registerUnified(getEventType());
-    cases.attachmentFramework.registerUnified(getSecurityAlertType());
-    cases.attachmentFramework.registerUnified(getTimelineAttachment());
+    cases.attachmentFramework.registerAttachment(getIndicatorAttachment());
+    cases.attachmentFramework.registerAttachment(getEndpointUnifiedAttachment());
+    cases.attachmentFramework.registerAttachment(getEventType());
+    cases.attachmentFramework.registerAttachment(getSecurityAlertType());
+    cases.attachmentFramework.registerAttachment(getTimelineAttachment());
 
     // Always register the entity attachment renderer so that attachments created
     // while the feature flag was enabled continue to display correctly after the
@@ -313,7 +317,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Lazily imported to keep the entity attachment module out of the page-load bundle.
     import('./cases/attachments/entity')
       .then(({ getEntityAttachment }) => {
-        cases.attachmentFramework.registerUnified(getEntityAttachment());
+        cases.attachmentFramework.registerAttachment(getEntityAttachment());
       })
       .catch((e) => {
         this.logger.error('Failed to register entity attachment type', e);
@@ -364,8 +368,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
+      registerEntityGraphAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        http: core.http,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+        experimentalFeatures: this.experimentalFeatures,
+        uiSettings: core.uiSettings,
+      });
+      if (this.experimentalFeatures.riskScoreHistoryEnabled) {
+        registerEntityRiskScoreHistoryAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          application: core.application,
+          agentBuilder: plugins.agentBuilder,
+          chrome: core.chrome,
+          experimentalFeatures: this.experimentalFeatures,
+          searchSession: plugins.data.search.session,
+          uiSettings: core.uiSettings,
+        });
+      }
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
@@ -375,6 +402,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({

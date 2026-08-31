@@ -8,14 +8,14 @@
 import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG, isWorkflowsEnabled } from '.';
 
 describe('isWorkflowsEnabled', () => {
-  it('queries the attackDiscoveryWorkflowsEnabled flag with a safe `false` default', async () => {
+  it('queries the attackDiscoveryWorkflowsEnabled flag with a `true` default (ON by default)', async () => {
     const getBooleanValue = jest.fn().mockResolvedValue(true);
 
     await isWorkflowsEnabled({ getBooleanValue });
 
     expect(getBooleanValue).toHaveBeenCalledWith(
       ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
-      false
+      true
     );
   });
 

@@ -40,6 +40,12 @@ export const CISBenchmarkIcon = (props: Props) => {
   if (!iconType) return <></>;
 
   return (
-    <EuiIconTip content={props.name} type={iconType} size={props.size || 'xl'} css={props.style} />
+    <EuiIconTip
+      content={props.name}
+      type={iconType}
+      size={props.size || 'xl'}
+      css={props.style}
+      aria-label={props.name}
+    />
   );
 };

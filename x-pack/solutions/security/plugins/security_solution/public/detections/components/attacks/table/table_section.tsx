@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -22,7 +23,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
@@ -58,6 +59,22 @@ import { useLocalStorage } from '../../../../common/components/local_storage';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const ATTACKS_TABLE_SORT_STORAGE_KEY = 'securitySolution:attacksTableSort';
+
+/**
+ * Scoped override: EUI's accordion button applies `text-decoration: underline` to its
+ * entire content on hover/focus. We strip that off the button and re-apply it only to
+ * the attack title `<h5>` so the underline is limited to the attack name itself.
+ */
+const accordionTitleUnderlineCss = css`
+  .euiAccordion__button:hover,
+  .euiAccordion__button:focus {
+    text-decoration: none;
+  }
+  .euiAccordion__button:hover h5,
+  .euiAccordion__button:focus h5 {
+    text-decoration: underline;
+  }
+`;
 
 export interface TableSectionProps {
   /**
@@ -172,6 +189,7 @@ export const TableSection = React.memo(
             openAttackFlyout({
               attackId: attack.id,
               indexName: dataView.getIndexPattern(),
+              origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
               attackTitle: attack.title,
             });
           } else {
@@ -327,7 +345,7 @@ export const TableSection = React.memo(
     const dslFilter = useMemo(() => dsl.isNotAttack(), []);
 
     return (
-      <div data-test-subj={TABLE_SECTION_TEST_ID}>
+      <div data-test-subj={TABLE_SECTION_TEST_ID} css={accordionTitleUnderlineCss}>
         <GroupedAlertsTable
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}

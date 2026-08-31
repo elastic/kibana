@@ -53,6 +53,9 @@ export interface AdHocRunSO extends Record<string, unknown> {
   // UIAM API key snapshotted from the rule when the backfill was scheduled.
   // Optional because legacy ad hoc runs and ES-only deployments don't have one.
   uiamApiKey?: string;
+  // UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key, also
+  // snapshotted from the rule. Absent means internal-key treatment (fail closed).
+  uiamApiKeyExternal?: boolean;
   createdAt: string;
   duration: string;
   enabled: boolean;
@@ -70,6 +73,7 @@ export interface AdHocRun {
   apiKeyId: string;
   apiKeyToUse: string;
   uiamApiKey?: string;
+  uiamApiKeyExternal?: boolean;
   createdAt: string;
   duration: string;
   enabled: boolean;

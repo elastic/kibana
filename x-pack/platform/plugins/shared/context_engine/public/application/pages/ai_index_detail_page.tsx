@@ -6,101 +6,189 @@
  */
 
 import {
-  EuiPanel,
-  EuiSkeletonRectangle,
-  EuiSkeletonText,
+  EuiBadge,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import {
+  AutomationsPanel,
+  DescriptionPanel,
+  SignalsPanel,
+  SourcesPanel,
+} from '../components/ai_index_detail';
+import { KiListPanel } from '../components/ki';
+import { EditSourcesFlyout } from '../components/edit_sources_flyout';
+import { useAiIndex } from '../hooks/use_ai_index';
+import { useKiList } from '../hooks/use_ki_list';
+import { useNavigation } from '../hooks/use_navigation';
+import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
+import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from '../layout/context_engine_page_template';
+import { CONTEXT_ENGINE_PATHS } from '../paths';
 
-const Panel = ({
-  title,
-  description,
-}: {
-  title: React.ReactNode;
-  description: React.ReactNode;
-}) => (
-  <EuiPanel hasBorder paddingSize="l">
-    <EuiTitle size="s">
-      <h2>{title}</h2>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
-      <p>{description}</p>
-    </EuiText>
-    <EuiSpacer size="m" />
-    <EuiSkeletonText lines={2} />
-  </EuiPanel>
-);
+type DetailTabId = 'overview' | 'knowledge_indicators';
+
+const backToContextLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToContext', {
+  defaultMessage: 'Back to Context',
+});
+
+const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
+  defaultMessage: 'Managed',
+});
 
 export const AiIndexDetailPage = () => {
-  return (
-    <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
-      <KibanaPageTemplate.Header
-        pageTitle={
+  const { id } = useParams<{ id: string }>();
+  const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
+  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
+  const [isEditingSources, setIsEditingSources] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
+
+  const { summary } = useKiList({
+    aiIndexId: aiIndex?.id,
+    size: KI_SUMMARY_PAGE_SIZE,
+    enabled: aiIndex !== undefined,
+  });
+
+  const isManaged = aiIndex !== undefined && aiIndex.managed;
+  const hideEditControls = isLoading || isManaged;
+  const pageTitle = aiIndex?.id ?? id ?? '';
+  const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+
+  const pageTitleContent = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <span data-test-subj="contextAiIndexDetailPageTitle">{pageTitle}</span>
+        </EuiFlexItem>
+        {isManaged && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj="contextAiIndexDetailManagedBadge">
+              {managedBadgeLabel}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+    [isManaged, pageTitle]
+  );
+
+  const pageContent = error ? (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      data-test-subj="contextAiIndexDetailError"
+      title={
+        <h2>
           <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.title"
-            defaultMessage="My AI index"
+            id="xpack.contextEngine.aiIndexDetail.error.title"
+            defaultMessage="Unable to load AI index"
           />
-        }
-      />
-      <KibanaPageTemplate.Section>
-        <Panel
-          title={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.description.title"
-              defaultMessage="Description"
-            />
+        </h2>
+      }
+      body={<p>{error.message}</p>}
+    />
+  ) : (
+    <>
+      <EuiTabs data-test-subj="contextAiIndexDetailTabs">
+        <EuiTab
+          isSelected={selectedTab === 'overview'}
+          onClick={() => setSelectedTab('overview')}
+          data-test-subj="contextAiIndexDetailTab-overview"
+        >
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.tabs.overview"
+            defaultMessage="Overview"
+          />
+        </EuiTab>
+        <EuiTab
+          isSelected={selectedTab === 'knowledge_indicators'}
+          onClick={() => setSelectedTab('knowledge_indicators')}
+          append={
+            summary.total > 0 ? (
+              <EuiNotificationBadge>{summary.total}</EuiNotificationBadge>
+            ) : undefined
           }
-          description={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.description.description"
-              defaultMessage="No sources yet — add a source and a summary will be generated automatically."
-            />
-          }
-        />
-        <EuiSpacer size="l" />
-        <Panel
-          title={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.title"
-              defaultMessage="Sources"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.description"
-              defaultMessage="ES|QL views, indices, Connectors and stream signals feeding this AI index."
-            />
-          }
-        />
-        <EuiSpacer size="l" />
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.automations.title"
-                defaultMessage="Automations"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.automations.description"
-                defaultMessage="Automations extract and refresh this AI index's Knowledge Indicators from its sources."
-              />
-            </p>
-          </EuiText>
+          data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+        >
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
+            defaultMessage="Knowledge Indicators"
+          />
+        </EuiTab>
+      </EuiTabs>
+
+      <EuiSpacer size="m" />
+
+      {selectedTab === 'overview' && (
+        <>
+          <DescriptionPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={isManaged}
+          />
           <EuiSpacer size="m" />
-          <EuiSkeletonRectangle width="100%" height={88} borderRadius="m" />
-        </EuiPanel>
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+          <SourcesPanel
+            isLoading={isLoading}
+            sources={aiIndex?.sources ?? []}
+            canEdit={aiIndex !== undefined}
+            onEditSources={() => setIsEditingSources(true)}
+            isManaged={hideEditControls}
+          />
+          <EuiSpacer size="m" />
+          <AutomationsPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={isManaged}
+          />
+          <EuiSpacer size="m" />
+          <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+        </>
+      )}
+
+      {selectedTab === 'knowledge_indicators' && aiIndex && <KiListPanel aiIndex={aiIndex} />}
+
+      {isEditingSources && aiIndex && (
+        <EditSourcesFlyout
+          aiIndex={aiIndex}
+          onClose={() => setIsEditingSources(false)}
+          onSaved={() => {
+            setIsEditingSources(false);
+            refetch();
+          }}
+        />
+      )}
+    </>
+  );
+
+  return (
+    <ContextEnginePageTemplate
+      data-test-subj="contextAiIndexDetailPage"
+      breadcrumbPageName={pageTitle || undefined}
+    >
+      <ContextEngineSubPageHeader
+        backLabel={backToContextLabel}
+        backHref={backHref}
+        onBackClick={(event) => {
+          event.preventDefault();
+          navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
+        }}
+        pageTitle={pageTitleContent}
+      />
+      <ContextEnginePageSection>{pageContent}</ContextEnginePageSection>
+    </ContextEnginePageTemplate>
   );
 };

@@ -25,15 +25,15 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./files'));
     loadTestFile(require.resolve('./indicator'));
     loadTestFile(require.resolve('./osquery'));
+    loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./persistable_state'));
     loadTestFile(require.resolve('./mixed_reads'));
     loadTestFile(require.resolve('./validation'));
     loadTestFile(require.resolve('./entity_sub_privilege'));
     loadTestFile(require.resolve('./legacy_route_compat'));
+    loadTestFile(require.resolve('./import_export'));
 
-    // Types that only exist as unified attachments
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./discover_session'));
-    loadTestFile(require.resolve('./map'));
+    // Reference saved-object types that only exist as unified attachments
+    loadTestFile(require.resolve('./saved_object_attachments'));
   });
 };

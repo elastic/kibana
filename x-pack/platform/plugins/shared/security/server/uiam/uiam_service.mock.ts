@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+
 import type { UiamServicePublic } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
@@ -15,6 +17,9 @@ export const uiamServiceMock = {
       [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
     })),
     getClientAuthentication: jest.fn(),
+    getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'some-internal-caller-attestation',
+    }),
     refreshSessionTokens: jest
       .fn()
       .mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' }),
@@ -41,6 +46,7 @@ export const uiamServiceMock = {
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
       revoked: true,
     }),
+    deleteOAuthClient: jest.fn().mockResolvedValue(undefined),
     listOAuthConnections: jest.fn().mockResolvedValue({ connections: [] }),
     updateOAuthConnection: jest.fn().mockResolvedValue({
       id: 'mock-connection-id',
@@ -54,6 +60,7 @@ export const uiamServiceMock = {
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
       revoked: true,
     }),
+    deleteOAuthConnection: jest.fn().mockResolvedValue(undefined),
     resolveUsers: jest.fn().mockResolvedValue({ users: {} }),
   }),
 };

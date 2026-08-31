@@ -163,7 +163,7 @@ describe('runTask', () => {
     getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2', 'alert-index-3']);
 
     // @ts-ignore - accessing private function for testing
-    await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+    await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController().signal);
 
     expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(0);
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(3);
@@ -407,7 +407,7 @@ describe('runTask', () => {
           spaceIds: ['default'],
         },
       },
-      new AbortController()
+      new AbortController().signal
     );
 
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
@@ -593,7 +593,7 @@ describe('runTask', () => {
           spaceIds: ['default'],
         },
       },
-      new AbortController()
+      new AbortController().signal
     );
 
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
@@ -715,7 +715,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -749,7 +749,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -788,7 +788,7 @@ describe('runTask', () => {
             },
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -857,7 +857,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       // active alerts search failures should not prevent inactive alerts from being deleted
@@ -971,7 +971,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);

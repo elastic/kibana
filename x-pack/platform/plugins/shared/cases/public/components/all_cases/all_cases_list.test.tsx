@@ -243,7 +243,11 @@ describe('AllCasesListGeneric', () => {
       )[0]
     );
 
-    expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'Damaged Raccoon (damaged_raccoon@elastic.co)'
+      );
+    });
   });
 
   it('should show a tooltip with all tags when hovered', async () => {
@@ -663,25 +667,6 @@ describe('AllCasesListGeneric', () => {
     }
 
     await waitForComponentToUpdate();
-  });
-
-  it('should hide the alerts column if the alert feature is disabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: false } } },
-    });
-
-    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
-  });
-
-  it('should show the alerts column if the alert feature is enabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: true } } },
-    });
-
-    const alertCounts = await screen.findAllByTestId('case-table-column-alertsCount');
-
-    expect(alertCounts.length).toBeGreaterThan(0);
   });
 
   it('should show the alerts column if the alert object is empty', async () => {

@@ -68,6 +68,7 @@ describe('createConnectorLifecycleHandler', () => {
     getConnectorSpecMock.mockReturnValue({
       metadata: { id: '.test', displayName: 'Test', description: '', minimumLicense: 'basic' },
       actions: {},
+      test: { handler: jest.fn(), enabled: false },
     } as never);
   });
 

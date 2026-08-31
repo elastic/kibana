@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { SyntheticsEsClient } from '../lib';
-import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import { getSyntheticsScopedIndex } from '../../common/get_synthetics_indices';
 import type { Ping } from '../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
@@ -117,7 +117,7 @@ export const getLastSuccessfulCheck = async ({
   });
 
   const { body: result } = await syntheticsEsClient.search({
-    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+    index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     ...lastSuccessCheckParams,
   });
 

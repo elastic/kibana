@@ -9,6 +9,7 @@
 
 import { CPSServerPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
+import { CPS_TIER_ELIGIBLE_FEATURE } from '@kbn/cps-common';
 import { registerRoutes } from './routes';
 
 jest.mock('./routes', () => ({
@@ -69,5 +70,29 @@ describe('CPSServerPlugin', () => {
   it('should register routes in serverless mode', () => {
     plugin.setup(mockCoreSetup);
     expect(registerRoutes).toHaveBeenCalled();
+  });
+
+  it('registers the CPS tier-eligibility pricing feature on setup', () => {
+    mockInitContext = coreMock.createPluginInitializerContext({ cpsEnabled: true });
+    (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
+    plugin = new CPSServerPlugin(mockInitContext);
+
+    plugin.setup(mockCoreSetup);
+
+    expect(mockCoreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith([
+      CPS_TIER_ELIGIBLE_FEATURE,
+    ]);
+  });
+
+  it('registers the CPS tier-eligibility pricing feature even when cpsEnabled is false', () => {
+    mockInitContext = coreMock.createPluginInitializerContext({ cpsEnabled: false });
+    (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
+    plugin = new CPSServerPlugin(mockInitContext);
+
+    plugin.setup(mockCoreSetup);
+
+    expect(mockCoreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith([
+      CPS_TIER_ELIGIBLE_FEATURE,
+    ]);
   });
 });

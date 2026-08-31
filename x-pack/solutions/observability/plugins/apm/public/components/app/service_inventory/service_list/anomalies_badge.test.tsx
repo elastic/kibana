@@ -7,39 +7,57 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { AnomalyDetectorType } from '@kbn/apm-types';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
-const baseQuery = {
-  environment: 'ENVIRONMENT_ALL',
-  kuery: '',
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-  serviceGroup: '',
-  comparisonEnabled: false,
-};
+// Production `getRedirectUrl` builds `/app/r?...` (share redirect). The mock must
+// return that path so tests fail if the badge uses it instead of `getUrl`.
+const SHARE_REDIRECT_URL = '/app/r?l=APM_LOCATOR&lz=compressed-payload';
+
+const mockGetRedirectUrl = jest.fn().mockReturnValue(SHARE_REDIRECT_URL);
+
+const mockGetUrl = jest
+  .fn()
+  .mockImplementation(async ({ serviceName, isMobileAgentName, query }: any) => {
+    const base = isMobileAgentName
+      ? `/app/apm/mobile-services/${serviceName}/overview`
+      : `/app/apm/services/${serviceName}/overview`;
+    const params = new URLSearchParams();
+    Object.entries(query ?? {}).forEach(([k, v]) => {
+      if (v !== undefined) params.set(k, String(v));
+    });
+    return `${base}?${params.toString()}`;
+  });
+
+const mockLocators = {
+  get: jest.fn().mockReturnValue({ getUrl: mockGetUrl, getRedirectUrl: mockGetRedirectUrl }),
+} as unknown as AnomaliesBadgeNavigationProps['locators'];
 
 const regularClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-java',
   agentName: 'nodejs',
-  query: baseQuery,
   anomalyEnvironment: 'production',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  locators: mockLocators,
 };
 
 const mobileClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-android',
   agentName: 'android/java',
-  query: baseQuery,
   anomalyEnvironment: 'mobile',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  locators: mockLocators,
 };
 
 const CRITICAL_SEVERITY = 82;
 const MAJOR_SEVERITY = 72;
 
 function renderBadge(ui: React.ReactElement) {
-  return render(<MockApmPluginContextWrapper>{ui}</MockApmPluginContextWrapper>);
+  return render(<EuiProvider>{ui}</EuiProvider>);
 }
 
 async function getTooltipText(): Promise<string | null | undefined> {
@@ -54,13 +72,38 @@ async function getTooltipText(): Promise<string | null | undefined> {
   return document.querySelector('.euiToolTipPopover')?.textContent;
 }
 
-function getBadgeHrefParts(): [string, string] {
-  const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-  const [pathname, search] = href!.split('?');
+async function getBadgeHref(): Promise<string> {
+  await waitFor(() => {
+    expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+  });
+  return screen.getByTestId('apmAnomaliesBadge').getAttribute('href')!;
+}
+
+async function getBadgeHrefParts(): Promise<[string, string]> {
+  const href = await getBadgeHref();
+  const [pathname, search] = href.split('?');
   return [pathname, search];
 }
 
+function expectInAppExpectedBoundsNavigation(pathname: string, search: string) {
+  expect(pathname).toMatch(/^\/app\/apm\//);
+  expect(pathname).not.toContain('/app/r');
+  expect(Object.fromEntries(new URLSearchParams(search)).offset).toBe('expected_bounds');
+  expect(mockGetUrl).toHaveBeenCalledWith(
+    expect.objectContaining({
+      query: expect.objectContaining({ offset: 'expected_bounds' }),
+    }),
+    undefined
+  );
+  expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+}
+
 describe('AnomaliesBadge', () => {
+  beforeEach(() => {
+    mockGetUrl.mockClear();
+    mockGetRedirectUrl.mockClear();
+  });
+
   it('names the anomalous detector in the tooltip when a detectorType is provided', async () => {
     renderBadge(
       <AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={AnomalyDetectorType.txFailureRate} />
@@ -124,14 +167,11 @@ describe('AnomaliesBadge', () => {
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
         detectorType={AnomalyDetectorType.txLatency}
-        navigationProps={{
-          ...regularClickProps,
-          query: { ...baseQuery, kuery: 'service.name: "foo"' },
-        }}
+        navigationProps={regularClickProps}
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -141,6 +181,7 @@ describe('AnomaliesBadge', () => {
       comparisonEnabled: 'true',
       offset: 'expected_bounds',
     });
+    expectInAppExpectedBoundsNavigation(pathname, search);
     expect(await getTooltipText()).toContain('Click to view more.');
   });
 
@@ -153,7 +194,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/mobile-services/opbeans-android/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -163,6 +204,7 @@ describe('AnomaliesBadge', () => {
       comparisonEnabled: 'true',
       offset: 'expected_bounds',
     });
+    expectInAppExpectedBoundsNavigation(pathname, search);
     expect(await getTooltipText()).toContain('Click to view more.');
   });
 
@@ -185,13 +227,14 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
       comparisonEnabled: 'false',
       offset: 'expected_bounds',
     });
+    expectInAppExpectedBoundsNavigation(pathname, search);
     expect(await getTooltipText()).toContain('Click to hide expected bounds.');
   });
 
@@ -208,13 +251,34 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
       comparisonEnabled: 'true',
       offset: 'expected_bounds',
     });
+    expectInAppExpectedBoundsNavigation(pathname, search);
     expect(await getTooltipText()).toContain('Click to view expected bounds.');
+  });
+
+  it('does not use getRedirectUrl (/app/r), which full-reloads APM and drops expected-bounds comparison', async () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={CRITICAL_SEVERITY}
+        detectorType={AnomalyDetectorType.txLatency}
+        navigationProps={regularClickProps}
+      />
+    );
+
+    const href = await getBadgeHref();
+
+    expect(href).not.toBe(SHARE_REDIRECT_URL);
+    expect(href).not.toMatch(/\/app\/r(\?|$)/);
+    expect(href).toContain('/app/apm/services/opbeans-java/overview');
+    expect(href).toContain('offset=expected_bounds');
+    expect(href).toContain('comparisonEnabled=true');
+    expect(mockGetUrl).toHaveBeenCalled();
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
   });
 });

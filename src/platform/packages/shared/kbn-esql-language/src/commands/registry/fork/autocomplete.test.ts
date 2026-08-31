@@ -384,6 +384,7 @@ describe('FORK Autocomplete', () => {
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(integerField) WHERE integerField ',
               [
+                ': $0',
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS_WHERE,
                   'any',

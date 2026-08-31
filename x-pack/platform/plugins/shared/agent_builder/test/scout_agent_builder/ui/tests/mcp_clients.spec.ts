@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import {
   createOAuthClient,
   createUiamAuthHeaders,
+  deleteOAuthClient,
   revokeOAuthClient,
   uniqueClientName,
 } from '../../../scout_agent_builder_shared/lib/oauth_clients_kbn';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/277343
-test.describe.skip(
+test.describe(
   '[NON-MKI] Agent Builder — MCP Clients management',
   { tag: ['@local-serverless-search'] },
   () => {
     let authHeaders: Record<string, string>;
     const createdClientIds: string[] = [];
 
-    test.beforeAll(async ({ kbnClient, samlAuth }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
+    test.beforeAll(async ({ samlAuth }) => {
       authHeaders = await createUiamAuthHeaders(samlAuth);
     });
 
@@ -34,12 +30,11 @@ test.describe.skip(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient, kbnClient }) => {
+    test.afterAll(async ({ apiClient }) => {
       await Promise.all(
-        createdClientIds.map((id) => revokeOAuthClient(apiClient, authHeaders, id))
+        createdClientIds.map((clientId) => deleteOAuthClient(apiClient, authHeaders, clientId))
       );
       createdClientIds.length = 0;
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('opens the MCP Clients page from the Manage MCP menu', async ({ page, pageObjects }) => {
@@ -58,7 +53,7 @@ test.describe.skip(
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.openMcpClientCreate();
       await pageObjects.agentBuilder.fillMcpClientName(clientName);
-      await pageObjects.agentBuilder.selectMcpClientLogo();
+      await pageObjects.agentBuilder.selectMcpClientLogo('Claude');
       const clientId = await pageObjects.agentBuilder.submitMcpClientCreate();
       createdClientIds.push(clientId);
 
@@ -92,7 +87,7 @@ test.describe.skip(
       createdClientIds.push(clientId);
 
       const modal = page.testSubj.locator('mcpClientDetailsModal');
-      await expect(modal.getByText('MCP client secret', { exact: false })).toBeVisible();
+      await expect(modal.getByText('MCP client secret', { exact: true })).toBeVisible();
 
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
@@ -163,6 +158,89 @@ test.describe.skip(
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
 
+    test('edits a client through the row actions menu', async ({
+      apiClient,
+      page,
+      pageObjects,
+    }) => {
+      const clientName = uniqueClientName('scout-edit');
+      const redirectUris = ['http://localhost/callback', 'http://127.0.0.1:3000/callback'];
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'public',
+        redirectUris,
+      });
+      createdClientIds.push(client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+      await pageObjects.agentBuilder.openMcpClientEdit(client.id);
+
+      await expect(page.testSubj.locator('mcpClientNameInput')).toHaveValue(clientName);
+      await expect(page.testSubj.locator('mcpClientLocalUri-0')).toHaveValue(redirectUris[0]);
+      await expect(page.testSubj.locator('mcpClientLocalUri-1')).toHaveValue(redirectUris[1]);
+      await expect(page.testSubj.locator('mcpClientLocalUri-2')).toHaveCount(0);
+      await expect(page.testSubj.locator('mcpClientConfidentialCheckbox')).toHaveCount(0);
+      await expect(page.testSubj.locator('mcpClientUpdateButton')).toBeDisabled();
+
+      const updatedName = `${clientName}-updated`;
+      await pageObjects.agentBuilder.fillMcpClientName(updatedName);
+      await pageObjects.agentBuilder.selectMcpClientLogo('MCP client logo');
+      await pageObjects.agentBuilder.submitMcpClientUpdate();
+
+      await pageObjects.agentBuilder.searchMcpClients(updatedName);
+      await expect(page.getByRole('button', { name: updatedName, exact: true })).toBeVisible();
+
+      await pageObjects.agentBuilder.openMcpClientDetailsFlyout(client.id);
+      await expect(
+        page.testSubj.locator('mcpClientDetailsFlyout').getByTestId('mcpClientLogo')
+      ).toBeVisible();
+      await pageObjects.agentBuilder.closeMcpClientDetails();
+    });
+
+    test('prefills the remote redirect type from stored HTTPS URIs', async ({
+      apiClient,
+      page,
+      pageObjects,
+    }) => {
+      const clientName = uniqueClientName('scout-edit-remote');
+      const redirectUris = ['https://example.com/callback', 'https://other.example.com/callback'];
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'confidential',
+        redirectUris,
+      });
+      createdClientIds.push(client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+      await pageObjects.agentBuilder.openMcpClientEdit(client.id);
+
+      await expect(page.testSubj.locator('mcpClientRemoteUri-0')).toHaveValue(redirectUris[0]);
+      await expect(page.testSubj.locator('mcpClientRemoteUri-1')).toHaveValue(redirectUris[1]);
+      await expect(page.testSubj.locator('mcpClientRemoteUri-2')).toHaveCount(0);
+    });
+
+    test('does not offer edit for a revoked client', async ({ apiClient, page, pageObjects }) => {
+      const clientName = uniqueClientName('scout-edit-revoked');
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'public',
+      });
+      createdClientIds.push(client.id);
+      await revokeOAuthClient(apiClient, authHeaders, client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+      await pageObjects.agentBuilder.openMcpClientActionsMenu(client.id);
+
+      await expect(page.testSubj.locator(`mcpClientDeleteAction-${client.id}`)).toBeVisible();
+      await expect(page.testSubj.locator(`mcpClientEditAction-${client.id}`)).toHaveCount(0);
+    });
+
     test('revokes a client through the row actions menu', async ({ apiClient, pageObjects }) => {
       const clientName = uniqueClientName('scout-revoke');
       const client = await createOAuthClient(apiClient, authHeaders, {
@@ -182,6 +260,31 @@ test.describe.skip(
         const status = await pageObjects.agentBuilder.getMcpClientRowStatus(client.id);
         expect(status).toContain('Revoked');
       }).toPass();
+    });
+
+    test('deletes a revoked client through the row actions menu', async ({
+      apiClient,
+      page,
+      pageObjects,
+    }) => {
+      const clientName = uniqueClientName('scout-delete');
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'public',
+      });
+      createdClientIds.push(client.id);
+      await revokeOAuthClient(apiClient, authHeaders, client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+
+      await pageObjects.agentBuilder.openMcpClientDeleteModal(client.id);
+      await pageObjects.agentBuilder.confirmMcpClientDelete();
+
+      await expect(page.testSubj.locator(`agentBuilderMcpClientsListRow-${client.id}`)).toHaveCount(
+        0
+      );
     });
   }
 );

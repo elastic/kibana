@@ -8,13 +8,15 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 /**
- * Runs the managed memory synthesis workflow in the caller's current space.
- * Returns the execution id when started, or undefined when workflows are unavailable
- * or the managed workflow has not been installed yet.
+ * Runs the managed memory synthesis workflow. The workflow document is global;
+ * the execution is started in the caller's current space so it appears in that
+ * space's Workflows UI. Returns the execution id when started, or undefined when
+ * workflows are unavailable or the managed workflow has not been installed yet.
  */
 export const triggerMemorySynthesisWorkflow = async ({
   workflowsManagement,
@@ -34,10 +36,10 @@ export const triggerMemorySynthesisWorkflow = async ({
     return undefined;
   }
 
-  const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+  const executionSpaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   const workflow = await workflowsManagement.management.getWorkflow(
     SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-    spaceId
+    GLOBAL_WORKFLOW_SPACE_ID
   );
 
   if (!workflow || !workflow.definition) {
@@ -49,7 +51,7 @@ export const triggerMemorySynthesisWorkflow = async ({
 
   const executionId = await workflowsManagement.management.runWorkflow(
     { ...workflow, definition: workflow.definition },
-    spaceId,
+    executionSpaceId,
     {},
     request,
     triggeredBy

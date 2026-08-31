@@ -48,3 +48,5 @@ export { bytePartition } from './src/byte_partition/byte_partition';
 export { type FromExternalVariant, fromExternalVariant } from './src/from_external_variant';
 
 export { toSlugIdentifier, isValidSlugIdentifier } from './src/slug_identifier';
+
+export { onceCacheOnSuccess } from './src/once_cache_on_success';

@@ -32,9 +32,15 @@ jest.mock('./vulnerability/main', () => ({ Vulnerability: () => null }));
 
 const mockFlyoutRef = { close: jest.fn(), onClose: Promise.resolve() };
 const mockOpenSystemFlyout = jest.fn().mockReturnValue(mockFlyoutRef);
+const mockReportEvent = jest.fn();
 
 jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } } }),
+  useKibana: () => ({
+    services: {
+      overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      telemetry: { reportEvent: mockReportEvent },
+    },
+  }),
 }));
 
 const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;

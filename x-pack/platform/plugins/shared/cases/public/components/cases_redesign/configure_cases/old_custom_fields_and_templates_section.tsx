@@ -39,10 +39,13 @@ import {
   useCasesTemplatesNavigation,
 } from '../../../common/navigation';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useCasesConfig } from '../../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import type { ClosureType } from '../../../containers/configure/types';
 import { SettingsSection } from './settings_section';
 import * as i18n from '../../configure_cases/translations';
+import * as customFieldsI18n from '../../custom_fields/translations';
+import * as templatesI18n from '../../templates/translations';
 
 type LegacyFlyoutType = 'customField' | 'template';
 
@@ -117,11 +120,16 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
       setFlyOutVisibility,
     }) => {
       const { permissions } = useCasesContext();
+      // When templates v2 is off, the v2 templates / field-library pages are unregistered and
+      // this section is the only place to manage custom fields and templates — so it is always
+      // expanded (no local-storage switch) and drops the migration copy that links to v2 pages.
+      const { templatesEnabled } = useCasesConfig();
       const { showLegacyCustomFields, setShowLegacyCustomFields, canDisableSwitch } =
         useShowLegacyCustomFields(customFields);
       const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
       const { getCasesTemplatesUrl } = useCasesTemplatesNavigation();
       const { data: currentConfiguration } = useGetCaseConfiguration();
+      const showSectionContent = !templatesEnabled || showLegacyCustomFields;
 
       const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(
         null
@@ -338,47 +346,57 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
           <EuiHorizontalRule margin="l" />
           <SettingsSection
             data-test-subj="cases-redesign-legacy-custom-fields-section"
-            title={i18n.LEGACY_CUSTOM_FIELDS_AND_TEMPLATES_TITLE}
+            title={
+              templatesEnabled
+                ? i18n.LEGACY_CUSTOM_FIELDS_AND_TEMPLATES_TITLE
+                : i18n.CUSTOM_FIELDS_AND_TEMPLATES_TITLE
+            }
             description={
-              <FormattedMessage
-                id="xpack.cases.configureCases.legacyCustomFieldsAndTemplatesDescription"
-                defaultMessage="Custom fields and templates you've created have been migrated to the new YAML-based template system. Manage them in the {templatesLink}. To view your migrated custom fields, visit the {customFieldsLink}. Your legacy configuration is kept here for reference during the transition."
-                values={{
-                  templatesLink: (
-                    <EuiLink
-                      href={getCasesTemplatesUrl()}
-                      data-test-subj="legacy-templates-view-new-link"
-                    >
-                      {i18n.VIEW_NEW_TEMPLATES}
-                    </EuiLink>
-                  ),
-                  customFieldsLink: (
-                    <EuiLink
-                      href={getCasesFieldLibraryUrl()}
-                      data-test-subj="legacy-custom-fields-view-new-link"
-                    >
-                      {i18n.VIEW_NEW_CUSTOM_FIELDS}
-                    </EuiLink>
-                  ),
-                }}
-              />
+              templatesEnabled ? (
+                <FormattedMessage
+                  id="xpack.cases.configureCases.legacyCustomFieldsAndTemplatesDescription"
+                  defaultMessage="Custom fields and templates you've created have been migrated to the new YAML-based template system. Manage them in the {templatesLink}. To view your migrated custom fields, visit the {customFieldsLink}. Your legacy configuration is kept here for reference during the transition."
+                  values={{
+                    templatesLink: (
+                      <EuiLink
+                        href={getCasesTemplatesUrl()}
+                        data-test-subj="legacy-templates-view-new-link"
+                      >
+                        {i18n.VIEW_NEW_TEMPLATES}
+                      </EuiLink>
+                    ),
+                    customFieldsLink: (
+                      <EuiLink
+                        href={getCasesFieldLibraryUrl()}
+                        data-test-subj="legacy-custom-fields-view-new-link"
+                      >
+                        {i18n.VIEW_NEW_CUSTOM_FIELDS}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                i18n.CUSTOM_FIELDS_AND_TEMPLATES_DESCRIPTION
+              )
             }
           >
-            <EuiToolTip
-              content={
-                canDisableSwitch ? undefined : i18n.SHOW_LEGACY_CUSTOM_FIELDS_SWITCH_DISABLED_HELP
-              }
-            >
-              <EuiSwitch
-                label={i18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES}
-                checked={showLegacyCustomFields}
-                disabled={!canDisableSwitch}
-                onChange={(e) => setShowLegacyCustomFields(e.target.checked)}
-                data-test-subj="show-legacy-custom-fields-switch"
-              />
-            </EuiToolTip>
+            {templatesEnabled && (
+              <EuiToolTip
+                content={
+                  canDisableSwitch ? undefined : i18n.SHOW_LEGACY_CUSTOM_FIELDS_SWITCH_DISABLED_HELP
+                }
+              >
+                <EuiSwitch
+                  label={i18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES}
+                  checked={showLegacyCustomFields}
+                  disabled={!canDisableSwitch}
+                  onChange={(e) => setShowLegacyCustomFields(e.target.checked)}
+                  data-test-subj="show-legacy-custom-fields-switch"
+                />
+              </EuiToolTip>
+            )}
 
-            {showLegacyCustomFields ? (
+            {showSectionContent ? (
               <>
                 <EuiSpacer size="l" />
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -387,14 +405,16 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                       <h3>{i18n.LEGACY_CUSTOM_FIELDS_LIST_TITLE}</h3>
                     </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="warning"
-                      data-test-subj="legacy-custom-fields-deprecated-badge"
-                    >
-                      {i18n.DEPRECATED_BADGE}
-                    </EuiBadge>
-                  </EuiFlexItem>
+                  {templatesEnabled && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge
+                        color="warning"
+                        data-test-subj="legacy-custom-fields-deprecated-badge"
+                      >
+                        {i18n.DEPRECATED_BADGE}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
                 <CustomFields
@@ -403,8 +423,12 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                   disabled={isLoadingCaseConfiguration}
                   hideTitle
                   useLineSeparators
-                  emptyStateMessage={null}
-                  addButtonLabel={i18n.ADD_LEGACY_CUSTOM_FIELD}
+                  emptyStateMessage={templatesEnabled ? null : undefined}
+                  addButtonLabel={
+                    templatesEnabled
+                      ? i18n.ADD_LEGACY_CUSTOM_FIELD
+                      : customFieldsI18n.ADD_CUSTOM_FIELD
+                  }
                   handleAddCustomField={onAddCustomField}
                   handleDeleteCustomField={onDeleteCustomField}
                   handleEditCustomField={onEditCustomField}
@@ -418,11 +442,13 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                       <h3>{i18n.LEGACY_TEMPLATES_LIST_TITLE}</h3>
                     </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="warning" data-test-subj="legacy-templates-deprecated-badge">
-                      {i18n.DEPRECATED_BADGE}
-                    </EuiBadge>
-                  </EuiFlexItem>
+                  {templatesEnabled && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="warning" data-test-subj="legacy-templates-deprecated-badge">
+                        {i18n.DEPRECATED_BADGE}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
                 <Templates
@@ -431,8 +457,10 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                   disabled={isLoadingCaseConfiguration}
                   hideTitle
                   useLineSeparators
-                  emptyStateMessage={null}
-                  addButtonLabel={i18n.ADD_LEGACY_TEMPLATE}
+                  emptyStateMessage={templatesEnabled ? null : undefined}
+                  addButtonLabel={
+                    templatesEnabled ? i18n.ADD_LEGACY_TEMPLATE : templatesI18n.ADD_TEMPLATE
+                  }
                   onAddTemplate={onAddTemplate}
                   onEditTemplate={onEditTemplate}
                   onDeleteTemplate={onDeleteTemplate}

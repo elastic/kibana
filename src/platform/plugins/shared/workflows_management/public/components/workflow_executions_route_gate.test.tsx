@@ -43,7 +43,7 @@ describe('WorkflowExecutionsRouteGate', () => {
       </KibanaContextProvider>
     );
 
-  it('redirects to workflows home when the executions view feature flag is off', () => {
+  it('redirects to workflows home when the executions view is disabled', () => {
     const services = createStartServicesMock();
     setExecutionsViewEnabled(services, false);
 
@@ -53,7 +53,7 @@ describe('WorkflowExecutionsRouteGate', () => {
     expect(screen.getByTestId('workflowsHomeStub')).toBeInTheDocument();
   });
 
-  it('renders the executions page when the executions view feature flag is on', () => {
+  it('renders the executions page when the executions view is enabled', () => {
     const services = createStartServicesMock();
     setExecutionsViewEnabled(services, true);
 

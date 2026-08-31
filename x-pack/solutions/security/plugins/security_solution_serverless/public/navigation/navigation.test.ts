@@ -27,7 +27,7 @@ mockedCreateAiNavigationTree.mockReturnValue(mockedAiNavTree);
 
 describe('Security Side Nav', () => {
   const services = mockServices;
-  const initNavigationSpy = jest.spyOn(services.serverless, 'initNavigation');
+  const initNavigationSpy = jest.spyOn(services.navigation, 'initNavigation');
 
   beforeEach(() => {
     jest.clearAllMocks();

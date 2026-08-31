@@ -20,7 +20,7 @@ export type QueryTab = 'base' | 'alert' | 'recovery';
 export type StepId =
   | 'alertCondition'
   | 'builderCondition'
-  | 'recoveryCondition'
+  | 'outcome'
   | 'details'
   | 'notifications';
 
@@ -39,11 +39,10 @@ export interface StepRenderProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
-  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
-  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {
@@ -73,7 +72,6 @@ export interface StepDefinition {
  * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
-  mode: ComposeDiscoverMode;
   step: number;
   /** 'default' = no_breach; 'custom' = query; 'none' = no recovery (persists as 'none'). */
   recoveryType: RecoveryType;

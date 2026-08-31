@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-evals-weekly-llm-evals
-  description: 'Runs weekly LLM eval suites (fanout across all LiteLLM models)'
+  description: 'Runs weekly LLM eval suites (fanout across EIS/OpenRouter models)'
   links:
     - url: 'https://buildkite.com/elastic/kibana-evals-weekly-llm-evals'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: 'Kibana / Evals / Weekly LLM Evals'
-      description: 'Runs all @kbn/evals suites against all LiteLLM models on a weekly schedule'
+      description: 'Runs all @kbn/evals suites against weekly EIS/OpenRouter models on a weekly schedule'
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kbn-evals-notifications'
@@ -54,7 +54,7 @@ spec:
           access_level: READ_ONLY
       schedules:
         Weekly build:
-          cronline: 0 0 * * 1 GMT
+          cronline: 0 20 * * 6 GMT
           message: Weekly LLM Evals (all suites, all models)
           branch: main
       tags:

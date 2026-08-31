@@ -10,6 +10,8 @@ import {
   isInferenceEndpointWithKibanaConnectorHeuristic,
   isInferenceEndpointWithDisplayNameMetadata,
   isCspRegion,
+  isReasoningEffortLevel,
+  isRegionPolicyConflictAttributes,
 } from './type_guards';
 
 const baseEndpoint = (overrides: Partial<InferenceInferenceEndpointInfo> = {}) =>
@@ -89,5 +91,77 @@ describe('isCspRegion', () => {
 
   it('returns false when region is not a string', () => {
     expect(isCspRegion({ csp: 'aws', region: null })).toBe(false);
+  });
+});
+
+describe('isReasoningEffortLevel', () => {
+  it.each(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])(
+    'returns true for valid level %s',
+    (level) => {
+      expect(isReasoningEffortLevel(level)).toBe(true);
+    }
+  );
+
+  it('returns false for an unsupported value', () => {
+    expect(isReasoningEffortLevel('extra_high')).toBe(false);
+  });
+
+  it('returns false for an empty string', () => {
+    expect(isReasoningEffortLevel('')).toBe(false);
+  });
+
+  it('returns false for non-string values', () => {
+    expect(isReasoningEffortLevel(undefined)).toBe(false);
+    expect(isReasoningEffortLevel(null)).toBe(false);
+    expect(isReasoningEffortLevel(42)).toBe(false);
+    expect(isReasoningEffortLevel({ effort: 'high' })).toBe(false);
+  });
+});
+
+describe('isRegionPolicyConflictAttributes', () => {
+  it('returns true for the ES in-use 409 payload with mixed string and array refs', () => {
+    expect(
+      isRegionPolicyConflictAttributes({
+        denied_endpoint_ids: ['.elser-2-elastic'],
+        referencing_pipelines: '.elser-2-elastic:region-policy-force-test',
+        referencing_indexes: ['.elser-2-elastic:region-policy-force-test-index'],
+      })
+    ).toBe(true);
+  });
+
+  it('returns true when only denied_endpoint_ids is present', () => {
+    expect(
+      isRegionPolicyConflictAttributes({
+        denied_endpoint_ids: ['.elser-2-elastic'],
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for null, primitives, and objects without conflict fields', () => {
+    expect(isRegionPolicyConflictAttributes(null)).toBe(false);
+    expect(isRegionPolicyConflictAttributes('conflict')).toBe(false);
+    expect(isRegionPolicyConflictAttributes({ reason: 'concurrent update' })).toBe(false);
+  });
+
+  it('returns false when only referencing fields are present', () => {
+    expect(
+      isRegionPolicyConflictAttributes({
+        referencing_indexes: ['.elser-2-elastic:my-index'],
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when a conflict field has the wrong type', () => {
+    expect(
+      isRegionPolicyConflictAttributes({
+        denied_endpoint_ids: 1,
+      })
+    ).toBe(false);
+    expect(
+      isRegionPolicyConflictAttributes({
+        denied_endpoint_ids: ['.elser-2-elastic'],
+        referencing_indexes: [1, 2],
+      })
+    ).toBe(false);
   });
 });

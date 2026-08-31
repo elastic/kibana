@@ -13,16 +13,20 @@ import type {
 import { EuiHealth, EuiLink, EuiText, EuiTextColor, EuiToolTip, formatDate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { getConnectionStatus, isRevocable } from './application_connections_filters';
 import { ConnectedBy, getConnectedByDisplayName } from './connected_by';
 import { InlineEditConnectionName } from './inline_edit_connection_name';
 import { labels } from '../constants/i18n';
-import type { ApplicationConnection } from '../constants/types';
+import type { ApplicationConnection, ApplicationConnectionStatusFilter } from '../constants/types';
 import { useApplicationConnectionsActions } from '../context/application_connections_provider';
 
 const AUTHORIZATION_DATE_FORMAT = 'll';
 
-export const isConnectionActive = ({ client, connection }: ApplicationConnection): boolean =>
-  !client.revoked && !connection.revoked;
+const STATUS_SORT_ORDER: Record<ApplicationConnectionStatusFilter, number> = {
+  connected: 0,
+  expired: 1,
+  revoked: 2,
+};
 
 export interface ConnectionTableColumnsOptions {
   withClientNameColumn?: boolean;
@@ -31,7 +35,8 @@ export interface ConnectionTableColumnsOptions {
 export const useConnectionTableColumns = ({
   withClientNameColumn = true,
 }: ConnectionTableColumnsOptions = {}): Array<EuiBasicTableColumn<ApplicationConnection>> => {
-  const { revokeConnections, viewClientDetails } = useApplicationConnectionsActions();
+  const { revokeConnections, deleteConnections, viewClientDetails } =
+    useApplicationConnectionsActions();
 
   return useMemo(() => {
     const connectionNameColumn: EuiTableFieldDataColumnType<ApplicationConnection> = {
@@ -42,7 +47,7 @@ export const useConnectionTableColumns = ({
       render: (_, applicationConnection: ApplicationConnection) => {
         const { client, connection } = applicationConnection;
         const displayName = connection.name ?? connection.id;
-        if (!isConnectionActive(applicationConnection)) {
+        if (!isRevocable(applicationConnection)) {
           return (
             <EuiText size="s" data-test-subj={`applicationConnectionRow-${connection.id}`}>
               <EuiTextColor color="subdued">{displayName}</EuiTextColor>
@@ -109,15 +114,22 @@ export const useConnectionTableColumns = ({
     const statusColumn: EuiTableComputedColumnType<ApplicationConnection> = {
       name: labels.connectionColumns.status,
       width: '120px',
-      sortable: (applicationConnection) => (isConnectionActive(applicationConnection) ? 0 : 1),
-      render: (applicationConnection) =>
-        isConnectionActive(applicationConnection) ? (
+      sortable: (applicationConnection) =>
+        STATUS_SORT_ORDER[getConnectionStatus(applicationConnection)],
+      render: (applicationConnection) => {
+        const status = getConnectionStatus(applicationConnection);
+        if (status === 'expired') {
+          return <EuiHealth color="warning">{labels.status.expired}</EuiHealth>;
+        }
+        if (status === 'revoked') {
+          return <EuiHealth color="danger">{labels.status.revoked}</EuiHealth>;
+        }
+        return (
           <EuiToolTip content={labels.status.connectedTooltip} position="top" display="flex">
             <EuiHealth color="success">{labels.status.connected}</EuiHealth>
           </EuiToolTip>
-        ) : (
-          <EuiHealth color="danger">{labels.status.revoked}</EuiHealth>
-        ),
+        );
+      },
     };
 
     const actionsColumn: EuiTableComputedColumnType<ApplicationConnection> = {
@@ -126,30 +138,29 @@ export const useConnectionTableColumns = ({
       name: labels.connectionColumns.actions,
       render: (applicationConnection) => {
         const { client, connection } = applicationConnection;
-        if (!isConnectionActive(applicationConnection)) {
-          return (
-            <EuiText size="s" color="subdued">
-              {labels.connectionColumns.revokedLabel}
-            </EuiText>
-          );
-        }
+        const revocable = isRevocable(applicationConnection);
+        const modalConnection = {
+          client,
+          connectionId: connection.id,
+          connectionName: connection.name,
+          userId: connection.user_id,
+          user: connection.user,
+        };
         return (
           <EuiLink
             color="danger"
-            data-test-subj={`revokeConnection-${connection.id}`}
+            data-test-subj={
+              revocable ? `revokeConnection-${connection.id}` : `deleteConnection-${connection.id}`
+            }
             onClick={() =>
-              revokeConnections([
-                {
-                  client,
-                  connectionId: connection.id,
-                  connectionName: connection.name,
-                  userId: connection.user_id,
-                  user: connection.user,
-                },
-              ])
+              revocable
+                ? revokeConnections([modalConnection])
+                : deleteConnections([modalConnection])
             }
           >
-            {labels.connectionColumns.revokeLabel}
+            {revocable
+              ? labels.connectionColumns.revokeLabel
+              : labels.connectionColumns.deleteLabel}
           </EuiLink>
         );
       },
@@ -163,5 +174,5 @@ export const useConnectionTableColumns = ({
       statusColumn,
       actionsColumn,
     ];
-  }, [revokeConnections, viewClientDetails, withClientNameColumn]);
+  }, [revokeConnections, deleteConnections, viewClientDetails, withClientNameColumn]);
 };

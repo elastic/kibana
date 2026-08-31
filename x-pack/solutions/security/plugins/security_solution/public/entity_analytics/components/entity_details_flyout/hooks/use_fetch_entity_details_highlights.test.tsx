@@ -78,6 +78,7 @@ const mockStoredSummary: PersistedEntityAiSummary = {
   recommended_actions: ['Stored action'],
   generated_at: 1_700_000_000_000,
   generated_by: 'stored-user',
+  author_profile_uid: 'u_stored_user',
   staleness: {
     enabled_signals: ['risk_score'],
     snapshot: { risk_score: 42 },
@@ -451,7 +452,28 @@ describe('useFetchEntityDetailsHighlights', () => {
         summaryAsText: '',
         generatedAt: mockStoredSummary.generated_at,
         generatedBy: mockStoredSummary.generated_by,
+        authorProfileUid: mockStoredSummary.author_profile_uid,
       });
+    });
+
+    it('clears the result when switching to an entity that has no stored summary', () => {
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useFetchEntityDetailsHighlights>[0]) =>
+          useFetchEntityDetailsHighlights(props),
+        {
+          initialProps: {
+            ...mockProps,
+            storedSummary: mockStoredSummary as PersistedEntityAiSummary | null,
+          },
+        }
+      );
+
+      expect(result.current.result).not.toBeNull();
+
+      // Switch to an entity with no persisted summary
+      rerender({ ...mockProps, entityIdentifier: 'entity-without-summary', storedSummary: null });
+
+      expect(result.current.result).toBeNull();
     });
 
     it('does not overwrite a freshly generated result when a stored summary arrives later', async () => {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EffectiveFailureStore, Streams } from '@kbn/streams-schema';
 import { isEnabledFailureStore, isEnabledLifecycleFailureStore } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -18,7 +18,7 @@ import { NoPermissionBanner } from './no_permission_banner';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 import { useFailureStoreConfig } from '../hooks/use_failure_store_config';
-import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
+import { LifecyclePreviewProvider, useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 import {
   type EditFlyoutPreviewModel,
   useEditFlyoutPreviewSyncFromModel,
@@ -42,6 +42,11 @@ const StreamDetailFailureStoreInner = ({
   const kibana = useKibana();
   const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const { timeState } = useTimefilter();
+  const { releaseHoldAfterRefresh } = useLifecyclePreview();
+
+  useEffect(() => {
+    releaseHoldAfterRefresh();
+  }, [definition, releaseHoldAfterRefresh]);
 
   const readFailureStorePrivilege = definition.privileges?.read_failure_store ?? false;
   const manageFailureStorePrivilege = definition.privileges?.manage_failure_store ?? false;
@@ -75,22 +80,23 @@ const StreamDetailFailureStoreInner = ({
     if (!isImportFlyoutOpen) {
       return null;
     }
-    if (!importPreviewFailureStore) {
-      return { action: 'clear', hasUnsavedChanges: false };
-    }
 
-    const nextFailureStore = getImportedFailureStore(importPreviewFailureStore);
-    const importHasUnsavedChanges = !isEqual(
-      definition.stream.ingest.failure_store,
-      nextFailureStore
-    );
+    // With no stream selected yet, prime the preview with the target stream's own failure store so
+    // the first selection animates from the current state instead of snapping the bars into place.
+    const effectiveFailureStore = importPreviewFailureStore ?? definition.effective_failure_store;
 
-    if (!isEnabledFailureStore(importPreviewFailureStore)) {
+    // While priming (no selection) the preview equals the current saved state: no unsaved changes.
+    const nextFailureStore = getImportedFailureStore(effectiveFailureStore);
+    const importHasUnsavedChanges = importPreviewFailureStore
+      ? !isEqual(definition.stream.ingest.failure_store, nextFailureStore)
+      : false;
+
+    if (!isEnabledFailureStore(effectiveFailureStore)) {
       return { action: 'clear', hasUnsavedChanges: importHasUnsavedChanges };
     }
 
-    const retentionPeriod = isEnabledLifecycleFailureStore(importPreviewFailureStore)
-      ? importPreviewFailureStore.lifecycle.enabled.data_retention ?? null
+    const retentionPeriod = isEnabledLifecycleFailureStore(effectiveFailureStore)
+      ? effectiveFailureStore.lifecycle.enabled.data_retention ?? null
       : null;
 
     return {
@@ -99,7 +105,12 @@ const StreamDetailFailureStoreInner = ({
       dataPhasesCount: retentionPeriod ? 2 : 1,
       hasUnsavedChanges: importHasUnsavedChanges,
     };
-  }, [definition.stream.ingest.failure_store, importPreviewFailureStore, isImportFlyoutOpen]);
+  }, [
+    definition.effective_failure_store,
+    definition.stream.ingest.failure_store,
+    importPreviewFailureStore,
+    isImportFlyoutOpen,
+  ]);
 
   const importPreviewFailureStoreEnabled =
     isImportFlyoutOpen && importPreviewFailureStore
@@ -181,15 +192,19 @@ const StreamDetailFailureStoreInner = ({
   );
 };
 
-export const StreamDetailFailureStore = (props: {
+export const StreamDetailFailureStore = ({
+  refreshSignal,
+  ...props
+}: {
   definition: Streams.ingest.all.GetResponse;
   data: ReturnType<typeof useDataStreamStats>;
   refreshDefinition: () => void;
+  refreshSignal?: number;
   isImportFlyoutOpen?: boolean;
   importPreviewFailureStore?: EffectiveFailureStore | null;
 }) => {
   return (
-    <LifecyclePreviewProvider>
+    <LifecyclePreviewProvider refreshSignal={refreshSignal}>
       <StreamDetailFailureStoreInner {...props} />
     </LifecyclePreviewProvider>
   );

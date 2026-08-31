@@ -17,12 +17,16 @@ export const mainTranslations = {
       'Connect to external data sources and add specific datasets to query with ES|QL, just like your indexed data. No ingestion required.',
   }),
 
-  technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
-    defaultMessage: 'Technical Preview',
+  experimental: i18n.translate('xpack.dataFederation.experimental', {
+    defaultMessage: 'Experimental',
   }),
 
   docsLink: i18n.translate('xpack.dataFederation.docsLink', {
     defaultMessage: 'Learn more',
+  }),
+
+  quickstartLink: i18n.translate('xpack.dataFederation.quickstartLink', {
+    defaultMessage: 'Quickstart',
   }),
 
   columns: {

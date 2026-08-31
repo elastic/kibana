@@ -30,12 +30,12 @@ import { parseFileStorageIndex } from './utils';
  * `tohost` and files `fromhost`
  *
  * @param esClient
- * @param abortController
+ * @param signal
  * @param status
  */
 export async function getFilesByStatus(
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   status: FileStatus = 'READY'
 ): Promise<SearchHit[]> {
   const result = await esClient
@@ -51,7 +51,7 @@ export async function getFilesByStatus(
         _source: false,
         ignore_unavailable: true,
       },
-      { signal: abortController.signal }
+      { signal }
     )
     .catch((err) => {
       Error.captureStackTrace(err);
@@ -69,12 +69,12 @@ interface FileIdsByIndex {
  * Returns subset of fileIds that don't have any file chunks
  *
  * @param esClient
- * @param abortController
+ * @param signal
  * @param files
  */
 export async function fileIdsWithoutChunksByIndex(
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   files: SearchHit[]
 ): Promise<{ fileIdsByIndex: FileIdsByIndex; allFileIds: Set<string> }> {
   const allFileIds: Set<string> = new Set();
@@ -113,7 +113,7 @@ export async function fileIdsWithoutChunksByIndex(
         _source: ['bid'],
         ignore_unavailable: true,
       },
-      { signal: abortController.signal }
+      { signal }
     )
     .catch((err) => {
       Error.captureStackTrace(err);
@@ -140,13 +140,13 @@ export async function fileIdsWithoutChunksByIndex(
  * Updates given files to provided status
  *
  * @param esClient
- * @param abortController
+ * @param signal
  * @param fileIdsByIndex
  * @param status
  */
 export async function updateFilesStatus(
   esClient: ElasticsearchClient,
-  abortController: AbortController | undefined,
+  signal: AbortSignal | undefined,
   fileIdsByIndex: FileIdsByIndex,
   status: FileStatus
 ): Promise<UpdateByQueryResponse[]> {
@@ -168,7 +168,7 @@ export async function updateFilesStatus(
               lang: 'painless',
             },
           },
-          abortController ? { signal: abortController.signal } : {}
+          signal ? { signal } : {}
         )
         .catch((err) => {
           Error.captureStackTrace(err);

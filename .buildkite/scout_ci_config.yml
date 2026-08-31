@@ -3,6 +3,7 @@ plugins:
   enabled:
     - advanced_settings
     - agent_builder
+    - agent_builder_dashboards
     - alerting
     - alerting_v2
     - apm
@@ -20,15 +21,18 @@ plugins:
     - dashboard
     - dashboard_markdown
     - data
+    - data_federation
     - data_view_editor
     - data_view_management
     - data_views
     - data_views_as_code
+    - data_visualizer
+    - dataset_quality
     - dev_tools
     - discover
     - discover_enhanced
-    - embeddable_alerts_table
     - discoveries
+    - embeddable_alerts_table
     - entity_store
     - error_boundary_example
     - event_annotation_listing
@@ -49,6 +53,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - license_management
     - links
     - logstash
     - management
@@ -56,22 +61,31 @@ plugins:
     - ml
     - monitoring
     - navigation
+    - nightshift
+    - nightshift_investigations
+    - notification_center
     - observability
     - observability_onboarding
     - osquery
     - painless_lab
     - profiling
+    - rollup
+    - remote_clusters
+    - reindex_service
     - saved_objects_management
     - saved_objects_tagging
+    - searchExamples
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
     - searchprofiler
     - security
     - security_solution
+    - security_solution_serverless
     - serverless_observability
     - share
     - significant_events
+    - significant_events_app
     - slo
     - snapshot_restore
     - spaces
@@ -85,7 +99,10 @@ plugins:
     - unified_search
     - upgrade_assistant
     - uptime
+    - usage_collection
     - ux
+    - vis_types/timeseries
+    - vis_types/vega
     - watcher
     - workflows_extensions
     - workflows_management
@@ -111,4 +128,7 @@ excluded_configs:
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
-  - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
+  - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts

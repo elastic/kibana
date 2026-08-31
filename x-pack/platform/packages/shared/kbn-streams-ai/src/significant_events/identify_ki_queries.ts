@@ -10,13 +10,13 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
-  ensureMetadata,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -25,7 +25,10 @@ import type {
   ToolCallback,
   ToolDefinition,
 } from '@kbn/inference-common';
-import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import {
+  executeAsReasoningAgent,
+  type ReasoningPromptDiagnostics,
+} from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -33,6 +36,7 @@ import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
   SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   getFeatureQueryFromToolArgs,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
@@ -167,7 +171,28 @@ interface ParsedToolQuery {
   severity_score: number;
   evidence?: string[];
   replaces?: string;
+  expects_matches?: boolean;
   features: QueryFeature[];
+}
+
+export type QueryAttemptStatus = 'Added' | 'Duplicate' | 'Failed to add';
+
+export type QueryAttemptFailureReason = 'missing_intent' | 'unknown_features' | 'validation_error';
+
+// Eval-only: one record per query across all add_queries calls, incl. rejected ones.
+export interface QueryAttempt {
+  title: string;
+  esql: string;
+  /** First-failure-wins, mirrors what the model is told. Not a duplicate-detection signal. */
+  status: QueryAttemptStatus;
+  replaces?: string;
+  /**
+   * Whether the query duplicates a seeded/existing one, determined independently of
+   * `status` so an earlier validation gate cannot hide it.
+   */
+  exactDuplicate?: boolean;
+  /** Why the attempt was rejected, when `status` is 'Failed to add'. */
+  failureReason?: QueryAttemptFailureReason;
 }
 
 /**
@@ -187,7 +212,10 @@ export async function identifyKIQueries({
   existingQueries,
   maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   maxSteps,
+  maxDurationMs,
   queryValidationTimeoutMs = DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
+  requireQueryIntent = false,
+  collectQueryAttempts = false,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -210,17 +238,29 @@ export async function identifyKIQueries({
    * tools (e.g. code grounding) add round-trips.
    */
   maxSteps?: number;
+  /** Optional wall-clock budget for the reasoning loop. */
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
+  /** Eval-only: require `expects_matches` on every add_queries item. */
+  requireQueryIntent?: boolean;
+  /** Eval-only: return a record of every attempted query, incl. rejected ones. */
+  collectQueryAttempts?: boolean;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
+  reasoningDiagnostics: ReasoningPromptDiagnostics;
+  queryAttempts?: QueryAttempt[];
 }> {
   logger.debug('Starting Significant Events KI query generation');
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
 
-  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
+  const prompt = createGenerateSignificantEventsPrompt({
+    systemPrompt,
+    additionalTools,
+    requireQueryIntent,
+  });
   const targetSources = getSourcesForStream(stream);
 
   const validationLookback = await computeValidationLookback({
@@ -232,7 +272,11 @@ export async function identifyKIQueries({
 
   const existingQueriesList = existingQueries ?? [];
 
-  const normalizedStoredEsqls = new Set(existingQueriesList.map((q) => normalizeEsqlSafe(q.esql)));
+  // Candidates are compared after their FROM is rewritten, so seeds must be rewritten too or
+  // nothing ever matches. Idempotent for stored queries, which already carry rewritten sources.
+  const normalizedStoredEsqls = new Set(
+    existingQueriesList.map((q) => normalizeEsqlSafe(replaceFromSources(q.esql, targetSources)))
+  );
 
   const contextLimit = Math.max(0, Math.floor(maxExistingQueriesForContext));
 
@@ -246,6 +290,8 @@ export async function identifyKIQueries({
 
   const returnedFeatureMap = new Map<string, string | undefined>();
   const validatedQueries: ParsedToolQuery[] = [];
+  const queryAttempts: QueryAttempt[] | undefined = collectQueryAttempts ? [] : undefined;
+  const resolvedMaxSteps = maxSteps ?? (additionalToolCallbacks ? 6 : 4);
 
   logger.trace('Generating Significant Events KI queries via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -254,10 +300,13 @@ export async function identifyKIQueries({
         name: stream.name,
         description: stream.description,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
-        computed_feature_instructions: getComputedFeatureInstructions(),
+        computed_feature_instructions: getComputedFeatureInstructions(
+          QUERY_GENERATION_EXCLUDED_FEATURE_TYPES
+        ),
         existing_queries: existingQueriesContext,
       },
-      maxSteps: maxSteps ?? (additionalToolCallbacks ? 6 : 4),
+      maxSteps: resolvedMaxSteps,
+      maxDurationMs,
       prompt,
       inferenceClient,
       toolCallbacks: {
@@ -318,10 +367,36 @@ export async function identifyKIQueries({
               },
             };
           }
-          let hasFailures = false;
+          // Tracked separately: a missing-intent rejection can only happen when the eval turns
+          // `requireQueryIntent` on, so counting it in `add_queries.failures` would charge the model
+          // for a rule that does not exist in production and make tool-usage scores incomparable.
+          // The omission rate stays visible through `queryAttempts` (`failureReason`).
+          let hasNonIntentFailures = false;
+          let hasIntentFailures = false;
 
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
+              // `status` is first-failure-wins, so a duplicate that also trips an earlier gate
+              // would never be reported as one. Decide it up front, independently.
+              const exactDuplicate = collectQueryAttempts
+                ? normalizedStoredEsqls.has(
+                    normalizeEsqlSafe(replaceFromSources(query.esql, targetSources))
+                  )
+                : undefined;
+
+              if (requireQueryIntent && typeof query.expects_matches !== 'boolean') {
+                hasIntentFailures = true;
+                return {
+                  query,
+                  valid: false,
+                  status: 'Failed to add' as const,
+                  failureReason: 'missing_intent' as const,
+                  exactDuplicate,
+                  error:
+                    'Missing intent: set "expects_matches" to true when the query is grounded in evidence currently present and should match rows in the evaluation window, or to false when it deliberately watches for a plausible future condition not present in the current evidence.',
+                };
+              }
+
               try {
                 const derivedType: QueryType = deriveQueryType(query.esql);
                 const warnings: string[] = [];
@@ -340,11 +415,13 @@ export async function identifyKIQueries({
                 }
 
                 if (validFeatureIds.length === 0) {
-                  hasFailures = true;
+                  hasNonIntentFailures = true;
                   return {
                     query,
                     valid: false,
-                    status: 'Failed to add',
+                    status: 'Failed to add' as const,
+                    failureReason: 'unknown_features' as const,
+                    exactDuplicate,
                     error: `feature_ids must reference at least one feature returned by get_stream_features. Unknown IDs: [${rawFeatureIds.join(
                       ', '
                     )}]`,
@@ -360,11 +437,7 @@ export async function identifyKIQueries({
                   run_id: returnedFeatureMap.get(id),
                 }));
 
-                const sourceRewritten = replaceFromSources(query.esql, targetSources);
-                const rewritten =
-                  derivedType === QUERY_TYPE_STATS
-                    ? sourceRewritten
-                    : ensureMetadata(sourceRewritten);
+                const rewritten = replaceFromSources(query.esql, targetSources);
 
                 if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
                   return {
@@ -374,9 +447,24 @@ export async function identifyKIQueries({
                       esql: rewritten,
                     },
                     valid: false,
-                    status: 'Duplicate',
+                    status: 'Duplicate' as const,
+                    exactDuplicate,
                     error: 'This query already exists for this stream.',
                     hints: undefined,
+                  };
+                }
+
+                // Static over-match - reject before the data probe.
+                const overBroadPredicates = findOverBroadMatchPredicates(rewritten);
+                if (overBroadPredicates.length > 0) {
+                  hasNonIntentFailures = true;
+                  return {
+                    query,
+                    valid: false,
+                    status: 'Failed to add' as const,
+                    failureReason: 'validation_error' as const,
+                    exactDuplicate,
+                    error: renderOverBroadMatchError(overBroadPredicates),
                   };
                 }
 
@@ -407,6 +495,7 @@ export async function identifyKIQueries({
                   severity_score: query.severity_score,
                   evidence: query.evidence,
                   replaces: query.replaces,
+                  expects_matches: query.expects_matches,
                   features: queryFeatures,
                 });
 
@@ -418,12 +507,13 @@ export async function identifyKIQueries({
                     esql: rewritten,
                   },
                   valid: true,
-                  status: 'Added',
+                  status: 'Added' as const,
+                  exactDuplicate,
                   error: undefined,
                   hints: allHints.length > 0 ? allHints : undefined,
                 };
               } catch (error) {
-                hasFailures = true;
+                hasNonIntentFailures = true;
                 logger.debug(
                   () =>
                     `ES|QL validation for query "${query.title}" failed: ${getErrorMessage(error)}`
@@ -431,14 +521,33 @@ export async function identifyKIQueries({
                 return {
                   query,
                   valid: false,
-                  status: 'Failed to add',
+                  status: 'Failed to add' as const,
+                  failureReason: 'validation_error' as const,
+                  exactDuplicate,
                   error: getErrorMessage(error),
                 };
               }
             })
           );
-          if (hasFailures) {
+          if (collectQueryAttempts && queryAttempts) {
+            for (const result of queryValidationResults) {
+              queryAttempts.push({
+                title: result.query.title,
+                esql: result.query.esql,
+                status: result.status,
+                replaces: result.query.replaces,
+                exactDuplicate: result.exactDuplicate,
+                ...('failureReason' in result ? { failureReason: result.failureReason } : {}),
+              });
+            }
+          }
+          if (hasNonIntentFailures) {
             toolUsage.add_queries.failures += 1;
+          }
+          if (hasIntentFailures) {
+            logger.debug(
+              `add_queries call omitted "expects_matches"; rejected for repair without counting a tool failure`
+            );
           }
           toolUsage.add_queries.latency_ms += Date.now() - startTime;
 
@@ -454,11 +563,40 @@ export async function identifyKIQueries({
     })
   );
 
-  logger.debug(`Generated ${validatedQueries.length} Significant Event KI queries`);
+  if (validatedQueries.length === 0) {
+    const observed =
+      toolUsage.get_stream_features.calls === 0
+        ? 'no_get_stream_features_calls'
+        : toolUsage.get_stream_features.failures === toolUsage.get_stream_features.calls
+        ? 'get_stream_features_failed'
+        : toolUsage.add_queries.calls > 0
+        ? 'add_queries_called_no_accepted_queries'
+        : returnedFeatureMap.size === 0
+        ? 'no_features_returned'
+        : 'no_add_queries_calls';
+    const message =
+      `Generated 0 Significant Event KI queries: ` +
+      `observed=${observed}, max_steps=${resolvedMaxSteps}, ` +
+      `features_returned=${returnedFeatureMap.size}, ` +
+      `get_stream_features_calls=${toolUsage.get_stream_features.calls}, ` +
+      `get_stream_features_failures=${toolUsage.get_stream_features.failures}, ` +
+      `add_queries_calls=${toolUsage.add_queries.calls}, ` +
+      `add_queries_failures=${toolUsage.add_queries.failures}`;
+
+    if (observed === 'no_features_returned') {
+      logger.debug(message);
+    } else {
+      logger.warn(message);
+    }
+  } else {
+    logger.debug(`Generated ${validatedQueries.length} Significant Event KI queries`);
+  }
 
   return {
     queries: validatedQueries,
     tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
+    reasoningDiagnostics: response.diagnostics,
+    ...(collectQueryAttempts && queryAttempts ? { queryAttempts } : {}),
   };
 }

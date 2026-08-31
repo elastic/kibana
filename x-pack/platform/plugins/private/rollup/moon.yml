@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/data-view-validation'
   - '@kbn/index-management-shared-types'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

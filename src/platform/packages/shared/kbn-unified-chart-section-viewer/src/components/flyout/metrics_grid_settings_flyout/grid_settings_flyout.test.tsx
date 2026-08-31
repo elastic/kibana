@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { GridSettingsFlyout } from './grid_settings_flyout';
-import type { MetricsGridSettings } from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',

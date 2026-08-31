@@ -719,6 +719,67 @@ describe('tabbed content', () => {
   });
 });
 
+describe('alert details navigation based on observability access', () => {
+  const getNoObservabilityAccessCapabilities = () => ({
+    ...capabilities,
+    navLinks: {
+      ...capabilities.navLinks,
+      apm: false,
+      metrics: false,
+      uptime: false,
+      synthetics: false,
+      slo: false,
+    },
+    logs: { show: false },
+    observabilityAlerts: { show: false },
+  });
+
+  const renderRuleComponent = async () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType({ hasAlertsMappings: true });
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await screen.findByTestId('alertsTable');
+  };
+
+  it('does not set alertDetailsNavigation when the user has no observability capabilities', async () => {
+    useKibanaMock().services.application.capabilities = getNoObservabilityAccessCapabilities();
+
+    await renderRuleComponent();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({ alertDetailsNavigation: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('sets alertDetailsNavigation when the user has the observabilityAlerts capability', async () => {
+    useKibanaMock().services.application.capabilities = {
+      ...getNoObservabilityAccessCapabilities(),
+      observabilityAlerts: { show: true },
+    };
+
+    await renderRuleComponent();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alertDetailsNavigation: expect.objectContaining({ appId: 'observability' }),
+      }),
+      expect.anything()
+    );
+  });
+});
+
 describe('cases ownership based on solution context', () => {
   const renderWithSolution = async (navId: string | null) => {
     solutionNavId$.next(navId);

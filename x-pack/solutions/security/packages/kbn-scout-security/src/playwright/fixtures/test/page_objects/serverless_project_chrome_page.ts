@@ -31,11 +31,26 @@ export class ServerlessProjectChromePage {
       // securitySolutionUI loads the full SIEM shell; first project chrome render can exceed the default action timeout in CI.
       timeout: 35_000,
     });
+    await this.page
+      .locator('#security-solution-app')
+      .waitFor({ state: 'visible', timeout: 35_000 });
   }
 
   /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyById). */
   navItemInBodyById(id: string): Locator {
     const selector = `[data-test-subj~="nav-item-id-${id}"]`;
+    return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
+  }
+
+  /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyByDeepLinkId). */
+  navItemInBodyByDeepLinkId(deepLinkId: string): Locator {
+    const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`;
+    return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
+  }
+
+  /** Item with `nav-item-isActive` in test-subj (current route) — primary strip or "More" popover. */
+  activeNavItemInBodyByDeepLinkId(deepLinkId: string): Locator {
+    const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"][data-test-subj~="nav-item-isActive"]`;
     return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
   }
 
@@ -51,6 +66,11 @@ export class ServerlessProjectChromePage {
 
   private async openMoreMenuIfTriggerVisible(): Promise<void> {
     if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
+      return;
+    }
+    // Already open: re-clicking would hit the popover's full-viewport click-to-close
+    // mask (rendered over the trigger while open) instead of the trigger itself, timing out.
+    if ((await this.moreMenuTrigger.getAttribute('aria-expanded')) === 'true') {
       return;
     }
     await this.moreMenuTrigger.click();

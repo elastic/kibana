@@ -684,7 +684,7 @@ describe('useSettingsView', () => {
       );
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
-      // Mock the feature flag to return true
+      // Mock the feature flag to return true; also enable the per-space uiSetting opt-in
       mockUseKibana.mockReturnValue({
         services: {
           data: {
@@ -700,7 +700,7 @@ describe('useSettingsView', () => {
           },
           telemetry: { reportEvent: jest.fn() },
           uiSettings: {
-            get: jest.fn(),
+            get: jest.fn().mockReturnValue(true),
           },
           unifiedSearch: {
             ui: {
@@ -1594,6 +1594,148 @@ describe('useSettingsView', () => {
         expect(onSettingsSave).toHaveBeenCalled();
         expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('when the feature flag is ON but the per-space uiSetting is OFF (FF on, setting off → legacy)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          data: {
+            query: {
+              filterManager: mockFilterManager,
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+          lens: {
+            EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+          },
+          telemetry: { reportEvent: jest.fn() },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
+          unifiedSearch: {
+            ui: {
+              SearchBar: (props: { onQuerySubmit: jest.Mock }) => {
+                if (props.onQuerySubmit) {
+                  mockOnQuerySubmit.mockImplementation(props.onQuerySubmit);
+                }
+                return <div data-test-subj="alertSelectionSearchBar" />;
+              },
+            },
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    });
+
+    it('does not render the workflow configuration panel when the feature flag is on but the uiSetting is off (FF on, setting off → workflow panel absent)', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      expect(screen.queryByTestId('workflowConfigurationPanel')).not.toBeInTheDocument();
+    });
+
+    it('does not report alertRetrievalHasError (non-workflow path) when the feature flag is on but the uiSetting is off', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      // alertRetrievalHasError is true only when workflows are enabled and a retrieval toggle error exists
+      expect(result.current.alertRetrievalHasError).toBe(false);
+    });
+
+    it('reads the feature flag with a true default (ON by default)', async () => {
+      renderHook(() => useSettingsView(defaultProps), { wrapper: TestProviders });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalledWith(
+        'securitySolution.attackDiscoveryWorkflowsEnabled',
+        true
+      );
+    });
+  });
+
+  describe('when the feature flag is OFF but the per-space uiSetting is ON (FF off, setting on → legacy)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          data: {
+            query: {
+              filterManager: mockFilterManager,
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
+          lens: {
+            EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+          },
+          telemetry: { reportEvent: jest.fn() },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
+          },
+          unifiedSearch: {
+            ui: {
+              SearchBar: (props: { onQuerySubmit: jest.Mock }) => {
+                if (props.onQuerySubmit) {
+                  mockOnQuerySubmit.mockImplementation(props.onQuerySubmit);
+                }
+                return <div data-test-subj="alertSelectionSearchBar" />;
+              },
+            },
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    });
+
+    it('does not render the workflow configuration panel when the feature flag is off regardless of the uiSetting (FF off, setting on → workflow panel absent)', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      expect(screen.queryByTestId('workflowConfigurationPanel')).not.toBeInTheDocument();
+    });
+
+    it('does not report alertRetrievalHasError (non-workflow path) when the feature flag is off', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      expect(result.current.alertRetrievalHasError).toBe(false);
     });
   });
 });

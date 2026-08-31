@@ -59,25 +59,29 @@ describe('hasConnectedRemoteClusters', () => {
 
 describe('prefixIndexPatternsWithCcs', () => {
   it('returns the original pattern unchanged when ccsEnabled is false', () => {
-    expect(prefixIndexPatternsWithCcs('logs-osquery_manager.result*', false)).toBe(
-      'logs-osquery_manager.result*'
-    );
+    expect(prefixIndexPatternsWithCcs('logs-osquery_manager.result*', false)).toEqual([
+      'logs-osquery_manager.result*',
+    ]);
   });
 
   it('appends *: prefixed patterns when ccsEnabled is true', () => {
-    expect(prefixIndexPatternsWithCcs('logs-osquery_manager.result*', true)).toBe(
-      'logs-osquery_manager.result*,*:logs-osquery_manager.result*'
-    );
+    expect(prefixIndexPatternsWithCcs('logs-osquery_manager.result*', true)).toEqual([
+      'logs-osquery_manager.result*',
+      '*:logs-osquery_manager.result*',
+    ]);
   });
 
-  it('handles comma-separated patterns', () => {
+  it('handles multiple patterns as separate index targets', () => {
     expect(
       prefixIndexPatternsWithCcs(
-        'logs-osquery_manager.result-default,logs-osquery_manager.result-ns1',
+        ['logs-osquery_manager.result-default', 'logs-osquery_manager.result-ns1'],
         true
       )
-    ).toBe(
-      'logs-osquery_manager.result-default,logs-osquery_manager.result-ns1,*:logs-osquery_manager.result-default,*:logs-osquery_manager.result-ns1'
-    );
+    ).toEqual([
+      'logs-osquery_manager.result-default',
+      'logs-osquery_manager.result-ns1',
+      '*:logs-osquery_manager.result-default',
+      '*:logs-osquery_manager.result-ns1',
+    ]);
   });
 });

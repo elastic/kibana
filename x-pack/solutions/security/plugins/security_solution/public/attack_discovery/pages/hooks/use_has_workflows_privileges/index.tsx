@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../../common/constants';
 import type { MissingPrivileges } from '../../../../common/hooks/use_missing_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -39,20 +40,22 @@ export interface UseHasWorkflowsPrivileges {
  * missing privileges so nothing is gated and no callout is shown.
  */
 export const useHasWorkflowsPrivileges = (): UseHasWorkflowsPrivileges => {
-  const { application, featureFlags } = useKibana().services;
+  const { application, featureFlags, uiSettings } = useKibana().services;
   const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
+      const ffEnabled = await featureFlags.getBooleanValue(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
+        true
       );
 
       if (!cancelled) {
-        setIsWorkflowsEnabled(enabled);
+        setIsWorkflowsEnabled(
+          ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
+        );
       }
     };
 
@@ -61,7 +64,7 @@ export const useHasWorkflowsPrivileges = (): UseHasWorkflowsPrivileges => {
     return () => {
       cancelled = true;
     };
-  }, [featureFlags]);
+  }, [featureFlags, uiSettings]);
 
   return useMemo<UseHasWorkflowsPrivileges>(() => {
     if (!isWorkflowsEnabled) {

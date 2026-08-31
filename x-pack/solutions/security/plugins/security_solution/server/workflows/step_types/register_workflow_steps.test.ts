@@ -6,7 +6,6 @@
  */
 
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
@@ -18,18 +17,23 @@ import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_s
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
+import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
+import { createNoteStepDefinition } from './create_note_step/create_note_step';
+import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
+import { updateNoteStepDefinition } from './update_note_step/update_note_step';
+import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (server)', () => {
-  it('registers all steps when publicAttacksApiEnabled is true', () => {
+  it('registers all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, {
-      publicAttacksApiEnabled: true,
-    } as ExperimentalFeatures);
+    registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(17);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -60,21 +64,24 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       disableRuleStepDefinition
     );
-  });
-
-  it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, {
-      publicAttacksApiEnabled: false,
-    } as ExperimentalFeatures);
-
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
-    const registeredSteps = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createRuleExceptionStepDefinition
     );
-    expect(registeredSteps).not.toContain(assignAttackStepDefinition);
-    expect(registeredSteps).not.toContain(setAttackStatusStepDefinition);
-    expect(registeredSteps).not.toContain(setAttackTagsStepDefinition);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createExceptionListItemStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createNoteStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      deleteNoteStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(getNotesStepDefinition);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      updateNoteStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createRuleStepDefinition
+    );
   });
 });

@@ -1,0 +1,5 @@
+summary: Dry-run validation succeeded without writing.
+value:
+  {
+    "valid": true
+  }

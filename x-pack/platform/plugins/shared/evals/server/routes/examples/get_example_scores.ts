@@ -13,19 +13,26 @@ import {
   buildExampleScoresQuery,
   SCORES_SORT_ORDER,
   GetExampleScoresRequestParams,
+  GetExampleScoresRequestQuery,
   type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
   { '@timestamp': { order: 'desc' as const } },
   ...SCORES_SORT_ORDER,
 ];
 
-export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExampleScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXAMPLE_SCORES_URL,
@@ -41,18 +48,22 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
         validate: {
           request: {
             params: buildRouteValidationWithZod(GetExampleScoresRequestParams),
+            query: buildRouteValidationWithZod(GetExampleScoresRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         try {
           const { exampleId } = request.params;
+          const { dataset_id: datasetId } = request.query;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildExampleScoresQuery(exampleId),
+            query: buildExampleScoresQuery(exampleId, { spaceId, datasetId }),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
+            _source_excludes: UNBOUNDED_SCORE_FIELDS,
           });
 
           const hits = searchResponse.hits?.hits ?? [];

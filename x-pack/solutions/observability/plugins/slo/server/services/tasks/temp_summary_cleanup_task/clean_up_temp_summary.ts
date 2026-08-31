@@ -33,7 +33,7 @@ export class CleanUpTempSummary {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly logger: Logger,
-    private readonly abortController: AbortController
+    private readonly signal: AbortSignal
   ) {}
 
   public async execute(): Promise<void> {
@@ -59,7 +59,7 @@ export class CleanUpTempSummary {
   private async shouldOpenCircuitBreaker() {
     const results = await this.esClient.count(
       { index: SUMMARY_TEMP_INDEX_NAME, terminate_after: 1 },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
     return results.count === 0;
   }
@@ -110,7 +110,7 @@ export class CleanUpTempSummary {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
 
     const buckets = (results.aggregations?.duplicate_ids.buckets ?? []).map((bucket) => bucket.key);
@@ -158,7 +158,7 @@ export class CleanUpTempSummary {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
   }
 }
