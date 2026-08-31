@@ -9,6 +9,7 @@
 
 import { randomUUID } from 'crypto';
 import Fs from 'fs/promises';
+import Path from 'path';
 import { ensureWorktree } from './ensure_worktree';
 import type {
   SourceRepoWorkspaceState,
@@ -42,6 +43,7 @@ async function readOrCreateStateFile(file: string): Promise<WorkspaceGlobalState
 
 async function writeGlobalState(file: string, state: WorkspaceGlobalState) {
   const tmp = `${file}.tmp`;
+  await Fs.mkdir(Path.dirname(file), { recursive: true });
   await Fs.writeFile(tmp, JSON.stringify(state, null, 2) + '\n', 'utf8');
   await Fs.rename(tmp, file);
 }
@@ -98,7 +100,7 @@ export class WorkspaceController {
       };
     }
 
-    this.saveState({
+    await this.saveState({
       ...state,
       workspaces: {
         ...state.workspaces,
