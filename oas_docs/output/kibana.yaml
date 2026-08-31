@@ -44609,6 +44609,71 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/data_streams/data:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/data_streams/data</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Check whether one or more data stream index patterns contain documents within a given time window.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.
+      operationId: get-fleet-data-streams-data
+      parameters:
+        - in: query
+          name: dataStreams
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: start
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  results:
+                    additionalProperties:
+                      type: boolean
+                    type: object
+                required:
+                  - results
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Check if data streams have data
+      tags:
+        - Data streams
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/enrollment_api_keys:
     get:
       description: |-
