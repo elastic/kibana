@@ -170,7 +170,7 @@ describe('create queries', () => {
       const queries = await createDynamicQueries({
         params: {
           saved_query_id: 'sq-1',
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
           agent_ids: [TEST_AGENT],
         },
         agents: [TEST_AGENT],
@@ -193,7 +193,7 @@ describe('create queries', () => {
       const queries = await createDynamicQueries({
         params: {
           saved_query_id: 'sq-1',
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
           agent_ids: [TEST_AGENT],
         },
         agents: [TEST_AGENT],
@@ -204,7 +204,7 @@ describe('create queries', () => {
         spaceScopedClient: { get } as unknown as SavedObjectsClient,
       });
 
-      expect(queries[0].query).toBe('select 42 as leaked;');
+      expect(queries[0].query).toBe('select 42 as custom;');
     });
 
     it('trims the saved query id before lookup', async () => {
@@ -276,7 +276,7 @@ describe('create queries', () => {
         createDynamicQueries({
           params: {
             saved_query_id: 'sq-1',
-            query: 'select 42 as leaked;',
+            query: 'select 42 as custom;',
             agent_ids: [TEST_AGENT],
           },
           agents: [TEST_AGENT],

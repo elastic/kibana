@@ -181,7 +181,7 @@ describe('createActionHandler', () => {
     await expect(
       createActionHandler(
         context,
-        { pack_id: 'missing-pack', query: 'SELECT 42 AS leaked;', agent_ids: [TEST_AGENT] },
+        { pack_id: 'missing-pack', query: 'SELECT 42 AS custom;', agent_ids: [TEST_AGENT] },
         { space: { id: 'production' } }
       )
     ).rejects.toThrow();
@@ -196,7 +196,7 @@ describe('createActionHandler', () => {
 
     await createActionHandler(
       context,
-      { saved_query_id: 'sq-1', query: 'select 42 as leaked;', agent_ids: [TEST_AGENT] },
+      { saved_query_id: 'sq-1', query: 'select 42 as custom;', agent_ids: [TEST_AGENT] },
       { space: { id: 'production' }, useStoredQuery: true }
     );
 

@@ -81,7 +81,7 @@ apiTest.describe(
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
           body: testData.getMinimalLiveQuery({
-            query: 'select 42 as leaked;',
+            query: 'select 42 as custom;',
             alert_ids: ['non-existent-alert-id'],
           }),
           responseType: 'json',
@@ -92,12 +92,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 403 when smuggling a custom query behind the saved query id',
+      'returns 403 when the supplied query does not match the saved query',
       async ({ apiClient }) => {
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
           body: testData.getSavedQueryLiveQuery(savedQueryId, {
-            query: 'select 42 as leaked;',
+            query: 'select 42 as custom;',
           }),
           responseType: 'json',
         });

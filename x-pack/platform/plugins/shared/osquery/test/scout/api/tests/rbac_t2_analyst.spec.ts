@@ -53,12 +53,12 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 403 when smuggling a custom query behind a saved query id',
+      'returns 403 when the supplied query does not match the saved query',
       async ({ apiClient }) => {
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
           body: testData.getSavedQueryLiveQuery(savedQueryId, {
-            query: 'select 42 as leaked;',
+            query: 'select 42 as custom;',
           }),
           responseType: 'json',
         });
@@ -68,12 +68,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 403 when smuggling a queries array behind a saved query id',
+      'returns 403 when a queries array is supplied with a saved query id',
       async ({ apiClient }) => {
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
           body: testData.getSavedQueryLiveQuery(savedQueryId, {
-            queries: [{ id: 'smuggled', query: 'select 42 as leaked;' }],
+            queries: [{ id: 'extra', query: 'select 42 as custom;' }],
           }),
           responseType: 'json',
         });
@@ -83,11 +83,11 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 403 when a whitespace saved query id is used to smuggle a custom query',
+      'returns 403 when the saved query id is blank',
       async ({ apiClient }) => {
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
-          body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as leaked;' }),
+          body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as custom;' }),
           responseType: 'json',
         });
 
@@ -99,7 +99,7 @@ apiTest.describe(
       const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
         body: testData.getSavedQueryLiveQuery('non-existent-saved-query-id', {
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
         }),
         responseType: 'json',
       });

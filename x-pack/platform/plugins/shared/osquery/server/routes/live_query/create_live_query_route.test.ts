@@ -124,7 +124,7 @@ describe('createLiveQueryRoute', () => {
   it('returns 403 for a saved_query_id that does not resolve', async () => {
     const response = await invokeRoute({
       saved_query_id: 'does-not-exist',
-      query: 'select 42 as leaked;',
+      query: 'select 42 as custom;',
       agent_ids: ['agent-1'],
     });
 
@@ -143,10 +143,10 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
-  it('returns 403 when a queries array is smuggled behind a saved query id', async () => {
+  it('returns 403 when a queries array is supplied with a saved query id', async () => {
     const response = await invokeRoute({
       saved_query_id: SAVED_QUERY_ID,
-      queries: [{ id: 'x', query: 'select 42 as leaked;' }],
+      queries: [{ id: 'x', query: 'select 42 as custom;' }],
       agent_ids: ['agent-1'],
     });
 
@@ -157,7 +157,7 @@ describe('createLiveQueryRoute', () => {
   it('returns 403 rather than 500 for a pack_id that does not resolve', async () => {
     const coreStart = createMockCoreStart();
     const response = await invokeRoute(
-      { pack_id: 'does-not-exist', query: 'select 42 as leaked;', agent_ids: ['agent-1'] },
+      { pack_id: 'does-not-exist', query: 'select 42 as custom;', agent_ids: ['agent-1'] },
       { coreStart }
     );
 
@@ -177,7 +177,7 @@ describe('createLiveQueryRoute', () => {
 
     const response = await invokeRoute(
       {
-        query: 'select 42 as leaked;',
+        query: 'select 42 as custom;',
         alert_ids: ['readable-alert-without-note'],
         agent_ids: ['agent-1'],
       },
@@ -196,7 +196,7 @@ describe('createLiveQueryRoute', () => {
 
     const response = await invokeRoute(
       {
-        query: 'select 42 as leaked;',
+        query: 'select 42 as custom;',
         alert_ids: ['missing-alert'],
         agent_ids: ['agent-1'],
       },
@@ -225,7 +225,7 @@ describe('createLiveQueryRoute', () => {
   it('returns 403 when caller SQL does not match the stored saved query', async () => {
     const response = await invokeRoute({
       saved_query_id: SAVED_QUERY_ID,
-      query: 'select 42 as leaked;',
+      query: 'select 42 as custom;',
       agent_ids: ['agent-1'],
     });
 

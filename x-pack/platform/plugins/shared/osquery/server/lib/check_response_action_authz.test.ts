@@ -136,7 +136,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: 'does-not-exist',
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
         })
       ).resolves.toBe(false);
     });
@@ -147,7 +147,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: ' ',
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
         })
       ).resolves.toBe(false);
     });
@@ -177,29 +177,29 @@ describe('isOsqueryResponseActionAuthorized', () => {
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: SAVED_QUERY_ID,
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
         })
       ).resolves.toBe(false);
     });
 
-    it('should reject a queries array smuggled behind a resolvable saved_query_id', async () => {
+    it('should reject a queries array with a resolvable saved_query_id', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: SAVED_QUERY_ID,
-          queries: [{ query: 'select 42 as leaked;' }],
+          queries: [{ query: 'select 42 as custom;' }],
         })
       ).resolves.toBe(false);
     });
 
-    it('should reject a queries array smuggled behind a resolvable pack_id', async () => {
+    it('should reject a queries array with a resolvable pack_id', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           pack_id: PACK_ID,
-          queries: [{ query: 'select 42 as leaked;' }],
+          queries: [{ query: 'select 42 as custom;' }],
         })
       ).resolves.toBe(false);
     });
@@ -267,7 +267,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
-    it('should reject SQL smuggled into a parameterised stored query', async () => {
+    it('should reject a parameter substitution that contains SQL', async () => {
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },
         { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
@@ -290,7 +290,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: SAVED_QUERY_ID,
-          query: "select * from os_version where name='Ubuntu'; select 42 as leaked;",
+          query: "select * from os_version where name='Ubuntu'; select 42 as custom;",
         })
       ).resolves.toBe(false);
     });
@@ -304,7 +304,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: SAVED_QUERY_ID,
-          query: 'select 42 as leaked;',
+          query: 'select 42 as custom;',
         })
       ).resolves.toBe(false);
     });

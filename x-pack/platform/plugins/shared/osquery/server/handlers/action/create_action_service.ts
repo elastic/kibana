@@ -38,7 +38,7 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
       alertData: options?.alertData,
       space: options?.space,
       error,
-      // Rule-run has no second authz gate; dispatch stored content for saved_query_id / pack_id.
+      // Rule-run dispatches stored content for saved_query_id / pack_id.
       useStoredQuery: true,
     });
   };

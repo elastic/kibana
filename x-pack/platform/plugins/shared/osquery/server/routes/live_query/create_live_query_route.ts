@@ -99,7 +99,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         if (isInvalid) {
-          // Investigation-guide match is the only unauthorized bypass.
+          // Investigation-guide match is the only path that proceeds when the request is otherwise unauthorized.
           if (!request.body.alert_ids?.length) {
             return response.forbidden();
           }
@@ -160,7 +160,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               metadata: { currentUser: username, userProfileUid },
               alertData,
               space,
-              // Investigation-guide bypass keeps caller SQL; otherwise stored SO is dispatched.
+              // Investigation-guide match keeps caller SQL; otherwise stored SO is dispatched.
               useStoredQuery: !isInvalid && !writeLiveQueries,
             }
           );

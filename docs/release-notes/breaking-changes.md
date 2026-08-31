@@ -48,7 +48,7 @@ $$$kibana-287882$$$
 
 The same rules apply when attaching an osquery response action to a detection rule (create, update, patch, import, and bulk duplicate). Rule-run dispatch also uses stored content, so SQL persisted on the action cannot override the referenced saved query.
 
-**Impact**<br> API clients that posted `{ saved_query_id, query }` with SQL that differed from the saved object — or that used a placeholder id to run ad-hoc SQL — now receive 403. No Kibana UI flow produces that payload: the saved-query picker requires `readSavedQueries`, and the query editor is read-only without `writeLiveQueries`.
+**Impact**<br> API clients that posted `{ saved_query_id, query }` with SQL that differed from the saved object, or an unresolvable `saved_query_id` / `pack_id`, now receive 403. Kibana UI flows are unaffected.
 
 **Action**<br> For `runSavedQueries`-only callers, send a resolvable `saved_query_id` or `pack_id`. You may omit `query` / `queries`, or send SQL that matches the stored object. To run arbitrary SQL, grant `writeLiveQueries`.
 

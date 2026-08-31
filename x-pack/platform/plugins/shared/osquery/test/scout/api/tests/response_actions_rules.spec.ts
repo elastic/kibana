@@ -308,11 +308,11 @@ apiTest.describe(
       }
     );
 
-    const smuggledOsqueryAction = () => ({
+    const mismatchedOsqueryAction = () => ({
       action_type_id: '.osquery' as const,
       params: {
         saved_query_id: savedQueryId,
-        query: 'select 42 as leaked;',
+        query: 'select 42 as custom;',
       },
     });
 
@@ -338,12 +338,12 @@ apiTest.describe(
     };
 
     apiTest(
-      'rejects smuggled SQL on rule create for a runSavedQueries-only author',
+      'rejects a mismatched query on rule create for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const response = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
           headers: { ...testData.COMMON_HEADERS, ...runSavedOnlyCredentials.apiKeyHeader },
           body: testData.getMinimalRule({
-            response_actions: [smuggledOsqueryAction()],
+            response_actions: [mismatchedOsqueryAction()],
           }),
           responseType: 'json',
         });
@@ -366,7 +366,7 @@ apiTest.describe(
                 action_type_id: '.osquery',
                 params: {
                   saved_query_id: savedQueryId,
-                  queries: [{ id: 'x', query: 'select 42 as leaked;' }],
+                  queries: [{ id: 'x', query: 'select 42 as custom;' }],
                 },
               },
             ],
@@ -403,7 +403,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'rejects smuggled SQL on rule update for a runSavedQueries-only author',
+      'rejects a mismatched query on rule update for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const ruleBody = testData.getMinimalRule();
         const createResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
@@ -419,7 +419,7 @@ apiTest.describe(
           body: {
             ...ruleBody,
             id: createResponse.body.id,
-            response_actions: [smuggledOsqueryAction()],
+            response_actions: [mismatchedOsqueryAction()],
           },
           responseType: 'json',
         });
@@ -429,7 +429,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'rejects smuggled SQL on rule patch for a runSavedQueries-only author',
+      'rejects a mismatched query on rule patch for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const createResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
           headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
@@ -443,7 +443,7 @@ apiTest.describe(
           headers: { ...testData.COMMON_HEADERS, ...runSavedOnlyCredentials.apiKeyHeader },
           body: {
             id: createResponse.body.id,
-            response_actions: [smuggledOsqueryAction()],
+            response_actions: [mismatchedOsqueryAction()],
           },
           responseType: 'json',
         });
@@ -453,11 +453,11 @@ apiTest.describe(
     );
 
     apiTest(
-      'rejects smuggled SQL on rule import for a runSavedQueries-only author',
+      'rejects a mismatched query on rule import for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const rule = testData.getMinimalRule({
           rule_id: `ra-import-${Date.now()}`,
-          response_actions: [smuggledOsqueryAction()],
+          response_actions: [mismatchedOsqueryAction()],
         });
         const multipart = buildRulesImportMultipart(rule);
 
@@ -487,12 +487,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'rejects smuggled SQL on bulk duplicate for a runSavedQueries-only author',
+      'rejects a mismatched query on bulk duplicate for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const createResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
           headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
           body: testData.getMinimalRule({
-            response_actions: [smuggledOsqueryAction()],
+            response_actions: [mismatchedOsqueryAction()],
           }),
           responseType: 'json',
         });

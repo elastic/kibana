@@ -40,7 +40,7 @@ type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
 export type CheckOsqueryResponseActionAuthz = (actionParams: {
   saved_query_id?: string;
   pack_id?: string;
-  /** Caller-supplied SQL; forwarded because rule-run has no second authz gate. */
+  /** Caller-supplied SQL; forwarded so attach-time authz matches what would be persisted. */
   query?: string;
   queries?: Array<{ query?: string }>;
   ecs_mapping?: Record<string, unknown>;
