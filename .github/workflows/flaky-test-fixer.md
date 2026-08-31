@@ -10,6 +10,7 @@ on:
         description: Issue number in this repository to fix
         required: true
         type: string
+  status-comment: true
 
 permissions:
   contents: read
@@ -119,8 +120,11 @@ sandbox:
   agent: awf
 
 safe-outputs:
-  activation-comments: false
+  activation-comments: true
   report-failure-as-issue: false
+  messages:
+    run-started: 'The flaky test fixer is investigating this issue. Follow progress in [{workflow_name}]({run_url}).'
+    run-failure: 'The flaky test fixer failed before it could report an outcome. Review [{workflow_name}]({run_url}), then remove and reapply `ai:fix-flaky` to retry.'
   mentions:
     allowed:
       - ${{ github.actor }}
@@ -262,6 +266,7 @@ safe-outputs:
 
 strict: false
 timeout-minutes: 90
+max-ai-credits: 1250
 ---
 
 # Flaky Test Fixer
@@ -306,6 +311,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 - **Read each file once, in the smallest useful slice.** Prefer a ranged read or a targeted `grep` over dumping a whole file, and never re-read or re-download a file you already have — after you edit a file, trust the returned state instead of reading it back.
 - **Don't pull large or binary artifacts into context.** Describe a failure screenshot from its metadata rather than loading the image, and `grep`/`sed` a big log for the failure timestamp instead of reading it end to end. Fetch only the specific artifacts you will actually use.
 - **Don't repeat a check whose inputs haven't changed.** A lint or search returns the same result until you edit the code it inspects, so re-running it just burns budget — reuse the result you already have, and never loop a command hoping for a different outcome. (The repeated runs in [Verifying a Jest fix](#verifying-a-jest-fix) are the deliberate exception: they measure flakiness, not a fixed result.)
+- **Deliver the core result before optional enrichment.** Once the patch passes verification, don't make new API calls or repository searches solely for attribution, reviewer, sibling-issue, or backport metadata. Omit uncertain attribution, leave the PR without a backport label, and skip optional follow-up tools rather than risking the PR, outcome comment, and label cleanup. Record those essential safe outputs immediately.
 
 ## Steps
 
@@ -315,11 +321,11 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-7. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
+7. Decide the backport strategy from evidence already gathered and open the PR (see "PR format" and "Backport label" below). If the evidence isn't already available, apply no backport label and say a human should decide — don't perform more research after verification. If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 10. **Only if you opened a PR in step 7**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
-11. **Only if you opened a PR in step 7 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+11. **Only if you opened a PR in step 7 and already identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Don't do additional research at this point. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
 
 ## Fix guardrails
 
