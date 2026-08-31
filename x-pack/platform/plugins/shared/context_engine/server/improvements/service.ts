@@ -34,6 +34,17 @@ const LATEST_ONLY: QueryDslQueryContainer = { term: { latest: true } };
 /** A bulk item carrying this lost its OCC race; anything else is a genuine failure. */
 const VERSION_CONFLICT = 'version_conflict_engine_exception';
 
+/**
+ * How many heads a head lookup allows for per lineage. A healthy lineage has exactly one; two runs
+ * creating the same brand-new `improvement_id` concurrently can leave more, because the first
+ * revision of a lineage has no existing head to guard it under OCC. Asking for room to see the
+ * duplicates is what lets a later write retire them all and converge the lineage.
+ */
+const MAX_HEADS_PER_LINEAGE = 10;
+
+/** Ceiling on a head lookup, so a large batch cannot ask for an unbounded page. */
+const MAX_HEAD_LOOKUP_SIZE = 1000;
+
 interface HeadRevision {
   document: Improvement;
   seqNo: number;
@@ -121,7 +132,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     }
 
     const heads = await this.loadHeads([...byImprovementId.keys()]);
-    const conflicted = await this.clearLatest([...heads.values()]);
+    const conflicted = await this.clearLatest([...heads.values()].flat());
 
     // A lineage that lost the race kept its head — its retire operation is the one that failed —
     // so it is left for the next run rather than appended to here. Only the losers are skipped:
@@ -138,7 +149,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     const revisions = [...byImprovementId.values()]
       .filter(({ improvement_id: improvementId }) => !conflicted.has(improvementId))
       .map((input): Improvement => {
-        const head = heads.get(input.improvement_id);
+        const [head] = heads.get(input.improvement_id) ?? [];
         return {
           ...input,
           revision_id: uuidv4(),
@@ -208,12 +219,14 @@ export class ImprovementsService implements ImprovementsServiceApi {
     to: ImprovementTransition,
     resolution?: ImprovementResolution
   ): Promise<Improvement> {
-    const head = (await this.loadHeads([improvementId])).get(improvementId);
+    // Every head, not just the newest: a duplicated lineage converges on this transition.
+    const lineage = (await this.loadHeads([improvementId])).get(improvementId) ?? [];
+    const [head] = lineage;
     if (!head) {
       throw new ImprovementNotFoundError(improvementId);
     }
 
-    const conflicted = await this.clearLatest([head]);
+    const conflicted = await this.clearLatest(lineage);
     if (conflicted.has(improvementId)) {
       throw new ImprovementConflictError([improvementId]);
     }
@@ -274,33 +287,41 @@ export class ImprovementsService implements ImprovementsServiceApi {
     });
   }
 
-  /** Reads the head revision of each lineage together with the OCC metadata needed to retire it. */
-  private async loadHeads(improvementIds: string[]): Promise<Map<string, HeadRevision>> {
+  /**
+   * Reads the head revisions of each lineage, newest first, with the OCC metadata needed to retire
+   * them.
+   *
+   * Returns every head found for a lineage rather than one. A lineage should only ever have one,
+   * but the first revision of a brand-new `improvement_id` has no existing head to guard it, so
+   * two concurrent runs can both append one. Keeping a single head per lineage here would retire
+   * only that one and leave the duplicate live — `list` would double-count the lineage and no
+   * later write could ever converge it. Retiring all of them makes the next write self-healing.
+   */
+  private async loadHeads(improvementIds: string[]): Promise<Map<string, HeadRevision[]>> {
     if (improvementIds.length === 0) {
       return new Map();
     }
 
     const response = await this.storageClient.search({
-      size: improvementIds.length,
+      size: Math.min(improvementIds.length * MAX_HEADS_PER_LINEAGE, MAX_HEAD_LOOKUP_SIZE),
       track_total_hits: false,
       seq_no_primary_term: true,
       query: {
         bool: { filter: [LATEST_ONLY, { terms: { improvement_id: improvementIds } }] },
       },
+      sort: [{ '@timestamp': { order: 'desc' } }],
     });
 
-    const heads = new Map<string, HeadRevision>();
+    const heads = new Map<string, HeadRevision[]>();
     for (const hit of response.hits.hits) {
       const document = hit._source;
       // OCC needs both; without them the guarded clear below would silently become unguarded.
       if (!document || hit._seq_no === undefined || hit._primary_term === undefined) {
         continue;
       }
-      heads.set(document.improvement_id, {
-        document,
-        seqNo: hit._seq_no,
-        primaryTerm: hit._primary_term,
-      });
+      const lineage = heads.get(document.improvement_id) ?? [];
+      lineage.push({ document, seqNo: hit._seq_no, primaryTerm: hit._primary_term });
+      heads.set(document.improvement_id, lineage);
     }
     return heads;
   }

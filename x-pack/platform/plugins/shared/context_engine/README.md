@@ -118,6 +118,13 @@ record of what the loop did to a user's index survives every transition:
   abandoning the batch. A bulk applies each operation independently, so the
   other heads are already retired by then; dropping them would leave those
   lineages with no `latest` revision at all.
+- OCC only guards a lineage that already has a head. The first revision of a
+  brand-new `improvement_id` has nothing to guard it, so two runs writing the
+  same new improvement concurrently can both append a head. Analysis runs for
+  one AI index are therefore expected to be serialized. Should it happen anyway,
+  it is self-healing rather than permanent: a head lookup returns every head of
+  a lineage and the next `write` or `transition` retires all of them, so the
+  lineage converges back to a single head.
 - `failed` is a status, not an error return: an approval whose apply step errors
   stays visible and retryable, with the reason on `resolution.error`.
 - A rejection keeps the reviewer's rationale on `resolution.reason`, so the next

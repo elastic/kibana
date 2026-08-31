@@ -185,6 +185,37 @@ describe('ImprovementsService', () => {
       ]);
     });
 
+    it('leaves room for more than one head per lineage, newest first', async () => {
+      await service.write([makeInput({ improvement_id: 'imp-1' })]);
+      const [request] = search.mock.calls[0];
+      // A lineage should have one head, but a lost creation race can leave two. Asking for exactly
+      // one per lineage would hide the duplicate and leave it live forever.
+      expect(request.size).toBeGreaterThan(1);
+      expect(request.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+    });
+
+    it('retires every head of a lineage, converging a duplicate left by a creation race', async () => {
+      // Two runs created the same brand-new improvement_id: nothing guards a first revision.
+      const newer = makeHead({ revision_id: 'rev-new', '@timestamp': '2026-01-03T00:00:00.000Z' });
+      const older = makeHead({ revision_id: 'rev-old', '@timestamp': '2026-01-02T00:00:00.000Z' });
+      search.mockResolvedValue(searchResponse([hitOf(newer, 9, 1), hitOf(older, 5, 1)]));
+
+      const [written] = await service.write([makeInput()]);
+
+      const [clear] = bulk.mock.calls[0];
+      expect(clear.operations.map(({ index }: { index: { _id: string } }) => index._id)).toEqual([
+        'rev-new',
+        'rev-old',
+      ]);
+      expect(
+        clear.operations.every(
+          ({ index }: { index: { document: Improvement } }) => index.document.latest === false
+        )
+      ).toBe(true);
+      // One head remains afterwards, and it continues from the newest of the two.
+      expect(written.previous_revision_id).toBe('rev-new');
+    });
+
     it('appends nothing for a lineage whose head moved under it', async () => {
       search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
       bulk.mockResolvedValueOnce(clearResponse({ conflicted: ['rev-1'] }));
@@ -376,6 +407,18 @@ describe('ImprovementsService', () => {
       expect(revision.applied_at).toBeUndefined();
       expect(revision.rejected_at).toBeUndefined();
       expect(revision.resolution).toEqual({ error: 'invalid workflow' });
+    });
+
+    it('retires every head, so a transition converges a duplicated lineage', async () => {
+      const newer = makeHead({ revision_id: 'rev-new', '@timestamp': '2026-01-03T00:00:00.000Z' });
+      const older = makeHead({ revision_id: 'rev-old', '@timestamp': '2026-01-02T00:00:00.000Z' });
+      search.mockResolvedValue(searchResponse([hitOf(newer, 9, 1), hitOf(older, 5, 1)]));
+
+      const revision = await service.transition('imp-1', 'applied');
+
+      const [clear] = bulk.mock.calls[0];
+      expect(clear.operations).toHaveLength(2);
+      expect(revision.previous_revision_id).toBe('rev-new');
     });
 
     it('rejects a transition on an unknown improvement', async () => {
