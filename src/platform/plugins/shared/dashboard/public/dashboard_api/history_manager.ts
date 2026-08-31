@@ -13,6 +13,7 @@ import {
   debounceTime,
   filter,
   map,
+  tap,
   withLatestFrom,
   type Observable,
   type Subject,
@@ -39,7 +40,6 @@ export function initializeHistoryManager({
   historyUpdated$: Subject<void>;
 }) {
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
-  const dashboardCurrentState$ = new BehaviorSubject<DashboardState | undefined>(undefined);
 
   const disableUndoRedoSubscription = combineLatest([hasOverlays$, dataLoading$])
     .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))
@@ -60,6 +60,9 @@ export function initializeHistoryManager({
             ...state,
             panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
           };
+        }),
+        tap(() => {
+          historyUpdated$.next();
         })
       ),
       setState: async (state: DashboardState) => {
@@ -71,25 +74,12 @@ export function initializeHistoryManager({
     }
   );
 
-  const onAnyStateChangeSubscription = combineLatest([anyStateChange$, dataLoading$])
-    .pipe(
-      debounceTime(0), // flatten anyStateChange + dataLoading event updates
-      withLatestFrom(hasOverlays$),
-      // do not push to history while a child is loading or an editor is open
-      filter(([[, loading], hasOverlays]) => !loading && !hasOverlays)
-    )
-    .subscribe(([[, loading]]) => {
-      dashboardCurrentState$.next(getState());
-      historyUpdated$.next();
-    });
-
   return {
     internalApi: {
       ...historyApi,
       disableUndoRedo$,
     },
     cleanup: () => {
-      onAnyStateChangeSubscription.unsubscribe();
       disableUndoRedoSubscription.unsubscribe();
       cleanupHistoryTracking();
     },
