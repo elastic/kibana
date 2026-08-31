@@ -107,6 +107,21 @@ describe('KiVerificationService', () => {
     await expect(run('thrower')).rejects.toThrow('boom');
   });
 
+  it('rethrows abort errors', async () => {
+    const abortError = new Error('Request aborted');
+    abortError.name = 'AbortError';
+    const aborter: KiVerifier = {
+      id: 'aborter',
+      applies: () => true,
+      verify: jest.fn(async () => {
+        throw abortError;
+      }),
+    };
+    registry.register(aborter);
+
+    await expect(run('aborter')).rejects.toThrow(abortError);
+  });
+
   it('propagates a failure from applies()', async () => {
     const thrower: KiVerifier = {
       id: 'applies-thrower',
