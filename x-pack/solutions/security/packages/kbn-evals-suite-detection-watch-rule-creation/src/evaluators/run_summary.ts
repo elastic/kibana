@@ -12,13 +12,23 @@ import { computeScoreStats, type ScoreStats } from '../score_stats';
 export type ScoreSink = Map<string, Array<number | null>>;
 
 /**
+ * Per-example scores keyed as `${evaluatorName}::${exampleId}` — the join key for
+ * PAIRED comparisons across arms (same example, two prompt revisions). Dataset
+ * means cannot resolve small deltas at this sample size (measured: ±0.16-0.19
+ * CI half-width at n=15, build 479); per-example pairing removes example-difficulty
+ * variance and is the only readout that can.
+ */
+export type PairedScoreSink = Map<string, number | null>;
+
+/**
  * Wraps each evaluator so every observed score is recorded, keyed by evaluator
  * name. The wrapper is transparent: same inputs, same outputs, same N/A
  * semantics — it only observes.
  */
 export const withScoreCollection = (
   evaluators: RuleEvaluator[],
-  sink: ScoreSink
+  sink: ScoreSink,
+  pairedSink: PairedScoreSink
 ): RuleEvaluator[] =>
   evaluators.map((evaluator) => ({
     ...evaluator,
@@ -27,6 +37,8 @@ export const withScoreCollection = (
       const bucket = sink.get(evaluator.name) ?? [];
       bucket.push(result.score ?? null);
       sink.set(evaluator.name, bucket);
+      const exampleId = (args as { expected?: { id?: string } }).expected?.id;
+      if (exampleId) pairedSink.set(`${evaluator.name}::${exampleId}`, result.score ?? null);
       return result;
     },
   })) as RuleEvaluator[];
@@ -74,4 +86,25 @@ export const logRunSummary = ({
     );
   }
   return rows;
+};
+
+/**
+ * Serializes the paired sink for cross-run comparison: one JSON line per example
+ * per evaluator, parseable by `pairedDeltas` in score_stats.ts. Printed at the
+ * end of each dataset run so an A/B readout needs nothing but the two build logs.
+ */
+export const logPairedScores = ({
+  pairedSink,
+  datasetName,
+  log,
+}: {
+  pairedSink: PairedScoreSink;
+  datasetName: string;
+  log: ToolingLog;
+}): void => {
+  if (pairedSink.size === 0) return;
+  const payload = JSON.stringify({ dataset: datasetName, scores: Object.fromEntries(pairedSink) });
+  for (const line of payload.match(/.{1,8000}/g) ?? [payload]) {
+    log.info(`PAIRED_SCORES ${line}`);
+  }
 };

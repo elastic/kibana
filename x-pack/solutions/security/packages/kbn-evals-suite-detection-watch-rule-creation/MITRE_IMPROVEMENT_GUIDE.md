@@ -64,3 +64,31 @@ Version bumped 3 -> 4 so versionStrategy:auto reinstalls on stack start.
   tactic entirely" and the current F1 collapses them.
 - Hard-cases need more examples before sub-0.1 deltas are resolvable; 5
   examples means one flip = 0.20 mean swing.
+
+## Measured resolution limits (build 479, first instrumented run)
+
+The reliability layer now prints 95% CI half-widths per evaluator. Measured at
+n=15 (3 reps x 5 examples):
+
+- MITRE Accuracy golden: 0.738 ± 0.162
+- MITRE Accuracy hard:   0.683 ± 0.185
+
+**Consequence: no unpaired MITRE delta below ~0.35 is resolvable at this sample
+size.** Any prompt A/B judged by comparing dataset means at n=15 will read noise.
+
+### The design that resolves at this sample size: paired per-example deltas
+
+Each run now emits `PAIRED_SCORES {dataset, scores}` (one JSON payload per
+dataset, keys `evaluator::exampleId`). To compare two arms:
+
+1. Grep `PAIRED_SCORES` from both build logs (baseline arm and candidate arm).
+2. Feed the two payloads to `pairedDeltas` (src/score_stats.ts): it pairs by
+   example, skips examples missing on either arm, and returns the per-example
+   delta distribution plus a paired t-style mean and std.
+3. A prompt change is proven only if the paired mean delta exceeds
+   2 * (paired std / sqrt(n)) — example-difficulty variance is removed by
+   pairing, so the effective resolution is far tighter than the ±0.16-0.19
+   unpaired band.
+
+Why not just raise n? Detecting +0.10 unpaired needs n≈90 per dataset
+(18 examples x 5 reps) — roughly 6x the runtime cost of pairing.
