@@ -77,3 +77,32 @@ describe('seed <-> reference-query contract', () => {
     expect(seedCorpus).toContain('net user');
   });
 });
+
+describe('term-level match operators', () => {
+  // `field : "value"` matches a WHOLE term. A seeded arg like `javascript:..\\RunHtml`
+  // is one token and does NOT match `process.args : "javascript"` — build 470 failed
+  // exactly this way, so assert the terms the `:` clauses need exist verbatim.
+  it('every `field : "literal"` clause has that literal as a standalone seeded term', () => {
+    const terms = new Set<string>();
+    for (const index of buildFixtures()) {
+      for (const doc of index.docs) {
+        JSON.stringify(doc)
+          .split(/["\s,\[\]{}]+/)
+          .filter(Boolean)
+          .forEach((t) => terms.add(t));
+      }
+    }
+
+    const missing: string[] = [];
+    for (const ex of [...goldenDataset, ...hardCases]) {
+      const query = ex.output.esqlQuery ?? '';
+      query.replace(/\w[\w.]*\s*:\s*"([^"]+)"/g, (_match, literal: string) => {
+        if (!literal.includes('*') && !terms.has(literal)) {
+          missing.push(`${ex.id}: ${literal}`);
+        }
+        return '';
+      });
+    }
+    expect(missing).toEqual([]);
+  });
+});
