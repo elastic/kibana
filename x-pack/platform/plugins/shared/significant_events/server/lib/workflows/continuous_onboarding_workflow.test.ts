@@ -9,11 +9,14 @@ import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   COORDINATOR_INTERVAL_MINUTES,
+  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
   MAX_SCHEDULED_STREAMS,
   POLL_DELAY_SECONDS,
 } from '../../../common/constants';
+import { createContinuousKiOnboardingWorkflowService } from './continuous_onboarding_workflow';
 
 // The continuous onboarding workflow YAML lives in the managed workflow
 // definition (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/continuous_onboarding.yaml).
@@ -114,5 +117,122 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 
   it('polls the onboarding status endpoint to await completion', () => {
     assertYamlContains('onboarding/_status');
+  });
+});
+
+describe('continuous KI onboarding scheduler reconciliation', () => {
+  const managedWorkflow = {
+    id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    enabled: true,
+  };
+  const legacyWorkflow = {
+    id: LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+    enabled: true,
+  };
+
+  const createService = ({
+    getWorkflow = jest
+      .fn()
+      .mockImplementation(async (id: string) =>
+        id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID ? managedWorkflow : undefined
+      ),
+    getScheduledTask = jest.fn().mockResolvedValue({ id: 'scheduled-task' }),
+  } = {}) => {
+    const managementApi = {
+      getWorkflow,
+      updateWorkflow: jest.fn().mockResolvedValue(managedWorkflow),
+      deleteWorkflows: jest.fn().mockResolvedValue({ deleted: 1, failures: [] }),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      cancelWorkflowExecution: jest.fn(),
+    };
+    const service = createContinuousKiOnboardingWorkflowService({
+      logger: loggingSystemMock.createLogger(),
+      managementApi: managementApi as unknown as Parameters<
+        typeof createContinuousKiOnboardingWorkflowService
+      >[0]['managementApi'],
+      streamsKIsOnboardingClient: {} as Parameters<
+        typeof createContinuousKiOnboardingWorkflowService
+      >[0]['streamsKIsOnboardingClient'],
+      getScheduledTask,
+    });
+    return { getScheduledTask, managementApi, service };
+  };
+
+  it('refreshes the existing schedule API key and verifies the postcondition', async () => {
+    const { getScheduledTask, managementApi, service } = createService();
+
+    await service.ensureCappedContinuousKiScheduled({ request: {} as never });
+
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      { enabled: true },
+      'default',
+      expect.anything()
+    );
+    expect(getScheduledTask).toHaveBeenCalledTimes(2);
+  });
+
+  it('repairs a missing deterministic schedule and verifies the postcondition', async () => {
+    const getScheduledTask = jest
+      .fn()
+      .mockRejectedValueOnce({ statusCode: 404 })
+      .mockResolvedValueOnce({ id: 'scheduled-task' });
+    const { managementApi, service } = createService({ getScheduledTask });
+
+    await service.ensureCappedContinuousKiScheduled({ request: {} as never });
+
+    expect(managementApi.updateWorkflow).toHaveBeenCalledTimes(1);
+    expect(getScheduledTask).toHaveBeenCalledWith(
+      `workflow:${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}:scheduled`
+    );
+  });
+
+  it('strictly removes an active legacy workflow before updating the managed workflow', async () => {
+    const getWorkflow = jest
+      .fn()
+      .mockImplementation(async (id: string) =>
+        id === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID ? legacyWorkflow : managedWorkflow
+      );
+    const { managementApi, service } = createService({ getWorkflow });
+
+    await service.ensureCappedContinuousKiScheduled({ request: {} as never });
+
+    expect(managementApi.deleteWorkflows).toHaveBeenCalledWith(
+      [LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
+      'default',
+      expect.anything(),
+      { force: true }
+    );
+    expect(managementApi.deleteWorkflows.mock.invocationCallOrder[0]).toBeLessThan(
+      managementApi.updateWorkflow.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not enable the managed workflow when legacy cancellation fails', async () => {
+    const getWorkflow = jest
+      .fn()
+      .mockImplementation(async (id: string) =>
+        id === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID ? legacyWorkflow : managedWorkflow
+      );
+    const { managementApi, service } = createService({ getWorkflow });
+    managementApi.getWorkflowExecutions.mockRejectedValueOnce(new Error('cancellation failed'));
+
+    await expect(
+      service.ensureCappedContinuousKiScheduled({ request: {} as never })
+    ).rejects.toThrow('cancellation failed');
+    expect(managementApi.deleteWorkflows).not.toHaveBeenCalled();
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('fails when the final workflow and schedule postcondition is not satisfied', async () => {
+    const getScheduledTask = jest
+      .fn()
+      .mockResolvedValueOnce({ id: 'scheduled-task' })
+      .mockRejectedValueOnce({ statusCode: 404 });
+    const { service } = createService({ getScheduledTask });
+
+    await expect(
+      service.ensureCappedContinuousKiScheduled({ request: {} as never })
+    ).rejects.toThrow('did not produce an enabled workflow and scheduled task');
   });
 });

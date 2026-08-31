@@ -36,18 +36,22 @@ export interface ContinuousKiOnboardingWorkflowService {
    * and managed workflows never run at the same time.
    */
   ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
+  ensureCappedContinuousKiScheduled(params: { request: KibanaRequest }): Promise<void>;
 }
 
 export const createContinuousKiOnboardingWorkflowService = ({
   logger,
   managementApi,
   streamsKIsOnboardingClient,
+  getScheduledTask,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  getScheduledTask: (taskId: string) => Promise<{ id: string }>;
 }): ContinuousKiOnboardingWorkflowService => {
   const log = logger.get('continuous-ki-onboarding-workflow');
+  const scheduledTaskId = `workflow:${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}:scheduled`;
 
   const getNonTerminalExecutions = async ({
     workflowId,
@@ -125,12 +129,20 @@ export const createContinuousKiOnboardingWorkflowService = ({
     );
   };
 
-  const deleteLegacyWorkflow = async ({ request }: { request: KibanaRequest }) => {
+  const deleteLegacyWorkflow = async ({
+    request,
+    activeOnly = false,
+    requireCancellation = false,
+  }: {
+    request: KibanaRequest;
+    activeOnly?: boolean;
+    requireCancellation?: boolean;
+  }) => {
     const legacy = await managementApi.getWorkflow(
       LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
       LEGACY_WORKFLOW_SPACE_ID
     );
-    if (!legacy) {
+    if (!legacy || (activeOnly && !legacy.enabled)) {
       return;
     }
 
@@ -138,11 +150,18 @@ export const createContinuousKiOnboardingWorkflowService = ({
       `Found legacy continuous KI extraction workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}, removing it`
     );
 
-    await cancelAndAwaitTermination({
+    const cancelLegacyExecutions = cancelAndAwaitTermination({
       workflowId: LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
       spaceId: LEGACY_WORKFLOW_SPACE_ID,
       request,
-    }).catch((err) => log.warn(`Failed to cancel legacy workflow executions: ${err}`));
+    });
+    if (requireCancellation) {
+      await cancelLegacyExecutions;
+    } else {
+      await cancelLegacyExecutions.catch((err) =>
+        log.warn(`Failed to cancel legacy workflow executions: ${err}`)
+      );
+    }
 
     const { deleted, failures } = await managementApi.deleteWorkflows(
       [LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
@@ -159,6 +178,17 @@ export const createContinuousKiOnboardingWorkflowService = ({
     }
 
     log.info(`Deleted legacy workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
+  };
+
+  const readScheduledTask = async () => {
+    try {
+      return await getScheduledTask(scheduledTaskId);
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 404) {
+        return undefined;
+      }
+      throw error;
+    }
   };
 
   return {
@@ -189,6 +219,51 @@ export const createContinuousKiOnboardingWorkflowService = ({
         .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
 
       log.info(`Disabled continuous KI onboarding workflow`);
+    },
+
+    async ensureCappedContinuousKiScheduled({ request }) {
+      await deleteLegacyWorkflow({
+        request,
+        activeOnly: true,
+        requireCancellation: true,
+      });
+
+      const [workflowBefore, taskBefore] = await Promise.all([
+        managementApi.getWorkflow(
+          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+          MANAGED_WORKFLOW_SPACE_ID
+        ),
+        readScheduledTask(),
+      ]);
+      if (!workflowBefore) {
+        throw new Error(
+          `Managed continuous onboarding workflow ${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID} is not installed yet`
+        );
+      }
+
+      // An enablement-only update delegates both the missing-task create and the
+      // existing-task API-key regeneration to the platform scheduler.
+      await managementApi.updateWorkflow(
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        { enabled: true },
+        MANAGED_WORKFLOW_SPACE_ID,
+        request
+      );
+
+      const [workflowAfter, taskAfter] = await Promise.all([
+        managementApi.getWorkflow(
+          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+          MANAGED_WORKFLOW_SPACE_ID
+        ),
+        readScheduledTask(),
+      ]);
+      if (!workflowAfter?.enabled || !taskAfter) {
+        throw new Error(
+          `Continuous KI onboarding reconciliation did not produce an enabled workflow and scheduled task (task existed before: ${Boolean(
+            taskBefore
+          )})`
+        );
+      }
     },
   };
 };

@@ -24,6 +24,10 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../lib/errors/status_error';
+import {
+  createRunQuotaInternalRepository,
+  recordRunQuotaScheduleTransition,
+} from '../../../lib/run_quotas';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 import {
   STREAMS_API_PRIVILEGES,
@@ -289,9 +293,23 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
       const configChanged = Object.keys(spaceUpdates).some(
         (key) => key !== OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
       );
+      const previousReviewInterval =
+        (spaceSettings[
+          OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES
+        ] as number | undefined) ?? DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES;
+      const reviewIntervalChanged =
+        scheduledDiscovery.reviewIntervalMinutes !== undefined &&
+        scheduledDiscovery.reviewIntervalMinutes !== previousReviewInterval;
+      const scheduleApplicabilityChanged = enabledChanged || reviewIntervalChanged;
+      const spaceId =
+        enabledChanged || (nextEnabled && configChanged) || scheduleApplicabilityChanged
+          ? await getSpaceId(request)
+          : undefined;
 
       if (enabledChanged || (nextEnabled && configChanged)) {
-        const spaceId = await getSpaceId(request);
+        if (!spaceId) {
+          throw new Error('Unable to resolve space for scheduled discovery reconciliation');
+        }
         if (nextEnabled) {
           if (!server.agentBuilder) {
             throw new Error(
@@ -318,6 +336,14 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
               'flakyRuleExemptSeverityScore'
             ),
           },
+        });
+      }
+      if (scheduleApplicabilityChanged && spaceId) {
+        await recordRunQuotaScheduleTransition({
+          internalRepository: createRunQuotaInternalRepository(server),
+          group: 'detection',
+          spaceId,
+          changedAt: new Date().toISOString(),
         });
       }
     } catch (err) {

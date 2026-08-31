@@ -9,6 +9,7 @@ module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/significant_events'],
+  testPathIgnorePatterns: ['\\.integration\\.test\\.ts$'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/significant_events',
   coverageReporters: ['text', 'html'],

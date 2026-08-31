@@ -82,6 +82,8 @@ dependsOn:
   - '@kbn/inference-prompt-utils'
   - '@kbn/esql-utils'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/test'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
