@@ -48,12 +48,7 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
 
 const createVisualizationSchema = z
   .object({
-    query: z
-      .string()
-      .max(2048)
-      .describe(
-        'A natural language query describing the visualization.'
-      ),
+    query: z.string().max(2048).describe('A natural language query describing the visualization.'),
     index: z
       .string()
       .max(1024)
