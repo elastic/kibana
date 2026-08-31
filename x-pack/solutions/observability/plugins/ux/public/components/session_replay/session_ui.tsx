@@ -19,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type {
-  RumSessionSummary,
-  SessionActivityBucket,
-  SessionClient,
-  SessionUser,
-  SessionWebVitals,
+import {
+  isBouncedSession,
+  type RumSessionSummary,
+  type SessionActivityBucket,
+  type SessionClient,
+  type SessionUser,
+  type SessionWebVitals,
 } from '../../../common/session_replay';
 import { VITAL_HELP } from '../../utils/vital_help';
 
@@ -290,10 +291,24 @@ export const SignalBadges = ({
 }: {
   session: Pick<
     RumSessionSummary,
-    'errorCount' | 'rageClickCount' | 'actionCount' | 'deadClickCount'
+    'errorCount' | 'rageClickCount' | 'actionCount' | 'deadClickCount' | 'pageCount'
   >;
 }) => {
   const badges: React.ReactNode[] = [];
+  if (isBouncedSession(session.pageCount)) {
+    badges.push(
+      <EuiToolTip
+        key="bounce"
+        content={i18n.translate('xpack.ux.sessions.signal.bounceTip', {
+          defaultMessage: 'Bounced: this session viewed exactly one page',
+        })}
+      >
+        <EuiBadge color="hollow" tabIndex={0}>
+          {i18n.translate('xpack.ux.sessions.signal.bounce', { defaultMessage: 'Bounce' })}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
   if (session.errorCount > 0) {
     badges.push(
       <EuiToolTip

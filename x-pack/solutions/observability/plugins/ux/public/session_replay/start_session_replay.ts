@@ -8,7 +8,11 @@
 import type { CoreStart } from '@kbn/core/public';
 import { SESSION_REPLAY_VENDOR_BUNDLE_PATH } from '../../common/session_replay_inject';
 import { fetchSessionReplaySettings } from '../services/rest/session_replay_api';
-import { sdkCaptureFromSettings } from '../../common/session_replay_settings';
+import {
+  sdkCaptureFromSettings,
+  sdkReplayFromSettings,
+  sdkSessionFromSettings,
+} from '../../common/session_replay_settings';
 
 interface EdotUserIdentity {
   id: string;
@@ -89,15 +93,8 @@ export const startSessionReplay = async (core: CoreStart): Promise<void> => {
         'deployment.environment': 'kibana',
       },
       capture,
-      replay: {
-        enabled: true,
-        samplingRate: settings.sampleRate,
-        errorSamplingRate: 100,
-        quality: { recordCanvas: true },
-        ...(settings.maskTextSelector
-          ? { privacy: { maskAllInputs: true, maskTextSelector: settings.maskTextSelector } }
-          : {}),
-      },
+      session: sdkSessionFromSettings(settings, true),
+      replay: sdkReplayFromSettings(settings),
     });
     if (handle) {
       if (user?.username) {

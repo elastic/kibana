@@ -6,7 +6,15 @@
  */
 
 import { RUM_SESSIONS_LOOKBACK_DAYS, RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
-import { normalizeSessionReplaySettings } from './session_replay_settings';
+import {
+  normalizeSessionReplaySettings,
+  sdkPrivacyFromSettings,
+  sdkReplayFromSettings,
+  sdkSessionFromSettings,
+  SESSION_IDLE_MS_DEFAULT,
+  SESSION_MAX_MS_DEFAULT,
+  SESSION_MAX_MS_MIN,
+} from './session_replay_settings';
 
 describe('normalizeSessionReplaySettings', () => {
   it('keeps a valid transform sync delay', () => {
@@ -35,6 +43,40 @@ describe('normalizeSessionReplaySettings', () => {
     const settings = normalizeSessionReplaySettings({});
     expect(settings.useAllRemoteClusters).toBe(false);
     expect(settings.selectedRemoteClusters).toEqual([]);
+  });
+
+  it('defaults privacy on and canvas on', () => {
+    const settings = normalizeSessionReplaySettings({});
+    expect(settings.maskAllInputs).toBe(true);
+    expect(settings.maskAllText).toBe(true);
+    expect(settings.recordCanvas).toBe(true);
+    expect(settings.sessionMaxMs).toBe(SESSION_MAX_MS_DEFAULT);
+    expect(settings.sessionIdleMs).toBe(SESSION_IDLE_MS_DEFAULT);
+    expect(sdkPrivacyFromSettings(settings)).toEqual({
+      maskAllInputs: true,
+      maskTextSelector: '*',
+    });
+    expect(sdkReplayFromSettings(settings).quality).toEqual({ recordCanvas: true });
+    expect(sdkSessionFromSettings(settings, true)).toEqual({
+      persistSession: true,
+      maxMs: SESSION_MAX_MS_DEFAULT,
+      idleMs: SESSION_IDLE_MS_DEFAULT,
+    });
+  });
+
+  it('allows unmasking and canvas opt-out', () => {
+    const settings = normalizeSessionReplaySettings({
+      maskAllInputs: false,
+      maskAllText: false,
+      recordCanvas: false,
+      sessionMaxMs: 60_000,
+    });
+    expect(settings.maskAllInputs).toBe(false);
+    expect(settings.maskAllText).toBe(false);
+    expect(settings.recordCanvas).toBe(false);
+    expect(settings.sessionMaxMs).toBe(SESSION_MAX_MS_MIN);
+    expect(sdkPrivacyFromSettings(settings)).toEqual({ maskAllInputs: false });
+    expect(sdkReplayFromSettings(settings).quality).toEqual({ recordCanvas: false });
   });
 
   it('keeps valid remote cluster aliases', () => {

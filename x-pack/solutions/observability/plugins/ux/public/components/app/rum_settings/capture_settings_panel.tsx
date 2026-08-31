@@ -34,6 +34,12 @@ import {
   URL_GROUPING_DEPTH_MIN,
   URL_GROUPING_RULES_MAX_LENGTH,
   SYNC_DELAY_MAX_LENGTH,
+  SESSION_MAX_MS_MAX,
+  SESSION_MAX_MS_MIN,
+  SESSION_IDLE_MS_MAX,
+  SESSION_IDLE_MS_MIN,
+  msToMinutes,
+  minutesToMs,
   normalizeSessionReplaySettings,
   type SessionReplaySettings,
 } from '../../../../common/session_replay_settings';
@@ -358,11 +364,99 @@ export function CaptureSettingsPanel() {
           </EuiFormRow>
 
           <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.sessionMaxLabel', {
+              defaultMessage: 'Session max duration (minutes)',
+            })}
+            helpText={i18n.translate('xpack.ux.sessionReplaySettings.sessionMaxHelp', {
+              defaultMessage:
+                'The browser SDK starts a new session id after this time. Default 240 minutes (4 hours); the SDK otherwise rotates at 14 minutes.',
+            })}
+          >
+            <EuiFieldNumber
+              value={msToMinutes(settings.sessionMaxMs)}
+              min={msToMinutes(SESSION_MAX_MS_MIN)}
+              max={msToMinutes(SESSION_MAX_MS_MAX)}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, sessionMaxMs: minutesToMs(Number(e.target.value)) }))
+              }
+              data-test-subj="uxSessionReplaySessionMaxField"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.sessionIdleLabel', {
+              defaultMessage: 'Session idle timeout (minutes)',
+            })}
+            helpText={i18n.translate('xpack.ux.sessionReplaySettings.sessionIdleHelp', {
+              defaultMessage: 'Start a new session after this much inactivity. Default 30 minutes.',
+            })}
+          >
+            <EuiFieldNumber
+              value={msToMinutes(settings.sessionIdleMs)}
+              min={msToMinutes(SESSION_IDLE_MS_MIN)}
+              max={msToMinutes(SESSION_IDLE_MS_MAX)}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, sessionIdleMs: minutesToMs(Number(e.target.value)) }))
+              }
+              data-test-subj="uxSessionReplaySessionIdleField"
+            />
+          </EuiFormRow>
+
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.ux.sessionReplaySettings.privacyTitle', {
+                defaultMessage: 'Privacy',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.ux.sessionReplaySettings.privacyHelp', {
+                defaultMessage:
+                  'Applied to the inject snippet and Kibana auto-capture. Masking and canvas recording are on by default.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.maskAllInputsLabel', {
+              defaultMessage: 'Form inputs',
+            })}
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.ux.sessionReplaySettings.maskAllInputsSwitch', {
+                defaultMessage: 'Mask all input and textarea values',
+              })}
+              checked={settings.maskAllInputs}
+              onChange={(e) => setSettings((s) => ({ ...s, maskAllInputs: e.target.checked }))}
+              data-test-subj="uxSessionReplayMaskAllInputsSwitch"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.maskAllTextLabel', {
+              defaultMessage: 'Page text',
+            })}
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.ux.sessionReplaySettings.maskAllTextSwitch', {
+                defaultMessage: 'Mask all text in the replay',
+              })}
+              checked={settings.maskAllText}
+              onChange={(e) => setSettings((s) => ({ ...s, maskAllText: e.target.checked }))}
+              data-test-subj="uxSessionReplayMaskAllTextSwitch"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
             label={i18n.translate('xpack.ux.sessionReplaySettings.maskSelectorLabel', {
-              defaultMessage: 'Mask text selector',
+              defaultMessage: 'Additional mask text selector',
             })}
             helpText={i18n.translate('xpack.ux.sessionReplaySettings.maskSelectorHelp', {
-              defaultMessage: 'CSS selector whose text is masked in session replay.',
+              defaultMessage:
+                'CSS selector whose text is masked. When page text masking is on, this narrows the default (*).',
             })}
           >
             <EuiFieldText
@@ -371,6 +465,25 @@ export function CaptureSettingsPanel() {
               maxLength={MASK_TEXT_SELECTOR_MAX_LENGTH}
               onChange={(e) => setSettings((s) => ({ ...s, maskTextSelector: e.target.value }))}
               data-test-subj="uxSessionReplayMaskSelectorField"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.recordCanvasLabel', {
+              defaultMessage: 'Canvas',
+            })}
+            helpText={i18n.translate('xpack.ux.sessionReplaySettings.recordCanvasHelp', {
+              defaultMessage:
+                'Canvas frames can include charts, PII, and other pixels not covered by text masking.',
+            })}
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.ux.sessionReplaySettings.recordCanvasSwitch', {
+                defaultMessage: 'Record canvas contents',
+              })}
+              checked={settings.recordCanvas}
+              onChange={(e) => setSettings((s) => ({ ...s, recordCanvas: e.target.checked }))}
+              data-test-subj="uxSessionReplayRecordCanvasSwitch"
             />
           </EuiFormRow>
 

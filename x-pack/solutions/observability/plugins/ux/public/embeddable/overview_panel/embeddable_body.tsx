@@ -43,7 +43,8 @@ import {
 } from '../../../common/embeddables/overview_panel/constants';
 import { UxWorkflowEmbeddableBody } from './extra_panels';
 
-const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
+const percent = (ratio: number | null): string =>
+  ratio == null ? '—' : `${Math.round(ratio * 1000) / 10}%`;
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -389,6 +390,22 @@ const KpiRow = ({ data }: { data: RumOverviewResponse }) => {
             defaultMessage: 'Error rate',
           })}
         />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiLink
+          data-test-subj="uxDashboardKpiBounce"
+          onClick={() =>
+            pushRumPath(history, '/session-replay', sessionsPatch({ hasBounced: 'true' }))
+          }
+        >
+          <EuiStat
+            title={percent(data.kpis.bounceRate)}
+            titleSize="s"
+            description={i18n.translate('xpack.ux.overview.kpi.bounceRate', {
+              defaultMessage: 'Bounce rate',
+            })}
+          />
+        </EuiLink>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiStat

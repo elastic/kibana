@@ -7,7 +7,7 @@
 
 export const RUM_SESSIONS_VERSION = 3;
 /** Pivot / dest-pipeline revision. Replace transform when this changes; dest stays. */
-export const RUM_SESSIONS_SPEC = 7;
+export const RUM_SESSIONS_SPEC = 9;
 /**
  * Transform dest only persists the first `top_metrics` hit (ES #74420).
  * Size 1 is the only value that lands on the session index.

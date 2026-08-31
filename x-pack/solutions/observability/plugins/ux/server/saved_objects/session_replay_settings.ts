@@ -22,6 +22,12 @@ import {
   URL_GROUPING_DEPTH_MIN,
   URL_GROUPING_RULES_MAX_LENGTH,
   SYNC_DELAY_MAX_LENGTH,
+  SESSION_MAX_MS_DEFAULT,
+  SESSION_MAX_MS_MIN,
+  SESSION_MAX_MS_MAX,
+  SESSION_IDLE_MS_DEFAULT,
+  SESSION_IDLE_MS_MIN,
+  SESSION_IDLE_MS_MAX,
 } from '../../common/session_replay_settings';
 import {
   RUM_SESSIONS_LOOKBACK_DAYS,
@@ -83,6 +89,22 @@ const attributesSchemaV5 = attributesSchemaV4.extends({
     }),
     { maxSize: RUM_CCS_CLUSTERS_MAX, defaultValue: [] }
   ),
+});
+
+const attributesSchemaV6 = attributesSchemaV5.extends({
+  maskAllInputs: schema.boolean({ defaultValue: true }),
+  maskAllText: schema.boolean({ defaultValue: true }),
+  recordCanvas: schema.boolean({ defaultValue: true }),
+  sessionMaxMs: schema.number({
+    defaultValue: SESSION_MAX_MS_DEFAULT,
+    min: SESSION_MAX_MS_MIN,
+    max: SESSION_MAX_MS_MAX,
+  }),
+  sessionIdleMs: schema.number({
+    defaultValue: SESSION_IDLE_MS_DEFAULT,
+    min: SESSION_IDLE_MS_MIN,
+    max: SESSION_IDLE_MS_MAX,
+  }),
 });
 
 export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
@@ -193,6 +215,36 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: attributesSchemaV5.extends({}, { unknowns: 'ignore' }),
         create: attributesSchemaV5,
+      },
+    },
+    6: {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => ({
+            attributes: {
+              maskAllInputs: doc.attributes.maskAllInputs !== false,
+              maskAllText: doc.attributes.maskAllText !== false,
+              recordCanvas: doc.attributes.recordCanvas !== false,
+              sessionMaxMs:
+                typeof doc.attributes.sessionMaxMs === 'number' &&
+                doc.attributes.sessionMaxMs >= SESSION_MAX_MS_MIN &&
+                doc.attributes.sessionMaxMs <= SESSION_MAX_MS_MAX
+                  ? doc.attributes.sessionMaxMs
+                  : SESSION_MAX_MS_DEFAULT,
+              sessionIdleMs:
+                typeof doc.attributes.sessionIdleMs === 'number' &&
+                doc.attributes.sessionIdleMs >= SESSION_IDLE_MS_MIN &&
+                doc.attributes.sessionIdleMs <= SESSION_IDLE_MS_MAX
+                  ? doc.attributes.sessionIdleMs
+                  : SESSION_IDLE_MS_DEFAULT,
+            },
+          }),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: attributesSchemaV6.extends({}, { unknowns: 'ignore' }),
+        create: attributesSchemaV6,
       },
     },
   },

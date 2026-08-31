@@ -110,6 +110,7 @@ export const fetchSessions = (
     hasErrors?: string;
     hasRage?: string;
     hasDead?: string;
+    hasBounced?: string;
     errorGroup?: string;
     sessionIds?: string;
     pageUrl?: string;
@@ -228,6 +229,7 @@ const buildScorecard = async (
       sessions: computeDelta(current.kpis.sessions, prev?.kpis.sessions ?? null),
       pageViews: computeDelta(current.kpis.pageViews, prev?.kpis.pageViews ?? null),
       errorRate: computeDelta(current.kpis.errorRate, prev?.kpis.errorRate ?? null),
+      bounceRate: computeDelta(current.kpis.bounceRate, prev?.kpis.bounceRate ?? null),
       p75LoadMs: computeDelta(current.kpis.p75LoadMs, prev?.kpis.p75LoadMs ?? null),
       p75Inp: computeDelta(current.kpis.p75Inp, prev?.kpis.p75Inp ?? null),
     },

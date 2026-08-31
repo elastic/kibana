@@ -75,6 +75,7 @@ const mergeFacets = (left: SessionListFacets, right: SessionListFacets): Session
   hasReplay: left.hasReplay + right.hasReplay,
   hasErrors: left.hasErrors + right.hasErrors,
   hasRage: left.hasRage + right.hasRage,
+  hasBounced: left.hasBounced + right.hasBounced,
 });
 
 const mergeStats = (left: SessionListStats, right: SessionListStats): SessionListStats => ({
@@ -83,6 +84,8 @@ const mergeStats = (left: SessionListStats, right: SessionListStats): SessionLis
   withErrors: left.withErrors + right.withErrors,
   rageClicks: left.rageClicks + right.rageClicks,
   medianDurationMs: left.medianDurationMs,
+  bounced: left.bounced + right.bounced,
+  viewed: left.viewed + right.viewed,
 });
 
 /** Live must already be S_new (IDs not in the session index). Totals add. */

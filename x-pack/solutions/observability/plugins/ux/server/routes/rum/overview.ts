@@ -122,6 +122,7 @@ const overlaySessionIndex = async (
       pageViews: slice.pageViews,
       errorSessions: slice.errorSessions,
       errorRate: sessions > 0 ? slice.errorSessions / sessions : 0,
+      bounceRate: slice.bounceRate,
     },
     frustration: {
       ...result.frustration,
@@ -512,6 +513,7 @@ export const getRumOverviewRoute = createUxServerRoute({
           pageViews,
           errorSessions,
           errorRate: sessions > 0 ? errorSessions / sessions : 0,
+          bounceRate: null,
           p75LoadMs,
           p75Inp: percentileValue(inpBucket?.p75 ?? undefined),
         },

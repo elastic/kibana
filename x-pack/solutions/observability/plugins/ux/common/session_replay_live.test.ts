@@ -8,6 +8,7 @@
 import {
   DEFAULT_LIVE_POLL_MS,
   clampReplayOffsetMs,
+  collectReplayEventPages,
   filterLiveSessions,
   formatReplayClock,
   hasLiveReplaySeed,
@@ -73,6 +74,61 @@ describe('session replay live helpers', () => {
       'aaa-111',
     ]);
     expect(filterLiveSessions(sessions, 'missing')).toEqual([]);
+  });
+
+  it('pages replay events until a short page', async () => {
+    const fetchPage = jest
+      .fn()
+      .mockResolvedValueOnce({
+        events: [{ type: 4 }],
+        hitCount: 500,
+        pageFull: true,
+        lastCompleteEvent: 10,
+      })
+      .mockResolvedValueOnce({
+        events: [{ type: 2 }],
+        hitCount: 12,
+        pageFull: false,
+        lastCompleteEvent: 22,
+      });
+
+    const collected = await collectReplayEventPages(fetchPage);
+
+    expect(fetchPage).toHaveBeenNthCalledWith(1, undefined);
+    expect(fetchPage).toHaveBeenNthCalledWith(2, 10);
+    expect(collected).toEqual({
+      events: [{ type: 4 }, { type: 2 }],
+      truncated: false,
+      lastCompleteEvent: 22,
+    });
+  });
+
+  it('stops and flags truncation when the cursor does not advance', async () => {
+    const collected = await collectReplayEventPages(async () => ({
+      events: [{ type: 3 }],
+      hitCount: 500,
+      pageFull: true,
+      lastCompleteEvent: null,
+    }));
+
+    expect(collected.truncated).toBe(true);
+    expect(collected.events).toEqual([{ type: 3 }]);
+  });
+
+  it('stops paging early once shouldStop is true', async () => {
+    const fetchPage = jest.fn().mockResolvedValue({
+      events: [{ type: 4 }, { type: 2 }],
+      hitCount: 500,
+      pageFull: true,
+      lastCompleteEvent: 2,
+    });
+
+    const collected = await collectReplayEventPages(fetchPage, {
+      shouldStop: (events) => hasLiveReplaySeed(events as Array<{ type?: number }>),
+    });
+
+    expect(fetchPage).toHaveBeenCalledTimes(1);
+    expect(collected.truncated).toBe(false);
   });
 
   it('accepts a pasted session id for follow-by-id', () => {

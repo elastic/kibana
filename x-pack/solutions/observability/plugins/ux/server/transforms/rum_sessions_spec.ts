@@ -148,6 +148,7 @@ const LAST_SEEN_FIELDS = [
   'resource.attributes.client.geo.country_iso_code',
   'attributes.browser.breakpoint',
   RUM_CANONICAL_SERVICE_NAME_FIELD,
+  RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
   'attributes.network.connection.type',
   'attributes.device.memory',
 ] as const;
@@ -498,9 +499,13 @@ export const rumSessionsDestPipeline = {
             }
             ctx.error_groups = keys;
           }
+          def last = ctx.last_seen;
           def pageTokens = [];
           addToken(pageTokens, tokenFrom(ctx.page_first, 'attributes.url.path.grouped'));
           addToken(pageTokens, tokenFrom(ctx.page_last, 'attributes.url.path.grouped'));
+          if (pageTokens.length == 0) {
+            addToken(pageTokens, fieldOf(last, 'attributes.url.path.grouped'));
+          }
           def clickTokens = [];
           addToken(clickTokens, tokenFrom(ctx.click_first, 'attributes.browser.css_selector'));
           addToken(clickTokens, tokenFrom(ctx.click_last, 'attributes.browser.css_selector'));
@@ -518,7 +523,6 @@ export const rumSessionsDestPipeline = {
           ctx.event_sequence = joinTokens(events, ' ');
           ctx.rage_click_count = countOf(ctx.rage_clicks);
           ctx.dead_click_count = countOf(ctx.dead_clicks);
-          def last = ctx.last_seen;
           if (ctx.user == null) { ctx.user = new HashMap(); }
           def identified = ctx.user_seen;
           def key = firstIdentity(identified instanceof Map ? identified.token : identified);
@@ -541,7 +545,8 @@ export const rumSessionsDestPipeline = {
             if (ctx.service == null) { ctx.service = new HashMap(); }
             ctx.service.name = service;
           }
-          ctx.page_count = pageTokens.size();
+          // Prefer page_view_count (full filter agg). pageTokens is entry+exit only (ES top_metrics size 1).
+          ctx.page_count = countOf(ctx.page_view_count);
           def sid = ctx['session.id'];
           if (sid == null && ctx.session instanceof Map) { sid = ctx.session.id; }
           if (sid != null) {

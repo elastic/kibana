@@ -86,6 +86,7 @@ describe('sessionsPatch', () => {
       sessionQuery: '',
       location: '',
       hasReplay: '',
+      hasBounced: '',
     });
   });
 
@@ -101,6 +102,7 @@ describe('sessionsPatch', () => {
       sessionQuery: '',
       location: '',
       hasReplay: '',
+      hasBounced: '',
     });
   });
 
@@ -116,6 +118,7 @@ describe('sessionsPatch', () => {
       sessionQuery: '',
       location: '',
       hasReplay: 'true',
+      hasBounced: '',
     });
   });
 });

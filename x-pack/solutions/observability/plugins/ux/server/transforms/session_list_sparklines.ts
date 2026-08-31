@@ -13,7 +13,11 @@ import {
   type SessionActivityBucket,
 } from '../../common/session_replay';
 import { rumEsSearchOptions } from '../routes/rum/es_retry';
-import { buildSparkline, type OtelHit } from '../routes/session_replay/session_attributes';
+import {
+  buildSparkline,
+  pagePathFromAnyHits,
+  type OtelHit,
+} from '../routes/session_replay/session_attributes';
 
 const SPARKLINE_SAMPLE_SIZE = 100;
 
@@ -124,8 +128,19 @@ export const fillSessionListSparklines = async (
     )?.sessions?.buckets;
     const sparklines = sparklinesFromFilterBuckets(buckets, sessions);
     return sessions.map((session) => {
+      const hits = buckets?.[session.sessionId]?.sample?.hits?.hits ?? [];
       const sparkline = sparklines.get(session.sessionId);
-      return sparkline ? { ...session, sparkline } : session;
+      const pagePath = session.pagePath.length > 0 ? session.pagePath : pagePathFromAnyHits(hits);
+      const entryPage = session.entryPage ?? pagePath[0] ?? null;
+      const exitPage =
+        session.exitPage ?? (pagePath.length > 0 ? pagePath[pagePath.length - 1]! : null);
+      return {
+        ...session,
+        pagePath,
+        entryPage,
+        exitPage,
+        ...(sparkline ? { sparkline } : {}),
+      };
     });
   } catch {
     return sessions;

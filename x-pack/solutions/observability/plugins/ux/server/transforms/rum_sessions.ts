@@ -440,22 +440,12 @@ export const reconcileRumSessionsTransform = async ({
     // A deploy that changes the transform body is otherwise invisible: the
     // installed transform keeps running the previous spec until reinstalled.
     if (needsUpgrade) {
-      logger.info(
-        `Upgrading ${RUM_SESSIONS_TRANSFORM_ID} to version ${RUM_SESSIONS_VERSION} spec ${RUM_SESSIONS_SPEC}`
+      // PUT/start as asInternalUser stores elastic/kibana on the transform.
+      // That user cannot read traces-*.otel-* / logs-*.otel-*, so the indexer
+      // stays red at checkpoint 0 and the session list never gets a watermark.
+      logger.warn(
+        `${RUM_SESSIONS_TRANSFORM_ID} is behind version ${RUM_SESSIONS_VERSION} spec ${RUM_SESSIONS_SPEC}. Reinstall from UX Settings so the transform keeps the current user's index privileges.`
       );
-      try {
-        await ensureRumSessionsTransform({
-          client,
-          logger,
-          syncDelay: delay,
-          sourceLookbackDays: lookbackDays,
-        });
-        return;
-      } catch (error) {
-        logger.error(
-          `Failed to upgrade ${RUM_SESSIONS_TRANSFORM_ID}: ${extractEsErrorMessage(error)}`
-        );
-      }
     }
     const { destRecreated } = await ensureSessionsDestSorted({ client, logger });
     if (destRecreated) {

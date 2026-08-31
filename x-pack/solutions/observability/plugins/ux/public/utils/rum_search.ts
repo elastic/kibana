@@ -40,6 +40,7 @@ export interface RumFilterPatch {
   includeRaw?: string;
   analyticsMode?: string;
   hasReplay?: string;
+  hasBounced?: string;
 }
 
 /** Merge filter params into the current search string. Empty values remove the key. */
@@ -128,6 +129,7 @@ export const sessionsPatch = (patch: RumFilterPatch): RumFilterPatch => ({
   sessionQuery: '',
   location: '',
   hasReplay: '',
+  hasBounced: '',
   ...patch,
 });
 

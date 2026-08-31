@@ -41,6 +41,8 @@ export interface RumOverviewKpis {
   pageViews: number;
   errorSessions: number;
   errorRate: number;
+  /** Single-page sessions / sessions with ≥1 page view. Null when dest is not queried. */
+  bounceRate: number | null;
   p75LoadMs: number | null;
   p75Inp: number | null;
 }

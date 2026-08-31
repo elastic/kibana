@@ -28,6 +28,7 @@ const scorecard: RumScorecardReport = {
     sessions: { current: 10, previous: 8, abs: 2, pct: 0.25 },
     pageViews: { current: 20, previous: 20, abs: 0, pct: 0 },
     errorRate: { current: 0.1, previous: 0.2, abs: -0.1, pct: -0.5 },
+    bounceRate: { current: 0.4, previous: 0.5, abs: -0.1, pct: -0.2 },
     p75LoadMs: { current: 1200, previous: 1000, abs: 200, pct: 0.2 },
     p75Inp: { current: 180, previous: 200, abs: -20, pct: -0.1 },
   },

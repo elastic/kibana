@@ -135,6 +135,7 @@ const scorecardModel = (report: RumScorecardReport): EmailModel => {
           `Sessions: ${kpiValue(report.kpis.sessions, formatCount)}`,
           `Page views: ${kpiValue(report.kpis.pageViews, formatCount)}`,
           `Error rate: ${kpiValue(report.kpis.errorRate, formatRate)}`,
+          `Bounce rate: ${kpiValue(report.kpis.bounceRate, formatRate)}`,
           `p75 load: ${kpiValue(report.kpis.p75LoadMs, formatMs)}`,
           `p75 INP: ${kpiValue(report.kpis.p75Inp, formatMs)}`,
         ],

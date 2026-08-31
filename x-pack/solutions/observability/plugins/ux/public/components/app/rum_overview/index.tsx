@@ -49,7 +49,8 @@ import { BudgetChips } from '../rum_budgets/budget_chips';
 import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
 import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 
-const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
+const percent = (ratio: number | null): string =>
+  ratio == null ? '—' : `${Math.round(ratio * 1000) / 10}%`;
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -354,6 +355,39 @@ export function RumOverviewV2() {
             </EuiLink>
             <EuiSpacer size="xs" />
             <BudgetChips items={budgets} templateId="error_rate" pagePath={pageUrl} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel hasBorder paddingSize="m">
+            <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
+              <EuiFlexItem>
+                <EuiLink
+                  data-test-subj="uxOverviewKpiBounce"
+                  onClick={() =>
+                    pushRumPath(history, '/session-replay', sessionsPatch({ hasBounced: 'true' }))
+                  }
+                >
+                  <EuiStat
+                    title={percent(data.kpis.bounceRate)}
+                    titleSize="m"
+                    description={i18n.translate('xpack.ux.overview.kpi.bounceRate', {
+                      defaultMessage: 'Bounce rate',
+                    })}
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate('xpack.ux.overview.kpi.bounceRateTip', {
+                    defaultMessage:
+                      'Share of sessions that viewed exactly one page. Sessions with no page view are excluded.',
+                  })}
+                  type="info"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="session_bounce" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>

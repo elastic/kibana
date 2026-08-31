@@ -6,7 +6,12 @@
  */
 
 import { deflateSync } from 'zlib';
-import { reassembleReplayEvents, reassembleReplayEventsWithCursor } from './reassemble_events';
+import {
+  MAX_REPLAY_CHUNKS,
+  MAX_REPLAY_INFLATE_BYTES,
+  reassembleReplayEvents,
+  reassembleReplayEventsWithCursor,
+} from './reassemble_events';
 
 describe('reassembleReplayEvents', () => {
   it('reassembles single-chunk events in sort order', () => {
@@ -136,5 +141,38 @@ describe('packed replay events', () => {
     ]);
 
     expect(events).toEqual([event]);
+  });
+
+  it('skips events that claim more chunks than the cap', () => {
+    const events = reassembleReplayEvents([
+      {
+        body: JSON.stringify({ type: 2, timestamp: 1 }),
+        attributes: {
+          'rr-web.event': 1,
+          'rr-web.chunk': 1,
+          'rr-web.total-chunks': MAX_REPLAY_CHUNKS + 1,
+        },
+      },
+    ]);
+
+    expect(events).toEqual([]);
+  });
+
+  it('skips packed payloads that inflate past the byte cap', () => {
+    const packed = deflateSync(Buffer.alloc(MAX_REPLAY_INFLATE_BYTES + 1, 97)).toString('latin1');
+
+    const events = reassembleReplayEvents([
+      {
+        body: JSON.stringify(packed),
+        attributes: {
+          'rr-web.event': 1,
+          'rr-web.chunk': 1,
+          'rr-web.total-chunks': 1,
+          'rrweb.packed': 1,
+        },
+      },
+    ]);
+
+    expect(events).toEqual([]);
   });
 });

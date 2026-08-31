@@ -34,12 +34,13 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { userGroupKey } from '../../../common/rum_report';
-import type {
-  RumSessionSummary,
-  SessionListFacets,
-  SessionListStats,
-  SessionSortDirection,
-  SessionSortField,
+import {
+  bounceRate,
+  type RumSessionSummary,
+  type SessionListFacets,
+  type SessionListStats,
+  type SessionSortDirection,
+  type SessionSortField,
 } from '../../../common/session_replay';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
@@ -69,6 +70,7 @@ const EMPTY_FACETS: SessionListFacets = {
   hasReplay: 0,
   hasErrors: 0,
   hasRage: 0,
+  hasBounced: 0,
 };
 
 const EMPTY_STATS: SessionListStats = {
@@ -77,6 +79,8 @@ const EMPTY_STATS: SessionListStats = {
   withErrors: 0,
   rageClicks: 0,
   medianDurationMs: 0,
+  bounced: 0,
+  viewed: 0,
 };
 
 interface DurationOption {
@@ -198,6 +202,7 @@ const FacetSelect = ({
 const KpiStrip = ({ stats }: { stats: SessionListStats }) => {
   const replayPct = stats.total > 0 ? Math.round((stats.withReplay / stats.total) * 100) : 0;
   const errorPct = stats.total > 0 ? Math.round((stats.withErrors / stats.total) * 100) : 0;
+  const bouncePct = bounceRate(stats.bounced, stats.viewed);
 
   const items: Array<{ title: string; description: string }> = [
     {
@@ -214,6 +219,12 @@ const KpiStrip = ({ stats }: { stats: SessionListStats }) => {
       title: `${errorPct}%`,
       description: i18n.translate('xpack.ux.sessions.kpi.errors', {
         defaultMessage: 'With errors',
+      }),
+    },
+    {
+      title: bouncePct == null ? '—' : `${Math.round(bouncePct * 1000) / 10}%`,
+      description: i18n.translate('xpack.ux.sessions.kpi.bounce', {
+        defaultMessage: 'Bounce rate',
       }),
     },
     {
@@ -276,6 +287,7 @@ export function SessionReplayPanel() {
       device,
       analyticsMode,
       hasReplay: urlHasReplay,
+      hasBounced: urlHasBounced,
     },
   } = useLegacyUrlParams();
 
@@ -297,6 +309,7 @@ export function SessionReplayPanel() {
   const [onlyReplay, setOnlyReplay] = useState(urlHasReplay === 'true');
   const [onlyErrors, setOnlyErrors] = useState(false);
   const [onlyRage, setOnlyRage] = useState(false);
+  const [onlyBounced, setOnlyBounced] = useState(urlHasBounced === 'true');
   const [browser, setBrowser] = useState<string | undefined>();
   const [os, setOs] = useState<string | undefined>();
   const [durationKey, setDurationKey] = useState('any');
@@ -309,6 +322,10 @@ export function SessionReplayPanel() {
   useEffect(() => {
     setOnlyReplay(urlHasReplay === 'true');
   }, [urlHasReplay]);
+
+  useEffect(() => {
+    setOnlyBounced(urlHasBounced === 'true');
+  }, [urlHasBounced]);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -353,6 +370,7 @@ export function SessionReplayPanel() {
         hasReplay: onlyReplay || undefined,
         hasErrors: onlyErrors || undefined,
         hasRage: onlyRage || undefined,
+        hasBounced: onlyBounced || undefined,
         browser: urlBrowser || browser,
         os: urlOs || os,
         location: typeof urlLocation === 'string' ? urlLocation : undefined,
@@ -397,6 +415,7 @@ export function SessionReplayPanel() {
     onlyReplay,
     onlyErrors,
     onlyRage,
+    onlyBounced,
     browser,
     os,
     duration,
@@ -632,6 +651,7 @@ export function SessionReplayPanel() {
     onlyReplay ||
     onlyErrors ||
     onlyRage ||
+    onlyBounced ||
     Boolean(browser) ||
     Boolean(os) ||
     durationKey !== 'any' ||
@@ -652,6 +672,7 @@ export function SessionReplayPanel() {
     setOnlyReplay(false);
     setOnlyErrors(false);
     setOnlyRage(false);
+    setOnlyBounced(false);
     setBrowser(undefined);
     setOs(undefined);
     setDurationKey('any');
@@ -674,6 +695,8 @@ export function SessionReplayPanel() {
         sessionQuery: '',
         includeBots: '',
         botUa: '',
+        hasReplay: '',
+        hasBounced: '',
       }),
     });
   }, [history]);
@@ -688,7 +711,13 @@ export function SessionReplayPanel() {
       <LiveSessionsPanel />
       <EuiSpacer />
       <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
-        {(pageUrl || errorGroup || sessionIds || frustration || urlUser || urlLocation) && (
+        {(pageUrl ||
+          errorGroup ||
+          sessionIds ||
+          frustration ||
+          urlUser ||
+          urlLocation ||
+          urlHasBounced) && (
           <>
             <EuiCallOut
               announceOnMount
@@ -728,6 +757,11 @@ export function SessionReplayPanel() {
                     ? i18n.translate('xpack.ux.sessions.deepLink.ids', {
                         defaultMessage: '{count} linked sessions',
                         values: { count: sessionIds.split(',').filter(Boolean).length },
+                      })
+                    : null,
+                  urlHasBounced
+                    ? i18n.translate('xpack.ux.sessions.deepLink.bounced', {
+                        defaultMessage: 'Bounced sessions',
                       })
                     : null,
                 ]
@@ -810,6 +844,27 @@ export function SessionReplayPanel() {
               >
                 {i18n.translate('xpack.ux.sessions.filter.hasRage', {
                   defaultMessage: 'Rage clicks',
+                })}
+              </EuiFilterButton>
+              <EuiFilterButton
+                hasActiveFilters={onlyBounced}
+                onClick={() =>
+                  resetPage(() => {
+                    const next = !onlyBounced;
+                    setOnlyBounced(next);
+                    history.replace({
+                      ...history.location,
+                      search: mergeRumSearch(history.location.search, {
+                        hasBounced: next ? 'true' : '',
+                      }),
+                    });
+                  })
+                }
+                numFilters={facets.hasBounced}
+                data-test-subj="uxSessionFilterBounced"
+              >
+                {i18n.translate('xpack.ux.sessions.filter.hasBounced', {
+                  defaultMessage: 'Bounced',
                 })}
               </EuiFilterButton>
             </EuiFilterGroup>

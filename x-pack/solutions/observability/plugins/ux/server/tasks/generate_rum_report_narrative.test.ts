@@ -23,6 +23,7 @@ const report = {
     sessions: { current: 10, previous: null, abs: null, pct: null },
     pageViews: { current: 20, previous: null, abs: null, pct: null },
     errorRate: { current: 0.1, previous: null, abs: null, pct: null },
+    bounceRate: { current: 0.4, previous: null, abs: null, pct: null },
     p75LoadMs: { current: 1200, previous: null, abs: null, pct: null },
     p75Inp: { current: 180, previous: null, abs: null, pct: null },
   },

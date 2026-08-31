@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_SESSION_REPLAY_SETTINGS,
+  sdkReplayFromSettings,
+  sdkSessionFromSettings,
+} from './session_replay_settings';
+
 /** Same-origin plugin asset for the vendored EDOT replay IIFE. */
 export const SESSION_REPLAY_VENDOR_BUNDLE_PATH =
   '/plugins/ux/assets/elastic_otel_browser_replay.min.js';
@@ -20,6 +26,11 @@ export interface SessionReplayInjectSnippetParams {
   urlGroupingDepth?: number;
   urlGroupingRules?: string[];
   maskTextSelector?: string;
+  maskAllInputs?: boolean;
+  maskAllText?: boolean;
+  recordCanvas?: boolean;
+  sessionMaxMs?: number;
+  sessionIdleMs?: number;
   captureGraphql?: boolean;
   sampleRate?: number;
 }
@@ -36,6 +47,11 @@ const injectConfig = ({
   urlGroupingDepth,
   urlGroupingRules = [],
   maskTextSelector,
+  maskAllInputs,
+  maskAllText,
+  recordCanvas,
+  sessionMaxMs,
+  sessionIdleMs,
   captureGraphql,
   sampleRate,
   persistent = false,
@@ -57,6 +73,16 @@ const injectConfig = ({
   if (captureGraphql) {
     capture.graphql = true;
   }
+  const replaySettings = {
+    ...DEFAULT_SESSION_REPLAY_SETTINGS,
+    sampleRate: sampleRate ?? DEFAULT_SESSION_REPLAY_SETTINGS.sampleRate,
+    maskTextSelector: maskTextSelector ?? '',
+    maskAllInputs: maskAllInputs ?? DEFAULT_SESSION_REPLAY_SETTINGS.maskAllInputs,
+    maskAllText: maskAllText ?? DEFAULT_SESSION_REPLAY_SETTINGS.maskAllText,
+    recordCanvas: recordCanvas ?? DEFAULT_SESSION_REPLAY_SETTINGS.recordCanvas,
+    sessionMaxMs: sessionMaxMs ?? DEFAULT_SESSION_REPLAY_SETTINGS.sessionMaxMs,
+    sessionIdleMs: sessionIdleMs ?? DEFAULT_SESSION_REPLAY_SETTINGS.sessionIdleMs,
+  };
   return {
     serviceName,
     otlpEndpoint,
@@ -68,13 +94,8 @@ const injectConfig = ({
           },
         }),
     ...(Object.keys(capture).length ? { capture } : {}),
-    replay: {
-      enabled: true,
-      samplingRate: sampleRate ?? 100,
-      errorSamplingRate: 100,
-      quality: { recordCanvas: true },
-      ...(maskTextSelector ? { privacy: { maskAllInputs: true, maskTextSelector } } : {}),
-    },
+    session: sdkSessionFromSettings(replaySettings, persistent),
+    replay: sdkReplayFromSettings(replaySettings),
   };
 };
 
@@ -86,6 +107,11 @@ export const buildSessionReplayInjectPreview = ({
   urlGroupingDepth,
   urlGroupingRules,
   maskTextSelector,
+  maskAllInputs,
+  maskAllText,
+  recordCanvas,
+  sessionMaxMs,
+  sessionIdleMs,
   captureGraphql,
   sampleRate,
 }: Omit<SessionReplayInjectSnippetParams, 'agentSource'>): string => {
@@ -96,6 +122,11 @@ export const buildSessionReplayInjectPreview = ({
     urlGroupingDepth,
     urlGroupingRules,
     maskTextSelector,
+    maskAllInputs,
+    maskAllText,
+    recordCanvas,
+    sessionMaxMs,
+    sessionIdleMs,
     captureGraphql,
     sampleRate,
   });
@@ -132,6 +163,11 @@ export const buildSessionReplayInjectSnippet = ({
   urlGroupingDepth,
   urlGroupingRules,
   maskTextSelector,
+  maskAllInputs,
+  maskAllText,
+  recordCanvas,
+  sessionMaxMs,
+  sessionIdleMs,
   captureGraphql,
   sampleRate,
 }: SessionReplayInjectSnippetParams): string => {
@@ -142,6 +178,11 @@ export const buildSessionReplayInjectSnippet = ({
     urlGroupingDepth,
     urlGroupingRules,
     maskTextSelector,
+    maskAllInputs,
+    maskAllText,
+    recordCanvas,
+    sessionMaxMs,
+    sessionIdleMs,
     captureGraphql,
     sampleRate,
   });

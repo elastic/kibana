@@ -28,6 +28,16 @@ export interface SessionReplaySettings {
   urlGroupingDepth: number;
   urlGroupingRules: string;
   maskTextSelector: string;
+  /** Mask `<input>` / `<textarea>` values in replay. Default on. */
+  maskAllInputs: boolean;
+  /** Mask all DOM text (`maskTextSelector: '*'` unless a narrower selector is set). Default on. */
+  maskAllText: boolean;
+  /** Record `<canvas>` pixels. Default on. */
+  recordCanvas: boolean;
+  /** SDK session rotation cap (`session.maxMs`). */
+  sessionMaxMs: number;
+  /** SDK idle rotation (`session.idleMs`). */
+  sessionIdleMs: number;
   captureGraphql: boolean;
   /** Elasticsearch time value applied to session and daily transforms (`5m`, `30s`, `1h`). */
   syncDelay: string;
@@ -56,6 +66,15 @@ export const URL_GROUPING_DEPTH_MAX = 8;
 export const SYNC_DELAY_MAX_LENGTH = 8;
 export const SELECTED_REMOTE_CLUSTERS_MAX = RUM_CCS_CLUSTERS_MAX;
 
+/** EDOT `session.maxMs` default — 4h, vs the SDK's built-in 14m rotation. */
+export const SESSION_MAX_MS_DEFAULT = 4 * 60 * 60 * 1000;
+export const SESSION_MAX_MS_MIN = 15 * 60 * 1000;
+export const SESSION_MAX_MS_MAX = 24 * 60 * 60 * 1000;
+/** EDOT `session.idleMs` default — keep the SDK's 30m idle timeout. */
+export const SESSION_IDLE_MS_DEFAULT = 30 * 60 * 1000;
+export const SESSION_IDLE_MS_MIN = 5 * 60 * 1000;
+export const SESSION_IDLE_MS_MAX = 4 * 60 * 60 * 1000;
+
 export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   enabled: false,
   otlpEndpoint: '',
@@ -65,6 +84,11 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   urlGroupingDepth: 3,
   urlGroupingRules: '',
   maskTextSelector: '',
+  maskAllInputs: true,
+  maskAllText: true,
+  recordCanvas: true,
+  sessionMaxMs: SESSION_MAX_MS_DEFAULT,
+  sessionIdleMs: SESSION_IDLE_MS_DEFAULT,
   captureGraphql: false,
   syncDelay: RUM_SESSIONS_SYNC_DELAY,
   sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
@@ -72,13 +96,24 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   selectedRemoteClusters: [],
 };
 
-const clampDepth = (value: unknown): number => {
+const clampInt = (value: unknown, min: number, max: number, fallback: number): number => {
   const n = Math.round(Number(value));
   if (!Number.isFinite(n)) {
-    return DEFAULT_SESSION_REPLAY_SETTINGS.urlGroupingDepth;
+    return fallback;
   }
-  return Math.min(URL_GROUPING_DEPTH_MAX, Math.max(URL_GROUPING_DEPTH_MIN, n));
+  return Math.min(max, Math.max(min, n));
 };
+
+const clampDepth = (value: unknown): number =>
+  clampInt(
+    value,
+    URL_GROUPING_DEPTH_MIN,
+    URL_GROUPING_DEPTH_MAX,
+    DEFAULT_SESSION_REPLAY_SETTINGS.urlGroupingDepth
+  );
+
+export const msToMinutes = (ms: number): number => Math.round(ms / 60_000);
+export const minutesToMs = (minutes: number): number => minutes * 60_000;
 
 /** Clamp/trim untrusted input to the persisted bounds. */
 export const normalizeSessionReplaySettings = (
@@ -94,6 +129,21 @@ export const normalizeSessionReplaySettings = (
   urlGroupingDepth: clampDepth(input.urlGroupingDepth),
   urlGroupingRules: String(input.urlGroupingRules ?? '').slice(0, URL_GROUPING_RULES_MAX_LENGTH),
   maskTextSelector: String(input.maskTextSelector ?? '').slice(0, MASK_TEXT_SELECTOR_MAX_LENGTH),
+  maskAllInputs: input.maskAllInputs !== false,
+  maskAllText: input.maskAllText !== false,
+  recordCanvas: input.recordCanvas !== false,
+  sessionMaxMs: clampInt(
+    input.sessionMaxMs,
+    SESSION_MAX_MS_MIN,
+    SESSION_MAX_MS_MAX,
+    SESSION_MAX_MS_DEFAULT
+  ),
+  sessionIdleMs: clampInt(
+    input.sessionIdleMs,
+    SESSION_IDLE_MS_MIN,
+    SESSION_IDLE_MS_MAX,
+    SESSION_IDLE_MS_DEFAULT
+  ),
   captureGraphql: Boolean(input.captureGraphql),
   syncDelay: isValidEsTimeValue(input.syncDelay)
     ? input.syncDelay
@@ -115,4 +165,43 @@ export const sdkCaptureFromSettings = (settings: SessionReplaySettings) => ({
   ignoreUrls: parseIgnoreUrls(settings.ignoreUrls),
   urlGrouping: groupingFromSettings(settings),
   graphql: settings.captureGraphql,
+});
+
+/** rrweb privacy block — inputs and text masked unless the operator opts out. */
+export const sdkPrivacyFromSettings = (
+  settings: Pick<SessionReplaySettings, 'maskAllInputs' | 'maskAllText' | 'maskTextSelector'>
+): { maskAllInputs: boolean; maskTextSelector?: string } => {
+  const privacy: { maskAllInputs: boolean; maskTextSelector?: string } = {
+    maskAllInputs: settings.maskAllInputs,
+  };
+  if (settings.maskAllText) {
+    privacy.maskTextSelector = settings.maskTextSelector || '*';
+  } else if (settings.maskTextSelector) {
+    privacy.maskTextSelector = settings.maskTextSelector;
+  }
+  return privacy;
+};
+
+/** SDK `replay` block reflected in inject / auto-start. */
+export const sdkReplayFromSettings = (
+  settings: Pick<
+    SessionReplaySettings,
+    'sampleRate' | 'maskAllInputs' | 'maskAllText' | 'maskTextSelector' | 'recordCanvas'
+  >
+) => ({
+  enabled: true,
+  samplingRate: settings.sampleRate,
+  errorSamplingRate: 100,
+  quality: { recordCanvas: settings.recordCanvas },
+  privacy: sdkPrivacyFromSettings(settings),
+});
+
+/** EDOT `session` block — `maxMs` / `idleMs` override the IIFE's 14m / 30m constants. */
+export const sdkSessionFromSettings = (
+  settings: Pick<SessionReplaySettings, 'sessionMaxMs' | 'sessionIdleMs'>,
+  persistSession: boolean
+) => ({
+  persistSession,
+  maxMs: settings.sessionMaxMs,
+  idleMs: settings.sessionIdleMs,
 });

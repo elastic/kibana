@@ -26,6 +26,7 @@ import type { HttpStart } from '@kbn/core/public';
 import { pushRumPath } from '../../utils/rum_search';
 import {
   clampReplayOffsetMs,
+  collectReplayEventPages,
   formatReplayClock,
   hasLiveReplaySeed,
   isAtLiveEdge,
@@ -363,23 +364,35 @@ export function LiveSessionPlayer({ http, sessionId, pollMs, active }: Props) {
       }
       inFlightRef.current = true;
       try {
-        const afterEvent = cursorRef.current ?? undefined;
-        const response = await fetchSessionReplayEvents({
-          http,
-          sessionId,
-          afterEvent,
-          size: afterEvent == null ? undefined : LIVE_EVENT_PAGE_SIZE,
-        });
-        if (cancelled) {
-          return;
-        }
-        if (response.lastCompleteEvent != null) {
-          cursorRef.current = response.lastCompleteEvent;
-        }
-        const playable = (response.events as ReplayEventLike[]).filter(isPlayableRrwebEvent);
-        setError(null);
-
         if (!seededRef.current) {
+          const collected = await collectReplayEventPages(
+            async (afterEvent) => {
+              const response = await fetchSessionReplayEvents({
+                http,
+                sessionId,
+                afterEvent,
+                size: LIVE_EVENT_PAGE_SIZE,
+              });
+              return {
+                events: response.events,
+                hitCount: response.hitCount ?? response.events.length,
+                pageFull: Boolean(response.truncated),
+                lastCompleteEvent: response.lastCompleteEvent,
+              };
+            },
+            {
+              shouldStop: (events) =>
+                hasLiveReplaySeed((events as ReplayEventLike[]).filter(isPlayableRrwebEvent)),
+            }
+          );
+          if (cancelled) {
+            return;
+          }
+          if (collected.lastCompleteEvent != null) {
+            cursorRef.current = collected.lastCompleteEvent;
+          }
+          const playable = (collected.events as ReplayEventLike[]).filter(isPlayableRrwebEvent);
+          setError(null);
           setStatus('waiting');
           bufferRef.current = bufferRef.current.concat(playable);
           setEventCount(bufferRef.current.length);
@@ -390,6 +403,22 @@ export function LiveSessionPlayer({ http, sessionId, pollMs, active }: Props) {
           }
           return;
         }
+
+        const afterEvent = cursorRef.current ?? undefined;
+        const response = await fetchSessionReplayEvents({
+          http,
+          sessionId,
+          afterEvent,
+          size: LIVE_EVENT_PAGE_SIZE,
+        });
+        if (cancelled) {
+          return;
+        }
+        if (response.lastCompleteEvent != null) {
+          cursorRef.current = response.lastCompleteEvent;
+        }
+        const playable = (response.events as ReplayEventLike[]).filter(isPlayableRrwebEvent);
+        setError(null);
 
         const replayer = replayerRef.current;
         if (!replayer || playable.length === 0) {

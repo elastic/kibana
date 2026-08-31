@@ -13,7 +13,6 @@ import {
   type SessionReplayEventsResponse,
 } from '../../../common/session_replay';
 import {
-  FULL_REPLAY_EVENT_PAGE_SIZE,
   LIVE_EVENT_PAGE_SIZE,
   LIVE_EVENT_PAGE_SIZE_MAX,
 } from '../../../common/session_replay_live';
@@ -57,10 +56,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
     const { sessionId } = params.path;
     const afterEvent = parseOptionalInt(params.query?.afterEvent);
     const requestedSize = parseOptionalInt(params.query?.size);
-    const incremental = afterEvent != null;
-    const cap = incremental ? LIVE_EVENT_PAGE_SIZE_MAX : FULL_REPLAY_EVENT_PAGE_SIZE;
-    const fallback = incremental ? LIVE_EVENT_PAGE_SIZE : FULL_REPLAY_EVENT_PAGE_SIZE;
-    const size = Math.min(requestedSize ?? fallback, cap);
+    const size = Math.min(requestedSize ?? LIVE_EVENT_PAGE_SIZE, LIVE_EVENT_PAGE_SIZE_MAX);
     const client = await getRumSearchClient({ context, core, request });
 
     const filters: object[] = [
@@ -99,6 +95,8 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
       events: assembled.events,
       total: assembled.events.length,
       lastCompleteEvent: assembled.lastCompleteEvent ?? afterEvent ?? null,
+      hitCount: hits.length,
+      truncated: hits.length >= size,
     };
   },
 });

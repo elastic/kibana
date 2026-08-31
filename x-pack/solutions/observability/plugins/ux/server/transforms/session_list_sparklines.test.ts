@@ -132,6 +132,40 @@ describe('fillSessionListSparklines', () => {
     expect(result).toEqual([]);
   });
 
+  it('fills an empty dest page path from fetch-span URLs', async () => {
+    const start = '2026-08-25T10:00:00.000Z';
+    const end = '2026-08-25T10:01:00.000Z';
+    const search = jest.fn().mockResolvedValue({
+      aggregations: {
+        sessions: {
+          buckets: {
+            a: {
+              sample: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': start,
+                        name: 'POST',
+                        attributes: { 'url.path.grouped': '/app/ux/kibana-pr-284540/*' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    const row = { ...summary('a', start, end), pagePath: [], entryPage: null, exitPage: null };
+    const result = await fillSessionListSparklines({ search } as unknown as ElasticsearchClient, [
+      row,
+    ]);
+    expect(result[0]?.pagePath).toEqual(['app/ux/kibana-pr-284540/*']);
+    expect(result[0]?.entryPage).toBe('app/ux/kibana-pr-284540/*');
+  });
+
   it('attaches sparklines from the follow-up filters agg', async () => {
     const start = '2026-08-25T10:00:00.000Z';
     const end = '2026-08-25T10:01:00.000Z';

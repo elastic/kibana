@@ -17,7 +17,10 @@ export const LIVE_SESSION_LIST_SIZE_MAX = 25;
 
 export const LIVE_EVENT_PAGE_SIZE = 500;
 export const LIVE_EVENT_PAGE_SIZE_MAX = 2000;
-export const FULL_REPLAY_EVENT_PAGE_SIZE = 10000;
+/** Per-request docs for a recorded replay. The player pages with `afterEvent`. */
+export const FULL_REPLAY_EVENT_PAGE_SIZE = LIVE_EVENT_PAGE_SIZE;
+/** Stop paging after this many requests (~20k docs) and surface truncation. */
+export const FULL_REPLAY_FETCH_MAX_PAGES = 40;
 /** First-page docs for a paused thumbnail (meta + full snapshot, possibly chunked). */
 export const PREVIEW_REPLAY_EVENT_PAGE_SIZE = 2000;
 
@@ -72,6 +75,61 @@ export const parseFollowSessionId = (query: string): string | null => {
     return null;
   }
   return value;
+};
+
+export interface ReplayEventsPage {
+  events: unknown[];
+  hitCount: number;
+  pageFull: boolean;
+  lastCompleteEvent: number | null;
+}
+
+export interface CollectedReplayEvents {
+  events: unknown[];
+  truncated: boolean;
+  lastCompleteEvent: number | null;
+}
+
+/**
+ * Drain `afterEvent` pages until a short page, a stuck cursor, max pages, or `shouldStop`.
+ */
+export const collectReplayEventPages = async (
+  fetchPage: (afterEvent: number | undefined) => Promise<ReplayEventsPage>,
+  {
+    maxPages = FULL_REPLAY_FETCH_MAX_PAGES,
+    shouldStop,
+  }: {
+    maxPages?: number;
+    shouldStop?: (events: unknown[]) => boolean;
+  } = {}
+): Promise<CollectedReplayEvents> => {
+  const events: unknown[] = [];
+  let afterEvent: number | undefined;
+  let lastCompleteEvent: number | null = null;
+
+  for (let page = 0; page < maxPages; page++) {
+    const response = await fetchPage(afterEvent);
+    events.push(...response.events);
+    if (response.lastCompleteEvent != null) {
+      lastCompleteEvent = response.lastCompleteEvent;
+    }
+
+    if (shouldStop?.(events)) {
+      return { events, truncated: false, lastCompleteEvent };
+    }
+
+    if (!response.pageFull) {
+      return { events, truncated: false, lastCompleteEvent };
+    }
+
+    const nextCursor = response.lastCompleteEvent;
+    if (nextCursor == null || nextCursor === afterEvent) {
+      return { events, truncated: true, lastCompleteEvent };
+    }
+    afterEvent = nextCursor;
+  }
+
+  return { events, truncated: true, lastCompleteEvent };
 };
 
 export const formatReplayClock = (ms: number): string => {

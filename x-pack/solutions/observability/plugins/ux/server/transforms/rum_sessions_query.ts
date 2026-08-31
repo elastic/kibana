@@ -29,7 +29,9 @@ import {
 } from '../../common/session_funnel';
 import type { SessionPatternsResponse } from '../../common/session_patterns';
 import {
+  bounceRate,
   sessionUserFromKey,
+  SESSION_REPLAY_INDEX,
   type RumSessionSummary,
   type SessionListFacets,
   type SessionListResponse,
@@ -37,6 +39,8 @@ import {
   type SessionSortField,
 } from '../../common/session_replay';
 import { fillSessionListSparklines } from './session_list_sparklines';
+import { rumEsSearchOptions } from '../routes/rum/es_retry';
+import { REPLAY_SESSION_ID_SCRIPT } from '../routes/session_replay/session_id_script';
 
 export {
   mergeFunnelResponses,
@@ -71,6 +75,94 @@ export const sessionIndexTimeFilter = (rangeFrom: string, rangeTo: string, water
 const serviceFilter = (serviceName?: string) =>
   serviceName ? [{ term: { 'service.name': serviceName } }] : [];
 
+const replayServiceFilter = (serviceName?: string) =>
+  serviceName
+    ? [
+        {
+          bool: {
+            should: [
+              { term: { 'resource.attributes.service.name': serviceName } },
+              { term: { 'attributes.service.name': serviceName } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [];
+
+/** Bound terms agg so dest list filters stay inside the ES terms clause limit. */
+export const REPLAY_SESSION_ID_CAP = 10_000;
+
+/** Session ids that have rrweb docs in the list time window. */
+export const listReplaySessionIds = async ({
+  client,
+  rangeFrom,
+  rangeTo,
+  watermark,
+  serviceName,
+}: {
+  client: ElasticsearchClient;
+  rangeFrom: string;
+  rangeTo: string;
+  watermark?: string | null;
+  serviceName?: string;
+}): Promise<string[]> => {
+  const lte = watermark && watermark < rangeTo ? watermark : rangeTo;
+  try {
+    const result = await client.search(
+      {
+        index: SESSION_REPLAY_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { range: { '@timestamp': { gte: rangeFrom, lte } } },
+              ...replayServiceFilter(serviceName),
+            ],
+          },
+        },
+        aggs: {
+          sessions: {
+            terms: {
+              script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' },
+              size: REPLAY_SESSION_ID_CAP,
+              exclude: '',
+            },
+          },
+        },
+      },
+      rumEsSearchOptions
+    );
+    const buckets =
+      (result.aggregations as { sessions?: { buckets?: Array<{ key?: string | number }> } })
+        ?.sessions?.buckets ?? [];
+    return buckets.map((bucket) => String(bucket.key ?? '')).filter(Boolean);
+  } catch {
+    return [];
+  }
+};
+
+const withReplaySessionIds = async (
+  client: ElasticsearchClient,
+  params: SessionIndexFilterParams
+): Promise<SessionIndexFilterParams> => {
+  if (params.replaySessionIds) {
+    return params;
+  }
+  return {
+    ...params,
+    replaySessionIds: await listReplaySessionIds({
+      client,
+      rangeFrom: params.rangeFrom,
+      rangeTo: params.rangeTo,
+      watermark: params.watermark,
+      serviceName: params.serviceName,
+    }),
+  };
+};
+
 const termMatch = (field: string, values: string[]): object | undefined => {
   if (values.length === 0) {
     return undefined;
@@ -102,6 +194,10 @@ const FRUSTRATION_CLAUSE = {
   rage: { range: { rage_click_count: { gt: 0 } } },
   dead: { range: { dead_click_count: { gt: 0 } } },
 } as const;
+
+/** Dest `bounced` is `page_view_count <= 1` and includes zero-page rows. Use exact one view. */
+export const SESSION_INDEX_BOUNCED_FILTER = { term: { page_view_count: 1 } };
+export const SESSION_INDEX_VIEWED_FILTER = { range: { page_view_count: { gte: 1 } } };
 
 type SessionFrustrationKind = keyof typeof FRUSTRATION_CLAUSE;
 
@@ -246,7 +342,8 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
     errorGroups: asStringArray(source.error_groups),
     activeMs: asNumber(source.duration_ms) || Math.max(0, endMs - startMs),
     durationMs: asNumber(source.duration_ms) || Math.max(0, endMs - startMs),
-    pageCount: asNumber(source.page_count) || pages.length,
+    // page_view_count is the transform filter agg; page_count was entry+exit size until spec 8.
+    pageCount: asNumber(source.page_view_count) || asNumber(source.page_count) || pages.length,
     entryPage: asString(source.entry_page),
     exitPage: asString(source.exit_page),
     pagePath: pages,
@@ -271,25 +368,23 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
 const sourceHasReplay = (source: Record<string, unknown>): boolean =>
   source.has_replay === true || asNumber(source.replay_event_count) > 0;
 
-export const sessionIndexHasReplayQuery = (): object => ({
-  bool: {
-    should: [{ term: { has_replay: true } }, { range: { replay_event_count: { gt: 0 } } }],
-    minimum_should_match: 1,
-  },
-});
+export const sessionIndexHasReplayQuery = (replaySessionIds?: string[]): object =>
+  replaySessionIds && replaySessionIds.length > 0
+    ? { terms: { 'session.id': replaySessionIds } }
+    : { match_none: {} };
 
-/** Hide dest rows that are only resource-timing heartbeats (no page/click/error/replay). */
-export const sessionIndexActivityFilter = (): object => ({
-  bool: {
-    should: [
-      { range: { page_view_count: { gt: 0 } } },
-      { range: { click_count: { gt: 0 } } },
-      { range: { error_count: { gt: 0 } } },
-      { term: { has_replay: true } },
-    ],
-    minimum_should_match: 1,
-  },
-});
+/** Hide dest rows with no page view, click, error, or replay documents. */
+export const sessionIndexActivityFilter = (replaySessionIds?: string[]): object => {
+  const should: object[] = [
+    { range: { page_view_count: { gt: 0 } } },
+    { range: { click_count: { gt: 0 } } },
+    { range: { error_count: { gt: 0 } } },
+  ];
+  if (replaySessionIds && replaySessionIds.length > 0) {
+    should.push({ terms: { 'session.id': replaySessionIds } });
+  }
+  return { bool: { should, minimum_should_match: 1 } };
+};
 
 const facetBuckets = (agg: unknown): Array<{ key: string; count: number }> => {
   const buckets = (agg as { buckets?: Array<{ key?: string; doc_count?: number }> } | undefined)
@@ -319,11 +414,13 @@ export interface SessionIndexFilterParams {
   hasErrors?: string;
   hasRage?: string;
   hasDead?: string;
+  hasBounced?: string;
   minDurationMs?: number;
   maxDurationMs?: number;
   connection?: string;
   device?: string;
   errorGroup?: string;
+  replaySessionIds?: string[];
 }
 
 export const sessionIndexParamsFromQuery = (
@@ -380,15 +477,17 @@ export const buildSessionIndexFilters = ({
   hasErrors,
   hasRage,
   hasDead,
+  hasBounced,
   minDurationMs,
   maxDurationMs,
   connection,
   device,
   errorGroup,
+  replaySessionIds,
 }: SessionIndexFilterParams): object[] => {
   const filters: object[] = [
     sessionIndexTimeFilter(rangeFrom, rangeTo, watermark ?? undefined),
-    sessionIndexActivityFilter(),
+    sessionIndexActivityFilter(replaySessionIds),
     ...serviceFilter(serviceName),
   ];
   const browserClause = facetTerm('browser.name', browser);
@@ -458,7 +557,7 @@ export const buildSessionIndexFilters = ({
     }
   }
   if (hasReplay === 'true') {
-    filters.push(sessionIndexHasReplayQuery());
+    filters.push(sessionIndexHasReplayQuery(replaySessionIds));
   }
   if (hasErrors === 'true') {
     filters.push(FRUSTRATION_CLAUSE.error);
@@ -468,6 +567,9 @@ export const buildSessionIndexFilters = ({
   }
   if (hasDead === 'true') {
     filters.push(FRUSTRATION_CLAUSE.dead);
+  }
+  if (hasBounced === 'true') {
+    filters.push(SESSION_INDEX_BOUNCED_FILTER);
   }
   const { include: frustrationInclude, exclude: frustrationExclude } =
     partitionFilterValues(frustration);
@@ -564,12 +666,13 @@ export const querySessionIndexTrends = async ({
   client: ElasticsearchClient;
   calendarInterval?: '1d';
 }): Promise<RumTrendPoint[]> => {
+  const withReplay = await withReplaySessionIds(client, params);
   const result = await client.search({
     index: RUM_SESSIONS_INDEX,
     ignore_unavailable: true,
     allow_no_indices: true,
     size: 0,
-    query: { bool: { filter: buildSessionIndexFilters(params) } },
+    query: { bool: { filter: buildSessionIndexFilters(withReplay) } },
     aggs: {
       trends: sessionTrendsAggregation(calendarInterval),
     },
@@ -601,12 +704,13 @@ export const querySessionIndexFilters = async ({
   client,
   ...params
 }: SessionIndexFilterParams & { client: ElasticsearchClient }): Promise<RumFiltersResponse> => {
+  const withReplay = await withReplaySessionIds(client, params);
   const result = await client.search({
     index: RUM_SESSIONS_INDEX,
     ignore_unavailable: true,
     allow_no_indices: true,
     size: 0,
-    query: { bool: { filter: buildSessionIndexFilters(params) } },
+    query: { bool: { filter: buildSessionIndexFilters(withReplay) } },
     aggs: {
       browsers: { terms: { field: 'browser.name', size: 20, exclude: '' } },
       os: { terms: { field: 'os.name', size: 20, exclude: '' } },
@@ -640,15 +744,19 @@ export const querySessionIndexKpis = async ({
   deadSessions: number;
   rageClicks: number;
   deadClicks: number;
+  bouncedSessions: number;
+  viewedSessions: number;
+  bounceRate: number | null;
   trends: RumTrendPoint[];
 }> => {
+  const withReplay = await withReplaySessionIds(client, params);
   const result = await client.search({
     index: RUM_SESSIONS_INDEX,
     ignore_unavailable: true,
     allow_no_indices: true,
     size: 0,
     track_total_hits: true,
-    query: { bool: { filter: buildSessionIndexFilters(params) } },
+    query: { bool: { filter: buildSessionIndexFilters(withReplay) } },
     aggs: {
       page_views: { sum: { field: 'page_view_count' } },
       error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
@@ -656,12 +764,18 @@ export const querySessionIndexKpis = async ({
       dead_sessions: { filter: { range: { dead_click_count: { gt: 0 } } } },
       rage_clicks: { sum: { field: 'rage_click_count' } },
       dead_clicks: { sum: { field: 'dead_click_count' } },
+      bounced_sessions: { filter: SESSION_INDEX_BOUNCED_FILTER },
+      viewed_sessions: { filter: SESSION_INDEX_VIEWED_FILTER },
       trends: sessionTrendsAggregation(),
     },
   });
   const total =
     typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
   const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
+  const bouncedSessions =
+    (aggs.bounced_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0;
+  const viewedSessions =
+    (aggs.viewed_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0;
   return {
     sessions: total,
     pageViews: asNumber((aggs.page_views as { value?: number } | undefined)?.value),
@@ -670,6 +784,9 @@ export const querySessionIndexKpis = async ({
     deadSessions: (aggs.dead_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
     rageClicks: asNumber((aggs.rage_clicks as { value?: number } | undefined)?.value),
     deadClicks: asNumber((aggs.dead_clicks as { value?: number } | undefined)?.value),
+    bouncedSessions,
+    viewedSessions,
+    bounceRate: bounceRate(bouncedSessions, viewedSessions),
     trends: trendsFromSessionHistogram(aggs.trends),
   };
 };
@@ -688,7 +805,10 @@ export const querySessionIndexSessions = async ({
   page: number;
   perPage: number;
 }): Promise<SessionListResponse> => {
-  const filters = buildSessionIndexFilters(params);
+  const withReplay = await withReplaySessionIds(client, params);
+  const filters = buildSessionIndexFilters(withReplay);
+  const replaySessionIds = withReplay.replaySessionIds ?? [];
+  const replayIdSet = new Set(replaySessionIds);
 
   const result = await client.search({
     index: RUM_SESSIONS_INDEX,
@@ -709,9 +829,11 @@ export const querySessionIndexSessions = async ({
       os: { terms: { field: 'os.name', size: 12, exclude: '' } },
       countries: { terms: { field: 'country_iso', size: 12, exclude: '' } },
       users: { terms: { field: 'user.key', size: 12, exclude: '' } },
-      has_replay: { filter: sessionIndexHasReplayQuery() },
+      has_replay: { filter: sessionIndexHasReplayQuery(replaySessionIds) },
       has_errors: { filter: { range: { error_count: { gt: 0 } } } },
       has_rage: { filter: { range: { rage_click_count: { gt: 0 } } } },
+      has_bounced: { filter: SESSION_INDEX_BOUNCED_FILTER },
+      viewed_sessions: { filter: SESSION_INDEX_VIEWED_FILTER },
       rage_clicks: { sum: { field: 'rage_click_count' } },
       duration_percentiles: { percentiles: { field: 'duration_ms', percents: [50] } },
     },
@@ -720,12 +842,17 @@ export const querySessionIndexSessions = async ({
   const total =
     typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
   const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
-  const sessions = await fillSessionListSparklines(
-    client,
-    result.hits.hits.map((hit) =>
-      toSummary((hit._source as Record<string, unknown>) ?? {}, String(hit._id))
+  const sessions = (
+    await fillSessionListSparklines(
+      client,
+      result.hits.hits.map((hit) =>
+        toSummary((hit._source as Record<string, unknown>) ?? {}, String(hit._id))
+      )
     )
-  );
+  ).map((session) => ({
+    ...session,
+    hasReplay: replayIdSet.has(session.sessionId),
+  }));
   const facets: SessionListFacets = {
     browsers: facetBuckets(aggs.browsers),
     os: facetBuckets(aggs.os),
@@ -734,6 +861,7 @@ export const querySessionIndexSessions = async ({
     hasReplay: (aggs.has_replay as { doc_count?: number } | undefined)?.doc_count ?? 0,
     hasErrors: (aggs.has_errors as { doc_count?: number } | undefined)?.doc_count ?? 0,
     hasRage: (aggs.has_rage as { doc_count?: number } | undefined)?.doc_count ?? 0,
+    hasBounced: (aggs.has_bounced as { doc_count?: number } | undefined)?.doc_count ?? 0,
   };
   const median =
     (aggs.duration_percentiles as { values?: Record<string, number> } | undefined)?.values?.[
@@ -745,6 +873,8 @@ export const querySessionIndexSessions = async ({
     withErrors: facets.hasErrors,
     rageClicks: asNumber((aggs.rage_clicks as { value?: number } | undefined)?.value),
     medianDurationMs: Number.isFinite(median) ? Math.round(median) : 0,
+    bounced: facets.hasBounced,
+    viewed: (aggs.viewed_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
   };
   return { sessions, total, facets, stats };
 };

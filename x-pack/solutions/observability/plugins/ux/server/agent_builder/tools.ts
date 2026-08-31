@@ -133,12 +133,17 @@ When to use:
 - Find slow users (sortField=durationMs)
 - Who is facing errors (hasErrors=true)
 - Frustration hotspots (hasRage=true)
+- Bounced visits (hasBounced=true)
 
 Returns a compact session list with IDs that can be opened in Session Replay.`,
     schema: z.object({
       ...scopeSchema,
       hasErrors: z.boolean().optional().describe('When true, only sessions that recorded errors.'),
       hasRage: z.boolean().optional().describe('When true, only sessions with rage clicks.'),
+      hasBounced: z
+        .boolean()
+        .optional()
+        .describe('When true, only bounced sessions (exactly one page view).'),
       minDurationMs: z.number().int().min(0).max(3_600_000).optional(),
       sortField: z
         .enum(['startTime', 'durationMs', 'errorCount', 'rageClickCount'])
@@ -154,11 +159,12 @@ Returns a compact session list with IDs that can be opened in Session Replay.`,
           ...toListQuery(params),
           hasErrors: params.hasErrors ? 'true' : undefined,
           hasRage: params.hasRage ? 'true' : undefined,
+          hasBounced: params.hasBounced ? 'true' : undefined,
           minDurationMs: params.minDurationMs != null ? String(params.minDurationMs) : undefined,
           sortField: params.sortField,
           sortDirection: params.sortDirection,
           perPage: String(params.limit),
-          page: '1',
+          page: '0',
         });
         return {
           results: [

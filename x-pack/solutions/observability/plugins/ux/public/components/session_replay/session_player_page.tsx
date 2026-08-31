@@ -11,12 +11,14 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCallOut,
   EuiCode,
   EuiCopy,
   EuiEmptyPrompt,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -29,7 +31,7 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { UxTourAnchor } from '../app/rum_tour/ux_tour_anchor';
 import { useSyncOpenWithTourStep } from '../app/rum_tour/use_sync_open_with_tour_step';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
-import { fetchSessionReplayEvents } from '../../services/rest/session_replay_api';
+import { fetchAllSessionReplayEvents } from '../../services/rest/session_replay_api';
 import {
   uxAppHref,
   mergeRumSearch,
@@ -368,6 +370,7 @@ export function SessionPlayerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [eventCount, setEventCount] = useState(0);
+  const [truncated, setTruncated] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState('1');
   const [skipIdle, setSkipIdle] = useState(false);
@@ -719,6 +722,7 @@ export function SessionPlayerPage() {
     const load = async () => {
       setLoading(true);
       setError(null);
+      setTruncated(false);
       setCurrentMs(0);
       setTotalMs(0);
       setPageUrl(null);
@@ -737,11 +741,12 @@ export function SessionPlayerPage() {
       }
 
       try {
-        const response = await fetchSessionReplayEvents({ http, sessionId });
+        const response = await fetchAllSessionReplayEvents({ http, sessionId });
         if (cancelled) {
           return;
         }
-        setEventCount(response.total);
+        setEventCount(response.events.length);
+        setTruncated(response.truncated);
 
         if (response.events.length === 0) {
           setError(
@@ -1190,6 +1195,27 @@ export function SessionPlayerPage() {
           ],
         }}
       >
+        {truncated && !error && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              title={i18n.translate('xpack.ux.sessionReplay.player.truncatedTitle', {
+                defaultMessage: 'Replay truncated',
+              })}
+              data-test-subj="uxSessionReplayTruncatedCallout"
+            >
+              {i18n.translate('xpack.ux.sessionReplay.player.truncatedBody', {
+                defaultMessage:
+                  'Only the first {count} events were loaded. Later activity in this session is not shown.',
+                values: { count: eventCount },
+              })}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {error && !loading && (
           <EuiEmptyPrompt
             color="danger"

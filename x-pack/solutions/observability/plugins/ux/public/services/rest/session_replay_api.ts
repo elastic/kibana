@@ -14,6 +14,12 @@ import type {
   SessionSortDirection,
   SessionSortField,
 } from '../../../common/session_replay';
+import {
+  collectReplayEventPages,
+  FULL_REPLAY_EVENT_PAGE_SIZE,
+  type CollectedReplayEvents,
+  type ReplayEventsPage,
+} from '../../../common/session_replay_live';
 import type { FunnelStepDef, SessionFunnelResponse } from '../../../common/session_funnel';
 import type { SessionPatternsResponse } from '../../../common/session_patterns';
 import {
@@ -36,6 +42,7 @@ export interface FetchSessionsParams {
   hasErrors?: boolean;
   hasRage?: boolean;
   hasDead?: boolean;
+  hasBounced?: boolean;
   browser?: string;
   os?: string;
   location?: string;
@@ -72,6 +79,7 @@ export const fetchSessionReplaySessions = async ({
   hasErrors,
   hasRage,
   hasDead,
+  hasBounced,
   browser,
   os,
   location,
@@ -107,6 +115,7 @@ export const fetchSessionReplaySessions = async ({
       ...(hasErrors ? { hasErrors: 'true' } : {}),
       ...(hasRage ? { hasRage: 'true' } : {}),
       ...(hasDead ? { hasDead: 'true' } : {}),
+      ...(hasBounced ? { hasBounced: 'true' } : {}),
       ...(browser ? { browser } : {}),
       ...(os ? { os } : {}),
       ...(location ? { location } : {}),
@@ -166,6 +175,31 @@ export const fetchSessionReplayEvents = async ({
     }
   );
 };
+
+const toReplayEventsPage = (response: SessionReplayEventsResponse): ReplayEventsPage => ({
+  events: response.events,
+  hitCount: response.hitCount ?? response.events.length,
+  pageFull: Boolean(response.truncated),
+  lastCompleteEvent: response.lastCompleteEvent,
+});
+
+export const fetchAllSessionReplayEvents = async ({
+  http,
+  sessionId,
+}: {
+  http: HttpStart;
+  sessionId: string;
+}): Promise<CollectedReplayEvents> =>
+  collectReplayEventPages(async (afterEvent) =>
+    toReplayEventsPage(
+      await fetchSessionReplayEvents({
+        http,
+        sessionId,
+        afterEvent,
+        size: FULL_REPLAY_EVENT_PAGE_SIZE,
+      })
+    )
+  );
 
 export const fetchLiveReplaySessions = async ({
   http,

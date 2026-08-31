@@ -28,6 +28,30 @@ export const isHeartbeatOnlySession = (session: {
   session.errorCount === 0 &&
   !session.hasReplay;
 
+/** Classic bounce: exactly one page view. Zero-page API slices are not bounces. */
+export const isBouncedSession = (pageCount: number): boolean => pageCount === 1;
+
+/** Bounced / viewed. Viewed is sessions with at least one page view. */
+export const bounceRate = (bouncedSessions: number, viewedSessions: number): number | null =>
+  viewedSessions > 0 ? bouncedSessions / viewedSessions : null;
+
+export const sessionBounceCounts = (
+  sessions: Array<{ pageCount: number }>
+): { bounced: number; viewed: number } => {
+  let bounced = 0;
+  let viewed = 0;
+  for (const { pageCount } of sessions) {
+    if (pageCount < 1) {
+      continue;
+    }
+    viewed += 1;
+    if (pageCount === 1) {
+      bounced += 1;
+    }
+  }
+  return { bounced, viewed };
+};
+
 export interface SessionUser {
   id: string | null;
   email: string | null;
@@ -129,6 +153,7 @@ export interface SessionListFacets {
   hasReplay: number;
   hasErrors: number;
   hasRage: number;
+  hasBounced: number;
 }
 
 /** Aggregate KPIs for the current (filtered) result set. */
@@ -138,6 +163,8 @@ export interface SessionListStats {
   withErrors: number;
   rageClicks: number;
   medianDurationMs: number;
+  bounced: number;
+  viewed: number;
 }
 
 export interface SessionListResponse {
@@ -206,6 +233,10 @@ export interface SessionReplayEventsResponse {
   total: number;
   /** Highest complete `rr-web.event` key in this response (or prior cursor). */
   lastCompleteEvent: number | null;
+  /** ES hits in this page (chunks, not assembled events). */
+  hitCount: number;
+  /** True when this page filled `size` — more documents may exist. */
+  truncated: boolean;
 }
 
 export interface LiveReplaySession {

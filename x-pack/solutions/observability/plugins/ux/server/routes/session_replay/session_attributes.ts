@@ -112,10 +112,38 @@ export const toPageLabel = (raw: string | null): string | null => {
 };
 
 export const pageFromHit = (source: Record<string, unknown>): string | null =>
+  toPageLabel(attrString(source, 'url.path.grouped')) ||
   toPageLabel(attrString(source, 'page.url.path')) ||
   toPageLabel(attrString(source, 'page.url')) ||
   toPageLabel(attrString(source, 'url.full')) ||
   toPageLabel(attrString(source, 'http.url'));
+
+/** Dest/list token: strip leading hash/slash so fetch URLs match transform output. */
+export const pagePathToken = (raw: string | null): string | null => {
+  if (!raw) {
+    return null;
+  }
+  let token = raw.trim();
+  while (token.startsWith('#') || token.startsWith('/')) {
+    token = token.slice(1);
+  }
+  return token.length > 0 ? token : null;
+};
+
+/** Ordered unique page labels from any event URL, not only documentLoad. */
+export const pagePathFromAnyHits = (hits: OtelHit[]): string[] => {
+  const pages: string[] = [];
+  for (const hit of hits) {
+    const token = pagePathToken(pageFromHit(hit._source ?? {}));
+    if (!token || isAssetPath(token) || isAssetPath(`/${token}`)) {
+      continue;
+    }
+    if (pages[pages.length - 1] !== token) {
+      pages.push(token);
+    }
+  }
+  return pages.slice(0, 12);
+};
 
 export const urlFromHit = (source: Record<string, unknown>): string | null =>
   attrString(source, 'page.url') ||

@@ -109,6 +109,7 @@ export interface RumScorecardReport extends RumReportMeta {
     sessions: RumReportDelta;
     pageViews: RumReportDelta;
     errorRate: RumReportDelta;
+    bounceRate: RumReportDelta;
     p75LoadMs: RumReportDelta;
     p75Inp: RumReportDelta;
   };

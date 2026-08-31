@@ -129,10 +129,15 @@ export function InjectSnippetPanel({ defaultServiceName }: { defaultServiceName?
       urlGroupingDepth: capture.urlGrouping.depth,
       urlGroupingRules: capture.urlGrouping.rules,
       maskTextSelector: settings.maskTextSelector,
+      maskAllInputs: settings.maskAllInputs,
+      maskAllText: settings.maskAllText,
+      recordCanvas: settings.recordCanvas,
+      sessionMaxMs: settings.sessionMaxMs,
+      sessionIdleMs: settings.sessionIdleMs,
       captureGraphql: capture.graphql,
       sampleRate: settings.sampleRate,
     }),
-    [otlpEndpoint, serviceName, capture, settings.maskTextSelector, settings.sampleRate]
+    [otlpEndpoint, serviceName, capture, settings]
   );
 
   const snippet = useMemo(

@@ -41,7 +41,7 @@ describe('rumSessionsTransformBody', () => {
     expect(aggregations.click_first.aggs.token.top_metrics.metrics.field).toBe(
       'attributes.browser.css_selector'
     );
-    expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(9);
+    expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(10);
     expect(aggregations.last_seen.top_metrics.metrics).toEqual(
       expect.arrayContaining([
         { field: 'attributes.client.geo.country_iso_code' },
@@ -62,7 +62,10 @@ describe('rumSessionsTransformBody', () => {
         { field: 'resource.attributes.user.email' },
       ])
     );
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 7 }));
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 9 }));
+    expect(aggregations.last_seen.top_metrics.metrics).toEqual(
+      expect.arrayContaining([{ field: 'attributes.url.path.grouped' }])
+    );
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -120,6 +123,10 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('boolean replay = false');
     expect(source).toContain('ctx.duration_ms');
     expect(source).toContain('ctx.page_view_count');
+    expect(source).toContain('ctx.page_count = countOf(ctx.page_view_count)');
+    expect(source).not.toContain('ctx.page_count = pageTokens.size()');
+    expect(source).toContain('pageTokens.length == 0');
+    expect(source).toContain("fieldOf(last, 'attributes.url.path.grouped')");
     expect(source).toContain('firstIdentity');
     expect(source).toContain('ctx.user_seen');
     expect(source).toContain('ctx.user.key');

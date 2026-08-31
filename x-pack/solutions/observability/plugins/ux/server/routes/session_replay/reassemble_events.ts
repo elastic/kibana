@@ -7,6 +7,11 @@
 
 import { inflateSync } from 'zlib';
 
+/** Drop packed payloads that would expand past this (zip-bomb guard). */
+export const MAX_REPLAY_INFLATE_BYTES = 8 * 1024 * 1024;
+/** Ignore events that claim more chunks than this. */
+export const MAX_REPLAY_CHUNKS = 256;
+
 export interface ReplayEventHitSource {
   body?: string | { text?: string } | null;
   attributes?: Record<string, unknown>;
@@ -86,6 +91,16 @@ export const reassembleReplayEventsWithCursor = (
 
     const chunk = getAttrNumber(attrs, 'rr-web.chunk', ['rr-web', 'chunk']) ?? 1;
     const total = getAttrNumber(attrs, 'rr-web.total-chunks', ['rr-web', 'total-chunks']) ?? 1;
+    if (
+      !Number.isFinite(total) ||
+      total < 1 ||
+      total > MAX_REPLAY_CHUNKS ||
+      !Number.isFinite(chunk) ||
+      chunk < 1 ||
+      chunk > total
+    ) {
+      continue;
+    }
     const packed = (getAttrNumber(attrs, 'rrweb.packed', ['rrweb', 'packed']) ?? 0) === 1;
     const bodyText = getBodyText(hit.body);
     if (bodyText == null) {
@@ -129,9 +144,9 @@ export const unpackReplayPayload = (parsed: unknown, packed: boolean): unknown =
   if (!packed || typeof parsed !== 'string') {
     return parsed;
   }
-  try {
-    return JSON.parse(inflateSync(Buffer.from(parsed, 'latin1')).toString('utf8'));
-  } catch {
-    return parsed;
-  }
+  return JSON.parse(
+    inflateSync(Buffer.from(parsed, 'latin1'), {
+      maxOutputLength: MAX_REPLAY_INFLATE_BYTES,
+    }).toString('utf8')
+  );
 };

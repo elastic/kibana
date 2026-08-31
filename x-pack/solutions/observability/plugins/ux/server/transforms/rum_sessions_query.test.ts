@@ -15,10 +15,31 @@ import {
 } from './rum_sessions_query';
 
 describe('sessionIndexHasReplayQuery', () => {
-  it('matches the SDK boolean or leftover replay_event_count', () => {
-    expect(sessionIndexHasReplayQuery()).toEqual({
+  it('matches dest session ids that have replay documents', () => {
+    expect(sessionIndexHasReplayQuery(['abc', 'def'])).toEqual({
+      terms: { 'session.id': ['abc', 'def'] },
+    });
+  });
+
+  it('matches nothing when no replay session ids were found', () => {
+    expect(sessionIndexHasReplayQuery([])).toEqual({ match_none: {} });
+  });
+});
+
+describe('sessionIndexActivityFilter', () => {
+  it('does not treat the SDK has_replay flag as activity', () => {
+    expect(JSON.stringify(sessionIndexActivityFilter())).not.toContain('has_replay');
+  });
+
+  it('keeps dest rows that have replay documents', () => {
+    expect(sessionIndexActivityFilter(['sid-1'])).toEqual({
       bool: {
-        should: [{ term: { has_replay: true } }, { range: { replay_event_count: { gt: 0 } } }],
+        should: [
+          { range: { page_view_count: { gt: 0 } } },
+          { range: { click_count: { gt: 0 } } },
+          { range: { error_count: { gt: 0 } } },
+          { terms: { 'session.id': ['sid-1'] } },
+        ],
         minimum_should_match: 1,
       },
     });
@@ -98,6 +119,16 @@ describe('buildSessionIndexFilters', () => {
         { bool: { must_not: [{ terms: { country_iso: ['US', 'DE'] } }] } },
       ])
     );
+  });
+
+  it('filters bounced dest rows as exactly one page view', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+      hasBounced: 'true',
+    });
+    expect(filters).toEqual(expect.arrayContaining([{ term: { page_view_count: 1 } }]));
+    expect(JSON.stringify(filters)).not.toContain('"bounced"');
   });
 
   it('ORs frustration kinds and does not double-apply hasErrors', () => {

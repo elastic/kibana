@@ -16,6 +16,8 @@ import {
 } from '../../transforms/rum_sessions_query';
 import {
   isHeartbeatOnlySession,
+  isBouncedSession,
+  sessionBounceCounts,
   RUM_SESSION_SOURCE_INDEX,
   SESSION_REPLAY_INDEX,
   type RumSessionSummary,
@@ -24,6 +26,7 @@ import {
   type SessionListStats,
   type SessionSortField,
 } from '../../../common/session_replay';
+import { CLICK_FILTER, EXCEPTION_FILTER } from '../../transforms/rum_sessions_spec';
 import {
   buildSparkline,
   clientFromHits,
@@ -31,6 +34,7 @@ import {
   computeActiveMs,
   countDeadAndErrorClicks,
   dedupeConsecutive,
+  pagePathFromAnyHits,
   userFromHits,
   type OtelHit,
 } from './session_attributes';
@@ -106,7 +110,8 @@ const deriveFromSample = (
   identifiedHits: OtelHit[] = []
 ): SessionDerived => {
   const { pages, activities, clicks, timestamps, errorGroups } = collectSessionSignals(hits);
-  const pagePath = dedupeConsecutive(pages).slice(0, 12);
+  const viewPath = dedupeConsecutive(pages).slice(0, 12);
+  const pagePath = viewPath.length > 0 ? viewPath : pagePathFromAnyHits(hits);
   const activityPath = dedupeConsecutive(activities).slice(0, 10);
   const { dead, rage } = countDeadAndErrorClicks(hits, clicks);
   const userHits = identifiedHits.length > 0 ? [...identifiedHits, ...hits] : hits;
@@ -115,7 +120,7 @@ const deriveFromSample = (
     entryPage: pagePath[0] ?? null,
     exitPage: pagePath.length > 0 ? pagePath[pagePath.length - 1]! : null,
     pagePath,
-    pageCount: pagePath.length,
+    pageCount: viewPath.length,
     activityPath,
     rageClickCount: rage,
     deadClickCount: dead,
@@ -152,6 +157,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
         hasErrors: boundedString(8),
         hasRage: boundedString(8),
         hasDead: boundedString(8),
+        hasBounced: boundedString(8),
         minDurationMs: boundedString(16),
         maxDurationMs: boundedString(16),
         click: boundedString(512),
@@ -196,6 +202,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
         hasErrors: params.query.hasErrors,
         hasRage: params.query.hasRage,
         hasDead: params.query.hasDead,
+        hasBounced: params.query.hasBounced,
         minDurationMs: params.query.minDurationMs ? Number(params.query.minDurationMs) : undefined,
         maxDurationMs: params.query.maxDurationMs ? Number(params.query.maxDurationMs) : undefined,
       });
@@ -366,20 +373,8 @@ const queryRawSessions = async (
             aggs: {
               start_time: { min: { field: '@timestamp' } },
               end_time: { max: { field: '@timestamp' } },
-              error_count: {
-                filter: {
-                  bool: {
-                    should: [
-                      { term: { event_name: 'exception' } },
-                      { term: { name: 'exception' } },
-                      { term: { 'attributes.event.outcome': 'failure' } },
-                      { term: { 'attributes.log.level': 'ERROR' } },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              },
-              click_count: { filter: { term: { name: 'click' } } },
+              error_count: { filter: EXCEPTION_FILTER },
+              click_count: { filter: CLICK_FILTER },
               sample: {
                 top_hits: {
                   size: 100,
@@ -577,6 +572,7 @@ const queryRawSessions = async (
     hasErrors,
     hasRage,
     hasDead,
+    hasBounced,
     browser,
     os,
     location,
@@ -601,11 +597,13 @@ const queryRawSessions = async (
   const wantRage = hasRage === 'true' || frustration === 'rage';
   const wantErrors = hasErrors === 'true' || frustration === 'error';
   const wantDead = hasDead === 'true' || frustration === 'dead';
+  const wantBounced = hasBounced === 'true';
   const filtered = searchFiltered.filter((session) => {
     if (hasReplay === 'true' && !session.hasReplay) return false;
     if (wantErrors && session.errorCount === 0) return false;
     if (wantRage && session.rageClickCount === 0) return false;
     if (wantDead && session.deadClickCount === 0) return false;
+    if (wantBounced && !isBouncedSession(session.pageCount)) return false;
     if (browser && session.client.browser !== browser) return false;
     if (os && session.client.os !== os) return false;
     if (location && session.client.countryIso !== location && session.client.country !== location) {
@@ -668,6 +666,7 @@ const computeFacets = (sessions: RumSessionSummary[]): SessionListFacets => ({
   hasReplay: sessions.filter((session) => session.hasReplay).length,
   hasErrors: sessions.filter((session) => session.errorCount > 0).length,
   hasRage: sessions.filter((session) => session.rageClickCount > 0).length,
+  hasBounced: sessions.filter((session) => isBouncedSession(session.pageCount)).length,
 });
 
 const computeStats = (sessions: RumSessionSummary[]): SessionListStats => {
@@ -681,11 +680,14 @@ const computeStats = (sessions: RumSessionSummary[]): SessionListStats => {
       : durations.length % 2 === 1
       ? durations[(durations.length - 1) / 2]
       : Math.round((durations[durations.length / 2 - 1] + durations[durations.length / 2]) / 2);
+  const bounce = sessionBounceCounts(sessions);
   return {
     total: sessions.length,
     withReplay: sessions.filter((session) => session.hasReplay).length,
     withErrors: sessions.filter((session) => session.errorCount > 0).length,
     rageClicks: sessions.reduce((sum, session) => sum + session.rageClickCount, 0),
     medianDurationMs: median,
+    bounced: bounce.bounced,
+    viewed: bounce.viewed,
   };
 };
