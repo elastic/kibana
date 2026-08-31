@@ -33,6 +33,11 @@ import {
  * (`libbeat/outputs/elasticsearch/config.go`, `config_presets.go`) so that both exporters
  * generated for the same output behave the same way. Keep them in sync.
  *
+ * The translation only runs for outputs that store performance configuration of their own —
+ * a `preset` or a `config_yaml` (see `hasStoredPerformanceConfig`). An output with neither,
+ * such as the never-edited `default` output Fleet creates at bootstrap, is left alone and the
+ * exporter keeps its own upstream defaults.
+ *
  * Transport settings (`timeout`, `idle_connection_timeout`, ssl, proxy) are deliberately out
  * of scope: the agent routes those through the `beatsauth` extension, which Fleet only emits
  * when the output actually configures ssl/proxy/transport fields (see `buildBeatsauthConfig`).
@@ -236,6 +241,17 @@ const readHeadersSetting = (
   return Object.keys(headers).length > 0 ? headers : undefined;
 };
 
+/**
+ * Whether the output stores any performance configuration of its own.
+ *
+ * The output Fleet creates at bootstrap (`DEFAULT_OUTPUT`) carries only name/type/hosts, and a
+ * `preset` is persisted only once the output is saved through the settings flyout. When nothing
+ * is stored there is no user intent to translate, so the exporter is left at its own upstream
+ * defaults rather than being given synthesised Beats defaults.
+ */
+const hasStoredPerformanceConfig = (output: Output): boolean =>
+  Boolean(output.preset) || (output.config_yaml ?? '').trim() !== '';
+
 const getPresetConfig = (output: Output): EsOutputPresetConfig | undefined => {
   if (!outputTypeSupportPresets(output.type)) {
     return undefined;
@@ -333,6 +349,10 @@ const calcNamedPresetSizing = (
  * the dynamic `data_stream.*` routing that OTel integrations rely on.
  */
 export const buildOtelEsExporterConfig = (output: Output): Record<string, unknown> => {
+  if (!hasStoredPerformanceConfig(output)) {
+    return {};
+  }
+
   const settings = resolveEffectiveEsOutputSettings(output);
 
   // Beats opens one connection per host per worker, and the agent derives the OTel
