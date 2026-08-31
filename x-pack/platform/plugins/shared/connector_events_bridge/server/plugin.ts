@@ -40,14 +40,9 @@ export class ConnectorEventsBridgePlugin
     this.logger.info('Inbound events enabled; registering connector event emitter');
     registerWorkflowsConnectorEventEmitter({
       actions,
-      logger: this.logger,
       getWorkflowsExtensionsStart: async () => {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.workflowsExtensions;
-      },
-      getInternalEsClient: async () => {
-        const [coreStart] = await core.getStartServices();
-        return coreStart.elasticsearch.client.asInternalUser;
       },
     });
 
