@@ -660,6 +660,121 @@ describe('Alerts Client', () => {
 
           spy.mockRestore();
         });
+
+        test('untracks alert documents whose uuid is not tracked in task state (orphans)', async () => {
+          clusterClient.search
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+              hits: { total: { relation: 'eq', value: 0 }, hits: [] },
+            })
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+              hits: {
+                total: { relation: 'eq', value: 1 },
+                hits: [
+                  {
+                    _id: 'abc',
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    _seq_no: 41,
+                    _primary_term: 665,
+                    _source: fetchedAlert1,
+                  },
+                ],
+              },
+            });
+          clusterClient.updateByQuery.mockResolvedValueOnce({ updated: 1, total: 1 });
+
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          // activeAlertsFromState/recoveredAlertsFromState are both empty in defaultExecutionOpts,
+          // so fetchedAlert1's uuid ('abc') is not tracked in task state and is an orphan.
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
+            allow_no_indices: true,
+            ignore_unavailable: true,
+            conflicts: 'proceed',
+            script: expect.objectContaining({ lang: 'painless' }),
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                filter: [{ ids: { values: ['abc'] } }],
+              },
+            },
+          });
+
+          spy.mockRestore();
+        });
+
+        test('does not call updateByQuery when there are no orphaned alerts', async () => {
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+
+          spy.mockRestore();
+        });
+
+        test('logs an error and does not throw when untracking orphaned alerts fails', async () => {
+          clusterClient.search
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+              hits: { total: { relation: 'eq', value: 0 }, hits: [] },
+            })
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+              hits: {
+                total: { relation: 'eq', value: 1 },
+                hits: [
+                  {
+                    _id: 'abc',
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    _seq_no: 41,
+                    _primary_term: 665,
+                    _source: fetchedAlert1,
+                  },
+                ],
+              },
+            });
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('untrack failed!'));
+
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await expect(
+            alertsClient.initializeExecution(defaultExecutionOpts)
+          ).resolves.not.toThrow();
+
+          expect(logger.error).toHaveBeenCalledWith(
+            expect.stringContaining('Error untracking 1 orphaned alerts'),
+            logTags
+          );
+
+          spy.mockRestore();
+        });
       });
 
       describe('persistAlerts()', () => {

@@ -47,6 +47,9 @@ export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   all: Record<string, Alert & AlertData>;
   seqNo: Record<string, number | undefined>;
   primaryTerm: Record<string, number | undefined>;
+  // uuids of active/delayed documents whose uuid is not present in task state, populated by
+  // getTrackedAlerts's reconciliation pass. AlertsClient untracks these on load.
+  orphanedAlertUuids: string[];
   get: (uuid: string) => Alert & AlertData;
   getById: (id: string) => (Alert & AlertData) | undefined;
 }

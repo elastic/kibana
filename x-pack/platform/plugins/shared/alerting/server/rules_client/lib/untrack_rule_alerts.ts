@@ -85,6 +85,16 @@ export const untrackRuleAlerts = async (
         if (!context.alertsService)
           throw new Error('Could not access alertsService to untrack alerts');
         await context.alertsService.setAlertsToUntracked({ indices, ruleIds: [id] });
+
+        // Every alert for this rule was just untracked in AAD, so nothing task state
+        // is still tracking can be legitimate anymore. Clear it, otherwise re-enabling
+        // the rule keeps uuids whose documents are now excluded from every read-back
+        // query, which leads to an unretried `create` 409 on the next write.
+        await context.taskManager.bulkUpdateState([attributes.scheduledTaskId], (taskState) => ({
+          ...taskState,
+          alertInstances: {},
+          alertRecoveredInstances: {},
+        }));
       }
     } catch (error) {
       // this should not block the rest of the disable process
