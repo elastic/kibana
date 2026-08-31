@@ -167,6 +167,9 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
   echo "--- Publish workflow step schema to CDN"
   if ! (cd "$(git rev-parse --show-toplevel)" && .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless); then
     echo "^^^ Workflow step schema CDN publish failed; continuing so the image-tag-update trigger is not blocked."
+    buildkite-agent annotate \
+      "**Workflow step schema CDN publish (serverless) failed.** The schema at https://workflows.elastic.co/schema/v1/serverless may be stale. Check the job log for details." \
+      --style warning --context workflow-schema-cdn
   fi
 fi
 

@@ -48,11 +48,15 @@ steps:
     command: ".buildkite/scripts/steps/workflow_step_schema/publish_schema.sh release"
     soft_fail: true
     if: 'build.env("RELEASE_BUILD") == "true" && build.env("DRY_RUN") != "true" && build.env("DRY_RUN") != "1"'
+    depends_on: "dra-prep"
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+    env:
+      BASE_VERSION: "${BASE_VERSION}"
+      FULL_VERSION: "${FULL_VERSION}"
     timeout_in_minutes: 10
 EOF
 else

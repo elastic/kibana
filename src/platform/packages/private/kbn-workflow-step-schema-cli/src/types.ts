@@ -29,15 +29,14 @@ export interface VariantManifest {
 }
 
 export interface IndexManifest {
-  kibanaVersion: string;
-  buildHash: string;
-  profile: 'superset';
   /**
-   * The channel is omitted from the committed artifact and stamped at CDN
-   * publish time by `publish_schema.sh` so the committed tree carries a single
-   * channel-agnostic bundle. The CLI path (`--channel`) still sets this field
-   * for out-of-band invocations.
+   * `kibanaVersion`, `buildHash`, and `channel` are omitted from the committed
+   * artifact and stamped at CDN publish time by `publish_schema.sh` (via `jq`).
+   * The CLI path still sets all three for out-of-band invocations.
    */
+  kibanaVersion?: string;
+  buildHash?: string;
+  profile: 'superset';
   channel?: string;
   /** Sorted connector type ids from `GET /api/workflows/connectors`. */
   connectorTypes: string[];
