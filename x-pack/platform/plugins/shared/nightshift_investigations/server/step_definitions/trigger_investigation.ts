@@ -35,7 +35,9 @@ const inputSchema = z.object({
   context: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe('Additional context to pass to the investigation workflow'),
+    .describe(
+      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (

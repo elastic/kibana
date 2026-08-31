@@ -57,27 +57,11 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'running'
-    on-failure:
-      continue: true
-  # Records a pending investigation on the Significant Event as soon as the workflow starts,
-  # so the UI can show an in-progress indicator before the agent step finishes.
-  # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
-  - name: attach_pending_to_significant_event
-    type: kibana.request
-    if: '${{ inputs.context.event_uuid != null }}'
-    with:
-      method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        workflow_execution_id: '{{ execution.id }}'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
       continue: true
 
@@ -110,7 +94,41 @@ steps:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
         {% endif %}
-        {% if inputs.context %}
+        {% if inputs.context.source == 'alert' %}
+        This investigation was triggered by an alerting rule, so the condition that fired is
+        already known — do not spend effort rediscovering it. Start from the rule condition
+        stated above (the reason, and the observed value against its threshold) and work
+        outwards to what caused the metric to move.
+
+        You are not investigating a significant event. That is a separate curated entity in
+        this product, not another word for an alert that matters, and none is attached here.
+        Skip the step that provides trigger feedback. Omit `trigger_feedback`
+        from your output entirely — do not invent severity, summary, or status changes for
+        one.
+
+        Treat the affected entity fields as the scope of the problem: filter your ES|QL queries
+        to that entity first, and only widen when you need to establish whether neighbours are
+        affected too. Where an index pattern is given, use it as the starting point for queries
+        rather than guessing at index names.
+
+        Where affected entity fields are given, they are the known starting point for what this
+        problem impacts. The rule grouped on them, so they are established fact rather than a
+        hypothesis, and every one of them is impacted unless you find evidence otherwise. Name
+        them explicitly in your summary rather than leaving them implicit in the reason text, and
+        use the field name as well as the value (for example "service.name checkout") so each one
+        is unambiguous. Not every rule type records them, so do not invent entity fields that
+        were not given to you.
+
+        Then establish whether the impact is wider than what the rule saw. The rule only grouped
+        on the fields it was configured with, so it cannot tell you about anything else that is
+        affected. When you find an additional impacted entity, say what evidence identified it
+        and keep it distinct from the entities the alert already named.
+
+        Where rule parameters are given, they describe how the condition is evaluated
+        (aggregation, window, and threshold). Read them before concluding that a spike is
+        anomalous — a short window or a tight threshold can fire on normal variation, and "the
+        rule is too sensitive" is a legitimate conclusion supported by the data.
+        {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
@@ -226,6 +244,17 @@ steps:
             description: >
               The mechanism/root-cause narrative, as plain prose — no markdown headings or bullet
               lists. Actionable steps belong in recommendations, not here.
+          severity:
+            type: string
+            enum: ['80-critical', '60-high', '40-medium', '20-low']
+            description: >
+              How severe the investigated situation is, rated on the tier ladder in the agent
+              instructions from what this investigation confirmed — whether the affected operation
+              fails, degrades, or still completes, and how broad that impact is. Set it for every
+              investigation, whatever triggered it, and rate it from your own findings rather than
+              copying a severity the trigger already carried. Distinct from a
+              trigger_feedback severity entry, which exists only for significant-event
+              runs and rates that one event rather than the whole situation.
           recommendations:
             type: array
             description: >
@@ -279,16 +308,16 @@ steps:
               required:
                 - title
                 - description
-          significant_event_updates:
+          trigger_feedback:
             type: array
             description: >
-              Optional list of proposed changes to the significant event's fields based on what the
-              investigation established. Each entry targets one field (severity, summary, or status)
+              Optional feedback for the trigger based on what the investigation established. Each
+              entry proposes a change to one significant-event field (severity, summary, or status)
               with a typed from/to, a one-or-two-sentence reason tied to the confirmed findings, and
               1–10 evidence items. Omit entries — or the whole array — for fields that do not need
-              changing. Changes are applied automatically via the attach_to_significant_event step; only
+              changing. The workflow returns this feedback but does not apply it directly; only
               propose what the listed evidence can defend. When no significant-event context was
-              provided (no event_uuid in inputs.context), omit significant_event_updates entirely.
+              provided (no event_uuid in inputs.context), omit trigger_feedback entirely.
             maxItems: 3
             items:
               oneOf:
@@ -666,39 +695,6 @@ steps:
     on-failure:
       continue: true
 
-  # Connects this investigation back to the Significant Event that triggered it, so the
-  # UI can surface investigation history and link to the full RCA result, and — in the same
-  # append-only version — applies any field changes the agent proposed via
-  # `significant_event_updates` (severity/summary/status). Recording the completed investigation
-  # and its reassessed fields as one write keeps the lifecycle to a single meaningful version
-  # rather than two. Only runs when a sig-event context was supplied (i.e. the investigation was
-  # triggered from discovery or from the chat agent for a specific event). Other callers (free-form
-  # issues, alerts) that do not supply `inputs.context.event_uuid` are unaffected.
-  #
-  # The agent only *proposes* field changes; this deterministic step performs the write. Each
-  # attribute the agent didn't reassess resolves to `undefined` (empty `first`) and is dropped from
-  # the request; proposing the current value is a server-side no-op. `reason`/`evidence` stay in the
-  # `investigate` structured output and are intentionally never forwarded to the event document —
-  # the version records only the changed field values plus this execution's id as the audit trail.
-  # `on-failure: continue` so a failed write never fails the overall workflow run.
-  - name: attach_to_significant_event
-    type: kibana.request
-    if: '${{ inputs.context.event_uuid != null }}'
-    with:
-      method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        workflow_execution_id: '{{ execution.id }}'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
-        summary: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'summary' | map: 'to' | first }}"
-        status: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'status' | map: 'to' | first }}"
-    on-failure:
-      continue: true
-
   # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
   # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.
   # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
@@ -729,7 +725,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -742,7 +738,7 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
