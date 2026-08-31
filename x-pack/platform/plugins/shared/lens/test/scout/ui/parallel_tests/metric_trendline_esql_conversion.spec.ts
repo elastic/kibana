@@ -11,6 +11,7 @@ import {
   applyLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
   createDashboardWithPanelId,
+  getMetricTrendline,
   openInlineEditorAndWaitVisible,
   testData,
 } from '../fixtures';
@@ -86,7 +87,7 @@ spaceTest.describe(
           await browserAuth.loginAsPrivilegedUser();
           await dashboard.openDashboardWithId(dashboardId);
           await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(getMetricTrendline(page)).toBeVisible();
         });
 
         await spaceTest.step('convert to ES|QL via inline editor', async () => {
@@ -97,12 +98,12 @@ spaceTest.describe(
 
         await spaceTest.step('verify trendline renders after conversion', async () => {
           await expect(page.getByTestId('ESQLEditor')).toBeVisible();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(getMetricTrendline(page)).toBeVisible();
         });
 
         await spaceTest.step('apply changes and verify trendline persists', async () => {
           await applyLensInlineEditorAndWaitClosed({ lens });
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(getMetricTrendline(page)).toBeVisible();
         });
       }
     );
