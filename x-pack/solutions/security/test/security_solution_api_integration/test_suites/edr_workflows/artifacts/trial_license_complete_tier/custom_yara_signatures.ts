@@ -339,7 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
                   .send(
                     customYaraSignatureApiCall.getBody(`
                       rule rule1 { condition: true }
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH - 1)} { condition: true }`)
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH)} { condition: true }`)
                   )
                   .expect(200);
               });
