@@ -23,7 +23,6 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -73,7 +72,8 @@ export const RoundInput = ({
       : euiTheme.colors.backgroundBaseSubdued};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
-    border-radius: 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+    border-radius: ${euiTheme.border.radius.small} ${euiTheme.size.base} ${euiTheme.size.base}
+      ${euiTheme.size.base};
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 
