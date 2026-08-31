@@ -3063,10 +3063,10 @@
     "@hapi/validate" "^2.0.1"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/hapi@21.4.9", "@hapi/hapi@^21.1.0":
-  version "21.4.9"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.9.tgz#49c791c91dfa85b8e504c11b463f7a13b0049c41"
-  integrity sha512-YnecZOVx2AD08VvPl0ZaFS0MjEHqg+InGRmBRli731ct+VwI++dpu3BIYA1Z4SMr6HUAnpyvbQ1aq5woe3fBWg==
+"@hapi/hapi@21.4.10", "@hapi/hapi@^21.1.0":
+  version "21.4.10"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.10.tgz#43fa3dbf1ceb180f8558525641fd3ea68a0d1c2e"
+  integrity sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==
   dependencies:
     "@hapi/accept" "^6.0.3"
     "@hapi/ammo" "^6.0.1"
