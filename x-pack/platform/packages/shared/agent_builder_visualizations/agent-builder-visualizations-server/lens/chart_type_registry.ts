@@ -234,9 +234,6 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Structured table with sortable columns. Choose when precise values, sortable columns, or multi-dimensional breakdowns matter more than visual patterns (e.g. "list top 20 hosts by CPU usage").',
       review: {
         critical: ['Invented custom cell or text colors are a critical issue.'],
-        suggestions: [
-          'Suggest setting width from the number of columns (`w: 24` or `w: 48`). More columns → closer to 48. Prefer not shrinking a table below 24.',
-        ],
       },
       config: {
         coloringRules: [

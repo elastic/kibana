@@ -77,8 +77,6 @@ describe('chart type guidance', () => {
       ### data_table
       Critical:
       - Invented custom cell or text colors are a critical issue.
-      Suggestions:
-      - Suggest setting width from the number of columns (\`w: 24\` or \`w: 48\`). More columns → closer to 48. Prefer not shrinking a table below 24.
       ### pie
       Critical:
       - Invented per-slice or custom colors are a critical issue.",
