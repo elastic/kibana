@@ -19,7 +19,14 @@ jest.mock('@kbn/workflows-ui');
 jest.mock('../services/action_policies_api');
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
-  buildRuleScopedMatcher: jest.fn((ruleId: string) => `rule.id: "${ruleId}"`),
+  // Real implementations kept simple to avoid depending on @kbn/std in this test.
+  buildRuleScopedMatcher: jest.fn((tag: string) => ({ tags: [tag] })),
+  resolveRuleNotificationTag: jest.fn((metadata: { name: string; tags?: string[] }) => {
+    const [firstTag] = metadata.tags ?? [];
+    return firstTag?.trim()
+      ? firstTag
+      : `notify-${metadata.name.toLowerCase().replace(/\s+/g, '-')}`;
+  }),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -129,7 +136,7 @@ describe('useSetupRuleNotifications', () => {
         expect(mockCreateActionPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'My Test Rule notifications',
-            matcher: 'rule.id: "rule-1"',
+            matcher: { tags: ['notify-my-test-rule'] },
             destinations: [{ type: 'workflow', id: 'workflow-new-1' }],
           })
         );
@@ -285,6 +292,53 @@ describe('useSetupRuleNotifications', () => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(1);
         expect(mockCreateActionPolicy).toHaveBeenCalledTimes(2);
         expect(mockAddSuccess).toHaveBeenCalledWith(expect.stringContaining('2'));
+      });
+    });
+  });
+
+  describe('matcher tag — rule already has tags', () => {
+    it('uses the first existing tag when the rule already has tags', async () => {
+      const ruleWithTags = {
+        ...mockRule,
+        metadata: { ...mockRule.metadata, tags: ['prod', 'infra'] },
+      };
+      mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-1' });
+      mockCreateActionPolicy.mockResolvedValue({});
+
+      const { result } = renderHook(() => useSetupRuleNotifications(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({ rule: ruleWithTags, actions: [emailAction] });
+
+      await waitFor(() => {
+        expect(mockCreateActionPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            matcher: { tags: ['prod'] },
+          })
+        );
+      });
+    });
+  });
+
+  describe('matcher tag — shared across multiple actions', () => {
+    it('uses the same matcher tag for all actions created for the rule', async () => {
+      mockCreateWorkflowFn
+        .mockResolvedValueOnce({ id: 'wf-a' })
+        .mockResolvedValueOnce({ id: 'wf-b' });
+      mockCreateActionPolicy.mockResolvedValue({});
+
+      const { result } = renderHook(() => useSetupRuleNotifications(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({ rule: mockRule, actions: [emailAction, slackAction] });
+
+      await waitFor(() => {
+        expect(mockCreateActionPolicy).toHaveBeenCalledTimes(2);
+        const calls = mockCreateActionPolicy.mock.calls;
+        expect(calls[0][0].matcher).toEqual({ tags: ['notify-my-test-rule'] });
+        expect(calls[1][0].matcher).toEqual({ tags: ['notify-my-test-rule'] });
       });
     });
   });

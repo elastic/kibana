@@ -62,6 +62,8 @@ export type {
 export {
   buildInlineWorkflowYaml,
   buildRuleScopedMatcher,
+  buildRuleNotificationTag,
+  resolveRuleNotificationTag,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
