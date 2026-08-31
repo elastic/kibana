@@ -19,7 +19,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
-import { useAgentId } from '../../../../hooks/use_conversation';
+import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
@@ -82,6 +82,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
   const agentId = useAgentId();
+  const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
 
@@ -151,6 +152,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
   const showFeedback = Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed;
+  const showRegenerateButton = isLastRound && !isReadOnly && !isConversationReadOnlyLoading;
 
   return (
     <EuiFlexGroup direction="column" gutterSize={actionStackGutterSize} responsive={false}>
@@ -182,7 +184,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
               />
             </EuiToolTip>
           </EuiFlexItem>
-          {isLastRound && (
+          {showRegenerateButton && (
             <EuiFlexItem grow={false}>
               <EuiToolTip content={labels.regenerate} disableScreenReaderOutput>
                 <EuiButtonIcon

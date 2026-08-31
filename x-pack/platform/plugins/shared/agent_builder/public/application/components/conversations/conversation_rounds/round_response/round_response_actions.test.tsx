@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 import { RoundResponseActions } from './round_response_actions';
 import { useToasts } from '../../../../hooks/use_toasts';
+import { useConversationReadOnly } from '../../../../hooks/use_conversation';
 
 jest.mock('copy-to-clipboard');
 
@@ -40,6 +41,7 @@ jest.mock('../../../../hooks/use_tracing_enabled', () => ({
 
 jest.mock('../../../../hooks/use_conversation', () => ({
   useAgentId: () => undefined,
+  useConversationReadOnly: jest.fn(),
 }));
 
 jest.mock('./feedback_controls/use_feedback', () => ({
@@ -64,6 +66,7 @@ jest.mock('./feedback_controls/use_feedback', () => ({
 
 const copyMock = copy as jest.MockedFunction<typeof copy>;
 const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
+const useConversationReadOnlyMock = jest.mocked(useConversationReadOnly);
 const addSuccessToast = jest.fn();
 
 describe('RoundResponseActions', () => {
@@ -71,6 +74,7 @@ describe('RoundResponseActions', () => {
     jest.clearAllMocks();
     copyMock.mockReturnValue(true);
     useToastsMock.mockReturnValue({ addSuccessToast } as unknown as ReturnType<typeof useToasts>);
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: false });
   });
 
   it('labels the copy action for the agent response by default', async () => {
@@ -98,5 +102,26 @@ describe('RoundResponseActions', () => {
 
     expect(copyMock).toHaveBeenCalledWith('my question');
     expect(addSuccessToast).toHaveBeenCalledWith('Prompt copied to clipboard');
+  });
+
+  it('hides the regenerate action for read-only conversations while keeping copy available', () => {
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: true, isLoading: false });
+
+    render(
+      <RoundResponseActions content="the answer" isVisible isLastRound actionStackGutterSize="s" />
+    );
+
+    expect(screen.getByRole('button', { name: 'Copy response' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();
+  });
+
+  it('hides the regenerate action while read-only state is loading', () => {
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: true });
+
+    render(
+      <RoundResponseActions content="the answer" isVisible isLastRound actionStackGutterSize="s" />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();
   });
 });

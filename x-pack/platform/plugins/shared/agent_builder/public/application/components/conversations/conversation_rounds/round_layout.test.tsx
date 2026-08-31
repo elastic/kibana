@@ -13,7 +13,7 @@ import {
   type ConversationRound,
 } from '@kbn/agent-builder-common';
 import { createReasoningStep } from '@kbn/agent-builder-common/chat/conversation';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
+import { AgentPromptType, type AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { RoundLayout } from './round_layout';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
@@ -21,9 +21,10 @@ import { RoundResponse } from './round_response/round_response';
 import { RoundAuthorAvatar } from './round_author_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentId } from '../../../hooks/use_conversation';
+import { useAgentId, useConversationReadOnly } from '../../../hooks/use_conversation';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { pendingRoundId } from '../../../utils/new_conversation';
+import { ConfirmationPrompt } from './round_prompt';
 
 jest.mock('./round_input', () => ({
   RoundInput: jest.fn(() => null),
@@ -56,7 +57,9 @@ jest.mock('./round_error/round_error', () => ({
 }));
 
 jest.mock('./round_prompt', () => ({
-  ConfirmationPrompt: () => null,
+  ConfirmationPrompt: jest.fn(() => null),
+  AuthorizationPrompt: jest.fn(() => null),
+  AskUserQuestionPrompt: jest.fn(() => null),
 }));
 
 jest.mock('./round_attachment_references', () => ({
@@ -73,18 +76,21 @@ jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
 
 jest.mock('../../../hooks/use_conversation', () => ({
   useAgentId: jest.fn(),
+  useConversationReadOnly: jest.fn(),
 }));
 
 const useConversationStreamMock = useConversationStream as jest.MockedFunction<
   typeof useConversationStream
 >;
 const useAgentIdMock = jest.mocked(useAgentId);
+const useConversationReadOnlyMock = jest.mocked(useConversationReadOnly);
 const useAgentBuilderAgentByIdMock = jest.mocked(useAgentBuilderAgentById);
 const roundInputMock = RoundInput as jest.MockedFunction<typeof RoundInput>;
 const roundEventsMock = RoundEvents as jest.MockedFunction<typeof RoundEvents>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
 const roundAuthorAvatarMock = jest.mocked(RoundAuthorAvatar);
 const roundAuthorHeaderMock = jest.mocked(RoundAuthorHeader);
+const confirmationPromptMock = jest.mocked(ConfirmationPrompt);
 const agent: AgentDefinition = {
   id: 'agent-1',
   type: 'chat',
@@ -123,6 +129,7 @@ describe('RoundLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAgentIdMock.mockReturnValue('agent-1');
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: false });
     useAgentBuilderAgentByIdMock.mockReturnValue({
       agent,
       isLoading: false,
@@ -420,6 +427,40 @@ describe('RoundLayout', () => {
         author: undefined,
         isPendingCurrentRound: true,
       })
+    );
+  });
+
+  it('disables awaiting prompt controls for read-only conversations', () => {
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: true, isLoading: false });
+
+    const round = {
+      ...createRound(1),
+      status: ConversationRoundStatus.awaitingPrompt,
+      pending_prompts: [
+        {
+          id: 'prompt-1',
+          type: AgentPromptType.confirmation,
+          message: 'Proceed?',
+        },
+      ],
+    } as ConversationRound;
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={true}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    expect(confirmationPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isDisabled: true,
+      }),
+      expect.anything()
     );
   });
 });

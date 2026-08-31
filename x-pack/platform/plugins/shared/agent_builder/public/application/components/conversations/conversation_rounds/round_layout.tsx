@@ -30,7 +30,7 @@ import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
 import { isPendingCurrentRound } from './round_author';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentId } from '../../../hooks/use_conversation';
+import { useAgentId, useConversationReadOnly } from '../../../hooks/use_conversation';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -122,6 +122,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pending_prompts: pendingPrompts,
   } = rawRound;
   const agentId = useAgentId();
+  const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
   const { agent } = useAgentBuilderAgentById(agentId);
   const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
@@ -133,7 +134,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useConversationStream();
-  const isHitlDisabled = isStreaming && !isResuming;
+  const isHitlDisabled =
+    isReadOnly || isConversationReadOnlyLoading || (isStreaming && !isResuming);
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
