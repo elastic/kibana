@@ -1578,10 +1578,10 @@
   resolved "https://registry.yarnpkg.com/@cfworker/json-schema/-/json-schema-4.1.1.tgz#4a2a3947ee9fa7b7c24be981422831b8674c3be6"
   integrity sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==
 
-"@colordx/core@^5.5.0":
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/@colordx/core/-/core-5.5.0.tgz#d786dfde8781bbe56a0be9f862f9ab5d1ab4629d"
-  integrity sha512-3PxTH8itZzltK0U9jTwVVnjLXvnDYuq3m+QXsHkENxWiPRh4WaoLcs1SQjqgZ55kS+QyirpH5BVwzP2gMVG6EQ==
+"@colordx/core@^5.6.0":
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/@colordx/core/-/core-5.6.0.tgz#5662d64103a40afd50e7f24f98c2439d29e5e2f3"
+  integrity sha512-EDlcg/Hmlj1WuFh/Os9YhA+A2aasB2XlgwFfGePUDuW7fVHC07HBi5AFIMx0Ct1eM8kHM9NRyOtZ0MuVYa8xvg==
 
 "@colors/colors@1.6.0", "@colors/colors@^1.6.0":
   version "1.6.0"
@@ -1979,10 +1979,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.1.tgz#a4bd17393daaa708cadafc1e9fa325f99c869b4a"
   integrity sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==
 
-"@elastic/eui-test-helpers@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.4.0.tgz#ec10c5e7a788e1a087aacaac6ea7980579cf17bf"
-  integrity sha512-ZiJcq/dMIs4VD1tdLK3Op21j6+dZ6Q2k54n08FjGz5hqVcd3MoEBUBp54xe+p2AQ9IPeFM21KWeYPDuUX0PwyA==
+"@elastic/eui-test-helpers@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.5.0.tgz#2d1aaddcbf5a4aadf10278ae47c2faa395211455"
+  integrity sha512-oW20Eaw3w1OzXbiRA2Dj0XPmYN9dkshFZHkM8atrcaHu8NcvspKijzDfw84rTaWGG6AnZEHMfyau08TKhrdZVw==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
@@ -8739,6 +8739,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-evals-workflow-traces@link:x-pack/solutions/security/packages/kbn-security-evals-workflow-traces":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-form-components@link:x-pack/platform/packages/shared/security/form_components":
   version "0.0.0"
   uid ""
@@ -8748,6 +8752,14 @@
   uid ""
 
 "@kbn/security-labs-artifact-builder@link:x-pack/packages/ai-infra/security-labs-artifact-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-mitre-attack-common@link:x-pack/solutions/security/packages/security-mitre-attack-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-mitre-attack-server@link:x-pack/solutions/security/packages/security-mitre-attack-server":
   version "0.0.0"
   uid ""
 
@@ -18597,6 +18609,17 @@ css-select@^5.1.0:
     domutils "^3.0.1"
     nth-check "^2.0.1"
 
+css-select@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/css-select/-/css-select-6.0.0.tgz#7e63f09881ad118084091048ed543786dad96644"
+  integrity sha512-rZZVSLle8v0+EY8QAkDWrKhpgt6SA5OtHsgBnsj6ZaLb5dmDVOWUDtQitd9ydxxvEjhewNudS6eTVU7uOyzvXw==
+  dependencies:
+    boolbase "^1.0.0"
+    css-what "^7.0.0"
+    domhandler "^5.0.3"
+    domutils "^3.2.2"
+    nth-check "^2.1.1"
+
 css-to-react-native@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/css-to-react-native/-/css-to-react-native-3.2.0.tgz#cdd8099f71024e149e4f6fe17a7d46ecd55f1e32"
@@ -18635,6 +18658,11 @@ css-what@^6.0.1, css-what@^6.1.0:
   resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.1.0.tgz#fb5effcf76f1ddea2c81bdfaa4de44e79bac70f4"
   integrity sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==
 
+css-what@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/css-what/-/css-what-7.0.0.tgz#5796fbebd43571d73c60ba0dd7a6e75dd0d22fe4"
+  integrity sha512-wD5oz5xibMOPHzy13CyGmogB3phdvcDaB5t0W/Nr5Z2O/agcB8YwOz6e2Lsp10pNDzBoDO9nVa3RGs/2BttpHQ==
+
 css.escape@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/css.escape/-/css.escape-1.5.1.tgz#42e27d4fa04ae32f931a4b4d4191fa9cddee97cb"
@@ -18660,45 +18688,10 @@ cssfontparser@^1.2.1:
   resolved "https://registry.yarnpkg.com/cssfontparser/-/cssfontparser-1.2.1.tgz#f4022fc8f9700c68029d542084afbaf425a3f3e3"
   integrity sha1-9AIvyPlwDGgCnVQghK+69CWj8+M=
 
-cssnano-preset-default@8.0.5:
-  version "8.0.5"
-  resolved "https://registry.yarnpkg.com/cssnano-preset-default/-/cssnano-preset-default-8.0.5.tgz#bf59155076016c8332f2c691f66953a31264c4cf"
-  integrity sha512-R9O+oRNnKcVBf7GZZ7nfBcOiBZZwi3kR1HtKirBHel/gTtHLMHOCsL2H3QGy1161CPystJV4EiKniC7XyUKfcw==
-  dependencies:
-    browserslist "^4.28.8"
-    cssnano-utils "^6.0.3"
-    postcss-calc "^10.1.1"
-    postcss-colormin "^8.0.3"
-    postcss-convert-values "^8.0.3"
-    postcss-discard-comments "^8.0.3"
-    postcss-discard-duplicates "^8.0.3"
-    postcss-discard-empty "^8.0.3"
-    postcss-discard-overridden "^8.0.3"
-    postcss-merge-longhand "^8.0.3"
-    postcss-merge-rules "^8.0.3"
-    postcss-minify-font-values "^8.0.3"
-    postcss-minify-gradients "^8.0.3"
-    postcss-minify-params "^8.0.3"
-    postcss-minify-selectors "^8.0.4"
-    postcss-normalize-charset "^8.0.3"
-    postcss-normalize-display-values "^8.0.3"
-    postcss-normalize-positions "^8.0.3"
-    postcss-normalize-repeat-style "^8.0.3"
-    postcss-normalize-string "^8.0.3"
-    postcss-normalize-timing-functions "^8.0.3"
-    postcss-normalize-unicode "^8.0.3"
-    postcss-normalize-url "^8.0.3"
-    postcss-normalize-whitespace "^8.0.3"
-    postcss-ordered-values "^8.0.3"
-    postcss-reduce-initial "^8.0.3"
-    postcss-reduce-transforms "^8.0.3"
-    postcss-svgo "^8.0.4"
-    postcss-unique-selectors "^8.0.3"
-
-cssnano-preset-default@^8.0.5:
-  version "8.0.8"
-  resolved "https://registry.yarnpkg.com/cssnano-preset-default/-/cssnano-preset-default-8.0.8.tgz#2fe4b6d80c02a61c3d07f69e678f759d61fd8e69"
-  integrity sha512-WHUoojPq3fMdps/OjSn73p6FDb3YAN7HiuMA5WJJxs6Ka0MFqtZZsS4EppIWTJzW/Ss4sEZHVIKst/qi22u3uA==
+cssnano-preset-default@8.0.6:
+  version "8.0.6"
+  resolved "https://registry.yarnpkg.com/cssnano-preset-default/-/cssnano-preset-default-8.0.6.tgz#73ee654af199521cab399770f385d1b5fed9af6c"
+  integrity sha512-U5MLdiyveJNVCVR0uISgHvCkoYLLB0xeJZSY+VnBESzv1lhY04x54u9MYUNvIKmEs6hwqHVdzztajBOUf8VD4A==
   dependencies:
     browserslist "^4.28.8"
     cssnano-utils "^6.0.4"
@@ -18707,15 +18700,50 @@ cssnano-preset-default@^8.0.5:
     postcss-convert-values "^8.0.4"
     postcss-discard-comments "^8.0.4"
     postcss-discard-duplicates "^8.0.4"
+    postcss-discard-empty "^8.0.4"
+    postcss-discard-overridden "^8.0.4"
+    postcss-merge-longhand "^8.0.4"
+    postcss-merge-rules "^8.0.4"
+    postcss-minify-font-values "^8.0.4"
+    postcss-minify-gradients "^8.0.4"
+    postcss-minify-params "^8.0.4"
+    postcss-minify-selectors "^8.0.5"
+    postcss-normalize-charset "^8.0.4"
+    postcss-normalize-display-values "^8.0.4"
+    postcss-normalize-positions "^8.0.4"
+    postcss-normalize-repeat-style "^8.0.4"
+    postcss-normalize-string "^8.0.4"
+    postcss-normalize-timing-functions "^8.0.4"
+    postcss-normalize-unicode "^8.0.4"
+    postcss-normalize-url "^8.0.4"
+    postcss-normalize-whitespace "^8.0.4"
+    postcss-ordered-values "^8.0.4"
+    postcss-reduce-initial "^8.0.4"
+    postcss-reduce-transforms "^8.0.4"
+    postcss-svgo "^8.0.5"
+    postcss-unique-selectors "^8.0.4"
+
+cssnano-preset-default@^8.0.6:
+  version "8.0.10"
+  resolved "https://registry.yarnpkg.com/cssnano-preset-default/-/cssnano-preset-default-8.0.10.tgz#6bcef428d99e8f953647dd17d961e844fbabdeef"
+  integrity sha512-34uq3q7OXgmfxXn+MHTgIqysCLH7zRZZUMAwrBiO09F5/KLVD33iDFNRRUNYStKdj0SaAIUVr6Akao2Fpp0aVA==
+  dependencies:
+    browserslist "^4.28.8"
+    cssnano-utils "^6.0.4"
+    postcss-calc "^10.1.1"
+    postcss-colormin "^8.0.5"
+    postcss-convert-values "^8.0.4"
+    postcss-discard-comments "^8.0.4"
+    postcss-discard-duplicates "^8.0.4"
     postcss-discard-empty "^8.0.5"
     postcss-discard-overridden "^8.0.4"
     postcss-merge-longhand "^8.0.4"
     postcss-merge-rules "^8.0.5"
     postcss-minify-font-values "^8.0.4"
-    postcss-minify-gradients "^8.0.5"
+    postcss-minify-gradients "^8.0.6"
     postcss-minify-params "^8.0.4"
     postcss-minify-selectors "^8.0.5"
-    postcss-normalize-charset "^8.0.4"
+    postcss-normalize-charset "^8.0.5"
     postcss-normalize-display-values "^8.0.4"
     postcss-normalize-positions "^8.0.4"
     postcss-normalize-repeat-style "^8.0.4"
@@ -18727,20 +18755,20 @@ cssnano-preset-default@^8.0.5:
     postcss-ordered-values "^8.0.5"
     postcss-reduce-initial "^8.0.5"
     postcss-reduce-transforms "^8.0.4"
-    postcss-svgo "^8.0.5"
+    postcss-svgo "^8.0.6"
     postcss-unique-selectors "^8.0.4"
 
-cssnano-utils@^6.0.3, cssnano-utils@^6.0.4:
+cssnano-utils@^6.0.4:
   version "6.0.4"
   resolved "https://registry.yarnpkg.com/cssnano-utils/-/cssnano-utils-6.0.4.tgz#f2f5e6c7746e2e5cd9873bb5b45ae160cbe5d0e1"
   integrity sha512-j1z2mW4MqtcGM4I8TxXAdOXUifp1DZ5/bZnyYnCpHlzQ/ilCj2voLxE0aqEKnBDA5hF6HahSY13JU8kyZ1s8Mg==
 
-cssnano@8.0.5:
-  version "8.0.5"
-  resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-8.0.5.tgz#c40f3deccebfe1a39bdc5118a547626858be1a3d"
-  integrity sha512-Yigb8Apuqi/jWwii1XFmZwgAPZ2RHDUx/ANodBZsEQusYIFryChhwOQNKco0A7V6zgFqDDy3LqefGK6OnniGMA==
+cssnano@8.0.6:
+  version "8.0.6"
+  resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-8.0.6.tgz#e1413255203594b34899541632ac188be65a3dce"
+  integrity sha512-KDwqW0R35qIGDDWse4vRhrNtF558sUOcfuqCbB/h0bUP4+aBUpbGT5X2bQlE1gEACk+nDFAL045VyesanJFEug==
   dependencies:
-    cssnano-preset-default "^8.0.5"
+    cssnano-preset-default "^8.0.6"
     lilconfig "^3.1.3"
 
 csso@^5.0.5:
@@ -19916,7 +19944,7 @@ domutils@^2.5.2, domutils@^2.8.0:
     domelementtype "^2.2.0"
     domhandler "^4.2.0"
 
-domutils@^3.0.1, domutils@^3.2.1:
+domutils@^3.0.1, domutils@^3.2.1, domutils@^3.2.2:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/domutils/-/domutils-3.2.2.tgz#edbfe2b668b0c1d97c24baf0f1062b132221bc78"
   integrity sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==
@@ -27205,7 +27233,7 @@ npm-run-path@^4.0.0, npm-run-path@^4.0.1:
   dependencies:
     path-key "^3.0.0"
 
-nth-check@^2.0.1:
+nth-check@^2.0.1, nth-check@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/nth-check/-/nth-check-2.1.1.tgz#c9eab428effce36cd6b92c924bdb000ef1f1ed1d"
   integrity sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==
@@ -28373,17 +28401,17 @@ postcss-calc@^10.1.1:
     postcss-selector-parser "^7.0.0"
     postcss-value-parser "^4.2.0"
 
-postcss-colormin@^8.0.3, postcss-colormin@^8.0.4:
-  version "8.0.4"
-  resolved "https://registry.yarnpkg.com/postcss-colormin/-/postcss-colormin-8.0.4.tgz#65bcc1730b9d6b4f8457d8edbfab72c59110e576"
-  integrity sha512-iQ8Eh6Fb3FJx32zduprL33D80bPnE9F4nm+EqvvoHvoK72H7XjvH4GzbD7VlIowmtzf96tgtkjZgmQ/bAi/CYA==
+postcss-colormin@^8.0.4, postcss-colormin@^8.0.5:
+  version "8.0.5"
+  resolved "https://registry.yarnpkg.com/postcss-colormin/-/postcss-colormin-8.0.5.tgz#df660fe23f7e47c4e130a7eaa9494a86deb53494"
+  integrity sha512-U/N+7tkHgHoD24NB6q9k9uFcRfVJRdzVSit0fM0T2L6fvnpUoTIAYgzkyjD56LHEoCoPNfkMcfTB47SW/lNegQ==
   dependencies:
-    "@colordx/core" "^5.5.0"
+    "@colordx/core" "^5.6.0"
     browserslist "^4.28.8"
     caniuse-api "^4.0.0"
     postcss-value-parser "^4.2.0"
 
-postcss-convert-values@^8.0.3, postcss-convert-values@^8.0.4:
+postcss-convert-values@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-convert-values/-/postcss-convert-values-8.0.4.tgz#e4252ac6382067b7372f3d48de2e1b85f9930cb7"
   integrity sha512-ifBmAJBfpDymi7r/CqxYRJWlG+BLdVmusUC/kFPOqH/+TitdBeHA68CYqY79wXL+iQnqg6e4LGHA2Mte14X6Ig==
@@ -28391,24 +28419,24 @@ postcss-convert-values@^8.0.3, postcss-convert-values@^8.0.4:
     browserslist "^4.28.8"
     postcss-value-parser "^4.2.0"
 
-postcss-discard-comments@^8.0.3, postcss-discard-comments@^8.0.4:
+postcss-discard-comments@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-discard-comments/-/postcss-discard-comments-8.0.4.tgz#b532f5a0373c3843e772e55c49c17341a6f9c91e"
   integrity sha512-SU1uLYRQPKLJJmqEmqzu+Ze+9xDurBm7m/LOzXG/ANBAfAGLjbQF+oIyZnf3jV3F155q5rRMYXsoTNEJsPyHng==
   dependencies:
     postcss-selector-parser "^7.1.5"
 
-postcss-discard-duplicates@^8.0.3, postcss-discard-duplicates@^8.0.4:
+postcss-discard-duplicates@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-discard-duplicates/-/postcss-discard-duplicates-8.0.4.tgz#dd42dcc41d5b05476b135ff35d7c3b5766364106"
   integrity sha512-/ugMYYTE+IpHpTmwz6/S8w+blCz9pZNroUgadTdlbPnHoLLWis9QvwmoyWui2mOgFzuRM6Me7AnoGU3i0Ua2ng==
 
-postcss-discard-empty@^8.0.3, postcss-discard-empty@^8.0.5:
+postcss-discard-empty@^8.0.4, postcss-discard-empty@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/postcss-discard-empty/-/postcss-discard-empty-8.0.5.tgz#2645e7c2325b447adacde87fec601727e7d85567"
   integrity sha512-im0QtfNFa6V3SGPrfqzrWYuhzSz1ztWORKsuhZHQbWdKMh0DiNj3pmqBnABbhdKjyeW6nZ1oZYGh4dMc3biyaw==
 
-postcss-discard-overridden@^8.0.3, postcss-discard-overridden@^8.0.4:
+postcss-discard-overridden@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-discard-overridden/-/postcss-discard-overridden-8.0.4.tgz#3d2afaaf08b8c7a2db083f835e5996dc43860bbe"
   integrity sha512-NqupxmnSSfWPJJDYbQk1qXWRwr+lw4Kyp/LSOjqwTpy/vSwo34EVXYKywgemSWpgh39P7Cs/G+tqynbRlXoJhw==
@@ -28427,7 +28455,7 @@ postcss-media-query-parser@^0.2.3:
   resolved "https://registry.yarnpkg.com/postcss-media-query-parser/-/postcss-media-query-parser-0.2.3.tgz#27b39c6f4d94f81b1a73b8f76351c609e5cef244"
   integrity sha1-J7Ocb02U+Bsac7j3Y1HGCeXO8kQ=
 
-postcss-merge-longhand@^8.0.3, postcss-merge-longhand@^8.0.4:
+postcss-merge-longhand@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-merge-longhand/-/postcss-merge-longhand-8.0.4.tgz#7d0c1892c13fd74d8d04820434c905cecc559a86"
   integrity sha512-ammolHhMvuTz/L9YN/ge1SWbUDcD3Y9o2gXlo3S6H4MCJHheyVPwcI/LAnSuNT4gcUmSF9pNTXo7+3M/2MFPAQ==
@@ -28435,7 +28463,7 @@ postcss-merge-longhand@^8.0.3, postcss-merge-longhand@^8.0.4:
     postcss-value-parser "^4.2.0"
     stylehacks "^8.0.4"
 
-postcss-merge-rules@^8.0.3, postcss-merge-rules@^8.0.5:
+postcss-merge-rules@^8.0.4, postcss-merge-rules@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/postcss-merge-rules/-/postcss-merge-rules-8.0.5.tgz#e1d8d3cbff50217b5d1dba816229e31b5a32c36e"
   integrity sha512-jz+QaKz4VhjsqTVsJMRuH+EvrX1F9l6kYFuF8g6geVxFoYnPEZN4G+zqCb6zhxOIcc2aeAo38XEl2pOIZi2gBw==
@@ -28445,23 +28473,23 @@ postcss-merge-rules@^8.0.3, postcss-merge-rules@^8.0.5:
     cssnano-utils "^6.0.4"
     postcss-selector-parser "^7.1.5"
 
-postcss-minify-font-values@^8.0.3, postcss-minify-font-values@^8.0.4:
+postcss-minify-font-values@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-minify-font-values/-/postcss-minify-font-values-8.0.4.tgz#e4d4b458fc268dc16224a351238c344139816cd2"
   integrity sha512-wZZgJ87U5WbQCEM0EOY/oM7M1a+sqW6vrOClGC9lNbsY0HYmbMFvFuukBn8PzF+ikKmaT0QB+uSAHTRLzMkD+A==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-minify-gradients@^8.0.3, postcss-minify-gradients@^8.0.5:
-  version "8.0.5"
-  resolved "https://registry.yarnpkg.com/postcss-minify-gradients/-/postcss-minify-gradients-8.0.5.tgz#c5e0405c1708c9e5952e128a31b2520b6f8a5703"
-  integrity sha512-ViFzyy4qqTcl2D1+SpoubxkgGUvWNRPxboQKL64WON60KslCzi+XOf/Yn5QdQlBYI8/ChCpYMLS3FJ0ksA+r1Q==
+postcss-minify-gradients@^8.0.4, postcss-minify-gradients@^8.0.6:
+  version "8.0.6"
+  resolved "https://registry.yarnpkg.com/postcss-minify-gradients/-/postcss-minify-gradients-8.0.6.tgz#138f0490d149f699c943eb700df38523b38c369f"
+  integrity sha512-NsqlG34WSO44NOHVT6m6ZWpN80fK2l5Zt73PMDXBJKT6fO6GPnI0NBi6xIVFr/naej3ukVUlIFQGxb7JGaa9Zg==
   dependencies:
-    "@colordx/core" "^5.5.0"
+    "@colordx/core" "^5.6.0"
     cssnano-utils "^6.0.4"
     postcss-value-parser "^4.2.0"
 
-postcss-minify-params@^8.0.3, postcss-minify-params@^8.0.4:
+postcss-minify-params@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-minify-params/-/postcss-minify-params-8.0.4.tgz#647110d091cc55e4d3bc3e49903ee558db30db79"
   integrity sha512-TDx9O/ni7KazRK32pVvoo3MjExyVxWE0949vB2XZ0oHnxdAtQFHa9oG21wWkvsOL3osjiOVejwDLe6a0d0EuSw==
@@ -28470,7 +28498,7 @@ postcss-minify-params@^8.0.3, postcss-minify-params@^8.0.4:
     cssnano-utils "^6.0.4"
     postcss-value-parser "^4.2.0"
 
-postcss-minify-selectors@^8.0.4, postcss-minify-selectors@^8.0.5:
+postcss-minify-selectors@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/postcss-minify-selectors/-/postcss-minify-selectors-8.0.5.tgz#33fcb987a0a86877ea48f2579057c7941f10a84f"
   integrity sha512-i+PlhVCaPa7xevjhpActH2PrP27kDNSuuFf/ZGk8YrIcd1pd3Mfcfiv8H7dbY1/vz7U+QparioAtJaFV+IEwQg==
@@ -28508,47 +28536,47 @@ postcss-modules-values@^4.0.0:
   dependencies:
     icss-utils "^5.0.0"
 
-postcss-normalize-charset@^8.0.3, postcss-normalize-charset@^8.0.4:
-  version "8.0.4"
-  resolved "https://registry.yarnpkg.com/postcss-normalize-charset/-/postcss-normalize-charset-8.0.4.tgz#eff522668f29156f616bf3dea77f33318e28523c"
-  integrity sha512-ihNV/Q9V/+Q9NTqgoK4FOwI7ipqJlsaxoTWxkGyCMi4ArLKX8HqLYIqATB/8xhXd9K88PCXqdR8218u9uuyc4w==
+postcss-normalize-charset@^8.0.4, postcss-normalize-charset@^8.0.5:
+  version "8.0.5"
+  resolved "https://registry.yarnpkg.com/postcss-normalize-charset/-/postcss-normalize-charset-8.0.5.tgz#d28ec806f31b8ef74ddda30da0bdebc880a4a45f"
+  integrity sha512-l0L1rIe9YHbLaf4xfL2pkkQV3gq/QIy8D0bjsaHYdGVgR+eQk7IBp3dUdIKe6XuG7DzFiCwJn248nvAFAi5CjA==
 
-postcss-normalize-display-values@^8.0.3, postcss-normalize-display-values@^8.0.4:
+postcss-normalize-display-values@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-display-values/-/postcss-normalize-display-values-8.0.4.tgz#ba96ad2da0df572ca5d4c713c3db9b4fa62e32dc"
   integrity sha512-F8DGtzelJDV6S5mhcugc+EJ8sXI+kFv2PBedkfMWqd8mvTE4qyy3kva6AQwjy2+L2lZ9TGTkSumdq+n3EhGeAw==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-positions@^8.0.3, postcss-normalize-positions@^8.0.4:
+postcss-normalize-positions@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-positions/-/postcss-normalize-positions-8.0.4.tgz#32ebcc728878644413e74b17387e5a4e28a3d18e"
   integrity sha512-anOMhqe6Z0OP4jvchK1v1hIG08kO7rsp8uHrxT2+XaKp8wbvVcUO3QHUzRmQDazWUPtRzy1h2UlixyJenF42sg==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-repeat-style@^8.0.3, postcss-normalize-repeat-style@^8.0.4:
+postcss-normalize-repeat-style@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-repeat-style/-/postcss-normalize-repeat-style-8.0.4.tgz#1595d40ab0cac7925f38f41dffeec201f2aae4c2"
   integrity sha512-vY8+k+/bFT7B8gzlHVye8FxBTMEpUAQxAgb4UYFAGGsKmXfwEvc7VPs+kpFNrTeqVKAvVh8+VVhZ+f3S4TWJPg==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-string@^8.0.3, postcss-normalize-string@^8.0.4:
+postcss-normalize-string@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-string/-/postcss-normalize-string-8.0.4.tgz#ead6b7298fe6dfd9278c094cdc848822dacad098"
   integrity sha512-dWnV1frIV1XUlSYzJudceAbQ7PGyho9EgVHQXMcAoog6Nwnet3G9rz8IXcCb0EF2eefmpYG9hDT9+yWJOxc5zw==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-timing-functions@^8.0.3, postcss-normalize-timing-functions@^8.0.4:
+postcss-normalize-timing-functions@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-timing-functions/-/postcss-normalize-timing-functions-8.0.4.tgz#adc0a814e2aeaa6df083af7c4b25dd7e347001bf"
   integrity sha512-VANJsokAWdQ03ZJwmcdEKXJjVHRtMgalB/BgbCgN3CRTdbwB5TXlSDRmdShSCxpnZs8WLAm0mPa//p5o5D/ZTg==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-unicode@^8.0.3, postcss-normalize-unicode@^8.0.4:
+postcss-normalize-unicode@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-unicode/-/postcss-normalize-unicode-8.0.4.tgz#55ddfb758324cd12aa4ba003846986b3ea6e1e6c"
   integrity sha512-SxVEoFdYed0bxxwZwAXnaAZ2lzNb5jtiQvYWyMIEqnGOzCuztWpVO8LvsqpOfUIacOb6oYaWi7WOAZR36OhYqw==
@@ -28556,21 +28584,21 @@ postcss-normalize-unicode@^8.0.3, postcss-normalize-unicode@^8.0.4:
     browserslist "^4.28.8"
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-url@^8.0.3, postcss-normalize-url@^8.0.4:
+postcss-normalize-url@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-normalize-url/-/postcss-normalize-url-8.0.4.tgz#5eb5432967da63e792951d425875b9b9bff07e0b"
   integrity sha512-JKZW8KRHkLEYkUb/55n3knDUMZeyvxlTv7ZA82bcHiCjL81b0Yyf9fIUBAYKZ6ucDgKfCDM78xhXuteVlk/o9Q==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-normalize-whitespace@^8.0.3, postcss-normalize-whitespace@^8.0.5:
+postcss-normalize-whitespace@^8.0.4, postcss-normalize-whitespace@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/postcss-normalize-whitespace/-/postcss-normalize-whitespace-8.0.5.tgz#3c7345d8c8826e99f384dc2af0abe31c960ba12b"
   integrity sha512-xuFovful3vVIA9fWWmAL2pG1Qr95Udj2MrLgjU50C6r+Xnh3s6t2BN1xXQ8lnCOCAtzMvMpPWYlnAh4nSv5VEQ==
   dependencies:
     postcss-value-parser "^4.2.0"
 
-postcss-ordered-values@^8.0.3, postcss-ordered-values@^8.0.5:
+postcss-ordered-values@^8.0.4, postcss-ordered-values@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/postcss-ordered-values/-/postcss-ordered-values-8.0.5.tgz#a63df2e316d3b825c77d81b263f3b20f9d172daf"
   integrity sha512-aDL7nPR7w1foUqo4rN6QY1Kr45+SYELnmUg5taZehh7FfFdxQmUjbuOOBuffIXjiHV45zqgFHCb4azsWW19jyw==
@@ -28578,7 +28606,7 @@ postcss-ordered-values@^8.0.3, postcss-ordered-values@^8.0.5:
     cssnano-utils "^6.0.4"
     postcss-value-parser "^4.2.0"
 
-postcss-reduce-initial@^8.0.3, postcss-reduce-initial@^8.0.5:
+postcss-reduce-initial@^8.0.4, postcss-reduce-initial@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/postcss-reduce-initial/-/postcss-reduce-initial-8.0.5.tgz#ddf13ac98b58929548d0c7d20977b195bd96b9b7"
   integrity sha512-Bh5d7zjH1Ai9LzJ1qULUZIaC18cniD+wA6gFlOPglMxJRC7meXbuPvpJ/zHQGg5QKwQgit++XQhDTiEIhCk8Ow==
@@ -28586,7 +28614,7 @@ postcss-reduce-initial@^8.0.3, postcss-reduce-initial@^8.0.5:
     browserslist "^4.28.8"
     caniuse-api "^4.0.0"
 
-postcss-reduce-transforms@^8.0.3, postcss-reduce-transforms@^8.0.4:
+postcss-reduce-transforms@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-reduce-transforms/-/postcss-reduce-transforms-8.0.4.tgz#61cc2582869eb7c34a52e1c646392f284fe5cb1f"
   integrity sha512-ZGU7/R0GmjE3x2mOGB0g9Ohx74X+JjYX62RB5IBYLOe6R0fuHGZ76HtTY2CdM5NE8Yey/ew5clEf8iZQnjDjWA==
@@ -28624,15 +28652,15 @@ postcss-selector-parser@^7.0.0, postcss-selector-parser@^7.1.1, postcss-selector
     cssesc "^3.0.0"
     util-deprecate "^1.0.2"
 
-postcss-svgo@^8.0.4, postcss-svgo@^8.0.5:
-  version "8.0.5"
-  resolved "https://registry.yarnpkg.com/postcss-svgo/-/postcss-svgo-8.0.5.tgz#dba720e0f34e687050cc6531b1ae5dc43ed88f24"
-  integrity sha512-8B5r9VfLVD2lANKxDi4FXeP2MX6NdaGIQwaMVXXy5DhzAPO3CdHqPYqknF63y7tuQLB+rSvYyNltW/tHHg4fAg==
+postcss-svgo@^8.0.5, postcss-svgo@^8.0.6:
+  version "8.0.6"
+  resolved "https://registry.yarnpkg.com/postcss-svgo/-/postcss-svgo-8.0.6.tgz#9b924bec0ee9de8f0c3480258356163527ace384"
+  integrity sha512-auQHNmduFFHzz1sWYM3sroW7IDMzxshlLjnwAALfkrAgPegHFats+jMK6BRCcdIulxPmqXFSQvgoAX4vw8I59g==
   dependencies:
     postcss-value-parser "^4.2.0"
-    svgo "^4.0.2"
+    svgo "^4.1.0"
 
-postcss-unique-selectors@^8.0.3, postcss-unique-selectors@^8.0.4:
+postcss-unique-selectors@^8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/postcss-unique-selectors/-/postcss-unique-selectors-8.0.4.tgz#a7c4655ffab88fa6a1909e8534ef99cdc99b82a4"
   integrity sha512-Sby0EtmD1mlvcZSWP5eXjxhxVgvXE5QVRzd+8NH0IbF+lYQIM57ybwAvJYYtI/fexMgCWcRnDETovjKOcLJb8w==
@@ -30827,10 +30855,10 @@ sass-lookup@^6.1.0:
     commander "^12.1.0"
     enhanced-resolve "^5.20.0"
 
-sax@>=0.6.0, sax@^1.2.4, sax@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/sax/-/sax-1.5.0.tgz#b5549b671069b7aa392df55ec7574cf411179eb8"
-  integrity sha512-21IYA3Q5cQf089Z6tgaUTr7lDAyzoTPx5HRtbhsME8Udispad8dC/+sziTNugOEx54ilvatQ9YCzl4KQLPcRHA==
+sax@1.6.1, sax@>=0.6.0, sax@^1.2.4, sax@^1.5.0:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.6.1.tgz#4c23cf608c0b693ab54b4b5888e92cfe977b9843"
+  integrity sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==
 
 saxes@^6.0.0:
   version "6.0.0"
@@ -32324,7 +32352,7 @@ svg-tags@^1.0.0:
   resolved "https://registry.yarnpkg.com/svg-tags/-/svg-tags-1.0.0.tgz#58f71cee3bd519b59d4b2a843b6c7de64ac04764"
   integrity sha1-WPcc7jvVGbWdSyqEO2x95krAR2Q=
 
-svgo@4.0.2, svgo@^4.0.2:
+svgo@4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/svgo/-/svgo-4.0.2.tgz#a62246f0a9d671c0314d04f3cc15f78b1bd0667f"
   integrity sha512-ekx94z1rRc5LDi6oSUaeRnYhd0UOJxdtQCL2rF8xpWxD3TPAsISWOrxezqGovqS38GRZOdpDfvQe3ts6F7nsng==
@@ -32336,6 +32364,19 @@ svgo@4.0.2, svgo@^4.0.2:
     csso "^5.0.5"
     picocolors "^1.1.1"
     sax "^1.5.0"
+
+svgo@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/svgo/-/svgo-4.1.0.tgz#c977eb69640ef232a5e8236a5a327ed8c9d52853"
+  integrity sha512-bkxnTg1kSU0guhIBmibA6UUhrQmPVA1XsQLN+ylCd+UWzbnLkySOcXpyk1mrl05f+pcaCx2eHb+sp6BgMZWX+Q==
+  dependencies:
+    commander "^11.1.0"
+    css-select "^6.0.0"
+    css-tree "^3.0.1"
+    css-what "^7.0.0"
+    csso "^5.0.5"
+    picocolors "^1.1.1"
+    sax "1.6.1"
 
 swr@2.3.3:
   version "2.3.3"

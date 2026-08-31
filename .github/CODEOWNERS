@@ -1413,6 +1413,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/conte
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engineering
@@ -1429,6 +1430,8 @@ x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
+x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
@@ -1842,7 +1845,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
-/x-pack/solutions/observability/test/functional/page_objects/asset_details.ts @elastic/obs-signals-metrics-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
 /x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/fixtures/es_archives/infra @elastic/obs-signals-metrics-team
 /src/platform/test/common/plugins/otel_metrics @elastic/obs-signals-metrics-team
@@ -3140,6 +3142,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
+
+# Nightshift investigations managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
 # PND managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
