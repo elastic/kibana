@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rRuleRequestSchema } from './v1';
+import { getRRuleRequestSchema, rRuleRequestSchema } from './v1';
 
 describe('rRuleRequestSchema', () => {
   const basicRequest = {
@@ -115,7 +115,7 @@ describe('rRuleRequestSchema', () => {
       ).toThrow();
     });
 
-    test('returns an error if the values are zero', () => {
+    test('returns an error if the values are less than one', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [0] })).toThrow();
     });
 
@@ -123,17 +123,40 @@ describe('rRuleRequestSchema', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [32] })).toThrow();
     });
 
-    test('returns an error if the values are smaller than -31', () => {
-      expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [-32] })).toThrow();
+    test('returns an error for negative values unless negative month days are allowed', () => {
+      expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [-1] })).toThrow();
     });
+  });
+
+  describe('bymonthday with allowNegativeMonthDay', () => {
+    const negativeMonthDaySchema = getRRuleRequestSchema({ allowNegativeMonthDay: true });
 
     test('accepts negative values counting back from the end of the month', () => {
-      expect(rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [-1] }).bymonthday).toEqual(
-        [-1]
-      );
       expect(
-        rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [1, -31] }).bymonthday
+        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [-1] }).bymonthday
+      ).toEqual([-1]);
+      expect(
+        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [1, -31] }).bymonthday
       ).toEqual([1, -31]);
+    });
+
+    test('returns an error if the values are zero', () => {
+      expect(() => negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [0] })).toThrow();
+    });
+
+    test('returns an error if the values are outside -31 to 31', () => {
+      expect(() =>
+        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [-32] })
+      ).toThrow();
+      expect(() =>
+        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [32] })
+      ).toThrow();
+    });
+
+    test('returns an error if the values are not integers', () => {
+      expect(() =>
+        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [-1.5] })
+      ).toThrow();
     });
   });
 

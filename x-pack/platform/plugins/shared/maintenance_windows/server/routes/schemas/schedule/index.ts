@@ -14,10 +14,12 @@ import {
 export const scheduleRequestSchema = getScheduleRequestSchema({
   metaId: 'maintenance_window_schedule_request',
   recurringMetaId: 'maintenance_window_schedule_recurring_request',
+  allowNegativeMonthDay: true,
 });
 export const scheduleResponseSchema = getScheduleResponseSchema({
   metaId: 'maintenance_window_schedule_response',
   recurringMetaId: 'maintenance_window_schedule_recurring_response',
+  allowNegativeMonthDay: true,
 });
 
 export const scheduleRequestSchemaV1 = scheduleRequestSchema;

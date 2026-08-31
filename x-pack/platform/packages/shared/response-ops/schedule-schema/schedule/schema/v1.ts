@@ -21,9 +21,20 @@ import { validateMonthDayV1 } from '../../r_rule/validation';
 interface GetScheduleSchemaOptions {
   metaId?: string;
   recurringMetaId?: string;
+  // Opt-in: consumers such as the alerting snooze API publish onMonthDay as 1-31 in their contracts.
+  allowNegativeMonthDay?: boolean;
 }
 
-const getRecurringRequestSchema = (recurringMetaId?: string) =>
+const MONTH_DAY_DESCRIPTION =
+  'The specific days of the month for a recurring schedule. Valid values are 1-31.';
+
+const NEGATIVE_MONTH_DAY_DESCRIPTION =
+  'The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.';
+
+const getRecurringRequestSchema = (
+  recurringMetaId?: string,
+  allowNegativeMonthDay: boolean = false
+) =>
   schema.object(
     {
       end: schema.maybe(
@@ -59,17 +70,24 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
       ),
       onMonthDay: schema.maybe(
         schema.arrayOf(
-          schema.number({
-            min: -31,
-            max: 31,
-            validate: (value: number) => validateMonthDayV1(value, 'schedule onMonthDay'),
-          }),
+          allowNegativeMonthDay
+            ? schema.number({
+                min: -31,
+                max: 31,
+                validate: (value: number) => validateMonthDayV1(value, 'schedule onMonthDay'),
+              })
+            : schema.number({
+                min: 1,
+                max: 31,
+                validate: (value: number) => validateInteger(value, 'onMonthDay'),
+              }),
           {
             minSize: 1,
-            maxSize: 62,
+            maxSize: 31,
             meta: {
-              description:
-                'The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.',
+              description: allowNegativeMonthDay
+                ? NEGATIVE_MONTH_DAY_DESCRIPTION
+                : MONTH_DAY_DESCRIPTION,
             },
           }
         )
@@ -106,6 +124,7 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
 export const getScheduleRequestSchema = ({
   metaId = 'schedule_request',
   recurringMetaId,
+  allowNegativeMonthDay,
 }: GetScheduleSchemaOptions = {}) =>
   schema.object(
     {
@@ -134,7 +153,7 @@ export const getScheduleRequestSchema = ({
           },
         })
       ),
-      recurring: schema.maybe(getRecurringRequestSchema(recurringMetaId)),
+      recurring: schema.maybe(getRecurringRequestSchema(recurringMetaId, allowNegativeMonthDay)),
     },
     {
       validate: validateScheduleV1,
@@ -144,7 +163,10 @@ export const getScheduleRequestSchema = ({
 
 export const scheduleRequestSchema = getScheduleRequestSchema();
 
-const getRecurringResponseSchema = (recurringMetaId?: string) =>
+const getRecurringResponseSchema = (
+  recurringMetaId?: string,
+  allowNegativeMonthDay: boolean = false
+) =>
   schema.object(
     {
       end: schema.maybe(
@@ -174,10 +196,11 @@ const getRecurringResponseSchema = (recurringMetaId?: string) =>
       ),
       onMonthDay: schema.maybe(
         schema.arrayOf(schema.number(), {
-          maxSize: 62,
+          maxSize: 31,
           meta: {
-            description:
-              'The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.',
+            description: allowNegativeMonthDay
+              ? NEGATIVE_MONTH_DAY_DESCRIPTION
+              : MONTH_DAY_DESCRIPTION,
           },
         })
       ),
@@ -204,6 +227,7 @@ const getRecurringResponseSchema = (recurringMetaId?: string) =>
 export const getScheduleResponseSchema = ({
   metaId = 'schedule_response',
   recurringMetaId,
+  allowNegativeMonthDay,
 }: GetScheduleSchemaOptions = {}) =>
   schema.object(
     {
@@ -226,7 +250,7 @@ export const getScheduleResponseSchema = ({
           },
         })
       ),
-      recurring: schema.maybe(getRecurringResponseSchema(recurringMetaId)),
+      recurring: schema.maybe(getRecurringResponseSchema(recurringMetaId, allowNegativeMonthDay)),
     },
     { meta: { id: metaId } }
   );

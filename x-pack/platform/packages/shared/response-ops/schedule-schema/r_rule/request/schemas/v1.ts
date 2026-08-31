@@ -17,11 +17,23 @@ import {
 interface GetRRuleRequestSchemaOptions {
   meta?: { id: string };
   validateTimezone?: (timezone: string) => string | undefined;
+  // Opt-in: consumers such as the alerting rule APIs publish bymonthday as 1-31 in their contracts.
+  allowNegativeMonthDay?: boolean;
 }
+
+const getMonthDayNumberSchema = (allowNegativeMonthDay: boolean) =>
+  allowNegativeMonthDay
+    ? schema.number({
+        min: -31,
+        max: 31,
+        validate: (value: number) => validateMonthDayV1(value, 'rRule bymonthday'),
+      })
+    : schema.number({ min: 1, max: 31 });
 
 export const getRRuleRequestSchema = ({
   meta,
   validateTimezone = validateTimezoneV1,
+  allowNegativeMonthDay = false,
 }: GetRRuleRequestSchemaOptions = {}) =>
   schema.object(
     {
@@ -65,14 +77,10 @@ export const getRRuleRequestSchema = ({
         })
       ),
       bymonthday: schema.maybe(
-        schema.arrayOf(
-          schema.number({
-            min: -31,
-            max: 31,
-            validate: (value: number) => validateMonthDayV1(value, 'rRule bymonthday'),
-          }),
-          { minSize: 1, maxSize: 62 }
-        )
+        schema.arrayOf(getMonthDayNumberSchema(allowNegativeMonthDay), {
+          minSize: 1,
+          maxSize: 31,
+        })
       ),
       bymonth: schema.maybe(
         schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1, maxSize: 12 })
