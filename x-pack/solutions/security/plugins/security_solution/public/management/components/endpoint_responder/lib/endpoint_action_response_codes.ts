@@ -136,7 +136,7 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   'ra_kill-process_success_done': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.successDone',
-    { defaultMessage: 'Action completed successfully' }
+    { defaultMessage: 'Killed' }
   ),
 
   'ra_kill-process_success_partial-descendants': i18n.translate(
@@ -192,7 +192,7 @@ const CODES = Object.freeze({
 
   'ra_kill-process_descendant_success_done': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantSuccessDone',
-    { defaultMessage: 'Process was killed successfully' }
+    { defaultMessage: 'Killed' }
   ),
 
   /**

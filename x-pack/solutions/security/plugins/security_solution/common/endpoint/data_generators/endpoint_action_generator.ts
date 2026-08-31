@@ -641,10 +641,24 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   /**
    * Returns a random kill-process code for a descendant process
    */
-  randomKillProcessDescendantResponseCode(): string {
-    return this.randomChoice(
-      KILL_PROCESS_RESPONSE_CODES.filter((code) => /_descendant_/.test(code))
-    );
+  randomKillProcessDescendantResponseCode(type: 'error' | 'success'): string {
+    const codeList = KILL_PROCESS_RESPONSE_CODES.filter((code) => {
+      if (!/_descendant_/.test(code)) {
+        return false;
+      }
+
+      if (!type) {
+        return true;
+      }
+
+      if (type === 'error') {
+        return /_error_/.test(code);
+      }
+
+      return /_success_/.test(code);
+    });
+
+    return this.randomChoice(codeList);
   }
 
   generateActivityLogAction(
@@ -761,7 +775,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                 pid: parameters.pid || 234,
                 ...(parameters?.entity_id ? { entity_id: parameters.entity_id } : {}),
                 ...(parameters?.process_name ? { process_name: parameters.process_name } : {}),
-                ...((parameters as ResponseActionParametersWithPid).kill_descendants
+                ...((parameters as ResponseActionParametersWithPid).kill_descendants &&
+                !overrides.content?.descendants
                   ? {
                       descendants: [
                         {
@@ -770,7 +785,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.456',
                           parent_entity_id: 'ksuqwn8364fnbks.234',
                           command: '456_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 567,
@@ -778,7 +793,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.567',
                           parent_entity_id: 'ksuqwn8364fnbks.456',
                           command: '567_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 5671,
@@ -786,7 +801,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.5671',
                           parent_entity_id: 'ksuqwn8364fnbks.567',
                           command: '5671_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 56711,
@@ -794,7 +809,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.56711',
                           parent_entity_id: 'ksuqwn8364fnbks.5671',
                           command: '56711_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 56712,
@@ -802,7 +817,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.56712',
                           parent_entity_id: 'ksuqwn8364fnbks.5671',
                           command: '56712_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 654,
@@ -811,7 +826,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           parent_entity_id: 'ksuqwn8364fnbks.234',
                           command: '654_command.exe',
                           was_killed: false,
-                          error: 'process is protected',
+                          code: 'ra_kill-process_descendant_error_failure',
                         },
                       ],
                     }
@@ -857,8 +872,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         parent_entity_id: parentEntityId,
         process_name: command.split('/').pop(),
         command,
-        was_killed: wasKilled,
         error: wasKilled ? undefined : this.randomChoice(possibleErrors),
+        code: wasKilled
+          ? this.randomKillProcessDescendantResponseCode('success')
+          : this.randomKillProcessDescendantResponseCode('error'),
       };
     };
 
