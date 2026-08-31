@@ -91,7 +91,7 @@ export function SignificantEventsPage() {
   );
 
   const pageTitle = i18n.translate('xpack.significantEventsApp.pageHeaderTitle', {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Nightshift Management',
   });
 
   const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
@@ -146,7 +146,6 @@ export function SignificantEventsPage() {
   ]);
 
   useNightshiftManagementBreadcrumbs();
-
   const tabs = useMemo(
     () => [
       {

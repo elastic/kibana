@@ -162,8 +162,24 @@ export interface GetStepExecutionParams {
 export interface SearchStepExecutionsParams {
   workflowId: string;
   stepId?: string;
+  /**
+   * When set, only step executions of this type, e.g. `ai.agent`. A step id can be shared by more
+   * than one document — the engine's step-level timeout wrapper reuses it — so this narrows a
+   * search to the one that carries the step's own result.
+   */
+  stepType?: string;
+  /**
+   * When set, restricts the search to step executions belonging to these workflow runs. An empty
+   * array matches nothing. Keep it to a page of ids — it becomes a single ES `terms` clause.
+   */
+  workflowExecutionIds?: string[];
   includeInput?: boolean;
   includeOutput?: boolean;
+  /**
+   * When set, only these `_source` paths are returned, and `includeInput`/`includeOutput` are
+   * ignored. For reading a few fields off runs whose `output` can be megabytes.
+   */
+  sourceIncludes?: string[];
   page?: number;
   size?: number;
   /** Datemath lower bound for filtering by startedAt. */
@@ -364,16 +380,20 @@ export class WorkflowsManagementApi {
     // Rewrite only the `name` field directly in the YAML text so that cloning
     // works even when the source workflow's YAML is schema-invalid. Strictly
     // parsing/validating here would reject invalid-but-editable workflows.
-    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, {
-      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
-        defaultMessage: 'Copy',
-      })}`,
-    });
+    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+      defaultMessage: 'Copy',
+    })}`;
+    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
 
+    // `updateWorkflowYamlFields` cannot inject a `name` key when the YAML root is not a
+    // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. Pass
+    // `cloneName` as an explicit fallback so the clone is still named "<name> Copy" instead
+    // of collapsing to "Untitled workflow".
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
-      request
+      request,
+      { nameFallback: cloneName }
     );
     this.notifySml(result.id, 'create', request);
     return result;
