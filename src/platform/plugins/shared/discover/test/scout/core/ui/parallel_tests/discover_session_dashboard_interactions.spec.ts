@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
-import { spaceTest, tags, testData } from '../fixtures';
+import { spaceTest, tags, testData } from '../../../common/ui/fixtures';
 
 const FLIGHTS_DATA_VIEW = 'kibana_sample_data_flights';
 const FLIGHTS_TIME_RANGE = {

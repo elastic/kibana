@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest } from '../../../common/ui/fixtures';
 
 const DASHBOARD_SAVED_SEARCH_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
