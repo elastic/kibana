@@ -25,6 +25,16 @@ jest.mock('./observation_modules/register_modules', () => ({
   registerObservationModules: (...args: unknown[]) => mockRegisterObservationModules(...args),
 }));
 
+const mockBuildEntityLookupMap = jest.fn();
+jest.mock('./entities_relationships', () => ({
+  buildEntityLookupMap: (...args: unknown[]) => mockBuildEntityLookupMap(...args),
+}));
+
+const mockAttachRelatedEntities = jest.fn();
+jest.mock('./attach_related_entities', () => ({
+  attachRelatedEntities: (...args: unknown[]) => mockAttachRelatedEntities(...args),
+}));
+
 const mockClassifyLeadCandidates = jest.fn();
 const mockPersistLeads = jest.fn();
 jest.mock('./lead_data_client', () => ({
@@ -61,6 +71,12 @@ describe('runLeadGenerationPipeline', () => {
   beforeEach(() => {
     mockSynthesizeLeads.mockResolvedValue([]);
     mockPersistLeads.mockResolvedValue(0);
+    mockBuildEntityLookupMap.mockImplementation(
+      async (entities: Array<{ id: string }>) => new Map(entities.map((e) => [e.id, e]))
+    );
+    mockAttachRelatedEntities.mockImplementation(
+      async ({ candidates }: { candidates: unknown[] }) => candidates
+    );
   });
 
   it('returns early when no entities are found', async () => {
@@ -75,6 +91,73 @@ describe('runLeadGenerationPipeline', () => {
     expect(mockRegisterObservationModules).not.toHaveBeenCalled();
     expect(mockPrepareLeadCandidates).not.toHaveBeenCalled();
     expect(mockSynthesizeLeads).not.toHaveBeenCalled();
+  });
+
+  it('degrades to a candidates-only entity lookup map when buildEntityLookupMap throws', async () => {
+    const mockEntity = {
+      record: { entity: { type: 'user', name: 'testuser', id: 'euid-testuser' } },
+      type: 'user',
+      name: 'testuser',
+      id: 'user:testuser',
+    };
+    mockListEntities.mockResolvedValueOnce([mockEntity]);
+    mockBuildEntityLookupMap.mockRejectedValueOnce(new Error('es unavailable'));
+
+    const candidate = {
+      entity: mockEntity,
+      priority: 5,
+      observations: [],
+      leadId: hashEuid(mockEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
+      contentHash: 'hash-fallback',
+    };
+    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
+
+    await runLeadGenerationPipeline({
+      ...pipelineParams,
+      sourceType: 'adhoc',
+    });
+
+    expect(mockRegisterObservationModules).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        entitiesMap: new Map([[mockEntity.id, mockEntity]]),
+      })
+    );
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('continues with unmodified candidates when attachRelatedEntities throws', async () => {
+    const mockEntity = {
+      record: { entity: { type: 'user', name: 'testuser', id: 'euid-testuser' } },
+      type: 'user',
+      name: 'testuser',
+      id: 'user:testuser',
+    };
+    mockListEntities.mockResolvedValueOnce([mockEntity]);
+    mockAttachRelatedEntities.mockRejectedValueOnce(new Error('ranking failed'));
+
+    const candidate = {
+      entity: mockEntity,
+      priority: 5,
+      observations: [],
+      leadId: hashEuid(mockEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
+      contentHash: 'hash-attach-fallback',
+    };
+    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
+
+    await runLeadGenerationPipeline({
+      ...pipelineParams,
+      sourceType: 'adhoc',
+    });
+
+    expect(mockClassifyLeadCandidates).toHaveBeenCalledWith([candidate]);
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('skips LLM for refresh candidates and only stamps timestamps', async () => {
@@ -109,6 +192,10 @@ describe('runLeadGenerationPipeline', () => {
         },
       ],
       leadId: 'entity-key-1',
+      topRelatedEntities: [
+        { id: 'host:shared', type: 'host', name: 'shared', kinds: ['communicates_with'] },
+      ],
+      relatedEntityCounts: { communicates_with: 3 },
       contentHash: 'hash-1',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -127,7 +214,13 @@ describe('runLeadGenerationPipeline', () => {
       expect.objectContaining({
         executionId: 'exec-123',
         sourceType: 'adhoc',
-        refreshes: [{ existingId: 'existing-lead' }],
+        refreshes: [
+          {
+            existingId: 'existing-lead',
+            topRelatedEntities: candidate.topRelatedEntities,
+            relatedEntityCounts: candidate.relatedEntityCounts,
+          },
+        ],
         creates: [],
         updates: [],
       })
@@ -155,6 +248,8 @@ describe('runLeadGenerationPipeline', () => {
       priority: 5,
       observations: [],
       leadId: hashEuid(mockEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
       contentHash: 'hash-create',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -192,6 +287,7 @@ describe('runLeadGenerationPipeline', () => {
         spaceId: 'default',
         riskScoreDataClient,
         relationshipsClient,
+        entitiesMap: new Map([[mockEntity.id, mockEntity]]),
       })
     );
     expect(mockSynthesizeLeads).toHaveBeenCalledWith(
@@ -238,6 +334,8 @@ describe('runLeadGenerationPipeline', () => {
       priority: 8,
       observations: [],
       leadId: hashEuid(mockEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
       contentHash: 'hash-new',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -300,6 +398,8 @@ describe('runLeadGenerationPipeline', () => {
       priority: 3,
       observations: [],
       leadId: 'entity-key-d',
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
       contentHash: 'hash-d',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -336,6 +436,8 @@ describe('runLeadGenerationPipeline', () => {
       priority: 5,
       observations: [],
       leadId: hashEuid(mockEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
       contentHash: 'hash-create',
     };
     const skipCandidate = {
