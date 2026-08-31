@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import type { UserEvent } from '@testing-library/user-event';
 import userEvent from '@testing-library/user-event';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
@@ -73,10 +74,15 @@ const EUI_FULL_SCREEN_TEST_ID = 'dataGridFullScreenButton';
 const EUI_PAGINATION_TEST_ID = 'tablePaginationPopoverButton';
 const EUI_TEN_ROWS_PER_PAGE_TEST_ID = 'tablePagination-10-rows';
 const EUI_CELL_EXPAND_TEST_ID = 'euiDataGridCellExpandButton';
+const EUI_CELL_EXPANSION_POPOVER_TEST_ID = 'euiDataGridExpansionPopover';
 const euiHeaderActionsTestId = (columnId: string) => `dataGridHeaderCellActionButton-${columnId}`;
 const euiPaginationButtonTestId = (pageNumber: number) => `pagination-button-${pageNumber - 1}`;
 const euiColumnToggleTestId = (columnId: string) =>
   `dataGridColumnSelectorToggleColumnVisibility-${columnId}`;
+
+// Every interaction here goes through the data grid, whose DOM is large enough that user-event's
+// default per-event delay and pointer-events restyling dominate the runtime of these tests.
+let user: UserEvent;
 
 const useFindAttackDiscoveriesMock = useFindAttackDiscoveries as jest.Mock;
 const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
@@ -170,13 +176,15 @@ const gridCellOf = (testId: string): HTMLElement => {
 
 /** Sorts the grid through the column header's own actions, as a user would. */
 const sortColumn = async (columnId: string, label: string) => {
-  await userEvent.click(screen.getByTestId(euiHeaderActionsTestId(columnId)));
-  await userEvent.click(await screen.findByText(label));
+  await user.click(screen.getByTestId(euiHeaderActionsTestId(columnId)));
+  await user.click(await screen.findByText(label));
 };
 
 describe('AttackTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // A fresh instance per test, so keyboard focus left by one test cannot reach the next.
+    user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
     // The grid persists its visible columns, so a selection left behind by one test would
     // decide what the next one renders.
     mockedUseKibana.services.storage.clear();
@@ -317,8 +325,8 @@ describe('AttackTabContent', () => {
         buildAttachment({ createdBy: { fullName: null, username: null, email: null } }),
       ]);
 
-      await userEvent.click(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID));
-      await userEvent.click(
+      await user.click(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID));
+      await user.click(
         await screen.findByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.attachedBy))
       );
 
@@ -342,7 +350,7 @@ describe('AttackTabContent', () => {
 
   describe('the column picker', () => {
     const openColumnPicker = async () => {
-      await userEvent.click(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID));
+      await user.click(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID));
     };
 
     /** Opens the picker once, then toggles each column, as a user works the popover. */
@@ -350,7 +358,7 @@ describe('AttackTabContent', () => {
       await openColumnPicker();
 
       for (const columnId of columnIds) {
-        await userEvent.click(await screen.findByTestId(euiColumnToggleTestId(columnId)));
+        await user.click(await screen.findByTestId(euiColumnToggleTestId(columnId)));
       }
     };
 
@@ -577,10 +585,18 @@ describe('AttackTabContent', () => {
 
       renderTab();
 
-      await userEvent.hover(summaryCell());
-      await userEvent.click(await screen.findByTestId(EUI_CELL_EXPAND_TEST_ID));
+      await user.hover(summaryCell());
+      expect(await screen.findByTestId(EUI_CELL_EXPAND_TEST_ID)).toBeInTheDocument();
 
-      const [, expanded] = screen.getAllByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
+      // The popover is opened by keyboard rather than by clicking the button above: the grid
+      // unmounts its hover actions as the pointer moves onto them, so a synthetic click lands on
+      // a detached node. Enter on the focused cell is the same affordance, and proves it is
+      // reachable without a pointer.
+      gridCellOf(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID).focus();
+      await user.keyboard('{Enter}');
+
+      const popover = await screen.findByTestId(EUI_CELL_EXPANSION_POPOVER_TEST_ID);
+      const expanded = within(popover).getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
       expect(expanded).toHaveTextContent('before exfiltrating data.');
       expect(expanded).not.toHaveStyleRule('white-space', 'nowrap');
     });
@@ -696,11 +712,11 @@ describe('AttackTabContent', () => {
 
   describe('the row actions control column', () => {
     const openRemovalPrompt = async () => {
-      await userEvent.click(removeAttackButton('so-1'));
+      await user.click(removeAttackButton('so-1'));
     };
 
     const confirmRemoval = async () => {
-      await userEvent.click(screen.getByText('Remove'));
+      await user.click(screen.getByText('Remove'));
     };
 
     it('renders both actions on every row', () => {
@@ -746,7 +762,7 @@ describe('AttackTabContent', () => {
       showAttackButton('so-1').focus();
       expect(showAttackButton('so-1')).toHaveFocus();
 
-      await userEvent.tab();
+      await user.tab();
 
       expect(removeAttackButton('so-1')).toHaveFocus();
     });
@@ -755,7 +771,7 @@ describe('AttackTabContent', () => {
       renderTab();
 
       showAttackButton('so-1').focus();
-      await userEvent.keyboard('{Enter}');
+      await user.keyboard('{Enter}');
 
       expect(mockOpenAttackFlyout).toHaveBeenCalledWith(
         expect.objectContaining({ attackId: 'attack-id-1' })
@@ -766,7 +782,7 @@ describe('AttackTabContent', () => {
       renderTab();
 
       removeAttackButton('so-1').focus();
-      await userEvent.keyboard('{Enter}');
+      await user.keyboard('{Enter}');
 
       expect(await screen.findByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
     });
@@ -820,7 +836,7 @@ describe('AttackTabContent', () => {
       renderTab();
 
       await openRemovalPrompt();
-      await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
+      await user.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
       await confirmRemoval();
 
       expect(removeAttack).toHaveBeenCalledTimes(1);
@@ -871,12 +887,12 @@ describe('AttackTabContent', () => {
     };
 
     const showTenRowsPerPage = async () => {
-      await userEvent.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
-      await userEvent.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
+      await user.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
+      await user.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
     };
 
     const goToPage = async (pageNumber: number) => {
-      await userEvent.click(screen.getByTestId(euiPaginationButtonTestId(pageNumber)));
+      await user.click(screen.getByTestId(euiPaginationButtonTestId(pageNumber)));
     };
 
     it('leads the row, ahead of the actions column', () => {
@@ -905,20 +921,20 @@ describe('AttackTabContent', () => {
 
       expect(rowCheckbox('so-1')).not.toBeChecked();
 
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
       expect(rowCheckbox('so-1')).toBeChecked();
 
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
       expect(rowCheckbox('so-1')).not.toBeChecked();
     });
 
     it('reflects a partial selection in the header checkbox', async () => {
       renderAttachments(twoAttachments());
 
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
       expect(selectAllCheckbox()).toBePartiallyChecked();
 
-      await userEvent.click(rowCheckbox('so-2'));
+      await user.click(rowCheckbox('so-2'));
       expect(selectAllCheckbox()).toBeChecked();
     });
 
@@ -926,7 +942,7 @@ describe('AttackTabContent', () => {
       renderTwelveAttachments();
       await showTenRowsPerPage();
 
-      await userEvent.click(selectAllCheckbox());
+      await user.click(selectAllCheckbox());
 
       expect(rowCheckbox('so-0')).toBeChecked();
 
@@ -939,8 +955,8 @@ describe('AttackTabContent', () => {
     it('deselects every row when the header checkbox is cleared', async () => {
       renderAttachments(twoAttachments());
 
-      await userEvent.click(selectAllCheckbox());
-      await userEvent.click(selectAllCheckbox());
+      await user.click(selectAllCheckbox());
+      await user.click(selectAllCheckbox());
 
       expect(rowCheckbox('so-1')).not.toBeChecked();
       expect(rowCheckbox('so-2')).not.toBeChecked();
@@ -950,7 +966,7 @@ describe('AttackTabContent', () => {
       renderTwelveAttachments();
       await showTenRowsPerPage();
 
-      await userEvent.click(rowCheckbox('so-0'));
+      await user.click(rowCheckbox('so-0'));
       await goToPage(2);
       await goToPage(1);
 
@@ -960,7 +976,7 @@ describe('AttackTabContent', () => {
     it('clears the selection when the page size changes', async () => {
       renderTwelveAttachments();
 
-      await userEvent.click(rowCheckbox('so-0'));
+      await user.click(rowCheckbox('so-0'));
       expect(rowCheckbox('so-0')).toBeChecked();
 
       await showTenRowsPerPage();
@@ -976,7 +992,7 @@ describe('AttackTabContent', () => {
         </TestProviders>
       );
 
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
       expect(rowCheckbox('so-1')).toBeChecked();
 
       rerender(
@@ -1001,16 +1017,16 @@ describe('AttackTabContent', () => {
       ]);
 
     const selectBothRows = async () => {
-      await userEvent.click(rowCheckbox('so-1'));
-      await userEvent.click(rowCheckbox('so-2'));
+      await user.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-2'));
     };
 
     const openBulkRemovalPrompt = async () => {
-      await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
+      await user.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
     };
 
     const confirmRemoval = async () => {
-      await userEvent.click(screen.getByText('Remove'));
+      await user.click(screen.getByText('Remove'));
     };
 
     it('stays hidden until a row is selected', () => {
@@ -1022,12 +1038,12 @@ describe('AttackTabContent', () => {
     it('appears with the selection, and counts it', async () => {
       renderTwoAttachments();
 
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
       expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
         '1 attack selected'
       );
 
-      await userEvent.click(rowCheckbox('so-2'));
+      await user.click(rowCheckbox('so-2'));
       expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
         '2 attacks selected'
       );
@@ -1036,8 +1052,8 @@ describe('AttackTabContent', () => {
     it('goes away again when the selection is cleared', async () => {
       renderTwoAttachments();
 
-      await userEvent.click(rowCheckbox('so-1'));
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
 
       expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
     });
@@ -1076,7 +1092,7 @@ describe('AttackTabContent', () => {
 
       await selectBothRows();
       await openBulkRemovalPrompt();
-      await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
+      await user.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
       await confirmRemoval();
 
       expect(removeAttack).toHaveBeenCalledWith(
@@ -1115,7 +1131,7 @@ describe('AttackTabContent', () => {
 
       renderTwoAttachments();
 
-      await userEvent.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-1'));
 
       expect(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID)).toBeDisabled();
     });
