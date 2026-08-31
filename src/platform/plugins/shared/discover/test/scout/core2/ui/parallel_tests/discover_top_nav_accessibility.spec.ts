@@ -53,7 +53,7 @@ spaceTest.describe('Discover top nav accessibility', { tag: '@local-stateful-cla
     }
   );
 
-  spaceTest('returns focus to Alerts after dismissing the alerts popover', async ({ page }) => {
+  spaceTest('returns focus to overflow after dismissing the overflow menu', async ({ page }) => {
     await focusAndPress(page, 'app-menu-overflow-button');
     await expect(page.testSubj.locator('discoverAlertsButton')).not.toBeFocused();
     await page.keyboard.press('Escape');

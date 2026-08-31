@@ -941,7 +941,7 @@ export class DiscoverApp {
   }
 
   getChartIntervalWarningIcon(): Locator {
-    return this.page.locator('[data-test-subj="unifiedHistogramRendered"] .euiToolTipAnchor');
+    return this.page.testSubj.locator('unifiedHistogramIntervalWarning');
   }
 
   // Waits for a Discover tab to finish loading.
