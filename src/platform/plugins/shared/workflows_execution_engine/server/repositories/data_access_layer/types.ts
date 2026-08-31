@@ -29,6 +29,7 @@ export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: 
 
 export interface CreateDataClientDeps {
   source: ExecutionStorageSource;
+  dataRetention: string;
   logger: Logger;
 }
 

@@ -39,7 +39,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       hidden: true,
       template: {
         mappings: DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-        lifecycle: { data_retention: '90d' },
+        lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
     coreSetup.dataStreams.registerDataStream({
@@ -48,7 +48,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       hidden: true,
       template: {
         mappings: DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-        lifecycle: { data_retention: '90d' },
+        lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
   }

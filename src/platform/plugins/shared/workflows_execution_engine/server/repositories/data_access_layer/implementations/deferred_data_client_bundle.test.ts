@@ -45,7 +45,11 @@ describe('DeferredDataClientBundle', () => {
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
 
-    bundle = new DeferredDataClientBundle({ source: 'plain_index', logger: loggerMock.create() });
+    bundle = new DeferredDataClientBundle({
+      source: 'plain_index',
+      dataRetention: '90d',
+      logger: loggerMock.create(),
+    });
   });
 
   describe('initSetup', () => {

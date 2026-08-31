@@ -52,7 +52,7 @@ describe('setupDependencies', () => {
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
     enabled: true,
-    storage: { source: 'plain_index' },
+    storage: { source: 'plain_index', dataRetention: '90d' },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     logging: {

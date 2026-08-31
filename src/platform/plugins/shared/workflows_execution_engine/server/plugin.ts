@@ -189,6 +189,7 @@ export class WorkflowsExecutionEnginePlugin
 
     this.dataClientBundle = createDataClientBundle({
       source: this.config.storage.source,
+      dataRetention: this.config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);

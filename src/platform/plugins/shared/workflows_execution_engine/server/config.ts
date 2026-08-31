@@ -35,6 +35,7 @@ const configSchema = schema.object({
     source: schema.oneOf([schema.literal('plain_index'), schema.literal('data_stream')], {
       defaultValue: 'plain_index',
     }),
+    dataRetention: schema.string({ defaultValue: '90d' }),
   }),
   eventDriven: EventTriggersConfigSchema,
   /**

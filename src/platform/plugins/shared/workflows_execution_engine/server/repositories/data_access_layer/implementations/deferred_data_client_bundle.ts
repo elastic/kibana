@@ -21,6 +21,7 @@ import type {
 
 export interface DeferredDataClientBundleDeps {
   source: ExecutionStorageSource;
+  dataRetention: string;
   logger: Logger;
 }
 
