@@ -268,7 +268,6 @@ export const Slack: ConnectorSpec = {
       },
       {
         type: 'relay',
-        isInternal: true, // set when the Elastic Slack app connects, never by a user
         defaults: {},
         overrides: {
           label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {

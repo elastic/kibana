@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { isString } from 'lodash';
 import { authTypeSpecs } from '../..';
-import { getAuthModeForAuthTypeId } from '../auth_mode_by_auth_type_id';
+import { getAuthModeForAuthTypeId, isInternalAuthTypeId } from '../auth_mode_by_auth_type_id';
 import type { AuthTypeDef, NormalizedAuthType } from '../connector_spec';
 
 export const AUTH_TYPE_DISCRIMINATOR = 'authType';
@@ -33,7 +33,6 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let labelOverride: string | undefined;
   let isRecommendedOverride: boolean | undefined;
   let isLegacyOverride: boolean | undefined;
-  let isInternalOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -45,7 +44,6 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     labelOverride = def.overrides?.label;
     isRecommendedOverride = def.isRecommended;
     isLegacyOverride = def.isLegacy;
-    isInternalOverride = def.isInternal;
   }
 
   if (!authTypeId) {
@@ -98,7 +96,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
     ...(isRecommendedOverride !== undefined ? { isRecommended: isRecommendedOverride } : {}),
     ...(isLegacyOverride !== undefined ? { isLegacy: isLegacyOverride } : {}),
-    ...(isInternalOverride !== undefined ? { isInternal: isInternalOverride } : {}),
+    ...(isInternalAuthTypeId(authTypeId) ? { isInternal: true } : {}),
   };
 
   return {

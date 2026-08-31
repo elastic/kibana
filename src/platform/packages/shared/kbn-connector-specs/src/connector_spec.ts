@@ -145,6 +145,8 @@ export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTyp
    * authenticating the axios client. Defaults to false.
    */
   usesRelayTransport?: boolean;
+  /** Kibana owns these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
+  isInternal?: boolean;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -357,8 +359,6 @@ export interface AuthTypeDef {
   isRecommended?: boolean;
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
-  /** When true, hidden from the UI picker and rejected on the connector API: Kibana sets these credentials, not the user. Unlike `isLegacy`, it is not deprecated. */
-  isInternal?: boolean;
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {

@@ -10,7 +10,7 @@
 import { isInternalAuthType } from './is_internal_auth_type';
 
 describe('isInternalAuthType()', () => {
-  test('is true for an auth type the spec marks as internal', () => {
+  test('is true for an internal auth type the spec offers', () => {
     expect(isInternalAuthType('.slack2', 'relay')).toBe(true);
   });
 
@@ -22,6 +22,10 @@ describe('isInternalAuthType()', () => {
 
   test('is false for an auth type the spec does not declare at all', () => {
     expect(isInternalAuthType('.slack2', 'basic')).toBe(false);
+  });
+
+  test('is false for a connector that does not offer the internal auth type', () => {
+    expect(isInternalAuthType('.notion', 'relay')).toBe(false);
   });
 
   test('is false for an unknown connector type', () => {

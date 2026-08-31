@@ -11,14 +11,21 @@ import { isString } from 'lodash';
 import type { AuthMode } from './connector_spec';
 import * as allAuthTypes from './all_auth_types';
 
-function isAuthTypeSpecEntry(
-  value: unknown
-): value is { id: string; authMode?: AuthMode; usesRelayTransport?: boolean } {
+function isAuthTypeSpecEntry(value: unknown): value is {
+  id: string;
+  authMode?: AuthMode;
+  usesRelayTransport?: boolean;
+  isInternal?: boolean;
+} {
   return isString((value as { id?: unknown })?.id);
 }
 
 function usesRelayTransportOf(spec: { id: string; usesRelayTransport?: boolean }): boolean {
   return spec.usesRelayTransport ?? false;
+}
+
+function isInternalOf(spec: { id: string; isInternal?: boolean }): boolean {
+  return spec.isInternal ?? false;
 }
 
 export const AUTH_MODE_BY_AUTH_TYPE_ID: Record<string, AuthMode> = Object.fromEntries(
@@ -39,4 +46,14 @@ export const USES_RELAY_BY_AUTH_TYPE_ID: Record<string, boolean> = Object.fromEn
 
 export function authTypeUsesRelay(authTypeId: string): boolean {
   return USES_RELAY_BY_AUTH_TYPE_ID[authTypeId] ?? false;
+}
+
+export const IS_INTERNAL_BY_AUTH_TYPE_ID: Record<string, boolean> = Object.fromEntries(
+  Object.values(allAuthTypes)
+    .filter(isAuthTypeSpecEntry)
+    .map((spec) => [spec.id, isInternalOf(spec)])
+) as Record<string, boolean>;
+
+export function isInternalAuthTypeId(authTypeId: string): boolean {
+  return IS_INTERNAL_BY_AUTH_TYPE_ID[authTypeId] ?? false;
 }

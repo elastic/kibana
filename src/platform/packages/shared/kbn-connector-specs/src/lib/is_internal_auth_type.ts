@@ -8,12 +8,13 @@
  */
 
 import { isString } from 'lodash';
+import { isInternalAuthTypeId } from '../auth_mode_by_auth_type_id';
 import { getConnectorSpec } from '../get_connector_spec';
 
 /**
- * Whether the spec marks this auth type `isInternal` — Kibana sets those credentials, so a user must
- * never supply them. Use it to reject create/update, not to gate execution: the connectors Kibana
- * provisioned this way have to keep working.
+ * Whether the spec offers this auth type and the auth type is internal — Kibana sets those
+ * credentials, so a user must never supply them. Use it to reject create/update, not to gate
+ * execution: the connectors Kibana provisioned this way have to keep working.
  */
 export const isInternalAuthType = (
   connectorTypeId: string,
@@ -24,9 +25,9 @@ export const isInternalAuthType = (
   }
 
   const authTypes = getConnectorSpec(connectorTypeId)?.auth?.types ?? [];
-
-  return authTypes.some(
-    (authType) =>
-      !isString(authType) && authType.type === authTypeId && authType.isInternal === true
+  const declaresAuthType = authTypes.some(
+    (authType) => (isString(authType) ? authType : authType.type) === authTypeId
   );
+
+  return declaresAuthType && isInternalAuthTypeId(authTypeId);
 };

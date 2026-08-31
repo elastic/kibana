@@ -36,6 +36,7 @@ export const RelayAuth: AuthTypeSpec<AuthSchemaType> = {
   schema: authSchema,
   authMode: 'shared',
   usesRelayTransport: true,
+  isInternal: true,
   configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
     return axiosInstance;
   },

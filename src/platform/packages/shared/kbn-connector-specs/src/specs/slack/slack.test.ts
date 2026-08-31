@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { getConnectorSpec } from '../../..';
+import { getConnectorSpec, isInternalAuthType } from '../../..';
 import { Slack } from './slack';
 import {
   SlackGetConversationHistoryInputSchema,
@@ -67,14 +67,8 @@ describe('Slack', () => {
     expect(types).toContain('relay');
   });
 
-  it('marks the relay auth type internal so a user can never configure it', () => {
-    const relayType = (Slack.auth?.types as Array<string | { type: string }>).find(
-      (t) => typeof t !== 'string' && t.type === 'relay'
-    ) as { isInternal?: boolean; defaults?: Record<string, unknown> } | undefined;
-
-    expect(relayType).toBeDefined();
-    expect(relayType?.isInternal).toBe(true);
-    expect(relayType?.defaults).toEqual({});
+  it('treats the relay auth type as internal so a user can never configure it', () => {
+    expect(isInternalAuthType('.slack2', 'relay')).toBe(true);
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {

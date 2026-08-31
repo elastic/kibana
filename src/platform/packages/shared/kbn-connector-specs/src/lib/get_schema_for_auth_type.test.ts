@@ -60,7 +60,7 @@ describe('getSchemaForAuthType()', () => {
   });
 
   test('carries isInternal into the schema meta so the form can skip the option', () => {
-    const { schema } = getSchemaForAuthType({ type: 'relay', isInternal: true, defaults: {} });
+    const { schema } = getSchemaForAuthType({ type: 'relay', defaults: {} });
 
     expect(schema.meta()).toEqual({
       authMode: 'shared',
@@ -69,8 +69,8 @@ describe('getSchemaForAuthType()', () => {
     });
   });
 
-  test('omits isInternal for an auth type that does not set it', () => {
-    const { schema } = getSchemaForAuthType({ type: 'relay', defaults: {} });
+  test('omits isInternal for an auth type that is not internal', () => {
+    const { schema } = getSchemaForAuthType({ type: 'basic', defaults: {} });
 
     expect(schema.meta()).not.toHaveProperty('isInternal');
   });

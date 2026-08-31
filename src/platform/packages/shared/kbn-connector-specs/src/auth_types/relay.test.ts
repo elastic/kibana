@@ -33,6 +33,10 @@ describe('RelayAuth', () => {
     expect(RelayAuth.usesRelayTransport).toBe(true);
   });
 
+  it('is internal so a user can never configure it', () => {
+    expect(RelayAuth.isInternal).toBe(true);
+  });
+
   describe('schema', () => {
     it('accepts a tenant key', () => {
       expect(RelayAuth.schema.parse({ tenantKey: 'tenant-A' })).toEqual({ tenantKey: 'tenant-A' });
