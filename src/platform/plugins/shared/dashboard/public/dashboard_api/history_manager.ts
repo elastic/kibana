@@ -65,10 +65,7 @@ export function initializeHistoryManager({
           historyUpdated$.next();
         })
       ),
-      setState: async (state: DashboardState) => {
-        await setState(state);
-        historyUpdated$.next();
-      },
+      setState,
       getLatestState: getState,
       maxSize: 100,
     }
