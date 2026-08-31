@@ -1,10 +1,23 @@
 {
-  "sha1": "b9be8887d46ea75917ae6df49074317371b5a6b7",
+  "sha1": "d104add6542dc4af323e3ceef6df6de1c5b5d329",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "9bce89873e5159b-49a387e65cecf33",
+      "title": "Analyzer resolver entity to tree for linked-cluster events entity lookup finds a linked-cluster process and tree returns parent and child",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/analyzer_resolver_linked_events.spec.ts",
+        "line": 189,
+        "column": 7
+      }
+    },
     {
       "id": "db410a9fb4d7600-bff7379b6ed22e0",
       "title": "CPS routing with a non-existent NPRE `_alias:_origin` resolves the origin project only",

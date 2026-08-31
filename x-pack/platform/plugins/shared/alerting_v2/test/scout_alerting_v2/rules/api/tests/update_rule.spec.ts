@@ -232,6 +232,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'update: persists a conditionless composed query without a breach block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-conditionless-composed' } })
+      );
+      const query = {
+        format: 'composed' as const,
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      };
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual(query);
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.query).toStrictEqual(query);
+    }
+  );
+
+  apiTest(
     'update: should update query to composed format with a recovery segment',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
@@ -641,6 +665,48 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response).toHaveStatusCode(403);
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.metadata.name).toBe('noaccess-cannot-update');
+    }
+  );
+
+  apiTest(
+    'builder_type: should reject query change on a builder rule without explicit builder_type clear',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'builder-rule', builder_type: 'threshold' },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BUILDER_TYPE_NOT_CLEARED');
+      // Rule should remain unchanged
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.builder_type).toBe('threshold');
+    }
+  );
+
+  apiTest(
+    'builder_type: should allow query change on a builder rule when builder_type is explicitly cleared',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'builder-rule-clear', builder_type: 'threshold' },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+          metadata: { builder_type: null },
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.builder_type).toBeUndefined();
     }
   );
 });

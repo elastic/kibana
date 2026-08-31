@@ -23,6 +23,7 @@ import {
 
 import moment from 'moment';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   AIOPS_FROZEN_TIER_PREFERENCE,
   type AiOpsKey,
@@ -38,6 +39,7 @@ const maxInlineSizeStyles = css`
 export const PageHeader: FC = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+  const { cps } = useAiopsAppContext();
 
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     AiOpsKey,
@@ -96,6 +98,7 @@ export const PageHeader: FC = () => {
                 disabled={false}
                 timefilter={timefilter}
                 callback={updateTimeState}
+                projectRouting={cps?.cpsManager?.getProjectRouting()}
               />
             </EuiFlexItem>
           )}
