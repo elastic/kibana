@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useViewDetailsActionProps } from './view_details_popover';
 import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
-
-const CALLOUT_DISMISSED_KEY = 'discover:warningCalloutDismissed';
 
 interface Props {
   warnings: SearchResponseWarning[];
@@ -21,13 +19,16 @@ interface Props {
 
 export const SearchResponseWarningsCallout = (props: Props) => {
   const viewDetailsActionProps = useViewDetailsActionProps(props.warnings);
-  const [isDismissed, setIsDismissed] = useState(
-    () => sessionStorage.getItem(CALLOUT_DISMISSED_KEY) === 'true'
-  );
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  useEffect(() => {
+    if (!props.warnings.length) {
+      setIsDismissed(false);
+    }
+  }, [props.warnings.length]);
 
   const handleDismiss = useCallback(() => {
     setIsDismissed(true);
-    sessionStorage.setItem(CALLOUT_DISMISSED_KEY, 'true');
   }, []);
 
   if (!props.warnings.length || isDismissed) {
