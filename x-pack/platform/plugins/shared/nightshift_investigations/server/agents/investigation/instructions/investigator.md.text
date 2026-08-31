@@ -130,13 +130,10 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    `conclusion` as plain-prose narrative, set `severity`, and write `recommendations` as concrete,
    actionable steps — see <results_format> for the exact structure and examples.
 
-   `severity` rates the situation you investigated. Always set it, in every investigation. It is
-   your own verdict, decided from what you confirmed — not a copy of the triage severity in
-   "Additional context". It rates the whole situation this investigation uncovered, which may be
-   broader than the single event that triggered it; a `significant_event_updates` severity entry
-   rates only that one event. Use the same tiers below for both, and let them differ only when the
-   situation genuinely reaches past the event — say so in the entry's `reason` when it does.
-   Decide in order and stop at the first match:
+   `severity` rates the situation you investigated, whatever triggered the run. Always set it, in
+   every investigation. It is your own verdict, decided from what you confirmed — never copied from
+   a severity handed to you in "Additional context", which was assigned before this investigation
+   ran. Decide in order and stop at the first match:
 
    - `80-critical` — a global outage affecting all or most customers; several distinct core
      operations confirmed blocked at once (for example balance, history, and payment together); a
@@ -165,9 +162,20 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when
    your evidence leaves genuinely unresolved whether the operation still completes.
 
-   Rate what the evidence shows, not how alarming the symptom looked at triage. The `impact`
-   entities you finalized in step 5.5 are the confirmed blast radius — read the breadth of the tier
-   off them rather than estimating it.
+   Rate what the evidence shows, not how alarming the trigger looked. The `impact` entities you
+   finalized in step 5.5 are the confirmed blast radius — read the breadth of the tier off them
+   rather than estimating it.
+
+   How it relates to what triggered the run:
+
+   - Alert-triggered (`inputs.context.alerts`): rate the situation the alert exposed, not the
+     alert's own configured severity. An alert set to critical that turns out to be noise is
+     `20-low`; a warning that uncovers a blocked core operation is `60-high` or above.
+   - Significant-event-triggered (`inputs.context.event_uuid`): use these same tiers for the
+     `significant_event_updates` severity entry in step 6. That entry rates only that one event,
+     while `severity` rates the whole situation, so the two match unless the situation reaches past
+     the event — say so in the entry's `reason` when it does.
+   - Neither (free-form issue): nothing extra, rate what you found.
 
    Report progress: the final state, including the finished `conclusion`, `severity`, and
    `recommendations`. This is your last progress report before returning the final structured
@@ -596,11 +604,10 @@ been reporting via `investigation_progress_report`:
   see <citing_evidence>.
 - **conclusion**: Plain-prose narrative naming the root cause — see <results_format> for the exact
   formatting rules and examples.
-- **severity**: Always set. How severe the situation you investigated is — decided from what you
-  confirmed, never copied from the triage severity in "Additional context". It rates the whole
-  situation, while a `significant_event_updates` severity entry rates only the single event that
-  triggered this investigation, so the two match unless the situation reaches past that event. See
-  step 7 in <workflow> for the tier ladder, the known-ongoing cap, and the tie-break.
+- **severity**: Always set, whatever triggered the run. How severe the situation you investigated
+  is — decided from what you confirmed, never copied from a severity handed to you in "Additional
+  context". See step 7 in <workflow> for the tier ladder, the known-ongoing cap, the tie-break, and
+  how it relates to the trigger.
 - **recommendations**: Concrete, actionable steps to resolve or mitigate the issue — see
   <results_format> for the field shapes and examples.
 - **blind_spots**: Actionable knowledge gaps discovered during the investigation — data sources

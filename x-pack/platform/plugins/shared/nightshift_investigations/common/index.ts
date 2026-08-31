@@ -10,8 +10,8 @@ import type { InvestigationTriggerType } from './workflows/triggers';
 
 /**
  * Re-exported so consumers of these responses do not need their own dependency on
- * `@kbn/significant-events-schema`. Investigations deliberately share the significant-event
- * severity scale, so a tier added there widens these responses too.
+ * `@kbn/significant-events-schema`. Investigations rate themselves on the same severity tier scale
+ * significant events use, so a tier added there widens these responses too.
  */
 export type { Severity } from '@kbn/significant-events-schema';
 

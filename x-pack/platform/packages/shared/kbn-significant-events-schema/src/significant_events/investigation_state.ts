@@ -248,10 +248,13 @@ export const investigationStateSchema = z.object({
    */
   conclusion: z.string().max(MAX_TEXT_LENGTH).optional(),
   /**
-   * How severe the investigated situation turned out to be, on the significant-event severity
-   * scale (see {@link severitySchema}). It rates the whole situation the investigation uncovered,
-   * while a `significant_event_updates` entry with `field: 'severity'` rates only the single event
-   * that triggered the run — the two match unless the situation reaches past that event.
+   * How severe the investigated situation turned out to be, on the shared severity tier scale
+   * (see {@link severitySchema}). Set for every investigation whatever triggered it — an alert, a
+   * significant event, or a free-form issue — and rated from what the run confirmed, never copied
+   * from a severity the trigger already carried.
+   *
+   * Distinct from a `significant_event_updates` entry with `field: 'severity'`, which exists only
+   * for significant-event runs and rates that one event rather than the whole situation.
    *
    * Optional for the same reason `conclusion` is: the agent settles it at the end, so the live
    * progress reports that share this schema carry it only once they reach that point, and

@@ -266,10 +266,11 @@ steps:
             description: >
               How severe the investigated situation is, rated on the tier ladder in the agent
               instructions from what this investigation confirmed — whether the affected operation
-              fails, degrades, or still completes, and how broad that impact is. This rates the
-              whole situation; a significant_event_updates severity entry rates only the single
-              event that triggered the investigation, so the two match unless the situation reaches
-              past that event. Always set it in the final output.
+              fails, degrades, or still completes, and how broad that impact is. Set it for every
+              investigation, whatever triggered it, and rate it from your own findings rather than
+              copying a severity the trigger already carried. Distinct from a
+              significant_event_updates severity entry, which exists only for significant-event
+              runs and rates that one event rather than the whole situation.
           recommendations:
             type: array
             description: >
