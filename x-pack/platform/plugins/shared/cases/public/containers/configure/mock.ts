@@ -56,6 +56,7 @@ export const caseConfigurationResponseMock: Configuration = {
   templates: templatesConfigurationMock,
   observableTypes: observableTypesMock,
   extractObservables: true,
+  workflowTags: [],
 };
 
 export const caseConfigurationRequest: ConfigurationRequest = {
@@ -84,4 +85,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   templates: templatesConfigurationMock,
   owner: 'securitySolution',
   observableTypes: observableTypesMock,
+  workflowTags: [],
 };
