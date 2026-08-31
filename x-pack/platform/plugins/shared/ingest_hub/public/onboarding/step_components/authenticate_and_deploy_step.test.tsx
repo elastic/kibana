@@ -108,7 +108,6 @@ function makeEcfReturn(
       globalRegion: 'us-east-1',
       launchedFamilies: [],
       onLaunch: jest.fn(),
-      dataFormat: 'ecs' as const,
     },
   };
 }

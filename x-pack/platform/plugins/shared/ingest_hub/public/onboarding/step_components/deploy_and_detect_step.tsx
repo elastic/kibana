@@ -109,37 +109,29 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
       )}
 
       {/* ── Navigation ──────────────────────────────────────────────────────── */}
-      {(onBack || hasStarted) && (
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {onBack && (
-                <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.backButton"
-                    defaultMessage="Back"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {hasStarted && (
-                <EuiButton
-                  fill
-                  onClick={onContinue}
-                  data-test-subj="deployAndDetectStep-continueButton"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.continueButton"
-                    defaultMessage="AWS Overview"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+      <EuiSpacer size="l" />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {onBack && (
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+              <FormattedMessage
+                id="xpack.ingestHub.deployAndDetectStep.backButton"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* Always show — ECF-only users have no agentless chips but should still be able
+              to advance. Deployment completion is gated in Step 3. */}
+          <EuiButton fill onClick={onContinue} data-test-subj="deployAndDetectStep-continueButton">
+            <FormattedMessage
+              id="xpack.ingestHub.deployAndDetectStep.continueButton"
+              defaultMessage="AWS Overview"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }

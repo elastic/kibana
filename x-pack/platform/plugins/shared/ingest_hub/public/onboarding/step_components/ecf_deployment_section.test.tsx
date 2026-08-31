@@ -79,7 +79,6 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
     globalRegion: 'us-east-1',
     launchedFamilies: [],
     onLaunch: jest.fn(),
-    dataFormat: 'ecs',
     ...props,
   };
   return render(
@@ -284,7 +283,6 @@ describe('EcfDeploymentSection', () => {
             globalRegion="us-east-1"
             launchedFamilies={['unified']}
             onLaunch={jest.fn()}
-            dataFormat="ecs"
           />
         </I18nProvider>
       );

@@ -179,7 +179,6 @@ export const useEcfDeployment = ({
       globalRegion,
       launchedFamilies,
       onLaunch,
-      dataFormat,
     },
   };
 };
@@ -282,7 +281,6 @@ interface EcfDeploymentSectionProps {
   globalRegion: string;
   launchedFamilies: EcfTemplateFamily[];
   onLaunch: (family: EcfTemplateFamily) => void;
-  dataFormat: DataFormat;
 }
 
 /** Collapsible accordion for all Elastic Cloud Forwarder template families in Step 3. */
@@ -296,7 +294,6 @@ export const EcfDeploymentSection = ({
   globalRegion,
   launchedFamilies,
   onLaunch,
-  dataFormat,
 }: EcfDeploymentSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'ecfContent' });
@@ -388,11 +385,8 @@ export const EcfDeploymentSection = ({
               description={
                 <FormattedMessage
                   id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
-                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the <b>{templateName}</b> template, per the data format chosen in Step 1. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
-                  values={{
-                    b: (chunks) => <strong>{chunks}</strong>,
-                    templateName: dataFormat === 'otel' ? 'OTel-native' : 'ECS-compatible',
-                  }}
+                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the <b>ECS-compatible</b> template. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
+                  values={{ b: (chunks) => <strong>{chunks}</strong> }}
                 />
               }
               launchUrl={unifiedLaunchUrl}
@@ -409,7 +403,8 @@ export const EcfDeploymentSection = ({
                 description={
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.otel.description"
-                    defaultMessage="Log collection in OpenTelemetry format via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the <b>OTel-native</b> template, per the data format chosen in Step 1. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
+                    values={{ b: (chunks) => <strong>{chunks}</strong> }}
                   />
                 }
                 launchUrl={otelLaunchUrl}
