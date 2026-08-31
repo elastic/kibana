@@ -25,6 +25,9 @@ export enum DimensionType {
   SPLIT_ROW = 'splitRow',
 }
 
+export const MAX_DATATABLE_ROWS = 10_000; // matches default ES index.max_result_window
+const MAX_DATATABLE_CELLS = MAX_DATATABLE_ROWS * 50; // max rows * 50 columns per row
+
 const name = 'datatable';
 
 /**
@@ -209,6 +212,12 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   },
   deserialize: (table) => {
     const { columns, rows } = table;
+    if (rows.length > MAX_DATATABLE_ROWS) {
+      throw new Error(`Datatable exceeds maximum of ${MAX_DATATABLE_ROWS} rows.`);
+    }
+    if (columns.length * rows.length > MAX_DATATABLE_CELLS) {
+      throw new Error(`Datatable exceeds maximum allowed size of ${MAX_DATATABLE_CELLS} cells.`);
+    }
     return {
       ...table,
       rows: rows.map((row) => {
