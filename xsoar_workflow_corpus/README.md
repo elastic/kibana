@@ -1,103 +1,83 @@
 # XSOAR → Kibana workflow gap corpus
 
-Local Node.js (ESM) tool. It is **not** a Kibana plugin. It reads cloned XSOAR content packs, inventories non-deprecated playbooks, converts a pack (default Phishing) to Kibana workflow YAML with gap `console` stubs, and indexes the analysis into local Elasticsearch for a Kibana dashboard.
+Local Node.js (ESM) tool. It is **not** a Kibana plugin. It inventories non-deprecated XSOAR playbooks, classifies conversion gaps (blocker vs non-blocker), and indexes the analysis into local Elasticsearch for a Kibana dashboard.
 
 PM-facing readout of the latest snapshot: [WORKFLOWS_PM_BRIEF.md](./WORKFLOWS_PM_BRIEF.md).
 
 A gap is a **blocker** when it is on the default success path and not optional (`skipunavailable` / `isOptional`). Optional vendor fan-out and off-path branches are non-blockers — the converted workflow can still run without them.
 
-## Prerequisites
+## Dashboard without an XSOAR Packs clone
 
-1. **Elasticsearch + Kibana 9.5+** (Dashboards API). From the Kibana repo root:
+The branch includes [`xsoar-workflow-seed.zip`](./xsoar-workflow-seed.zip) (~750KB): playbook summary, gap events, and connector frequency. **`ingest` unpacks it automatically** when `corpus/` is empty.
 
-   ```bash
-   yarn es snapshot
-   yarn start
-   ```
+You still need **local Elasticsearch + Kibana 9.5+** (the dashboard is created in your running Kibana, not stored as a saved object in git). You do **not** need the `demisto/content` Packs repo.
 
-   Defaults: Elasticsearch `http://localhost:9200`, Kibana `http://localhost:5601`, user `elastic` / password `changeme`.
-
-2. **XSOAR content clone** with a `Packs/` directory (playbook YAML). Default path is `/Users/agusruidiaz/Documents/Security/content/Packs`. Override with `XSOAR_PACKS_ROOT`.
-
-3. **This folder’s dependencies** (parent Kibana is not this package’s npm workspace):
-
-   ```bash
-   cd xsoar_workflow_corpus
-   npm install --no-workspaces
-   ```
-
-## Seed Elasticsearch and create the dashboard
-
-Generated files land under `corpus/` (gitignored). Re-run these commands whenever playbooks or classification change.
+```bash
+# From the Kibana repo root — local stack
+yarn es snapshot
+yarn start
+```
 
 ```bash
 cd xsoar_workflow_corpus
-
-# 1. Scan Packs/ → inventory JSON, connector CSV, gap NDJSON
-node --import tsx src/cli.ts inventory
-
-# 2. Bulk-index into ES, create data view xsoar-workflow-*, upsert the dashboard
+npm install --no-workspaces
 node --import tsx src/cli.ts ingest
 ```
 
-`ingest` deletes and recreates the analysis indices, so it is safe to re-run. It calls the public Dashboards API:
+Then open [XSOAR Workflow Gap Analysis](http://localhost:5601/app/dashboards#/view/xsoar-workflow-gap-analysis) (time range last 10 years) or search that title in **Dashboards**. Discover data view: `xsoar-workflow-*`.
 
-`PUT /api/dashboards/xsoar-workflow-gap-analysis`
-
-There is no extra “import saved objects” step in Stack Management.
-
-To refresh **only** the dashboard definition (same id, no re-index):
+To refresh **only** the dashboard definition (no re-index):
 
 ```bash
 node --import tsx src/cli.ts dashboard
 ```
 
+`ingest` deletes and recreates the analysis indices, so it is safe to re-run. It upserts `PUT /api/dashboards/xsoar-workflow-gap-analysis`. There is no Stack Management import step.
+
 ### Environment
 
 | Variable | Default |
 | --- | --- |
-| `XSOAR_PACKS_ROOT` | `/Users/agusruidiaz/Documents/Security/content/Packs` |
 | `ES_URL` | `http://localhost:9200` |
 | `ES_AUTH` | `elastic:changeme` |
 | `KIBANA_URL` | `http://localhost:5601` |
 | `KIBANA_AUTH` | same as `ES_AUTH` |
+| `XSOAR_PACKS_ROOT` | `/Users/agusruidiaz/Documents/Security/content/Packs` (only for `inventory` / `convert`) |
 
-### Other commands
+## Rebuild inventory from Packs YAML (optional)
+
+Needed only to refresh numbers from a new content clone, or to emit converted workflow YAML.
 
 ```bash
-# Phishing playbooks → IR + Kibana YAML + pack-scoped analysis (includes nested packs)
+cd xsoar_workflow_corpus
+# Packs/ playbook YAML — override default path with XSOAR_PACKS_ROOT
+node --import tsx src/cli.ts inventory
 node --import tsx src/cli.ts convert --pack Phishing
-
-# inventory + convert + ingest
 node --import tsx src/cli.ts all
-
 npm test
 ```
 
-## See the analysis in Kibana
+After `inventory`, regenerate the committed zip from `corpus/` (paths relative to `corpus/`):
 
-After a successful `ingest`:
-
-1. **Dashboard** — open [XSOAR Workflow Gap Analysis](http://localhost:5601/app/dashboards#/view/xsoar-workflow-gap-analysis)  
-   or Kibana → **Dashboards** → search `XSOAR Workflow Gap Analysis`.  
-   The saved time range is `now-10y` → `now` so the ingest `@timestamp` is included. If charts are empty, widen the time picker to the last 10 years.
-
-2. **Discover** — data view **`xsoar-workflow-*`** (created by ingest). Indices:
-
-   - `xsoar-workflow-playbooks`
-   - `xsoar-workflow-gaps`
-   - `xsoar-workflow-connectors`
-   - `xsoar-workflow-approvals`
-
-Chart-by-chart interpretation: [WORKFLOWS_PM_BRIEF.md](./WORKFLOWS_PM_BRIEF.md).
+```bash
+cd corpus
+zip -q ../xsoar-workflow-seed.zip \
+  inventory/playbooks_summary.json \
+  telemetry/gap_events.ndjson \
+  analysis/connector_frequency.json \
+  analysis/connector_frequency.csv \
+  analysis/approval_inventory.csv \
+  analysis/presentation_metrics.md
+```
 
 ## Outputs (`corpus/`, not committed)
 
-- `inventory/playbooks.json` — full inventory for the Workflows team
-- `inventory/playbooks_summary.json` — same without per-step arrays
-- `ir/` — per-playbook IR (`convert`)
-- `yaml/` — Kibana workflow YAML, `enabled: false`, gap `console` steps
-- `analysis/connector_frequency.csv` — vendor brands vs Elastic backlog
+Unpacked from the seed zip, or written by `inventory` / `convert`:
+
+- `inventory/playbooks_summary.json` — inventory without per-step arrays (what `ingest` uses from the seed)
+- `inventory/playbooks.json` — full inventory including steps (`inventory` only)
+- `ir/` / `yaml/` — IR and Kibana workflow YAML (`convert`)
+- `analysis/connector_frequency.csv` / `.json`
 - `analysis/approval_inventory.csv`
 - `analysis/presentation_metrics.md`
 - `telemetry/gap_events.ndjson`

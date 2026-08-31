@@ -2,7 +2,7 @@
 
 **Audience:** Workflows PM  
 **Snapshot:** 27 August 2026 ingest of non-deprecated XSOAR playbooks  
-**How to regenerate:** [README](./README.md) (inventory → ingest → dashboard)
+**How to regenerate:** [README](./README.md) — `ingest` unpacks `xsoar-workflow-seed.zip` (no Packs clone). Local ES + Kibana still required.
 
 Local dashboard after ingest: [XSOAR Workflow Gap Analysis](http://localhost:5601/app/dashboards#/view/xsoar-workflow-gap-analysis)
 

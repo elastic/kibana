@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createGapAnalysisDashboard } from './create_dashboard.ts';
-import { corpusDirs } from './paths.ts';
+import { corpusDirs, ensureSeedCorpus } from './paths.ts';
 import type { ConnectorFrequencyRow, GapEvent, InventoryFile } from './types.ts';
 
 const ES_URL = process.env.ES_URL ?? 'http://localhost:9200';
@@ -103,6 +103,8 @@ async function bulkIndex(index: string, docs: Array<{ id?: string; body: unknown
 }
 
 export async function ingestToElastic(): Promise<void> {
+  ensureSeedCorpus();
+
   const ping = await es('GET', '/');
   if (ping.status >= 300) {
     throw new Error(`Elasticsearch not reachable at ${ES_URL} (${ping.status})`);
@@ -197,9 +199,10 @@ export async function ingestToElastic(): Promise<void> {
     console.warn(`Index delete returned ${del.status}`);
   }
 
-  const inventory = JSON.parse(
-    readFileSync(path.join(corpusDirs.inventory, 'playbooks.json'), 'utf8')
-  ) as InventoryFile;
+  const fullInventory = path.join(corpusDirs.inventory, 'playbooks.json');
+  const summaryInventory = path.join(corpusDirs.inventory, 'playbooks_summary.json');
+  const inventoryPath = existsSync(fullInventory) ? fullInventory : summaryInventory;
+  const inventory = JSON.parse(readFileSync(inventoryPath, 'utf8')) as InventoryFile;
   const playbookDocs = inventory.playbooks.map((p) => ({
     id: `${p.pack}:${p.id}`,
     body: {
