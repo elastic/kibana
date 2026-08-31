@@ -358,7 +358,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               {agent && (
                 <EuiFlexItem grow={false}>
-                  <RoundAuthorHeader startedAt={startedAt} agent={agent} />
+                  <RoundAuthorHeader agent={agent} origin={origin} startedAt={startedAt} />
                 </EuiFlexItem>
               )}
               {agentOutputContent}

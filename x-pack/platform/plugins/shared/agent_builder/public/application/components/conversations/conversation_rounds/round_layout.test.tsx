@@ -256,6 +256,7 @@ describe('RoundLayout', () => {
     expect(roundAuthorHeaderMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         agent,
+        origin: round.origin,
         startedAt: round.started_at,
       })
     );
