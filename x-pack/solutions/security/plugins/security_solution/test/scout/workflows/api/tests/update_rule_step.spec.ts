@@ -115,7 +115,7 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
     const step = execution.stepExecutions.find((s) => s.stepId === UPDATE_RULE_STEP_ID);
     expect(step).toBeDefined();
 
-    // Check the rule after the update
+    // Check the rule in response after the update
     const output = step?.output as
       | { id?: string; query?: string; severity?: string; name?: string }
       | undefined;
@@ -132,6 +132,7 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
         responseType: 'json',
       }
     );
+    // Check the rule after reading it
     expect(readResponse).toHaveStatusCode(200);
     const readRule = readResponse.body as { query: string; severity: string; enabled: boolean };
     expect(readRule.query).toBe(UPDATED_QUERY);
