@@ -6,7 +6,6 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
@@ -19,7 +18,6 @@ import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
-import { getDefaultEsqlCacheKey } from './cache_key';
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -133,7 +131,6 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
-  sessionId,
   model: inputModel,
   modelProvider,
   esClient,
@@ -147,8 +144,6 @@ export const generateEsql = async ({
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
-  const cacheSessionId = sessionId ?? getDefaultEsqlCacheKey();
-  const cacheControl: ChatCompleteCacheControl = { type: 'ephemeral', ttl: '5m' };
 
   const graph = createNlToEsqlGraph({
     model,
@@ -157,8 +152,6 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
-    sessionId: cacheSessionId,
-    cacheControl,
   });
 
   return withActiveInferenceSpan(
@@ -166,9 +159,6 @@ export const generateEsql = async ({
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
-        [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl,
-        [ElasticGenAIAttributes.CacheControlSessionId]: cacheSessionId,
       },
     },
     async () => {
