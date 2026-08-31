@@ -199,7 +199,7 @@ describe('actions column builder', () => {
         };
 
         const props: ActionsColumnProps = {
-          children: <Action id="archive" name="Archive" icon="folderClosed" />,
+          children: <Action id="archive" name="Archive" icon="folder" />,
         };
         const result = buildActionsColumn(props, context) as ActionsColumn;
 
@@ -208,7 +208,7 @@ describe('actions column builder', () => {
         const action = result.actions[0] as DefaultItemAction<ContentListItem>;
         expect(action).toMatchObject({
           name: 'Archive',
-          icon: 'folderClosed',
+          icon: 'folder',
           'data-test-subj': 'content-list-table-action-archive',
         });
         expect(action.onClick).toEqual(expect.any(Function));
@@ -234,7 +234,7 @@ describe('actions column builder', () => {
               id="archive"
               name="Archive"
               description="Archive this item"
-              icon="folderClosed"
+              icon="folder"
             />
           ),
         };
@@ -259,7 +259,7 @@ describe('actions column builder', () => {
           children: (
             <>
               <EditAction />
-              <Action id="archive" name="Archive" icon="folderClosed" />
+              <Action id="archive" name="Archive" icon="folder" />
             </>
           ),
         };
@@ -278,7 +278,7 @@ describe('actions column builder', () => {
           },
         };
         const props: ActionsColumnProps = {
-          children: <Action id="archive" name="Archive" icon="folderClosed" />,
+          children: <Action id="archive" name="Archive" icon="folder" />,
         };
         const result = buildActionsColumn(props, context) as ActionsColumn;
         const action = result.actions[0] as DefaultItemAction<ContentListItem>;

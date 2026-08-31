@@ -69,7 +69,7 @@ export const createStatusUserActionBuilder: UserActionBuilder = ({
       userProfiles,
       handleOutlineComment,
       label,
-      icon: 'folderClosed',
+      icon: 'folder',
     });
 
     return commonBuilder.build();

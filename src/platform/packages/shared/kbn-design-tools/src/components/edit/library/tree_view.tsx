@@ -22,7 +22,7 @@ const defaultItems: Node[] = [
       {
         id: 'dt-tv-1-1',
         label: 'components',
-        icon: <EuiIcon type="folderClosed" aria-hidden />,
+        icon: <EuiIcon type="folder" aria-hidden />,
         iconWhenExpanded: <EuiIcon type="folderOpen" aria-hidden />,
         children: [
           { id: 'dt-tv-1-1-1', label: 'app.tsx', icon: <EuiToken iconType="tokenFile" /> },
@@ -43,7 +43,7 @@ const compressedItems: Node[] = [
   {
     id: 'dt-tv-c1',
     label: 'transporter',
-    icon: <EuiIcon type="folderClosed" size="s" aria-hidden />,
+    icon: <EuiIcon type="folder" size="s" aria-hidden />,
     iconWhenExpanded: <EuiIcon type="folderOpen" size="s" aria-hidden />,
     children: [
       { id: 'dt-tv-c1-1', label: 'service', icon: <EuiToken iconType="tokenModule" size="xs" /> },

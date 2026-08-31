@@ -264,7 +264,7 @@ EventsAndAlertsGroup.args = {
       id: 'alert-mixed-2',
       action: 'unauthorized_access',
       actor: { id: 'external-ip', label: '203.0.113.42', icon: 'globe' },
-      target: { id: 'secure-folder', label: '/secure/documents', icon: 'folderClosed' },
+      target: { id: 'secure-folder', label: '/secure/documents', icon: 'folder' },
     }),
   ],
 };

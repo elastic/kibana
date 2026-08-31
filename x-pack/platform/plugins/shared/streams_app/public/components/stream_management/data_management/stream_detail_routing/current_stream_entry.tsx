@@ -50,7 +50,7 @@ export function CurrentStreamEntry({ definition }: { definition: PartitionableDe
                   <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
                     <EuiFlexItem grow={false}>
                       <EuiIcon
-                        type={isLast ? 'folderOpen' : 'folderClosed'}
+                        type={isLast ? 'folderOpen' : 'folder'}
                         size="m"
                         color="subdued"
                         aria-hidden={true}

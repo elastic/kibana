@@ -33,7 +33,7 @@ const getIcon = (mimeType: string | undefined) => {
   }
 
   if (compressionMimeTypes.includes(mimeType)) {
-    return 'folderClosed';
+    return 'folder';
   }
 
   return DEFAULT_ICON;

@@ -51,7 +51,7 @@ export const GroupSelectorMenu = ({
   const button = (
     <EuiButton
       data-test-subj="mlJobSelectionBadge"
-      iconType="folderClosed"
+      iconType="folder"
       iconSide="left"
       onClick={onButtonClick}
       size="s"
