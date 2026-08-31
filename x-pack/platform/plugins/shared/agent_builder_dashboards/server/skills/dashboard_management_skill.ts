@@ -28,6 +28,8 @@ Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
+When the user asks to prettify or enhance the attached dashboard, read the dashboard attachment and improve its layout and presentation with \`generate_dashboard\`. The tool updates the attachment in place. Do not create a new dashboard.
+
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
