@@ -318,8 +318,7 @@ async function hashSecrets(output: PreconfiguredOutput) {
   }
 
   if (isOtlpOutput(output)) {
-    const otlpOutput = output as NewOtlpOutput;
-    const tls = otlpOutput.secrets?.otlp_exporter?.tls;
+    const tls = output.secrets?.otlp_exporter?.tls;
     const tlsHashes: Record<string, unknown> = {};
 
     if (typeof tls?.key_pem === 'string') {

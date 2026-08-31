@@ -866,8 +866,7 @@ class OutputService {
         data.type === outputType.RemoteElasticsearch
       ) {
         if (!output.service_token && output.secrets?.service_token) {
-          (data as OutputSoRemoteElasticsearchAttributes).service_token = output.secrets
-            .service_token as string;
+          data.service_token = output.secrets.service_token as string;
         }
       }
     }
@@ -1173,11 +1172,6 @@ class OutputService {
       );
     }
 
-    // Domain validation complete; transition to SO persistence shape.
-    const updateSoData = updateData as unknown as Nullable<Partial<OutputSOAttributes>> & {
-      type: ValueOf<OutputType>;
-    };
-
     const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
       target.version = null;
       target.key = null;
@@ -1439,8 +1433,8 @@ class OutputService {
       }
     }
 
-    if (outputTypeSupportPresets(updateSoData) && updateSoData.hosts) {
-      updateSoData.hosts = updateSoData.hosts.map(normalizeHostsForAgents);
+    if (outputTypeSupportPresets(updateData) && updateData.hosts) {
+      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
     // Kafka does not support proxies — clear any proxy_id silently (#267281)
@@ -1498,7 +1492,7 @@ class OutputService {
         secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
-      updateSoData.secrets = secretsRes.outputUpdate.secrets;
+      updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (isBeatsOutput(typedFullUpdateData) && isBeatsOutput(updateData)) {
@@ -1523,7 +1517,7 @@ class OutputService {
       }
     }
 
-    patchUpdateDataWithRequireEncryptedAADFields(updateSoData, originalOutput);
+    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -1535,7 +1529,7 @@ class OutputService {
     await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
-      updateSoData
+      updateData
     );
 
     if (secretsToDelete.length) {
