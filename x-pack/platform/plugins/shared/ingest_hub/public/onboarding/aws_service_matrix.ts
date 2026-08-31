@@ -151,6 +151,12 @@ export interface AwsServiceMatrixEntry {
    * this gate they would inherit managed_integration and be POSTed to Fleet with an unknown input.
    */
   ecfOnly?: boolean;
+  /**
+   * Force agent-based-only deployment, suppressing a manifest-derived managed_integration flag.
+   * Use for data streams within an otherwise-agentless policy template that do not yet have
+   * agentless support (e.g. firewall_metrics within the firewall PT).
+   */
+  agentBasedOnly?: boolean;
 }
 
 /**
@@ -280,6 +286,17 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     excludedDataStreams: ['firewall_metrics'],
   },
   {
+    id: 'firewall_metrics',
+    name: 'AWS Network Firewall Metrics',
+    category: 'security_identity_compliance',
+    packageName: 'aws',
+    policyTemplate: 'firewall',
+    // Metrics data stream has no agentless support; suppress the PT-level managed_integration flag.
+    agentBasedOnly: true,
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+    excludedDataStreams: ['firewall_logs'],
+  },
+  {
     id: 'firewall_otel',
     name: 'AWS Network Firewall',
     category: 'security_identity_compliance',
@@ -298,6 +315,12 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'securityhub',
     category: 'security_identity_compliance',
     packageName: 'aws',
+  },
+  // TODO missing service settings
+    {
+    id: 'aws_securityhub',
+    category: 'security_identity_compliance',
+    packageName: 'aws_securityhub',
   },
   {
     id: 'waf',
@@ -487,12 +510,12 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
 
   // ── aws_mq package — application_integration ────────────────────────────
-  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
+  // TODO missing service settings
   {
     id: 'amazon_mq',
     category: 'application_integration',
     packageName: 'aws_mq',
-    showInUI: false,
+    // showInUI: false,
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
@@ -818,7 +841,9 @@ export function buildAwsServiceMatrix(
 
       if (pt) {
         managedIntegrations =
-          (pt as any)?.deployment_modes?.agentless?.enabled === true && !entry.ecfOnly;
+          (pt as any)?.deployment_modes?.agentless?.enabled === true &&
+          !entry.ecfOnly &&
+          !entry.agentBasedOnly;
 
         if (!name && (pt as any)?.title) {
           name = (pt as any).title as string;
