@@ -72,6 +72,15 @@ export const GRAPH_ENTITY_NODE_BUTTON_ID =
 export const GRAPH_ENTITY_NODE_DETAILS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeDetails` as const;
 
+export const GRAPH_ENTITY_NODE_SIMPLIFIED_ID = `${GRAPH_ENTITY_NODE_ID}Simplified` as const;
+export const GRAPH_ENTITY_NODE_CARD_ID = `${GRAPH_ENTITY_NODE_ID}Card` as const;
+export const GRAPH_ENTITY_NODE_METADATA_ID = `${GRAPH_ENTITY_NODE_ID}Metadata` as const;
+export const GRAPH_ENTITY_NODE_ENTITY_ID_ROW_ID = `${GRAPH_ENTITY_NODE_ID}EntityIdRow` as const;
+export const GRAPH_ENTITY_NODE_RISK_SCORE_ID = `${GRAPH_ENTITY_NODE_ID}RiskScore` as const;
+export const GRAPH_ENTITY_NODE_ASSET_CRITICALITY_ID =
+  `${GRAPH_ENTITY_NODE_ID}AssetCriticality` as const;
+export const GRAPH_ENTITY_NODE_ICON_ID = `${GRAPH_ENTITY_NODE_ID}Icon` as const;
+
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_BUTTON_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsButton` as const;
 export const GRAPH_IPS_VALUE_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsValue` as const;
@@ -84,6 +93,18 @@ export const GRAPH_IPS_POPOVER_CONTENT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverContent` as const;
 export const GRAPH_IPS_POPOVER_IP_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverId` as const;
 export const GRAPH_IPS_POPOVER_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopover` as const;
+
+export const GRAPH_ENTITY_IDS_VALUE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityIdsValue` as const;
+export const GRAPH_ENTITY_IDS_PLUS_COUNT_BUTTON_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityIdsPlusCountButton` as const;
+export const GRAPH_ENTITY_IDS_PLUS_COUNT_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityIdsPlusCount` as const;
+export const GRAPH_ENTITY_IDS_POPOVER_CONTENT_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityIdsPopoverContent` as const;
+export const GRAPH_ENTITY_IDS_POPOVER_ITEM_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityIdsPopoverItem` as const;
+export const GRAPH_ENTITY_IDS_POPOVER_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityIdsPopover` as const;
 
 export const GRAPH_FLAGS_BADGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsBadge` as const;
 export const GRAPH_FLAGS_VISIBLE_FLAG_ID =

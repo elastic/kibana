@@ -53,6 +53,14 @@ jest.mock('./constants', () => ({
   ONLY_RENDER_VISIBLE_ELEMENTS: false,
 }));
 
+// Force the detailed entity node variant so entity names are rendered as text.
+// (Entity nodes render a simplified icon-only tile below the zoom threshold, where
+// the name is only exposed via an on-hover tooltip.)
+jest.mock('./detail_level', () => ({
+  ...jest.requireActual('./detail_level'),
+  useDetailLevel: () => 'detailed',
+}));
+
 describe('GraphLargeStackedEdgeCases story', () => {
   it('all labels should be visible and nodes should have correct icons', async () => {
     const { getAllByText, container } = render(<GraphLargeStackedEdgeCases />);

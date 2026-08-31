@@ -32,6 +32,39 @@ export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =
   node.shape === 'diamond' ||
   node.shape === 'hexagon';
 
+/**
+ * Collects the entity IDs for an entity node from each entity document in
+ * `documentsData` (a grouped node aggregates multiple entity documents), falling
+ * back to the node id when no entity documents are present.
+ */
+export const getEntityIdsFromNode = (nodeData: EntityNodeViewModel): string[] => {
+  const documentEntityIds = (nodeData.documentsData ?? [])
+    .filter((doc) => doc.type === DOCUMENT_TYPE_ENTITY)
+    .map((doc) => doc.id)
+    .filter((id): id is string => Boolean(id));
+
+  return documentEntityIds.length > 0 ? documentEntityIds : [nodeData.id];
+};
+
+/**
+ * Derives the view-model presentation fields (`entityType`, `entityIds`) for an
+ * entity node from its raw data and stamps the `interactive` flag. Keeps the
+ * presentational EntityNode components dumb by mapping at the graph boundary.
+ */
+export const enrichEntityNodeData = (
+  nodeData: EntityNodeViewModel,
+  interactive: boolean
+): EntityNodeViewModel => {
+  const entity = nodeData.documentsData?.find((doc) => doc.type === DOCUMENT_TYPE_ENTITY)?.entity;
+
+  return {
+    ...nodeData,
+    interactive,
+    entityType: nodeData.entityType ?? entity?.sub_type ?? entity?.type,
+    entityIds: nodeData.entityIds ?? getEntityIdsFromNode(nodeData),
+  };
+};
+
 export const isLabelNode = (node: NodeViewModel): node is LabelNodeViewModel =>
   node.shape === 'label';
 
@@ -227,6 +260,8 @@ export const buildGraphFromViewModels = (
       node.extent = 'parent';
       node.expandParent = false;
       node.draggable = false;
+    } else if (isEntityNode(nodeData)) {
+      node.data = enrichEntityNodeData(nodeData, interactive);
     }
 
     return node;
