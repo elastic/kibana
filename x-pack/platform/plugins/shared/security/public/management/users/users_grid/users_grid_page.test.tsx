@@ -9,6 +9,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,7 +18,12 @@ import { UsersGridPage } from './users_grid_page';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+    </I18nProvider>
+  );
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;
@@ -28,7 +34,7 @@ describe('UsersGridPage', () => {
     history.createHref = (location: LocationDescriptorObject) => {
       return `${location.pathname}${location.search ? '?' + location.search : ''}`;
     };
-    coreStart = coreMock.createStart();
+    coreStart = coreMock.createStart() as unknown as CoreStart;
   });
 
   it('renders the list of users and create button', async () => {

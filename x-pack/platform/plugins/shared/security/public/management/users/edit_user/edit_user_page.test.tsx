@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { EditUserPage } from './edit_user_page';
@@ -53,14 +56,16 @@ describe('EditUserPage', () => {
 
     const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/User has been deactivated/i);
-    await findByTestId('editUserBackButton');
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
   });
 
   it('warns when viewing deprecated user', async () => {
@@ -74,21 +79,19 @@ describe('EditUserPage', () => {
     });
     coreStart.http.get.mockResolvedValueOnce([]);
 
-    const { findByRole, findByText, findByTestId } = render(
+    const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/User is deprecated/i);
     await findByText(/Use .new_user. instead/i);
-    await findByTestId('editUserBackButton');
-
-    fireEvent.click(await findByRole('button', { name: 'Back to users' }));
-
-    expect(history.location.pathname).toBe('/');
+    expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href', '/');
   });
 
   it('warns when viewing built-in user', async () => {
@@ -98,20 +101,18 @@ describe('EditUserPage', () => {
     });
     coreStart.http.get.mockResolvedValueOnce([]);
 
-    const { findByRole, findByText, findByTestId } = render(
+    const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/User is built in/i);
-    await findByTestId('editUserBackButton');
-
-    fireEvent.click(await findByRole('button', { name: 'Back to users' }));
-
-    expect(history.location.pathname).toBe('/');
+    expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href', '/');
   });
 
   it('warns when selecting deprecated role', async () => {
@@ -133,14 +134,16 @@ describe('EditUserPage', () => {
 
     const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/Role .deprecated_role. is deprecated. Use .new_role. instead/i);
-    await findByTestId('editUserBackButton');
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
   });
 
   it('disables form when viewing with readonly privileges', async () => {
@@ -155,13 +158,15 @@ describe('EditUserPage', () => {
 
     const { findAllByRole, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
-    await findByTestId('editUserBackButton');
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
 
     const fields = await findAllByRole('textbox');
     expect(fields.length).toBeGreaterThanOrEqual(1);
