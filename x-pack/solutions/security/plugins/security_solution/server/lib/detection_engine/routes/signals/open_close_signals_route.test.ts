@@ -23,6 +23,7 @@ import { RuntimeFieldTypeEnum } from '../../../../../common/api/detection_engine
 import { MAX_RUNTIME_FIELDS_PER_REQUEST } from './bulk_close_runtime_mappings';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -290,6 +291,256 @@ describe('set signal status', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertStatusChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertStatusChanged: jest.fn() };
+      setSignalsStatusRoute(
+        server.router,
+        logger,
+        createMockTelemetryEventsSender(),
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    describe('by-ids path', () => {
+      beforeEach(() => {
+        // prefetchAllPreviousStatusesByIds uses esClient.search internally
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'somefakeid1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'open' },
+              },
+              {
+                _id: 'somefakeid2',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'open' },
+              },
+            ],
+            total: { value: 2, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+      });
+
+      test('emits alertStatusChanged with the updated ids and status', async () => {
+        await server.inject(
+          getSetSignalStatusByIdsRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            alertIds: ['somefakeid1', 'somefakeid2'],
+            status: 'closed',
+            truncated: false,
+          })
+        );
+      });
+
+      test('does not emit when all signal ids already have the target status', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'somefakeid1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'closed' },
+              },
+              {
+                _id: 'somefakeid2',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'closed' },
+              },
+            ],
+            total: { value: 2, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByIdsRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('by-query path', () => {
+      beforeEach(() => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'query-alert-1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'open' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+      });
+
+      test('emits alertStatusChanged with prefetched alert ids', async () => {
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            alertIds: ['query-alert-1'],
+            status: 'closed',
+          })
+        );
+      });
+
+      test('does not emit when prefetch returns no results (all pre-filtered by excludeStatus)', async () => {
+        // With excludeStatus passed to prefetchPreviousStatusesByQuery, ES filters out docs
+        // already at the target status via must_not. An empty result means nothing is transitioning.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [],
+            total: { value: 0, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+
+      test('does not emit for hits with no workflow status field', async () => {
+        // The update script only assigns when a status field is non-null, so a status-less
+        // hit is an Elasticsearch no-op and must not start a workflow.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'status-less',
+                _index: '.siem-signals-default',
+                _source: { 'some.other.field': 'value' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+
+      test('still emits a hit whose stored status is non-null but unrecognized', async () => {
+        // "triaged" is overwritten by the update script, so the ID transitions even though
+        // it produces no previousStatuses row.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'unrecognized',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'triaged' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ alertIds: ['unrecognized'], previousStatuses: [] })
+        );
+      });
+
+      test('does not report truncation for a large all-status-less query', async () => {
+        // ES now excludes status-less docs from the prefetch, so hits.total reflects only
+        // documents that can actually transition. Without that, `truncated` stayed true after
+        // every hit was filtered out and fired the trigger with an empty alertIds list.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { hits: [], total: { value: 0, relation: 'eq' }, max_score: 0 },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+
+      test('requires a non-null status field in the prefetch query', async () => {
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        const call = context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0] as {
+          query: { bool: { must_not: unknown[] } };
+        };
+        expect(call.query.bool.must_not).toContainEqual({
+          bool: {
+            must_not: [
+              { exists: { field: 'kibana.alert.workflow_status' } },
+              { exists: { field: 'signal.status' } },
+            ],
+          },
+        });
+      });
+
+      test('does not emit when prefetch fails', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+          new Error('ES search error')
+        );
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
     });
   });
 });
