@@ -138,7 +138,11 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
       }
 
       try {
-        const { workflow, yaml: generatedYaml, response: generationComment } = await generateWorkflow({
+        const {
+          workflow,
+          yaml: generatedYaml,
+          response: generationComment,
+        } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
           additionalContext: workflowContext,
