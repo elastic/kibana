@@ -146,6 +146,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -158,11 +159,7 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // This currently splits generation from detection: rule execution still follows the
-      // space's project routing expression, so a rule can be blind to data its knowledge
-      // indicator was derived from. That split is transitional: once alerting v2 supports
-      // per-rule project routing, significant events rules will opt into all linked projects
-      // too, and both scopes will match.
+      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',
@@ -211,6 +208,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
+          isServerless,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -372,7 +370,7 @@ export class SignificantEventsPlugin
   public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
     if (this.server) {
       this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
+      this.server.isServerless = this.server.cloud?.isServerlessEnabled ?? false;
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;

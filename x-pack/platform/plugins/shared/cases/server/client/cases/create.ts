@@ -23,8 +23,9 @@ import { CasePostRequestRt } from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
-  resolveGlobalFields,
+  resolveGlobalFieldsWithoutStaleMirrorRequired,
   validateCaseExtendedFields,
+  validateRequiredGlobalFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
@@ -176,11 +177,17 @@ export const create = async (
     // exists, defeating the point of this flag.
     const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
     let globalFields: InlineField[] | undefined;
+    const resolveGlobals = (owner: string) =>
+      resolveGlobalFieldsWithoutStaleMirrorRequired(
+        owner,
+        fieldDefinitionsService,
+        customFieldsConfiguration
+      );
     // Hoisted for create-time Activity filtering: compare persisted fields against the same
     // template ∪ global default baseline used for injection (global wins on key collision).
     let globalFieldsDefaults: Record<string, string> = {};
     if (clientArgs.config.templates.enabled) {
-      globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFields = await resolveGlobals(query.owner);
       globalFieldsDefaults = Object.fromEntries(
         // A field without a default produces '' — writing that adds no information and, for a
         // required field, would immediately fail its own validation. Only inject real defaults.
@@ -289,8 +296,7 @@ export const create = async (
     });
 
     if (normalizedCase.extended_fields) {
-      globalFields =
-        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
+      globalFields = globalFields ?? (await resolveGlobals(query.owner));
       await validateCaseExtendedFields({
         extendedFields: normalizedCase.extended_fields,
         templateId: query.template?.id,
@@ -300,6 +306,20 @@ export const create = async (
         owner: query.owner,
         partial: !hadExtendedFieldsBeforeDefaults,
         preResolvedTemplateFields: resolvedTemplateFields,
+      });
+    }
+
+    // v1-parity `required` enforcement: a required global field with no default and no value
+    // fails the create with a 400, exactly like a required v1 custom field does through
+    // validateRequiredCustomFields. Runs AFTER defaults injection and pairing so the map is
+    // the one that will be persisted — a linked customFields value (or a v1 configuration
+    // defaultValue pairing copied across) satisfies the global field. Must run even when
+    // extended_fields is absent: that is the no-value path this check exists to reject.
+    if (clientArgs.config.templates.enabled) {
+      globalFields = globalFields ?? (await resolveGlobals(query.owner));
+      validateRequiredGlobalFields({
+        globalFields,
+        extendedFields: normalizedCase.extended_fields ?? {},
       });
     }
 

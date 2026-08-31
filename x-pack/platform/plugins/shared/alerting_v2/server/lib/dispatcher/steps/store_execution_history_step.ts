@@ -12,7 +12,7 @@ import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../.
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../../services/event_log_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { RuleCatalog } from '../state';
+import { EpisodeTriage, RuleCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -108,7 +108,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     const {
       dispatch = [],
       throttled = [],
-      dispatchable = [],
+      triage = EpisodeTriage.empty(),
       dispatchedExecutions,
       dispatchFailures = [],
       rules = RuleCatalog.empty(),
@@ -118,7 +118,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     if (
       dispatch.length === 0 &&
       throttled.length === 0 &&
-      dispatchable.length === 0 &&
+      !triage.hasDispatchable() &&
       dispatchFailures.length === 0
     ) {
       return { type: 'continue' };
@@ -157,7 +157,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     // their episodes are not double-reported as `unmatched`. Those episodes did
     // match a policy; `dispatch_failed` already carries their episode_ids.
     const unmatched = aggregateUnmatchedBySubject(
-      getUnmatchedEpisodes(dispatchable, dispatch, throttled)
+      getUnmatchedEpisodes(triage.dispatchable, dispatch, throttled)
     );
     for (const group of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, group });
