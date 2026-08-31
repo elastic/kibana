@@ -45,15 +45,10 @@ spaceTest.describe(
       );
       await pageObjects.discover.submitQuery();
       await drainInitial;
-      // The first response isn't completion: an async search answers immediately with
-      // `is_running: true` and finishes over its polls. Leaving with searches in flight
-      // makes showChart() re-request that data, so the "no requests" test counts 1
-      // instead of 0. Settle on UI state, which covers the whole poll cycle.
+      // Document completion doesn't imply the Lens chart finished rendering. Wait for
+      // its terminal render state so outstanding chart work can't enter the count window.
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await page.testSubj.locator('unifiedHistogramRendered').waitFor({ state: 'visible' });
-      await page.testSubj
-        .locator('unifiedHistogramProgressBar')
-        .waitFor({ state: 'hidden', timeout: 30_000 });
+      await pageObjects.renderable.waitForRender();
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace, scoutSpace }) => {
