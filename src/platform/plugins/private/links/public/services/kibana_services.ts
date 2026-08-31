@@ -14,6 +14,9 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { LINKS_LIBRARY_TYPE } from '../../common';
 import type { LinksStartDependencies } from '../plugin';
@@ -23,6 +26,7 @@ export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
 export let contentManagement: ContentManagementPublicStart;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
+export let dashboardLocator: LocatorPublic<DashboardLocatorParams> | undefined;
 export let trackUiMetric: (
   type: string,
   eventNames: string | string[],
@@ -49,6 +53,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   embeddableService = deps.embeddable;
   contentManagement = deps.contentManagement;
   savedObjectsTaggingService = deps.savedObjectsTaggingOss;
+  dashboardLocator = deps.share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
   if (deps.usageCollection)
     trackUiMetric = deps.usageCollection.reportUiCounter.bind(

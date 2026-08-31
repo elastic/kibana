@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { openLazyFlyout } from '@kbn/presentation-util';
+import React from 'react';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
+import type { LinksByValueState } from '../../server';
+import { LinksStrings } from '../components/links_strings';
 import { loadFromLibrary } from '../links_client/load_from_library';
-import { getEditorFlyout } from './get_editor_flyout';
 import { resolveLinks } from '../lib/resolve_links';
 import { coreServices } from '../services/kibana_services';
-import type { LinksByValueState } from '../../server';
 
 export async function onVisualizationsEdit(refId: string) {
-  openLazyFlyout({
+  openLazySystemFlyout({
     core: coreServices,
     loadContent: async ({ closeFlyout }) => {
       let linksState: LinksByValueState | undefined;
@@ -26,7 +27,8 @@ export async function onVisualizationsEdit(refId: string) {
         return;
       }
 
-      return getEditorFlyout({
+      const { LinksLibraryEditor } = await import('./links_library_editor');
+      return React.createElement(LinksLibraryEditor, {
         initialState: {
           refId,
           ...linksState,
@@ -37,6 +39,7 @@ export async function onVisualizationsEdit(refId: string) {
     },
     flyoutProps: {
       'data-test-subj': 'links--panelEditor--flyout',
+      title: LinksStrings.editor.panelEditor.getEditFlyoutTitle(),
     },
   });
 }

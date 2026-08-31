@@ -18,7 +18,9 @@ export {
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
+  EmbeddableEditorPreview,
 } from './components';
+export type { EmbeddableEditorPreviewProps } from './components';
 
 export function plugin() {
   return new PresentationUtilPlugin();

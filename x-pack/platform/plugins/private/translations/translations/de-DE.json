@@ -6900,8 +6900,6 @@
     "links.panelEditor.layoutSettingsTitle": "Layout",
     "links.panelEditor.linksTitle": "Links",
     "links.panelEditor.saveButtonLabel": "Speichern",
-    "links.panelEditor.saveToLibrarySwitchLabel": "In der Bibliothek speichern",
-    "links.panelEditor.saveToLibrarySwitchTooltip": "Speichern Sie dieses Links-Panel in der Bibliothek, damit Sie es einfach zu anderen Dashboards hinzufügen können.",
     "links.panelEditor.titleInputLabel": "Titel",
     "links.visTypeAlias.title": "Links",
     "lists.exceptions.doesNotExistOperatorLabel": "existiert nicht",

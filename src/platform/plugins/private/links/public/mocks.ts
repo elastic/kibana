@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -38,12 +39,12 @@ export const setStubKibanaServices = () => {
     dashboard: dashboardPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     contentManagement: contentManagementMock.createStartContract(),
+    share: sharePluginMock.createStartContract(),
   });
 };
 
 export const getMockLinksParentApi = (state: LinksEmbeddableState): LinksParentApi => ({
   ...getMockPresentationContainer(),
-  type: 'dashboard',
   filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
   query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
   timeRange$: new BehaviorSubject<TimeRange | undefined>({

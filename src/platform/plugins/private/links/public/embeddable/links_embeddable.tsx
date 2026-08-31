@@ -34,7 +34,7 @@ import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/constants';
-import { isParentApiCompatible } from '../actions/add_links_panel_action';
+import { isLinksParentApiCompatible } from '../actions/add_links_panel_action';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
@@ -61,7 +61,7 @@ export const getLinksEmbeddableFactory = () => {
       const isByReference = refId !== undefined;
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      if (!isParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
+      if (!isLinksParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
 
       const defaultDescription$ = new BehaviorSubject(
         isByReference ? intialLinksState.description : undefined
@@ -163,16 +163,26 @@ export const getLinksEmbeddableFactory = () => {
             parentApi,
             loadContent: async ({ closeFlyout }) => {
               const { getEditorFlyout } = await import('../editor/get_editor_flyout');
+              const initialLayout = layout$.getValue();
+              const initialLinks = resolvedLinks$.getValue();
               return getEditorFlyout({
                 initialState: {
                   description:
                     titleManager.api.description$.getValue() ?? defaultDescription$.getValue(),
-                  layout: layout$.getValue(),
-                  links: resolvedLinks$.getValue(),
+                  layout: initialLayout,
+                  links: initialLinks,
                   title: titleManager.api.title$.getValue() ?? defaultTitle$.getValue(),
                   refId,
                 },
                 parentDashboard: parentApi,
+                onPreview: (links, layout) => {
+                  layout$.next(layout);
+                  resolvedLinks$.next(links);
+                },
+                onCancelEdit: () => {
+                  layout$.next(initialLayout);
+                  resolvedLinks$.next(initialLinks);
+                },
                 onCompleteEdit: async (newState) => {
                   if (!newState) return;
 
