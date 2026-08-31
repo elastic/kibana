@@ -7,8 +7,9 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ResolvePanelContent } from './operations/panels';
-import type { ResolveControlField, ResolveCustomContentTemplate } from './operations/types';
+import type { ResolveCustomContentTemplate } from './operations/types';
 import type { PanelFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
@@ -27,7 +28,7 @@ interface ExecuteDashboardOperationsParams {
   logger: Logger;
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
-  resolveControlField?: ResolveControlField;
+  esClient?: ElasticsearchClient;
 }
 
 /**
@@ -35,8 +36,8 @@ interface ExecuteDashboardOperationsParams {
  * an empty one) plus an ordered list of operations into a new payload. Identity,
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
- * reads any store. Control field names are checked via `resolveControlField`
- * when the host provides it.
+ * reads any store. Control fields are validated against index mappings when
+ * the host provides `esClient`.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -44,7 +45,7 @@ export const executeDashboardOperations = async ({
   logger,
   resolvePanelContent,
   resolveCustomContentTemplate,
-  resolveControlField,
+  esClient,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: PanelFailure[];
@@ -65,7 +66,7 @@ export const executeDashboardOperations = async ({
     logger,
     resolvePanelContent,
     resolveCustomContentTemplate,
-    resolveControlField,
+    esClient,
     failures,
     panelAuthoringNotes,
   });

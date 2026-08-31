@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
@@ -25,6 +27,12 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
+
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  getIndexFields: jest.fn(),
+}));
+
+const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
 
 const createMockLogger = (): Logger =>
   ({
@@ -2350,11 +2358,15 @@ describe('add_controls / remove_controls operations', () => {
   });
 
   it('add_controls skips a field that is not aggregatable and records a failure', async () => {
-    const resolveControlField = jest.fn(async ({ fieldName }: { fieldName: string }) =>
-      fieldName === 'method'
-        ? { error: 'Field "method" is not an aggregatable field on this index.' }
-        : { fieldName }
-    );
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: {
+        type: 'index',
+        fields: [
+          { path: 'host', type: 'keyword', meta: {} },
+          { path: 'host.keyword', type: 'keyword', meta: {} },
+        ],
+      },
+    });
 
     const { dashboardData, failures } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
@@ -2372,7 +2384,7 @@ describe('add_controls / remove_controls operations', () => {
         },
       ],
       logger,
-      resolveControlField,
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
     });
 
     expect(dashboardData.pinned_panels).toHaveLength(1);
@@ -2390,9 +2402,15 @@ describe('add_controls / remove_controls operations', () => {
   });
 
   it('add_controls rewrites a text field to the aggregatable keyword sibling', async () => {
-    const resolveControlField = jest.fn(async ({ fieldName }: { fieldName: string }) =>
-      fieldName === 'host' ? { fieldName: 'host.keyword' } : { fieldName }
-    );
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: {
+        type: 'index',
+        fields: [
+          { path: 'host', type: 'text', meta: {} },
+          { path: 'host.keyword', type: 'keyword', meta: {} },
+        ],
+      },
+    });
 
     const { dashboardData, failures } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
@@ -2410,7 +2428,7 @@ describe('add_controls / remove_controls operations', () => {
         },
       ],
       logger,
-      resolveControlField,
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
     });
 
     expect(failures).toEqual([]);

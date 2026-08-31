@@ -16,11 +16,17 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/dashboard-plugin/server';
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import type { PanelFailure } from '../utils';
-import { defineOperation, type ResolveControlField } from './types';
+import { getErrorMessage, type PanelFailure } from '../utils';
+import { defineOperation } from './types';
+import {
+  resolveAggregatableControlField,
+  type ControlFieldTypes,
+} from './resolve_aggregatable_control_field';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -107,17 +113,52 @@ const filterDuplicateTimeSliders = ({
   });
 };
 
+const loadFieldsByIndex = async (
+  indexes: string[],
+  esClient: ElasticsearchClient
+): Promise<Map<string, ControlFieldTypes>> => {
+  const result = await getIndexFields({ indices: indexes, esClient });
+  return new Map(
+    indexes.map((index) => [
+      index,
+      Object.fromEntries((result[index]?.fields ?? []).map((field) => [field.path, field.type])),
+    ])
+  );
+};
+
 const resolveControlFields = async ({
   controls,
-  resolveControlField,
+  esClient,
   failures,
 }: {
   controls: ControlInput[];
-  resolveControlField?: ResolveControlField;
+  esClient?: ElasticsearchClient;
   failures: PanelFailure[];
 }): Promise<ControlInput[]> => {
-  if (!resolveControlField) {
+  if (!esClient) {
     return controls;
+  }
+
+  const indexes = [
+    ...new Set(controls.flatMap((control) => ('index' in control ? [control.index] : []))),
+  ];
+
+  let fieldsByIndex: Map<string, ControlFieldTypes>;
+  try {
+    fieldsByIndex = indexes.length > 0 ? await loadFieldsByIndex(indexes, esClient) : new Map();
+  } catch (error) {
+    const message = getErrorMessage(error);
+    return controls.filter((control, controlInputIndex) => {
+      if (!('field_name' in control)) {
+        return true;
+      }
+      failures.push({
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: `controls[${controlInputIndex}]`,
+        error: `Could not load mapping for index "${control.index}": ${message}`,
+      });
+      return false;
+    });
   }
 
   const resolved: ControlInput[] = [];
@@ -127,9 +168,9 @@ const resolveControlFields = async ({
       continue;
     }
 
-    const result = await resolveControlField({
+    const result = resolveAggregatableControlField({
       fieldName: control.field_name,
-      index: control.index,
+      fields: fieldsByIndex.get(control.index) ?? {},
     });
 
     if (result.error !== undefined) {
@@ -214,7 +255,7 @@ export const addControlsOperation = defineOperation({
     const existingControls = dashboardData.pinned_panels ?? [];
     const resolvedControls = await resolveControlFields({
       controls: operation.controls,
-      resolveControlField: context.resolveControlField,
+      esClient: context.esClient,
       failures: context.failures,
     });
     const controlsToAdd = filterDuplicateTimeSliders({

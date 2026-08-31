@@ -21,7 +21,6 @@ import { createCustomContentTemplateResolver } from '@kbn/custom-content-server'
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
-  createControlFieldResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -151,10 +150,7 @@ Use operations[] to:
             modelProvider,
             esClient,
           }),
-          resolveControlField: createControlFieldResolver({
-            esClient: esClient.asCurrentUser,
-            logger,
-          }),
+          esClient: esClient.asCurrentUser,
         });
 
         // Data-aware default time range computation
