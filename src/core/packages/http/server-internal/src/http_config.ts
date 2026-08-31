@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'node:fs';
 import { EOL, hostname } from 'node:os';
 import url, { URL } from 'node:url';
 import type { Duration } from 'moment';
@@ -77,6 +78,13 @@ const configSchema = schema.object(
     selfHttp: schema.object({
       target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
         defaultValue: 'auto' as const,
+      }),
+      // Keep an eye on existing validation in src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts
+      // If this SSL validation starts becoming more complex we may want to share validation
+      ssl: schema.object({
+        certificateAuthorities: schema.maybe(
+          schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
+        ),
       }),
     }),
     basePath: schema.maybe(
@@ -305,14 +313,21 @@ const configSchema = schema.object(
         return 'cannot use [rewriteBasePath] when [basePath] is not specified';
       }
 
-      if (rawConfig.publicBaseUrl) {
-        const parsedUrl = url.parse(rawConfig.publicBaseUrl);
+      const parsedUrl = rawConfig.publicBaseUrl && url.parse(rawConfig.publicBaseUrl);
+      if (parsedUrl) {
         if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
           return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
         }
         if (parsedUrl.path !== (rawConfig.basePath ?? '/')) {
           return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.path} !== ${rawConfig.basePath}`;
         }
+      }
+
+      if (
+        rawConfig.selfHttp.ssl.certificateAuthorities !== undefined &&
+        (rawConfig.selfHttp.target !== 'auto' || !parsedUrl || parsedUrl.protocol !== 'https:')
+      ) {
+        return '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS';
       }
 
       if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
@@ -393,6 +408,7 @@ export class HttpConfig implements IHttpConfig {
   public publicBaseUrl?: string;
   public selfHttp: {
     target: 'auto' | 'local';
+    ssl: { certificateAuthorities?: string[] };
   };
   public rewriteBasePath: boolean;
   public cdn: CdnConfig;
@@ -458,7 +474,14 @@ export class HttpConfig implements IHttpConfig {
     this.protocol = rawHttpConfig.protocol;
     this.basePath = rawHttpConfig.basePath;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
-    this.selfHttp = rawHttpConfig.selfHttp;
+    this.selfHttp = {
+      target: rawHttpConfig.selfHttp.target,
+      ssl: {
+        certificateAuthorities: readCertificateAuthorities(
+          rawHttpConfig.selfHttp.ssl?.certificateAuthorities
+        ),
+      },
+    };
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.payloadTimeout = rawHttpConfig.payloadTimeout;
@@ -484,6 +507,19 @@ export class HttpConfig implements IHttpConfig {
     this.oas = rawHttpConfig.oas;
   }
 }
+
+const readCertificateAuthorities = (
+  certificateAuthorities: string | string[] | undefined
+): string[] | undefined => {
+  if (!certificateAuthorities) {
+    return undefined;
+  }
+
+  const paths = Array.isArray(certificateAuthorities)
+    ? certificateAuthorities
+    : [certificateAuthorities];
+  return paths.map((path) => readFileSync(path, 'utf8'));
+};
 
 const convertHeader = (entry: any): string => {
   return typeof entry === 'object' ? JSON.stringify(entry) : String(entry);

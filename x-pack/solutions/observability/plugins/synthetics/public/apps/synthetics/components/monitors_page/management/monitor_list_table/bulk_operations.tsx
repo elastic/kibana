@@ -19,13 +19,16 @@ import { useEnablement } from '../../../../hooks';
 import { CANNOT_PERFORM_ACTION_SYNTHETICS } from '../../../common/components/permissions';
 import { SERVICE_NOT_ALLOWED } from '../disabled_callout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
-import { isMonitorBulkEditable } from './bulk_edit_eligibility';
+import { isMonitorBulkEditable, isMonitorBulkStatusEditable } from './bulk_edit_eligibility';
+
+export type BulkEditAction = 'tags' | 'serviceName' | 'labels';
 
 export const BulkOperations = ({
   selectedItems,
   setMonitorPendingDeletion,
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
+  setBulkEditAction,
   setIsLocationsFlyoutOpen,
   setIsScheduleFlyoutOpen,
   setIsMaintenanceWindowsFlyoutOpen,
@@ -37,6 +40,7 @@ export const BulkOperations = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
+  setBulkEditAction: (action: BulkEditAction) => void;
   setIsLocationsFlyoutOpen: (val: boolean) => void;
   setIsScheduleFlyoutOpen: (val: boolean) => void;
   setIsMaintenanceWindowsFlyoutOpen: (val: boolean) => void;
@@ -62,8 +66,8 @@ export const BulkOperations = ({
   // Enable/Disable are per-current-state: only the monitors that would actually
   // change are counted and patched, so we avoid re-syncing Fleet policies for
   // monitors already in the target state. The full by-state set is still handed
-  // to the modal so it can surface the ineligible (project/terraform, or
-  // permission-restricted) monitors as skipped.
+  // to the modal so it can surface the ineligible (permission-restricted)
+  // monitors as skipped.
   const enableCandidates = selectedItems.filter((item) => !item[ConfigKey.ENABLED]);
   const disableCandidates = selectedItems.filter((item) => item[ConfigKey.ENABLED]);
   const enableIds = enableCandidates.map((item) => item[ConfigKey.CONFIG_ID]);
@@ -71,11 +75,14 @@ export const BulkOperations = ({
 
   // Counts/disabled state reflect only monitors that can actually be updated, so
   // the menu never offers an action that would open a modal with nothing to do.
+  // Project/terraform monitors ARE eligible for enable/disable (unlike other
+  // bulk edits), so status eligibility only gates on the public-location
+  // capability.
   const eligibleEnableCount = enableCandidates.filter((item) =>
-    isMonitorBulkEditable(item, canUsePublicLocations)
+    isMonitorBulkStatusEditable(item, canUsePublicLocations)
   ).length;
   const eligibleDisableCount = disableCandidates.filter((item) =>
-    isMonitorBulkEditable(item, canUsePublicLocations)
+    isMonitorBulkStatusEditable(item, canUsePublicLocations)
   ).length;
 
   if (selectedItems.length === 0) {
@@ -86,7 +93,7 @@ export const BulkOperations = ({
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           isDisabled={true}
         >
@@ -102,6 +109,17 @@ export const BulkOperations = ({
     : !isServiceAllowed
     ? SERVICE_NOT_ALLOWED
     : undefined;
+
+  // Tags/schedule/locations/etc. still reject project/terraform monitors
+  // (and public locations without the capability). Disable those items when
+  // nothing in the selection could actually be patched, so the menu doesn't
+  // open a flyout that would skip every monitor.
+  const eligibleConfigEditCount = selectedItems.filter((item) =>
+    isMonitorBulkEditable(item, canUsePublicLocations)
+  ).length;
+  const isConfigEditDisabled = isActionDisabled || eligibleConfigEditCount === 0;
+  const configEditTooltip =
+    disabledTooltip ?? (eligibleConfigEditCount === 0 ? NO_ELIGIBLE_TO_EDIT : undefined);
 
   const items: EuiContextMenuPanelItemDescriptor[] = [
     {
@@ -156,6 +174,45 @@ export const BulkOperations = ({
         setMonitorPendingStatusUpdate({ ids: disableIds, enabled: false });
       },
     },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editTags', {
+        defaultMessage: 'Edit tags',
+      }),
+      icon: 'tag',
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
+      'data-test-subj': 'syntheticsBulkEditTagsItem',
+      onClick: () => {
+        closePopover();
+        setBulkEditAction('tags');
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editServiceName', {
+        defaultMessage: 'Edit service name',
+      }),
+      icon: 'chartWaterfall',
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
+      'data-test-subj': 'syntheticsBulkEditServiceNameItem',
+      onClick: () => {
+        closePopover();
+        setBulkEditAction('serviceName');
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editLabels', {
+        defaultMessage: 'Edit labels',
+      }),
+      icon: 'list',
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
+      'data-test-subj': 'syntheticsBulkEditLabelsItem',
+      onClick: () => {
+        closePopover();
+        setBulkEditAction('labels');
+      },
+    },
     ...(resetIds.length > 0
       ? [
           {
@@ -165,6 +222,8 @@ export const BulkOperations = ({
               values: { count: resetIds.length },
             }),
             icon: 'refresh',
+            disabled: isActionDisabled,
+            toolTipContent: disabledTooltip,
             'data-test-subj': 'syntheticsBulkResetIntegrationButton',
             onClick: () => {
               closePopover();
@@ -178,8 +237,8 @@ export const BulkOperations = ({
         defaultMessage: 'Edit locations',
       }),
       icon: 'globe',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditLocationsItem',
       onClick: () => {
         closePopover();
@@ -190,9 +249,9 @@ export const BulkOperations = ({
       name: i18n.translate('xpack.synthetics.bulkOperations.editSchedule', {
         defaultMessage: 'Edit schedule',
       }),
-      icon: 'timeRefresh',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      icon: 'refreshTime',
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditScheduleItem',
       onClick: () => {
         closePopover();
@@ -204,8 +263,8 @@ export const BulkOperations = ({
         defaultMessage: 'Manage maintenance windows',
       }),
       icon: 'bellSlash',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkMaintenanceWindowsItem',
       onClick: () => {
         closePopover();
@@ -231,11 +290,14 @@ export const BulkOperations = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.synthetics.bulkOperations.popoverAriaLabel', {
+        defaultMessage: 'Bulk actions for the selected monitors',
+      })}
       button={
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         >
@@ -276,13 +338,18 @@ const ALL_ALREADY_DISABLED = i18n.translate('xpack.synthetics.bulkOperations.all
 
 const NO_ELIGIBLE_TO_ENABLE = i18n.translate('xpack.synthetics.bulkOperations.noEligibleToEnable', {
   defaultMessage:
-    'None of the selected monitors can be enabled here. Project and Terraform-managed monitors, and monitors using locations you cannot access, are excluded.',
+    'None of the selected monitors can be enabled here. Monitors using locations you cannot access are excluded.',
 });
 
 const NO_ELIGIBLE_TO_DISABLE = i18n.translate(
   'xpack.synthetics.bulkOperations.noEligibleToDisable',
   {
     defaultMessage:
-      'None of the selected monitors can be disabled here. Project and Terraform-managed monitors, and monitors using locations you cannot access, are excluded.',
+      'None of the selected monitors can be disabled here. Monitors using locations you cannot access are excluded.',
   }
 );
+
+const NO_ELIGIBLE_TO_EDIT = i18n.translate('xpack.synthetics.bulkOperations.noEligibleToEdit', {
+  defaultMessage:
+    'None of the selected monitors can be edited here. Project and Terraform-managed monitors must be updated from their source, and monitors using locations you cannot access are excluded.',
+});

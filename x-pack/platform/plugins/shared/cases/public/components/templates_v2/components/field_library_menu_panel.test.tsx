@@ -87,4 +87,25 @@ describe('FieldLibraryMenuPanel', () => {
     const option = screen.getByRole('option', { name: /root_cause/ });
     expect(option).toHaveAttribute('aria-disabled', 'true');
   });
+
+  it('disables a field already referenced by the template with different casing', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [field('root_cause')] },
+      isLoading: false,
+    });
+    // Template already references the field, but with different casing than the
+    // library definition's stored name (e.g. after a case-only rename).
+    const existingYaml = `fields:\n  - $ref: Root_Cause\n`;
+    renderWithTestingProviders(
+      <FieldLibraryMenuPanel
+        owner="cases"
+        existingYaml={existingYaml}
+        onSelect={jest.fn()}
+        width={320}
+      />
+    );
+
+    const option = screen.getByRole('option', { name: /root_cause/ });
+    expect(option).toHaveAttribute('aria-disabled', 'true');
+  });
 });

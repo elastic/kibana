@@ -66,7 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await lens.waitForVisualization('xyVisChart');
   };
 
-  describe('lens inline editing tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/283755
+  describe.skip('lens inline editing tests', () => {
     it('should allow inline editing of a by value visualization', async () => {
       await createNewLens();
       await lens.save('New Lens from Modal', false, false, false, 'new');

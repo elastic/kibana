@@ -445,11 +445,9 @@ const AXIOS_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
   'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
   'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/packages/shared/kbn-evals/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/private/canvas/common/lib/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/private/data_usage/server/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/private/indices_metadata/server/lib/services/**/*.{js,mjs,ts,tsx}',
@@ -460,7 +458,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/fleet/server/services/agents/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
@@ -474,22 +471,16 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
   'x-pack/platform/test/fleet_cypress/fleet_server.ts',
   'x-pack/platform/test/fleet_multi_cluster/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/ui_capabilities/common/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/kbn-synthetics-forge/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/apm/server/test_helpers/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/observability_onboarding/server/test_helpers/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
@@ -1523,7 +1514,7 @@ module.exports = {
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
-      plugins: ['eslint-plugin-node', 'react'],
+      plugins: ['eslint-plugin-n', 'react'],
       env: {
         jest: true,
       },
@@ -1532,7 +1523,7 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1763,7 +1754,8 @@ module.exports = {
         'playwright/expect-expect': [
           'warn',
           {
-            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+            assertFunctionNames: ['expect', 'expect.soft'],
+            assertFunctionPatterns: ['^assert[A-Z]'],
           },
         ],
         'playwright/no-commented-out-tests': 'error',
@@ -1824,7 +1816,7 @@ module.exports = {
     {
       // typescript and javascript for front and back
       files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-node'],
+      plugins: ['eslint-plugin-n'],
       env: {
         jest: true,
       },
@@ -1848,7 +1840,7 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -2083,6 +2075,32 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * Custom Content overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        'react-hooks/exhaustive-deps': 'error',
+        // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
+        'react/no-danger': 'error',
+      },
+    },
+    {
+      files: [
+        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
+      ],
+      excludedFiles: ['**/*.test.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
       },
     },
 
@@ -2337,6 +2355,8 @@ module.exports = {
      */
     {
       files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
+      // Playwright resolves its configuration from a default export.
+      excludedFiles: ['src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -2538,7 +2558,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
-      plugins: ['eslint-plugin-node', 'react'],
+      plugins: ['eslint-plugin-n', 'react'],
       env: {
         jest: true,
       },
@@ -2547,7 +2567,7 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -2825,6 +2845,43 @@ module.exports = {
       },
     },
     {
+      // @rspack/* packages are pure ESM. Direct value imports work in
+      // production (Node require(esm)) but break any Jest test that loads
+      // them, so the optimizer must go through its rspack_runtime shim, which
+      // loads them natively via createRequire (see rspack_runtime.ts).
+      files: [
+        'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
+        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+      ],
+      rules: {
+        '@typescript-eslint/no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@rspack/core',
+                allowTypeImports: true,
+                message:
+                  'Import the `rspack` runtime value from the optimizer rspack_runtime shim instead (@rspack/core is pure ESM and breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rspack/plugin-react-refresh',
+                allowTypeImports: true,
+                message:
+                  'Load via loadReactRefreshRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rsdoctor/rspack-plugin',
+                allowTypeImports: true,
+                message:
+                  'Load via loadRsdoctorRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ['x-pack/**/cypress/**/*.ts'],
       rules: {
         'no-restricted-imports': [
@@ -3020,9 +3077,9 @@ module.exports = {
     {
       // Platform & Solutions API Tests
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
@@ -3114,8 +3171,9 @@ module.exports = {
               '@kbn/*',
               '!@kbn/i18n',
               '!@kbn/i18n-react',
-              '!@kbn/ui-chrome-layout-constants',
-              '!@kbn/ui-chrome-layout-utils',
+              '!@kbn/ui-chrome-layout',
+              '!@kbn/ui-app-menu',
+              '!@kbn/ui-favorite-button',
             ],
           },
         ],
@@ -3126,10 +3184,12 @@ module.exports = {
       // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution and workflows_management blocks). The trade-off: the
-      // allowlisted files that overlap with those blocks lose their `*legacy*`
-      // pattern check; verified that none of them currently import any path
-      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // security_solution block). The trade-off: the allowlisted files that
+      // overlap with that block lose their `*legacy*` pattern check; verified
+      // that none of them currently import any path matching `*legacy*`. The
+      // workflows_management overlap is gone, and this comment can be dropped
+      // entirely once the remaining security_solution consumers migrate. The
+      // js-yaml freeze is handled separately via
       // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
       // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
@@ -3194,7 +3254,6 @@ module.exports.overrides.push({
     'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
-    'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
     'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',

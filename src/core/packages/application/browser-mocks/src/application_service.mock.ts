@@ -93,6 +93,7 @@ const createInternalStartContractMock = (
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
     currentLocation$: currentLocation$.asObservable(),
+    appNotFound$: new BehaviorSubject(false).asObservable(),
     currentActionMenu$: new BehaviorSubject<MountPoint | undefined>(undefined),
     getComponent: jest.fn(),
     getRegisteredAppsInfo: jest.fn().mockReturnValue([]),

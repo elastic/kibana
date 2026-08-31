@@ -6,14 +6,16 @@
  */
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  type SignificantEventInvestigation,
+} from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
-import {
-  EVENT_STATUS_CHANGED_TRIGGER_ID,
-  INVESTIGATION_COMPLETED_TRIGGER_ID,
-} from '../../../../common/workflows/triggers';
+import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -91,6 +93,26 @@ describe('attachInvestigationToEvent', () => {
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.event_uuid).not.toBe('event-1');
     expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
+  });
+
+  it('attaches an investigation to a legacy event with longer narratives', async () => {
+    const existing = createEvent({
+      event_uuid: 'event-1',
+      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await expect(
+      attachInvestigationToEvent({
+        eventClient: client,
+        eventUuid: 'event-1',
+        investigation: createInvestigation(),
+      })
+    ).resolves.toMatchObject({ updated: 1 });
+
+    expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
   });
 
   it('replaces a pending entry with a terminal one, preserving started_at', async () => {
@@ -394,10 +416,6 @@ describe('attachInvestigationToEvent', () => {
     expect(triggerEmitter).toHaveBeenCalledWith(
       EVENT_STATUS_CHANGED_TRIGGER_ID,
       expect.objectContaining({ status: 'closed', previous_status: 'open' })
-    );
-    expect(triggerEmitter).toHaveBeenCalledWith(
-      INVESTIGATION_COMPLETED_TRIGGER_ID,
-      expect.objectContaining({ workflow_execution_id: investigation.workflow_execution_id })
     );
   });
 

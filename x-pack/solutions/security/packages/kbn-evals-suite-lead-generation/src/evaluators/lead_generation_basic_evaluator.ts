@@ -20,7 +20,8 @@ const isValidLead = (lead: unknown): lead is Lead => {
     l.title.length > 0 &&
     typeof l.byline === 'string' &&
     typeof l.description === 'string' &&
-    Array.isArray(l.entities) &&
+    typeof l.entity === 'object' &&
+    l.entity !== null &&
     typeof l.priority === 'number' &&
     l.priority >= 1 &&
     l.priority <= 10 &&
@@ -40,6 +41,7 @@ export const createLeadGenerationBasicEvaluator = (): Evaluator<
 > => ({
   name: LEAD_GENERATION_BASIC_EVALUATOR_NAME,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const errors = output?.errors;
     if (errors && errors.length > 0) {

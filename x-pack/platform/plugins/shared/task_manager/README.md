@@ -53,8 +53,41 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 - `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
 - `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 - `unsafe.exclude_task_types` - A list of task types to exclude from running. Supports wildcard usage, such as `namespace:*`. This configuration is experimental, unsupported, and can only be used for temporary debugging purposes because it causes Kibana to behave in unexpected ways.
+- `execution_control.poll_interval` - How often (ms) each Kibana node polls the runtime task execution control (pause/resume) state. Defaults to 5000ms. See [Pausing task execution at runtime](#pausing-task-execution-at-runtime).
 - `invalidate_api_key_task.interval` - Check [API Key Invalidation](#api-key-invalidation) for details.
 - `invalidate_api_key_task.removalDelay` - Check [API Key Invalidation](#api-key-invalidation) for details.
+
+## Pausing task execution at runtime
+
+During an incident (e.g. background work overwhelming Elasticsearch or the Kibana heap) an operator can stop Task Manager from running tasks at runtime, without a restart, and later resume. This is a supported, access-controlled alternative to the `node.roles: [ui]` / `unsafe.exclude_task_types` levers, and it works the same on self-managed, ECH, and serverless.
+
+The pause state is stored in a single `task-execution-control` saved object in the `.kibana_task_manager` index. Every node polls it on `execution_control.poll_interval` (5s by default), so a change propagates to all nodes within seconds. Because it is persisted, a crash-looping Kibana comes back paused.
+
+Pausing:
+- Stops all task **claiming** (or claiming of specific task types) across every node.
+- Best-effort **cancels tasks already running** (fires each task's `cancel()` / `AbortController`; tasks without a cancel handler run to completion).
+- Does **not** block task CRUD — rules, connectors, reports, and other tasks can still be created, updated, and deleted while execution is paused.
+
+The routes are internal and require the `superuser` privilege:
+
+```
+# Pause all task execution
+POST /internal/task_manager/execution/_pause
+
+# Pause only specific task types
+POST /internal/task_manager/execution/_pause   { "task_types": ["alerting:.es-query"] }
+
+# Resume all task execution (also clears any paused task types)
+POST /internal/task_manager/execution/_resume
+
+# Resume only specific task types
+POST /internal/task_manager/execution/_resume   { "task_types": ["alerting:.es-query"] }
+
+# Read the current state
+GET  /internal/task_manager/execution/_status
+```
+
+While paused, workload/overdue stats grow and the health API may report a degraded status; the current state is exposed at `/api/task_manager/_health` under `stats.configuration.value.execution_control`. Cancelled tasks remain in a `running` state in the index until their `retryAt` and are reclaimed once execution is resumed.
 
 ## Task definitions
 

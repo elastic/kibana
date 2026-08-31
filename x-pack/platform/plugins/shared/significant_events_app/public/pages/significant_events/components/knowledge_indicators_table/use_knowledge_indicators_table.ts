@@ -19,6 +19,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { KI_ROW_ACTION_MUTATION_KEY } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorTitle } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_title';
 import { matchesKnowledgeIndicatorFilters } from '../../../../components/knowledge_indicators/utils/matches_knowledge_indicator_filters';
 import {
   BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
@@ -34,8 +35,7 @@ import {
 import { getPromoteSkipReason } from '../../../../lib/promote_skip_reason';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
-export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
-  ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
+export { getKnowledgeIndicatorTitle };
 
 export function useKnowledgeIndicatorsTable() {
   const {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,6 +16,11 @@ import {
   isRemoteSyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 import { createRemoteMonitorDetailUrl } from '../../utils/remote/remote_monitor_urls';
+import {
+  getRemoteMonitorCalloutTitle,
+  getViewOnRemoteOriginButtonLabel,
+  isLinkedProjectOrigin,
+} from '../../utils/remote/remote_origin_copy';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
@@ -24,9 +29,9 @@ import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
  * Callout rendered at the top of the monitor detail body when the selected
  * monitor is read-only — i.e. it has no local Synthetics saved object. Two
  * variants share this surface:
- *   - remote (CCS): mirrors SLO's `SloRemoteCallout` — surfaces the remote
- *     cluster name + Kibana URL and a button that deep-links to the same monitor
- *     on the origin cluster's Kibana.
+ *   - remote (CCS cluster or CPS linked project): mirrors SLO's
+ *     `SloRemoteCallout` — surfaces the origin name + Kibana URL and a button
+ *     that deep-links to the same monitor on the origin Kibana.
  *   - heartbeat: run by Heartbeat / Elastic Agent (e.g. Kubernetes
  *     autodiscovery). There is nowhere to deep-link to, so it only explains why
  *     the monitor is read-only here.
@@ -85,39 +90,32 @@ const RemoteCallout = () => {
     return null;
   }
 
+  const originName = monitor.remote.remoteName;
+  const isLinkedProject = isLinkedProjectOrigin();
+  const kibanaUrlLink = remoteKibanaUrl ? (
+    <EuiLink
+      data-test-subj="syntheticsMonitorRemoteCalloutLink"
+      href={remoteKibanaUrl}
+      target="_blank"
+      external
+    >
+      {remoteKibanaUrl}
+    </EuiLink>
+  ) : undefined;
+
   return (
     <>
       <EuiCallOut
         data-test-subj="syntheticsMonitorRemoteCallout"
-        title={REMOTE_MONITOR_TITLE}
-        iconType="cluster"
+        title={getRemoteMonitorCalloutTitle()}
+        iconType={isLinkedProject ? 'symlink' : 'cluster'}
       >
         <p>
-          {remoteKibanaUrl ? (
-            <FormattedMessage
-              id="xpack.synthetics.monitorDetails.remoteCallout.descriptionWithUrl"
-              defaultMessage="This is a remote monitor which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName} with Kibana URL {kibanaUrl}."
-              values={{
-                remoteName: <strong>{monitor.remote.remoteName}</strong>,
-                kibanaUrl: (
-                  <EuiLink
-                    data-test-subj="syntheticsMonitorRemoteCalloutLink"
-                    href={remoteKibanaUrl}
-                    target="_blank"
-                    external
-                  >
-                    {remoteKibanaUrl}
-                  </EuiLink>
-                ),
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.synthetics.monitorDetails.remoteCallout.description"
-              defaultMessage="This is a remote monitor which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName}."
-              values={{ remoteName: <strong>{monitor.remote.remoteName}</strong> }}
-            />
-          )}
+          <RemoteCalloutDescription
+            isLinkedProject={isLinkedProject}
+            originName={originName}
+            kibanaUrlLink={kibanaUrlLink}
+          />
         </p>
         <EuiButton
           data-test-subj="syntheticsMonitorRemoteCalloutButton"
@@ -126,14 +124,56 @@ const RemoteCallout = () => {
           isDisabled={!remoteMonitorUrl}
           href={remoteMonitorUrl}
           target="_blank"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
         >
-          {VIEW_ON_REMOTE_CLUSTER_LABEL}
+          {getViewOnRemoteOriginButtonLabel()}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
+  );
+};
+
+const RemoteCalloutDescription = ({
+  isLinkedProject,
+  originName,
+  kibanaUrlLink,
+}: {
+  isLinkedProject: boolean;
+  originName: string;
+  kibanaUrlLink?: ReactNode;
+}) => {
+  const originNameNode = <strong>{originName}</strong>;
+
+  if (isLinkedProject) {
+    return kibanaUrlLink ? (
+      <FormattedMessage
+        id="xpack.synthetics.monitorDetails.linkedProjectCallout.withUrlDescription"
+        defaultMessage="This monitor belongs to another Kibana project. It is fetched from the linked project: {projectName} with Kibana URL {kibanaUrl}."
+        values={{ projectName: originNameNode, kibanaUrl: kibanaUrlLink }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.synthetics.monitorDetails.linkedProjectCallout.withoutUrlDescription"
+        defaultMessage="This monitor belongs to another Kibana project. It is fetched from the linked project: {projectName}."
+        values={{ projectName: originNameNode }}
+      />
+    );
+  }
+
+  return kibanaUrlLink ? (
+    <FormattedMessage
+      id="xpack.synthetics.monitorDetails.remoteCallout.descriptionWithUrl"
+      defaultMessage="This is a remote monitor which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName} with Kibana URL {kibanaUrl}."
+      values={{ remoteName: originNameNode, kibanaUrl: kibanaUrlLink }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.synthetics.monitorDetails.remoteCallout.description"
+      defaultMessage="This is a remote monitor which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName}."
+      values={{ remoteName: originNameNode }}
+    />
   );
 };
 
@@ -153,17 +193,6 @@ const HeartbeatCallout = () => (
     </EuiCallOut>
     <EuiSpacer size="m" />
   </>
-);
-
-const REMOTE_MONITOR_TITLE = i18n.translate('xpack.synthetics.monitorDetails.remoteCallout.title', {
-  defaultMessage: 'Remote monitor',
-});
-
-const VIEW_ON_REMOTE_CLUSTER_LABEL = i18n.translate(
-  'xpack.synthetics.monitorDetails.remoteCallout.viewOnRemoteCluster',
-  {
-    defaultMessage: 'View on remote cluster',
-  }
 );
 
 const HEARTBEAT_MONITOR_TITLE = i18n.translate(

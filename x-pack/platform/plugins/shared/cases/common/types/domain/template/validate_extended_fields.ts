@@ -151,19 +151,10 @@ export const validateExtendedFields = (
 ): string[] => {
   let errors: string[] = [];
   // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
-  // `extended_fields`, so they take no part in value/required validation. Dropping them here also
-  // ensures their snake key is treated as an unknown key if it is ever submitted.
+  // `extended_fields`, so they take no part in value/required validation.
   const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
 
-  // 1. Build valid key set
-  const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
-
-  // 2. Unknown keys + value-size backstop
-  for (const key of Object.keys(extendedFields)) {
-    if (!validKeys.has(key)) {
-      errors.push(`Unknown extended field key: "${key}"`);
-    }
-  }
+  // 1. Value-size backstop
   errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
 
   // 3. Build helper maps

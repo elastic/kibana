@@ -37,6 +37,11 @@ export const STREAM_COLUMN_LABEL = i18n.translate(
   { defaultMessage: 'Stream' }
 );
 
+export const DURABILITY_COLUMN_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicators.columns.durabilityLabel',
+  { defaultMessage: 'Durability' }
+);
+
 export const ACTIONS_COLUMN_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicators.columns.actionsLabel',
   { defaultMessage: 'Actions' }

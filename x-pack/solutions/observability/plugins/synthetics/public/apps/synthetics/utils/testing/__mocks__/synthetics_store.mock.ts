@@ -116,6 +116,11 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: null,
   },
+  agentStats: {
+    loading: false,
+    error: null,
+    data: null,
+  },
   privateLocations: {
     isPrivateLocationFlyoutVisible: false,
     loading: false,
@@ -477,6 +482,7 @@ function getMonitorDetailsMockSlice() {
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
+      certificate_error_spki_allowlist: [],
       throttling: {
         value: {
           download: '5',

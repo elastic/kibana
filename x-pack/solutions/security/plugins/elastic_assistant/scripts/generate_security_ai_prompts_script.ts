@@ -11,7 +11,7 @@ import type { Prompt } from '@kbn/security-ai-prompts';
 import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
 import * as path from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 
 import { localPrompts } from '../server/lib/prompt/local_prompt_object';
 import { localToolPrompts } from '../server/lib/prompt/tool_prompts';

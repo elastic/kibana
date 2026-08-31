@@ -77,6 +77,14 @@ export interface InternalApplicationStart extends ApplicationStart {
   getRegisteredAppsInfo(): RegisteredAppInfo[];
 
   /**
+   * Emits true while AppContainer is showing App Not Found (missing or inaccessible application).
+   * Used by chrome visibility so navigation remains available as a recovery surface.
+   *
+   * @internal
+   */
+  appNotFound$: Observable<boolean>;
+
+  /**
    * The potential action menu set by the currently mounted app.
    * Consumed by the chrome header.
    *

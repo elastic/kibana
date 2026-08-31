@@ -18,13 +18,14 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
 dependsOn:
   - '@kbn/evals'
-  - '@kbn/evals-phoenix-executor'
   - '@kbn/agent-builder-common'
   - '@kbn/alerting-v2-constants'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/tooling-log'
   - '@kbn/scout'
   - '@kbn/data-forge'
+  - '@kbn/workflows'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package

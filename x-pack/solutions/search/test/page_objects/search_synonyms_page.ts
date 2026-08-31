@@ -9,7 +9,6 @@ import type { FtrProviderContext } from './ftr_provider_context';
 
 export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
 
@@ -115,8 +114,7 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
       },
       async expectSynonymsSetDetailPageNavigated(name: string) {
         await retry.tryForTime(5000, async () => {
-          const h1Element = await find.byCssSelector('main header h1');
-          const text = await h1Element.getVisibleText();
+          const text = await testSubjects.getVisibleText('appHeaderTitle');
           if (text !== name) {
             throw new Error(`Expected page title to be "${name}" but got "${text}"`);
           }

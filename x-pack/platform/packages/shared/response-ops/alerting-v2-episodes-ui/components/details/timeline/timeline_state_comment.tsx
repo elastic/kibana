@@ -32,7 +32,7 @@ export const AlertEpisodeTimelineStateComment = ({
         <EuiAvatar
           size="s"
           name={verb}
-          iconType={isInitial ? 'flag' : 'arrowRight'}
+          iconType={isInitial ? 'flag' : 'chevronSingleRight'}
           color="subdued"
         />
       }

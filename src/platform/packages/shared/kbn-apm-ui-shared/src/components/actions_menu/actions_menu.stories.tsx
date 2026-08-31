@@ -79,14 +79,14 @@ export const GroupedActions: StoryFn = () => (
           {
             id: 'filterFor',
             name: 'Filter for value',
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             onClick: () => alert('Filter for'),
             ebt: { action: 'filterFor', element: 'actionsMenu' },
           },
           {
             id: 'filterOut',
             name: 'Filter out value',
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             onClick: () => alert('Filter out'),
             ebt: { action: 'filterOut', element: 'actionsMenu' },
           },
@@ -112,7 +112,7 @@ export const WithSubPanel: StoryFn = () => (
           {
             id: 'openIn',
             name: 'Open in…',
-            icon: 'popout',
+            icon: 'external',
             ebt: { action: 'openIn', element: 'actionsMenu' },
             items: [
               {

@@ -24,6 +24,7 @@ import { TransactionMetadata } from '../metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
 import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
 import { useGenAiData } from '../genai_tab/use_genai_data';
+import { TRANSACTION_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import { TransactionSummary } from '../summary/transaction_summary';
 import { TransactionActionMenu } from '../transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
@@ -32,6 +33,7 @@ import type { SpanLinksCount } from '../span_links';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   transactionId: string;
@@ -141,7 +143,15 @@ function TransactionFlyoutBody({
     timestamp: transaction['@timestamp'],
   });
 
-  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+  const { core } = useApmPluginContext();
+
+  const genAiTabContent = getGenAiTabContent({
+    isGenAiSpan,
+    genAi,
+    ebt: { element: TRANSACTION_FLYOUT_EBT_ELEMENTS.TABS },
+    reportEvent: core.analytics.reportEvent,
+    resourceId: transaction.transaction?.id,
+  });
 
   const tabs = [
     {

@@ -28,8 +28,6 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CasesContextProps } from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
 import type { CasesPublicStartDependencies } from '../../types';
 import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
@@ -40,8 +38,6 @@ interface TestProviderProps {
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
-  externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry?: UnifiedAttachmentTypeRegistry;
   license?: ILicense;
   services?: CasesPublicStartDependencies;
@@ -86,8 +82,6 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   owner,
   permissions,
   releasePhase,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   license,
   coreStart,
@@ -149,16 +143,6 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     [finalFilesClient]
   );
 
-  const defaultExternalReferenceAttachmentTypeRegistry = useMemo(
-    () => new ExternalReferenceAttachmentTypeRegistry(),
-    []
-  );
-
-  const defaultPersistableStateAttachmentTypeRegistry = useMemo(
-    () => new PersistableStateAttachmentTypeRegistry(),
-    []
-  );
-
   const defaultUnifiedAttachmentTypeRegistry = useMemo(
     () => new UnifiedAttachmentTypeRegistry(),
     []
@@ -166,10 +150,6 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
 
   const casesProviderValue: CasesContextProps = useMemo(
     () => ({
-      externalReferenceAttachmentTypeRegistry:
-        externalReferenceAttachmentTypeRegistry ?? defaultExternalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry:
-        persistableStateAttachmentTypeRegistry ?? defaultPersistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry:
         unifiedAttachmentTypeRegistry ?? defaultUnifiedAttachmentTypeRegistry,
       features,
@@ -179,17 +159,13 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       getFilesClient: getFilesClientFinal,
     }),
     [
-      defaultExternalReferenceAttachmentTypeRegistry,
       defaultPermissions,
-      defaultPersistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
       defaultUnifiedAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
       features,
       getFilesClientFinal,
       owner,
       permissions,
-      persistableStateAttachmentTypeRegistry,
       releasePhase,
     ]
   );

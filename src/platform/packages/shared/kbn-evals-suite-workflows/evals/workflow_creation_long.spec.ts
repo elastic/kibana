@@ -115,66 +115,48 @@ evaluate.describe(
   'Long workflow creation — scheduled data pipelines',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate(
-      'creates a multi-source security metrics pipeline',
-      async ({ evaluateLongCreateDataset }) => {
-        await evaluateLongCreateDataset({
-          dataset: {
-            name: 'workflow-creation-long: multi-source-pipeline',
-            description:
-              'Evaluate creation of a 10–15-step scheduled pipeline: fetch from multiple HTTP sources, ' +
-              'ES|QL aggregation, foreach transform, bulk index results, Slack summary.',
-            examples: [
-              {
-                input: {
-                  instruction:
-                    'Set up a workflow that runs every hour and builds a security posture snapshot. ' +
-                    'It should fetch the current open alert counts from three different API endpoints: ' +
-                    'https://api.example.com/alerts/critical, /alerts/high, and /alerts/medium. ' +
-                    'Then run an ES|QL query on metrics-security.* to get average response times grouped by rule category. ' +
-                    'After that, loop over each alert severity bucket, build a summary document for each, and bulk-index them into a security-posture-snapshots index. ' +
-                    'Finally, post a Slack message with the total open counts and top 3 slow rule categories.',
-                },
-                output: {
-                  criteria: [
-                    'The workflow has a scheduled trigger set to every 1 hour (cron or interval expression).',
-                    'There are exactly three HTTP steps, one per severity endpoint (critical, high, medium).',
-                    'There is an ES|QL step querying the metrics-security.* index, with both a STATS aggregation grouping by rule category AND a numeric percentile/avg over a response-time field.',
-                    'The ES|QL output is sorted and limited so only the top 3 slow categories survive into downstream steps.',
-                    'There is a foreach step iterating over severity buckets, and the bulk-indexed documents differ per iteration (severity-specific fields, not a single shared payload).',
-                    'A bulk indexing step writes documents to the security-posture-snapshots index, with each document containing severity, count, and an @timestamp set to the workflow run time.',
-                    'The Slack message body references at least three Liquid expressions across at least two distinct steps (one HTTP count and one ES|QL field).',
-                    'Connector steps include a connector-id field.',
-                    'There is no redundant HTTP wrapper around the ES|QL or bulk-index calls — the workflow uses the dedicated step types.',
-                  ],
-                  expectedStepCount: { min: 10, max: 14 },
-                  expectedStepTypes: [
-                    'http',
-                    'elasticsearch.esql.query',
-                    'foreach',
-                    'elasticsearch.bulk',
-                    'slack2.sendMessage',
-                  ],
-                  expectedMaxToolCalls: 8,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'long-creation' },
-              },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate('creates a full incident response pipeline', async ({ evaluateLongCreateDataset }) => {
+    evaluate('long creation cases', async ({ evaluateLongCreateDataset }) => {
       await evaluateLongCreateDataset({
         dataset: {
-          name: 'workflow-creation-long: full-incident-response',
+          name: 'workflow-creation-long: core',
           description:
-            'Evaluate creation of a 14–20-step full incident response workflow: ' +
-            'alert trigger, case creation, per-alert enrichment loop, conditional escalation, ' +
-            'remediation action, cross-team notification, evidence preservation.',
+            'Long workflow creation (10–20+ steps): multi-source security metrics pipeline and full incident response pipeline.',
           examples: [
+            {
+              input: {
+                instruction:
+                  'Set up a workflow that runs every hour and builds a security posture snapshot. ' +
+                  'It should fetch the current open alert counts from three different API endpoints: ' +
+                  'https://api.example.com/alerts/critical, /alerts/high, and /alerts/medium. ' +
+                  'Then run an ES|QL query on metrics-security.* to get average response times grouped by rule category. ' +
+                  'After that, loop over each alert severity bucket, build a summary document for each, and bulk-index them into a security-posture-snapshots index. ' +
+                  'Finally, post a Slack message with the total open counts and top 3 slow rule categories.',
+              },
+              output: {
+                criteria: [
+                  'The workflow has a scheduled trigger set to every 1 hour (cron or interval expression).',
+                  'There are exactly three HTTP steps, one per severity endpoint (critical, high, medium).',
+                  'There is an ES|QL step querying the metrics-security.* index, with both a STATS aggregation grouping by rule category AND a numeric percentile/avg over a response-time field.',
+                  'The ES|QL output is sorted and limited so only the top 3 slow categories survive into downstream steps.',
+                  'There is a foreach step iterating over severity buckets, and the bulk-indexed documents differ per iteration (severity-specific fields, not a single shared payload).',
+                  'A bulk indexing step writes documents to the security-posture-snapshots index, with each document containing severity, count, and an @timestamp set to the workflow run time.',
+                  'The Slack message body references at least three Liquid expressions across at least two distinct steps (one HTTP count and one ES|QL field).',
+                  'Connector steps include a connector-id field.',
+                  'There is no redundant HTTP wrapper around the ES|QL or bulk-index calls — the workflow uses the dedicated step types.',
+                ],
+                expectedStepCount: { min: 10, max: 14 },
+                expectedStepTypes: [
+                  'http',
+                  'elasticsearch.esql.query',
+                  'foreach',
+                  'elasticsearch.bulk',
+                  'slack2.sendMessage',
+                ],
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'long-multi-source-pipeline' },
+            },
             {
               input: {
                 instruction:
@@ -224,7 +206,7 @@ evaluate.describe(
                   { ref: 'steps.create_case.output.id', resolvesTo: 'step-output' },
                 ],
               },
-              metadata: { category: 'long-creation' },
+              metadata: { category: 'long-incident-response' },
             },
           ],
         },

@@ -9,7 +9,11 @@ import type { ReactNode } from 'react';
 import type { ComposerQuery } from '@elastic/esql';
 import type { LensESQLConfig } from '../../types';
 import { ChartType, getTimeSeriesColor } from '../../../../charts/helper/get_timeseries_color';
-import { ESQL_NULLIFY_UNMAPPED_FIELDS, TIME_BUCKET_FIELD } from './constants';
+import {
+  ESQL_NULLIFY_UNMAPPED_FIELDS,
+  TIME_BUCKET_FIELD,
+  esqlSetProjectRouting,
+} from './constants';
 import type { FlyoutLensChartConfigDefinition, LensYAxis, LensYBounds } from './types';
 
 export function printQuery(query: ComposerQuery): string {
@@ -27,6 +31,7 @@ export function buildChartDefinition({
   buildQuery,
   yAxis,
   yBounds,
+  projectRouting,
 }: {
   id: string;
   title: string;
@@ -35,15 +40,21 @@ export function buildChartDefinition({
   buildQuery: (indices: string) => ComposerQuery;
   yAxis: LensYAxis[];
   yBounds?: LensYBounds;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   if (!indices) {
     return { id, title, titleAction };
   }
 
+  const setInstructions = [
+    ...(projectRouting ? [esqlSetProjectRouting(projectRouting)] : []),
+    ESQL_NULLIFY_UNMAPPED_FIELDS,
+  ].join('\n');
+
   const config: LensESQLConfig = {
     chartType: 'xy',
     title,
-    dataset: { esql: `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${printQuery(buildQuery(indices))}` },
+    dataset: { esql: `${setInstructions}\n${printQuery(buildQuery(indices))}` },
     layers: [
       {
         type: 'series',

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { defineBulkDeleteOAuthConnectionsRoute } from './bulk_delete_connections';
 import { defineBulkRevokeOAuthConnectionsRoute } from './bulk_revoke_connections';
 import { defineCreateOAuthClientRoute } from './create_client';
+import { defineDeleteOAuthClientRoute } from './delete_client';
+import { defineDeleteOAuthConnectionRoute } from './delete_connection';
 import { defineGetOAuthClientRoute } from './get_client';
 import { defineGetOAuthConnectionRoute } from './get_connection';
 import { defineListOAuthClientsRoute } from './list_clients';
@@ -23,9 +26,12 @@ export function defineOAuthRoutes(params: RouteDefinitionParams) {
   defineListOAuthClientsRoute(params);
   defineUpdateOAuthClientRoute(params);
   defineRevokeOAuthClientRoute(params);
+  defineDeleteOAuthClientRoute(params);
   defineGetOAuthConnectionRoute(params);
   defineListOAuthConnectionsRoute(params);
   defineUpdateOAuthConnectionRoute(params);
   defineRevokeOAuthConnectionRoute(params);
   defineBulkRevokeOAuthConnectionsRoute(params);
+  defineDeleteOAuthConnectionRoute(params);
+  defineBulkDeleteOAuthConnectionsRoute(params);
 }

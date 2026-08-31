@@ -51,6 +51,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
   ],
   [
+    '.censys',
+    lazy(() => import(/* webpackChunkName: "connectorIconCensys" */ './specs/censys/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
@@ -106,6 +110,12 @@ export const ConnectorIconsMap: Map<
         import(
           /* webpackChunkName: "connectorIconConfluenceCloud" */ './specs/atlassian/confluence_cloud/icon'
         )
+    ),
+  ],
+  [
+    '.google_docs',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDocs" */ './specs/google_docs/icon')
     ),
   ],
   [
@@ -253,6 +263,11 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.trello',
+    lazy(() => import(/* webpackChunkName: "connectorIcontrello" */ './specs/trello/icon')),
+  ],
   [
     '.workday',
     lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
@@ -337,5 +352,29 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconopensearchawsopensearchservice" */ './specs/opensearch_aws_opensearch_service/icon'
         )
     ),
+  ],
+  [
+    '.zabbix',
+    lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
+  ],
+
+  ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
+  [
+    '.gcp_iam',
+    lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
+  ],
+  [
+    '.gcp_secret_manager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpSecretManager" */ './specs/gcp_secret_manager/icon'
+        )
+    ),
+  ],
+  ['.unifi', lazy(() => import(/* webpackChunkName: "connectorIconUnifi" */ './specs/unifi/icon'))],
+  [
+    '.urlscan_io',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
 ]);

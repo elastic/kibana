@@ -27,9 +27,9 @@ import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { getCreateWithAgentTooltipText } from './components/rule_create_options/rule_create_options_panel';
 import {
-  getIsRuleManagementABSkillAvailable,
-  getRuleManagementABSkillRequirements,
-} from './hooks/use_is_rule_management_ab_skill_available';
+  getAreAgentBuilderSkillsAvailable,
+  getAgentBuilderSkillsRequirements,
+} from './hooks/use_are_agent_builder_skills_available';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 
@@ -231,6 +231,9 @@ const CreateRuleOptionsFlyoutInner = ({
         size="s"
         ownFocus
         onClose={onClose}
+        aria-label={i18n.translate('xpack.alertingV2.createAlertFlyout.loadingFlyoutAriaLabel', {
+          defaultMessage: 'Create rule',
+        })}
         data-test-subj="createAlertFlyoutLoading"
       >
         <EuiFlyoutBody>
@@ -242,13 +245,13 @@ const CreateRuleOptionsFlyoutInner = ({
 
   const { services, ComposeDiscoverFlyout } = value;
 
-  const abSkillRequirements = getRuleManagementABSkillRequirements(
+  const abSkillRequirements = getAgentBuilderSkillsRequirements(
     services.application,
     services.uiSettings
   );
   // Always render the "Create with agent" option; disable it (and show a tooltip naming the missing
   // prerequisite) when unavailable.
-  const createWithAgentDisabled = !getIsRuleManagementABSkillAvailable(
+  const createWithAgentDisabled = !getAreAgentBuilderSkillsAvailable(
     services.application,
     services.uiSettings
   );

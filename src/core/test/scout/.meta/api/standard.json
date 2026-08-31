@@ -1,8 +1,7 @@
 {
-  "sha1": "34ad3766a3eacd92e761b2fde5b00fb766c90d0d",
+  "sha1": "7a63effb2cacba3700a3d046e9156e7583ec0371",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -283,6 +282,26 @@
         "file": "src/core/test/scout/api/tests/compression.spec.ts",
         "line": 25,
         "column": 24
+      }
+    },
+    {
+      "id": "2392b373cc723ee-ab33734347ca58f",
+      "title": "kibana status api returns version, status and metrics fields",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/status.spec.ts",
+        "line": 19,
+        "column": 11
       }
     },
     {

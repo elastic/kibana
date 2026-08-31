@@ -5,25 +5,44 @@
  * 2.0.
  */
 
+import { useEffect, useMemo } from 'react';
 import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { merge, isEqual, isEmpty } from 'lodash';
+import { mergeWith, isEqual, isEmpty } from 'lodash';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
-import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';
+import { useGlobalToggleFieldsFilterConfig } from './use_global_toggle_fields_filter_config';
+import { deflattenCustomFieldKey, isFlattenCustomField, isFlattenExtendedField } from '../utils';
 
-const mergeSystemAndCustomFieldConfigs = ({
+const VALID_TOGGLE_FILTER_VALUES = new Set(['true', 'false']);
+
+const hasCustomFieldFilterValues = (customFields: FilterOptions['customFields']): boolean =>
+  Object.values(customFields ?? {}).some((field) => !isEmpty(field?.options));
+
+const clearCustomFieldFilterValues = (
+  customFields: FilterOptions['customFields']
+): FilterOptions['customFields'] =>
+  Object.fromEntries(
+    Object.entries(customFields ?? {}).map(([key, field]) => [
+      key,
+      { ...field, options: [] as string[] },
+    ])
+  );
+
+const mergeSystemAndFieldConfigs = ({
   systemFilterConfig,
-  customFieldsFilterConfig,
+  fieldFilterConfig,
 }: {
   systemFilterConfig: FilterConfig[];
-  customFieldsFilterConfig: FilterConfig[];
+  fieldFilterConfig: FilterConfig[];
 }) => {
   const newFilterConfig = new Map(
-    [...systemFilterConfig, ...customFieldsFilterConfig]
+    [...systemFilterConfig, ...fieldFilterConfig]
       .filter((filter) => filter.isAvailable)
       .map((filter) => [filter.key, filter])
   );
@@ -31,24 +50,67 @@ const mergeSystemAndCustomFieldConfigs = ({
   return newFilterConfig;
 };
 
-const shouldBeActive = ({
+const hasExtendedFieldFilterValue = ({
   filter,
   filterOptions,
+  filterConfigs,
 }: {
   filter: FilterConfigState;
   filterOptions: FilterOptions;
-}) => {
-  if (isFlattenCustomField(filter.key)) {
-    return (
-      !filter.isActive &&
-      !isEmpty(filterOptions.customFields[deflattenCustomFieldKey(filter.key)]?.options)
-    );
+  filterConfigs?: Map<string, FilterConfig>;
+}): boolean => {
+  const config = filterConfigs?.get(filter.key);
+  const label = config?.label;
+  if (label == null) {
+    return false;
   }
-
-  return !filter.isActive && !isEmpty(filterOptions[filter.key as keyof FilterOptions]);
+  return (filterOptions.extendedFieldFilters ?? []).some(
+    (entry) => entry.label.toLowerCase() === label.toLowerCase()
+  );
 };
 
-const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
+const filterConfigHasValue = ({
+  filterKey,
+  filterOptions,
+  filterConfigs,
+}: {
+  filterKey: string;
+  filterOptions: FilterOptions;
+  filterConfigs?: Map<string, FilterConfig>;
+}): boolean => {
+  if (isFlattenCustomField(filterKey)) {
+    return !isEmpty(filterOptions.customFields[deflattenCustomFieldKey(filterKey)]?.options);
+  }
+
+  if (isFlattenExtendedField(filterKey)) {
+    return hasExtendedFieldFilterValue({
+      filter: { key: filterKey, isActive: false },
+      filterOptions,
+      filterConfigs,
+    });
+  }
+
+  return !isEmpty(filterOptions[filterKey as keyof FilterOptions]);
+};
+
+const shouldBeActive = ({
+  filter,
+  filterOptions,
+  filterConfigs,
+}: {
+  filter: FilterConfigState;
+  filterOptions: FilterOptions;
+  filterConfigs?: Map<string, FilterConfig>;
+}) =>
+  !filter.isActive && filterConfigHasValue({ filterKey: filter.key, filterOptions, filterConfigs });
+
+const useActiveByFilterKeyState = ({
+  filterOptions,
+  filterConfigs,
+}: {
+  filterOptions: FilterOptions;
+  filterConfigs: Map<string, FilterConfig>;
+}) => {
   const [activeByFilterKey, setActiveByFilterKey] = useCasesLocalStorage<FilterConfigState[]>(
     LOCAL_STORAGE_KEYS.casesTableFiltersConfig,
     []
@@ -60,7 +122,7 @@ const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOpt
   const newActiveByFilterKey = [...(activeByFilterKey || [])];
 
   newActiveByFilterKey.forEach((filter) => {
-    if (shouldBeActive({ filter, filterOptions })) {
+    if (shouldBeActive({ filter, filterOptions, filterConfigs })) {
       const currentIndex = newActiveByFilterKey.findIndex((_filter) => filter.key === _filter.key);
       newActiveByFilterKey.splice(currentIndex, 1);
       newActiveByFilterKey.push({ key: filter.key, isActive: true });
@@ -77,26 +139,68 @@ const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOpt
   ];
 };
 
-const deactivateNonExistingFilters = ({
+const replaceArrayMerge = (_objValue: unknown, srcValue: unknown) => {
+  if (Array.isArray(srcValue)) {
+    return srcValue;
+  }
+};
+
+/**
+ * Merges getEmptyOptions results. Array-shaped fields (extendedFieldFilters) must replace,
+ * not index-merge. When multiple extended-field filters deactivate together, rebuild the
+ * array once by removing all of their labels from the current filterOptions.
+ */
+const mergeEmptyOptions = ({
+  emptyOptions,
+  deactivatedConfigs,
+  filterOptions,
+}: {
+  emptyOptions: Array<Partial<FilterOptions>>;
+  deactivatedConfigs: FilterConfig[];
+  filterOptions: FilterOptions;
+}): Partial<FilterOptions> => {
+  const extendedLabelsToClear = new Set(
+    deactivatedConfigs
+      .filter((config) => isFlattenExtendedField(config.key))
+      .map((config) => config.label.toLowerCase())
+  );
+
+  if (extendedLabelsToClear.size === 0) {
+    return mergeWith({}, ...emptyOptions, replaceArrayMerge);
+  }
+
+  const withoutExtended = emptyOptions.map(({ extendedFieldFilters: _ignored, ...rest }) => rest);
+  const merged = mergeWith({}, ...withoutExtended, replaceArrayMerge);
+
+  return {
+    ...merged,
+    extendedFieldFilters: (filterOptions.extendedFieldFilters ?? []).filter(
+      (entry) => !extendedLabelsToClear.has(entry.label.toLowerCase())
+    ),
+  };
+};
+
+const getNonExistingFiltersCleanup = ({
   prevFilterConfigs,
   currentFilterConfigs,
-  onFilterOptionsChange,
+  filterOptions,
 }: {
   prevFilterConfigs: Map<string, FilterConfig>;
   currentFilterConfigs: Map<string, FilterConfig>;
-  onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
-}) => {
+  filterOptions: FilterOptions;
+}): Partial<FilterOptions> | undefined => {
+  const removedConfigs: FilterConfig[] = [];
   const emptyOptions: Array<Partial<FilterOptions>> = [];
 
   [...(prevFilterConfigs?.entries() ?? [])].forEach(([filterKey, filter]) => {
     if (!currentFilterConfigs.has(filterKey)) {
-      emptyOptions.push(filter.getEmptyOptions());
+      removedConfigs.push(filter);
+      emptyOptions.push(filter.getEmptyOptions(filterOptions));
     }
   });
 
   if (emptyOptions.length > 0) {
-    const mergedEmptyOptions = merge({}, ...emptyOptions);
-    onFilterOptionsChange(mergedEmptyOptions);
+    return mergeEmptyOptions({ emptyOptions, deactivatedConfigs: removedConfigs, filterOptions });
   }
 };
 
@@ -106,6 +210,9 @@ export const useFilterConfig = ({
   systemFilterConfig,
   filterOptions,
   customFields,
+  globalInlineFields = [],
+  areGlobalFieldsLoaded = false,
+  templatesEnabled = false,
   isLoading,
 }: {
   isSelectorView: boolean;
@@ -114,45 +221,134 @@ export const useFilterConfig = ({
   systemFilterConfig: FilterConfig[];
   filterOptions: FilterOptions;
   customFields: CasesConfigurationUI['customFields'];
+  globalInlineFields?: InlineField[];
+  areGlobalFieldsLoaded?: boolean;
+  templatesEnabled?: boolean;
 }) => {
   /**
    * Initially we won't save any order, it will use the default config as it is defined in the system.
    * Once the user adds/removes a filter, we start saving the order and the visible state.
    */
-  const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({
-    filterOptions,
-  });
 
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
-    isSelectorView,
+    isSelectorView: isSelectorView || templatesEnabled,
     customFields,
     isLoading,
     onFilterOptionsChange,
   });
 
-  const activeCustomFieldsConfig = customFieldsFilterConfig.map((customField) => {
-    return {
-      ...customField,
-      isActive: Object.entries(filterOptions.customFields).find(
-        ([key, _]) => key === deflattenCustomFieldKey(customField.key)
-      )
-        ? true
-        : customField.isActive,
-    };
-  });
-
-  const filterConfigs = mergeSystemAndCustomFieldConfigs({
-    systemFilterConfig,
-    customFieldsFilterConfig: activeCustomFieldsConfig,
-  });
-
-  const prevFilterConfigs = usePrevious(filterConfigs) ?? new Map();
-
-  deactivateNonExistingFilters({
-    prevFilterConfigs,
-    currentFilterConfigs: filterConfigs,
+  const { globalToggleFieldsFilterConfig } = useGlobalToggleFieldsFilterConfig({
+    isSelectorView: isSelectorView || !templatesEnabled,
+    globalInlineFields,
+    isLoading,
     onFilterOptionsChange,
   });
+
+  const fieldFilterConfig = templatesEnabled
+    ? globalToggleFieldsFilterConfig
+    : customFieldsFilterConfig;
+
+  const validGlobalToggleFilterLabels = useMemo(
+    () =>
+      new Set(
+        globalInlineFields
+          .filter((field) => field.control === FieldType.TOGGLE)
+          .map((field) => (field.label ?? field.name).toLowerCase())
+      ),
+    [globalInlineFields]
+  );
+
+  const activeFieldFilterConfig = useMemo(
+    () =>
+      fieldFilterConfig.map((fieldFilter) => {
+        if (isFlattenCustomField(fieldFilter.key)) {
+          return {
+            ...fieldFilter,
+            isActive: Object.entries(filterOptions.customFields).find(
+              ([key, _]) => key === deflattenCustomFieldKey(fieldFilter.key)
+            )
+              ? true
+              : fieldFilter.isActive,
+          };
+        }
+
+        if (isFlattenExtendedField(fieldFilter.key)) {
+          const hasValue = (filterOptions.extendedFieldFilters ?? []).some(
+            (entry) => entry.label.toLowerCase() === fieldFilter.label.toLowerCase()
+          );
+          return {
+            ...fieldFilter,
+            isActive: hasValue ? true : fieldFilter.isActive,
+          };
+        }
+
+        return fieldFilter;
+      }),
+    [fieldFilterConfig, filterOptions]
+  );
+
+  const filterConfigs = useMemo(
+    () =>
+      mergeSystemAndFieldConfigs({
+        systemFilterConfig,
+        fieldFilterConfig: activeFieldFilterConfig,
+      }),
+    [activeFieldFilterConfig, systemFilterConfig]
+  );
+
+  const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({
+    filterOptions,
+    filterConfigs,
+  });
+
+  const previousFilterConfigs = usePrevious(filterConfigs);
+
+  useEffect(() => {
+    const cleanupOptions: Array<Partial<FilterOptions>> = [];
+    const nonExistingFiltersCleanup = getNonExistingFiltersCleanup({
+      prevFilterConfigs: previousFilterConfigs ?? new Map(),
+      currentFilterConfigs: filterConfigs,
+      filterOptions,
+    });
+
+    if (nonExistingFiltersCleanup != null) {
+      cleanupOptions.push(nonExistingFiltersCleanup);
+    }
+
+    if (templatesEnabled) {
+      if (hasCustomFieldFilterValues(filterOptions.customFields)) {
+        cleanupOptions.push({
+          customFields: clearCustomFieldFilterValues(filterOptions.customFields),
+        });
+      }
+
+      if (areGlobalFieldsLoaded) {
+        const validExtendedFieldFilters = (filterOptions.extendedFieldFilters ?? []).filter(
+          ({ label, value }) =>
+            validGlobalToggleFilterLabels.has(label.toLowerCase()) &&
+            VALID_TOGGLE_FILTER_VALUES.has(value)
+        );
+
+        if (!isEqual(validExtendedFieldFilters, filterOptions.extendedFieldFilters)) {
+          cleanupOptions.push({ extendedFieldFilters: validExtendedFieldFilters });
+        }
+      }
+    } else if ((filterOptions.extendedFieldFilters ?? []).length > 0) {
+      cleanupOptions.push({ extendedFieldFilters: [] });
+    }
+
+    if (cleanupOptions.length > 0) {
+      onFilterOptionsChange(mergeWith({}, ...cleanupOptions, replaceArrayMerge));
+    }
+  }, [
+    areGlobalFieldsLoaded,
+    filterConfigs,
+    filterOptions,
+    onFilterOptionsChange,
+    previousFilterConfigs,
+    templatesEnabled,
+    validGlobalToggleFilterLabels,
+  ]);
 
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
     const newActiveByFilterKey = [...(activeByFilterKey || [])];
@@ -196,13 +392,14 @@ export const useFilterConfig = ({
       }
     });
 
-    const emptyOptions = deactivatedFilters
+    const deactivatedConfigs = deactivatedFilters
       .filter((key) => filterConfigs.has(key))
-      .map((key) => (filterConfigs.get(key) as FilterConfig).getEmptyOptions());
+      .map((key) => filterConfigs.get(key) as FilterConfig);
+
+    const emptyOptions = deactivatedConfigs.map((config) => config.getEmptyOptions(filterOptions));
 
     if (emptyOptions.length > 0) {
-      const mergedEmptyOptions = merge({}, ...emptyOptions);
-      onFilterOptionsChange(mergedEmptyOptions);
+      onFilterOptionsChange(mergeEmptyOptions({ emptyOptions, deactivatedConfigs, filterOptions }));
     }
 
     setActiveByFilterKey(newActiveByFilterKey);
@@ -223,10 +420,24 @@ export const useFilterConfig = ({
   const source =
     activeByFilterKey && activeByFilterKey.length > 0 ? activeByFilterKey : filterConfigArray;
 
-  const activeFilters = source
-    .filter((filter) => filter.isActive && filterConfigs.has(filter.key))
-    .map((filter) => filterConfigs.get(filter.key)) as FilterConfig[];
+  const activeFiltersByKey = new Map(
+    source
+      .filter((filter) => filter.isActive && filterConfigs.has(filter.key))
+      .map((filter) => [filter.key, filterConfigs.get(filter.key) as FilterConfig])
+  );
 
+  // Deep-linked / URL-driven values must surface as chips even when localStorage already
+  // tracks a different active set (otherwise filters apply with no way to clear them).
+  filterConfigs.forEach((config, key) => {
+    if (activeFiltersByKey.has(key)) {
+      return;
+    }
+    if (filterConfigHasValue({ filterKey: key, filterOptions, filterConfigs })) {
+      activeFiltersByKey.set(key, { ...config, isActive: true });
+    }
+  });
+
+  const activeFilters = Array.from(activeFiltersByKey.values());
   const activeFilterKeys = activeFilters.map((filter) => filter.key);
 
   return {

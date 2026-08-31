@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { AskPndFab } from './pnd_chrome';
 import { getPndDeepLinks } from '../../deep_links';
-import { PND_DEEP_LINK } from './translations';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 
 const renderWithPath = (path: string, ui: React.ReactElement) => {
   const history = createMemoryHistory({ initialEntries: [path] });
@@ -24,13 +24,13 @@ describe('PND chrome', () => {
     const ids = deepLinks.map((link) => link.id);
 
     expect(ids).toEqual([
-      PND_DEEP_LINK.chats,
-      PND_DEEP_LINK.alerts,
-      PND_DEEP_LINK.attacks,
-      PND_DEEP_LINK.records,
-      PND_DEEP_LINK.threatHunt,
-      PND_DEEP_LINK.streams,
-      PND_DEEP_LINK.watches,
+      SecurityPageName.pndChats,
+      SecurityPageName.alerts,
+      SecurityPageName.attacks,
+      SecurityPageName.pndRecords,
+      SecurityPageName.pndThreatHunt,
+      SecurityPageName.pndStreams,
+      SecurityPageName.pndWatches,
     ]);
     expect(ids).not.toContain('discover');
     expect(ids).not.toContain('dashboards');

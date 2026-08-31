@@ -9,7 +9,11 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ExecutionHistorySearchBar, type RuleOption } from './execution_history_search_bar';
+import {
+  ExecutionHistorySearchBar,
+  type PolicyOutcomeFilter,
+  type RuleOption,
+} from './execution_history_search_bar';
 
 const mockUseFetchRules = jest.fn();
 
@@ -55,7 +59,7 @@ const setup = (
     ruleFilters: RuleOption[];
     onRuleFiltersChange: (rules: RuleOption[]) => void;
     onSearchChange: (value: string) => void;
-    onOutcomeChange: (value: 'all' | 'dispatched' | 'throttled') => void;
+    onOutcomeChange: (value: PolicyOutcomeFilter) => void;
   }> = {}
 ) => {
   const onRuleFiltersChange = overrides.onRuleFiltersChange ?? jest.fn();

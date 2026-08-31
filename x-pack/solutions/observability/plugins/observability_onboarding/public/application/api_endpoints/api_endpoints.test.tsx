@@ -109,6 +109,26 @@ describe('ApiEndpoints', () => {
     } as unknown as ReturnType<typeof useKibana>);
   });
 
+  it('renders the section title as an h3 by default, for the V1 page', () => {
+    renderApiEndpoints();
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Connect directly to the endpoint' })
+    ).toBeInTheDocument();
+  });
+
+  it('renders the section title as an h2 when titleTag="h2" is passed, for the V2 page', () => {
+    render(
+      <I18nProvider>
+        <ApiEndpoints titleTag="h2" />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Connect directly to the endpoint' })
+    ).toBeInTheDocument();
+  });
+
   it('describes managed inputs and links to managed inputs documentation', () => {
     const { container } = renderApiEndpoints();
     const learnMoreLink = container.querySelector(
@@ -205,7 +225,7 @@ describe('ApiEndpoints', () => {
               cardTitle: 'Supabase',
               fieldLabel: 'Supabase logs endpoint',
               logo: 'supabase' as const,
-              url: 'https://otlp.example.com:443/supabase/v1/logs',
+              url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
             },
           ],
         },
@@ -246,14 +266,14 @@ describe('ApiEndpoints', () => {
               cardTitle: 'Supabase',
               fieldLabel: 'Supabase logs endpoint',
               logo: 'supabase' as const,
-              url: 'https://otlp.example.com:443/supabase/v1/logs',
+              url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
             },
             {
               id: ApiEndpointId.Vercel,
               cardTitle: 'Vercel',
               fieldLabel: 'Vercel endpoint',
               logo: 'vercel_black' as const,
-              url: 'https://otlp.example.com:443/vercel',
+              url: 'https://otlp.example.com:443/inputs/vercel/_default_',
             },
           ],
         },
@@ -261,7 +281,7 @@ describe('ApiEndpoints', () => {
           id: ApiEndpointId.Prometheus,
           label: 'Prometheus',
           logo: 'prometheus',
-          url: 'https://otlp.example.com:443/api/v1/write',
+          url: 'https://otlp.example.com:443/inputs/prometheus-remote-write/_default_/api/v1/write',
           usesManagedInput: true,
           additionalEndpoints: [],
         },
@@ -306,14 +326,14 @@ describe('ApiEndpoints', () => {
           cardTitle: 'Supabase',
           fieldLabel: 'Supabase logs endpoint',
           logo: 'supabase' as const,
-          url: 'https://otlp.example.com:443/supabase/v1/logs',
+          url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
         },
         {
           id: ApiEndpointId.Vercel,
           cardTitle: 'Vercel',
           fieldLabel: 'Vercel endpoint',
           logo: 'vercel_black' as const,
-          url: 'https://otlp.example.com:443/vercel',
+          url: 'https://otlp.example.com:443/inputs/vercel/_default_',
         },
       ],
       isLoading: false,

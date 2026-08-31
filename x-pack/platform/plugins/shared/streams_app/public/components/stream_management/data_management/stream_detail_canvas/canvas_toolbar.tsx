@@ -140,7 +140,7 @@ export function CanvasToolbar({ onUndo, onRedo, canUndo, canRedo }: CanvasToolba
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <ToolButton
-            iconType="editorUndo"
+            iconType="undo"
             dataTestSubj="streamsCanvasUndo"
             label={i18n.translate('xpack.streams.canvas.toolbar.undo', {
               defaultMessage: 'Undo',
@@ -151,7 +151,7 @@ export function CanvasToolbar({ onUndo, onRedo, canUndo, canRedo }: CanvasToolba
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToolButton
-            iconType="editorRedo"
+            iconType="redo"
             dataTestSubj="streamsCanvasRedo"
             label={i18n.translate('xpack.streams.canvas.toolbar.redo', {
               defaultMessage: 'Redo',

@@ -35,7 +35,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import type { StreamQueryStats } from '../../../../hooks/use_fetch_query_occurrence_stats';
@@ -50,7 +50,6 @@ import {
   OPEN_IN_DISCOVER_ACTION_TITLE,
 } from './translations';
 import { AssetImage } from '../../../../components/asset_image';
-import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 
 interface QueryDetailsFlyoutProps {
@@ -82,28 +81,15 @@ export function QueryDetailsFlyout({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  useEffect(() => {
-    setIsActionsPopoverOpen(false);
-    setIsDeleteModalVisible(false);
-  }, [item.query.id]);
-
   const queryType = item.query.type ?? QUERY_TYPE_MATCH;
   const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;
 
   const generalInfoItems = [
     {
-      title: TYPE_LABEL,
-      description: <QueryTypeBadge type={queryType} />,
-    },
-    {
       title: DESCRIPTION_LABEL,
       description: (
         <EuiText size="s">{item.query.description || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
       ),
-    },
-    {
-      title: SEVERITY_DETAILS_LABEL,
-      description: <SeverityBadge score={item.query.severity_score} />,
     },
   ];
 
@@ -117,7 +103,6 @@ export function QueryDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        {/* First header: minimal toolbar with actions and close */}
         <FlyoutToolbarHeader>
           <EuiFlexItem grow={false}>
             <EuiPopover
@@ -169,7 +154,6 @@ export function QueryDetailsFlyout({
           </EuiFlexItem>
         </FlyoutToolbarHeader>
 
-        {/* Second header: title and metadata cards */}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id={flyoutTitleId}>{item.query.title}</h2>

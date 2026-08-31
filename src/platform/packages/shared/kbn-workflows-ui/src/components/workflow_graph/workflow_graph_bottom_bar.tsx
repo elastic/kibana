@@ -116,7 +116,7 @@ function ViewToggle({
     },
     {
       id: 'yaml',
-      iconType: 'editorCodeBlock',
+      iconType: 'code',
       label: i18n.translate('workflowsUi.bottomBar.editorViewYaml', { defaultMessage: 'YAML' }),
     },
   ];

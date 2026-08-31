@@ -42,4 +42,24 @@ describe('assertConfig', () => {
       })
     ).toThrow('onCompare must be a function when provided');
   });
+
+  it('rejects paired comparisons that cannot attempt every requested pair', () => {
+    expect(() =>
+      assertConfig({
+        name: 'memory-check',
+        comparisonRun: {
+          mode: 'paired',
+          pairs: 8,
+          maxAttempts: 7,
+        },
+        benchmarks: [
+          {
+            kind: 'module',
+            name: 'warm-start',
+            module: './warm_start.js',
+          },
+        ],
+      })
+    ).toThrow('maxAttempts must be greater than or equal to pairs');
+  });
 });

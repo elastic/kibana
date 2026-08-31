@@ -24,7 +24,6 @@ import {
 } from '../../utils';
 import {
   dataGeneratorFactory,
-  forceStartDatafeeds,
   indexDocuments,
   setupMlModulesWithRetry,
 } from '../../../detections_response/utils';
@@ -91,7 +90,6 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   const siemModule = 'security_linux_v3';
-  const mlJobId = 'v3_linux_anomalous_network_activity_ea';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -162,14 +160,14 @@ export default function ({ getService }: FtrProviderContext) {
         log,
       });
 
-      // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
-      // as the job looks for certain indices on start
+      // Order is critical here: auditbeat data must be loaded before setting up the ML job,
+      // as the job looks for certain indices on setup
       await kibanaServer.uiSettings.update({
         [DEFAULT_ANOMALY_SCORE]: 1,
       });
       await esArchiver.load(auditPath);
       await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
-      await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
+      // Intentionally don't start the datafeed: a live datafeed re-analyzes the auditbeat data and overwrites the canned anomaly records this suite asserts on (the query reads .ml-anomalies-* by job id, so a running job isn't needed).
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
       );
@@ -309,7 +307,8 @@ export default function ({ getService }: FtrProviderContext) {
           MEDIUM: 0,
           NONE: 0,
         },
-        anomalies: [],
+        // anomalies is null when there are no ML findings
+        anomalies: null,
       });
       expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain(

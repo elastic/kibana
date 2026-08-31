@@ -10,21 +10,34 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import type { RawRuleTemplate } from '../../../types';
+import type { AlertingV1RawRuleTemplate } from '../../../saved_objects/schemas/raw_rule_template';
+import {
+  buildAlertingV1RuleTemplateEngineFilter,
+  combineFilters,
+} from '../../../rules_client/common/filters';
 
 export interface FindRuleTemplatesSoParams {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsFindOptions: Omit<SavedObjectsFindOptions, 'type'>;
 }
 
+/**
+ * Finds Fleet / alerting v1 rule templates only (`engine: "v1"` or unset).
+ */
 export const findRuleTemplatesSo = (
   params: FindRuleTemplatesSoParams
-): Promise<SavedObjectsFindResponse<RawRuleTemplate>> => {
+): Promise<SavedObjectsFindResponse<AlertingV1RawRuleTemplate>> => {
   const { savedObjectsClient, savedObjectsFindOptions } = params;
+  const filter = combineFilters([
+    savedObjectsFindOptions.filter as KueryNode | undefined,
+    buildAlertingV1RuleTemplateEngineFilter(),
+  ]);
 
-  return savedObjectsClient.find<RawRuleTemplate>({
+  return savedObjectsClient.find<AlertingV1RawRuleTemplate>({
     ...savedObjectsFindOptions,
+    filter,
     type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   });
 };

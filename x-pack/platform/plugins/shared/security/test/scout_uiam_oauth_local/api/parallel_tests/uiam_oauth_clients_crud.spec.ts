@@ -42,7 +42,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'creates, reads, lists, patches (incl. redirect_uris), and revokes a client',
+      'creates, reads, lists, patches (incl. redirect_uris), and deletes a client',
       async ({ apiClient }) => {
         const clientName = `scout-crud-${Date.now()}`;
         const initialRedirectUri = 'https://example.com/callback';
@@ -113,14 +113,28 @@ apiTest.describe(
             expect(patchedUris).toContain(initialRedirectUri);
             expect(patchedUris).toContain(secondRedirectUri);
           });
+
+          await apiTest.step('delete client', async () => {
+            const deleteResponse = await apiClient.delete(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders }
+            );
+            expect(deleteResponse.statusCode).toBe(204);
+
+            const getResponse = await apiClient.get(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders, responseType: 'json' }
+            );
+            expect(getResponse.statusCode).toBe(404);
+
+            clientId = undefined;
+          });
         } finally {
-          // Best-effort cleanup (only if the client was successfully created above).
+          // Best-effort cleanup for a client that was created but not reached by the delete step.
           // eslint-disable-next-line playwright/no-conditional-in-test
           if (clientId) {
-            await apiClient.post(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`, {
+            await apiClient.delete(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}`, {
               headers: authHeaders,
-              responseType: 'json',
-              body: { reason: 'scout cleanup' },
             });
           }
         }

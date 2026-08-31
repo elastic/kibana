@@ -23,7 +23,7 @@ export function FlappingBadge() {
   const button = (
     <EuiBadge
       color="hollow"
-      iconType="visGauge"
+      iconType="chartGauge"
       iconSide="left"
       tabIndex={0}
       onClick={() => setIsOpen((open) => !open)}

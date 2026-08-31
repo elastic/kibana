@@ -27,6 +27,7 @@ import {
   EuiTextArea,
   EuiTextColor,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -50,7 +51,6 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
-import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
@@ -81,8 +81,7 @@ export function SettingsTab() {
   // settings routes used by `core.settings.client`/`globalClient` (require
   // `advancedSettings.save`). Gate the whole form on both so the user never
   // triggers a partial save that 403s halfway through.
-  const { ui: streamsUiPrivileges } = useSignificantEventsPrivileges();
-  const canManageStreams = streamsUiPrivileges.manage;
+  const canManageStreams = core.application.capabilities.streams?.manage === true;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
@@ -143,11 +142,9 @@ export function SettingsTab() {
     enabledFromStatus: maintenanceStatus?.featureSettings?.scheduledDiscoveryEnabled,
   });
 
-  // Any dirty continuous/scheduled change is blocked while paused (server 409).
-  // Disable while status is loading too; pause tooltip copy only when actually paused.
+  // Dirty continuous/scheduled changes are blocked while paused (server 409).
   const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
-  const showPausedSaveTooltip = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -173,6 +170,7 @@ export function SettingsTab() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
+  const zeroMatchConfirmModalTitleId = useGeneratedHtmlId({ prefix: 'zeroMatchConfirmModalTitle' });
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
@@ -372,7 +370,7 @@ export function SettingsTab() {
                           'xpack.significantEventsApp.settings.scheduledDiscoveryHelp',
                           {
                             defaultMessage:
-                              'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
+                              'When enabled, Significant Events detection and discovery run automatically in the current Kibana space.',
                           }
                         )}
                   </EuiText>
@@ -466,7 +464,7 @@ export function SettingsTab() {
                       )}
                       helpText={i18n.translate(
                         'xpack.significantEventsApp.settings.reviewIntervalHelp',
-                        { defaultMessage: 'How often scheduled discovery and triage review runs.' }
+                        { defaultMessage: 'How often scheduled discovery review runs.' }
                       )}
                     >
                       <EuiFieldNumber
@@ -519,44 +517,13 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.significantEventsApp.settings.triageBatchSizeLabel',
-                        { defaultMessage: 'Triage batch size' }
-                      )}
-                      helpText={i18n.translate(
-                        'xpack.significantEventsApp.settings.triageBatchSizeHelp',
-                        {
-                          defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-triage-batch-size"
-                        value={scheduledDiscovery.draft.triageBatchSize}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            triageBatchSize: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                      />
-                    </EuiFormRow>
-                    <EuiFormRow
-                      label={i18n.translate(
                         'xpack.significantEventsApp.settings.maxReviewPassesLabel',
                         { defaultMessage: 'Review passes' }
                       )}
                       helpText={i18n.translate(
                         'xpack.significantEventsApp.settings.maxReviewPassesHelp',
                         {
-                          defaultMessage:
-                            'Maximum discovery and triage pass pairs per scheduled review run.',
+                          defaultMessage: 'Maximum discovery passes per scheduled review run.',
                         }
                       )}
                     >
@@ -870,10 +837,12 @@ export function SettingsTab() {
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
+          aria-labelledby={zeroMatchConfirmModalTitleId}
           data-test-subj="streams-settings-zero-match-confirm"
           title={i18n.translate('xpack.significantEventsApp.settings.zeroMatchConfirmTitle', {
             defaultMessage: 'No streams match these patterns',
           })}
+          titleProps={{ id: zeroMatchConfirmModalTitleId }}
           onCancel={() => setIsConfirmingZeroMatch(false)}
           onConfirm={handleConfirmZeroMatch}
           cancelButtonText={i18n.translate(
@@ -914,7 +883,7 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={showPausedSaveTooltip ? activityBlockTooltip : undefined}>
+                  <EuiToolTip content={saveBlockedByPause ? activityBlockTooltip : undefined}>
                     <EuiButton
                       data-test-subj="streams-settings-save-button"
                       color="primary"
