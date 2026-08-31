@@ -174,6 +174,17 @@ TemplateFieldRow.displayName = 'TemplateFieldRow';
 
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
+  /**
+   * Additional fields from a sibling renderer whose values should be visible to this renderer's
+   * condition evaluator. Used in `CreateCaseTemplateFields` to let each section's `show_when` /
+   * `required_when` conditions reference fields rendered by the other section — for example, a
+   * global field referenced via `$ref` in the template can have a `show_when` that references
+   * another global field still rendered in the global section, and vice versa.
+   *
+   * Display-only fields and fields whose names already appear in `resolvedFields` are silently
+   * ignored (they hold no form value / would duplicate a watch path).
+   */
+  conditionContextFields?: InlineField[];
   onFieldConfirm?: (fieldName: string, fieldType: string, onPersisted?: () => void) => void;
   savingFieldKey?: string;
   /** Renders read-only values with an explicit per-field Edit control. */
@@ -186,6 +197,7 @@ export const FieldsRenderer: FC<{
   onSectionEditRequest?: () => void;
 }> = ({
   resolvedFields,
+  conditionContextFields,
   onFieldConfirm,
   savingFieldKey,
   viewMode = false,
@@ -200,26 +212,39 @@ export const FieldsRenderer: FC<{
   const isSectionMode = onSectionEditRequest != null;
   const dirtyFieldKeys = (dirtyFields?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<string, boolean>;
 
+  // Combine own fields with context fields for condition evaluation. Context fields are
+  // deduplicated against own fields (by name) and display-only fields are excluded since
+  // they hold no form value and can't meaningfully serve as condition controllers.
+  const allConditionFields = useMemo(() => {
+    if (!conditionContextFields?.length) return resolvedFields;
+    const ownNames = new Set(resolvedFields.map((f) => f.name));
+    const uniqueContext = conditionContextFields.filter(
+      (f) => !isDisplayOnlyField(f) && !ownNames.has(f.name)
+    );
+    return uniqueContext.length ? [...resolvedFields, ...uniqueContext] : resolvedFields;
+  }, [resolvedFields, conditionContextFields]);
+
   const fieldTypeMap = useMemo(
-    () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.type])),
-    [resolvedFields]
+    () => Object.fromEntries(allConditionFields.map((f) => [f.name, f.type])),
+    [allConditionFields]
   );
 
   const fieldControlMap = useMemo(
-    () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.control])),
-    [resolvedFields]
+    () => Object.fromEntries(allConditionFields.map((f) => [f.name, f.control])),
+    [allConditionFields]
   );
 
   const allFieldPaths = useMemo(
-    () => resolvedFields.map((f) => `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(f.name, f.type)}`),
-    [resolvedFields]
+    () =>
+      allConditionFields.map((f) => `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(f.name, f.type)}`),
+    [allConditionFields]
   );
 
   const watchedValues = useWatch({ control, name: allFieldPaths });
 
   const fieldValues = useMemo(() => {
-    return Object.fromEntries(resolvedFields.map((f, i) => [f.name, watchedValues?.[i]]));
-  }, [watchedValues, resolvedFields]);
+    return Object.fromEntries(allConditionFields.map((f, i) => [f.name, watchedValues?.[i]]));
+  }, [watchedValues, allConditionFields]);
 
   return (
     <>

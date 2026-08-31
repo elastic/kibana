@@ -10,6 +10,10 @@ import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
 
+/** Locator for the metric trendline sparkline, scoped to the metric visualization. */
+export const getMetricTrendline = (page: ScoutPage): Locator =>
+  page.locator('[data-test-subj="mtrVis"] .echSingleMetricSparkline');
+
 export async function openDimensionEditorAndWaitForFlyout(
   { lens }: DashboardAndLens,
   page: ScoutPage,
