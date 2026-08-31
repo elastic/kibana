@@ -27,7 +27,7 @@ export const sortMatchedActionPolicies = (
     if (categoryDiff !== 0) {
       return categoryDiff;
     }
-    return a.actionPolicy.name.localeCompare(b.actionPolicy.name);
+    return a.actionPolicy.name.localeCompare(b.actionPolicy.name, 'en');
   });
 
 export interface UseLinkedActionPoliciesResult {

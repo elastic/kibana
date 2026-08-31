@@ -15,6 +15,7 @@ import type {
   ActionPolicyResponse,
   FindActionPoliciesRequest,
   FindActionPoliciesResponse,
+  MatchActionPoliciesForRuleResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
@@ -56,6 +57,13 @@ export class ActionPoliciesApi {
         sort_order: params.sort_order,
       },
     });
+  }
+
+  public async matchActionPoliciesForRule(ruleId: string) {
+    return this.http.post<MatchActionPoliciesForRuleResponse>(
+      `${ALERTING_V2_ACTION_POLICY_API_PATH}/_match_for_rule`,
+      { body: JSON.stringify({ rule: { id: ruleId } }) }
+    );
   }
 
   public async createActionPolicy(data: CreateActionPolicyData) {

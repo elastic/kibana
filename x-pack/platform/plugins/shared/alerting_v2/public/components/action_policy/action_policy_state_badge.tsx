@@ -13,11 +13,16 @@ import React from 'react';
 interface ActionPolicyStateBadgeProps {
   policy: ActionPolicyResponse;
   isLoading: boolean;
+  'data-test-subj'?: string;
 }
 
-export const ActionPolicyStateBadge = ({ policy, isLoading }: ActionPolicyStateBadgeProps) => {
+export const ActionPolicyStateBadge = ({
+  policy,
+  isLoading,
+  'data-test-subj': dataTestSubj,
+}: ActionPolicyStateBadgeProps) => {
   return (
-    <EuiBadge color={policy.enabled ? 'success' : 'default'}>
+    <EuiBadge color={policy.enabled ? 'success' : 'default'} data-test-subj={dataTestSubj}>
       {policy.enabled
         ? i18n.translate('xpack.alertingV2.actionPolicy.stateBadge.enabled', {
             defaultMessage: 'Enabled',

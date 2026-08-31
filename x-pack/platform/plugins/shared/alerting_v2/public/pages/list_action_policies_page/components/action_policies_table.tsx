@@ -7,10 +7,11 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
@@ -20,7 +21,12 @@ import {
   type ActionPolicyCreateOption,
 } from '../../../components/action_policy/create_options/action_policy_create_options_panel';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
-import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT, paths } from '../../../constants';
+import {
+  ACTION_POLICY_LIST_RULE_ID_PARAM,
+  CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
+  paths,
+  readActionPolicyListRuleId,
+} from '../../../constants';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../../hooks/use_delete_action_policy';
@@ -92,6 +98,9 @@ export const ActionPoliciesTable = () => {
 
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const location = useLocation();
+  const history = useHistory();
+  const matchingRuleId = readActionPolicyListRuleId(location.search);
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
   const navigateToAgentBuilder = useNavigateToAgentBuilder(
     CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT
@@ -181,7 +190,14 @@ export const ActionPoliciesTable = () => {
     [createActionPolicy]
   );
 
-  const dataSource = useActionPoliciesDataSource();
+  const dataSource = useActionPoliciesDataSource(matchingRuleId);
+
+  const clearMatchingRuleFilter = useCallback(() => {
+    const params = new URLSearchParams(location.search);
+    params.delete(ACTION_POLICY_LIST_RULE_ID_PARAM);
+    const nextSearch = params.toString();
+    history.replace({ search: nextSearch ? `?${nextSearch}` : '' });
+  }, [history, location.search]);
 
   const itemConfig = useMemo(() => ({}), []);
 
@@ -284,6 +300,33 @@ export const ActionPoliciesTable = () => {
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
+        {matchingRuleId ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              iconType="filter"
+              data-test-subj="actionPoliciesMatchingRuleFilterCallout"
+              title={i18n.translate(
+                'xpack.alertingV2.actionPoliciesList.matchingRuleFilterCalloutTitle',
+                { defaultMessage: 'Showing action policies that match this rule' }
+              )}
+            >
+              <EuiButtonEmpty
+                flush="left"
+                size="s"
+                onClick={clearMatchingRuleFilter}
+                data-test-subj="actionPoliciesMatchingRuleFilterClear"
+              >
+                {i18n.translate(
+                  'xpack.alertingV2.actionPoliciesList.matchingRuleFilterClearButton',
+                  { defaultMessage: 'View all action policies' }
+                )}
+              </EuiButtonEmpty>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent
             canWrite={canWrite}

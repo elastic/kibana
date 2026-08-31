@@ -194,9 +194,9 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   ...overrides,
 });
 
-const renderTable = () =>
+const renderTable = (initialEntries?: string[]) =>
   render(
-    <ListPageTestProviders>
+    <ListPageTestProviders initialEntries={initialEntries}>
       <ActionPoliciesTable />
     </ListPageTestProviders>
   );
@@ -242,6 +242,26 @@ describe('ActionPoliciesTable', () => {
       )
     );
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.queryByTestId('actionPoliciesMatchingRuleFilterCallout')).not.toBeInTheDocument();
+  });
+
+  it('shows a matching-rule filter when the URL includes ruleId', async () => {
+    const user = userEvent.setup();
+    renderTable(['/?ruleId=rule-1']);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('actionPoliciesMatchingRuleFilterCallout')).toHaveTextContent(
+        'Showing action policies that match this rule'
+      )
+    );
+
+    await user.click(screen.getByTestId('actionPoliciesMatchingRuleFilterClear'));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId('actionPoliciesMatchingRuleFilterCallout')
+      ).not.toBeInTheDocument()
+    );
   });
 
   it('renders the create button when policies exist and the user can write', async () => {

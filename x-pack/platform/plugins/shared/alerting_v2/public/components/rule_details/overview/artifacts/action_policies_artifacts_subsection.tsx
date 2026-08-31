@@ -37,22 +37,22 @@ import {
 export const LINKED_ACTION_POLICIES_VISIBLE_LIMIT = 8;
 
 const openLinkLabel = i18n.translate(
-  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.openLink',
-  { defaultMessage: 'Open notification policies' }
+  'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.openLink',
+  { defaultMessage: 'Open action policies' }
 );
 
 const catchAllBadgeLabel = i18n.translate(
-  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.catchAllBadgeLabel',
+  'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.catchAllBadgeLabel',
   { defaultMessage: 'Catch-all' }
 );
 
 const matchingCriteriaBadgeLabel = i18n.translate(
-  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.matchingCriteriaBadgeLabel',
+  'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.matchingCriteriaBadgeLabel',
   { defaultMessage: 'Matching criteria' }
 );
 
 const snoozedBadgeLabel = i18n.translate(
-  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.snoozedBadgeLabel',
+  'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.snoozedBadgeLabel',
   { defaultMessage: 'Snoozed' }
 );
 
@@ -66,8 +66,8 @@ const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <strong>
-              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.title', {
-                defaultMessage: 'Notification policies',
+              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.title', {
+                defaultMessage: 'Action policies',
               })}
             </strong>
           </EuiText>
@@ -118,8 +118,8 @@ const PolicyRowActions = ({
   editHref: string;
 }) => {
   const editAriaLabel = i18n.translate(
-    'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.editPolicyAriaLabel',
-    { defaultMessage: 'Open {name} in notification policies', values: { name: policy.name } }
+    'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.editPolicyAriaLabel',
+    { defaultMessage: 'Open {name} in action policies', values: { name: policy.name } }
   );
 
   return (
@@ -148,7 +148,7 @@ const PolicyArtifactRow = ({
 }) => {
   const { actionPolicy, category } = item;
   const viewAriaLabel = i18n.translate(
-    'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.viewPolicyAriaLabel',
+    'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.viewPolicyAriaLabel',
     { defaultMessage: 'View details for {name}', values: { name: actionPolicy.name } }
   );
 
@@ -179,11 +179,12 @@ const PolicyArtifactRow = ({
               <PolicyCategoryBadge category={category} policyId={actionPolicy.id} />
             </EuiFlexItem>
             {!actionPolicy.enabled ? (
-              <EuiFlexItem
-                grow={false}
-                data-test-subj={`ruleActionPolicyArtifactDisabledBadge-${actionPolicy.id}`}
-              >
-                <ActionPolicyStateBadge policy={actionPolicy} isLoading={false} />
+              <EuiFlexItem grow={false}>
+                <ActionPolicyStateBadge
+                  policy={actionPolicy}
+                  isLoading={false}
+                  data-test-subj={`ruleActionPolicyArtifactDisabledBadge-${actionPolicy.id}`}
+                />
               </EuiFlexItem>
             ) : null}
             {isSnoozed(actionPolicy.snoozed_until) ? (
@@ -235,52 +236,64 @@ const ArtifactsSubsectionBody = ({
         data-test-subj="ruleActionPoliciesArtifactsError"
         title={
           <h4>
-            {i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.errorTitle',
-              {
-                defaultMessage: 'Could not load notification policies',
-              }
-            )}
+            {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.errorTitle', {
+              defaultMessage: 'Could not load action policies',
+            })}
           </h4>
         }
         body={
           <EuiText size="s">
-            {i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.errorBody',
-              {
-                defaultMessage: 'Try refreshing the page.',
-              }
-            )}
+            {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.errorBody', {
+              defaultMessage: 'Try refreshing the page.',
+            })}
           </EuiText>
         }
       />
     );
   }
 
+  const truncatedHint = isMatchTruncated ? (
+    <>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" data-test-subj="ruleActionPoliciesArtifactsTruncatedHint">
+        {i18n.translate(
+          'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.truncatedCountHint',
+          {
+            defaultMessage:
+              'This space has more than {fetchLimit} action policies, so this list may be incomplete.',
+            values: { fetchLimit: LINKED_ACTION_POLICIES_FETCH_LIMIT },
+          }
+        )}
+      </EuiText>
+    </>
+  ) : null;
+
   if (items.length === 0) {
     return (
-      <EuiEmptyPrompt
-        iconType="reporter"
-        data-test-subj="ruleActionPoliciesArtifactsEmpty"
-        title={
-          <h4>
-            {i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.emptyTitle',
-              { defaultMessage: 'No matching notification policies' }
-            )}
-          </h4>
-        }
-        body={
-          <EuiText size="s">
-            {i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.emptyDescription',
-              {
-                defaultMessage: 'No notification policies currently match this rule.',
-              }
-            )}
-          </EuiText>
-        }
-      />
+      <>
+        <EuiEmptyPrompt
+          iconType="reporter"
+          data-test-subj="ruleActionPoliciesArtifactsEmpty"
+          title={
+            <h4>
+              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.emptyTitle', {
+                defaultMessage: 'No matching action policies',
+              })}
+            </h4>
+          }
+          body={
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.emptyDescription',
+                {
+                  defaultMessage: 'No action policies currently match this rule.',
+                }
+              )}
+            </EuiText>
+          }
+        />
+        {truncatedHint}
+      </>
     );
   }
 
@@ -312,10 +325,10 @@ const ArtifactsSubsectionBody = ({
               data-test-subj="ruleActionPoliciesArtifactsViewMoreLink"
             >
               {i18n.translate(
-                'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.viewMoreLinkText',
+                'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.viewMoreLinkText',
                 {
                   defaultMessage:
-                    '{hiddenCount, plural, one {# more matching policy} other {# more matching policies}}',
+                    '{hiddenCount, plural, one {# more action policy} other {# more action policies}}',
                   values: { hiddenCount },
                 }
               )}
@@ -324,25 +337,7 @@ const ArtifactsSubsectionBody = ({
         </>
       ) : null}
 
-      {isMatchTruncated ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText
-            size="s"
-            color="subdued"
-            data-test-subj="ruleActionPoliciesArtifactsTruncatedHint"
-          >
-            {i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.truncatedCountHint',
-              {
-                defaultMessage:
-                  'This space has more than {fetchLimit} action policies, so this list may be incomplete.',
-                values: { fetchLimit: LINKED_ACTION_POLICIES_FETCH_LIMIT },
-              }
-            )}
-          </EuiText>
-        </>
-      ) : null}
+      {truncatedHint}
     </>
   );
 };
@@ -353,7 +348,9 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const { items, isMatchTruncated, isLoading, isError } = useLinkedActionPolicies(rule.id);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
 
-  const openNotificationPoliciesHref = http.basePath.prepend(paths.actionPolicyList);
+  const openActionPoliciesHref = http.basePath.prepend(paths.actionPolicyList);
+  const viewMoreHref = http.basePath.prepend(paths.actionPolicyListHref({ ruleId: rule.id }));
+  const prepend = useCallback((path: string) => http.basePath.prepend(path), [http.basePath]);
 
   const handleOpenPolicy = useCallback((policyId: string) => {
     setPolicyToViewId(policyId);
@@ -366,15 +363,15 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   return (
     <>
       <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleActionPoliciesArtifactsSection">
-        <ActionPoliciesSubsectionHeader openHref={openNotificationPoliciesHref} />
+        <ActionPoliciesSubsectionHeader openHref={openActionPoliciesHref} />
         <EuiSpacer size="m" />
         <ArtifactsSubsectionBody
           items={items}
           isMatchTruncated={isMatchTruncated}
           isLoading={isLoading}
           isError={isError}
-          openHref={openNotificationPoliciesHref}
-          prepend={http.basePath.prepend.bind(http.basePath)}
+          openHref={viewMoreHref}
+          prepend={prepend}
           onOpen={handleOpenPolicy}
         />
       </EuiPanel>

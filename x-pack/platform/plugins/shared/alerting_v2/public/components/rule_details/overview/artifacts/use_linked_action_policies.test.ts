@@ -69,6 +69,21 @@ describe('sortMatchedActionPolicies', () => {
       'catch-z',
     ]);
   });
+
+  it('compares names with a fixed English locale', () => {
+    const localeCompare = jest.spyOn(String.prototype, 'localeCompare');
+
+    try {
+      sortMatchedActionPolicies([
+        buildItem('global', { id: 'b', name: 'Beta' }),
+        buildItem('global', { id: 'a', name: 'Alpha' }),
+      ]);
+
+      expect(localeCompare.mock.calls.some((call) => call[1] === 'en')).toBe(true);
+    } finally {
+      localeCompare.mockRestore();
+    }
+  });
 });
 
 describe('useLinkedActionPolicies', () => {

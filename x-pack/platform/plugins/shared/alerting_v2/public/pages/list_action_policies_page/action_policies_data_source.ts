@@ -69,7 +69,87 @@ const toContentListItem = (policy: ActionPolicyResponse): ActionPolicyContentLis
   policy,
 });
 
-export const useActionPoliciesDataSource = (): DataSourceConfig => {
+const comparePolicies = (
+  a: ActionPolicyResponse,
+  b: ActionPolicyResponse,
+  sortField: string | undefined,
+  sortOrder: 'asc' | 'desc' | undefined
+): number => {
+  const direction = sortOrder === 'desc' ? -1 : 1;
+  if (sortField === 'updated_at') {
+    return direction * a.updated_at.localeCompare(b.updated_at);
+  }
+  if (sortField === 'created_at') {
+    return direction * a.created_at.localeCompare(b.created_at);
+  }
+  return direction * a.name.localeCompare(b.name, 'en');
+};
+
+/** Client-side search / filter / sort / page over matched policies for a rule. */
+export const pageMatchedActionPolicies = (
+  policies: readonly ActionPolicyResponse[],
+  {
+    search,
+    tags,
+    enabled,
+    sortField,
+    sortOrder,
+    pageIndex,
+    pageSize,
+  }: {
+    search?: string;
+    tags?: string[];
+    enabled?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+    pageIndex: number;
+    pageSize: number;
+  }
+): { items: ActionPolicyContentListItem[]; total: number } => {
+  const searchTerm = search?.trim().toLowerCase();
+  const filtered = policies.filter((policy) => {
+    if (searchTerm) {
+      const haystack = `${policy.name} ${policy.description ?? ''}`.toLowerCase();
+      if (!haystack.includes(searchTerm)) {
+        return false;
+      }
+    }
+    if (tags && tags.length > 0) {
+      const policyTags = policy.tags ?? [];
+      if (!tags.some((tag) => policyTags.includes(tag))) {
+        return false;
+      }
+    }
+    if (enabled !== undefined && policy.enabled !== enabled) {
+      return false;
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => comparePolicies(a, b, sortField, sortOrder));
+  const start = pageIndex * pageSize;
+  return {
+    items: sorted.slice(start, start + pageSize).map(toContentListItem),
+    total: sorted.length,
+  };
+};
+
+const parseEnabledFilter = (
+  enabledFilter: IncludeExcludeFilter | undefined
+): boolean | undefined => {
+  if (enabledFilter?.include?.length !== 1) {
+    return undefined;
+  }
+  if (enabledFilter.include[0] === 'enabled') {
+    return true;
+  }
+  if (enabledFilter.include[0] === 'disabled') {
+    return false;
+  }
+  return undefined;
+};
+
+export const useActionPoliciesDataSource = (ruleId?: string): DataSourceConfig => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const { toasts } = useService(CoreStart('notifications'));
 
@@ -77,14 +157,25 @@ export const useActionPoliciesDataSource = (): DataSourceConfig => {
     async ({ searchQuery, filters, sort, page }) => {
       const tagFilter = filters[TAG_FILTER_ID] as IncludeExcludeFilter | undefined;
       const enabledFilter = filters[ENABLED_FILTER_ID] as IncludeExcludeFilter | undefined;
-
-      let enabled: boolean | undefined;
-      if (enabledFilter?.include?.length === 1) {
-        if (enabledFilter.include[0] === 'enabled') enabled = true;
-        else if (enabledFilter.include[0] === 'disabled') enabled = false;
-      }
+      const enabled = parseEnabledFilter(enabledFilter);
 
       try {
+        if (ruleId) {
+          const matched = await actionPoliciesApi.matchActionPoliciesForRule(ruleId);
+          return pageMatchedActionPolicies(
+            matched.items.map((item) => item.actionPolicy),
+            {
+              search: searchQuery || undefined,
+              tags: tagFilter?.include,
+              enabled,
+              sortField: sort?.field,
+              sortOrder: sort?.direction,
+              pageIndex: page.index,
+              pageSize: page.size,
+            }
+          );
+        }
+
         const response = await actionPoliciesApi.listActionPolicies(
           toFindActionPoliciesRequest({
             page: page.index + 1,
@@ -110,7 +201,7 @@ export const useActionPoliciesDataSource = (): DataSourceConfig => {
         return { items: [], total: 0 };
       }
     },
-    [actionPoliciesApi, toasts]
+    [actionPoliciesApi, ruleId, toasts]
   );
 
   return useMemo(() => ({ findItems }), [findItems]);

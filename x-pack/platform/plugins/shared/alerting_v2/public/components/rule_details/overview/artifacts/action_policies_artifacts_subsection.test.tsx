@@ -156,8 +156,25 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('renders an empty prompt when no policies match', () => {
     renderSubsection();
     expect(screen.getByTestId('ruleActionPoliciesArtifactsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No matching notification policies')).toBeInTheDocument();
+    expect(screen.getByText('No matching action policies')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleActionPoliciesArtifactsTruncatedHint')
+    ).not.toBeInTheDocument();
+  });
+
+  it('still shows the truncated hint when no evaluated policies match', () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      isMatchTruncated: true,
+    });
+
+    renderSubsection();
+
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsTruncatedHint')).toHaveTextContent(
+      'This space has more than 100 action policies, so this list may be incomplete.'
+    );
   });
 
   it('lists matching and catch-all policies with distinct badges and an edit link', () => {
@@ -199,7 +216,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'href',
       '/app/management/alertingV2/action_policies'
     );
-    expect(screen.getByText('Open notification policies')).toBeInTheDocument();
+    expect(screen.getByText('Open action policies')).toBeInTheDocument();
   });
 
   it('opens the policy details flyout when a policy name is clicked', () => {
@@ -235,12 +252,12 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     renderSubsection();
 
-    expect(
-      screen.getByTestId('ruleActionPolicyArtifactDisabledBadge-policy-quiet')
-    ).toHaveTextContent('Disabled');
-    expect(
-      screen.getByTestId('ruleActionPolicyArtifactSnoozedBadge-policy-quiet')
-    ).toHaveTextContent('Snoozed');
+    const disabledBadge = screen.getByTestId('ruleActionPolicyArtifactDisabledBadge-policy-quiet');
+    const snoozedBadge = screen.getByTestId('ruleActionPolicyArtifactSnoozedBadge-policy-quiet');
+
+    expect(disabledBadge).toHaveTextContent('Disabled');
+    expect(snoozedBadge).toHaveTextContent('Snoozed');
+    expect(disabledBadge.tagName).toBe(snoozedBadge.tagName);
   });
 
   it('caps the visible list and links to the remaining policies', () => {
@@ -270,11 +287,44 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       )
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveTextContent(
-      '2 more matching policies'
+      '2 more action policies'
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/action_policies'
+      '/app/management/alertingV2/action_policies?ruleId=rule-1'
+    );
+  });
+
+  it('does not label hidden catch-all overflow as matching policies', () => {
+    const items = [
+      ...Array.from({ length: LINKED_ACTION_POLICIES_VISIBLE_LIMIT }, (_, index) =>
+        buildItem('global-filtered', {
+          id: `match-${index}`,
+          name: `Match ${index}`,
+        })
+      ),
+      buildItem('global', { id: 'catch-hidden', name: 'Hidden catch-all' }),
+    ];
+
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items,
+    });
+
+    renderSubsection();
+
+    expect(
+      screen.queryByTestId('ruleActionPolicyArtifactRow-catch-hidden')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveTextContent(
+      '1 more action policy'
+    );
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveAttribute(
+      'href',
+      '/app/management/alertingV2/action_policies?ruleId=rule-1'
+    );
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).not.toHaveTextContent(
+      'matching'
     );
   });
 
