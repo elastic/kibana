@@ -35,10 +35,10 @@ const APP_FRAME_SELECTOR = '.kbnChromeLayoutApplication:has(.dshDashboardViewpor
 type RecommendationId = 'default' | 'rec1' | 'rec2' | 'rec3';
 
 const RECOMMENDATION_OPTIONS: Array<{ value: RecommendationId; text: string }> = [
-  { value: 'default', text: 'Default · radial + linear gradients' },
-  { value: 'rec1', text: 'Rec 1 · shade 15 + subtle divider' },
-  { value: 'rec2', text: 'Rec 2 · shade 20 solid (recommended)' },
-  { value: 'rec3', text: 'Rec 3 · shade 15 → shade 20 linear' },
+  { value: 'default', text: 'Planned · radial + linear gradients' },
+  { value: 'rec1', text: 'Alternative 1 · shade 15 + subtle divider' },
+  { value: 'rec2', text: 'Alternative 2 · shade 20 solid' },
+  { value: 'rec3', text: 'Alternative 3 · shade 15 → shade 20 linear' },
 ];
 
 const RECOMMENDATIONS: Record<
