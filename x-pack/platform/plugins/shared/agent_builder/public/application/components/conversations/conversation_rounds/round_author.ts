@@ -86,18 +86,18 @@ export const isCurrentUserAuthor = ({
 export const getRoundAuthorHeaderName = ({
   agent,
   author,
-  resolvedAuthorProfile,
+  authorProfile,
 }: {
   agent?: AgentDefinition;
   author?: RoundAuthor;
-  resolvedAuthorProfile?: UserProfileWithAvatar;
+  authorProfile?: UserProfileWithAvatar;
 }): string | undefined => {
   if (agent) {
     return agent.name;
   }
 
-  if (resolvedAuthorProfile) {
-    return getUserDisplayName(resolvedAuthorProfile.user);
+  if (authorProfile) {
+    return getUserDisplayName(authorProfile.user);
   }
 
   if (isUserProfileAuthor(author)) {

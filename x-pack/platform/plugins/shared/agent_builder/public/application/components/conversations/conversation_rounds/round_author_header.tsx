@@ -48,27 +48,17 @@ const formatRoundTime = (startedAt: string): string => {
 
 interface RoundAuthorAvatarProps {
   agent?: AgentDefinition;
-  resolvedAuthorProfile?: UserProfileWithAvatar;
+  authorProfile?: UserProfileWithAvatar;
   name?: string;
 }
 
-const RoundAuthorAvatar: React.FC<RoundAuthorAvatarProps> = ({
-  agent,
-  resolvedAuthorProfile,
-  name,
-}) => {
+const RoundAuthorAvatar: React.FC<RoundAuthorAvatarProps> = ({ agent, authorProfile, name }) => {
   if (agent) {
     return <AgentAvatar agent={agent} size="s" iconPaddingSize="none" />;
   }
 
-  if (resolvedAuthorProfile) {
-    return (
-      <UserAvatar
-        user={resolvedAuthorProfile.user}
-        avatar={resolvedAuthorProfile.data?.avatar}
-        size="s"
-      />
-    );
+  if (authorProfile) {
+    return <UserAvatar user={authorProfile.user} avatar={authorProfile.data?.avatar} size="s" />;
   }
 
   if (name) {
@@ -169,12 +159,12 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   const hasUserProfileAuthor = isUserProfileAuthor(author);
   const shouldResolveAuthorProfile =
     !isAgent && !hasUserProfileAuthor && !origin && Boolean(author?.id);
-  const { data: resolvedAuthorProfiles = [] } = useUserProfiles({
+  const { data: authorProfiles = [] } = useUserProfiles({
     uids: !hasUserProfileAuthor && author?.id ? [author.id] : [],
     enabled: shouldResolveAuthorProfile,
   });
-  const resolvedAuthorProfile = hasUserProfileAuthor ? author : resolvedAuthorProfiles[0];
-  const name = getRoundAuthorHeaderName({ agent, author, resolvedAuthorProfile });
+  const authorProfile = hasUserProfileAuthor ? author : authorProfiles[0];
+  const name = getRoundAuthorHeaderName({ agent, author, authorProfile });
 
   return (
     <EuiFlexGroup
@@ -186,11 +176,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <RoundAuthorAvatar
-          agent={agent}
-          resolvedAuthorProfile={resolvedAuthorProfile}
-          name={name}
-        />
+        <RoundAuthorAvatar agent={agent} authorProfile={authorProfile} name={name} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
