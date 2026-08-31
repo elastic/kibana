@@ -115,12 +115,25 @@ describe('rRuleRequestSchema', () => {
       ).toThrow();
     });
 
-    test('returns an error if the values are less than one', () => {
+    test('returns an error if the values are zero', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [0] })).toThrow();
     });
 
     test('returns an error if the values are bigger than 31', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [32] })).toThrow();
+    });
+
+    test('returns an error if the values are smaller than -31', () => {
+      expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [-32] })).toThrow();
+    });
+
+    test('accepts negative values counting back from the end of the month', () => {
+      expect(rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [-1] }).bymonthday).toEqual(
+        [-1]
+      );
+      expect(
+        rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [1, -31] }).bymonthday
+      ).toEqual([1, -31]);
     });
   });
 

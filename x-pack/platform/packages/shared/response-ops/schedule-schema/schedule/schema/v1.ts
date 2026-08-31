@@ -16,6 +16,7 @@ import {
   validateScheduleV1,
 } from '../validation';
 import { validateInteger } from '../validation/validate_integer/v1';
+import { validateMonthDayV1 } from '../../r_rule/validation';
 
 interface GetScheduleSchemaOptions {
   metaId?: string;
@@ -59,16 +60,16 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
       onMonthDay: schema.maybe(
         schema.arrayOf(
           schema.number({
-            min: 1,
+            min: -31,
             max: 31,
-            validate: (value: number) => validateInteger(value, 'onMonthDay'),
+            validate: (value: number) => validateMonthDayV1(value, 'schedule onMonthDay'),
           }),
           {
             minSize: 1,
-            maxSize: 31,
+            maxSize: 62,
             meta: {
               description:
-                'The specific days of the month for a recurring schedule. Valid values are 1-31.',
+                'The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.',
             },
           }
         )
@@ -173,10 +174,10 @@ const getRecurringResponseSchema = (recurringMetaId?: string) =>
       ),
       onMonthDay: schema.maybe(
         schema.arrayOf(schema.number(), {
-          maxSize: 31,
+          maxSize: 62,
           meta: {
             description:
-              'The specific days of the month for a recurring schedule. Valid values are 1-31.',
+              'The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.',
           },
         })
       ),

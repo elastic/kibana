@@ -102361,12 +102361,12 @@ components:
           minItems: 1
           type: array
         onMonthDay:
-          description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+          description: The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.
           items:
             maximum: 31
-            minimum: 1
+            minimum: -31
             type: number
-          maxItems: 31
+          maxItems: 62
           minItems: 1
           type: array
         onWeekDay:
@@ -102398,10 +102398,10 @@ components:
           maxItems: 12
           type: array
         onMonthDay:
-          description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+          description: The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.
           items:
             type: number
-          maxItems: 31
+          maxItems: 62
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
@@ -110745,12 +110745,12 @@ components:
               minItems: 1
               type: array
             onMonthDay:
-              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+              description: The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or -31 to -1, counting backward from the end of the month. For example, `-1` is the last day of the month.
               items:
                 maximum: 31
-                minimum: 1
+                minimum: -31
                 type: number
-              maxItems: 31
+              maxItems: 62
               minItems: 1
               type: array
             onWeekDay:

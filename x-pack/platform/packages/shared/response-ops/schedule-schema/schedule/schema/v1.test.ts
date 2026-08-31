@@ -120,14 +120,14 @@ describe('scheduleRequestSchema', () => {
     );
   });
 
-  it(`throws an error when onMonthDay is less than 1`, async () => {
+  it(`throws an error when onMonthDay is zero`, async () => {
     expect(() =>
       scheduleRequestSchema.validate({
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [0] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [1]."`
+      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or between -31 and -1."`
     );
   });
 
@@ -142,6 +142,26 @@ describe('scheduleRequestSchema', () => {
     );
   });
 
+  it(`throws an error when onMonthDay is less than -31`, async () => {
+    expect(() =>
+      scheduleRequestSchema.validate({
+        ...defaultSchedule,
+        recurring: { ...recurring, onMonthDay: [-32] },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [-31]."`
+    );
+  });
+
+  it(`accepts negative onMonthDay values counting back from the end of the month`, async () => {
+    expect(
+      scheduleRequestSchema.validate({
+        ...defaultSchedule,
+        recurring: { ...recurring, onMonthDay: [-1] },
+      }).recurring?.onMonthDay
+    ).toEqual([-1]);
+  });
+
   it(`throws an error when onMonthDay is not an integer`, async () => {
     expect(() =>
       scheduleRequestSchema.validate({
@@ -149,7 +169,7 @@ describe('scheduleRequestSchema', () => {
         recurring: { ...recurring, onMonthDay: [25.5] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: schedule onMonthDay must be a positive integer."`
+      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or between -31 and -1."`
     );
   });
 

@@ -11,6 +11,7 @@ import {
   validateEndDateV1,
   validateRecurrenceByWeekdayV1,
   validateTimezoneV1,
+  validateMonthDayV1,
 } from '../../validation';
 
 interface GetRRuleRequestSchemaOptions {
@@ -64,7 +65,14 @@ export const getRRuleRequestSchema = ({
         })
       ),
       bymonthday: schema.maybe(
-        schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1, maxSize: 31 })
+        schema.arrayOf(
+          schema.number({
+            min: -31,
+            max: 31,
+            validate: (value: number) => validateMonthDayV1(value, 'rRule bymonthday'),
+          }),
+          { minSize: 1, maxSize: 62 }
+        )
       ),
       bymonth: schema.maybe(
         schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1, maxSize: 12 })

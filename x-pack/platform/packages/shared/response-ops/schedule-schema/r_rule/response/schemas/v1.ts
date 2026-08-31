@@ -126,10 +126,11 @@ export const getRRuleResponseSchema = ({ meta }: GetRRuleResponseSchemaOptions =
           schema.arrayOf(
             schema.number({
               meta: {
-                description: 'Indicates the days of the month to recur.',
+                description:
+                  'Indicates the days of the month to recur. Negative values count backward from the end of the month, so -1 is the last day of the month.',
               },
             }),
-            { maxSize: 31 }
+            { maxSize: 62 }
           )
         )
       ),
