@@ -31,8 +31,8 @@ export const DEFAULT_INFERENCE_DOCUMENT_LIMITS: InferenceDocumentLimits = {
   maxFieldNameLength: 1024,
   maxStringLength: 8 * 1024,
   maxArrayItems: 3,
-  maxTagItems: 100,
-  maxNestedObjectEntries: 100,
+  maxTagItems: 20,
+  maxNestedObjectEntries: 20,
   maxNestedDepth: 5,
 };
 

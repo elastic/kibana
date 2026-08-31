@@ -17,8 +17,10 @@ import {
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
-// Bounded separately from the per-document limits: the workflow persists this payload across steps.
-export const MAX_INFERENCE_DOCUMENTS_BYTES = 768 * 1024;
+// Caps the sample at ~100K tokens (JSON runs ~3 chars/token) to leave headroom for output and
+// tool calls. Bounded separately from the per-document limits because the workflow persists this
+// payload across steps.
+export const MAX_INFERENCE_DOCUMENTS_BYTES = 288 * 1024;
 export const MAX_INFERENCE_DOCUMENT_BYTES = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxDocumentBytes;
 export const MAX_INFERENCE_DOCUMENT_FIELDS = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFields;
 export const MAX_INFERENCE_FIELD_NAME_LENGTH = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFieldNameLength;

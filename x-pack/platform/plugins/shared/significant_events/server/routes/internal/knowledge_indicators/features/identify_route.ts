@@ -96,10 +96,6 @@ const bootstrapSyncWorkflow = async ({
   }
 };
 
-// ---------------------------------------------------------------------------
-// Route 1: Prepare inferred feature sampling
-// ---------------------------------------------------------------------------
-
 const prepareInferredSamplingRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred/prepare',
   options: {
@@ -337,10 +333,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
   },
 });
 
-// ---------------------------------------------------------------------------
-// Route 3: Identify computed features (generate and persist computed KI features)
-// ---------------------------------------------------------------------------
-
 const identifyComputedFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/features/_identify/computed',
   options: {
@@ -425,10 +417,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
     }
   },
 });
-
-// ---------------------------------------------------------------------------
-// Route 4: Check whether features identification should run
-// ---------------------------------------------------------------------------
 
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{streamName}/features/_should_identify',
