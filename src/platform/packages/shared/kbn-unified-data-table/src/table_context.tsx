@@ -11,7 +11,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { SourceDisplayMode, ValueToStringConverter } from './types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from './types';
 import type { UseSelectedDocsState } from './hooks/use_selected_docs';
 
 export interface DataTableContext {
@@ -19,12 +19,13 @@ export interface DataTableContext {
   setExpanded?: (hit?: DataTableRecord) => void;
   getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
+  hideFilteringOnComputedColumns?: boolean;
   dataView: DataView;
   selectedDocsState: UseSelectedDocsState;
   valueToStringConverter: ValueToStringConverter;
   componentsTourSteps?: Record<string, string>;
   isPlainRecord?: boolean;
-  sourceDisplayMode?: SourceDisplayMode;
+  documentsDisplayMode?: DocumentsDisplayMode;
   pageIndex: number | undefined; // undefined when the pagination is disabled
   pageSize: number | undefined;
 }

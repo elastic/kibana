@@ -36,6 +36,7 @@ export const createExcludeSemanticEvaluator = ({
 }) => ({
   name: 'llm_exclude_compliance',
   kind: 'LLM' as const,
+  direction: 'maximize' as const,
   evaluate: async ({
     output,
   }: {

@@ -1,21 +1,9 @@
 {
   "sha1": "4548a64dd686cbd321a57ac07170dc78607c15f9",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6c80b774cf64439-77a83c0bedb19bd",
-      "title": "Teardown tabs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "11b6599941153f8-ebb8e7d98ca43bb",
       "title": "Setup tabs tests data",
@@ -844,6 +832,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
         "line": 55,
         "column": 25
+      }
+    },
+    {
+      "id": "6c80b774cf64439-77a83c0bedb19bd",
+      "title": "Teardown tabs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

@@ -31,6 +31,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
+import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
@@ -39,7 +40,14 @@ export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
-export type AlertingServerSetup = void;
+export interface AlertingServerSetup {
+  /**
+   * Registers an artifact type owned by the calling plugin. Its `dataSchema` is
+   * enforced for this type on rule create and update. Unregistered types pass
+   * through unchanged.
+   */
+  registerArtifactType(definition: ArtifactTypeDefinition): void;
+}
 
 export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;

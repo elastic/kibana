@@ -65,6 +65,9 @@ export function initRoutes(
     parked: boolean;
     continuedAfterHold: boolean;
     authCompleted: boolean;
+    // Sticky: set once the client cancels the request (HTTP/2 RST_STREAM). Unlike the socket
+    // snapshot this is not re-read per poll, so it survives the stream going away.
+    aborted: boolean;
     snapshotSocket: () => PreauthHoldSocketSnapshot;
     release: () => void;
   }
@@ -159,10 +162,19 @@ export function initRoutes(
         parked: true,
         continuedAfterHold: false,
         authCompleted: false,
+        aborted: false,
         snapshotSocket: () => snapshotSocket(request),
         release: () => deferred.resolve(),
       };
       preauthHolds.set(holdId, hold);
+
+      // Subscribe before parking: `getEvents` only builds the observable, and the underlying
+      // 'close' listener attaches on first subscribe. Under HTTP/2 this is how RST_STREAM
+      // becomes observable server-side — the session socket itself is unaffected by a single
+      // stream being destroyed, so it can no longer be used to detect the cancellation.
+      const abortSubscription = request.events.aborted$.subscribe(() => {
+        hold.aborted = true;
+      });
 
       let timeoutId: NodeJS.Timeout | undefined;
       try {
@@ -184,6 +196,7 @@ export function initRoutes(
       } finally {
         hold.authCompleted = true;
         hold.parked = false;
+        abortSubscription.unsubscribe();
         // Keep the completed hold around long enough for the test to observe `authCompleted`,
         // then evict so the map does not retain the request (and its socket) indefinitely.
         setTimeout(() => {
@@ -251,6 +264,7 @@ export function initRoutes(
           parked: hold?.parked ?? false,
           continuedAfterHold: hold?.continuedAfterHold ?? false,
           authCompleted: hold?.authCompleted ?? false,
+          aborted: hold?.aborted ?? false,
           authorized: socket?.authorized ?? null,
           peerCertificateNull: socket?.peerCertificateNull ?? false,
         },

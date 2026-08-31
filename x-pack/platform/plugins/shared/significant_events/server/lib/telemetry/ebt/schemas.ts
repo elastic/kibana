@@ -71,6 +71,13 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
         description: 'The name of the Stream',
       },
     },
+    external_content_tool_continuations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Reasoning turns that contained external content and pending task tools and were correctly continued',
+      },
+    },
     tool_usage: {
       properties: {
         get_stream_features: {

@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import type {
-  AgentCapabilities,
   AgentExecutionMode,
   ChatEvent,
   ConverseInput,
@@ -33,8 +32,6 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /** Capabilities to use for this execution. */
-  capabilities?: AgentCapabilities;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */

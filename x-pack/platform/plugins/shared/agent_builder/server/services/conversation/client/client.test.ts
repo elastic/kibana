@@ -1235,6 +1235,144 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('updateRoundFeedback', () => {
+    const round = createRound({ id: 'round-1' });
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('persists a vote with chips and comment, stamping connector and model from model_usage', async () => {
+      const roundWithModel = createRound({
+        id: 'round-1',
+        model_usage: {
+          connector_id: 'connector-abc',
+          model: 'claude-4.6-sonnet',
+          input_tokens: 10,
+          output_tokens: 5,
+          llm_calls: 1,
+        },
+      });
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ rounds: [roundWithModel] })] },
+      });
+
+      await client.updateRoundFeedback('conversation-1', 'round-1', {
+        vote: 'up',
+        chips: ['useful'],
+        comment: 'great answer',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          if_seq_no: 1,
+          if_primary_term: 1,
+          document: expect.objectContaining({
+            conversation_rounds: [
+              expect.objectContaining({
+                id: 'round-1',
+                feedback: expect.objectContaining({
+                  vote: 'up',
+                  chips: ['useful'],
+                  comment: 'great answer',
+                  connector_id: 'connector-abc',
+                  model: 'claude-4.6-sonnet',
+                }),
+              }),
+            ],
+          }),
+        })
+      );
+    });
+
+    it('removes the feedback sub-object entirely on retract (vote: null)', async () => {
+      const roundWithFeedback = {
+        ...round,
+        feedback: {
+          vote: 'up' as const,
+          chips: [],
+          comment: '',
+          submitted_at: '2025-01-01T00:00:00.000Z',
+        },
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ rounds: [roundWithFeedback] })] },
+      });
+
+      await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
+
+      const persistedRounds = mockEsClient.index.mock.calls[0][0].document
+        .conversation_rounds as Array<Record<string, unknown>>;
+      expect(persistedRounds[0]).not.toHaveProperty('feedback');
+    });
+
+    it('throws not found when the round does not exist in the conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ rounds: [round] })] },
+      });
+
+      await expect(
+        client.updateRoundFeedback('conversation-1', 'nonexistent-round', { vote: 'up' })
+      ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: [createConversationDocument({ seqNo: 1, rounds: [round] })] },
+        })
+        .mockResolvedValue({
+          hits: { hits: [createConversationDocument({ seqNo: 2, rounds: [round] })] },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValue({});
+
+      await client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'down' });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.index).toHaveBeenLastCalledWith(
+        expect.objectContaining({ if_seq_no: 2, if_primary_term: 1 })
+      );
+    });
+
+    it('throws a write conflict error once retries are exhausted', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ rounds: [round] })] },
+      });
+      mockEsClient.index.mockRejectedValue(createConflictError());
+
+      const error = await client
+        .updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
+        .catch((e) => e);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(error.meta.statusCode).toBe(409);
+    });
+
+    it('is restricted to the conversation owner', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Private,
+              rounds: [round],
+            }),
+          ],
+        },
+      });
+
+      await expect(
+        client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
+      ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+  });
+
   describe('delete', () => {
     it('remains owner-only for public conversations when the caller is not an admin', async () => {
       mockEsClient.search.mockResolvedValue({
