@@ -9,7 +9,16 @@ fi
 
 ELASTICSEARCH_PATH="$1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Ensure local node_modules are installed (yarn kbn bootstrap skips this standalone package)
+if [ ! -f "$PKG_DIR/node_modules/.bin/ts-node" ]; then
+  echo "Installing kbn-esql-scripts dependencies..."
+  (cd "$PKG_DIR" && npm install --no-save --ignore-scripts)
+fi
+
+TS_NODE="$PKG_DIR/node_modules/.bin/ts-node"
 
 # Run both scripts with the provided path
-ts-node --transpileOnly "$SCRIPT_DIR/generate_esql_command_docs.ts" "$ELASTICSEARCH_PATH" && \
-ts-node --transpileOnly "$SCRIPT_DIR/generate_esql_docs.ts" "$ELASTICSEARCH_PATH"
+"$TS_NODE" --project "$PKG_DIR/tsconfig.scripts.json" --transpileOnly "$SCRIPT_DIR/generate_esql_command_docs.ts" "$ELASTICSEARCH_PATH" && \
+"$TS_NODE" --project "$PKG_DIR/tsconfig.scripts.json" --transpileOnly "$SCRIPT_DIR/generate_esql_docs.ts" "$ELASTICSEARCH_PATH"
