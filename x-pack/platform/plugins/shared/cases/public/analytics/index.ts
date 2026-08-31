@@ -41,16 +41,6 @@ export const registerAnalytics = ({
           optional: false,
         },
       },
-      workflow_run_availability: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'Whether the "Run workflow" action is available to the current user on this case, ' +
-            'and if not, the first blocking reason. One of: "available", "no_update_privilege", ' +
-            '"config_disabled", "ui_setting_disabled", "no_execute_privilege".',
-          optional: true,
-        },
-      },
     },
   });
 

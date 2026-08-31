@@ -105,48 +105,23 @@ export const useAreWorkflowsAvailableForCases = (): boolean => {
 };
 
 /**
- * The bounded set of reasons describing whether the "Run workflow" action is available
- * to the current user. Used as the `workflow_run_availability` field on `case_page_view`
- * EBT events so trigger counts can be read against the reachable population.
- */
-export type WorkflowRunAvailability =
-  | 'available'
-  | 'no_update_privilege'
-  | 'config_disabled'
-  | 'ui_setting_disabled'
-  | 'no_execute_privilege';
-
-/**
- * Returns the first reason that would block the current user from running a workflow
- * from a case, or `'available'` when all four conditions are satisfied:
+ * Returns true when the current user satisfies all four conditions required to
+ * run a workflow from a case:
  *   1. `cases:<owner>/updateCase` privilege (permissions.update)
  *   2. `runWorkflows.enabled` kibana config flag
  *   3. Workflows UI feature flag (uiSetting)
  *   4. `workflowsManagement:execute` application capability
  */
-export const useWorkflowRunAvailability = (): WorkflowRunAvailability => {
+export const useCanRunCaseWorkflow = (): boolean => {
   const { permissions } = useCasesContext();
   const { runWorkflowsEnabled } = useCasesConfig();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowsUIEnabled = useWorkflowsUIEnabledSetting();
 
-  return useMemo(() => {
-    if (!permissions.update) return 'no_update_privilege';
-    if (!runWorkflowsEnabled) return 'config_disabled';
-    if (!workflowsUIEnabled) return 'ui_setting_disabled';
-    if (!canExecuteWorkflow) return 'no_execute_privilege';
-    return 'available';
-  }, [permissions.update, runWorkflowsEnabled, workflowsUIEnabled, canExecuteWorkflow]);
-};
-
-/**
- * Returns true when the current user satisfies all four conditions required to
- * run a workflow from a case. Delegates to `useWorkflowRunAvailability` so there
- * is one source of truth for the gating logic.
- */
-export const useCanRunCaseWorkflow = (): boolean => {
-  const availability = useWorkflowRunAvailability();
-  return availability === 'available';
+  return useMemo(
+    () => permissions.update && runWorkflowsEnabled && workflowsUIEnabled && canExecuteWorkflow,
+    [permissions.update, runWorkflowsEnabled, workflowsUIEnabled, canExecuteWorkflow]
+  );
 };
 
 /**
