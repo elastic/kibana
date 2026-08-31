@@ -69,6 +69,20 @@ export const serviceMapAttachmentDataSchema = z.object({
   nodeMetadata: z.record(z.string().max(MAX_LABEL_LENGTH), serviceNodeMetadataSchema).optional(),
   serviceName: z.string().max(MAX_LABEL_LENGTH).optional(),
   title: z.string().max(MAX_LABEL_LENGTH).optional(),
+  /**
+   * Time range used for the topology tool call. Drives the popover/flyout
+   * data fetches and the "Explore in Service map" link of the contextual
+   * renderer. Optional for back-compat with stored conversations; the
+   * renderer falls back to the tool's default range (now-1h → now).
+   */
+  timeRange: z
+    .object({
+      start: z.string().max(MAX_LABEL_LENGTH),
+      end: z.string().max(MAX_LABEL_LENGTH),
+    })
+    .optional(),
+  /** Environment used for the topology tool call, if it was scoped to one. */
+  environment: z.string().max(MAX_LABEL_LENGTH).optional(),
 });
 
 export type ServiceNodeMetadata = z.infer<typeof serviceNodeMetadataSchema>;
