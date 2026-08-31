@@ -61,7 +61,7 @@ export function initializeHistoryManager({
           panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
         };
       },
-      maxSize: 10,
+      maxSize: 100,
     }
   );
 
