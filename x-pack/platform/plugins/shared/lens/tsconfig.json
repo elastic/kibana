@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
     "@kbn/spaces-plugin",
@@ -142,8 +143,6 @@
     "@kbn/controls-constants",
     "@kbn/presentation-publishing-schemas",
     "@kbn/field-formats-common",
-    "@kbn/calculate-auto",
-    "@kbn/esql-language",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-telemetry",
     "@kbn/core-http-browser",

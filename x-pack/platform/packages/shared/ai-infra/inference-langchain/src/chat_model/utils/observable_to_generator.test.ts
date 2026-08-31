@@ -22,6 +22,32 @@ describe('toAsyncIterator', () => {
     expect(output).toEqual(input);
   });
 
+  it('drains a large synchronous backlog in linear time and in order', async () => {
+    const count = 100_000;
+    const obs$ = new Observable<number>((subscriber) => {
+      for (let i = 0; i < count; i++) {
+        subscriber.next(i);
+      }
+      subscriber.complete();
+    });
+
+    const iterator = toAsyncIterator(obs$);
+    const started = performance.now();
+    let received = 0;
+    let outOfOrder = 0;
+    for await (const event of iterator) {
+      if (event !== received) {
+        outOfOrder++;
+      }
+      received++;
+    }
+
+    expect(received).toBe(count);
+    expect(outOfOrder).toBe(0);
+    // shift()-based dequeuing takes multiple seconds at this size
+    expect(performance.now() - started).toBeLessThan(2000);
+  });
+
   it('throws an error when the source observable throws', async () => {
     const obs$ = new Observable<number>((subscriber) => {
       subscriber.next(1);

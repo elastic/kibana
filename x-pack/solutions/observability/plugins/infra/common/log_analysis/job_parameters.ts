@@ -59,6 +59,7 @@ export const jobSourceConfigurationRT = rt.partial({
   timestampField: rt.string,
   bucketSpan: rt.number,
   datasetFilter: datasetFilterRT,
+  projectRouting: rt.string,
 });
 
 export type JobSourceConfiguration = rt.TypeOf<typeof jobSourceConfigurationRT>;
