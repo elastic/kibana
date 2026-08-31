@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cps-utils'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/cps-utils'
   description: Moon project for @kbn/cps-utils
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/shared/kbn-cps-utils
 dependsOn:
   - '@kbn/cps-common'
