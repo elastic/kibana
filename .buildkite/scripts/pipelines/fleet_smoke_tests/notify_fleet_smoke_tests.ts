@@ -22,10 +22,7 @@ const BUILD_SEARCH_WINDOW_DAYS = 7;
 const DEFAULT_CONSECUTIVE_FAILURES_THRESHOLD = 3;
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
 
-const SCHEDULED_SUITES = [
-  'Scheduled QA Smoke Tests - Observability',
-  'Scheduled QA Smoke Tests - Security',
-];
+const SCHEDULED_BUILDS_MESSAGE_PREFIX = 'Scheduled QA Smoke Tests';
 
 function getThreshold(): number {
   const raw = process.env.CONSECUTIVE_FAILURES_THRESHOLD;
@@ -87,48 +84,46 @@ async function main() {
   const threshold = getThreshold();
 
   const since = new Date(Date.now() - BUILD_SEARCH_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const builds = await buildkite.getBuildsAfterDate(SMOKE_TESTS_PIPELINE_SLUG, since, 200);
+  const builds = await buildkite.getBuildsAfterDate(SMOKE_TESTS_PIPELINE_SLUG, since, 50);
 
-  for (const suite of SCHEDULED_SUITES) {
-    const suiteBuilds = builds.filter(
-      (build) =>
-        ['passed', 'failed'].includes(build.state) &&
-        build.branch === 'main' &&
-        build.message?.includes(suite)
-    );
+  const relevantBuilds = builds.filter(
+    (build) =>
+      ['passed', 'failed'].includes(build.state) &&
+      build.branch === 'main' &&
+      build.message?.includes(SCHEDULED_BUILDS_MESSAGE_PREFIX)
+  );
 
-    console.log(`[${suite}] ${suiteBuilds.length} finished build(s) found`);
+  console.log(`${relevantBuilds.length} finished scheduled build(s) found on main`);
 
-    if (suiteBuilds.length === 0) {
-      continue;
-    }
-
-    const recentBuilds = suiteBuilds.slice(0, threshold);
-    const allFailed =
-      recentBuilds.length === threshold && recentBuilds.every((b) => b.state === 'failed');
-
-    console.log(
-      `[${suite}] Last ${recentBuilds.length} build(s): ${recentBuilds
-        .map((b) => `#${b.number} (${b.state})`)
-        .join(', ')}`
-    );
-
-    if (!allFailed) {
-      console.log(`[${suite}] No alert needed (not ${threshold} consecutive failures)`);
-      continue;
-    }
-
-    const buildLinks = recentBuilds.map((b) => `<${b.web_url}|#${b.number}>`).join(', ');
-
-    const message = [
-      `:alert: *fleet-smoke-tests* (${suite}) has failed ${threshold} times in a row.`,
-      `Failed builds: ${buildLinks}`,
-      `<https://buildkite.com/elastic/${SMOKE_TESTS_PIPELINE_SLUG}|View pipeline>`,
-    ].join('\n');
-
-    console.log(`Sending alert:\n${message}`);
-    sendSlackNotification(message);
+  if (relevantBuilds.length === 0) {
+    return;
   }
+
+  const recentBuilds = relevantBuilds.slice(0, threshold);
+  const allFailed =
+    recentBuilds.length === threshold && recentBuilds.every((b) => b.state === 'failed');
+
+  console.log(
+    `Last ${recentBuilds.length} build(s): ${recentBuilds
+      .map((b) => `#${b.number} (${b.state})`)
+      .join(', ')}`
+  );
+
+  if (!allFailed) {
+    console.log(`No alert needed (not ${threshold} consecutive failures)`);
+    return;
+  }
+
+  const buildLinks = recentBuilds.map((b) => `<${b.web_url}|#${b.number}>`).join(', ');
+
+  const message = [
+    `:alert: *fleet-smoke-tests* has failed ${threshold} times in a row.`,
+    `Failed builds: ${buildLinks}`,
+    `<https://buildkite.com/elastic/${SMOKE_TESTS_PIPELINE_SLUG}|View pipeline>`,
+  ].join('\n');
+
+  console.log(`Sending alert:\n${message}`);
+  sendSlackNotification(message);
 }
 
 if (require.main === module) {
