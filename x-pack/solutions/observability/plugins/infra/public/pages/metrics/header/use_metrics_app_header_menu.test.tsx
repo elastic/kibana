@@ -65,14 +65,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: { get: mockUiSettingsGet },
-    },
-  }),
-}));
-
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useLinkProps: () => ({ href: '/app/metrics/settings' }),
   useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),

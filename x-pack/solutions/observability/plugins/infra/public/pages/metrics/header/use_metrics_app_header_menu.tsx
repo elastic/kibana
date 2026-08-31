@@ -10,7 +10,6 @@ import type { AppMenuPopoverItem } from '@kbn/app-menu';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLinkProps, useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -99,7 +98,6 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
     services: { inspector, observability, share, uiSettings, application },
   } = useKibanaContextForPlugin();
   const { inspectorAdapters } = useInspectorContext();
-  const { services: kibanaServices } = useKibana();
   const settingsLinkProps = useLinkProps({
     app: 'metrics',
     pathname: 'settings',
@@ -116,9 +114,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
   }, []);
 
   const canCreateAlerts = Boolean(application?.capabilities?.infrastructure?.save);
-  const isInspectorEnabled = Boolean(
-    (kibanaServices.uiSettings ?? uiSettings)?.get<boolean>(enableInspectEsQueries)
-  );
+  const isInspectorEnabled = Boolean(uiSettings?.get<boolean>(enableInspectEsQueries));
   const manageRulesLinkProps = observability.useRulesLink();
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
