@@ -63,6 +63,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
           name: 'correctness',
           version: '1.0.0',
           kind: 'llm',
+          direction: 'maximize',
           origin: 'built_in',
           description: 'Built-in correctness evaluator',
           evaluate: jest.fn(),

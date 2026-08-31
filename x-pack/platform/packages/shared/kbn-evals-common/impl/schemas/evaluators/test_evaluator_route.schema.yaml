@@ -57,6 +57,7 @@ paths:
                         required:
                           - name
                           - kind
+                          - direction
                         properties:
                           name:
                             type: string
@@ -65,6 +66,16 @@ paths:
                             type: string
                             enum:
                               - llm
+                          direction:
+                            type: string
+                            enum:
+                              - maximize
+                              - minimize
+                              - neutral
+                            description: >-
+                              Whether a higher score is an improvement (`maximize`),
+                              a lower score is an improvement (`minimize`), or the
+                              score cannot be compared across arms at all (`neutral`).
                           model:
                             $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                       scores:

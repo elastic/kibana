@@ -23,7 +23,17 @@ export const columnsAfter = (
     },
   });
 
-  return previousColumns.filter((field) => {
-    return columnsToKeep.some((column) => column === field.name);
+  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
+  const uniqueColumnsToKeep = columnsToKeep.filter(
+    (name, index) => columnsToKeep.lastIndexOf(name) === index
+  );
+
+  // KEEP follows the written order and keeps the last occurrence of repeated columns.
+  // For example, `KEEP a, b, a` returns `[b, a]`.
+  // Multi-column IN uses this order to compare the fields on each side.
+  return uniqueColumnsToKeep.flatMap((name) => {
+    const column = columnsByName.get(name);
+
+    return column ? [column] : [];
   });
 };

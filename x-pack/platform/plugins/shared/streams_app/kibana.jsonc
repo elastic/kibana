@@ -35,9 +35,7 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
-      "evals",
-      "significantEvents",
-      "significantEventsApp"
+      "evals"
     ],
     "requiredBundles": [
       "discover",

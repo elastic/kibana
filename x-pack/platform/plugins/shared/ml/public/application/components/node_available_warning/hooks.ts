@@ -73,6 +73,7 @@ const defaultCloudInfo: CloudInfo = {
   deploymentId: null,
   cloudUrl: null,
   isMlAutoscalingEnabled: false,
+  isMlCpsEnabled: false,
 };
 
 export function useCloudCheck() {
@@ -90,6 +91,7 @@ export function useCloudCheck() {
         deploymentId: !resp.cloudId ? null : extractDeploymentId(resp.cloudId),
         cloudUrl: resp.cloudUrl ?? null,
         isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
+        isMlCpsEnabled: resp.isMlCpsEnabled,
       });
     } catch (error) {
       if (error.statusCode === 403) {

@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -304,6 +305,9 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
       apiKeyId,
+      // Mirror the backfill run's own credential treatment onto the connector tasks: the request
+      // is marked by getFakeKibanaRequest from the ad hoc run's snapshotted `uiamApiKeyExternal`.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
       ruleLabel,
@@ -415,7 +419,8 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
+      const { rule, apiKeyToUse, uiamApiKey, uiamApiKeyExternal, schedule, start, end } =
+        adHocRunData;
       this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -523,6 +528,7 @@ export class AdHocTaskRunner implements CancellableTask {
         apiKeyToUse,
         {
           uiamApiKey,
+          uiamApiKeyExternal,
           apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
           apiKeyOwner: rule.apiKeyOwner,
           ruleId: rule.id,

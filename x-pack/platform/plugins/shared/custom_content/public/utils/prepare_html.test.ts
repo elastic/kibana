@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
 
 describe('injectStyleTag', () => {
   it('injects a <style> tag after <head>', () => {
@@ -40,6 +41,41 @@ describe('injectCsp', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
     expect(twice.split('Content-Security-Policy').length).toBe(2);
+  });
+});
+
+describe('applyHtmlTheme', () => {
+  const euiTheme = {
+    colors: {
+      textParagraph: '#111',
+      emptyShade: '#fff',
+      lightestShade: '#eee',
+      primary: '#06c',
+      accentSecondary: '#0a8',
+      accent: '#e6a',
+      warning: '#fc0',
+      danger: '#b00',
+      borderBasePlain: '#ccc',
+    },
+  } as unknown as EuiThemeComputed;
+
+  // A meta CSP only governs resources fetched after it is parsed, so it must precede the
+  // theme <style> tag — otherwise CSS injected ahead of it would be ungoverned.
+  it('places the CSP meta before the injected theme style tag', () => {
+    const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
+    expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
+  });
+
+  it('places the CSP meta first when there is no <head>', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+    expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
+    expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
+  });
+
+  it('still injects the theme CSS custom properties', () => {
+    const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
+    expect(result).toContain('--cc-color-text:#111');
+    expect(result).toContain('--cc-color-border:#ccc');
   });
 });
 

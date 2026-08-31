@@ -23,6 +23,13 @@ Array [
   },
   Any<Object>,
   Any<Object>,
+  Object {
+    "content": Any<Function>,
+    "href": "",
+    "iconType": "",
+    "label": "",
+    "order": 600,
+  },
 ]
 `;
 
@@ -49,5 +56,12 @@ Array [
   },
   Any<Object>,
   Any<Object>,
+  Object {
+    "content": Any<Function>,
+    "href": "",
+    "iconType": "",
+    "label": "",
+    "order": 600,
+  },
 ]
 `;

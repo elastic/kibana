@@ -514,7 +514,7 @@ describe('POST /conversations', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] })
     );
-    expect(mockGet).toHaveBeenCalledWith(createdConversation.id);
+    expect(mockGet).not.toHaveBeenCalled();
     expect(result.status).toBe(200);
     expect(result.payload).toBe(createdConversation);
   });

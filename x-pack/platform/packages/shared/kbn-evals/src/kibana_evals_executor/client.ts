@@ -267,6 +267,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   );
                   return {
                     evaluatorName: evaluator.name,
+                    direction: evaluator.direction,
                     result,
                     evaluatorTraceId,
                     kind: evaluator.kind,
@@ -280,6 +281,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
               for (const {
                 evaluatorName,
+                direction,
                 result,
                 evaluatorTraceId,
                 kind,
@@ -293,6 +295,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
+                  direction,
                   kind,
                   ...(model && { model }),
                 };

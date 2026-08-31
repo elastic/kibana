@@ -21,6 +21,7 @@ const definition = ({
   version,
   origin,
   kind: 'llm',
+  direction: 'maximize',
   description: `${name} ${version}`,
   evaluate: jest.fn(),
 });

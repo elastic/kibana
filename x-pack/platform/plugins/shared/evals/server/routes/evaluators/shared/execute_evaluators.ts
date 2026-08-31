@@ -162,7 +162,12 @@ export const executeEvaluators = async ({
     definition: EvaluatorDefinition,
     connectorId?: string
   ): Promise<EvaluateResponse['results'][number]['evaluator']> => {
-    const base = { name: definition.name, version: definition.version, kind: definition.kind };
+    const base = {
+      name: definition.name,
+      version: definition.version,
+      kind: definition.kind,
+      direction: definition.direction,
+    };
     if (definition.kind !== 'llm' || !connectorId) {
       return base;
     }

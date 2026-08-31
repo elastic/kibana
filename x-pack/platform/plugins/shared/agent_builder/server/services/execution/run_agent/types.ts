@@ -7,4 +7,9 @@
 
 export interface ResolvedConfiguration {
   instructions: string;
+  /**
+   * Context Engine ids of the AI indices this agent may use. These are ids, not Elasticsearch
+   * index names.
+   */
+  aiIndices: string[];
 }

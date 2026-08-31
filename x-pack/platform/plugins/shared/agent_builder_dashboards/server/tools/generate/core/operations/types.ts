@@ -17,6 +17,8 @@ export type ResolveCustomContentTemplate = (params: {
   prompt: string;
   esqlQuery?: string;
   existingTemplate?: string;
+  /** True when the panel already has an ES|QL query that is not changing, so the resolver can skip re-sampling. */
+  hasExistingQuery?: boolean;
 }) => Promise<string>;
 
 export interface OperationExecutionContext {

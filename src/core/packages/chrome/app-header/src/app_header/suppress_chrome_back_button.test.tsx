@@ -16,7 +16,6 @@ import { SuppressChromeBackButton } from './suppress_chrome_back_button';
 describe('SuppressChromeBackButton', () => {
   it('registers back: false when Chrome Next project style is active', () => {
     const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.next.appHeader.set.mockReturnValue(jest.fn());
 
@@ -39,7 +38,6 @@ describe('SuppressChromeBackButton', () => {
 
   it('does not register outside Chrome Next project style', () => {
     const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => false });
     chrome.getChromeStyle.mockReturnValue('classic');
     chrome.next.appHeader.set.mockReturnValue(jest.fn());
 

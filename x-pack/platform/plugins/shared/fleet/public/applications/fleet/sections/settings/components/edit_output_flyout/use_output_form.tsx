@@ -193,10 +193,12 @@ export function extractDefaultDynamicKafkaTopics(
   if (!o?.topic || (o?.topic && !o.topic?.includes('%{['))) {
     return [];
   }
+  const topic = o.topic;
+  const simpleToken = topic.match(/^%\{\[([^\]]+)\]\}$/);
   return [
     {
-      label: o.topic,
-      value: o.topic,
+      label: simpleToken ? simpleToken[1] : topic,
+      value: topic,
     },
   ];
 }

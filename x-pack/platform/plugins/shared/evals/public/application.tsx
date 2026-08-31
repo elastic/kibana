@@ -19,6 +19,7 @@ import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { AppMountParameters, ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import { APP_TITLE } from './translations';
 import { ExperimentsListPage } from './pages/experiments_list';
 import { DatasetsListPage } from './pages/datasets_list';
 
@@ -60,10 +61,6 @@ const RunOverviewPage = React.lazy(async () => {
 const EvaluatorsPage = React.lazy(async () => {
   const mod = await import('./pages/evaluators');
   return { default: mod.EvaluatorsPage };
-});
-
-const appTitleLabel = i18n.translate('xpack.evals.app.title', {
-  defaultMessage: 'Evaluations',
 });
 
 const experimentsTabLabel = i18n.translate('xpack.evals.navigation.experiments', {
@@ -123,7 +120,7 @@ const EvalsHeader: React.FC = () => {
       >
         <EuiFlexItem>
           <EuiTitle size="l">
-            <h2>{appTitleLabel}</h2>
+            <h2>{APP_TITLE}</h2>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>

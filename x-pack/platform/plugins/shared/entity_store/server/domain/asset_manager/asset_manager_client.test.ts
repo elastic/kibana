@@ -158,9 +158,6 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -168,7 +165,9 @@ describe('AssetManagerClient', () => {
       analytics: {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
-      savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsClient: {
+        delete: jest.fn().mockResolvedValue({}),
+      } as unknown as SavedObjectsClientContract,
     });
   });
 
@@ -256,9 +255,6 @@ describe('AssetManagerClient', () => {
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
           mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-        remoteLogExtractionStateClient: {
-          delete: jest.fn().mockResolvedValue(undefined),
-        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
         namespace,
         isServerless: false,
         logsExtractionClient: {
@@ -558,21 +554,16 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const buildClient = (
     overrides: Partial<{
       latestExists: boolean;
-      updatesExists: boolean;
       metadataExists: boolean;
     }> = {}
   ) => {
-    const { latestExists = true, updatesExists = true, metadataExists = true } = overrides;
+    const { latestExists = true, metadataExists = true } = overrides;
 
     mockUserEsClient = {
       indices: {
         exists: jest.fn().mockResolvedValue(latestExists),
         getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
-          if (name.includes('updates')) {
-            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          } else {
-            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          }
+          return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
         }),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -596,9 +587,6 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         find: jest.fn(),
         delete: jest.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -616,7 +604,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns false and does not reinstall when all assets are present', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: true, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -625,7 +613,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns true and reinstalls when the latest index is missing', async () => {
-    buildClient({ latestExists: false, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: false, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -641,20 +629,8 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     );
   });
 
-  it('returns true and reinstalls when the updates data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: false, metadataExists: true });
-
-    const result = await client.reinstallSharedAssetsIfMissing();
-
-    expect(result).toBe(true);
-    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.updates.default')
-    );
-  });
-
   it('returns true and reinstalls when the metadata data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: false });
+    buildClient({ latestExists: true, metadataExists: false });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -784,9 +760,6 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
         engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         globalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: true,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -807,7 +780,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
   };
 
   describe('legacy-only assets (FF-off post-upgrade scenario)', () => {
-    it('reports legacy index template names as installed', async () => {
+    it('reports neutral index template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -821,14 +794,12 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
-      expect(templates[0].id).toContain('security_');
-      expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).toContain('security_');
-      expect(templates[1].installed).toBe(true);
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).not.toContain('security_');
+      expect(templates[0].installed).toBe(false);
     });
 
-    it('reports legacy component template names as installed', async () => {
+    it('reports neutral component template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -842,11 +813,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
-      expect(componentTemplates[0].id).toContain('security_');
-      expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
+      expect(componentTemplates).toHaveLength(1);
+      expect(componentTemplates[0].id).not.toContain('security_');
+      expect(componentTemplates[0].installed).toBe(false);
     });
   });
 
@@ -865,11 +834,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
+      expect(templates).toHaveLength(1);
       expect(templates[0].id).not.toContain('security_');
       expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).not.toContain('security_');
-      expect(templates[1].installed).toBe(true);
     });
 
     it('reports neutral component template names as installed', async () => {
@@ -886,11 +853,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
+      expect(componentTemplates).toHaveLength(1);
       expect(componentTemplates[0].id).not.toContain('security_');
       expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).not.toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
     });
   });
 

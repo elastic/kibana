@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/agent-builder-browser",

@@ -116,6 +116,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   fieldValue,
   fieldType = 'object',
   embeddings,
+  dimensions,
   isExpanded,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -155,7 +156,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
                 }
               )}
             />
-            <VectorFieldValue embeddings={embeddings} />
+            <VectorFieldValue embeddings={embeddings} dimensions={dimensions} />
           </Styles.SemanticVectorGrid>
         </EuiTableRowCell>
       </EuiTableRow>
@@ -172,6 +173,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
           fieldValue={fieldValue}
           fieldType={fieldType}
           embeddings={isExpanded ? embeddings : undefined}
+          dimensions={dimensions}
           isExpanded={isExpanded}
         />
       </EuiTableRowCell>

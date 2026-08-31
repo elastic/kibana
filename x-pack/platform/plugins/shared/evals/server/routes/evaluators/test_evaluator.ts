@@ -88,6 +88,7 @@ export const registerTestEvaluatorRoute = ({
             evaluator: {
               name: result.evaluator.name,
               kind: 'llm',
+              direction: evaluator.direction,
               ...(result.evaluator.model ? { model: result.evaluator.model } : {}),
             },
           };

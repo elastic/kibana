@@ -627,7 +627,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           request: {
             params: schema.object({ indexPattern: schema.string({ maxLength: 10000 }) }),
             query: schema.maybe(
-              schema.object({ rollup: schema.maybe(schema.string({ maxLength: 10000 })) })
+              schema.object({
+                rollup: schema.maybe(schema.string({ maxLength: 10000 })),
+                projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
+              })
             ),
           },
         },
@@ -637,10 +640,11 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           try {
             const { indexPattern } = request.params;
             const isRollup = request.query?.rollup === 'true';
+            const projectRouting = request.query?.projectRouting;
             const { newJobCaps } = jobServiceProvider(client, mlClient, serverless);
 
             const dataViewsService = await getDataViewsService();
-            const resp = await newJobCaps(indexPattern, isRollup, dataViewsService);
+            const resp = await newJobCaps(indexPattern, isRollup, dataViewsService, projectRouting);
 
             return response.ok({
               body: resp,
