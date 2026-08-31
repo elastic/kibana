@@ -7,21 +7,12 @@
 
 import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 
 const EXCEPTION_LIST_URL = '/api/exception_lists';
 const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
 const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE =
   '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in';
-
-const LISTS_API_HEADERS = {
-  'elastic-api-version': '2023-10-31',
-  'x-elastic-internal-origin': 'kibana',
-};
-
-const INTERNAL_API_HEADERS = {
-  'elastic-api-version': '1',
-  'x-elastic-internal-origin': 'kibana',
-};
 
 export interface CreateEndpointArtifactListInput {
   listId: string;
@@ -61,7 +52,7 @@ export const getEndpointArtifactsApiService = ({
       method: 'DELETE',
       path: `${basePath}${EXCEPTION_LIST_URL}`,
       query: { list_id: listId, namespace_type: 'agnostic' },
-      headers: LISTS_API_HEADERS,
+      headers: PUBLIC_API_HEADERS,
       ignoreErrors: [404],
       retries: 0,
     });
@@ -73,7 +64,7 @@ export const getEndpointArtifactsApiService = ({
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}${EXCEPTION_LIST_URL}`,
-          headers: LISTS_API_HEADERS,
+          headers: PUBLIC_API_HEADERS,
           retries: 0,
           ignoreErrors: [409],
           body: {
@@ -92,7 +83,7 @@ export const getEndpointArtifactsApiService = ({
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}${EXCEPTION_LIST_ITEM_URL}`,
-          headers: LISTS_API_HEADERS,
+          headers: PUBLIC_API_HEADERS,
           retries: 0,
           body: {
             name,
