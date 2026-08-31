@@ -270,9 +270,20 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
+                "builder_fields": Object {
+                  "additionalProperties": Object {},
+                  "description": "Parameters the builder identified by builder_type was configured with. The server validates these against that builder's schema and generates the rule query from them, so \`query\` must not be sent alongside them.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
                 "builder_type": Object {
-                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
+                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL. When set, the server owns the rule query and generates it from builder_fields.",
                   "maxLength": 64,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "description": Object {
@@ -461,7 +472,11 @@ describe('rule template create-rule schema coupling', () => {
               "description": "How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query.",
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_rule_query",
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_query",
+                },
+              ],
             },
             "recovery_strategy": Object {
               "anyOf": Array [
@@ -549,7 +564,6 @@ describe('rule template create-rule schema coupling', () => {
             "metadata",
             "time_field",
             "schedule",
-            "query",
           ],
           "type": "object",
         },

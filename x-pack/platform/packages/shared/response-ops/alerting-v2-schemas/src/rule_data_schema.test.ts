@@ -24,6 +24,8 @@ import { tagsResponseSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
+  MAX_BUILDER_FIELDS_KEYS,
+  MAX_BUILDER_TYPE_LENGTH,
   MAX_BULK_ITEMS,
   MAX_FIELD_NAME_LENGTH,
 } from './constants';
@@ -996,6 +998,160 @@ describe('createRuleDataSchema', () => {
       }
     );
   });
+
+  describe('builder metadata', () => {
+    const { query: _query, ...withoutQuery } = validCreateData;
+    const builderMetadata = {
+      name: 'test rule',
+      builder_type: 'threshold',
+      builder_fields: { indexPattern: 'logs-*' },
+    };
+
+    it('accepts builder_type with builder_fields and no query', () => {
+      const result = createRuleDataSchema.parse({
+        ...withoutQuery,
+        metadata: builderMetadata,
+      });
+
+      expect(result.metadata).toEqual(builderMetadata);
+      expect(result.query).toBeUndefined();
+    });
+
+    it('rejects query sent alongside builder_fields', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: builderMetadata,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain('query');
+    });
+
+    it('accepts builder_type with a query and no builder_fields', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder_type: 'threshold' },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects builder_fields without builder_type', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder_fields: { indexPattern: 'logs-*' } },
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain(
+        'metadata.builder_fields'
+      );
+    });
+
+    it('rejects a payload with neither query nor builder_fields', () => {
+      const result = createRuleDataSchema.safeParse(withoutQuery);
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain('query');
+    });
+
+    it('rejects an empty builder_type', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        metadata: { ...builderMetadata, builder_type: '' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an over-long builder_type', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        metadata: { ...builderMetadata, builder_type: 'a'.repeat(MAX_BUILDER_TYPE_LENGTH + 1) },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects builder_fields with more than the maximum number of keys', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        metadata: {
+          ...builderMetadata,
+          builder_fields: Object.fromEntries(
+            Array.from({ length: MAX_BUILDER_FIELDS_KEYS + 1 }, (_, i) => [`field_${i}`, i])
+          ),
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a builder_fields key longer than a field name', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        metadata: {
+          ...builderMetadata,
+          builder_fields: { ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)]: 1 },
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a signal rule authored by a builder, whose query format is not known yet', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        kind: 'signal',
+        metadata: builderMetadata,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('still requires the standalone format from a signal rule that sends its own query', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        query: { format: 'composed', base: 'FROM logs-*' },
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain('query.format');
+    });
+
+    it('accepts recovery_strategy "query" without a query, which the builder generates', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        recovery_strategy: 'query',
+        metadata: builderMetadata,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('still requires a recovery block from a rule that sends its own query', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain('query.recovery');
+    });
+
+    it('leaves the shape of builder_fields to the builder that owns it', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...withoutQuery,
+        metadata: {
+          ...builderMetadata,
+          builder_fields: { anything: { nested: [1, 'two', null] } },
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
 });
 
 describe('updateRuleDataSchema', () => {
@@ -1249,6 +1405,65 @@ describe('updateRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('builder metadata', () => {
+    const someQuery = {
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    };
+
+    it('accepts a builder_fields-only update', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { builder_fields: { indexPattern: 'logs-*' } },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts builder_fields with builder_type', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { builder_type: 'threshold', builder_fields: { indexPattern: 'logs-*' } },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects query sent alongside builder_fields', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { builder_type: 'threshold', builder_fields: { indexPattern: 'logs-*' } },
+        query: someQuery,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain('query');
+    });
+
+    it('accepts query when builder_type is cleared in the same request', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { builder_type: null },
+        query: someQuery,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects builder_fields while builder_type is being cleared', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { builder_type: null, builder_fields: { indexPattern: 'logs-*' } },
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain(
+        'metadata.builder_fields'
+      );
+    });
+
+    it('accepts clearing builder_fields with null', () => {
+      const result = updateRuleDataSchema.safeParse({ metadata: { builder_fields: null } });
+
+      expect(result.success).toBe(true);
     });
   });
 });

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export type { ArtifactTypeDefinition, RuleArtifactLike } from './types';
-export { ArtifactTypeRegistry } from './artifact_type_registry';
-export type { ArtifactTypeRegistryContract } from './artifact_type_registry';
+export type {
+  BuilderTypeDefinition,
+  RegisteredBuilderType,
+  OpaqueBuilderFields,
+  GeneratedQuery,
+} from './types';
+export { BuilderTypeRegistry } from './builder_type_registry';
+export type { BuilderTypeRegistryContract } from './builder_type_registry';
 export { assertValidDefinition } from './assert_valid_definition';
-export { registerBuiltinArtifactTypes, dashboardIdSchema } from './register_builtin_artifact_types';

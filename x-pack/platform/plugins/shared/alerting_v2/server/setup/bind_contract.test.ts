@@ -6,6 +6,7 @@
  */
 
 import { Container, ContainerModule } from 'inversify';
+import { z } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
@@ -14,6 +15,7 @@ import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
@@ -45,15 +47,32 @@ describe('bindContract', () => {
       getContainer: jest.fn(() => container),
     } as never);
     container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+    container.bind(BuilderTypeRegistry).toSelf().inSingletonScope();
 
     container.load(new ContainerModule((options) => bindContract(options)));
   });
 
-  it('exposes registerArtifactType on the setup contract', () => {
+  it('exposes the extension points on the setup contract', () => {
     const setup = container.get(AlertingSetupToken);
     expect(setup).toEqual({
       registerArtifactType: expect.any(Function),
+      registerBuilderType: expect.any(Function),
     });
+  });
+
+  it('registers a builder type into the registry other plugins share', () => {
+    const setup = container.get(AlertingSetupToken);
+    const definition = {
+      type: 'my_builder',
+      builderFieldsSchema: z.object({ index: z.string().max(64) }).strict(),
+      generateQuery: () => ({
+        query: { format: 'composed' as const, base: 'FROM logs-*' },
+      }),
+    };
+
+    setup.registerBuilderType(definition);
+
+    expect(container.get(BuilderTypeRegistry).has('my_builder')).toBe(true);
   });
 
   it('exposes all client factories on the start contract', () => {

@@ -23,6 +23,8 @@ import {
   ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
+  MAX_BUILDER_FIELDS_KEYS,
+  MAX_BUILDER_TYPE_LENGTH,
 } from './constants';
 
 /** Primitives */
@@ -59,6 +61,33 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 /** Metadata (required) */
 
+/**
+ * Structured builder parameters. The envelope is bounded here; the shape is
+ * validated server-side against the schema registered for `builder_type`.
+ */
+const builderFieldsSchema = z
+  .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
+  .check((ctx) => {
+    if (Object.keys(ctx.value).length > MAX_BUILDER_FIELDS_KEYS) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `builder_fields must have at most ${MAX_BUILDER_FIELDS_KEYS} top-level fields.`,
+        input: ctx.value,
+      });
+    }
+  })
+  .describe(
+    "Parameters the builder identified by builder_type was configured with. The server validates these against that builder's schema and generates the rule query from them, so `query` must not be sent alongside them."
+  );
+
+const builderTypeSchema = z
+  .string()
+  .min(1)
+  .max(MAX_BUILDER_TYPE_LENGTH)
+  .describe(
+    'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL. When set, the server owns the rule query and generates it from builder_fields.'
+  );
+
 export const metadataSchema = z
   .object({
     name: z
@@ -76,13 +105,8 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
-    builder_type: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(
-        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
-      ),
+    builder_type: builderTypeSchema.optional(),
+    builder_fields: builderFieldsSchema.optional(),
   })
   .strict()
   .describe('Rule metadata.')
@@ -546,12 +570,54 @@ const rejectEmitNoDataStrategy = {
   path: ['no_data_strategy'],
 };
 
+/** Builder invariants — shared between the create and update schemas. */
+
+interface BuilderMetadataLike {
+  metadata?: { builder_type?: string | null; builder_fields?: unknown };
+  query?: unknown;
+}
+
+/**
+ * The server generates the query from `metadata.builder_fields`, so a request
+ * cannot carry both. Sending `builder_fields: null` releases the query for
+ * direct edits in the same request.
+ */
+const isQueryAbsentForBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields == null || data.query == null;
+
+/** `builder_type` names the schema that validates `builder_fields`, so it is required with them. */
+const isBuilderTypeProvidedForBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields == null || Boolean(data.metadata?.builder_type);
+
+const rejectQueryWithBuilderFields = {
+  message:
+    'query cannot be set together with metadata.builder_fields — the server generates the query from those fields. Send metadata.builder_fields: null in the same request to stop using the builder and set query directly.',
+  path: ['query'],
+};
+
+const rejectBuilderFieldsWithoutBuilderType = {
+  message: 'metadata.builder_fields requires metadata.builder_type.',
+  path: ['metadata', 'builder_fields'],
+};
+
+/** A rule that is not builder-generated has to carry its own query. */
+const isQueryProvidedWithoutBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields != null || data.query != null;
+
 export const createRuleDataSchema = createRuleDataBaseSchema
+  // Builder-authored rules omit `query`: the server generates it from
+  // `metadata.builder_fields`. The refinements below keep exactly one of the two
+  // sources present.
+  .extend({ query: querySchema.optional() })
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine(isSignalUsingStandaloneFormat, {
+  // A builder-authored request carries no query to check the format of. The
+  // generated one is still held to this rule: the rules client adapts it to the
+  // rule's kind, and the stored-shape validation applies the predicate below
+  // unconditionally.
+  .refine((data) => data.metadata.builder_fields != null || isSignalUsingStandaloneFormat(data), {
     message: 'kind "signal" requires query.format "standalone".',
     path: ['query', 'format'],
   })
@@ -563,10 +629,15 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     message: 'query.recovery is only allowed when recovery_strategy is "query".',
     path: ['query', 'recovery'],
   })
-  .refine(isRecoveryQueryProvidedForStrategy, {
-    message: 'query.recovery is required when recovery_strategy is "query".',
-    path: ['query', 'recovery'],
-  })
+  // Also unverifiable until the builder has generated the query; likewise
+  // re-checked once it has.
+  .refine(
+    (data) => data.metadata.builder_fields != null || isRecoveryQueryProvidedForStrategy(data),
+    {
+      message: 'query.recovery is required when recovery_strategy is "query".',
+      path: ['query', 'recovery'],
+    }
+  )
   .refine(isNoDataQueryConsistentWithStrategy, {
     message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
     path: ['query', 'no_data'],
@@ -577,6 +648,12 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     path: ['query', 'no_data'],
   })
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
+  .refine(isQueryAbsentForBuilderFields, rejectQueryWithBuilderFields)
+  .refine(isBuilderTypeProvidedForBuilderFields, rejectBuilderFieldsWithoutBuilderType)
+  .refine(isQueryProvidedWithoutBuilderFields, {
+    message: 'query is required unless metadata.builder_fields is set.',
+    path: ['query'],
+  })
   .meta({ id: 'alerting_new_rule' });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
@@ -608,7 +685,12 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        // `null` opts the rule out of builder mode, clearing both builder fields
+        // and releasing `query` for direct edits in the same request.
+        builder_type: builderTypeSchema.optional().nullable(),
+        builder_fields: builderFieldsSchema.optional().nullable(),
+      })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
@@ -627,6 +709,29 @@ export const updateRuleDataSchema = z
         path: ['no_data_strategy'],
         message: rejectEmitNoDataStrategy.message,
         input: ctx.value.no_data_strategy,
+      });
+    }
+
+    if (!isQueryAbsentForBuilderFields(ctx.value)) {
+      ctx.issues.push({
+        code: 'custom',
+        path: rejectQueryWithBuilderFields.path,
+        message: rejectQueryWithBuilderFields.message,
+        input: ctx.value.query,
+      });
+    }
+
+    // `builder_fields` needs a `builder_type` to validate it. On update that
+    // type may already be on the stored rule, so only an explicitly cleared
+    // `builder_type` is contradictory here; the rules client rejects fields sent
+    // for a rule that has no builder.
+    if (ctx.value.metadata?.builder_type === null && ctx.value.metadata?.builder_fields != null) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['metadata', 'builder_fields'],
+        message:
+          'metadata.builder_fields cannot be set while metadata.builder_type is being cleared with null.',
+        input: ctx.value.metadata.builder_fields,
       });
     }
   });

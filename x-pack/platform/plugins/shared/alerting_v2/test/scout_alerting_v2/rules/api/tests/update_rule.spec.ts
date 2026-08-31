@@ -691,6 +691,40 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'builder_fields: should reject fields naming a builder type that is not registered',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'builder-fields-unknown-type' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: { builder_type: 'not-a-builder', builder_fields: { indexPattern: 'logs-*' } },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('UNKNOWN_BUILDER_TYPE');
+    }
+  );
+
+  apiTest(
+    'builder_fields: should reject a query sent alongside builder_fields',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'builder-fields-with-query' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: { builder_type: 'threshold', builder_fields: { indexPattern: 'logs-*' } },
+          query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'builder_type: should allow query change on a builder rule when builder_type is explicitly cleared',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
