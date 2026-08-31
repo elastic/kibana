@@ -28,6 +28,7 @@ export const registerFinalizeExperimentRecordRoute = ({
     .post({
       path: EVALS_EXPERIMENT_RECORD_FINALIZE_URL,
       access: INTERNAL_API_ACCESS,
+      enableQueryVersion: true,
       security: {
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
