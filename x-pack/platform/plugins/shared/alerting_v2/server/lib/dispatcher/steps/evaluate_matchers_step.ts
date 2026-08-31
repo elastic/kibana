@@ -10,7 +10,7 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { PolicyCatalog, RuleCatalog } from '../state';
+import { EpisodeTriage, PolicyCatalog, RuleCatalog } from '../state';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
@@ -29,12 +29,12 @@ export class EvaluateMatchersStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const {
-      dispatchable = [],
+      triage = EpisodeTriage.empty(),
       rules = RuleCatalog.empty(),
       policies = PolicyCatalog.empty(),
     } = state;
 
-    const matched = this.evaluateMatchers(dispatchable, rules, policies, logger);
+    const matched = this.evaluateMatchers(triage.dispatchable, rules, policies, logger);
 
     return { type: 'continue', data: { matched } };
   }

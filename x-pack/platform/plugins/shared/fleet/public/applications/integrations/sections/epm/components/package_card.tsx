@@ -41,6 +41,7 @@ import {
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
+import { buildPackageCardNavigateState } from './package_card_navigate_state';
 import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
@@ -213,7 +214,14 @@ export function PackageCard({
         : {};
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
         path,
-        state: { fromIntegrations, ...(fromCollection ? { fromCollection } : {}), ...cancelState },
+        state: {
+          ...buildPackageCardNavigateState({
+            search: typeof window !== 'undefined' ? window.location.search : '',
+            fromIntegrations,
+            fromCollection,
+          }),
+          ...cancelState,
+        },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');

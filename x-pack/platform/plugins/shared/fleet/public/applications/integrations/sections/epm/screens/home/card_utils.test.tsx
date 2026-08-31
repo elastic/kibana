@@ -11,6 +11,8 @@ import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 import type { PackageListItem } from '../../../../types';
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import type { DynamicPagePathValues } from '../../../../constants';
+
 import { getIntegrationLabels, mapToCard } from './card_utils';
 
 function renderIntegrationLabels(item: Partial<PackageListItem>) {
@@ -377,6 +379,39 @@ describe('Card utils', () => {
 
         expect(cardItem.url).toBe('integration_details_overview');
       });
+    });
+
+    it('does not put return params on package card hrefs', () => {
+      const getHrefWithValues: Parameters<typeof mapToCard>[0]['getHref'] = jest.fn(
+        (_page: string, values?: DynamicPagePathValues) =>
+          `integration_details_overview?${new URLSearchParams(
+            Object.entries(values ?? {}).map(([key, value]) => [key, String(value)])
+          ).toString()}`
+      );
+      const cardArgs = Object.assign(
+        {
+          item: {
+            id: 'nginx',
+            name: 'nginx',
+            title: 'Nginx',
+            version: '1.0.0',
+            type: 'integration',
+          } as PackageListItem,
+          addBasePath,
+          getHref: getHrefWithValues,
+          getAbsolutePath: (p: string) => p,
+        },
+        {
+          returnAppId: 'observabilityOnboarding',
+          returnPath: '?',
+        } as Record<string, string>
+      );
+      const cardItem = mapToCard(cardArgs);
+
+      expect(getHrefWithValues).toHaveBeenCalledWith('integration_details_overview', {
+        pkgkey: 'nginx-1.0.0',
+      });
+      expect(cardItem.url).not.toContain('returnAppId');
     });
   });
   describe('getIntegrationLabels', () => {
