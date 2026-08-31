@@ -44,6 +44,7 @@ function updatePkgEntries(depsObj, actual, expected) {
 }
 
 /**
+ * Updates the package.json file with the latest dependencies from the workspace.
  * @param {import('@kbn/repo-packages').Package[]} pkgs
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */

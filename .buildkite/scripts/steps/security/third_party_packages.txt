@@ -1,5 +1,3 @@
-@types/mdast
-@types/unist
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm

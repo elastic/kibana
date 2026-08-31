@@ -6,43 +6,35 @@ set -euo pipefail
 # fresh checkout on an agent bootstraps from a warm store instead of the network.
 #
 # It produces three directories under $KBN_PNPM_CACHE_DIR (default ~/.kibana):
-#   pnpm-store/    the content-addressable pnpm store
+#   .pnpm-store/   the content-addressable pnpm store
 #   node_modules/  a fully installed, hoisted node_modules linked to that store
 #
-# .buildkite/scripts/bootstrap.sh consumes them (see the "Using ~/.kibana/... as a
-# starting point" block). node_modules and the store are moved as a pair so the
-# hardlinks between them survive intact — build them together here and bake them
-# together on the image.
+# .buildkite/scripts/bootstrap.sh consumes them, by moving them to $KIBANA_DIR
 #
 # Run this in the image build (other repo) from a clean Kibana checkout at the ref
 # you are baking:  .buildkite/scripts/bake_pnpm_cache.sh
 
 KIBANA_DIR="${KIBANA_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
-PNPM_CACHE_DIR="${KBN_PNPM_CACHE_DIR:-${CACHE_DIR:-$HOME/cache/kibana}}"
+PNPM_CACHE_DIR="${KBN_PNPM_CACHE_DIR:-${CACHE_DIR:-$HOME/.cache/kibana/pnpm}}"
 STORE_DIR="$PNPM_CACHE_DIR/.pnpm-store"
 
 cd "$KIBANA_DIR"
 
-# Provision Node + pnpm exactly like every Kibana CI bootstrap. This downloads
-# the pinned Node (.node-version) into $PNPM_CACHE_DIR/node and enables the corepack
-# pnpm in that writable node bin dir. Rolling our own here failed two ways:
-# `corepack enable` can't symlink into root-owned /usr/bin, and the image's
-# system Node is too old, so `kbn bootstrap` rejects it (engine check wants the
-# pinned v24). Sourcing this gets Node and pnpm right in one step.
+# Setup node and env similar to the CI bootstrap.
 source "$KIBANA_DIR/.buildkite/scripts/common/util.sh"
 source "$KIBANA_DIR/.buildkite/scripts/common/env.sh"
 source "$KIBANA_DIR/.buildkite/scripts/common/setup_node.sh"
 
 echo "--- baking pnpm cache into $PNPM_CACHE_DIR (pnpm $(pnpm --version))"
 
-# CI=true gives us the same install as an agent: frozen lockfile, no vscode config.
-# --no-prebuilt skips the webpack bundles; they are ref-specific and rebuilt per
-# distribution build, so baking them would only add stale weight to the image.
+# Install the dependencies and skip the webpack bundles.
 CI=true pnpm kbn bootstrap --no-prebuilt
 
 echo "--- ES snapshots and endpoint agents"
 
-if [[ ! -f "$ES_CACHE_DIR/.done" ]]; then
+# Download ES snapshots, but consider the main branch as the reference branch 
+#  (older branches versions.json don't have all versions)
+if [[ ! -f "$ES_CACHE_DIR/.done" || $(jq -r '.branch' package.json) == "main" ]]; then
   cd .buildkite && npm ci && cd "$KIBANA_DIR"
 
   for version in $(jq -r '.versions[].version' versions.json); do
@@ -55,9 +47,8 @@ if [[ ! -f "$ES_CACHE_DIR/.done" ]]; then
   touch "$ES_CACHE_DIR/.done"
 fi
 
-# Stage node_modules next to the store so the image bakes the matching pair.
-# When the checkout already IS the cache dir (the image build checks Kibana out
-# into ~/.kibana), bootstrap installed it there already — nothing to move.
+# Move node_modules next to the store so the image bakes the matching pair.
+# When the checkout already IS the cache dir, bootstrap installed it there already.
 if [[ "$KIBANA_DIR" != "$PNPM_CACHE_DIR" ]]; then
   rm -rf "$PNPM_CACHE_DIR/node_modules"
   mv "$KIBANA_DIR/node_modules" "$PNPM_CACHE_DIR/node_modules"
