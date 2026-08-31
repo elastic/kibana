@@ -77,9 +77,6 @@ export const RequireEuiFormCompressed: Rule.RuleModule = {
           });
         }
       },
-      // eslint dispatches visitors by node type at runtime; the JSX visitor is
-      // typed with @typescript-eslint nodes, which don't structurally match
-      // eslint's estree RuleListener signature.
     } as unknown as Rule.RuleListener;
   },
 };

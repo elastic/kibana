@@ -199,11 +199,7 @@
     },
     {
       "groupName": "Enzyme dependencies",
-      "matchDepNames": [
-        "@wojtekmaj/enzyme-adapter-react-17",
-        "enzyme",
-        "@types/enzyme"
-      ],
+      "matchDepNames": ["@wojtekmaj/enzyme-adapter-react-17", "enzyme", "@types/enzyme"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "matchUpdateTypes": ["patch"],
@@ -510,14 +506,6 @@
       "reviewers": ["team:kibana-cases", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
-    },
-    {
-      "groupName": "markdown AST types",
-      "matchDepNames": ["@types/mdast", "@types/unist"],
-      "reviewers": ["team:kibana-cases", "team:security-solution"],
-      "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },

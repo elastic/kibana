@@ -27,6 +27,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
       ['**/.es']: true,
       ['**/.eslintcache']: true,
       ['**/.pnpm-store']: true,
+      ['**/.yarn-local-mirror']: true,
       ['**/*.log']: true,
       ['**/api_docs']: true,
       ['**/bazel-*']: true,

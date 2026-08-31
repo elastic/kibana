@@ -4,15 +4,7 @@ set -euo pipefail
 
 # Pre-populates the pnpm cache that the CI agent image bakes into ~/.kibana, so a
 # fresh checkout on an agent bootstraps from a warm store instead of the network.
-#
-# It produces three directories under $KBN_PNPM_CACHE_DIR (default ~/.kibana):
-#   .pnpm-store/   the content-addressable pnpm store
-#   node_modules/  a fully installed, hoisted node_modules linked to that store
-#
 # .buildkite/scripts/bootstrap.sh consumes them, by moving them to $KIBANA_DIR
-#
-# Run this in the image build (other repo) from a clean Kibana checkout at the ref
-# you are baking:  .buildkite/scripts/bake_pnpm_cache.sh
 
 KIBANA_DIR="${KIBANA_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 PNPM_CACHE_DIR="${KBN_PNPM_CACHE_DIR:-${CACHE_DIR:-$HOME/.cache/kibana/pnpm}}"
@@ -49,8 +41,6 @@ if [[ ! -f "$ES_CACHE_DIR/.done" || $(jq -r '.branch' package.json) == "main" ]]
   touch "$ES_CACHE_DIR/.done"
 fi
 
-# Move node_modules next to the store so the image bakes the matching pair.
-# When the checkout already IS the cache dir, bootstrap installed it there already.
 if [[ "$KIBANA_DIR" != "$PNPM_CACHE_DIR" ]]; then
   rm -rf "$PNPM_CACHE_DIR/node_modules"
   mv "$KIBANA_DIR/node_modules" "$PNPM_CACHE_DIR/node_modules"

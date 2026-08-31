@@ -152,7 +152,7 @@ report.asciidoc
 /tsconfig.refs.json
 *.type_check.json
 
-# Yarn
+# Yarn local mirror content
 .yarn-local-mirror
 
 # PNPM

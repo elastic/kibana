@@ -39,8 +39,7 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
-  # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
-  # So, we should just delete node_modules in between attempts
+  # Delete node_modules in between attempts to prompt a clean install
   rm -rf node_modules
 
   echo "--- pnpm install and bootstrap, attempt 2"
@@ -51,8 +50,7 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'pnpm kbn bootstrap'
 fi
 
-# Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
-# Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
+# Drop caches after install to reclaim disk.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
   echo "--- Clearing cache leftovers"
   # We no longer use this cache
