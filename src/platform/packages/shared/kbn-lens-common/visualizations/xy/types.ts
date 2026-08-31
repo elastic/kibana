@@ -153,4 +153,33 @@ export interface XYVisualizationState {
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   pointVisibility?: PointVisibility;
+  bubbles?: XYBubblePoint[];
+  /** Series name shown when hovering the bubble markers. */
+  bubblesTitle?: string;
+  /** ES|QL query fetched at render time to build the bubble markers. */
+  bubblesQuery?: string;
+  /** Result column used as the Y value for the fetched bubble markers. */
+  bubblesValueColumn?: string;
+}
+
+/**
+ * A generic label/value row shown for a bubble marker. `field` is the optional
+ * source field name, so the consumer can identify specific rows (e.g. trace.id)
+ * without matching on the display label.
+ */
+export interface XYBubbleDetail {
+  label: string;
+  value: string;
+  field?: string;
+}
+
+/**
+ * A generic clickable marker overlaid on the XY chart as a bubble series. The
+ * consumer owns what each point means and what its `details` contain; the chart
+ * only renders the marker and, when `details` are present, a details popover.
+ */
+export interface XYBubblePoint {
+  x: number;
+  y: number;
+  details?: XYBubbleDetail[];
 }

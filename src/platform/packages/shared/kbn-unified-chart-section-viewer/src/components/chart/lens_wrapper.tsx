@@ -35,6 +35,8 @@ export type LensWrapperProps = {
   disabledActions?: string[];
   extraDisabledActions?: string[];
   quickActionIds?: QuickActionIds;
+  /** Called when a bubble marker (e.g. an exemplar) is clicked, with its payload. */
+  onBubbleClick?: (data: unknown) => void;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = [
@@ -55,6 +57,7 @@ export function LensWrapper({
   onExploreInDiscoverTab,
   syncTooltips,
   syncCursor,
+  onBubbleClick,
   extraDisabledActions = [],
   quickActionIds,
 }: LensWrapperProps) {
@@ -160,6 +163,7 @@ export function LensWrapper({
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
+          onBubbleClick={onBubbleClick}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />

@@ -19,3 +19,4 @@ export * from './color_assignment';
 export * from './annotations';
 export * from './data_layers';
 export * from './format';
+export * from './bubbles';

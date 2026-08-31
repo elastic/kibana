@@ -38,6 +38,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     chartLayers: LensSeriesLayer[];
     yBounds?: LensYBoundsConfig;
     legend?: LensLegendConfig;
+    metricName?: string;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
@@ -65,6 +66,8 @@ export const Chart = ({
   syncTooltips,
   yBounds,
   legend,
+  metricName,
+  onBubbleClick,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -92,6 +95,7 @@ export const Chart = ({
     chartLayers,
     yBounds,
     legend,
+    metricName,
     error,
     userMessages,
     profileId,
@@ -115,6 +119,7 @@ export const Chart = ({
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            onBubbleClick={onBubbleClick}
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}

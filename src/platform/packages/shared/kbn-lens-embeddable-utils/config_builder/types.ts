@@ -11,6 +11,7 @@ import type {
   FormulaPublicApi,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  XYBubblePoint,
 } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -309,6 +310,10 @@ export interface LensXYConfigBase {
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;
   valueLabels?: 'hide' | 'show';
+  bubbles?: XYBubblePoint[];
+  bubblesTitle?: string;
+  bubblesQuery?: string;
+  bubblesValueColumn?: string;
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;

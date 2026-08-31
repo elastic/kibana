@@ -12,6 +12,7 @@ import type { LensApi } from '@kbn/lens-common-2';
 import {
   isLensAlertRule,
   isLensBrushEvent,
+  isLensBubbleClickEvent,
   isLensEditEvent,
   isLensFilterEvent,
   isLensMultiFilterEvent,
@@ -48,6 +49,8 @@ export const prepareEventHandler =
       eventHandler = callbacks.onFilter;
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = callbacks.onTableRowClick;
+    } else if (isLensBubbleClickEvent(event)) {
+      eventHandler = callbacks.onBubbleClick;
     } else if (isLensAlertRule(event)) {
       // TODO: here is where we run the uiActions on the embeddable for the alert rule
       eventHandler = callbacks.onAlertRule;

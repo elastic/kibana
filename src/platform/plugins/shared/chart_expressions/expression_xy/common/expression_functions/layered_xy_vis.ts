@@ -59,6 +59,26 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       help: strings.getPointVisibilityHelp(),
       options: Object.values(PointVisibilityOptions),
     },
+    bubbles: {
+      types: ['string'],
+      help: strings.getBubblesHelp(),
+      default: '[]',
+    },
+    bubblesQuery: {
+      types: ['string'],
+      help: strings.getBubblesQueryHelp(),
+      default: '',
+    },
+    bubblesValueColumn: {
+      types: ['string'],
+      help: strings.getBubblesValueColumnHelp(),
+      default: '',
+    },
+    bubblesTitle: {
+      types: ['string'],
+      help: strings.getBubblesTitleHelp(),
+      default: '',
+    },
   },
   async fn(data, args, handlers) {
     const { layeredXyVisFn } = await import('./expression_module');

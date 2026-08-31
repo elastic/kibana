@@ -184,6 +184,9 @@ describe('useLensProps', () => {
           legend: {
             show: false,
           },
+          bubblesQuery: undefined,
+          bubblesValueColumn: undefined,
+          bubblesTitle: undefined,
         },
         {
           query: {

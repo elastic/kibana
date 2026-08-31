@@ -199,6 +199,12 @@ export interface LensPublicCallbacks extends LensApiProps {
    */
   userMessages?: UserMessage[];
   onAlertRule?: (data: unknown) => void;
+  /**
+   * Called when a generic bubble-series marker is clicked, with the opaque payload
+   * the consumer attached to that marker (e.g. its details). Lets the consumer own
+   * what happens on click, such as opening a flyout.
+   */
+  onBubbleClick?: (data: unknown) => void;
 }
 
 /**

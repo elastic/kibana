@@ -37,9 +37,12 @@ import {
   Direction,
   Tooltip,
   LEGACY_LIGHT_THEME,
+  BubbleSeries,
+  ScaleType,
+  PointShape,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { type IconType } from '@elastic/eui';
+import { type IconType, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -99,6 +102,10 @@ import {
   validateExtent,
   getOriginalAxisPosition,
   getMaximumFractionDigits,
+  parseBubbles,
+  BUBBLES_SERIES_ID,
+  type BubblePoint,
+  type BubbleDetail,
 } from '../helpers';
 import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -152,6 +159,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
   onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
+  onBubbleClick?: (details: BubbleDetail[]) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -204,6 +212,19 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
 
 export const XYChartReportable = React.memo(XYChart);
 
+const openBubbleTraceLabel = i18n.translate('expressionXY.bubbleTooltip.openTraceAction', {
+  defaultMessage: 'Open in Discover',
+});
+
+/** Returns the details of the bubble marker present in the given tooltip values, if any. */
+const getBubbleTooltipDetails = (
+  values?: Array<TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>>
+): BubbleDetail[] | undefined => {
+  const bubble = values?.find((value) => value.seriesIdentifier?.specId === BUBBLES_SERIES_ID)
+    ?.datum as unknown as BubblePoint | undefined;
+  return bubble?.details?.length ? bubble.details : undefined;
+};
+
 export function XYChart({
   args,
   data,
@@ -216,6 +237,7 @@ export function XYChart({
   onClickValue,
   onClickMultiValue,
   onCreateAlertRule,
+  onBubbleClick,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -243,11 +265,23 @@ export function XYChart({
     singleTable,
     annotations,
     pointVisibility,
+    bubbles: bubblesJson,
+    bubblesTitle,
   } = args;
 
   const chartRef = useRef<Chart>(null);
+  const { euiTheme } = useEuiTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
+  // `useEuiTheme()` doesn't reliably reflect Kibana dark mode in this chart's
+  // render path, so drive the bubble marker colors from the trusted `darkMode`
+  // flag using the colorMode-independent constants `plainLight`/`plainDark`.
+  // `bubbleInk` is the series color: it fills the marker and shows as the swatch
+  // next to the series name in the tooltip, so it must contrast with the tooltip
+  // background (black in light mode, white in dark mode). `bubblePaper` is the
+  // inverse, used as the marker outline so the marker stays legible on the line.
+  const bubbleInk = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
+  const bubblePaper = darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = useMemo(() => getFilteredLayers(layers), [layers]);
@@ -353,6 +387,10 @@ export function XYChart({
     },
     [renderComplete]
   );
+
+  // Bubble markers are provided by the consumer (e.g. Metrics Experience) and
+  // passed in as a JSON string through the expression.
+  const bubbles = useMemo<BubblePoint[]>(() => parseBubbles(bubblesJson), [bubblesJson]);
 
   useEffect(() => {
     const chartSizeSpec: ChartSizeSpec =
@@ -638,6 +676,13 @@ export function XYChart({
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
 
+    // Bubble markers are handled through the tooltip (hover shows details, the
+    // pinned tooltip exposes the "Open in Discover" action). Skip the normal
+    // filter path so a bubble click does not filter the chart.
+    if (xySeries.specId === BUBBLES_SERIES_ID) {
+      return;
+    }
+
     const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) =>
         l.accessors.some(
@@ -875,18 +920,46 @@ export function XYChart({
                     )
                   : undefined
               }
-              actions={getTooltipActions(
-                dataLayers,
-                onClickMultiValue,
-                onCreateAlertRule,
-                fieldFormats,
-                formattedDatatables,
-                xAxisFormatter,
-                formatFactory,
-                isEsqlMode,
-                canCreateAlerts,
-                interactive && !args.detailedTooltip
-              )}
+              actions={
+                bubbles.length && onBubbleClick
+                  ? (selected) => {
+                      const base =
+                        getTooltipActions(
+                          dataLayers,
+                          onClickMultiValue,
+                          onCreateAlertRule,
+                          fieldFormats,
+                          formattedDatatables,
+                          xAxisFormatter,
+                          formatFactory,
+                          isEsqlMode,
+                          canCreateAlerts,
+                          interactive && !args.detailedTooltip
+                        ) ?? [];
+                      const details = getBubbleTooltipDetails(selected);
+                      return details
+                        ? [
+                            {
+                              label: () => openBubbleTraceLabel,
+                              onSelect: () => onBubbleClick(details),
+                            },
+                            ...base,
+                          ]
+                        : base;
+                    }
+                  : getTooltipActions(
+                      dataLayers,
+                      onClickMultiValue,
+                      onCreateAlertRule,
+                      fieldFormats,
+                      formattedDatatables,
+                      xAxisFormatter,
+                      formatFactory,
+                      isEsqlMode,
+                      canCreateAlerts,
+                      interactive && !args.detailedTooltip
+                    )
+              }
               customTooltip={
                 args.detailedTooltip
                   ? ({ header, values }) => (
@@ -1111,6 +1184,28 @@ export function XYChart({
                 pointVisibility={pointVisibility}
               />
             )}
+            {bubbles.length ? (
+              <BubbleSeries
+                id={BUBBLES_SERIES_ID}
+                name={bubblesTitle || undefined}
+                groupId={(yAxesMap.left ?? yAxesMap.right)?.groupId}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={bubbles}
+                color={bubbleInk}
+                bubbleSeriesStyle={{
+                  point: {
+                    shape: PointShape.Diamond,
+                    radius: 4,
+                    strokeWidth: 1,
+                    stroke: bubblePaper,
+                  },
+                }}
+                hideInLegend
+              />
+            ) : null}
             {referenceLineLayers.length ? (
               <ReferenceLines
                 layers={referenceLineLayers}

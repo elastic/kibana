@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import type { XYBubbleDetail } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
@@ -37,6 +38,7 @@ import {
   ACTION_VIEW_DETAILS,
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { TRACE_ID_FIELD } from '../../chart/hooks/fetch_exemplars';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
 
@@ -394,6 +396,30 @@ const ChartItem = React.memo(
       return getFieldSearchMatchingHighlight(metricItem.metricName, searchTerm.trim());
     }, [metricItem.metricName, searchTerm]);
 
+    // Bubble (exemplar) click opens the related trace in a new Discover tab. The
+    // chart forwards the clicked bubble's details via the tooltip "Open in Discover"
+    // action; only exemplars carrying a trace id navigate.
+    const handleBubbleClick = useCallback(
+      (data: unknown) => {
+        const details = (data as { details?: XYBubbleDetail[] })?.details;
+        const traceId = details?.find((detail) => detail.field === TRACE_ID_FIELD)?.value;
+        if (!traceId) {
+          return;
+        }
+        actions.openInNewTab?.({
+          query: {
+            esql: `FROM traces-apm*,apm-*,traces-*.otel-* | WHERE trace.id == "${traceId}"`,
+          },
+          tabLabel: i18n.translate('metricsExperience.exemplars.traceTabLabel', {
+            defaultMessage: 'Trace {traceId}',
+            values: { traceId },
+          }),
+          timeRange: fetchParams.timeRange,
+        });
+      },
+      [actions, fetchParams.timeRange]
+    );
+
     return (
       <A11yGridCell
         id={id}
@@ -420,6 +446,8 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
+          metricName={metricItem.metricName}
+          onBubbleClick={handleBubbleClick}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}
