@@ -13,6 +13,9 @@
     "requiredPlugins": [
       "share"
     ],
+    "optionalPlugins": [
+      "cps"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ],

@@ -16,6 +16,9 @@
     "requiredPlugins": [
       "cloud"
     ],
+    "optionalPlugins": [
+      "developerToolbar"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

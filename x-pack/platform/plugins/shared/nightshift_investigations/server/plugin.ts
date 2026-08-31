@@ -21,6 +21,7 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -95,6 +96,10 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           triggerInvestigationStepDefinition(getInvestigationsClient)
         );
+        // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
+        plugins.workflowsExtensions.registerStepDefinition(
+          ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
+        );
       }
 
       registerRoutes({
@@ -119,6 +124,9 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
 
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install exists so the agent is
+    // visible and editable in the Agent Builder UI before the first investigation ever runs.
     if (plugins.agentBuilder) {
       void installInvestigationAgent({
         agentBuilder: plugins.agentBuilder,
