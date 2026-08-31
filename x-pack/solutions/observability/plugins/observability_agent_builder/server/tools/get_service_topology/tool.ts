@@ -105,7 +105,7 @@ After reviewing topology results, consider:
 - Use \`observability.get_trace_metrics\` with timeseries to check latency/error trends over time
 - Use \`observability.get_traces\` to find error patterns in failing dependencies
 
-Also returns \`nodeMetadata\`: a map keyed by service name with per-service \`alertsCount\`, \`sloStatus\`, and \`sloCount\`. Pass both \`connections\` and \`nodeMetadata\` verbatim into an "observability.service-map" attachment to render alert/SLO badges on the service nodes.`,
+Also returns \`nodeMetadata\`: a map keyed by service name with per-service \`alertsCount\`, \`sloStatus\`, and \`sloCount\`. Pass both \`connections\` and \`nodeMetadata\` verbatim into an "observability.service-map" attachment to render alert/SLO badges on the service nodes. When creating that attachment, also set \`serviceName\` to the focal service and \`timeRange\` to the \`start\`/\`end\` used for this call so the interactive map can scope its drill-down views.`,
     schema: getServiceTopologyToolSchema,
     tags: ['observability', 'apm', 'service-map', 'topology'],
     availability: {
