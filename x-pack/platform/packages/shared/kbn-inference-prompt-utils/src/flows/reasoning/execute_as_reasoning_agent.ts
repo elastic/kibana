@@ -38,6 +38,7 @@ import { BEGIN_INTERNAL_REASONING_MARKER, END_INTERNAL_REASONING_MARKER } from '
 import type { PlanningToolCall, PlanningToolMessage } from './planning_tools';
 import { PLANNING_TOOLS, isPlanningToolName, removeSystemToolCalls } from './planning_tools';
 import type {
+  ReasoningPromptDiagnostics,
   ReasoningPromptOptions,
   ReasoningPromptResponse,
   ReasoningPromptResponseOf,
@@ -126,6 +127,10 @@ export async function executeAsReasoningAgent(
     abortSignal,
   } = options;
   const startTime = Date.now();
+
+  const diagnostics: ReasoningPromptDiagnostics = {
+    externalContentToolContinuations: 0,
+  };
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
@@ -313,6 +318,11 @@ export async function executeAsReasoningAgent(
       !content.includes(END_INTERNAL_REASONING_MARKER) &&
       !response.toolCalls.length;
 
+    const [systemToolCalls, nonSystemToolCalls] = partition(
+      response.toolCalls,
+      (toolCall): toolCall is PlanningToolCall => isPlanningToolName(toolCall.function.name)
+    );
+
     /**
      * Remove content after <<<END_INTERNAL>>>. This means that the LLM has combined final output
      * with internal reasoning, and it usually leads the LLM into a loop where it repeats itself.
@@ -323,9 +333,12 @@ export async function executeAsReasoningAgent(
     const externalContent = externalContentParts.join(END_INTERNAL_REASONING_MARKER).trim();
 
     // use some kind of buffer to allow small artifacts around the markers, like markdown.
-    if (externalContent.length && externalContent.length > 25) {
+    const hasExternalContent = externalContent.length > 25;
+    const shouldContinueAfterExternalContent = hasExternalContent && nonSystemToolCalls.length > 0;
+
+    if (hasExternalContent) {
       content = internalContent + END_INTERNAL_REASONING_MARKER;
-      completeNextTurn = true;
+      completeNextTurn = !shouldContinueAfterExternalContent;
     }
 
     const assistantMessage: AssistantMessage = {
@@ -333,11 +346,6 @@ export async function executeAsReasoningAgent(
       content,
       toolCalls: response.toolCalls,
     };
-
-    const [systemToolCalls, nonSystemToolCalls] = partition(
-      response.toolCalls,
-      (toolCall): toolCall is PlanningToolCall => isPlanningToolName(toolCall.function.name)
-    );
 
     if (systemToolCalls.length && response.toolCalls.length > 1) {
       throw new Error(`When using system tools, only a single tool call is allowed`);
@@ -362,7 +370,12 @@ export async function executeAsReasoningAgent(
           (toolCall) => toolCall.function.name === finalToolCallName
         ),
         input: removeSystemToolCalls(prevMessages),
+        diagnostics,
       };
+    }
+
+    if (shouldContinueAfterExternalContent) {
+      diagnostics.externalContentToolContinuations += 1;
     }
 
     const toolMessagesForNonSystemToolCalls = nonSystemToolCalls.length

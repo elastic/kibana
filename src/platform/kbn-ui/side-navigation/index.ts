@@ -16,5 +16,4 @@ export type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 } from './types';

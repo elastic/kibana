@@ -24,6 +24,8 @@ import { useLicense } from '../../common/use_license';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useSubmitCase, type UseSubmitCaseProps } from './use_submit_case';
 import { TestProviders } from '../../common/mock/test_providers';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 
 import {
   sampleConnectorData,
@@ -146,6 +148,62 @@ describe('useSubmitCase', () => {
       expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
       expect(onSuccess).toHaveBeenCalled();
       expect(afterCaseCreated).toHaveBeenCalled();
+    });
+  });
+
+  describe('getAttachments', () => {
+    it('calls createAttachments with the resolved owner from theCase', async () => {
+      const createAttachments = jest.fn();
+      useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
+
+      const resolvedAttachment = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'alert-1',
+        metadata: { index: 'idx-1', rule: null },
+      };
+
+      const getAttachments = jest.fn().mockReturnValue([resolvedAttachment]);
+
+      postCase.mockResolvedValue({
+        id: sampleId,
+        ...sampleDataWithoutTags,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      const { result } = renderUseSubmitCase({ getAttachments });
+
+      await result.current.submitCase(sampleDataWithoutTags, true);
+
+      await waitFor(() => {
+        expect(getAttachments).toHaveBeenCalledWith(SECURITY_SOLUTION_OWNER);
+      });
+
+      expect(createAttachments).toHaveBeenCalledWith({
+        caseId: sampleId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        attachments: [resolvedAttachment],
+      });
+    });
+
+    it('does not call createAttachments when getAttachments returns empty array', async () => {
+      const createAttachments = jest.fn();
+      useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
+
+      postCase.mockResolvedValue({
+        id: sampleId,
+        ...sampleDataWithoutTags,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      const { result } = renderUseSubmitCase({ getAttachments: () => [] });
+
+      await result.current.submitCase(sampleDataWithoutTags, true);
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(createAttachments).not.toHaveBeenCalled();
     });
   });
 

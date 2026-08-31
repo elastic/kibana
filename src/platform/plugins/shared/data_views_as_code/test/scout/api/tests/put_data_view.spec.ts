@@ -11,7 +11,7 @@ import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { BASE_PATH, COMMON_HEADERS, ID_OVER_MAX_LENGTH } from '../fixtures/constants';
 
-apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('PUT /api/data_views/v2/{id} - as code', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 

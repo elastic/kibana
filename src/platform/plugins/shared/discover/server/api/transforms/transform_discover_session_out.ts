@@ -59,6 +59,10 @@ export const transformDiscoverSessionOut = (
         }),
         ...(visContext !== undefined && { vis_context: visContext }),
         ...(controlPanels !== undefined && { control_panels: controlPanels }),
+        ...(tab.attributes.isTextBasedQuery &&
+          tab.attributes.esqlApproximation !== undefined && {
+            esql_approximation: tab.attributes.esqlApproximation,
+          }),
       };
     }),
   };

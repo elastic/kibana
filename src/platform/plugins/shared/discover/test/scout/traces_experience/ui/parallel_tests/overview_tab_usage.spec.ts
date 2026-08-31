@@ -91,7 +91,7 @@ spaceTest.describe(
 
         await spaceTest.step('click transaction name link and verify APM page', async () => {
           await flyout.about.transactionNameLink.click();
-          const serviceHeader = page.testSubj.locator('apmMainTemplateHeaderServiceName');
+          const serviceHeader = page.testSubj.locator('appHeaderTitle');
           await expect(serviceHeader).toHaveText(RICH_TRACE.SERVICE_NAME);
           await expect(page.testSubj.locator('transactionsTab')).toHaveAttribute(
             'aria-selected',

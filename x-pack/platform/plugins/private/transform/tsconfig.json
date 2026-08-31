@@ -94,7 +94,8 @@
     "@kbn/cps-utils",
     "@kbn/core-notifications-browser",
     "@kbn/cps-common",
-    "@kbn/mock-idp-utils"
+    "@kbn/mock-idp-utils",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

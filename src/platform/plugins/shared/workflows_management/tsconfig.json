@@ -15,6 +15,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/esql-language",
     "@kbn/esql-types",
@@ -22,6 +23,10 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-hooks",
+    "@kbn/shared-ux-page-solution-nav",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
     "@kbn/core-application-browser",

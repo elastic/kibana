@@ -83,7 +83,7 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     if (noDataStrategy === 'emit') {
       noData = alertEpisodeStatus.active;
     } else if (noDataStrategy === 'recover') {
-      noData = base.recovered;
+      noData = alertEpisodeStatus.inactive;
     }
 
     return { breached: base.breached, recovered: base.recovered, no_data: noData };
