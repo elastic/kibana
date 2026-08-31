@@ -151,7 +151,7 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
               </>
             )}
 
-            {esAssets.length > 0 && <RequiredAssets esAssets={filteredEsAssets} />}
+            {filteredEsAssets.length > 0 && <RequiredAssets esAssets={filteredEsAssets} />}
           </EuiPanel>
         </div>
       )}
