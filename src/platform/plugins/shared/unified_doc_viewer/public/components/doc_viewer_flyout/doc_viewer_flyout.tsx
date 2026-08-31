@@ -159,16 +159,18 @@ export function UnifiedDocViewerFlyout({
 
   const renderSubheader = pageCount > 1 || flyoutActions || notice;
 
-  const isResizeHandle = useCallback(
-    (target: EventTarget) =>
-      target instanceof HTMLElement &&
-      target.closest('[data-test-subj="euiResizableButton"]') !== null,
-    []
-  );
+  const isResizeHandle = useCallback((target: EventTarget, flyout: EventTarget) => {
+    if (!(target instanceof HTMLElement) || !(flyout instanceof HTMLElement)) {
+      return false;
+    }
+
+    const resizeHandleSelector = '[data-test-subj="euiResizableButton"]';
+    return target.closest(resizeHandleSelector) === flyout.querySelector(resizeHandleSelector);
+  }, []);
 
   const onPointerDown = useCallback(
     (ev: React.PointerEvent) => {
-      if (isResizeHandle(ev.target)) {
+      if (isResizeHandle(ev.target, ev.currentTarget)) {
         shouldPersistNextFlyoutWidthRef.current = true;
       }
     },
@@ -182,7 +184,7 @@ export function UnifiedDocViewerFlyout({
   const onResizeHandleKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
       if (
-        isResizeHandle(ev.target) &&
+        isResizeHandle(ev.target, ev.currentTarget) &&
         (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT)
       ) {
         // Capture the interaction before EUI handles the key and calls onResize.
@@ -236,7 +238,7 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
-      if (isResizeHandle(ev.target)) {
+      if (isResizeHandle(ev.target, ev.currentTarget)) {
         // ignore events triggered when the resizable button is focused
         return;
       }

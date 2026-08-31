@@ -21,24 +21,32 @@ import { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   const react = jest.requireActual('react');
-  const OriginalFlyout = actual.EuiFlyout;
 
   return {
     ...actual,
     EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
-      <OriginalFlyout {...props} ref={ref}>
-        <button
-          data-test-subj="euiResizableButton"
-          onPointerUp={() => props.onResize?.(700)}
-        >
+      <div
+        ref={ref}
+        data-test-subj={props['data-test-subj']}
+        onKeyDown={props.onKeyDown}
+        onKeyDownCapture={props.onKeyDownCapture}
+        onPointerDown={props.onPointerDown}
+        onPointerCancel={props.onPointerCancel}
+      >
+        <button data-test-subj="euiResizableButton" onPointerUp={() => props.onResize?.(700)}>
           <span>Resize handle</span>
         </button>
         <button onClick={() => props.onResize?.(700)}>Trigger resize</button>
+        <div>
+          <button data-test-subj="euiResizableButton">
+            <span>Nested resize handle</span>
+          </button>
+        </div>
         {props.flyoutMenuProps && (
           <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
         )}
         {props.children}
-      </OriginalFlyout>
+      </div>
     )),
   };
 });
@@ -106,13 +114,13 @@ describe('UnifiedDocViewerFlyout', () => {
 
     const renderFlyout = () => {
       render(
-        <UnifiedDocViewerFlyout
-          {...buildProps({ flyoutWidthLocalStorageKey: storageKey })}
-        />
+        <UnifiedDocViewerFlyout {...buildProps({ flyoutWidthLocalStorageKey: storageKey })} />
       );
+      // useLocalStorage initializes the key during render; assertions below only cover later writes.
+      localStorage.removeItem(storageKey);
 
       return {
-        resizeHandle: screen.getByTestId('euiResizableButton'),
+        resizeHandle: screen.getAllByTestId('euiResizableButton')[0],
         triggerResize: screen.getByRole('button', { name: 'Trigger resize' }),
       };
     };
@@ -132,6 +140,15 @@ describe('UnifiedDocViewerFlyout', () => {
       fireEvent.click(triggerResize);
 
       expect(localStorage.getItem(storageKey)).toBe('700');
+    });
+
+    it('does not persist after interacting with a nested resize handle', () => {
+      const { triggerResize } = renderFlyout();
+
+      fireEvent.pointerDown(screen.getByText('Nested resize handle'));
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBeNull();
     });
 
     it('does not persist later resize callbacks from container changes', () => {
