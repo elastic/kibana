@@ -28,6 +28,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
@@ -417,5 +418,29 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
 
       expect(result.details_markdown).toEqual(`{{ user.name james }}`);
     });
+  });
+
+  it('returns generation_source when the document carries it', () => {
+    mockDocument[ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE] = 'watch_floor_ad_worker';
+
+    const result: AttackDiscoveryApiAlert = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: mockDocument,
+      enableFieldRendering: true,
+      id,
+      withReplacements: false,
+    });
+
+    expect(result.generation_source).toBe('watch_floor_ad_worker');
+  });
+
+  it('omits generation_source when the document does not carry it', () => {
+    const result: AttackDiscoveryApiAlert = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: mockDocument,
+      enableFieldRendering: true,
+      id,
+      withReplacements: false,
+    });
+
+    expect(Object.prototype.hasOwnProperty.call(result, 'generation_source')).toBe(false);
   });
 });

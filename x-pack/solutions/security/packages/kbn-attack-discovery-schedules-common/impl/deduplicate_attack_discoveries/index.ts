@@ -13,6 +13,7 @@ import type {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 
+import type { AttackDiscoveryGenerationSource } from '../constants';
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 
 interface DeduplicateAttackDiscoveriesParams {
@@ -20,6 +21,7 @@ interface DeduplicateAttackDiscoveriesParams {
   computeSha256Hash: (input: string) => string;
   connectorId: string;
   esClient: ElasticsearchClient;
+  generationSource?: AttackDiscoveryGenerationSource;
   indexPattern: string;
   logger: Logger;
   ownerInfo: {
@@ -35,6 +37,7 @@ export const deduplicateAttackDiscoveries = async ({
   computeSha256Hash,
   connectorId,
   esClient,
+  generationSource,
   indexPattern,
   logger,
   ownerInfo,
@@ -53,6 +56,7 @@ export const deduplicateAttackDiscoveries = async ({
       attackDiscovery: attack,
       computeSha256Hash,
       connectorId,
+      generationSource,
       ownerId,
       replacements,
       spaceId,
@@ -61,7 +65,9 @@ export const deduplicateAttackDiscoveries = async ({
   });
   const alertUuids = alertDocs.map((doc) => doc.alertHash);
 
-  // 2. Search for existing alerts in ES
+  // 2. Search for existing alerts in ES.
+  // Intentionally does not filter on generation_source: documents written before
+  // that field existed would stop matching and would be re-created as duplicates.
   const searchResult = await esClient.search<AttackDiscoveryAlertDocument>({
     index: indexPattern,
     size: alertUuids.length,

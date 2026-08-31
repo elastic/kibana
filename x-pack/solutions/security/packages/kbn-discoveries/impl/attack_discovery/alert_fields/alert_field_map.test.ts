@@ -6,7 +6,10 @@
  */
 
 import { attackDiscoveryAlertFieldMap } from './alert_field_map';
-import { ALERT_ATTACK_DISCOVERY_TITLE } from './alert_field_names';
+import {
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
+  ALERT_ATTACK_DISCOVERY_TITLE,
+} from './alert_field_names';
 
 describe('attackDiscoveryAlertFieldMap', () => {
   it('contains a mapping for the title field', () => {
@@ -16,5 +19,19 @@ describe('attackDiscoveryAlertFieldMap', () => {
         ALERT_ATTACK_DISCOVERY_TITLE
       )
     ).toBe(true);
+  });
+
+  it('maps generation_source as an optional non-array keyword', () => {
+    expect(attackDiscoveryAlertFieldMap[ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]).toEqual({
+      type: 'keyword',
+      array: false,
+      required: false,
+    });
+  });
+
+  it('resolves ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE to kibana.alert.attack_discovery.generation_source', () => {
+    expect(ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE).toBe(
+      'kibana.alert.attack_discovery.generation_source'
+    );
   });
 });

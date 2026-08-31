@@ -30,6 +30,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import type { PostValidateRequestBody } from '@kbn/discoveries-schemas';
+import type { AttackDiscoveryGenerationSource } from '@kbn/attack-discovery-schedules-common';
 
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
@@ -45,6 +46,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
@@ -104,6 +106,7 @@ export const generateAttackDiscoveryAlertHash = ({
   alertIds,
   attackDiscoveryId,
   connectorId,
+  generationSource,
   ownerId,
   replacements,
   spaceId,
@@ -111,6 +114,7 @@ export const generateAttackDiscoveryAlertHash = ({
   alertIds: string[];
   attackDiscoveryId: string | undefined;
   connectorId: string;
+  generationSource?: AttackDiscoveryGenerationSource;
   ownerId: string;
   replacements: Record<string, string> | undefined;
   spaceId: string;
@@ -128,7 +132,11 @@ export const generateAttackDiscoveryAlertHash = ({
     hash.update('attack_discovery');
   }
 
-  return hash.update(connectorId).update(ownerId).update(spaceId).digest('hex');
+  hash.update(connectorId).update(ownerId).update(spaceId);
+  if (generationSource != null) {
+    hash.update(`|generation_source=${generationSource}`);
+  }
+  return hash.digest('hex');
 };
 
 /**
@@ -197,12 +205,14 @@ export const transformToAlertDocuments = ({
 }): Array<Record<string, unknown>> => {
   const converted = convertApiFieldsToCamelCase(validateRequestBody);
   const { attackDiscoveries, generationUuid, ...restParams } = converted;
+  const generationSource = validateRequestBody.generation_source;
 
   return attackDiscoveries.map((attackDiscovery) => {
     const alertHash = generateAttackDiscoveryAlertHash({
       alertIds: attackDiscovery.alertIds,
       attackDiscoveryId: attackDiscovery.id,
       connectorId: restParams.apiConfig.connectorId,
+      generationSource,
       ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
       replacements: restParams.replacements,
       spaceId,
@@ -263,6 +273,9 @@ export const transformToAlertDocuments = ({
         messageContent: attackDiscovery.title,
         replacements: restParams.replacements,
       }),
+      ...(generationSource != null
+        ? { [ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]: generationSource }
+        : {}),
       [ALERT_ATTACK_IDS]: [alertHash],
     };
 

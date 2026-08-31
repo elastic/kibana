@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { deduplicateAttackDiscoveries } from '.';
 import { mockAttackDiscoveries } from '../__mocks__/mock_attack_discoveries';
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
+import { WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE } from '../constants';
 
 jest.mock('../transforms/transform_to_alert_documents', () => ({
   ...jest.requireActual('../transforms/transform_to_alert_documents'),
@@ -44,11 +45,17 @@ describe('deduplicateAttackDiscoveries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEsClient.search.mockResponse({ hits: { hits: [] } } as unknown as estypes.SearchResponse);
-    (generateAttackDiscoveryAlertHash as jest.Mock).mockImplementation(({ attackDiscovery }) => {
-      if (attackDiscovery === attack1) return uuid1;
-      if (attackDiscovery === attack2) return uuid2;
-      return 'unknown-uuid';
-    });
+    (generateAttackDiscoveryAlertHash as jest.Mock).mockImplementation(
+      ({ attackDiscovery, generationSource }) => {
+        const base =
+          attackDiscovery === attack1
+            ? uuid1
+            : attackDiscovery === attack2
+            ? uuid2
+            : 'unknown-uuid';
+        return generationSource != null ? `${base}|${generationSource}` : base;
+      }
+    );
   });
 
   it('should return empty array if no attack discoveries passed to the function', async () => {
@@ -148,5 +155,58 @@ describe('deduplicateAttackDiscoveries', () => {
         2
       )}`
     );
+  });
+
+  it('does not treat a different generation source as a duplicate of an existing producer', async () => {
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [{ _source: { 'kibana.alert.instance.id': uuid1 } }],
+      },
+    } as unknown as estypes.SearchResponse);
+
+    const result = await deduplicateAttackDiscoveries({
+      ...defaultProps,
+      attackDiscoveries: [attack1],
+      generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+    });
+
+    expect(result).toEqual([attack1]);
+  });
+
+  it('drops a repeated run from the same generation source', async () => {
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _source: {
+              'kibana.alert.instance.id': `${uuid1}|${WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE}`,
+            },
+          },
+        ],
+      },
+    } as unknown as estypes.SearchResponse);
+
+    const result = await deduplicateAttackDiscoveries({
+      ...defaultProps,
+      attackDiscoveries: [attack1],
+      generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('still treats a hit whose _source has no generation_source as a duplicate', async () => {
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [{ _source: { 'kibana.alert.instance.id': uuid1 } }],
+      },
+    } as unknown as estypes.SearchResponse);
+
+    const result = await deduplicateAttackDiscoveries({
+      ...defaultProps,
+      attackDiscoveries: [attack1],
+    });
+
+    expect(result).toEqual([]);
   });
 });

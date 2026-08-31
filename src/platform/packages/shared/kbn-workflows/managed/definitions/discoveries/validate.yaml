@@ -58,6 +58,13 @@ triggers:
         generation_uuid:
           description: Generation execution UUID for tracking
           type: string
+        generation_source:
+          description: >
+            Optional producer identity so independent writers to the shared
+            Attack Discovery index do not deduplicate against each other.
+          enum:
+            - watch_floor_ad_worker
+          type: string
         replacements:
           additionalProperties: true
           description: Anonymization replacements
@@ -107,6 +114,7 @@ steps:
       connector_name: ${{ inputs.connector_name }}
       enable_field_rendering: ${{ inputs.enable_field_rendering }}
       generation_uuid: ${{ inputs.generation_uuid }}
+      generation_source: ${{ inputs.generation_source }}
       replacements: ${{ inputs.replacements }}
       source: ${{ inputs.source }}
       with_replacements: ${{ inputs.with_replacements }}

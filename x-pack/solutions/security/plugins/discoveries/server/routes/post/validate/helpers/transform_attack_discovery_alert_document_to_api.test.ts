@@ -196,6 +196,31 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     expect(result.generation_uuid).toBe('');
   });
 
+  it('returns generation_source when the document carries it', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: {
+        ...baseDoc,
+        'kibana.alert.attack_discovery.generation_source': 'watch_floor_ad_worker',
+      },
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.generation_source).toBe('watch_floor_ad_worker');
+  });
+
+  it('omits generation_source when the document does not carry it', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: baseDoc,
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(Object.prototype.hasOwnProperty.call(result, 'generation_source')).toBe(false);
+  });
+
   it('returns an empty array for alert_ids when they are missing', () => {
     const { ['kibana.alert.attack_discovery.alert_ids']: _ignored, ...docWithoutAlertIds } =
       baseDoc;

@@ -30,6 +30,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
@@ -97,6 +98,8 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       (val: T) => renderMarkdownField(val) as T
     )();
 
+  const generationSource = attackDiscoveryAlertDocument[ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE];
+
   return {
     alert_ids: attackDiscoveryAlertDocument[ALERT_ATTACK_DISCOVERY_ALERT_IDS] ?? [], // required field
     alert_rule_uuid: attackDiscoveryAlertDocument[ALERT_RULE_UUID],
@@ -127,6 +130,9 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       defaultValue: undefined,
     }),
     generation_uuid: attackDiscoveryAlertDocument[ALERT_RULE_EXECUTION_UUID] ?? '', // required field
+    ...(generationSource === 'watch_floor_ad_worker'
+      ? { generation_source: generationSource }
+      : {}),
     id, // required field
     mitre_attack_tactics: Array.isArray(
       attackDiscoveryAlertDocument[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]

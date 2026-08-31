@@ -53,6 +53,11 @@ components:
         generation_uuid:
           description: The generation ID of the run that created the attack discovery
           type: string
+        generation_source:
+          description: Optional producer identity so independent writers to the shared Attack Discovery index do not deduplicate against each other
+          enum:
+            - watch_floor_ad_worker
+          type: string
         replacements:
           description: Replacements enable anonymization of data sent to the LLM.
           $ref: '../common_attributes.schema.yaml#/components/schemas/Replacements'
