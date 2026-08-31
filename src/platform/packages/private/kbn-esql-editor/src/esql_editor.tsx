@@ -944,12 +944,12 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      {!hideQuickSearch && (
+      {!hideQuickSearch && Boolean(editorIsInline) && (
         <QuickSearchVisor
           query={code}
           isSpaceReduced={isSpaceReduced}
-          isInline={Boolean(editorIsInline)}
-          isVisible={Boolean(editorIsInline) ? isVisorOpen : true}
+          isInline
+          isVisible={isVisorOpen}
           onNlResult={showVisorReview}
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
