@@ -5,43 +5,21 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  useEuiTheme,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { getEbtProps } from '@kbn/ebt-click';
 import {
-  useConversationPermissions,
+  useConversation,
   useConversationReadOnly,
-  useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
-import { DeleteConversationModal } from '../delete_conversation_modal';
-import { RenameConversationModal } from '../rename_conversation_modal';
+import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
+import { ConversationTitleMetadata } from './conversation_title_metadata';
 
 const labels = {
-  rename: i18n.translate('xpack.agentBuilder.conversationTitle.rename', {
-    defaultMessage: 'Rename',
-  }),
-  delete: i18n.translate('xpack.agentBuilder.conversationTitle.delete', {
-    defaultMessage: 'Delete',
-  }),
   newConversation: i18n.translate('xpack.agentBuilder.conversationTitle.newConversation', {
     defaultMessage: 'New conversation',
-  }),
-  openTitleMenu: i18n.translate('xpack.agentBuilder.conversationTitle.openTitleMenu', {
-    defaultMessage: 'Open conversation menu',
   }),
   readOnly: i18n.translate('xpack.agentBuilder.conversationTitle.readOnly', {
     defaultMessage: 'Read-Only',
@@ -52,18 +30,16 @@ interface ConversationTitleProps {
   ariaLabelledBy?: string;
 }
 
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
-  const { title, isLoading: isLoadingTitle } = useConversationTitle();
+export const ConversationTitle = ({ ariaLabelledBy }: ConversationTitleProps) => {
+  const { conversation, isLoading: isLoadingTitle } = useConversation();
   const isReadOnly = useConversationReadOnly();
   const hasPersistedConversation = useHasPersistedConversation();
-  const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
+  const templateDisplay = useConversationTemplateDisplay();
+  const templateName = templateDisplay?.name;
+  const templateIcon = templateDisplay?.icon;
+  const displayedTitle = isLoadingTitle ? '' : conversation?.title || labels.newConversation;
 
   const titleWrapperStyles = css`
     min-width: 0;
@@ -97,54 +73,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     </EuiBadge>
   ) : null;
 
-  const menuItems = [
-    ...(canRename
-      ? [
-          <EuiContextMenuItem
-            key="rename"
-            icon="pencil"
-            onClick={() => {
-              setIsPopoverOpen(false);
-              setIsRenameModalOpen(true);
-            }}
-            data-test-subj="agentBuilderConversationRenameButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
-              detail: 'conversation',
-            })}
-          >
-            {labels.rename}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    ...(canDelete
-      ? [
-          <EuiContextMenuItem
-            key="delete"
-            icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-            onClick={() => {
-              setIsPopoverOpen(false);
-              setIsDeleteModalOpen(true);
-            }}
-            css={css`
-              color: ${euiTheme.colors.danger};
-            `}
-            data-test-subj="agentBuilderConversationDeleteButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
-              detail: 'conversation',
-            })}
-          >
-            {labels.delete}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-  ];
-
-  // Nothing to open the popover for: an unsaved conversation, or one the user may not act on.
-  if (!hasPersistedConversation || menuItems.length === 0) {
+  if (!hasPersistedConversation) {
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={titleWrapperStyles}>
         <EuiFlexItem grow={false} css={titleTextStyles}>
@@ -163,74 +92,28 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     );
   }
 
-  const titleButtonStyles = css`
-    max-width: 100%;
-    block-size: auto;
-    font-weight: ${euiTheme.font.weight.semiBold};
-    .euiButtonEmpty__text {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  `;
-
-  const titleButton = (
-    <EuiButtonEmpty
-      color="text"
-      iconType="chevronSingleDown"
-      iconSide="right"
-      flush="left"
-      onClick={() => setIsPopoverOpen((open) => !open)}
-      aria-expanded={isPopoverOpen}
-      css={titleButtonStyles}
-      data-test-subj="agentBuilderConversationTitleButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_TITLE_MENU,
-        detail: 'conversation',
-      })}
-    >
-      <span css={titleWrapperStyles}>
-        <span id={ariaLabelledBy} css={titleTextStyles}>
-          {displayedTitle}
-        </span>
-      </span>
-    </EuiButtonEmpty>
-  );
-
   return (
-    <>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
-        css={titleActionsWrapperStyles}
-      >
-        <EuiFlexItem grow={false} css={titleTextStyles}>
-          <EuiPopover
-            button={titleButton}
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downCenter"
-            aria-label={labels.openTitleMenu}
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={titleActionsWrapperStyles}
+    >
+      <EuiFlexItem grow={false}>
+        <ConversationTitleMetadata ariaLabelledBy={ariaLabelledBy} />
+      </EuiFlexItem>
+      {templateName && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType={templateIcon}
+            data-test-subj="agentBuilderConversationTemplateBadge"
           >
-            <EuiContextMenuPanel items={menuItems} />
-          </EuiPopover>
+            {templateName}
+          </EuiBadge>
         </EuiFlexItem>
-
-        {readOnlyBadge && <EuiFlexItem grow={false}>{readOnlyBadge}</EuiFlexItem>}
-      </EuiFlexGroup>
-
-      <RenameConversationModal
-        isOpen={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
-      />
-
-      <DeleteConversationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
-    </>
+      )}
+      {readOnlyBadge && <EuiFlexItem grow={false}>{readOnlyBadge}</EuiFlexItem>}
+    </EuiFlexGroup>
   );
 };
