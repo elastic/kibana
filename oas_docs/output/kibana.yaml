@@ -44625,11 +44625,13 @@ paths:
           name: dataStreams
           required: true
           schema:
+            maxLength: 4096
             type: string
         - in: query
           name: start
           required: true
           schema:
+            maxLength: 64
             type: string
       responses:
         '200':
