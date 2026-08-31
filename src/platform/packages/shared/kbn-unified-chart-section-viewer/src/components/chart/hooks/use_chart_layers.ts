@@ -87,7 +87,7 @@ export const useChartLayers = ({
             label: metricField,
             compactValues: true,
             seriesColor: color,
-            ...(resolvedUnit ? getLensMetricFormat(resolvedUnit) : {}),
+            ...getLensMetricFormat(resolvedUnit),
           },
         ],
         breakdown: hasDimensions ? dimensions.map((dim) => dim.name) : undefined,
