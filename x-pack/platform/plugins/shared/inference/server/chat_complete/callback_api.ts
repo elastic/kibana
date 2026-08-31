@@ -64,6 +64,8 @@ interface CreateChatCompleteApiOptions {
   callbackManager?: InferenceCallbackManager;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -119,6 +121,8 @@ export function createChatCompleteCallbackApi({
   callbackManager,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -147,6 +151,8 @@ export function createChatCompleteCallbackApi({
         anonymization,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
       })
     ).pipe(
       retryHoldingTokenCountEvents({
@@ -319,6 +325,8 @@ function resolveAndCreatePipeline({
   anonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -335,8 +343,14 @@ function resolveAndCreatePipeline({
   anonymization?: InferenceAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
 }) {
-  return from(endpointIdCache.has(connectorId)).pipe(
+  return from(
+    throwIfConnectorNotAllowed({ connectorId, isDefaultConnectorOnly, getDefaultConnectorId }).then(
+      () => endpointIdCache.has(connectorId)
+    )
+  ).pipe(
     switchMap((isInferenceEndpoint) => {
       let resolvedAsInferenceEndpoint = isInferenceEndpoint;
 
@@ -476,6 +490,30 @@ function resolveAndCreatePipeline({
         })
       );
     })
+  );
+}
+
+async function throwIfConnectorNotAllowed({
+  connectorId,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+}: {
+  connectorId: string;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+}): Promise<void> {
+  if (!isDefaultConnectorOnly || !getDefaultConnectorId || !(await isDefaultConnectorOnly())) {
+    return;
+  }
+  const defaultConnectorId = await getDefaultConnectorId();
+  if (connectorId === defaultConnectorId) {
+    return;
+  }
+  throw createInferenceRequestError(
+    `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${
+      defaultConnectorId ? ` "${defaultConnectorId}"` : ''
+    }`,
+    400
   );
 }
 
