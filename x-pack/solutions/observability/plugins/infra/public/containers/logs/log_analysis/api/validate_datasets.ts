@@ -20,10 +20,12 @@ interface RequestArgs {
   startTime: number;
   endTime: number;
   runtimeMappings: estypes.MappingRuntimeFields;
+  projectRouting?: string;
 }
 
 export const callValidateDatasetsAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
-  const { indices, timestampField, startTime, endTime, runtimeMappings } = requestArgs;
+  const { indices, timestampField, startTime, endTime, runtimeMappings, projectRouting } =
+    requestArgs;
   const response = await fetch(LOG_ANALYSIS_VALIDATE_DATASETS_PATH, {
     method: 'POST',
     body: JSON.stringify(
@@ -34,6 +36,7 @@ export const callValidateDatasetsAPI = async (requestArgs: RequestArgs, fetch: H
           startTime,
           timestampField,
           runtimeMappings,
+          projectRouting,
         },
       })
     ),
