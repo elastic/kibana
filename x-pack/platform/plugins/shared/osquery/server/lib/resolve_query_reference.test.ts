@@ -281,4 +281,20 @@ describe('lookupSavedQuery', () => {
 
     await expect(lookupSavedQuery(soClient, 'legacy-id')).resolves.toBeUndefined();
   });
+
+  it('should fail closed when resolve returns an error result', async () => {
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+      resolve: jest.fn().mockResolvedValue({
+        saved_object: {
+          id: 'legacy-id',
+          type: savedQuerySavedObjectType,
+          error: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
+        },
+        outcome: 'exactMatch',
+      }),
+    };
+
+    await expect(lookupSavedQuery(soClient, 'legacy-id')).resolves.toBeUndefined();
+  });
 });

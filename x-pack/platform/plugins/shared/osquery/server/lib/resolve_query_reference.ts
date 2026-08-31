@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { escapeQuotes } from '@kbn/es-query';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/types';
@@ -92,7 +92,7 @@ export const lookupSavedQuery = async (
     );
 
     // Exact id plus a legacy alias for a different object — do not pick one.
-    if (outcome === 'conflict') {
+    if (outcome === 'conflict' || isSavedObjectErrorResult(savedQuerySO)) {
       return undefined;
     }
 
