@@ -144,4 +144,26 @@ describe('CanvasFlyout', () => {
       expect(mockOpenSidebarConversation).not.toHaveBeenCalled();
     });
   });
+
+  it('forwards closeCanvas to getActionButtons when rendering canvas header actions', () => {
+    const getActionButtons = jest.fn().mockReturnValue([]);
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      renderCanvasContent: () => <div>canvas body</div>,
+      getActionButtons,
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(getActionButtons).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isCanvas: true,
+        closeCanvas: mockCloseCanvas,
+      })
+    );
+  });
 });

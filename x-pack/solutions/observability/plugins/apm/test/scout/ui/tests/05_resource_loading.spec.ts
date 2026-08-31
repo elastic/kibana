@@ -34,11 +34,13 @@ test.describe(
         return () => count;
       };
 
-      const hasDataRequests = countRequests(/\/internal\/apm\/has_data/);
-      const serviceIconsRequests = countRequests(
-        /\/internal\/apm\/services\/opbeans-java\/metadata\/icons/
-      );
-      const apmPoliciesRequests = countRequests(/\/apm\/fleet\/has_apm_policies/);
+      const hasDataPattern = /\/internal\/apm\/has_data/;
+      const serviceIconsPattern = /\/internal\/apm\/services\/opbeans-java\/metadata\/icons/;
+      const apmPoliciesPattern = /\/apm\/fleet\/has_apm_policies/;
+
+      const hasDataRequests = countRequests(hasDataPattern);
+      const serviceIconsRequests = countRequests(serviceIconsPattern);
+      const apmPoliciesRequests = countRequests(apmPoliciesPattern);
 
       await navigationPage.gotoServiceOverview(testData.SERVICE_OPBEANS_JAVA, {
         comparisonEnabled: 'true',
@@ -54,12 +56,10 @@ test.describe(
         });
       });
 
-      await test.step('shared resources loaded once', async () => {
-        expect(hasDataRequests()).toBe(1);
-        expect(serviceIconsRequests()).toBe(1);
-        expect(apmPoliciesRequests()).toBe(1);
-      });
-
+      // Waiting for the tabs to render signals the main template has mounted and
+      // issued the three shared-resource requests. The counters increment on send,
+      // so we can't await their responses: has_apm_policies is aborted once
+      // has_data reports hasData:true, and would never resolve.
       await test.step('wait for other tabs to load', async () => {
         await expect(page.getByTestId('transactionsTab')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
@@ -67,6 +67,12 @@ test.describe(
         await expect(page.getByTestId('dependenciesTab')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
+      });
+
+      await test.step('shared resources loaded once', async () => {
+        expect(hasDataRequests()).toBe(1);
+        expect(serviceIconsRequests()).toBe(1);
+        expect(apmPoliciesRequests()).toBe(1);
       });
 
       await test.step('navigate to the errors tab', async () => {

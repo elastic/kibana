@@ -9,16 +9,20 @@ import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   Case,
-  ExternalReferenceAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
   PersistableStateAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
   ExternalReferenceStorageType,
   AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import {
+  INDICATOR_ATTACHMENT_TYPE,
+  LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import { expect } from 'expect';
-import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findAttachments,
@@ -71,7 +75,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
+  const createAttachmentAndNavigate = async (attachment: AttachmentRequestV2) => {
     const caseData = await cases.api.createCase({
       title: `Registered attachment of type ${attachment.type}`,
     });
@@ -90,16 +94,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const validateAttachment = async (
     type: string,
-    attachmentId?: string | null,
-    attachmentTypeId = '.test'
+    attachmentId: string | null | undefined,
+    attachmentTypeId: string
   ) => {
     await testSubjects.existOrFail(`comment-${type}-${attachmentTypeId}`);
     await testSubjects.existOrFail(`copy-link-${attachmentId}`);
   };
 
   /**
-   * Attachment types are being registered in
-   * x-pack/platform/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
+   * These specs exercise real migrated attachment types via their legacy wire shapes
+   * (`indicator` external reference, `.lens` persistable state). They are registered by their
+   * owning plugins (security_solution, lens), not by the cases test fixture.
    */
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
@@ -116,8 +121,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(AttachmentType.externalReference, attachmentId);
-        await testSubjects.existOrFail('test-attachment-content');
+        await validateAttachment(
+          INDICATOR_ATTACHMENT_TYPE,
+          attachmentId,
+          INDICATOR_ATTACHMENT_TYPE
+        );
       });
     });
 
@@ -200,12 +208,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const comments = userActions.filter((userAction) => userAction.type === 'comment');
 
-        const externalRefAttachmentId = comments[0].comment_id;
+        const externalReferenceAttachmentId = comments[0].comment_id;
         const lensAttachmentId = comments[1].comment_id;
-        await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
+        await validateAttachment(
+          INDICATOR_ATTACHMENT_TYPE,
+          externalReferenceAttachmentId,
+          INDICATOR_ATTACHMENT_TYPE
+        );
         await validateAttachment(LENS_ATTACHMENT_TYPE, lensAttachmentId, LENS_ATTACHMENT_TYPE);
 
-        await testSubjects.existOrFail('test-attachment-content');
         await retry.waitFor(
           'lens visualization to exist',
           async () => await find.existsByCssSelector('.lnsExpressionRenderer')
@@ -381,6 +392,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
+        // Pin the default data view to logstash. `createAndAddLensFromDashboard`
+        // opens Lens against whatever data view is default and immediately
+        // configures dimensions on logstash fields (bytes / @timestamp / ip).
+        // With cases analytics v2 enabled, the managed "Case Analytics" data
+        // view can otherwise win the default slot (the data-views default
+        // resolver auto-selects the first view when none is set), leaving Lens
+        // pointed at a view without those fields and failing this hook.
+        await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
 
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
@@ -405,6 +424,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.unload(
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
+        await kibanaServer.uiSettings.unset('defaultIndex');
 
         await cases.api.deleteAllCases();
       });
@@ -429,8 +449,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(caseTitle);
+        await cases.common.waitForCaseViewToLoad();
+        if (await cases.common.isRedesignEnabled()) {
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
+        } else {
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          expect(await title.getVisibleText()).toEqual(caseTitle);
+        }
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -455,8 +481,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        await cases.common.waitForCaseViewToLoad();
+        if (await cases.common.isRedesignEnabled()) {
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
+        } else {
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        }
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -535,12 +567,17 @@ const getLensState = (dataViewId: string) => ({
   },
 });
 
-const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayload => ({
+// The attachment owner must equal the parent case owner (enforced server-side)
+const getExternalReferenceAttachment = (): ExternalReferenceNoSOAttachmentPayload => ({
   type: AttachmentType.externalReference,
-  externalReferenceId: 'my-id',
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-  externalReferenceAttachmentTypeId: '.test',
-  externalReferenceMetadata: null,
+  externalReferenceId: 'indicator-1',
+  externalReferenceAttachmentTypeId: LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  externalReferenceMetadata: {
+    indicatorName: 'malware.exe',
+    indicatorType: 'file',
+    indicatorFeedName: '[Filebeat] AbuseCH Malware',
+  },
   owner: 'cases',
 });
 

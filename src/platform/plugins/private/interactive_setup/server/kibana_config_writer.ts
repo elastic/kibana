@@ -10,8 +10,8 @@
 import { X509Certificate } from 'crypto';
 import { constants } from 'fs';
 import fs from 'fs/promises';
-import yaml from 'js-yaml';
 import path from 'path';
+import { Document, isCollection, isMap, parse } from 'yaml';
 
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
@@ -41,6 +41,26 @@ interface FleetOutputConfig {
   hosts: string[];
   ca_trusted_fingerprint: string;
 }
+
+/**
+ * Serializes a flat Kibana configuration object to YAML, rendering nested collections in
+ * flow style so that e.g. `elasticsearch.hosts` stays on one line:
+ * `elasticsearch.hosts: [localhost:9200]`.
+ */
+const dumpConfig = (config: Record<string, unknown>): string => {
+  const doc = new Document(config);
+
+  // Nested collections inherit flow style, so marking the top-level values is enough.
+  if (isMap(doc.contents)) {
+    for (const { value } of doc.contents.items) {
+      if (isCollection(value)) {
+        value.flow = true;
+      }
+    }
+  }
+
+  return doc.toString({ flowCollectionPadding: false, lineWidth: 0 });
+};
 
 export class KibanaConfigWriter {
   constructor(
@@ -118,16 +138,13 @@ export class KibanaConfigWriter {
       );
 
       const existingCommentedConfig = KibanaConfigWriter.commentOutKibanaConfig(existingConfig.raw);
-      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.dump(
-        { ...existingConfig.parsed, ...config },
-        { flowLevel: 1 }
+      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${dumpConfig(
+        { ...existingConfig.parsed, ...config }
       )}\n`;
     } else {
       configToWrite = `${
         existingConfig.raw
-      }\n\n# This section was automatically generated during setup.\n${yaml.dump(config, {
-        flowLevel: 1,
-      })}\n`;
+      }\n\n# This section was automatically generated during setup.\n${dumpConfig(config)}\n`;
     }
 
     if (params.caCert) {
@@ -172,7 +189,7 @@ export class KibanaConfigWriter {
 
     let parsedConfig: Record<string, unknown>;
     try {
-      parsedConfig = getFlattenedObject(yaml.load(rawConfig) ?? {});
+      parsedConfig = getFlattenedObject(parse(rawConfig) ?? {});
     } catch (err) {
       this.logger.error(`Failed to parse configuration file: ${getDetailedErrorMessage(err)}.`);
       throw err;

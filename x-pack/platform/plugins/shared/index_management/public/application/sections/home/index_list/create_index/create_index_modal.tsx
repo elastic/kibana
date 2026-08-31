@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiSuperSelect,
   EuiForm,
@@ -33,10 +32,15 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
-import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import {
+  LOOKUP_INDEX_MODE,
+  STANDARD_INDEX_MODE,
+  VECTOR_DB_INDEX_MODE,
+} from '../../../../../../common/constants';
 import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
 import { createIndex } from '../../../../services';
-import { useServices } from '../../../../app_context';
+import { useAppContext, useServices } from '../../../../app_context';
 
 import { generateRandomIndexName, isValidIndexName } from './utils';
 
@@ -58,6 +62,9 @@ export interface CreateIndexModalProps {
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
   const { notificationService } = useServices();
+  const {
+    config: { enableIndexMode },
+  } = useAppContext();
   const modalTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
 
@@ -69,19 +76,21 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   const [createError, setCreateError] = useState<string | undefined>();
   const [showApi, setShowApi] = useState(false);
 
-  const apiCode = `PUT ${indexName}
+  const apiCode = enableIndexMode
+    ? `PUT ${indexName}
 {
   "settings": {
     "index":{
       "mode":"${indexMode}"
     }
   }
-}`;
+}`
+    : `PUT ${indexName}`;
 
   const putCreateIndex = useCallback(async () => {
     setIsSaving(true);
     try {
-      const { error } = await createIndex(indexName, indexMode);
+      const { error } = await createIndex(indexName, enableIndexMode ? indexMode : undefined);
       setIsSaving(false);
       if (!error) {
         notificationService.showSuccessToast(
@@ -99,7 +108,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       setIsSaving(false);
       setCreateError(e.message);
     }
-  }, [closeModal, indexMode, indexName, loadIndices, notificationService]);
+  }, [closeModal, enableIndexMode, indexMode, indexName, loadIndices, notificationService]);
 
   const onSave = () => {
     if (isValidIndexName(indexName)) {
@@ -147,22 +156,19 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       <EuiModalBody>
         {createError && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
-              color="danger"
-              iconType="error"
               title={i18n.translate('xpack.idxMgmt.createIndex.modal.error.title', {
                 defaultMessage: 'Error creating index',
               })}
-            >
-              <EuiText>
+              text={
                 <FormattedMessage
                   id="xpack.idxMgmt.createIndex.modal.error.description"
                   defaultMessage="Error creating index: {errorMessage}"
                   values={{ errorMessage: createError }}
                 />
-              </EuiText>
-            </EuiCallOut>
+              }
+            />
             <EuiSpacer />
           </>
         )}
@@ -193,54 +199,69 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
-                  defaultMessage: 'Index mode',
-                })}
-                isDisabled={isSaving}
-                css={css`
-                  width: calc(${euiTheme.size.xxxl} * 4);
-                `}
-              >
-                <EuiSuperSelect
+            {enableIndexMode && (
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
                   fullWidth
-                  name="indexMode"
-                  valueOfSelected={indexMode}
-                  onChange={(mode) => setIndexMode(mode)}
-                  data-test-subj="indexModeField"
-                  options={[
-                    {
-                      value: STANDARD_INDEX_MODE,
-                      inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
-                      'data-test-subj': 'indexModeStandardOption',
-                      dropdownDisplay: (
-                        <Fragment>
-                          <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
-                          </EuiText>
-                        </Fragment>
-                      ),
-                    },
-                    {
-                      value: LOOKUP_INDEX_MODE,
-                      inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
-                      'data-test-subj': 'indexModeLookupOption',
-                      dropdownDisplay: (
-                        <Fragment>
-                          <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
-                          </EuiText>
-                        </Fragment>
-                      ),
-                    },
-                  ]}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
+                  label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
+                    defaultMessage: 'Index mode',
+                  })}
+                  isDisabled={isSaving}
+                  css={css`
+                    width: calc(${euiTheme.size.xxxl} * 4);
+                  `}
+                >
+                  <EuiSuperSelect
+                    fullWidth
+                    name="indexMode"
+                    valueOfSelected={indexMode}
+                    onChange={(mode) => setIndexMode(mode)}
+                    data-test-subj="indexModeField"
+                    options={[
+                      {
+                        value: STANDARD_INDEX_MODE,
+                        inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
+                        'data-test-subj': 'indexModeStandardOption',
+                        dropdownDisplay: (
+                          <Fragment>
+                            <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
+                            <EuiText size="s" color="subdued">
+                              <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
+                            </EuiText>
+                          </Fragment>
+                        ),
+                      },
+                      {
+                        value: LOOKUP_INDEX_MODE,
+                        inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
+                        'data-test-subj': 'indexModeLookupOption',
+                        dropdownDisplay: (
+                          <Fragment>
+                            <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
+                            <EuiText size="s" color="subdued">
+                              <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
+                            </EuiText>
+                          </Fragment>
+                        ),
+                      },
+                      {
+                        value: VECTOR_DB_INDEX_MODE,
+                        inputDisplay: indexModeLabels[VECTOR_DB_INDEX_MODE],
+                        'data-test-subj': 'indexModeVectordbDocumentOption',
+                        dropdownDisplay: (
+                          <Fragment>
+                            <strong>{indexModeLabels[VECTOR_DB_INDEX_MODE]}</strong>
+                            <EuiText size="s" color="subdued">
+                              <p>{indexModeDescriptions[VECTOR_DB_INDEX_MODE]}</p>
+                            </EuiText>
+                          </Fragment>
+                        ),
+                      },
+                    ]}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />

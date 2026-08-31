@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { screen, within, render } from '@testing-library/react';
-import { HitsCounter, HitsCounterMode } from './hits_counter';
+import { HitsCounter } from './hits_counter';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import type {
@@ -52,23 +52,13 @@ describe('hits counter', function () {
       result: 1,
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$();
-    const component1 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
 
-    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1');
-    expect(screen.getAllByTestId('discoverQueryHits').length).toBe(1);
-
-    component1.unmount();
-
-    const component2 = renderWithToolkit(
-      toolkit,
-      <HitsCounter mode={HitsCounterMode.standalone} />
-    );
+    const component = renderWithToolkit(toolkit, <HitsCounter variant="results" />);
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
     expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 result');
     expect(screen.getAllByTestId('discoverQueryHits').length).toBe(1);
 
-    component2.unmount();
+    component.unmount();
   });
 
   it('expect to render 1,899 hits if 1899 hits given', async function () {
@@ -78,23 +68,15 @@ describe('hits counter', function () {
       result: 1899,
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$();
-    const component1 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
-    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899');
 
-    component1.unmount();
-
-    const component2 = renderWithToolkit(
-      toolkit,
-      <HitsCounter mode={HitsCounterMode.standalone} />
-    );
+    const component = renderWithToolkit(toolkit, <HitsCounter variant="results" />);
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
     expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 results');
 
-    component2.unmount();
+    component.unmount();
   });
 
-  it('renders with custom hit counter labels', async function () {
+  it('renders the documents variant with document/documents wording', async function () {
     const { toolkit, dataStateContainer } = await setup();
     dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
@@ -102,49 +84,48 @@ describe('hits counter', function () {
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$();
 
-    const component1 = renderWithToolkit(
-      toolkit,
-      <HitsCounter
-        mode={HitsCounterMode.appended}
-        hitCounterLabel="kibanana"
-        hitCounterPluralLabel="kibananas"
-      />
-    );
+    const component1 = renderWithToolkit(toolkit, <HitsCounter variant="documents" />);
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 documents');
 
     component1.unmount();
-
-    const component2 = renderWithToolkit(
-      toolkit,
-      <HitsCounter
-        mode={HitsCounterMode.standalone}
-        hitCounterLabel="kibanana"
-        hitCounterPluralLabel="kibananas"
-      />
-    );
-    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 kibananas');
-
-    component2.unmount();
 
     dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1,
     }) as DataTotalHits$;
 
-    const component3 = renderWithToolkit(
-      toolkit,
-      <HitsCounter
-        mode={HitsCounterMode.standalone}
-        hitCounterLabel="kibanana"
-        hitCounterPluralLabel="kibananas"
-      />
-    );
+    const component2 = renderWithToolkit(toolkit, <HitsCounter variant="documents" />);
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 kibanana');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 document');
 
-    component3.unmount();
+    component2.unmount();
+  });
+
+  it('renders the groups variant with group/groups wording', async function () {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1899,
+    }) as DataTotalHits$;
+    dataStateContainer.data$.documents$ = getDocuments$();
+
+    const component1 = renderWithToolkit(toolkit, <HitsCounter variant="groups" />);
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 groups');
+
+    component1.unmount();
+
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1,
+    }) as DataTotalHits$;
+
+    const component2 = renderWithToolkit(toolkit, <HitsCounter variant="groups" />);
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 group');
+
+    component2.unmount();
   });
 
   it('should render a EuiLoadingSpinner when status is partial', async () => {
@@ -154,7 +135,7 @@ describe('hits counter', function () {
       result: 2,
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$();
-    const component = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+    const component = renderWithToolkit(toolkit, <HitsCounter variant="results" />);
 
     const progressElement = within(component.container).getAllByRole('progressbar');
 
@@ -169,21 +150,22 @@ describe('hits counter', function () {
       result: 2,
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$();
-    renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+    renderWithToolkit(toolkit, <HitsCounter variant="results" />);
     expect(screen.queryByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
     expect(screen.queryByTestId('discoverQueryTotalHits')).toHaveTextContent('≥2 results');
   });
 
-  it('should not render if loading', async () => {
+  it('should render a loading spinner in place of the count while loading', async () => {
     const { toolkit, dataStateContainer } = await setup();
     dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.LOADING,
       result: undefined,
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$();
-    const component = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+    const component = renderWithToolkit(toolkit, <HitsCounter variant="results" />);
 
-    expect(component.container).toBeEmptyDOMElement();
+    expect(within(component.container).getByRole('progressbar')).toHaveClass('euiLoadingSpinner');
+    expect(screen.queryByTestId('discoverQueryTotalHits')).not.toBeInTheDocument();
   });
 
   it('should render discoverQueryHitsPartial when status is error', async () => {
@@ -193,7 +175,7 @@ describe('hits counter', function () {
       result: undefined,
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$(3);
-    const component = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+    const component = renderWithToolkit(toolkit, <HitsCounter variant="results" />);
     expect(screen.getByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
     expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥3 resultsInfo');
 
@@ -205,9 +187,9 @@ describe('hits counter', function () {
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$(2);
 
-    const component2 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
+    const component2 = renderWithToolkit(toolkit, <HitsCounter variant="documents" />);
     expect(screen.getByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥200Info');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥200 documentsInfo');
 
     component2.unmount();
 
@@ -217,9 +199,9 @@ describe('hits counter', function () {
     }) as DataTotalHits$;
     dataStateContainer.data$.documents$ = getDocuments$(1);
 
-    const component3 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
+    const component3 = renderWithToolkit(toolkit, <HitsCounter variant="documents" />);
     expect(screen.getByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
-    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥1Info');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥1 documentInfo');
 
     component3.unmount();
   });

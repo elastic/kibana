@@ -28,7 +28,7 @@ describe('accessesFrequentlyMaintainer', () => {
         state: {},
         taskStatus: 'started',
       },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
       logger: loggerMock.create(),
       fakeRequest: {} as KibanaRequest,
       esClient: {} as ElasticsearchClient,
@@ -135,12 +135,12 @@ describe('accessesFrequentlyMaintainer', () => {
     expect(payload).not.toHaveProperty('breakdown');
   });
 
-  it('passes abortController to runRelationshipMaintainer', async () => {
+  it('passes signal to runRelationshipMaintainer', async () => {
     const telemetry = makeTelemetry();
     const ac = new AbortController();
     const ctx = makeContext({
       telemetry: telemetry as unknown as Ctx['telemetry'],
-      abortController: ac,
+      signal: ac.signal,
     });
 
     const spy = jest.spyOn(engineModule, 'runRelationshipMaintainer').mockResolvedValue({
@@ -158,6 +158,6 @@ describe('accessesFrequentlyMaintainer', () => {
 
     await accessesFrequentlyMaintainer.run(ctx);
 
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ abortController: ac }));
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ signal: ac.signal }));
   });
 });

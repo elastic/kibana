@@ -357,7 +357,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
         });
         await testSubjects.setValue('lns-colorMapping-colorPicker-custom-input', customColor, {
-          typeCharByChar: true,
           clearWithKeyboard: true,
         });
 

@@ -8,14 +8,16 @@
 import React from 'react';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
+import { LOGSDB_INDEX_MODE } from '../../../../../common/constants';
 import { StepLogistics } from './step_logistics';
 
 let mockIsServerless = false;
 
 jest.mock('../../../app_context', () => ({
   useAppContext: () => ({
-    config: { isServerless: mockIsServerless },
+    config: { isServerless: mockIsServerless, enableIndexMode: true },
     plugins: { cloud: undefined },
     core: {
       application: { capabilities: { management: { stack: { license_management: true } } } },
@@ -122,6 +124,26 @@ describe('StepLogistics', () => {
 
     const lastCall = onChange.mock.calls.at(-1)?.[0];
     expect(await lastCall.validate()).toBe(false);
+  });
+
+  it('SHOULD set the index mode to logsdb when the index pattern is logs-*-*', async () => {
+    const onChange = jest.fn();
+
+    render(
+      <I18nProvider>
+        <StepLogistics defaultValue={baseDefaultValue} onChange={onChange} isLegacy={false} />
+      </I18nProvider>
+    );
+
+    const indexPatterns = new EuiComboBoxTestHarness('indexPatternsField');
+    await indexPatterns.clear();
+    indexPatterns.addCustomValue('logs-*-*');
+    await indexPatterns.close({ timeout: 250 });
+
+    await waitFor(() => {
+      const lastCall = onChange.mock.calls.at(-1)?.[0];
+      expect(lastCall?.getData().indexMode).toBe(LOGSDB_INDEX_MODE);
+    });
   });
 
   describe('WHEN running on Stateful', () => {

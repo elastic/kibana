@@ -21,8 +21,9 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataGridDensity, isLegacySort, type SortOrder } from '@kbn/discover-utils';
+import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { JsonModeSettings } from '@kbn/unified-data-table';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
   isDiscoverSessionEsqlTab,
@@ -81,6 +82,8 @@ export function fromStoredSearchEmbeddableByRef(
     rowsPerPage,
     headerRowHeight,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
     grid,
     selectedTabId,
     savedObjectId,
@@ -135,6 +138,8 @@ export function fromStoredSearchEmbeddableByValue(
     rowsPerPage,
     headerRowHeight,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
     grid,
     attributes,
     title,
@@ -196,16 +201,12 @@ export function fromStoredTab(
     sort,
     sampleSize,
     rowsPerPage,
-    headerRowHeight,
-    density,
     viewMode,
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
   const apiTab = {
     ...toDiscoverSessionPanelOverrides(tab),
     sort: fromStoredSort(sort),
-    header_row_height: fromStoredHeight(headerRowHeight),
-    density: density ?? DataGridDensity.COMPACT,
   };
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
   const { index, query, filter } = injectReferences(searchSourceValues, references);
@@ -262,18 +263,30 @@ export function toStoredTab(
 export function toDiscoverSessionPanelOverrides(
   storedState: StoredSearchEmbeddableState | DiscoverSessionTabAttributes
 ): DiscoverSessionPanelOverrides {
-  const { sort, columns, rowHeight, sampleSize, rowsPerPage, headerRowHeight, density, grid } =
-    storedState;
+  const {
+    sort,
+    columns,
+    rowHeight,
+    sampleSize,
+    rowsPerPage,
+    headerRowHeight,
+    density,
+    documentsDisplayMode,
+    jsonModeSettings,
+    grid,
+  } = storedState;
   return {
     ...(sort && { sort: fromStoredSort(sort) }),
     ...(columns && { column_order: columns }),
     ...(grid &&
       Object.keys(grid?.columns ?? {}).length && { column_settings: fromStoredGrid(grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
+    ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
     ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
+    ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
+    ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
+    ...(jsonModeSettings && { json_mode_settings: fromStoredJsonModeSettings(jsonModeSettings) }),
   };
 }
 
@@ -289,6 +302,8 @@ export function fromDiscoverSessionPanelOverrides(
     rows_per_page: rowsPerPage,
     header_row_height: headerRowHeight,
     density,
+    documents_display_mode: documentsDisplayMode,
+    json_mode_settings: jsonModeSettings,
   } = apiState;
   return {
     ...(sort && { sort: toStoredSort(sort) }),
@@ -298,9 +313,25 @@ export function fromDiscoverSessionPanelOverrides(
     ...(rowsPerPage && { rowsPerPage }),
     ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
     ...(density && { density }),
+    ...(documentsDisplayMode && { documentsDisplayMode }),
+    ...(jsonModeSettings && { jsonModeSettings: toStoredJsonModeSettings(jsonModeSettings) }),
     ...(Object.keys(columnSettings ?? {}).length && { grid: toStoredGrid(columnSettings) }),
   };
 }
+
+const fromStoredJsonModeSettings = (
+  jsonModeSettings: JsonModeSettings
+): NonNullable<DiscoverSessionPanelOverrides['json_mode_settings']> => ({
+  ...(jsonModeSettings.hideNulls !== undefined && { hide_nulls: jsonModeSettings.hideNulls }),
+  ...(jsonModeSettings.wrapLines !== undefined && { wrap_lines: jsonModeSettings.wrapLines }),
+});
+
+const toStoredJsonModeSettings = (
+  jsonModeSettings: NonNullable<DiscoverSessionPanelOverrides['json_mode_settings']>
+): JsonModeSettings => ({
+  ...(jsonModeSettings.hide_nulls !== undefined && { hideNulls: jsonModeSettings.hide_nulls }),
+  ...(jsonModeSettings.wrap_lines !== undefined && { wrapLines: jsonModeSettings.wrap_lines }),
+});
 
 export function fromStoredGrid(
   grid: DiscoverSessionTabAttributes['grid']
@@ -333,7 +364,7 @@ export function toStoredSort(
   return sort.map((s) => [s.name, s.direction]);
 }
 
-export function fromStoredHeight(height: number = 3): DiscoverSessionTab['row_height'] {
+export function fromStoredRowHeight(height: number) {
   return height === -1 ? 'auto' : height;
 }
 

@@ -1,0 +1,38 @@
+{
+  "sha1": "c3c56e4d4a683ab2180c7fac830deef4c86d75e5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a409be037e17b3c-8fa17d839dd5b8c",
+      "title": "ProjectAPIKeys generates API key and verifies viewer restrictions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/project_api_keys.spec.ts",
+        "line": 17,
+        "column": 10
+      }
+    },
+    {
+      "id": "e99d9585b4b933e-4400b6af6810211",
+      "title": "ProjectMonitorReadOnly project monitor is read-only and can be re-pushed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/project_monitor_read_only.spec.ts",
+        "line": 19,
+        "column": 11
+      }
+    }
+  ]
+}

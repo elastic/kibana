@@ -32,8 +32,8 @@ test.describe(
 
 This is equivalent to assigning all of these tags:
 
-- `@local-stateful-*` (local stateful)
-- `@cloud-stateful-*` (Elastic Cloud)
+- `@local-stateful-classic` (local stateful)
+- `@cloud-stateful-classic` (Elastic Cloud)
 - `@local-serverless-security_complete` (local serverless)
 - `@cloud-serverless-security_complete` (Elastic Cloud)
 
@@ -58,9 +58,9 @@ Pick the narrowest scope that's still correct for the feature under test, as eve
 | The test covers…                                 | Use                                                                                                                  |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | A platform feature that works everywhere         | [`tags.deploymentAgnostic`](#scout-deployment-tags-deployment-agnostic)                                              |
-| A solution feature                               | `tags.stateful.<solution>` + `tags.serverless.<solution>` (use `.complete` when the solution has tiers)              |
+| A solution feature                               | `tags.stateful.classic` + `tags.serverless.<solution>` (use `.complete` when the solution has tiers)                 |
 | Behavior specific to one serverless project tier | The explicit tier tag, e.g. `tags.serverless.security.essentials` or `tags.serverless.observability.logs_essentials` |
-| Behavior that only exists on stateful            | `tags.stateful.<solution>` alone                                                                                     |
+| Behavior that only exists on stateful            | `tags.stateful.classic` alone                                                                                        |
 
 ::::::{warning}
 Don't reach for `tags.deploymentAgnostic` from a solution module. It runs your test across every solution and is expensive — use explicit per-deployment tags instead. See the [`tags.deploymentAgnostic` note](#scout-deployment-tags-deployment-agnostic).
@@ -85,15 +85,24 @@ Workplace AI is excluded because it has no stateful counterpart.
 
 ### Stateful [scout-deployment-tags-stateful]
 
-| Helper                        | Compatible with solution view            |
-| ----------------------------- | ---------------------------------------- |
-| `tags.stateful.all`           | All space solution views                 |
-| `tags.stateful.classic`       | {icon}`logo_elastic_stack` Classic       |
-| `tags.stateful.search`        | {icon}`logo_elasticsearch` Elasticsearch |
-| `tags.stateful.observability` | {icon}`logo_observability` Observability |
-| `tags.stateful.security`      | {icon}`logo_security` Security           |
+| Helper                  | What it targets                                                  |
+| ----------------------- | ----------------------------------------------------------------- |
+| `tags.stateful.all`     | All stateful runs CI currently schedules (today: `classic`)       |
+| `tags.stateful.classic` | {icon}`logo_elastic_stack` The only stateful domain CI schedules  |
 
-The target solution view indicates the **solution view** the test is intended for, but is not enforced at test execution time. To set the solution view in a test, use `scoutSpace.setSolutionView()`.
+::::{note}
+Kibana CI only schedules stateful test runs tagged `classic` — always tag stateful coverage with
+`tags.stateful.classic`, regardless of which solution view the test targets. If your test needs a
+specific solution view (Search, Observability, Security) on stateful, tag it with
+`tags.stateful.classic` and switch the solution view at runtime via the Kibana API,
+`scoutSpace.setSolutionView()`, instead of reaching for a per-solution stateful tag.
+
+Per-solution stateful domains (search, observability, security) aren't exposed by the
+`tags.stateful` helper, and are also blocked as raw tag strings (for example `@local-stateful-search`) by
+the `@kbn/eslint/scout_no_deprecated_tags` lint rule. This isn't a permanent limitation — Kibana CI
+doesn't schedule those combinations yet — so the helper can expose them again once CI support
+lands.
+::::
 
 ### Serverless (by solution) [scout-deployment-tags-serverless]
 

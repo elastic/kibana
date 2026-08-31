@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope } from '../../affected-packages';
+import { allChangedFilesInScope, createScopeMatcher } from '../../affected-packages';
 
 /**
  * Scout-tests-only fast path for the Jest/FTR orchestrator.
@@ -45,6 +45,11 @@ const SCOUT_TESTS_ONLY_EXCLUDE_GLOBS: readonly string[] = [
 ];
 
 /**
+ * Returns `true` when a single file sits inside a Scout test scope (fixtures included).
+ */
+export const isScoutTestPath = createScopeMatcher(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
+
+/**
  * Returns `true` only when every changed file is either documentation noise
  * (README, *.md, CHANGELOG*) or sits inside a Scout test scope, excluding
  * `fixtures/` changes. Falls back to `false` on an empty diff or anything
@@ -56,5 +61,19 @@ export function isScoutTestsOnlyDiff(changedFiles: readonly string[]): boolean {
     SCOUT_TESTS_ONLY_SCOPE_GLOBS,
     SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
     SCOUT_TESTS_ONLY_EXCLUDE_GLOBS
+  );
+}
+
+/**
+ * Returns `true` when every changed file sits inside a Scout test scope
+ * (fixtures included). Unlike `isScoutTestsOnlyDiff`, fixtures aren't
+ * excluded here: Jest/FTR can't consume Scout fixtures either way, so the
+ * tests-only/dependency-tree distinction only matters to Scout's own pipeline.
+ */
+export function isScoutPathOnlyDiff(changedFiles: readonly string[]): boolean {
+  return allChangedFilesInScope(
+    changedFiles,
+    SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+    SCOUT_TESTS_ONLY_IGNORE_PATTERNS
   );
 }

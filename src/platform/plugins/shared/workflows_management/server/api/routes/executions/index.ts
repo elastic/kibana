@@ -24,6 +24,7 @@ import {
 } from './resume_execution_external';
 import { registerExternalResumeFormRoute } from './resume_execution_external_form';
 import { registerRunWorkflowRoute } from './run_workflow';
+import { registerSearchExecutionsRoute } from './search_executions';
 import { registerTestStepRoute } from './test_step';
 import { registerTestWorkflowRoute } from './test_workflow';
 import type { RouteDependencies } from '../types';
@@ -33,6 +34,7 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerTestWorkflowRoute(deps);
   registerTestStepRoute(deps);
   registerGetWorkflowExecutionsRoute(deps);
+  registerSearchExecutionsRoute(deps);
   registerGetWorkflowStepExecutionsRoute(deps);
   registerGetExecutionRoute(deps);
   registerGetExecutionLogsRoute(deps);

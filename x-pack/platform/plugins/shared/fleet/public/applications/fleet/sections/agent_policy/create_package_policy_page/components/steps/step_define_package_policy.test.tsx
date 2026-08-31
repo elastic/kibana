@@ -829,6 +829,32 @@ describe('StepDefinePackagePolicy', () => {
         expect(onIlmPolicyChange).toHaveBeenLastCalledWith('policy-a');
       });
 
+      it('resets the selected ILM policy and calls onIlmPolicyChange(undefined) when toggle is turned off', async () => {
+        const onIlmPolicyChange = jest.fn();
+        renderResult = testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, namespace: 'staging' }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={true}
+            onNamespaceCustomizationEnabledChange={jest.fn()}
+            onIlmPolicyChange={onIlmPolicyChange}
+          />
+        );
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+        await userEvent.click(toggle); // turn ON
+        const select = await renderResult.findByTestId('packagePolicyIlmPolicySelect');
+        await waitFor(() => expect(select).not.toBeDisabled());
+        fireEvent.change(select, { target: { value: 'policy-a' } });
+        expect(onIlmPolicyChange).toHaveBeenLastCalledWith('policy-a');
+        await userEvent.click(toggle); // turn OFF
+        expect(onIlmPolicyChange).toHaveBeenLastCalledWith(undefined);
+        await waitFor(() => expect(select).toHaveValue(''));
+      });
+
       it('keeps the currently assigned ilm_policy selectable even if excluded from the fetched list', async () => {
         renderResult = renderWithToggle({
           packagePolicyOverride: { namespace: 'staging' },

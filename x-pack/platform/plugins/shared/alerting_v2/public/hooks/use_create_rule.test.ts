@@ -25,16 +25,17 @@ const mockRuleResponse: RuleResponse = {
   enabled: true,
   metadata: {
     name: 'My CPU Alert',
+    version: 1,
     description: '',
     tags: [],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  createdBy: 'test-user',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'test-user',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  created_by: 'test-user',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'test-user',
+  updated_at: '2026-01-01T00:00:00.000Z',
 };
 
 const mockCreatePayload: CreateRuleData = {
@@ -58,8 +59,12 @@ const createWrapper = () => {
 
 describe('useCreateRule', () => {
   const mockCreateRule = jest.fn();
+  const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const mockAddDanger = jest.fn();
+  const mockNavigateToUrl = jest.fn();
+  const mockPrepend = jest.fn((path: string) => path);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,26 +73,107 @@ describe('useCreateRule', () => {
 
     mockUseService.mockImplementation((service: unknown) => {
       if (service === RulesApi) {
-        return { createRule: mockCreateRule } as any;
+        return { createRule: mockCreateRule, disableRule: mockDisableRule } as any;
       }
       if (service === 'notifications') {
-        return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
+        return {
+          toasts: { addSuccess: mockAddSuccess, addError: mockAddError, addDanger: mockAddDanger },
+        } as any;
+      }
+      if (service === 'application') {
+        return { navigateToUrl: mockNavigateToUrl } as any;
+      }
+      if (service === 'http') {
+        return { basePath: { prepend: mockPrepend } } as any;
       }
       return undefined as any;
     });
   });
 
+  const expectSuccessToast = () => {
+    expect(mockAddSuccess).toHaveBeenCalledWith({
+      title: 'Rule "My CPU Alert" created successfully',
+      actionProps: {
+        primary: expect.objectContaining({
+          children: 'View rule',
+          href: '/app/management/alertingV2/rules/rule-1',
+          'data-test-subj': 'alertingV2ViewRuleToastLink',
+        }),
+      },
+    });
+    expect(mockAddError).not.toHaveBeenCalled();
+  };
+
   it('should create a rule and show a success toast with the rule name', async () => {
     mockCreateRule.mockResolvedValue(mockRuleResponse);
     const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate(mockCreatePayload);
+    result.current.mutate({ payload: mockCreatePayload });
 
     await waitFor(() => {
       expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
-      expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" created successfully');
-      expect(mockAddError).not.toHaveBeenCalled();
+      expect(mockDisableRule).not.toHaveBeenCalled();
+      expectSuccessToast();
     });
+
+    const toast = mockAddSuccess.mock.calls[0][0];
+    const preventDefault = jest.fn();
+    toast.actionProps.primary.onClick({ preventDefault });
+    expect(preventDefault).toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/rule-1');
+  });
+
+  it('should disable the created rule before showing the success toast', async () => {
+    const disabledRule = { ...mockRuleResponse, enabled: false };
+    mockCreateRule.mockResolvedValue(mockRuleResponse);
+    mockDisableRule.mockResolvedValue(disabledRule);
+    const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ payload: mockCreatePayload, enabled: false });
+
+    await waitFor(() => {
+      expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
+      expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
+      expectSuccessToast();
+    });
+    expect(mockCreateRule.mock.invocationCallOrder[0]).toBeLessThan(
+      mockDisableRule.mock.invocationCallOrder[0]
+    );
+    expect(mockDisableRule.mock.invocationCallOrder[0]).toBeLessThan(
+      mockAddSuccess.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('should show a disable-failed toast with a view-rule action when disable fails after create', async () => {
+    const disableError = new Error('disable failed');
+    mockCreateRule.mockResolvedValue(mockRuleResponse);
+    mockDisableRule.mockRejectedValue(disableError);
+    const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ payload: mockCreatePayload, enabled: false });
+
+    await waitFor(() => {
+      expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title: 'Rule created but could not be disabled',
+        text: '"My CPU Alert" is enabled and will start running. Disable it from the rule details page.',
+        actionProps: {
+          primary: expect.objectContaining({
+            children: 'View rule',
+            href: '/app/management/alertingV2/rules/rule-1',
+            'data-test-subj': 'alertingV2ViewRuleToastLink',
+          }),
+        },
+      });
+      expect(mockAddError).not.toHaveBeenCalled();
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
+
+    const toast = mockAddDanger.mock.calls[0][0];
+    const preventDefault = jest.fn();
+    toast.actionProps.primary.onClick({ preventDefault });
+    expect(preventDefault).toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/rule-1');
   });
 
   it('should surface the server error message in the modal and a friendly status in the toast', async () => {
@@ -99,9 +185,10 @@ describe('useCreateRule', () => {
     mockCreateRule.mockRejectedValue(httpError);
     const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate(mockCreatePayload);
+    result.current.mutate({ payload: mockCreatePayload });
 
     await waitFor(() => {
+      expect(mockDisableRule).not.toHaveBeenCalled();
       expect(mockAddError).toHaveBeenCalledTimes(1);
       const [enrichedError, options] = mockAddError.mock.calls[0];
       expect(enrichedError.message).toBe('metadata.name is required');
@@ -122,7 +209,7 @@ describe('useCreateRule', () => {
     mockCreateRule.mockRejectedValue(httpError);
     const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate(mockCreatePayload);
+    result.current.mutate({ payload: mockCreatePayload });
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
@@ -138,7 +225,7 @@ describe('useCreateRule', () => {
     mockCreateRule.mockRejectedValue(error);
     const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate(mockCreatePayload);
+    result.current.mutate({ payload: mockCreatePayload });
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(error, {

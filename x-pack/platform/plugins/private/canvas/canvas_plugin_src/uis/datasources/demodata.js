@@ -6,18 +6,14 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings } from '../../../i18n';
 
 const { DemoData: strings } = DataSourceStrings;
 
 const DemodataDatasource = () => (
-  <EuiCallOut title={strings.getHeading()} iconType="info">
-    <EuiText size="s">
-      <p>{strings.getDescription()}</p>
-    </EuiText>
-  </EuiCallOut>
+  <KbnInfoCallout title={strings.getHeading()} text={strings.getDescription()} />
 );
 
 export const demodata = () => ({

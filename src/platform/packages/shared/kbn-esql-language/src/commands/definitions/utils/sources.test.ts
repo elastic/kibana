@@ -156,6 +156,34 @@ describe('sourceExists', () => {
   it('should handle empty string gracefully (false)', () => {
     expect(sourceExists('', mockSources)).toBe(false);
   });
+
+  describe('cross-project search (CPS) prefix matching', () => {
+    const cpsSources = new Set([
+      'linked_local_project:cps-timefield-test',
+      'linked_local_project:another-index',
+      'local-index',
+    ]);
+
+    it('should return true when the index matches the local part of a project-prefixed source', () => {
+      expect(sourceExists('cps-timefield-test', cpsSources)).toBe(true);
+    });
+
+    it('should return true when the fully prefixed name is used', () => {
+      expect(sourceExists('linked_local_project:cps-timefield-test', cpsSources)).toBe(true);
+    });
+
+    it('should return true for a local (non-prefixed) source alongside CPS sources', () => {
+      expect(sourceExists('local-index', cpsSources)).toBe(true);
+    });
+
+    it('should return false when the index does not match any source or its local part', () => {
+      expect(sourceExists('nonexistent-index', cpsSources)).toBe(false);
+    });
+
+    it('should handle comma-separated indices where one is a CPS local name', () => {
+      expect(sourceExists('local-index,cps-timefield-test', cpsSources)).toBe(true);
+    });
+  });
 });
 
 describe('buildSourcesDefinitions', () => {
@@ -448,6 +476,44 @@ describe('getSourceOfJoinTarget', () => {
     const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
     expect(joinTarget).toBe('lookup_index');
+  });
+
+  it('removes the coordinator prefix from the target index', () => {
+    const query = EsqlQuery.fromSrc(
+      'FROM remote_cluster:index | LOOKUP JOIN _coordinator:lookup_index ON id'
+    );
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+
+    expect(getLookupJoinSource(joinCommand as ESQLAstJoinCommand)).toBe('lookup_index');
+  });
+
+  it('removes the coordinator prefix from an aliased target index', () => {
+    const query = EsqlQuery.fromSrc(
+      'FROM remote_cluster:index | LOOKUP JOIN _coordinator:lookup_index AS lookup ON id'
+    );
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+
+    expect(getLookupJoinSource(joinCommand as ESQLAstJoinCommand)).toBe('lookup_index');
+  });
+
+  it('keeps unsupported remote prefixes unchanged', () => {
+    const query = EsqlQuery.fromSrc(
+      'FROM remote_cluster:index | LOOKUP JOIN another_cluster:lookup_index ON id'
+    );
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+
+    expect(getLookupJoinSource(joinCommand as ESQLAstJoinCommand)).toBe(
+      'another_cluster:lookup_index'
+    );
   });
 });
 

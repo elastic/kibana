@@ -54,7 +54,7 @@ export const SignalFiringsChart: React.FC<SignalFiringsChartProps> = ({
   );
 
   const seriesName = i18n.translate('xpack.alertingV2.signalOverview.firingsSeriesName', {
-    defaultMessage: 'Signals',
+    defaultMessage: 'Events',
   });
 
   return (

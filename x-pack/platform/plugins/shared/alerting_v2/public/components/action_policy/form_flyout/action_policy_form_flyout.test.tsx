@@ -31,7 +31,7 @@ const INLINE_DEFS = [
   {
     id: 'email',
     label: 'Email',
-    iconType: 'email',
+    iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: 'to: ""\n',
   },
@@ -67,8 +67,8 @@ jest.mock('../form/components/matcher_input', () => ({
   ),
 }));
 
-jest.mock('../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_event_fields', () => ({
+  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({
@@ -228,19 +228,19 @@ describe('ActionPolicyFormFlyout', () => {
       description: 'Routes critical alerts',
       enabled: true,
       matcher: 'data.severity : "critical"',
-      groupBy: ['host.name', 'service.name'],
+      group_by: ['host.name', 'service.name'],
       tags: ['production'],
-      groupingMode: 'per_field',
+      grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
-      snoozedUntil: null,
+      snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      createdBy: 'elastic',
-      createdAt: '2026-03-01T10:00:00.000Z',
-      updatedBy: 'elastic',
-      updatedAt: '2026-03-01T10:00:00.000Z',
+      created_by: 'elastic',
+      created_at: '2026-03-01T10:00:00.000Z',
+      updated_by: 'elastic',
+      updated_at: '2026-03-01T10:00:00.000Z',
       auth: {
         owner: 'elastic',
-        createdByUser: true,
+        created_by_user: true,
       },
     };
 

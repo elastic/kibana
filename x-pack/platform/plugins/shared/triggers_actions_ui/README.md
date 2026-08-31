@@ -820,7 +820,7 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 // UI control item for open flyout
 <EuiButton
   fill
-  iconType="plusInCircle"
+  iconType="plusCircle"
   iconSide="left"
   onClick={() => setAlertFlyoutVisibility(true)}
 >
@@ -1567,7 +1567,7 @@ const connector = {
 // UI control item for open flyout
 <EuiButton
   fill
-  iconType="plusInCircle"
+  iconType="plusCircle"
   iconSide="left"
   onClick={() => setAddFlyoutVisibility(true)}
 >
@@ -1640,7 +1640,7 @@ const { http, triggersActionsUi, notifications, application } = useKibana().serv
 // UI control item for open flyout
 <EuiButton
   fill
-  iconType="plusInCircle"
+  iconType="plusCircle"
   iconSide="left"
   onClick={() => setEditFlyoutVisibility(true)}
 >

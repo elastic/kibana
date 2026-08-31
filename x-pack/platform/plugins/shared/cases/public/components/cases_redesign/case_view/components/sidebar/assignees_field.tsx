@@ -151,7 +151,7 @@ const AssigneesFieldComponent: React.FC<AssigneesFieldProps> = ({
         <EuiButtonIcon
           data-test-subj="case-view-assignees-add-button"
           aria-label={i18n.EDIT_ASSIGNEES_ARIA_LABEL}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           color="primary"
           onClick={togglePopover}
           disabled={isLoading}

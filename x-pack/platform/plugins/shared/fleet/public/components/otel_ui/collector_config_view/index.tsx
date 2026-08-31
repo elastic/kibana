@@ -36,7 +36,7 @@ export const CollectorConfigView: React.FunctionComponent<CollectorConfigViewPro
   if (pipelineIds.length === 0) {
     return (
       <EuiEmptyPrompt
-        iconType="visLine"
+        iconType="chartLine"
         title={
           <h3>
             <FormattedMessage

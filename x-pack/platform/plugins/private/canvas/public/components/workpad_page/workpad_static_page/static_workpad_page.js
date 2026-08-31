@@ -9,6 +9,7 @@ import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
 import { staticWorkpadPagePropTypes } from '../prop_types';
 import { isGroupId } from '../../../lib/workpad';
+import { WorkpadPageRoot } from '../workpad_page_root';
 
 export class StaticWorkpadPage extends PureComponent {
   static propTypes = staticWorkpadPagePropTypes;
@@ -17,7 +18,7 @@ export class StaticWorkpadPage extends PureComponent {
     const { pageId, pageStyle, className, animationStyle, elements, height, width } = this.props;
 
     return (
-      <div
+      <WorkpadPageRoot
         key={pageId}
         id={pageId}
         data-test-subj="canvasWorkpadPage"
@@ -30,7 +31,7 @@ export class StaticWorkpadPage extends PureComponent {
           .map((element) => (
             <ElementWrapper key={element.id} element={element} />
           ))}
-      </div>
+      </WorkpadPageRoot>
     );
   }
 }

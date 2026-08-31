@@ -11,12 +11,14 @@ import { pipe } from 'fp-ts/pipeable';
 
 import type {
   CasesFindResponse,
+  CasesSearchResponse,
   CasesBulkGetResponse,
   CasesMetricsResponse,
   CasesSimilarResponse,
 } from '../../common/types/api';
 import {
   CasesFindResponseRt,
+  CasesSearchResponseRt,
   CasesBulkGetResponseRt,
   CasesMetricsResponseRt,
   CasesSimilarResponseRt,
@@ -26,6 +28,18 @@ import { throwErrors } from '../../common';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+
+/**
+ * Decodes the internal `_search` response, which is a superset of the public `_find` response that
+ * additionally carries `mttr` for the cases list metrics bar. Using the search RT here (rather than
+ * `CasesFindResponseRt`) keeps the strict decode from stripping/rejecting the `mttr` key.
+ */
+export const decodeCasesSearchResponse = (respCases?: CasesSearchResponse) =>
+  pipe(
+    CasesSearchResponseRt.decode(respCases),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
   pipe(
     CasesMetricsResponseRt.decode(metrics),

@@ -73,6 +73,15 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
           },
         },
       },
+      // Required plugins, read unconditionally by the unified results table.
+      uiActions: {
+        getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => null,
+        },
+      },
       notifications: {
         toasts: jest.fn(),
       },

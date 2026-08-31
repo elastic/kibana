@@ -16,6 +16,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
   createRule,
+  createAlertsIndex,
 } from '@kbn/detections-response-ftr-services';
 import { waitForCases } from '../../../utils/cases';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -48,19 +49,11 @@ export default ({ getService }: FtrProviderContext) => {
     describe('adding actions', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0',
-          {
-            useCreate: true,
-            docsOnly: true,
-          }
-        );
+        await createAlertsIndex(supertest, log);
       });
       after(async () => {
         await esArchiver.unload(auditbeatPath);
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/signals/severity_risk_overrides'
-        );
+        await deleteAllAlerts(supertest, log, es);
       });
       beforeEach(async () => {
         await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });

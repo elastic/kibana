@@ -142,6 +142,42 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
+  it('should allow to specify iacProvisioner.api.url and tls with a single CA path', () => {
+    expect(() => {
+      config.schema.validate({
+        iacProvisioner: {
+          enabled: true,
+          api: {
+            url: 'https://iac-provisioner.api.url',
+            tls: {
+              certificate: 'config/certs/kibana.crt',
+              key: 'config/certs/kibana.key',
+              ca: 'config/certs/ca.crt',
+            },
+          },
+        },
+      });
+    }).not.toThrow();
+  });
+
+  it('should reject iacProvisioner.api.tls.ca as a list of CA paths', () => {
+    expect(() => {
+      config.schema.validate({
+        iacProvisioner: {
+          enabled: true,
+          api: {
+            url: 'https://iac-provisioner.api.url',
+            tls: {
+              certificate: 'config/certs/kibana.crt',
+              key: 'config/certs/kibana.key',
+              ca: ['config/certs/cluster-ca.crt', 'config/certs/mki-ca.crt'],
+            },
+          },
+        },
+      });
+    }).toThrow();
+  });
+
   it('should allow to specify packageInstallation configuration', () => {
     expect(() => {
       config.schema.validate({
@@ -260,6 +296,8 @@ describe('Config schema', () => {
       const res = applyConfigDeprecations({
         experimentalFeatures: {
           enableAgentlessPoliciesUI: false,
+          // disableAgentlessLegacyAPI defaults on, so pin it off to isolate "only the UI disabled".
+          disableAgentlessLegacyAPI: false,
         },
       });
 

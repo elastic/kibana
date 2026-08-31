@@ -133,7 +133,6 @@ import type { BadgeOptions } from '../../../../common/components/header_page/typ
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link/edit_rule_settings_button_link';
@@ -157,7 +156,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 
@@ -246,7 +244,12 @@ export const RuleDetailsPage = connector(
     const isRuleChangesHistoryEnabled =
       ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
-    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -307,7 +310,6 @@ export const RuleDetailsPage = connector(
       isExistingRule,
     } = useRuleWithFallback(ruleId);
 
-    const { pollForSignalIndex } = useSignalHelpers();
     const [rule, setRule] = useState<RuleResponse | null>(null);
     const [shouldStackAboutContent, setShouldStackAboutContent] = useState(false);
     const isLoading = useMemo(() => ruleLoading && rule == null, [rule, ruleLoading]);
@@ -362,6 +364,21 @@ export const RuleDetailsPage = connector(
         path: getRuleDetailsTabUrl(ruleId ?? '', 'alerts', ''),
       });
     }, [navigateToApp, ruleId]);
+
+    // Sync after a chat-driven rule save. Must refetch here: the save handler can't write
+    // to this page's react-query cache (security pages use the Cases context's query client).
+    useEffect(() => {
+      let prevSaving: ReadonlySet<string> = new Set();
+      const savingSub = aiRuleCreation.saving$.subscribe((saving) => {
+        if (saving.size < prevSaving.size) {
+          refreshRule();
+        }
+        prevSaving = saving;
+      });
+      return () => {
+        savingSub.unsubscribe();
+      };
+    }, [aiRuleCreation, refreshRule]);
 
     // persist rule until refresh is complete
     useEffect(() => {
@@ -659,7 +676,6 @@ export const RuleDetailsPage = connector(
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
-        {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
         {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
@@ -870,11 +886,7 @@ export const RuleDetailsPage = connector(
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <FiltersGlobal>
-                          <SiemSearchBar
-                            dataView={dataView}
-                            pollForSignalIndex={pollForSignalIndex}
-                            id={InputsModelId.global}
-                          />
+                          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
                         </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

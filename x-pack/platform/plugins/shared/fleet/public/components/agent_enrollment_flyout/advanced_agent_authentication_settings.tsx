@@ -9,14 +9,8 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiCallOut,
-  EuiSelect,
-  EuiSpacer,
-  EuiFormPrepend,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSelect, EuiSpacer, EuiFormPrepend } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { SO_SEARCH_LIMIT } from '../../applications/fleet/constants';
 import type {
@@ -28,6 +22,7 @@ import {
   useStartServices,
   sendCreateEnrollmentAPIKey,
 } from '../../applications/fleet/hooks';
+import { isEnrollmentTokenExpired } from '../../services';
 import { Loading } from '../loading';
 
 const NoEnrollmentKeysCallout: React.FunctionComponent<{
@@ -65,34 +60,35 @@ const NoEnrollmentKeysCallout: React.FunctionComponent<{
   };
 
   return (
-    <EuiCallOut
-      color="warning"
+    <KbnWarningCallout
       title={i18n.translate(
         'xpack.fleet.enrollmentStepAgentPolicy.noEnrollmentTokensForSelectedPolicyCallout',
         {
           defaultMessage: 'There are no enrollment tokens for the selected agent policy',
         }
       )}
-    >
-      <div className="eui-textBreakWord">
-        <FormattedMessage
-          id="xpack.fleet.agentEnrenrollmentStepAgentPolicyollment.noEnrollmentTokensForSelectedPolicyCalloutDescription"
-          defaultMessage="You must create and enrollment token in order to enroll agents with this policy"
-        />
-      </div>
-      <EuiSpacer size="m" />
-      <EuiButton
-        iconType="plusCircle"
-        isLoading={isLoadingEnrollmentKey}
-        fill
-        onClick={onCreateEnrollmentTokenClick}
-      >
-        <FormattedMessage
-          id="xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink"
-          defaultMessage="Create enrollment token"
-        />
-      </EuiButton>
-    </EuiCallOut>
+      text={
+        <div className="eui-textBreakWord">
+          <FormattedMessage
+            id="xpack.fleet.agentEnrenrollmentStepAgentPolicyollment.noEnrollmentTokensForSelectedPolicyCalloutDescription"
+            defaultMessage="You must create and enrollment token in order to enroll agents with this policy"
+          />
+        </div>
+      }
+      actionProps={{
+        primary: {
+          iconType: 'plusCircle',
+          isLoading: isLoadingEnrollmentKey,
+          onClick: onCreateEnrollmentTokenClick,
+          children: (
+            <FormattedMessage
+              id="xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink"
+              defaultMessage="Create enrollment token"
+            />
+          ),
+        },
+      }}
+    />
   );
 };
 
@@ -156,7 +152,10 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
           }
 
           const enrollmentAPIKeysResponse = res.data.items.filter(
-            (key) => key.policy_id === agentPolicyId && key.active === true
+            (key) =>
+              key.policy_id === agentPolicyId &&
+              key.active === true &&
+              !isEnrollmentTokenExpired(key)
           );
 
           setEnrollmentAPIKeys(enrollmentAPIKeysResponse);

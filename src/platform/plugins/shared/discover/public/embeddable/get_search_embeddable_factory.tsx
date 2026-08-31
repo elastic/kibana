@@ -32,11 +32,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
-import {
-  getDiscoverSessionEmbeddableComparators,
-  getSearchEmbeddableComparators,
-} from './utils/get_search_embeddable_comparators';
+import { getDiscoverSessionEmbeddableComparators } from './utils/get_search_embeddable_comparators';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -78,9 +74,6 @@ export const getSearchEmbeddableFactory = ({
       parentApi,
       uuid,
     }) => {
-      const embeddableTransformsEnabled =
-        discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled();
-
       const runtimeState = await deserializeState({
         serializedState: initialState,
         discoverServices,
@@ -105,14 +98,7 @@ export const getSearchEmbeddableFactory = ({
 
       const tabs = runtimeState.tabs ?? [];
 
-      const defaultState = embeddableTransformsEnabled
-        ? { selected_tab_id: tabs[0]?.id }
-        : {
-            selectedTabId: tabs[0]?.id,
-            sort: [],
-            grid: {},
-            ...getSearchEmbeddableDefaults(discoverServices.uiSettings),
-          };
+      const defaultState = { selected_tab_id: tabs[0]?.id };
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -141,7 +127,6 @@ export const getSearchEmbeddableFactory = ({
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
           selectedTabId: selectedTabId$.getValue(),
-          embeddableTransformsEnabled,
         });
 
       const inlineEditingApi = initializeInlineEditingApi({
@@ -181,9 +166,7 @@ export const getSearchEmbeddableFactory = ({
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...(embeddableTransformsEnabled
-              ? getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators)
-              : getSearchEmbeddableComparators(isByValue, shouldSkipTabComparators)),
+            ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
             nonPersistedDisplayOptions: 'skip',
           };
         },
@@ -214,6 +197,8 @@ export const getSearchEmbeddableFactory = ({
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
       });
+
+      let cancelRequests: () => void = () => {};
 
       const api: SearchEmbeddableApi = finalizeApi({
         ...stateApi,
@@ -274,6 +259,7 @@ export const getSearchEmbeddableFactory = ({
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
         },
+        cancelRequests: () => cancelRequests(),
       });
 
       const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
@@ -330,7 +316,7 @@ export const getSearchEmbeddableFactory = ({
         toolkit,
       });
 
-      const unsubscribeFromFetch = initializeFetch({
+      const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -352,6 +338,7 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
+      cancelRequests = _cancelRequests;
 
       return {
         api,
@@ -389,7 +376,7 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
-              unsubscribeFromFetch();
+              cleanupFetch();
             };
           }, []);
 

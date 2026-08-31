@@ -19,12 +19,6 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(() => false),
 }));
 
-jest.mock('../../data_view_manager/hooks/use_data_view_spec', () => ({
-  useDataViewSpec: jest.fn(() => ({
-    dataViewSpec: { id: 'experimental', matchedIndices: ['index-2'] },
-  })),
-}));
-
 jest.mock('../../data_view_manager/hooks/use_data_view');
 
 jest.mock('../hooks/use_enabled_entity_types', () => ({

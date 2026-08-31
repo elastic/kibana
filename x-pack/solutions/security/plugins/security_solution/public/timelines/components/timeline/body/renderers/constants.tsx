@@ -27,3 +27,4 @@ export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';
 export const REASON_FIELD_NAME = 'kibana.alert.reason';
 export const EVENT_SUMMARY_FIELD_NAME = 'eventSummary';
 export const EVENT_SOURCE_FIELD_NAME = 'kibana.alert.ancestors.id';
+export const LEGACY_EVENT_SOURCE_FIELD_NAME = 'signal.ancestors.id';

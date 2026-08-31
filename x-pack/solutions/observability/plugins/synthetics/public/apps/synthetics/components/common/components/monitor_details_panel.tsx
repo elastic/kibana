@@ -24,6 +24,7 @@ import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
+import { MonitorAssignedAgents } from './monitor_assigned_agents';
 import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
@@ -33,6 +34,7 @@ import type {
 } from '../../../../../../common/runtime_types';
 import { ConfigKey, isExternalSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
+import { MonitorMaintenanceWindows } from './monitor_maintenance_windows';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -73,6 +75,7 @@ export const MonitorDetailsPanel = ({
 
   const url = latestPing?.url?.full ?? (savedMonitor as unknown as MonitorFields)?.[ConfigKey.URLS];
   const labels = savedMonitor?.[ConfigKey.LABELS];
+  const maintenanceWindows = savedMonitor?.[ConfigKey.MAINTENANCE_WINDOWS];
   // External monitors have no SO schedule; Heartbeat encodes its run interval in
   // each ping's `monitor.timespan`, so fall back to deriving it for display.
   const schedule =
@@ -180,10 +183,28 @@ export const MonitorDetailsPanel = ({
           </>
         )}
 
+        {!hideLocations && (
+          <MonitorAssignedAgents
+            key={configId}
+            configId={configId}
+            monitorLocations={monitor.locations}
+            hasMaintenanceWindows={!isEmpty(maintenanceWindows)}
+          />
+        )}
+
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <TagsList tags={monitor[ConfigKey.TAGS]} />
         </EuiDescriptionListDescription>
+
+        {!isEmpty(maintenanceWindows) ? (
+          <>
+            <EuiDescriptionListTitle>{MAINTENANCE_WINDOWS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <MonitorMaintenanceWindows monitorMWs={maintenanceWindows!} />
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
 
         {!isEmpty(labels) ? (
           <>
@@ -310,6 +331,13 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags'
 const LABELS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.labels', {
   defaultMessage: 'Labels',
 });
+
+const MAINTENANCE_WINDOWS_LABEL = i18n.translate(
+  'xpack.synthetics.management.monitorList.maintenanceWindows',
+  {
+    defaultMessage: 'Maintenance windows',
+  }
+);
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
   defaultMessage: 'Enabled (all locations)',

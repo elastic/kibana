@@ -34,11 +34,11 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
       timeout: TASK_TIMEOUT,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
         fakeRequest,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
         fakeRequest?: KibanaRequest;
       }) => {
         const logger = appContextService.getLogger();
@@ -54,20 +54,20 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
               let results: BulkPackageOperationsTaskState['results'];
               if (taskParams.type === 'bulk_uninstall') {
                 results = await _runBulkUninstallTask({
-                  abortController,
+                  signal,
                   logger,
                   taskParams: taskParams as BulkUninstallTaskParams,
                 });
               } else if (taskParams.type === 'bulk_upgrade') {
                 results = await _runBulkUpgradeTask({
-                  abortController,
+                  signal,
                   logger,
                   taskParams: taskParams as BulkUpgradeTaskParams,
                   request: fakeRequest!,
                 });
               } else if (taskParams.type === 'bulk_rollback') {
                 results = await _runBulkRollbackTask({
-                  abortController,
+                  signal,
                   logger,
                   taskParams: taskParams as BulkRollbackTaskParams,
                 });
@@ -93,7 +93,6 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
           },
           cancel: async () => {
             logger.debug(`Bulk package operations timed out: ${taskInstance.params.type}`);
-            abortController.abort('task timed out');
           },
         };
       },

@@ -325,6 +325,7 @@ export const executeJestValidation = async ({
     const message = [
       `${JEST_LABEL} failed (Moon exited with code ${result.exitCode}).`,
       ...excerptLines.map((l) => `  ${l}`),
+      ...(result.logPath ? [`Full Jest output: ${result.logPath}`] : []),
       'Re-run with: node scripts/jest --profile quick',
     ].join('\n');
     throw createFailError(message);
@@ -334,7 +335,7 @@ export const executeJestValidation = async ({
     log.info(
       `No affected Jest configs found ${describeValidationNoTargetsScope(
         baseContext
-      )}; skipping jest.`
+      )}; skipping Jest.`
     );
     return null;
   }

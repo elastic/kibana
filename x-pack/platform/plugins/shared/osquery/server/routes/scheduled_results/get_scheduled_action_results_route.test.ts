@@ -11,9 +11,15 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
+
+jest.mock('../../utils/get_internal_saved_object_client', () => ({
+  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
+}));
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
 
@@ -29,6 +35,7 @@ const createMockScheduledResponse = ({
   successCount = 0,
   errorCount = 0,
   rowsCount = 0,
+  respondedAgents,
   timestamp = '2026-03-11T12:00:00.000Z',
   packId = 'pack-1',
 }: {
@@ -37,6 +44,7 @@ const createMockScheduledResponse = ({
   successCount?: number;
   errorCount?: number;
   rowsCount?: number;
+  respondedAgents?: number;
   timestamp?: string;
   packId?: string;
 } = {}) => ({
@@ -57,12 +65,10 @@ const createMockScheduledResponse = ({
       aggs: {
         responses_by_schedule: {
           rows_count: { value: rowsCount },
-          responses: {
-            buckets: [
-              { key: 'success', doc_count: successCount },
-              { key: 'error', doc_count: errorCount },
-            ],
-          },
+          // Agent cardinality — the shape the DSL actually requests.
+          responded_agents: { value: respondedAgents ?? successCount + errorCount },
+          success_agents: { agents: { value: successCount } },
+          error_agents: { agents: { value: errorCount } },
         },
       },
     },
@@ -101,7 +107,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   const registerRoute = (osqueryContext: OsqueryAppContext) => {
@@ -247,18 +253,170 @@ describe('getScheduledActionResultsRoute', () => {
     });
   });
 
+  describe('CPS strict space scoping', () => {
+    it('passes matchMissingSpaceId false to the search strategy when CPS is enabled', async () => {
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
+
+      const mockOsqueryContext = {
+        cpsEnabled: true,
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([
+            { elasticsearch: { client: { asInternalUser: {} } } },
+            { data: { search: { asScoped: mockCpsSearch } } },
+          ]),
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ matchMissingSpaceId: false }),
+        expectedSearchOptions
+      );
+    });
+
+    it('uses the CPS-scoped search client when CPS is enabled', async () => {
+      const mockCpsSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = jest.fn();
+
+      const cpsContext = {
+        cpsEnabled: true,
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([
+            { elasticsearch: { client: { asInternalUser: {} } } },
+            { data: { search: { asScoped: mockCpsSearch } } },
+          ]),
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(cpsContext);
+
+      await routeHandler(
+        createMockContext(contextSearchFn) as never,
+        httpServerMock.createKibanaRequest({
+          params: { scheduleId: 'sched-1', executionCount: 1 },
+          query: {},
+        }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockCpsSearch).toHaveBeenCalledWith(expect.anything(), { projectRouting: 'space' });
+      expect(mockCpsSearchFn).toHaveBeenCalled();
+      expect(contextSearchFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('integration namespace scoping', () => {
+    it('passes resolved integration namespaces to the search strategy', async () => {
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+
+      const mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getIntegrationNamespaces: jest
+            .fn()
+            .mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: ['team.a'] }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationNamespaces: ['team.a'] }),
+        expectedSearchOptions
+      );
+    });
+
+    it('passes undefined namespaces when Fleet resolves none', async () => {
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+
+      const mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
+        },
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationNamespaces: undefined }),
+        expectedSearchOptions
+      );
+    });
+  });
+
   describe('aggregation extraction', () => {
-    it('should correctly extract success, failure, and row counts from nested aggregations', async () => {
+    // Degraded shape: missing cardinality sub-aggs must report 0, not `doc_count`.
+    // Current-shape agent counts are covered in `agent_count_regression.test.ts`.
+    it('should report zero agents rather than doc counts when cardinality aggs are absent', async () => {
       const mockSearchFn = jest.fn().mockReturnValue(
-        of(
-          createMockScheduledResponse({
-            total: 5,
-            successCount: 3,
-            errorCount: 2,
-            rowsCount: 150,
-            packId: '',
-          })
-        )
+        of({
+          edges: [],
+          rawResponse: {
+            hits: {
+              total: { value: 5, relation: 'eq' },
+              hits: [{ fields: { '@timestamp': ['2026-03-11T12:00:00.000Z'], pack_id: [''] } }],
+            },
+            aggregations: {
+              aggs: {
+                responses_by_schedule: {
+                  rows_count: { value: 150 },
+                  // Legacy painless-terms shape, no cardinality sub-aggs.
+                  responses: {
+                    buckets: [
+                      { key: 'success', doc_count: 3 },
+                      { key: 'error', doc_count: 2 },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          inspect: { dsl: [] },
+        })
       );
 
       const mockOsqueryContext = {
@@ -281,9 +439,10 @@ describe('getScheduledActionResultsRoute', () => {
         body: expect.objectContaining({
           aggregations: {
             totalRowCount: 150,
-            totalResponded: 5,
-            successful: 3,
-            failed: 2,
+            // Not 5/3/2 — those are document counts.
+            totalResponded: 0,
+            successful: 0,
+            failed: 0,
             pending: 0,
           },
         }),

@@ -10,8 +10,8 @@
  * via the Evals managed-dataset API.
  *
  * Environment variables:
- *   EVALUATIONS_KBN_URL      - Kibana URL of the golden cluster (required)
- *   EVALUATIONS_KBN_API_KEY  - API key for dataset operations (optional)
+ *   EVAL_KBN_URL      - Kibana URL of the golden cluster (required)
+ *   EVAL_KBN_API_KEY  - API key for dataset operations (optional)
  *
  * Usage:
  *   # Authenticate first:
@@ -62,12 +62,12 @@ function parseJsonlLine(line, lineNumber) {
 
 async function main() {
   const jsonlPath = process.argv[2] || DEFAULT_JSONL_PATH;
-  const kbnUrl = process.env.EVALUATIONS_KBN_URL;
-  const apiKey = process.env.EVALUATIONS_KBN_API_KEY;
+  const kbnUrl = process.env.EVAL_KBN_URL;
+  const apiKey = process.env.EVAL_KBN_API_KEY;
 
   if (!kbnUrl) {
     throw new Error(
-      'EVALUATIONS_KBN_URL is not set. ' +
+      'EVAL_KBN_URL is not set. ' +
         'Source local_ci_env.sh or set it manually. See data/README.md for details.'
     );
   }

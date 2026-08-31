@@ -23,7 +23,6 @@
       "uiActions",
       "embeddable",
       "share",
-      "presentationUtil",
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressionGauge",
@@ -58,6 +57,7 @@
       "charts",
       "esqlDataGrid",
       "esql",
+      "presentationUtil",
     ],
     "extraPublicDirs": ["common/constants"]
   }

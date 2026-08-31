@@ -8,7 +8,7 @@
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createEsqlResponse } from '../test_utils';
 import { createExecutionContext } from '../execution_context';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { fetchActiveAlertGroupHashes } from './fetch_active_alert_group_hashes';
 
 describe('fetchActiveAlertGroupHashes', () => {
@@ -34,7 +34,7 @@ describe('fetchActiveAlertGroupHashes', () => {
     const { queryService, mockEsClient, executionContext } = setup();
     mockEsqlGroupHashesResponse(mockEsClient, ['hash-1', 'hash-2', 'hash-3']);
 
-    const result = await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext);
+    const result = await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext, 100);
 
     expect(result).toEqual([
       { group_hash: 'hash-1' },
@@ -47,16 +47,16 @@ describe('fetchActiveAlertGroupHashes', () => {
     const { queryService, mockEsClient, executionContext } = setup();
     mockEsqlGroupHashesResponse(mockEsClient, []);
 
-    const result = await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext);
+    const result = await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext, 100);
 
     expect(result).toEqual([]);
   });
 
-  it('binds the ruleId as a named param and only keeps non-inactive episodes', async () => {
+  it('binds the ruleId as a named param, keeps non-inactive episodes, and bounds the result with an explicit LIMIT', async () => {
     const { queryService, mockEsClient, executionContext } = setup();
     mockEsqlGroupHashesResponse(mockEsClient, []);
 
-    await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext);
+    await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext, 9999);
 
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
     const [request] = mockEsClient.esql.query.mock.calls[0];
@@ -68,6 +68,7 @@ describe('fetchActiveAlertGroupHashes', () => {
     expect(request.query).toContain('episode.status IS NOT NULL');
     expect(request.query).toContain('last_episode_status IN ("pending", "active", "recovering")');
     expect(request.query).toContain('| KEEP group_hash');
+    expect(request.query).toContain('| LIMIT 9999');
   });
 
   it('forwards the executionContext abort signal to the ES client', async () => {
@@ -77,7 +78,7 @@ describe('fetchActiveAlertGroupHashes', () => {
     const abortController = new AbortController();
     const executionContext = createExecutionContext(abortController.signal);
 
-    await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext);
+    await fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext, 100);
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.any(Object),
@@ -90,7 +91,7 @@ describe('fetchActiveAlertGroupHashes', () => {
     mockEsClient.esql.query.mockRejectedValue(new Error('boom'));
 
     await expect(
-      fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext)
+      fetchActiveAlertGroupHashes(queryService, 'rule-1', executionContext, 100)
     ).rejects.toThrow('boom');
   });
 });

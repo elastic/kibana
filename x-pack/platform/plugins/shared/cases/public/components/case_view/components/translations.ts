@@ -30,6 +30,12 @@ export const ATTACH_MENU_SAVED_OBJECT = i18n.translate(
   }
 );
 
+export const ATTACH_TIMELINE_SUCCESS_TITLE = (objectTitle: string): string =>
+  i18n.translate('xpack.cases.caseView.attach.timeline.successAddedToCase', {
+    defaultMessage: 'Added timeline {objectTitle} to case',
+    values: { objectTitle },
+  });
+
 export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
   'xpack.cases.caseView.attachments.noSearchResults.title',
   {
@@ -59,3 +65,17 @@ export const AUTHOR = i18n.translate('xpack.cases.authorFilter.buttonLabel', {
 export const CLEAR_FILTERS = i18n.translate('xpack.cases.caseViewFilters.clearFilters', {
   defaultMessage: 'Clear filters',
 });
+
+export const COLLAPSE_ALL_ATTACHMENTS = i18n.translate(
+  'xpack.cases.caseView.attachments.collapseAll',
+  { defaultMessage: 'Collapse all' }
+);
+
+export const EXPAND_ALL_ATTACHMENTS = i18n.translate('xpack.cases.caseView.attachments.expandAll', {
+  defaultMessage: 'Expand all',
+});
+
+export const NO_COLLAPSIBLE_ATTACHMENTS = i18n.translate(
+  'xpack.cases.caseView.attachments.noCollapsibleAttachments',
+  { defaultMessage: 'No collapsible attachments available' }
+);

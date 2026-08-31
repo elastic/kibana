@@ -34,21 +34,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('should show discover but with no data', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-      await testSubjects.existOrFail('~breadcrumb-deepLinkId-discover');
       await testSubjects.existOrFail('discover-dataView-switch-link');
       await testSubjects.click('discover-dataView-switch-link');
       await testSubjects.existOrFail('indexPattern-add-field');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
     });
 
     it('should show dashboard but with no data in dashboard', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
-      await testSubjects.existOrFail('~breadcrumb-deepLinkId-dashboards');
       await testSubjects.existOrFail('dashboardListingCreateButton');
       await testSubjects.click('dashboardListingCreateButton');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Editing New Dashboard',
-      });
+      await testSubjects.existOrFail('emptyDashboardWidget');
     });
   });
 }

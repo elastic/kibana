@@ -72,4 +72,23 @@ describe('useObservedUserFields', () => {
       ]
     );
   });
+
+  it('omits the anomalies field when hideAnomalies is true', () => {
+    const { result } = renderHook(() => useObservedUserFields(mockObservedUser, true), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.map(({ label }) => label)).toEqual([
+      'User ID',
+      'Domain',
+      'First seen',
+      'Last seen',
+      'Operating system',
+      'Family',
+      'IP addresses',
+    ]);
+    expect(
+      result.current.find(({ label }) => label === 'Max anomaly score by job')
+    ).toBeUndefined();
+  });
 });

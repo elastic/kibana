@@ -77,7 +77,7 @@ export const Content: FC<ContentProps> = memo(({ ip, flowTarget }: ContentProps)
   } = useKibana();
 
   const { dataView, status } = useDataView();
-  const selectedPatterns = useSelectedPatterns();
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = !!dataView.matchedIndices?.length;
 
   const [filterQuery, kqlError] = useMemo(

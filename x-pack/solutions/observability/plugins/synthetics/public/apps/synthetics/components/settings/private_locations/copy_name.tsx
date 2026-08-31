@@ -19,7 +19,7 @@ export const CopyName = ({ text }: { text: string }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiText>{text}</EuiText>
+        <EuiText size="s">{text}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCopy textToCopy={text}>

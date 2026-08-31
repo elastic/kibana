@@ -52,7 +52,7 @@ export const registerCreateRoute = (router: TagsPluginRouter, usageCounter?: Usa
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           const result = await create(ctx, req.body);
           if (result.outcome === 'conflict') {

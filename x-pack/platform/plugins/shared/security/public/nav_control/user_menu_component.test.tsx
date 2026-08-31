@@ -35,7 +35,7 @@ describe('UserMenuComponent', () => {
   it('should render the avatar inside a HeaderActionButton', () => {
     render(<UserMenuComponent {...defaultProps} />);
 
-    expect(screen.getByTestId('chromeNextUserMenuHeaderButton')).toBeInTheDocument();
+    expect(screen.getByTestId('userMenuButton')).toBeInTheDocument();
     expect(screen.getByTestId('mockAvatar')).toBeInTheDocument();
   });
 
@@ -43,7 +43,7 @@ describe('UserMenuComponent', () => {
     const user = userEvent.setup();
     render(<UserMenuComponent {...defaultProps} />);
 
-    await user.click(screen.getByTestId('chromeNextUserMenuHeaderButton'));
+    await user.click(screen.getByTestId('userMenuButton'));
     expect(defaultProps.toggleMenu).toHaveBeenCalledTimes(1);
   });
 });

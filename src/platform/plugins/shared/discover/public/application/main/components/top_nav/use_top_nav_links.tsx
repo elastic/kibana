@@ -34,6 +34,7 @@ import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getCreateRuleOptionsAppMenuItem,
+  getExportAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -57,6 +58,7 @@ import type { DiscoverAppState } from '../../state_management/redux';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
+import { useDiscoverShareAction } from './use_discover_share_action';
 
 const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.alerts,
@@ -70,10 +72,14 @@ export interface UseTopNavLinksParams {
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
-  hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
+}
+
+export interface UseTopNavLinksResult {
+  menu: AppMenuConfig;
+  shareAction: ReturnType<typeof useDiscoverShareAction>;
 }
 
 /**
@@ -85,11 +91,10 @@ export const useTopNavLinks = ({
   hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
-  hasShareIntegration,
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
-}: UseTopNavLinksParams): AppMenuConfig => {
+}: UseTopNavLinksParams): UseTopNavLinksResult => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
@@ -147,6 +152,16 @@ export const useTopNavLinks = ({
     }),
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
+
+  const shareAction = useDiscoverShareAction({
+    discoverParams,
+    services,
+    currentTab,
+    runtimeStateManager,
+    persistedDiscoverSession,
+    totalHitsState,
+    hasUnsavedChanges,
+  });
 
   const showCreateRuleV2 = isEsqlMode && shouldShowAlertingV2CreateRuleFlyout(services.core);
 
@@ -222,17 +237,27 @@ export const useTopNavLinks = ({
       items.push(openSearchMenuItem);
     }
 
-    const shareAppMenuItem = getShareAppMenuItem({
+    const exportAppMenuItem = getExportAppMenuItem({
       discoverParams,
       services,
-      hasIntegrations: hasShareIntegration,
-      hasUnsavedChanges,
       currentTab,
+      runtimeStateManager,
       persistedDiscoverSession,
       totalHitsState,
+      hasUnsavedChanges,
+      getState,
       intl,
     });
-    items.push(...shareAppMenuItem);
+
+    if (exportAppMenuItem) {
+      items.push(exportAppMenuItem);
+    }
+
+    const shareAppMenuItem = getShareAppMenuItem({ shareAction });
+
+    if (shareAppMenuItem) {
+      items.push(shareAppMenuItem);
+    }
 
     if (canSwitchLanguageMode) {
       items.push({
@@ -287,15 +312,16 @@ export const useTopNavLinks = ({
     isEsqlMode,
     currentDataView,
     currentTab,
+    runtimeStateManager,
     isDataViewMode,
     openInspector,
     persistedDiscoverSession,
-    hasShareIntegration,
     hasUnsavedChanges,
     totalHitsState,
     intl,
     showCreateRuleV2,
     switchLanguageMode,
+    shareAction,
   ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
@@ -441,22 +467,25 @@ export const useTopNavLinks = ({
     onOpenSaveAsModal,
   ]);
 
-  return useMemo((): AppMenuConfig => {
+  return useMemo((): UseTopNavLinksResult => {
     const config = appMenuRegistry.getAppMenuConfig();
 
     return {
-      items: config.items?.map((item) =>
-        enhanceAppMenuItemWithRunAction({
-          appMenuItem: item,
-          services,
-        })
-      ),
-      primaryActionItem: config.primaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.primaryActionItem,
+      menu: {
+        items: config.items?.map((item) =>
+          enhanceAppMenuItemWithRunAction({
+            appMenuItem: item,
             services,
           })
-        : undefined,
+        ),
+        primaryActionItem: config.primaryActionItem
+          ? enhanceAppMenuItemWithRunAction({
+              appMenuItem: config.primaryActionItem,
+              services,
+            })
+          : undefined,
+      },
+      shareAction,
     };
-  }, [appMenuRegistry, services]);
+  }, [appMenuRegistry, services, shareAction]);
 };

@@ -43,6 +43,12 @@ export class SharePageObject extends FtrService {
   }
 
   async clickShareTopNavButton() {
+    // The project header renders share as a title action revealed on header hover, outside the menu.
+    if (await this.testSubjects.exists('appHeader', { timeout: 1000 })) {
+      await this.testSubjects.moveMouseTo('appHeader');
+      await this.testSubjects.click('~shareTopNavButton');
+      return;
+    }
     return this.appMenu.clickMenuItem('shareTopNavButton');
   }
 

@@ -58,6 +58,7 @@ export interface CreateConnectorFlyoutProps {
   isServerless?: boolean;
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
   icon?: IconType;
+  size?: 's' | 'm' | 'l';
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -68,6 +69,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onTestConnector,
   initialConnector,
   icon,
+  size,
 }) => {
   const { docLinks } = useKibana().services;
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -277,6 +279,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           headerName: flyoutHeaderName,
         },
       })}
+      size={size}
     >
       <FlyoutHeader
         icon={icon ?? actionTypeModel?.iconClass}

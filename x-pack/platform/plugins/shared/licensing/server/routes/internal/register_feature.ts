@@ -10,6 +10,10 @@ import type { LicenseType } from '@kbn/licensing-types';
 import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type { FeatureUsageServiceSetup } from '../../services';
 import type { LicensingRouter } from '../../types';
+import {
+  MAX_LICENSING_FEATURE_ID_LENGTH,
+  MAX_LICENSING_LICENSE_TYPE_LENGTH,
+} from './route_length_limits';
 
 export function registerRegisterFeatureRoute(
   router: LicensingRouter,
@@ -27,8 +31,9 @@ export function registerRegisterFeatureRoute(
       validate: {
         body: schema.arrayOf(
           schema.object({
-            featureId: schema.string(),
+            featureId: schema.string({ maxLength: MAX_LICENSING_FEATURE_ID_LENGTH }),
             licenseType: schema.string({
+              maxLength: MAX_LICENSING_LICENSE_TYPE_LENGTH,
               validate: (value) => {
                 if (!(value in LICENSE_TYPE)) {
                   return `Invalid license type: ${value}`;

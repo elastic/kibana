@@ -70,16 +70,16 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
     { type: 'workflow', id: 'wf-2' },
   ],
   matcher: 'data.severity : "critical"',
-  groupBy: ['host.name', 'service.name'],
+  group_by: ['host.name', 'service.name'],
   tags: ['production', 'oncall'],
-  groupingMode: 'per_field',
+  grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: ELASTIC_UID,
-  createdAt: '2026-03-01T10:00:00.000Z',
-  updatedBy: ELASTIC_UID,
-  updatedAt: '2026-03-02T11:00:00.000Z',
+  snoozed_until: null,
+  auth: { owner: 'elastic', created_by_user: true },
+  created_by: ELASTIC_UID,
+  created_at: '2026-03-01T10:00:00.000Z',
+  updated_by: ELASTIC_UID,
+  updated_at: '2026-03-02T11:00:00.000Z',
   ...overrides,
 });
 
@@ -156,15 +156,42 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Disabled')).toBeInTheDocument();
     });
 
-    it('renders a snoozed-until chip when the policy is actively snoozed', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+    it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: futureIso() }) });
 
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
     it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('replaces the chip with the interactive unsnooze button for writers', () => {
+      renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
+
+      expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toBeInTheDocument();
+      expect(screen.queryByText(/^Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('renders the snooze bell for writers on an enabled policy', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
+    });
+
+    it('does not render the snooze bell for readers', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
+    });
+
+    it('unsnoozes from the header when the policy is snoozed', async () => {
+      const { handlers } = renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
+
+      await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
+
+      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
     });
   });
 
@@ -216,8 +243,8 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('does not render the group-by row when grouping mode is per_episode', () => {
       renderFlyout({
         policy: createPolicy({
-          groupingMode: 'per_episode',
-          groupBy: null,
+          grouping_mode: 'per_episode',
+          group_by: null,
           throttle: { strategy: 'on_status_change', interval: null },
         }),
       });

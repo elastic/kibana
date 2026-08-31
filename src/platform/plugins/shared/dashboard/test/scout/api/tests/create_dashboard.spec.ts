@@ -76,9 +76,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.title]: expected value of type [string] but got [undefined]'
-    );
+    expect(response.body.message).toContain('"title"');
   });
 
   apiTest('validation - returns error if panels is not an array', async ({ apiClient }) => {
@@ -95,9 +93,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.panels]: expected value of type [array] but got [Object]'
-    );
+    expect(response.body.message).toContain('"panels"');
   });
 
   apiTest(

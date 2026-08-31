@@ -92,10 +92,6 @@ class DownloadSourceService {
         id
       );
 
-    if (soResponse.error) {
-      throw new FleetError(soResponse.error.message);
-    }
-
     return savedObjectToDownloadSource(soResponse);
   }
 
@@ -425,27 +421,30 @@ class DownloadSourceService {
       }
     }
 
-    const soResponse = await this.soClient.update<DownloadSourceSOAttributes>(
+    await this.soClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,
       updateData
     );
-    if (soResponse.error) {
-      throw new FleetError(soResponse.error.message);
-    } else {
-      logger.debug(`Updated download source ${id}`);
-    }
+    logger.debug(`Updated download source ${id}`);
   }
 
-  public async delete(id: string) {
+  public async delete(id: string, options?: { fromPreconfiguration?: boolean }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
     const targetDS = await this.get(id);
 
     if (targetDS.is_default) {
-      throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
+      throw new DownloadSourceError(`Default download source ${id} cannot be deleted.`);
     }
+
+    if (targetDS.is_preconfigured && !options?.fromPreconfiguration) {
+      throw new DownloadSourceError(
+        `Preconfigured download source ${id} cannot be deleted outside of kibana config file.`
+      );
+    }
+
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id

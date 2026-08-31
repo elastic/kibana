@@ -19,6 +19,7 @@ interface VarGroupSelectorProps {
   isAgentlessEnabled: boolean;
   hideInVarGroupOptions?: Record<string, string[]>;
   disabled?: boolean;
+  hideTitle?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
   isAgentlessEnabled,
   hideInVarGroupOptions,
   disabled = false,
+  hideTitle = false,
 }) => {
   const visibleOptions = useMemo(
     () => getVisibleOptions(varGroup, isAgentlessEnabled, hideInVarGroupOptions),
@@ -84,22 +86,26 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
 
   return (
     <>
-      {/* Section title */}
-      <EuiTitle size="s">
-        <h4>{varGroup.title}</h4>
-      </EuiTitle>
-
-      {/* Group description */}
-      {varGroup.description && (
+      {!hideTitle && (
         <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            {varGroup.description}
-          </EuiText>
+          {/* Section title */}
+          <EuiTitle size="s">
+            <h4>{varGroup.title}</h4>
+          </EuiTitle>
+
+          {/* Group description */}
+          {varGroup.description && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                {varGroup.description}
+              </EuiText>
+            </>
+          )}
+
+          <EuiSpacer size="m" />
         </>
       )}
-
-      <EuiSpacer size="m" />
 
       {/* Selector dropdown */}
       <EuiFormRow label={varGroup.selector_title} helpText={selectedOption?.description} fullWidth>
