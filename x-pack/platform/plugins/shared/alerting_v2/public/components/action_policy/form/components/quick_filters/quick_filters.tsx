@@ -15,7 +15,10 @@ export const QuickFilters = ({ matcher, onChange }: QuickFiltersProps) => {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.label', {
-        defaultMessage: 'Filter conditions',
+        defaultMessage: 'Tag conditions',
+      })}
+      helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.helpText', {
+        defaultMessage: 'Tag conditions are combined with OR.',
       })}
     >
       <EuiFilterGroup data-test-subj="quickFilters">

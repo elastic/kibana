@@ -149,7 +149,7 @@ export const ActionPolicyForm = () => {
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-              defaultMessage="Define which alerts this policy applies to. Rule, status, tag, and query conditions are all combined with AND."
+              defaultMessage="Define which alerts this policy applies to. Tags and expression conditions are combined with AND."
             />
           </EuiText>
         </EuiSplitPanel.Inner>
