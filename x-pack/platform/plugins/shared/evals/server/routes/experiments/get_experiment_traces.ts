@@ -109,41 +109,35 @@ export const registerGetExperimentTracesRoute = ({
             return response.ok({ body: emptyBody });
           }
 
-          // One batched span fetch for the whole page instead of a search per trace.
-          const spanResponse = await esClient.search<TraceSpanSource>({
+          const spanResponse = await esClient.msearch<TraceSpanSource>({
             index: TRACES_INDEX_PATTERN,
-            query: {
-              terms: { trace_id: traceReferences.map((reference) => reference.trace_id) },
-            },
-            sort: [{ '@timestamp': { order: 'asc' } }],
-            size: MAX_SPANS_PER_TRACE_SEARCH,
+            searches: traceReferences.flatMap((reference) => [
+              {},
+              {
+                query: { term: { trace_id: reference.trace_id } },
+                sort: [{ '@timestamp': { order: 'asc' } }],
+                size: MAX_SPANS_PER_TRACE_SEARCH,
+              },
+            ]),
           });
-
-          const spansByTraceId = new Map<string, EvalTraceSpan[]>();
-          for (const hit of spanResponse.hits?.hits ?? []) {
-            const traceId = hit._source?.trace_id;
-            if (!traceId) {
-              continue;
-            }
-            const span = shapeTraceSpan(hit, traceId);
-            if (!span) {
-              continue;
-            }
-            const group = spansByTraceId.get(traceId);
-            if (group) {
-              group.push(span);
-            } else {
-              spansByTraceId.set(traceId, [span]);
-            }
-          }
 
           const body: GetEvaluationExperimentTracesResponse = {
             ...emptyBody,
-            traces: traceReferences.map((reference) => {
+            traces: traceReferences.map((reference, index) => {
+              const item = spanResponse.responses[index];
+              if (item === undefined || 'error' in item) {
+                const reason =
+                  item !== undefined && 'error' in item
+                    ? item.error?.reason ?? item.error?.type ?? 'unknown error'
+                    : 'missing msearch response item';
+                throw new Error(`Span search failed for trace ${reference.trace_id}: ${reason}`);
+              }
               // A trace whose spans aged out of traces-* keeps its reference with
               // empty spans, so callers can tell an expired trace from a run that
               // was never traced (which has no reference at all).
-              const spans = spansByTraceId.get(reference.trace_id) ?? [];
+              const spans = (item.hits?.hits ?? [])
+                .map((hit) => shapeTraceSpan(hit, reference.trace_id))
+                .filter((span): span is EvalTraceSpan => span !== null);
               return {
                 ...reference,
                 spans,

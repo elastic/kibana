@@ -108,7 +108,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
     expect(response.payload).toEqual({
       message: 'Experiment not found for experiment: experiment-abc',
     });
-    expect(esClient.search).not.toHaveBeenCalled();
+    expect(esClient.msearch).not.toHaveBeenCalled();
   });
 
   it('names the evaluator in the 404 message when its filter matches nothing', async () => {
@@ -126,7 +126,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
     });
   });
 
-  it('resolves trace ids through score docs and batch-fetches all spans in one query', async () => {
+  it('resolves trace ids through score docs and fetches spans with one msearch, one sub-search per trace', async () => {
     const { handler, context, evaluationScoreService, esClient } = setup();
     evaluationScoreService.search.mockResolvedValueOnce(
       scoreAggregationResponse({
@@ -134,25 +134,45 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
         evaluatorTraces: [{ evaluator_name: 'correctness', trace_id: 'trace-eval-1' }],
       })
     );
-    esClient.search.mockResolvedValueOnce({
-      hits: {
-        hits: [
-          spanHit('trace-task-1', 's1', '2025-06-01T00:00:00.000Z', 2_000_000),
-          spanHit('trace-task-1', 's2', '2025-06-01T00:00:05.000Z', 3_000_000),
-          spanHit('trace-eval-1', 's3', '2025-06-01T00:01:00.000Z', 1_000_000),
-        ],
-      },
+    esClient.msearch.mockResolvedValueOnce({
+      responses: [
+        {
+          hits: {
+            hits: [
+              spanHit('trace-task-1', 's1', '2025-06-01T00:00:00.000Z', 2_000_000),
+              spanHit('trace-task-1', 's2', '2025-06-01T00:00:05.000Z', 3_000_000),
+            ],
+          },
+        },
+        {
+          hits: {
+            hits: [spanHit('trace-eval-1', 's3', '2025-06-01T00:01:00.000Z', 1_000_000)],
+          },
+        },
+      ],
     } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(esClient.search).toHaveBeenCalledTimes(1);
-    expect(esClient.search).toHaveBeenCalledWith(
+    expect(esClient.msearch).toHaveBeenCalledTimes(1);
+    expect(esClient.msearch).toHaveBeenCalledWith(
       expect.objectContaining({
         index: TRACES_INDEX_PATTERN,
-        query: { terms: { trace_id: ['trace-task-1', 'trace-eval-1'] } },
-        size: 10000,
+        searches: [
+          {},
+          {
+            query: { term: { trace_id: 'trace-task-1' } },
+            sort: [{ '@timestamp': { order: 'asc' } }],
+            size: 10000,
+          },
+          {},
+          {
+            query: { term: { trace_id: 'trace-eval-1' } },
+            sort: [{ '@timestamp': { order: 'asc' } }],
+            size: 10000,
+          },
+        ],
       })
     );
     expect(response.payload).toEqual({
@@ -212,7 +232,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
     evaluationScoreService.search.mockResolvedValueOnce(
       scoreAggregationResponse({ taskTraceIds: ['trace-aged-out'] })
     );
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    esClient.msearch.mockResolvedValueOnce({ responses: [{ hits: { hits: [] } }] } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -234,7 +254,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
       hits: { total: { value: 4 }, hits: [] },
       aggregations: { task_traces: { buckets: [{ key: { trace_id: 'trace-task-1' } }] } },
     } as any);
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    esClient.msearch.mockResolvedValueOnce({ responses: [{ hits: { hits: [] } }] } as any);
 
     const response = await handler(context, makeRequest({ role: 'task' }), kibanaResponseFactory);
 
@@ -256,7 +276,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
         },
       },
     } as any);
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    esClient.msearch.mockResolvedValueOnce({ responses: [{ hits: { hits: [] } }] } as any);
 
     const response = await handler(
       context,
@@ -300,7 +320,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
       per_page: 2,
       traces: [],
     });
-    expect(esClient.search).not.toHaveBeenCalled();
+    expect(esClient.msearch).not.toHaveBeenCalled();
   });
 
   it('only fetches spans of the traces in the requested page', async () => {
@@ -308,7 +328,9 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
     evaluationScoreService.search.mockResolvedValueOnce(
       scoreAggregationResponse({ taskTraceIds: ['trace-1', 'trace-2', 'trace-3', 'trace-4'] })
     );
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    esClient.msearch.mockResolvedValueOnce({
+      responses: [{ hits: { hits: [] } }, { hits: { hits: [] } }],
+    } as any);
 
     const response = await handler(
       context,
@@ -318,11 +340,29 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload.total).toBe(4);
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: { terms: { trace_id: ['trace-3', 'trace-4'] } },
-      })
+    const { searches } = esClient.msearch.mock.calls[0][0] as any;
+    expect(searches.filter((s: any) => s.query).map((s: any) => s.query.term.trace_id)).toEqual([
+      'trace-3',
+      'trace-4',
+    ]);
+  });
+
+  it('returns 500 when an msearch item fails for one trace', async () => {
+    const { handler, context, evaluationScoreService, esClient, logger } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce(
+      scoreAggregationResponse({ taskTraceIds: ['trace-ok', 'trace-broken'] })
     );
+    esClient.msearch.mockResolvedValueOnce({
+      responses: [
+        { hits: { hits: [] } },
+        { error: { type: 'search_phase_execution_exception', reason: 'shard failure' } },
+      ],
+    } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(500);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('shard failure'));
   });
 
   it('returns 500 when ES throws', async () => {
