@@ -22,7 +22,7 @@ const sourceSchema = schema.object(
       schema.literal('rule'),
       schema.literal('attack'),
       schema.literal('api'),
-      schema.literal('ui'),
+      schema.literal('user'),
     ]),
     id: schema.string({ maxLength: MAX_ACTION_SOURCE_ID_LENGTH }),
     name: schema.maybe(schema.string({ maxLength: MAX_ACTION_SOURCE_NAME_LENGTH })),
