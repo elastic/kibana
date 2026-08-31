@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { internalApiHeaders, publicApiHeaders } from '@kbn/scout-security';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type { KbnClient, KibanaRole } from '@kbn/scout-security';
 import {
   ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
@@ -175,7 +175,7 @@ export const getWorkflowSchedulesApis = (
   apiClient: ScheduleApiClient,
   headers: Record<string, string>
 ) => {
-  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...internalApiHeaders };
+  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
 
   return {
     createSchedule: (body: Record<string, unknown>) =>
@@ -252,7 +252,7 @@ export const getSimpleGenerateBody = (
  * Convenience wrapper around the internal ad-hoc generation route.
  */
 export const getGenerateApi = (apiClient: ScheduleApiClient, headers: Record<string, string>) => {
-  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...internalApiHeaders };
+  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
 
   return {
     generate: (body: Record<string, unknown>) =>
@@ -275,7 +275,7 @@ export const getMonitoringApis = (
   apiClient: ScheduleApiClient,
   headers: Record<string, string>
 ) => {
-  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...internalApiHeaders };
+  const defaultHeaders = { ...headers, ...COMMON_HEADERS, ...INTERNAL_API_HEADERS };
 
   return {
     getExecutionTracking: (executionId: string) =>
@@ -303,7 +303,7 @@ export const getPublicSchedulesApis = (
   const defaultHeaders = {
     ...headers,
     ...COMMON_HEADERS,
-    ...publicApiHeaders,
+    ...PUBLIC_API_HEADERS,
   };
 
   return {

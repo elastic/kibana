@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { elasticInternalOriginHeader, publicApiHeaders } from '@kbn/scout-security';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type { EsClient } from '@kbn/scout-security';
 import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
@@ -18,12 +18,12 @@ const BASE_HEADERS = {
 
 export const PUBLIC_HEADERS = {
   ...BASE_HEADERS,
-  ...publicApiHeaders,
+  ...PUBLIC_API_HEADERS,
 };
 
 export const INTERNAL_HEADERS = {
   ...BASE_HEADERS,
-  ...elasticInternalOriginHeader,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
   'elastic-api-version': '2',
 };
 

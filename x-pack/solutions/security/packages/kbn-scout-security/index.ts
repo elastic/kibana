@@ -26,9 +26,9 @@ export { INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ } from './src/playwright/co
 export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
 export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
 export {
-  elasticInternalOriginHeader,
-  publicApiHeaders,
-  internalApiHeaders,
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
+  PUBLIC_API_HEADERS,
+  INTERNAL_API_HEADERS,
 } from './src/playwright/constants/api_headers';
 
 // Security-specific test enums

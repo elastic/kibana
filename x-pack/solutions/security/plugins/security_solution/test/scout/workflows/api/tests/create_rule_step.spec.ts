@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { publicApiHeaders } from '@kbn/scout-security';
+import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import {
@@ -119,7 +119,7 @@ apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.c
       expect(output?.enabled).toBe(false);
 
       const readResponse = await apiClient.get(`${DETECTION_ENGINE_RULES_URL}?id=${ruleId}`, {
-        headers: { ...editorHeaders, ...publicApiHeaders },
+        headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
         responseType: 'json',
       });
       expect(readResponse).toHaveStatusCode(200);

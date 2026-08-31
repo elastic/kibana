@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { apiTest, elasticInternalOriginHeader, tags } from '@kbn/scout-security';
+import { apiTest, ELASTIC_INTERNAL_ORIGIN_HEADER, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'Content-Type': 'application/json;charset=UTF-8',
-  ...elasticInternalOriginHeader,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };
 
 const EXPECTED_SECURITY_TRIGGER_IDS = [

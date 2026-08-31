@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { publicApiHeaders } from '@kbn/scout-security';
+import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type {
   EsClient,
   KbnClient,
@@ -92,7 +92,7 @@ const installEntityStoreInSpace = async (params: {
   await kbnClient.request({
     method: 'POST',
     path: `/s/${spaceId}/api/security/entity_store/install`,
-    headers: publicApiHeaders,
+    headers: PUBLIC_API_HEADERS,
     body: { entityTypes: ['host', 'user'] },
     retries: 0,
   });
@@ -103,7 +103,7 @@ const installEntityStoreInSpace = async (params: {
         const { data } = await kbnClient.request<{ status?: string }>({
           method: 'GET',
           path: `/s/${spaceId}/api/security/entity_store/status`,
-          headers: publicApiHeaders,
+          headers: PUBLIC_API_HEADERS,
         });
         return data?.status;
       },

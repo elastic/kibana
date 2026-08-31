@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticInternalOriginHeader, publicApiHeaders, tags } from '@kbn/scout-security';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
 import {
   ENTITY_LATEST,
   ENTITY_UPDATES,
@@ -24,12 +24,12 @@ const BASE_HEADERS = {
 
 export const PUBLIC_HEADERS = {
   ...BASE_HEADERS,
-  ...publicApiHeaders,
+  ...PUBLIC_API_HEADERS,
 };
 
 export const INTERNAL_HEADERS = {
   ...BASE_HEADERS,
-  ...elasticInternalOriginHeader,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
   'elastic-api-version': '2',
 };
 

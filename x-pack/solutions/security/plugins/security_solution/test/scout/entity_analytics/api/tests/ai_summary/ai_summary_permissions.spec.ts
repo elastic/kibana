@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest, elasticInternalOriginHeader, tags } from '@kbn/scout-security';
+import { apiTest, ELASTIC_INTERNAL_ORIGIN_HEADER, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
@@ -23,7 +23,7 @@ import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../../common
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'Content-Type': 'application/json;charset=UTF-8',
-  ...elasticInternalOriginHeader,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };
 
 // AI-summary read/write routes are internal (security_solution) — version comes from the
