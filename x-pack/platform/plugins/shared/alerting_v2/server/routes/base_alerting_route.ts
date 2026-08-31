@@ -18,6 +18,8 @@ import { injectable } from 'inversify';
 import merge from 'lodash/merge';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
+import type { AlertingLabels } from '../lib/services/logger_service/types';
 import type { AlertingRouteContext } from './alerting_route_context';
 import { getCommonErrorOasOperationObject } from './common_error_oas_examples';
 import { deepMergeRouteOptions } from './deep_merge_route_options';
@@ -199,13 +201,24 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     }
   }
 
+  protected errorLabels(_e: Boom.Boom | Error): AlertingLabels | undefined {
+    return undefined;
+  }
+
   protected onError(e: Boom.Boom | Error): IKibanaResponse {
     const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
 
     if (boom.output.statusCode >= 500) {
-      this.ctx.logger.error(`${this.routeName} error: ${boom.message}`, { error: e });
+      this.ctx.logger.error({
+        error: e,
+        code: ALERTING_LOG_CODES.ROUTES_HANDLER_FAILED,
+        labels: this.errorLabels(e),
+      });
     } else {
-      this.ctx.logger.debug(`${this.routeName} error: ${boom.message}`);
+      this.ctx.logger.debug({
+        message: 'Route handler returned client error',
+        labels: { resource: this.routeName },
+      });
     }
 
     const data = (boom.data ?? undefined) as AlertingBoomData | undefined;

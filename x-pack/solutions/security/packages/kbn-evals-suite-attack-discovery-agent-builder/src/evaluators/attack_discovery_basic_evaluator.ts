@@ -21,6 +21,7 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
   return {
     name: ATTACK_DISCOVERY_BASIC_EVALUATOR_NAME,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       if (!expectsAttackDiscovery(expected?.expectedToolPath)) {
         return {

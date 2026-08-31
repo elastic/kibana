@@ -41,6 +41,7 @@ export interface KIQueryGenerationScenario {
     expected_categories: string[];
     expected_ground_truth: string;
     expect_stats?: boolean;
+    expect_queries?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
@@ -112,6 +113,13 @@ export interface DiscoveryScenario {
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
+  /** Memory pages seeded via the memory API before the agent runs (the spec wipes the memory data stream between scenarios). */
+  memoryPages?: Array<{
+    name: string;
+    title: string;
+    content: string;
+    categories?: string[];
+  }>;
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;

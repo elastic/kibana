@@ -98,6 +98,7 @@ const GroupGridCardContent = ({
 
 export const GroupGridItem = ({
   loaded,
+  groupId,
   groupLabel,
   fullScreenGroup,
   setFullScreenGroup,
@@ -107,6 +108,7 @@ export const GroupGridItem = ({
 }: {
   loaded: boolean;
   groupMonitors: OverviewStatusMetaData[];
+  groupId?: string;
   groupLabel: string;
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;
@@ -129,9 +131,10 @@ export const GroupGridItem = ({
   const downMonitorsCount = downMonitors.length;
 
   const { status } = useSelector(selectOverviewStatus);
+  const groupKey = groupId ?? groupLabel;
 
   useKey('Escape', () => {
-    if (fullScreenGroup === groupLabel) {
+    if (fullScreenGroup === groupKey) {
       setFullScreenGroup('');
     }
   });
@@ -140,9 +143,10 @@ export const GroupGridItem = ({
 
   return (
     <EuiAccordion
-      initialIsOpen={fullScreenGroup === groupLabel}
-      isDisabled={fullScreenGroup === groupLabel || groupMonitors.length === 0}
-      id={'groupAccordion' + groupLabel}
+      data-test-subj={`syntheticsOverviewGroup-${groupKey}`}
+      initialIsOpen={fullScreenGroup === groupKey}
+      isDisabled={fullScreenGroup === groupKey || groupMonitors.length === 0}
+      id={'groupAccordion' + groupKey}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem className="eui-textNoWrap">{groupLabel}</EuiFlexItem>
@@ -179,7 +183,7 @@ export const GroupGridItem = ({
                       document.exitFullscreen();
                     } else {
                       document.documentElement.requestFullscreen();
-                      setFullScreenGroup(groupLabel);
+                      setFullScreenGroup(groupKey);
                     }
                   }}
                 />

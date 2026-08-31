@@ -7,15 +7,17 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
+  Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
   RegistryDataStream,
 } from '../../../types';
+import { ElasticsearchAssetType } from '../../../../common';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
@@ -23,6 +25,8 @@ import {
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
+
+import { appContextService } from '../../app_context';
 
 import { dataStreamService } from '../..';
 
@@ -147,6 +151,67 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
     (ds) => ds._meta?.package?.name && ds._meta.package.name !== pkgInfo.name
   );
 };
+
+function hasUncorroboratedUploadAssets(
+  installation: Pick<Installation, 'name' | 'install_source' | 'installed_es'>,
+  existingDataStreams: IndicesDataStream[],
+  existingIndexTemplate: IndicesIndexTemplate | null,
+  dataStreamType: string,
+  datasetName: string
+): boolean {
+  // Same escape hatch as the upload validator: flagged deployments opt out of
+  // the upload takeover protections entirely.
+  if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+    return false;
+  }
+
+  if (installation.install_source !== 'upload') {
+    return false;
+  }
+
+  const hasUncorroboratedStream = existingDataStreams.some(
+    (liveStream) =>
+      !isAssetCorroboratedByUpload(
+        installation,
+        liveStream._meta?.package?.name,
+        dataStreamType,
+        datasetName
+      )
+  );
+  if (hasUncorroboratedStream) {
+    return true;
+  }
+
+  return Boolean(
+    existingIndexTemplate &&
+      !isAssetCorroboratedByUpload(
+        installation,
+        existingIndexTemplate._meta?.package?.name,
+        dataStreamType,
+        datasetName
+      )
+  );
+}
+
+function isAssetCorroboratedByUpload(
+  installation: Pick<Installation, 'name' | 'installed_es'>,
+  owner: string | undefined,
+  dataStreamType: string,
+  datasetName: string
+): boolean {
+  if (owner !== installation.name) {
+    return false;
+  }
+
+  const expected = `${dataStreamType}-${datasetName}`;
+  return (installation.installed_es ?? []).some((asset) => {
+    if (asset.type !== ElasticsearchAssetType.indexTemplate) {
+      return false;
+    }
+    const base = asset.id.split('@')[0];
+    return base === expected || base.startsWith(`${expected}.`) || expected.startsWith(`${base}.`);
+  });
+}
 
 export const isInputPackageDatasetUsedByMultiplePolicies = (
   packagePolicies: PackagePolicy[],
@@ -342,6 +407,21 @@ async function installAssetsForDataStreamType(opts: {
       `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
     );
   }
+
+  if (
+    hasUncorroboratedUploadAssets(
+      installedPkgWithAssets.installation,
+      existingDataStreams,
+      existingIndexTemplate,
+      dataStream.type,
+      datasetName
+    )
+  ) {
+    throw new PackagePolicyValidationError(
+      `Data stream or index template for dataset "${datasetName}" already exists and its ownership cannot be verified for this uploaded package. Remove the existing assets or reinstall the package before reusing the dataset.`
+    );
+  }
+
   try {
     if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
       const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {

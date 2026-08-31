@@ -1993,15 +1993,72 @@ paths:
           name: agent_id
           required: false
           schema:
+            maxLength: 64
             type: string
+        - description: Page number, 1-based.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Number of results per page. Maximum 1000.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 1000
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Sort direction for results, ordered by updated_at.
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Filter to pinned (true) or unpinned (false) conversations. Omit to return all.
+          in: query
+          name: pinned
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               examples:
-                listConversationsResponseExample:
-                  description: Example response containing the list of conversations with all agents
+                listConversationsPinnedExample:
+                  description: Example response filtered to pinned conversations only
                   value:
+                    pagination:
+                      page: 1
+                      per_page: 1000
+                      total: 3
+                    results:
+                      - agent_id: elastic-ai-agent
+                        created_at: '2025-08-01T10:00:00.000Z'
+                        id: a1b2c3d4-1234-5678-abcd-000000000001
+                        permissions:
+                          delete: true
+                          rename: true
+                        pinned: true
+                        title: Important reference conversation
+                        updated_at: '2025-09-20T08:30:00.000Z'
+                        user:
+                          username: elastic
+                listConversationsResponseExample:
+                  description: Example response returning the first page of conversations for all agents
+                  value:
+                    pagination:
+                      page: 1
+                      per_page: 1000
+                      total: 128
                     results:
                       - agent_id: elastic-ai-agent
                         created_at: '2025-09-19T17:45:39.554Z'
@@ -2021,11 +2078,19 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
-              -H "Authorization: ApiKey ${API_KEY}"
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&sort_order=desc" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31"
+        - label: Filter to pinned conversations
+          lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations?pinned=true" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31"
         - lang: Console
           source: |
-            GET kbn://api/agent_builder/conversations
+            GET kbn://api/agent_builder/conversations?page=1&sort_order=desc
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -2110,7 +2175,7 @@ paths:
                     - access_mode
                 agent_id:
                   description: The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.
-                  maxLength: 256
+                  maxLength: 64
                   type: string
                 conversation_id:
                   description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
@@ -2267,7 +2332,14 @@ paths:
                       delete: true
                       rename: true
                     rounds:
-                      - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
+                      - feedback:
+                          chips:
+                            - accurate
+                            - useful
+                          comment: ''
+                          submitted_at: '2025-09-19T17:46:12.000Z'
+                          vote: up
+                        id: 170ec3b2-0f5a-4538-8b60-549572386d2a
                         input:
                           message: Hello, how are you?
                         response:
@@ -3196,14 +3268,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -3673,14 +3737,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -9666,6 +9722,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 150
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -36628,6 +36686,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -43908,7 +43983,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48967,6 +49042,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -85157,6 +85249,16 @@ components:
       description: The description for the case.
       maxLength: 30000
       type: string
+    Cases_case_extended_fields:
+      additionalProperties:
+        maxLength: 30000
+        type: string
+      description: |
+        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+      maxProperties: 500
+      title: Case extended fields
+      type: object
+      x-state: Technical preview; added in 9.5.0
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -85497,6 +85599,13 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -86004,6 +86113,8 @@ components:
           type: array
         description:
           $ref: '#/components/schemas/Cases_case_description'
+        extended_fields:
+          $ref: '#/components/schemas/Cases_case_extended_fields'
         owner:
           $ref: '#/components/schemas/Cases_owner'
         settings:
@@ -87045,6 +87156,8 @@ components:
                 type: array
               description:
                 $ref: '#/components/schemas/Cases_case_description'
+              extended_fields:
+                $ref: '#/components/schemas/Cases_case_extended_fields'
               id:
                 description: The identifier for the case.
                 maxLength: 30000
@@ -99083,6 +99196,7 @@ components:
                     aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                     aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                     apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                    custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                     discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                     field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -99108,6 +99222,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -99371,6 +99486,49 @@ components:
         - grid
         - config
       title: APM Service map
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          type: object
+          properties:
+            description:
+              description: A short description of the panel.
+              type: string
+            esql_query:
+              items:
+                maxLength: 1000000
+                type: string
+              maxItems: 1
+              type: array
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            template:
+              maxLength: 510000
+              type: string
+            title:
+              description: The panel title.
+              type: string
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - custom_content
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Custom content
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
@@ -101061,6 +101219,7 @@ components:
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -101086,6 +101245,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -133327,7 +133487,7 @@ components:
           metadata:
             execution_context:
               name: osquery
-              url: /app/osquery/live_queries/new
+              url: /app/osquery/new
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
@@ -134954,7 +135114,7 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.
