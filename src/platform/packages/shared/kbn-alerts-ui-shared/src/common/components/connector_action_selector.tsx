@@ -51,9 +51,9 @@ const SCOPE_LABELS: Record<ActionScope, string> = {
 };
 
 const SCOPE_BADGE_COLORS: Record<ActionScope, string> = {
-  read: '#d4edda',
-  write: '#fff3cd',
-  destroy: '#fce4e4',
+  read: 'success',
+  write: 'warning',
+  destroy: 'danger',
 };
 
 const MODE_ALL = 'all';
