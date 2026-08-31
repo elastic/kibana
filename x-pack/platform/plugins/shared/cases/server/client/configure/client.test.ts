@@ -389,6 +389,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            workflowTags: [],
           },
         });
 
@@ -450,6 +451,7 @@ describe('client', () => {
               },
             ],
             observableTypes: [],
+            workflowTags: [],
           },
           version: 'test-version',
         });
@@ -462,6 +464,7 @@ describe('client', () => {
           references: [],
           attributes: {
             observableTypes: [],
+            workflowTags: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1052,6 +1055,7 @@ describe('client', () => {
               closure_type: 'close-by-user',
               owner: 'cases',
               observableTypes: [],
+              workflowTags: [],
             },
             id: 'test-id',
             version: 'test-version',
@@ -1120,6 +1124,7 @@ describe('client', () => {
                   },
                 ],
                 observableTypes: [],
+                workflowTags: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1271,6 +1276,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            workflowTags: [],
           },
         };
 
@@ -1618,6 +1624,7 @@ describe('client', () => {
                   updated_at: null,
                   updated_by: null,
                   observableTypes: [],
+                  workflowTags: [],
                 },
                 score: 0,
               },
@@ -1644,6 +1651,7 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              workflowTags: [],
             },
           });
 
@@ -1883,6 +1891,7 @@ describe('client', () => {
           ],
           templates: [],
           observableTypes: [],
+          workflowTags: [],
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
           updated_at: null,

@@ -19,6 +19,8 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import {
@@ -116,6 +118,13 @@ export const ObservableTypesConfigurationRt = limitedArraySchema({
   }),
 });
 
+export const WorkflowTagsConfigurationRt = limitedArraySchema({
+  codec: limitedStringSchema({ fieldName: 'workflow tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+  min: 0,
+  max: MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  fieldName: 'workflow tags',
+});
+
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({
     /**
@@ -189,6 +198,7 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      workflowTags: WorkflowTagsConfigurationRt,
     })
   ),
 ]);
@@ -215,6 +225,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      workflowTags: WorkflowTagsConfigurationRt,
     })
   ),
   rt.strict({ version: rt.string }),
@@ -226,3 +237,4 @@ export type GetConfigurationFindRequest = rt.TypeOf<typeof GetConfigurationFindR
 export type GetConfigureResponse = Configurations;
 export type CreateConfigureResponse = Configuration;
 export type UpdateConfigureResponse = Configuration;
+export type WorkflowTagsConfiguration = rt.TypeOf<typeof WorkflowTagsConfigurationRt>;
