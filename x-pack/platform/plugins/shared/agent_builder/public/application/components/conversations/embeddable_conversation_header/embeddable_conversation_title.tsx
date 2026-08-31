@@ -7,12 +7,9 @@
 
 import React, { useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiPopover,
   useEuiTheme,
@@ -23,7 +20,6 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
   useConversationPermissions,
-  useConversationReadOnly,
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
@@ -43,9 +39,6 @@ const labels = {
   openTitleMenu: i18n.translate('xpack.agentBuilder.conversationTitle.openTitleMenu', {
     defaultMessage: 'Open conversation menu',
   }),
-  readOnly: i18n.translate('xpack.agentBuilder.conversationTitle.readOnly', {
-    defaultMessage: 'Read-Only',
-  }),
 };
 
 interface EmbeddableConversationTitleProps {
@@ -56,7 +49,6 @@ export const EmbeddableConversationTitle = ({
   ariaLabelledBy,
 }: EmbeddableConversationTitleProps) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
-  const isReadOnly = useConversationReadOnly();
   const hasPersistedConversation = useHasPersistedConversation();
   const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
@@ -66,38 +58,6 @@ export const EmbeddableConversationTitle = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
-
-  const titleWrapperStyles = css`
-    min-width: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: ${euiTheme.size.xs};
-  `;
-
-  const titleActionsWrapperStyles = css`
-    min-width: 0;
-  `;
-
-  const titleTextStyles = css`
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  `;
-
-  const readOnlyBadge = isReadOnly ? (
-    <EuiBadge
-      color={euiTheme.colors.lightShade}
-      iconType="lock"
-      data-test-subj="agentBuilderConversationReadOnlyBadge"
-      css={css`
-        border-radius: 999px;
-        color: ${euiTheme.colors.text};
-      `}
-    >
-      {labels.readOnly}
-    </EuiBadge>
-  ) : null;
 
   const menuItems = [
     ...(canRename
@@ -148,20 +108,15 @@ export const EmbeddableConversationTitle = ({
   // Nothing to open the popover for: an unsaved conversation, or one the user may not act on.
   if (!hasPersistedConversation || menuItems.length === 0) {
     return (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={titleWrapperStyles}>
-        <EuiFlexItem grow={false} css={titleTextStyles}>
-          <h4
-            id={ariaLabelledBy}
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            data-test-subj="agentBuilderConversationTitle"
-          >
-            {displayedTitle}
-          </h4>
-        </EuiFlexItem>
-        {readOnlyBadge && <EuiFlexItem grow={false}>{readOnlyBadge}</EuiFlexItem>}
-      </EuiFlexGroup>
+      <h4
+        id={ariaLabelledBy}
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+        data-test-subj="agentBuilderConversationTitle"
+      >
+        {displayedTitle}
+      </h4>
     );
   }
 
@@ -192,37 +147,22 @@ export const EmbeddableConversationTitle = ({
         detail: 'conversation',
       })}
     >
-      <span css={titleWrapperStyles}>
-        <span id={ariaLabelledBy} css={titleTextStyles}>
-          {displayedTitle}
-        </span>
-      </span>
+      <span id={ariaLabelledBy}>{displayedTitle}</span>
     </EuiButtonEmpty>
   );
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
-        css={titleActionsWrapperStyles}
+      <EuiPopover
+        button={titleButton}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downCenter"
+        aria-label={labels.openTitleMenu}
       >
-        <EuiFlexItem grow={false} css={titleTextStyles}>
-          <EuiPopover
-            button={titleButton}
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downCenter"
-            aria-label={labels.openTitleMenu}
-          >
-            <EuiContextMenuPanel items={menuItems} />
-          </EuiPopover>
-        </EuiFlexItem>
-
-        {readOnlyBadge && <EuiFlexItem grow={false}>{readOnlyBadge}</EuiFlexItem>}
-      </EuiFlexGroup>
+        <EuiContextMenuPanel items={menuItems} />
+      </EuiPopover>
 
       <RenameConversationModal
         isOpen={isRenameModalOpen}

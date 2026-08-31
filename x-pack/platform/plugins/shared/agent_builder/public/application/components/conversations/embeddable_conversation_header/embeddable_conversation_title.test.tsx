@@ -11,7 +11,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConversationPermissions } from '../../../../../common/http_api/conversations';
 import {
   useConversationPermissions,
-  useConversationReadOnly,
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
@@ -19,7 +18,6 @@ import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 
 jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
-  useConversationReadOnly: jest.fn(),
   useHasPersistedConversation: jest.fn(),
   useConversationPermissions: jest.fn(),
 }));
@@ -33,19 +31,11 @@ jest.mock('../delete_conversation_modal', () => ({
 }));
 
 const mockUseConversationTitle = jest.mocked(useConversationTitle);
-const mockUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 
-const renderTitle = (
-  permissions: Partial<ConversationPermissions>,
-  { isReadOnly = false }: { isReadOnly?: boolean } = {}
-) => {
-  mockUseConversationTitle.mockReturnValue({
-    title: 'My conversation',
-    isLoading: false,
-  });
-  mockUseConversationReadOnly.mockReturnValue(isReadOnly);
+const renderTitle = (permissions: Partial<ConversationPermissions>) => {
+  mockUseConversationTitle.mockReturnValue({ title: 'My conversation', isLoading: false });
   mockUseHasPersistedConversation.mockReturnValue(true);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,
@@ -92,26 +82,6 @@ describe('EmbeddableConversationTitle', () => {
     expect(screen.queryByTestId('agentBuilderConversationTitleButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderConversationTitle')).toHaveTextContent(
       'My conversation'
-    );
-  });
-
-  it('renders the read-only chip when the conversation is read-only', () => {
-    renderTitle({ rename: false, delete: false }, { isReadOnly: true });
-
-    expect(screen.getByTestId('agentBuilderConversationReadOnlyBadge')).toHaveTextContent(
-      'Read-Only'
-    );
-  });
-
-  it('renders the read-only chip after the title menu button', () => {
-    renderTitle({ rename: true, delete: true }, { isReadOnly: true });
-
-    const titleButton = screen.getByTestId('agentBuilderConversationTitleButton');
-    const readOnlyBadge = screen.getByTestId('agentBuilderConversationReadOnlyBadge');
-
-    expect(titleButton).not.toContainElement(readOnlyBadge);
-    expect(titleButton.compareDocumentPosition(readOnlyBadge)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
     );
   });
 });
