@@ -321,7 +321,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               rawRound={rawRound}
             />
           </EuiFlexItem>
-          <EuiSpacer />
           <RoundAttachmentReferences
             attachmentRefs={input.attachment_refs}
             conversationAttachments={conversationAttachments}
