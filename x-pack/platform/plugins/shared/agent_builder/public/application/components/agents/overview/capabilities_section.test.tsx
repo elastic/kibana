@@ -36,19 +36,21 @@ describe('CapabilitiesSection', () => {
     jest.clearAllMocks();
   });
 
-  it('renders Skills, Plugins, and Tools cards when experimental features are enabled', () => {
+  it('renders Skills, Plugins, Connectors, and Tools cards when experimental features are enabled', () => {
     render(<CapabilitiesSection {...baseProps} isExperimentalFeaturesEnabled={true} />);
 
     expect(screen.getByTestId('agentOverviewCapabilityCardSkills')).toBeInTheDocument();
     expect(screen.getByTestId('agentOverviewCapabilityCardPlugins')).toBeInTheDocument();
+    expect(screen.getByTestId('agentOverviewCapabilityCardConnectors')).toBeInTheDocument();
     expect(screen.getByTestId('agentOverviewCapabilityCardTools')).toBeInTheDocument();
   });
 
-  it('omits the Plugins card when experimental features are disabled', () => {
+  it('omits the Plugins card but keeps Connectors when experimental features are disabled', () => {
     render(<CapabilitiesSection {...baseProps} isExperimentalFeaturesEnabled={false} />);
 
     expect(screen.getByTestId('agentOverviewCapabilityCardSkills')).toBeInTheDocument();
     expect(screen.queryByTestId('agentOverviewCapabilityCardPlugins')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentOverviewCapabilityCardConnectors')).toBeInTheDocument();
     expect(screen.getByTestId('agentOverviewCapabilityCardTools')).toBeInTheDocument();
   });
 

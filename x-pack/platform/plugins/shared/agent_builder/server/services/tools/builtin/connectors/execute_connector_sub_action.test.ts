@@ -107,6 +107,12 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(tool.tags).toEqual(['connector', 'sub-action']);
   });
 
+  it('is always available, independent of the Agent Builder experimental features flag', () => {
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    expect(tool.availability).toBeUndefined();
+    expect(tool.experimental).toBeFalsy();
+  });
+
   describe('schema (strict, no structural normalization)', () => {
     it('rejects flattened sub-action fields at the root (unknown keys)', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });

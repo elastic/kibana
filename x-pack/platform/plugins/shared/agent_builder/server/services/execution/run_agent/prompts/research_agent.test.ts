@@ -184,6 +184,16 @@ describe('getResearchAgentPrompt', () => {
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
 
+  it('points connector discovery at list_connectors, not sml_search/sml_attach', async () => {
+    const messages = await getResearchAgentPrompt(makeParams());
+    const system = asText(messages[0]);
+
+    expect(system).toContain('## CONNECTOR DISCOVERY');
+    expect(system).toContain('list_connectors');
+    expect(system).not.toContain('sml_search` with');
+    expect(system).toContain('Do not rely on `sml_search`/`sml_attach` to find connectors.');
+  });
+
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
     const params = {
       conversationTimestamp: now,

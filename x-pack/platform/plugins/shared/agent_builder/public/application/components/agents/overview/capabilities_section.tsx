@@ -88,19 +88,18 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
           />
         </EuiFlexItem>
       )}
-      {isExperimentalFeaturesEnabled && (
-        <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
-          <CapabilityCard
-            count={connectorsCount}
-            title={overviewLabels.connectorsLabel(connectorsCount)}
-            description={overviewLabels.connectorsDescription}
-            emptyDescription={overviewLabels.connectorsOnboardingDescription}
-            image={connectorsImage}
-            href={connectorsHref}
-            onClick={onNavigateToConnectors}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
+        <CapabilityCard
+          dataTestSubj="agentOverviewCapabilityCardConnectors"
+          count={connectorsCount}
+          title={overviewLabels.connectorsLabel(connectorsCount)}
+          description={overviewLabels.connectorsDescription}
+          emptyDescription={overviewLabels.connectorsOnboardingDescription}
+          image={connectorsImage}
+          href={connectorsHref}
+          onClick={onNavigateToConnectors}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
         <CapabilityCard
           dataTestSubj="agentOverviewCapabilityCardTools"
