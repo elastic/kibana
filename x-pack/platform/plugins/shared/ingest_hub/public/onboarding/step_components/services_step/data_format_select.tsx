@@ -101,7 +101,7 @@ export function DataFormatSelect({ dataFormat, onChange, disabled }: DataFormatS
   // events so the tooltip fires even when the select is non-interactive.
   return disabled ? (
     <EuiToolTip content={disabledTooltip}>
-      <span style={{ display: 'inline-block' }}>{select}</span>
+      <span tabIndex={0} style={{ display: 'inline-block' }}>{select}</span>
     </EuiToolTip>
   ) : (
     select
