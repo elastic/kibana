@@ -96,9 +96,9 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
   },
   /**
    * v3 migrates `matcher` from a raw KQL string to a structured object
-   * `{ tags, rules, statuses, expression }`. Existing string matchers are
-   * wrapped in `{ expression: oldMatcher }` so they continue to evaluate
-   * identically via `PolicyMatcher.toKql()`.
+   * `{ tags, expression }`. Existing string matchers are wrapped in
+   * `{ expression: oldMatcher }` so they continue to evaluate identically
+   * via `PolicyMatcher.toKql()`.
    */
   '3': {
     changes: [

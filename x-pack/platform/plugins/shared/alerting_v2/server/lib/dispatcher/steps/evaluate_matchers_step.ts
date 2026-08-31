@@ -46,6 +46,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): MatchedPair[] {
     const matched: MatchedPair[] = [];
+    const now = Date.now();
 
     for (const episode of dispatchable) {
       if (rules.isOrphanedInternalEpisode(episode)) continue;
@@ -56,7 +57,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
-        if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        if (policy.snoozedUntil && new Date(policy.snoozedUntil).getTime() > now) continue;
 
         const policyMatcher = PolicyMatcher.of(policy.matcher);
         if (policyMatcher.isCatchAll()) {
