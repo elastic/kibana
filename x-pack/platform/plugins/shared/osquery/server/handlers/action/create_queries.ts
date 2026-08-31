@@ -9,16 +9,13 @@ import { isEmpty, isNumber, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
-import { savedQuerySavedObjectType } from '../../../common/types';
-import type { SavedQuerySavedObject } from '../../common/types';
-import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
+import { lookupSavedQuery, type ResolvedQueryReference } from '../../lib/resolve_query_reference';
 import { CustomHttpRequestError } from '../../common/error';
 
 interface CreateDynamicQueriesParams {
@@ -31,6 +28,8 @@ interface CreateDynamicQueriesParams {
   spaceScopedClient: SavedObjectsClient;
   /** When true, dispatch stored SO content even if the caller supplied a query. */
   useStoredQuery?: boolean;
+  /** Authz-resolved saved query; when set, skip a second SO lookup. */
+  storedQuery?: ResolvedQueryReference;
 }
 
 export const createDynamicQueries = async ({
@@ -42,16 +41,18 @@ export const createDynamicQueries = async ({
   spaceId,
   spaceScopedClient,
   useStoredQuery,
+  storedQuery,
 }: CreateDynamicQueriesParams) => {
-  const storedSavedQuery = params.queries?.length
-    ? undefined
-    : await getSavedQueryContent(params.saved_query_id, spaceScopedClient);
+  const savedQueryId = params.saved_query_id?.trim();
+  const enforceStoredSavedQuery = Boolean(useStoredQuery && savedQueryId);
+  const storedSavedQuery =
+    storedQuery ??
+    (params.queries?.length && !enforceStoredSavedQuery
+      ? undefined
+      : await lookupSavedQuery(spaceScopedClient, savedQueryId ?? ''));
 
-  if (useStoredQuery && params.saved_query_id?.trim() && !storedSavedQuery) {
-    throw new CustomHttpRequestError(
-      `Saved query [${params.saved_query_id.trim()}] could not be resolved`,
-      400
-    );
+  if (enforceStoredSavedQuery && !storedSavedQuery) {
+    throw new CustomHttpRequestError(`Saved query [${savedQueryId}] could not be resolved`, 400);
   }
 
   const query = useStoredQuery
@@ -60,77 +61,50 @@ export const createDynamicQueries = async ({
   const ecsMapping = useStoredQuery
     ? storedSavedQuery?.ecs_mapping ?? params.ecs_mapping
     : params.ecs_mapping ?? storedSavedQuery?.ecs_mapping;
+  const prebuiltId = storedSavedQuery?.savedObjectId ?? savedQueryId;
 
-  return params.queries?.length
-    ? map(params.queries, ({ query: packQuery, ...restQuery }) => {
-        const replacedQuery = replacedQueries(packQuery, alertData);
+  if (params.queries?.length && !enforceStoredSavedQuery) {
+    return map(params.queries, ({ query: packQuery, ...restQuery }) => {
+      const replacedQuery = replacedQueries(packQuery, alertData);
 
-        return pickBy(
-          {
-            ...replacedQuery,
-            ...restQuery,
-            ...(error ? { error } : {}),
-            action_id: uuidv4(),
-            alert_ids: params.alert_ids,
-            agents,
-          },
-          (value) => !isEmpty(value) || value === true || isNumber(value)
-        );
-      })
-    : [
-        pickBy(
-          {
-            action_id: uuidv4(),
-            id: uuidv4(),
-            ...replacedQueries(query, alertData),
-            saved_query_id: params.saved_query_id,
-            saved_query_prebuilt: params.saved_query_id
-              ? await isSavedQueryPrebuilt(
-                  osqueryContext.service.getPackageService()?.asInternalUser,
-                  params.saved_query_id,
-                  spaceScopedClient,
-                  spaceId
-                )
-              : undefined,
-            ecs_mapping: ecsMapping,
-            alert_ids: params.alert_ids,
-            timeout: params.timeout,
-            agents,
-            ...(error ? { error } : {}),
-          },
-          (value) => !isEmpty(value) || isNumber(value)
-        ),
-      ];
-};
-
-/** Returns stored query content, or `undefined` on 404. Other SO errors propagate. */
-const getSavedQueryContent = async (
-  savedQueryId: string | undefined,
-  spaceScopedClient: SavedObjectsClient
-): Promise<{ query?: string; ecs_mapping?: Record<string, unknown> } | undefined> => {
-  const trimmedSavedQueryId = savedQueryId?.trim();
-
-  if (!trimmedSavedQueryId) {
-    return undefined;
+      return pickBy(
+        {
+          ...replacedQuery,
+          ...restQuery,
+          ...(error ? { error } : {}),
+          action_id: uuidv4(),
+          alert_ids: params.alert_ids,
+          agents,
+        },
+        (value) => !isEmpty(value) || value === true || isNumber(value)
+      );
+    });
   }
 
-  try {
-    const savedQuerySO = await spaceScopedClient.get<SavedQuerySavedObject>(
-      savedQuerySavedObjectType,
-      trimmedSavedQueryId
-    );
-
-    return {
-      query: savedQuerySO.attributes.query,
-      ecs_mapping: toEcsMappingRecord(savedQuerySO.attributes.ecs_mapping),
-    };
-  } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return undefined;
-    }
-
-    throw error;
-  }
+  return [
+    pickBy(
+      {
+        action_id: uuidv4(),
+        id: uuidv4(),
+        ...replacedQueries(query, alertData),
+        saved_query_id: params.saved_query_id,
+        saved_query_prebuilt: prebuiltId
+          ? await isSavedQueryPrebuilt(
+              osqueryContext.service.getPackageService()?.asInternalUser,
+              prebuiltId,
+              spaceScopedClient,
+              spaceId
+            )
+          : undefined,
+        ecs_mapping: ecsMapping,
+        alert_ids: params.alert_ids,
+        timeout: params.timeout,
+        agents,
+        ...(error ? { error } : {}),
+      },
+      (value) => !isEmpty(value) || isNumber(value)
+    ),
+  ];
 };
 
 export const replacedQueries = (

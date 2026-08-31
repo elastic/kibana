@@ -7,11 +7,16 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { resolveQueryReference } from './resolve_query_reference';
+import { escapeQuotes } from '@kbn/es-query';
+import { lookupSavedQuery, resolveQueryReference } from './resolve_query_reference';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/types';
 
 const SAVED_QUERY_ID = 'saved-query-1';
+const SAVED_QUERY_SO_ID = 'so-uuid-1';
 const PACK_ID = 'pack-1';
+
+const attributesIdFilter = (id: string) =>
+  `${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(id)}"`;
 
 describe('resolveQueryReference', () => {
   const createMockCoreStart = (
@@ -21,30 +26,86 @@ describe('resolveQueryReference', () => {
       const spaceId = (request as unknown as { spaceId?: string }).spaceId ?? 'default';
       const objects = objectsBySpace[spaceId] ?? {};
 
-      return {
-        get: jest.fn(async (type: string, id: string) => {
-          const found = objects[id];
+      const get = jest.fn(async (type: string, id: string) => {
+        const found = objects[id];
 
-          if (!found) {
-            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-          }
+        if (!found) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
 
-          return { id, type, attributes: found, references: [] };
-        }),
-      };
+        return { id, type, attributes: found, references: [] };
+      });
+
+      const find = jest.fn(async ({ filter }: { filter?: string }) => {
+        const matches = Object.entries(objects).filter(([, attributes]) => {
+          const publicId = (attributes as { id?: string }).id;
+
+          return filter === attributesIdFilter(publicId ?? '');
+        });
+
+        return {
+          saved_objects: matches.map(([id, attributes]) => ({
+            id,
+            type: savedQuerySavedObjectType,
+            attributes,
+            references: [],
+          })),
+          total: matches.length,
+        };
+      });
+
+      const resolve = jest.fn(async (type: string, id: string) => ({
+        saved_object: await get(type, id),
+        outcome: 'exactMatch' as const,
+      }));
+
+      return { get, find, resolve };
     });
 
     return { savedObjects: { getScopedClient } } as unknown as CoreStart;
   };
 
-  it('should resolve a saved query in the active space', async () => {
+  it('should resolve a saved query in the active space by SO id', async () => {
     const coreStart = createMockCoreStart({
       default: { [SAVED_QUERY_ID]: { query: 'select 1;' } },
     });
 
     await expect(
       resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_ID })
-    ).resolves.toEqual({ query: 'select 1;' });
+    ).resolves.toEqual({ savedObjectId: SAVED_QUERY_ID, query: 'select 1;' });
+  });
+
+  it('should resolve a saved query by attributes.id when it differs from the SO id', async () => {
+    const coreStart = createMockCoreStart({
+      default: { [SAVED_QUERY_SO_ID]: { id: SAVED_QUERY_ID, query: 'select 1;' } },
+    });
+
+    await expect(
+      resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_ID })
+    ).resolves.toEqual({ savedObjectId: SAVED_QUERY_SO_ID, query: 'select 1;' });
+
+    const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: savedQuerySavedObjectType,
+        filter: attributesIdFilter(SAVED_QUERY_ID),
+        perPage: 2,
+      })
+    );
+    expect(soClient.get).not.toHaveBeenCalled();
+  });
+
+  it('should fail closed when more than one saved query has the same attributes.id', async () => {
+    const coreStart = createMockCoreStart({
+      default: {
+        'so-a': { id: SAVED_QUERY_ID, query: 'select 1;' },
+        'so-b': { id: SAVED_QUERY_ID, query: 'select 2;' },
+      },
+    });
+
+    await expect(
+      resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_ID })
+    ).resolves.toBeUndefined();
   });
 
   it('should include stored ecs_mapping in record form', async () => {
@@ -60,6 +121,7 @@ describe('resolveQueryReference', () => {
     await expect(
       resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_ID })
     ).resolves.toEqual({
+      savedObjectId: SAVED_QUERY_ID,
       query: 'select 1;',
       ecs_mapping: { 'host.name': { field: 'name' } },
     });
@@ -74,7 +136,10 @@ describe('resolveQueryReference', () => {
 
     await expect(
       resolveQueryReference(coreStart, 'default', { pack_id: PACK_ID })
-    ).resolves.toEqual({ queries: ['select 1;', 'select 2;'] });
+    ).resolves.toEqual({
+      savedObjectId: PACK_ID,
+      queries: ['select 1;', 'select 2;'],
+    });
   });
 
   it('should return undefined for a reference that does not exist', async () => {
@@ -121,7 +186,7 @@ describe('resolveQueryReference', () => {
 
     await expect(
       resolveQueryReference(coreStart, 'other', { saved_query_id: SAVED_QUERY_ID })
-    ).resolves.toEqual({ query: 'select 1;' });
+    ).resolves.toEqual({ savedObjectId: SAVED_QUERY_ID, query: 'select 1;' });
   });
 
   it('should prefer pack_id when both references are supplied', async () => {
@@ -137,7 +202,7 @@ describe('resolveQueryReference', () => {
         saved_query_id: SAVED_QUERY_ID,
         pack_id: PACK_ID,
       })
-    ).resolves.toEqual({ queries: ['select 2;'] });
+    ).resolves.toEqual({ savedObjectId: PACK_ID, queries: ['select 2;'] });
   });
 
   it('should look references up as their expected saved object types', async () => {
@@ -148,7 +213,13 @@ describe('resolveQueryReference', () => {
     await resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_ID });
     const savedQueryClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0]
       .value;
-    expect(savedQueryClient.get).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
+    expect(savedQueryClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ type: savedQuerySavedObjectType })
+    );
+    expect(savedQueryClient.resolve).toHaveBeenCalledWith(
+      savedQuerySavedObjectType,
+      SAVED_QUERY_ID
+    );
 
     await resolveQueryReference(coreStart, 'default', { pack_id: PACK_ID });
     const packClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[1].value;
@@ -159,7 +230,8 @@ describe('resolveQueryReference', () => {
     const coreStart = {
       savedObjects: {
         getScopedClient: jest.fn().mockReturnValue({
-          get: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
+          find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+          resolve: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
         }),
       },
     } as unknown as CoreStart;
@@ -167,5 +239,46 @@ describe('resolveQueryReference', () => {
     await expect(
       resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_ID })
     ).rejects.toThrow('elasticsearch unavailable');
+  });
+});
+
+describe('lookupSavedQuery', () => {
+  it('should not call the SO client for a blank id', async () => {
+    const soClient = {
+      find: jest.fn(),
+      resolve: jest.fn(),
+    };
+
+    await expect(lookupSavedQuery(soClient, '  ')).resolves.toBeUndefined();
+    expect(soClient.find).not.toHaveBeenCalled();
+    expect(soClient.resolve).not.toHaveBeenCalled();
+  });
+
+  it('should use a legacy-alias match when find has no attributes.id hit', async () => {
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+      resolve: jest.fn().mockResolvedValue({
+        saved_object: { id: 'current-so-id', attributes: { query: 'select 1;' } },
+        outcome: 'aliasMatch',
+        alias_target_id: 'current-so-id',
+      }),
+    };
+
+    await expect(lookupSavedQuery(soClient, 'legacy-id')).resolves.toEqual({
+      savedObjectId: 'current-so-id',
+      query: 'select 1;',
+    });
+  });
+
+  it('should fail closed when resolve reports an alias conflict', async () => {
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+      resolve: jest.fn().mockResolvedValue({
+        saved_object: { id: 'legacy-id', attributes: { query: 'select 1;' } },
+        outcome: 'conflict',
+      }),
+    };
+
+    await expect(lookupSavedQuery(soClient, 'legacy-id')).resolves.toBeUndefined();
   });
 });

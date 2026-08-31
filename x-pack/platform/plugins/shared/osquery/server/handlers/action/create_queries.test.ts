@@ -30,6 +30,21 @@ describe('create queries', () => {
   };
   const TEST_AGENT = 'test-agent';
 
+  const emptyFindResult = { saved_objects: [], total: 0 };
+
+  const soClientWithGet = (get: jest.Mock): SavedObjectsClient => {
+    const resolve = jest.fn(async (type: string, id: string) => ({
+      saved_object: await get(type, id),
+      outcome: 'exactMatch' as const,
+    }));
+
+    return {
+      find: jest.fn().mockResolvedValue(emptyFindResult),
+      get,
+      resolve,
+    } as unknown as SavedObjectsClient;
+  };
+
   const mockedQueriesParams = {
     queries: [
       {
@@ -154,7 +169,7 @@ describe('create queries', () => {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
         } as unknown as OsqueryAppContext,
         spaceId,
-        spaceScopedClient: { get } as unknown as SavedObjectsClient,
+        spaceScopedClient: soClientWithGet(get),
       });
 
       expect(get).toHaveBeenCalledWith(savedQuerySavedObjectType, 'sq-1');
@@ -178,7 +193,7 @@ describe('create queries', () => {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
         } as unknown as OsqueryAppContext,
         spaceId,
-        spaceScopedClient: { get } as unknown as SavedObjectsClient,
+        spaceScopedClient: soClientWithGet(get),
         useStoredQuery: true,
       });
 
@@ -201,7 +216,7 @@ describe('create queries', () => {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
         } as unknown as OsqueryAppContext,
         spaceId,
-        spaceScopedClient: { get } as unknown as SavedObjectsClient,
+        spaceScopedClient: soClientWithGet(get),
       });
 
       expect(queries[0].query).toBe('select 42 as custom;');
@@ -219,7 +234,7 @@ describe('create queries', () => {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
         } as unknown as OsqueryAppContext,
         spaceId,
-        spaceScopedClient: { get } as unknown as SavedObjectsClient,
+        spaceScopedClient: soClientWithGet(get),
       });
 
       expect(get).toHaveBeenCalledWith(savedQuerySavedObjectType, 'sq-1');
@@ -236,7 +251,7 @@ describe('create queries', () => {
             service: { getPackageService: jest.fn().mockReturnValue(undefined) },
           } as unknown as OsqueryAppContext,
           spaceId,
-          spaceScopedClient: { get } as unknown as SavedObjectsClient,
+          spaceScopedClient: soClientWithGet(get),
         })
       ).rejects.toThrow('elasticsearch unavailable');
     });
@@ -259,7 +274,7 @@ describe('create queries', () => {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
         } as unknown as OsqueryAppContext,
         spaceId,
-        spaceScopedClient: { get } as unknown as SavedObjectsClient,
+        spaceScopedClient: soClientWithGet(get),
       });
 
       expect(queries[0].query).toBe('select 1;');
@@ -284,10 +299,97 @@ describe('create queries', () => {
             service: { getPackageService: jest.fn().mockReturnValue(undefined) },
           } as unknown as OsqueryAppContext,
           spaceId,
-          spaceScopedClient: { get } as unknown as SavedObjectsClient,
+          spaceScopedClient: soClientWithGet(get),
           useStoredQuery: true,
         })
       ).rejects.toThrow('could not be resolved');
+    });
+
+    it('resolves a saved query by attributes.id when it differs from the SO id', async () => {
+      const find = jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'so-uuid-1',
+            attributes: {
+              id: 'sq-1',
+              query: 'select 1;',
+              ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+            },
+          },
+        ],
+        total: 1,
+      });
+      const get = jest.fn();
+
+      const queries = await createDynamicQueries({
+        params: { saved_query_id: 'sq-1', agent_ids: [TEST_AGENT] },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: { find, get } as unknown as SavedObjectsClient,
+      });
+
+      expect(get).not.toHaveBeenCalled();
+      expect(queries[0].query).toBe('select 1;');
+      expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
+    });
+
+    it('ignores caller queries[] when useStoredQuery is set with a saved_query_id', async () => {
+      const get = jest.fn().mockResolvedValue({
+        id: 'sq-1',
+        attributes: { query: 'select 1;' },
+      });
+
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          queries: [
+            {
+              query: 'select 42 as custom;',
+              id: 'x',
+              ...defualtQueryParams,
+            },
+          ],
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
+      });
+
+      expect(queries).toHaveLength(1);
+      expect(queries[0].query).toBe('select 1;');
+    });
+
+    it('uses the authz-resolved saved query and does not look it up again', async () => {
+      const get = jest.fn();
+      const client = soClientWithGet(get);
+
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          query: 'select 42 as custom;',
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: client,
+        useStoredQuery: true,
+        storedQuery: { savedObjectId: 'so-uuid-1', query: 'select 1;' },
+      });
+
+      expect(get).not.toHaveBeenCalled();
+      expect(client.find).not.toHaveBeenCalled();
+      expect(queries[0].query).toBe('select 1;');
     });
   });
 });

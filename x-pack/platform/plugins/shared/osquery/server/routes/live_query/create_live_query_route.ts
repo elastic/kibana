@@ -25,9 +25,10 @@ import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
 import {
   getOsqueryCapabilities,
-  isOsqueryResponseActionAuthorized,
+  authorizeOsqueryResponseAction,
 } from '../../lib/check_response_action_authz';
 import { createLiveQueryResponseSchema } from './response_schemas';
+import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -63,9 +64,29 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
         const space = await osqueryContext.service.getActiveSpace(request);
-        const { writeLiveQueries } = await getOsqueryCapabilities(coreStartServices, request);
+        const { writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(
+          coreStartServices,
+          request
+        );
 
-        const isInvalid = !(await isOsqueryResponseActionAuthorized(
+        const client = await osqueryContext.service
+          .getRuleRegistryService()
+          ?.getRacClientWithRequest(request);
+
+        // Unreadable/missing alert on the deny path is 403, not 500.
+        let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
+        let alertError: unknown;
+        try {
+          alertData = request.body.alert_ids?.length
+            ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
+                _index: string;
+              })
+            : undefined;
+        } catch (error) {
+          alertError = error;
+        }
+
+        const { authorized, resolved } = await authorizeOsqueryResponseAction(
           coreStartServices,
           request,
           {
@@ -75,32 +96,14 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             queries: request.body.queries,
             ecs_mapping: request.body.ecs_mapping,
           },
-          space?.id
-        ));
-
-        const client = await osqueryContext.service
-          .getRuleRegistryService()
-          ?.getRacClientWithRequest(request);
-
-        // Unreadable/missing alert on the deny path is 403, not 500.
-        let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
-        try {
-          alertData = request.body.alert_ids?.length
-            ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
-                _index: string;
-              })
-            : undefined;
-        } catch (error) {
-          if (isInvalid) {
-            return response.forbidden();
-          }
-
-          throw error;
-        }
+          space?.id,
+          alertData
+        );
+        const isInvalid = !authorized;
 
         if (isInvalid) {
-          // Investigation-guide match is the only path that proceeds when the request is otherwise unauthorized.
-          if (!request.body.alert_ids?.length) {
+          // Investigation-guide match requires runSavedQueries; it is not a grant of its own.
+          if (!runSavedQueries || !request.body.alert_ids?.length || alertError) {
             return response.forbidden();
           }
 
@@ -133,7 +136,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
                 return (
                   replacedConfigurationQuery === request.body.query &&
-                  deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
+                  deepEqual(
+                    toEcsMappingRecord(payload.configuration.ecs_mapping),
+                    toEcsMappingRecord(request.body.ecs_mapping)
+                  )
                 );
               }
             );
@@ -142,6 +148,8 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           } catch (error) {
             return response.forbidden();
           }
+        } else if (alertError) {
+          throw alertError;
         }
 
         try {
@@ -162,6 +170,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               space,
               // Investigation-guide match keeps caller SQL; otherwise stored SO is dispatched.
               useStoredQuery: !isInvalid && !writeLiveQueries,
+              storedQuery: !isInvalid && !writeLiveQueries ? resolved : undefined,
             }
           );
           if (!fleetActionsCount) {

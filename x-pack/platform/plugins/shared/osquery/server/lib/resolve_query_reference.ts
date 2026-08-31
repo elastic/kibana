@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { escapeQuotes } from '@kbn/es-query';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/types';
 import type { PackSavedObject, SavedQuerySavedObject } from '../common/types';
 import { getInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
@@ -39,10 +40,71 @@ export const toEcsMappingRecord = (
 };
 
 export interface ResolvedQueryReference {
+  savedObjectId: string;
   query?: string;
   queries?: string[];
   ecs_mapping?: Record<string, unknown>;
 }
+
+const toSavedQueryReference = (savedQuerySO: {
+  id: string;
+  attributes: SavedQuerySavedObject;
+}): ResolvedQueryReference => ({
+  savedObjectId: savedQuerySO.id,
+  query: savedQuerySO.attributes.query,
+  ecs_mapping: toEcsMappingRecord(savedQuerySO.attributes.ecs_mapping),
+});
+
+/**
+ * Body `saved_query_id` is `attributes.id` (public id). Path `/{id}` is the SO uuid.
+ * Find the documented identity first; fall back to SO uuid for callers that already send it.
+ * Multiple `attributes.id` matches fail closed.
+ */
+export const lookupSavedQuery = async (
+  soClient: Pick<SavedObjectsClientContract, 'find' | 'resolve'>,
+  savedQueryId: string
+): Promise<ResolvedQueryReference | undefined> => {
+  const trimmedSavedQueryId = savedQueryId.trim();
+
+  if (!trimmedSavedQueryId) {
+    return undefined;
+  }
+
+  const found = await soClient.find<SavedQuerySavedObject>({
+    type: savedQuerySavedObjectType,
+    filter: `${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(trimmedSavedQueryId)}"`,
+    perPage: 2,
+    page: 1,
+  });
+
+  if (found.total > 1 || found.saved_objects.length > 1) {
+    return undefined;
+  }
+
+  if (found.saved_objects.length === 1) {
+    return toSavedQueryReference(found.saved_objects[0]);
+  }
+
+  try {
+    const { saved_object: savedQuerySO, outcome } = await soClient.resolve<SavedQuerySavedObject>(
+      savedQuerySavedObjectType,
+      trimmedSavedQueryId
+    );
+
+    // Exact id plus a legacy alias for a different object — do not pick one.
+    if (outcome === 'conflict') {
+      return undefined;
+    }
+
+    return toSavedQueryReference(savedQuerySO);
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+
+    throw error;
+  }
+};
 
 /**
  * Resolves a saved query or pack via the internal space-scoped SO client.
@@ -69,19 +131,12 @@ export const resolveQueryReference = async (
       const packSO = await soClient.get<PackSavedObject>(packSavedObjectType, trimmedPackId);
 
       return {
+        savedObjectId: packSO.id,
         queries: (packSO.attributes.queries ?? []).map(({ query }) => query),
       };
     }
 
-    const savedQuerySO = await soClient.get<SavedQuerySavedObject>(
-      savedQuerySavedObjectType,
-      trimmedSavedQueryId as string
-    );
-
-    return {
-      query: savedQuerySO.attributes.query,
-      ecs_mapping: toEcsMappingRecord(savedQuerySO.attributes.ecs_mapping),
-    };
+    return lookupSavedQuery(soClient, trimmedSavedQueryId as string);
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return undefined;

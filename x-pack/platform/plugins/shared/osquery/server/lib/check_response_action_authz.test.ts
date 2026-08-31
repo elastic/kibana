@@ -8,13 +8,22 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { isOsqueryResponseActionAuthorized } from './check_response_action_authz';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/types';
 
 const SAVED_QUERY_ID = 'test-saved-query-id';
+const SAVED_QUERY_SO_ID = 'so-uuid-1';
 const PACK_ID = 'test-pack-id';
 const STORED_QUERY = 'select 1 from uptime;';
 const STORED_PACK_QUERY = 'select * from processes;';
+const UBUNTU_ALERT = {
+  host: { os: { name: 'Ubuntu' } },
+} as unknown as ParsedTechnicalFields & { _index: string };
+
+const attributesIdFilter = (id: string) =>
+  `${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(id)}"`;
 
 describe('isOsqueryResponseActionAuthorized', () => {
   let request: KibanaRequest;
@@ -24,6 +33,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     savedObjects: Record<
       string,
       {
+        id?: string;
         query?: string;
         queries?: Array<{ query: string }>;
         ecs_mapping?: Array<{ key: string; value: Record<string, unknown> }>;
@@ -40,12 +50,35 @@ describe('isOsqueryResponseActionAuthorized', () => {
       return { id, type, attributes: found, references: [] };
     });
 
+    const find = jest.fn(async ({ filter }: { filter?: string }) => {
+      const matches = Object.entries(savedObjects).filter(([, attributes]) => {
+        const publicId = attributes.id;
+
+        return publicId !== undefined && filter === attributesIdFilter(publicId);
+      });
+
+      return {
+        saved_objects: matches.map(([id, attributes]) => ({
+          id,
+          type: savedQuerySavedObjectType,
+          attributes,
+          references: [],
+        })),
+        total: matches.length,
+      };
+    });
+
+    const resolve = jest.fn(async (type: string, id: string) => ({
+      saved_object: await get(type, id),
+      outcome: 'exactMatch' as const,
+    }));
+
     return {
       capabilities: {
         resolveCapabilities: jest.fn().mockResolvedValue({ osquery: capabilities }),
       },
       savedObjects: {
-        getScopedClient: jest.fn().mockReturnValue({ get }),
+        getScopedClient: jest.fn().mockReturnValue({ get, find, resolve }),
       },
     } as unknown as CoreStart;
   };
@@ -122,6 +155,41 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
+    it('should reject when more than one saved query has the same attributes.id', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        {
+          'so-a': { id: SAVED_QUERY_ID, query: STORED_QUERY },
+          'so-b': { id: SAVED_QUERY_ID, query: STORED_QUERY },
+        }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, { saved_query_id: SAVED_QUERY_ID })
+      ).resolves.toBe(false);
+    });
+
+    it('should authorize a saved_query_id that matches attributes.id rather than the SO id', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        { [SAVED_QUERY_SO_ID]: { id: SAVED_QUERY_ID, query: STORED_QUERY } }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, { saved_query_id: SAVED_QUERY_ID })
+      ).resolves.toBe(true);
+
+      const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: savedQuerySavedObjectType,
+          filter: attributesIdFilter(SAVED_QUERY_ID),
+          perPage: 2,
+        })
+      );
+      expect(soClient.get).not.toHaveBeenCalled();
+    });
+
     it('should authorize a resolvable pack_id', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
@@ -193,18 +261,17 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(false);
     });
 
-    it('should reject a queries array with a resolvable pack_id', async () => {
+    it('should reject a queries array without a pack_id', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
-          pack_id: PACK_ID,
           queries: [{ query: 'select 42 as custom;' }],
         })
       ).resolves.toBe(false);
     });
 
-    it('should reject a queries array even when it matches the stored pack queries', async () => {
+    it('should authorize a resolvable pack_id even when queries[] is also supplied', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
@@ -212,7 +279,18 @@ describe('isOsqueryResponseActionAuthorized', () => {
           pack_id: PACK_ID,
           queries: [{ query: STORED_PACK_QUERY }],
         })
-      ).resolves.toBe(false);
+      ).resolves.toBe(true);
+    });
+
+    it('should authorize a pack_id when the copied queries[] do not match the pack', async () => {
+      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          pack_id: PACK_ID,
+          queries: [{ query: 'select 42 as custom;' }],
+        })
+      ).resolves.toBe(true);
     });
 
     it('should reject a mismatched ecs_mapping on a resolvable saved query', async () => {
@@ -253,7 +331,27 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
-    it('should authorize a client-substituted query when the stored query is parameterised', async () => {
+    it('should authorize a client-substituted query when it matches server-side substitution', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(
+          coreStart,
+          request,
+          {
+            saved_query_id: SAVED_QUERY_ID,
+            query: "select * from os_version where name='Ubuntu';",
+          },
+          undefined,
+          UBUNTU_ALERT
+        )
+      ).resolves.toBe(true);
+    });
+
+    it('should reject a client-substituted query without alert context', async () => {
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },
         { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
@@ -264,20 +362,26 @@ describe('isOsqueryResponseActionAuthorized', () => {
           saved_query_id: SAVED_QUERY_ID,
           query: "select * from os_version where name='Ubuntu';",
         })
-      ).resolves.toBe(true);
+      ).resolves.toBe(false);
     });
 
-    it('should reject a parameter substitution that contains SQL', async () => {
+    it('should reject a parameter substitution that does not match server-side substitution', async () => {
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },
         { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
       );
 
       await expect(
-        isOsqueryResponseActionAuthorized(coreStart, request, {
-          saved_query_id: SAVED_QUERY_ID,
-          query: "select * from os_version where name='' UNION SELECT name FROM users --';",
-        })
+        isOsqueryResponseActionAuthorized(
+          coreStart,
+          request,
+          {
+            saved_query_id: SAVED_QUERY_ID,
+            query: "select * from os_version where name='' UNION SELECT name FROM users --';",
+          },
+          undefined,
+          UBUNTU_ALERT
+        )
       ).resolves.toBe(false);
     });
 
@@ -288,10 +392,16 @@ describe('isOsqueryResponseActionAuthorized', () => {
       );
 
       await expect(
-        isOsqueryResponseActionAuthorized(coreStart, request, {
-          saved_query_id: SAVED_QUERY_ID,
-          query: "select * from os_version where name='Ubuntu'; select 42 as custom;",
-        })
+        isOsqueryResponseActionAuthorized(
+          coreStart,
+          request,
+          {
+            saved_query_id: SAVED_QUERY_ID,
+            query: "select * from os_version where name='Ubuntu'; select 42 as custom;",
+          },
+          undefined,
+          UBUNTU_ALERT
+        )
       ).resolves.toBe(false);
     });
 
@@ -302,10 +412,16 @@ describe('isOsqueryResponseActionAuthorized', () => {
       );
 
       await expect(
-        isOsqueryResponseActionAuthorized(coreStart, request, {
-          saved_query_id: SAVED_QUERY_ID,
-          query: 'select 42 as custom;',
-        })
+        isOsqueryResponseActionAuthorized(
+          coreStart,
+          request,
+          {
+            saved_query_id: SAVED_QUERY_ID,
+            query: 'select 42 as custom;',
+          },
+          undefined,
+          UBUNTU_ALERT
+        )
       ).resolves.toBe(false);
     });
   });
@@ -339,7 +455,10 @@ describe('isOsqueryResponseActionAuthorized', () => {
       });
 
       const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
-      expect(soClient.get).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: savedQuerySavedObjectType })
+      );
+      expect(soClient.resolve).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
     });
 
     it('should look a pack reference up as the pack saved object type', async () => {
@@ -362,7 +481,8 @@ describe('isOsqueryResponseActionAuthorized', () => {
       });
 
       const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
-      expect(soClient.get).toHaveBeenCalledTimes(1);
+      expect(soClient.find).toHaveBeenCalledTimes(1);
+      expect(soClient.resolve).toHaveBeenCalledTimes(1);
     });
   });
 });

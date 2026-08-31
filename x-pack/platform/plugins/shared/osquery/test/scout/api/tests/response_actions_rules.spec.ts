@@ -403,6 +403,36 @@ apiTest.describe(
     );
 
     apiTest(
+      'accepts a pack response action with copied queries for a runSavedQueries-only author',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
+          headers: { ...testData.COMMON_HEADERS, ...runSavedOnlyCredentials.apiKeyHeader },
+          body: testData.getMinimalRule({
+            response_actions: [
+              {
+                action_type_id: '.osquery',
+                params: {
+                  pack_id: packSavedObjectId,
+                  queries: [
+                    {
+                      id: 'memoryInfo',
+                      query: 'SELECT * FROM memory_info;',
+                      interval: 3600,
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        createdRuleIds.push(response.body.id);
+      }
+    );
+
+    apiTest(
       'rejects a mismatched query on rule update for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const ruleBody = testData.getMinimalRule();

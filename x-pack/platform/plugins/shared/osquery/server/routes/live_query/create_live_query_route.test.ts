@@ -8,6 +8,7 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createLiveQueryRoute } from './create_live_query_route';
@@ -27,7 +28,11 @@ const mockedCreateActionHandler = createActionHandler as jest.MockedFunction<
 >;
 
 const SAVED_QUERY_ID = 'real-saved-query';
+const SAVED_QUERY_SO_ID = 'so-uuid-1';
 const STORED_QUERY = 'select 1;';
+
+const attributesIdFilter = (id: string) =>
+  `${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(id)}"`;
 
 describe('createLiveQueryRoute', () => {
   const createMockRouter = () => {
@@ -37,7 +42,11 @@ describe('createLiveQueryRoute', () => {
   };
 
   const createMockCoreStart = (
-    savedObjects: Record<string, { query?: string; queries?: Array<{ query: string }> }> = {}
+    savedObjects: Record<
+      string,
+      { id?: string; query?: string; queries?: Array<{ query: string }> }
+    > = {},
+    capabilities: { writeLiveQueries?: boolean; runSavedQueries?: boolean } = {}
   ): CoreStart => {
     const get = jest.fn(async (type: string, id: string) => {
       const found = savedObjects[id];
@@ -49,14 +58,40 @@ describe('createLiveQueryRoute', () => {
       return { id, type, attributes: found, references: [] };
     });
 
+    const find = jest.fn(async ({ filter }: { filter?: string }) => {
+      const matches = Object.entries(savedObjects).filter(([, attributes]) => {
+        const publicId = attributes.id;
+
+        return publicId !== undefined && filter === attributesIdFilter(publicId);
+      });
+
+      return {
+        saved_objects: matches.map(([id, attributes]) => ({
+          id,
+          type: savedQuerySavedObjectType,
+          attributes,
+          references: [],
+        })),
+        total: matches.length,
+      };
+    });
+
+    const resolve = jest.fn(async (type: string, id: string) => ({
+      saved_object: await get(type, id),
+      outcome: 'exactMatch' as const,
+    }));
+
     return {
       capabilities: {
         resolveCapabilities: jest.fn().mockResolvedValue({
-          osquery: { writeLiveQueries: false, runSavedQueries: true },
+          osquery: {
+            writeLiveQueries: capabilities.writeLiveQueries ?? false,
+            runSavedQueries: capabilities.runSavedQueries ?? true,
+          },
         }),
       },
       savedObjects: {
-        getScopedClient: jest.fn().mockReturnValue({ get }),
+        getScopedClient: jest.fn().mockReturnValue({ get, find, resolve }),
       },
     } as unknown as CoreStart;
   };
@@ -154,6 +189,28 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
+  it('authorizes a pack_id when queries[] is also supplied', async () => {
+    const packId = 'real-pack';
+    const coreStart = createMockCoreStart({
+      [packId]: { queries: [{ query: 'select * from processes;' }] },
+    });
+
+    await invokeRoute(
+      {
+        pack_id: packId,
+        queries: [{ id: 'x', query: 'select * from processes;' }],
+        agent_ids: ['agent-1'],
+      },
+      { coreStart }
+    );
+
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pack_id: packId }),
+      expect.objectContaining({ useStoredQuery: true })
+    );
+  });
+
   it('returns 403 rather than 500 for a pack_id that does not resolve', async () => {
     const coreStart = createMockCoreStart();
     const response = await invokeRoute(
@@ -214,10 +271,59 @@ describe('createLiveQueryRoute', () => {
     await invokeRoute({ saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] }, { coreStart });
 
     const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
-    expect(soClient.get).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ type: savedQuerySavedObjectType })
+    );
+    expect(soClient.resolve).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ saved_query_id: SAVED_QUERY_ID }),
+      expect.objectContaining({
+        useStoredQuery: true,
+        storedQuery: expect.objectContaining({ query: STORED_QUERY }),
+      })
+    );
+  });
+
+  it('resolves a saved_query_id that matches attributes.id rather than the SO id', async () => {
+    const coreStart = createMockCoreStart({
+      [SAVED_QUERY_SO_ID]: { id: SAVED_QUERY_ID, query: STORED_QUERY },
+    });
+
+    await invokeRoute({ saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] }, { coreStart });
+
+    const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+    expect(soClient.get).not.toHaveBeenCalled();
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ saved_query_id: SAVED_QUERY_ID }),
+      expect.objectContaining({ useStoredQuery: true })
+    );
+  });
+
+  it('authorizes a substituted query using alert data fetched before authz', async () => {
+    const coreStart = createMockCoreStart({
+      [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" },
+    });
+    const racGet = jest.fn().mockResolvedValue({
+      _index: '.alerts-security.alerts-default',
+      host: { os: { name: 'Ubuntu' } },
+    });
+
+    await invokeRoute(
+      {
+        saved_query_id: SAVED_QUERY_ID,
+        query: "select * from os_version where name='Ubuntu';",
+        alert_ids: ['alert-1'],
+        agent_ids: ['agent-1'],
+      },
+      { coreStart, racGet }
+    );
+
+    expect(racGet).toHaveBeenCalledWith({ id: 'alert-1' });
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
       expect.objectContaining({ useStoredQuery: true })
     );
   });
@@ -244,6 +350,41 @@ describe('createLiveQueryRoute', () => {
       expect.anything(),
       expect.objectContaining({ query: STORED_QUERY, saved_query_id: SAVED_QUERY_ID }),
       expect.objectContaining({ useStoredQuery: true })
+    );
+  });
+
+  it('returns 403 for an investigation-guide query when the caller lacks runSavedQueries', async () => {
+    const coreStart = createMockCoreStart({}, { writeLiveQueries: false, runSavedQueries: false });
+    const racGet = jest.fn().mockResolvedValue({
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.rule.note': '!{osquery{"query":"select 1;","ecs_mapping":{}}}',
+    });
+
+    const response = await invokeRoute(
+      { query: 'select 1;', alert_ids: ['alert-with-guide'], agent_ids: ['agent-1'] },
+      { coreStart, racGet }
+    );
+
+    expect(response.forbidden).toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
+
+  it('allows an investigation-guide query when the caller has runSavedQueries', async () => {
+    const coreStart = createMockCoreStart({}, { writeLiveQueries: false, runSavedQueries: true });
+    const racGet = jest.fn().mockResolvedValue({
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.rule.note': '!{osquery{"query":"select 1;","ecs_mapping":{}}}',
+    });
+
+    await invokeRoute(
+      { query: 'select 1;', alert_ids: ['alert-with-guide'], agent_ids: ['agent-1'] },
+      { coreStart, racGet }
+    );
+
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ useStoredQuery: false })
     );
   });
 });

@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { escapeRegExp } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CheckResponseActionAuthzParams } from '../types';
 import { CustomHttpRequestError } from '../common/error';
-import { containsDynamicQuery } from '../../common/utils/replace_params_query';
+import { containsDynamicQuery, replaceParamsQuery } from '../../common/utils/replace_params_query';
 import type { ResolvedQueryReference } from './resolve_query_reference';
 import { resolveQueryReference, toEcsMappingRecord } from './resolve_query_reference';
-
-/** Captures `{{param}}` so `split` yields alternating literal / placeholder segments. */
-const DYNAMIC_PARAMETER_REGEX = /\{{([^}]+)\}}/g;
 
 interface OsqueryCapabilities {
   writeLiveQueries: boolean;
@@ -44,14 +41,18 @@ const resolveCachedQueryReference = (
     referenceCache.set(request, perRequest);
   }
 
-  const cached = perRequest.get(cacheKey);
+  const cache = perRequest;
+  const cached = cache.get(cacheKey);
 
   if (cached) {
     return cached;
   }
 
-  const pending = resolveQueryReference(coreStart, spaceId, reference);
-  perRequest.set(cacheKey, pending);
+  const pending = resolveQueryReference(coreStart, spaceId, reference).catch((error) => {
+    cache.delete(cacheKey);
+    throw error;
+  });
+  cache.set(cacheKey, pending);
 
   return pending;
 };
@@ -79,21 +80,27 @@ export const getOsqueryCapabilities = (
   return promise;
 };
 
+export interface AuthorizeOsqueryResponseActionResult {
+  authorized: boolean;
+  resolved?: ResolvedQueryReference;
+}
+
 /** `writeLiveQueries` may supply SQL. `runSavedQueries` may only run a resolved saved query or pack. */
-export const isOsqueryResponseActionAuthorized = async (
+export const authorizeOsqueryResponseAction = async (
   coreStart: CoreStart,
   request: KibanaRequest,
   actionParams: CheckResponseActionAuthzParams,
-  spaceId?: string
-): Promise<boolean> => {
+  spaceId?: string,
+  alertData?: ParsedTechnicalFields & { _index: string }
+): Promise<AuthorizeOsqueryResponseActionResult> => {
   const { writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(coreStart, request);
 
   if (writeLiveQueries) {
-    return true;
+    return { authorized: true };
   }
 
   if (!runSavedQueries) {
-    return false;
+    return { authorized: false };
   }
 
   const resolved = await resolveCachedQueryReference(request, coreStart, spaceId, {
@@ -102,24 +109,42 @@ export const isOsqueryResponseActionAuthorized = async (
   });
 
   if (!resolved) {
-    return false;
+    return { authorized: false };
   }
 
-  return callerSuppliedQueryMatches(actionParams, resolved);
+  return {
+    authorized: callerSuppliedQueryMatches(actionParams, resolved, alertData),
+    resolved,
+  };
 };
+
+export const isOsqueryResponseActionAuthorized = async (
+  coreStart: CoreStart,
+  request: KibanaRequest,
+  actionParams: CheckResponseActionAuthzParams,
+  spaceId?: string,
+  alertData?: ParsedTechnicalFields & { _index: string }
+): Promise<boolean> =>
+  (await authorizeOsqueryResponseAction(coreStart, request, actionParams, spaceId, alertData))
+    .authorized;
 
 const callerSuppliedQueryMatches = (
   actionParams: CheckResponseActionAuthzParams,
-  resolved: ResolvedQueryReference
+  resolved: ResolvedQueryReference,
+  alertData?: ParsedTechnicalFields & { _index: string }
 ): boolean => {
-  if (actionParams.queries?.length) {
+  // Pack response actions persist a copy of the pack's queries. Ad-hoc queries[]
+  // (no pack_id) is writeLiveQueries. saved_query_id + queries[] is not a pack.
+  if (actionParams.queries?.length && !actionParams.pack_id?.trim()) {
     return false;
   }
 
   if (actionParams.query !== undefined) {
     const storedQueries = resolved.queries ?? (resolved.query ? [resolved.query] : []);
 
-    if (!storedQueries.some((stored) => queriesMatch(actionParams.query as string, stored))) {
+    if (
+      !storedQueries.some((stored) => queriesMatch(actionParams.query as string, stored, alertData))
+    ) {
       return false;
     }
   }
@@ -136,36 +161,20 @@ const callerSuppliedQueryMatches = (
   return true;
 };
 
-const SQL_IN_SUBSTITUTION = /;|--|\/\*|\bunion\b/i;
-
-/** UI still posts client-substituted `{{param}}` SQL; substitutions must not contain SQL. */
-const queriesMatch = (supplied: string, stored: string): boolean => {
+const queriesMatch = (
+  supplied: string,
+  stored: string,
+  alertData?: ParsedTechnicalFields & { _index: string }
+): boolean => {
   if (supplied === stored) {
     return true;
   }
 
-  if (!containsDynamicQuery(stored)) {
+  if (!alertData || !containsDynamicQuery(stored)) {
     return false;
   }
 
-  const segments = stored.split(DYNAMIC_PARAMETER_REGEX);
-  // A placeholder-only stored query would compile to ^[\s\S]*$ and match any SQL.
-  const literals = segments.filter((_, index) => index % 2 === 0);
-  if (literals.every((literal) => literal.trim() === '')) {
-    return false;
-  }
-
-  const pattern = segments
-    .map((segment, index) => (index % 2 === 1 ? '([\\s\\S]*)' : escapeRegExp(segment)))
-    .join('');
-
-  const match = new RegExp(`^${pattern}$`).exec(supplied);
-
-  if (!match) {
-    return false;
-  }
-
-  return match.slice(1).every((captured) => !SQL_IN_SUBSTITUTION.test(captured));
+  return replaceParamsQuery(stored, alertData).result === supplied;
 };
 
 /** Throws 403 if the request is not authorized for the given osquery response action. */

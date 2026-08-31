@@ -191,17 +191,18 @@ describe('createActionHandler', () => {
     expect(reportEvent).not.toHaveBeenCalled();
   });
 
-  it('forwards useStoredQuery to createDynamicQueries', async () => {
+  it('forwards useStoredQuery and storedQuery to createDynamicQueries', async () => {
     const { context } = buildOsqueryContext();
+    const storedQuery = { savedObjectId: 'sq-so', query: 'select 1;' };
 
     await createActionHandler(
       context,
       { saved_query_id: 'sq-1', query: 'select 42 as custom;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' }, useStoredQuery: true }
+      { space: { id: 'production' }, useStoredQuery: true, storedQuery }
     );
 
     expect(mockedCreateDynamicQueries).toHaveBeenCalledWith(
-      expect.objectContaining({ useStoredQuery: true })
+      expect.objectContaining({ useStoredQuery: true, storedQuery })
     );
   });
 

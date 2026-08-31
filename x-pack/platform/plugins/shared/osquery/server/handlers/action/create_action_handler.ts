@@ -21,6 +21,7 @@ import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import type { ResolvedQueryReference } from '../../lib/resolve_query_reference';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -46,6 +47,8 @@ interface CreateActionHandlerOptions {
   error?: string;
   /** When true, dispatch stored SO content even if the caller supplied a query. */
   useStoredQuery?: boolean;
+  /** Authz-resolved saved query; when set, dispatch skips a second lookup. */
+  storedQuery?: ResolvedQueryReference;
 }
 
 export const createActionHandler = async (
@@ -61,7 +64,7 @@ export const createActionHandler = async (
     options.space?.id ?? DEFAULT_SPACE_ID
   );
 
-  const { metadata, alertData, error, useStoredQuery } = options;
+  const { metadata, alertData, error, useStoredQuery, storedQuery } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -92,7 +95,7 @@ export const createActionHandler = async (
   if (packId) {
     packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
       packSavedObjectType,
-      packId
+      storedQuery?.savedObjectId ?? packId
     );
   }
 
@@ -146,6 +149,7 @@ export const createActionHandler = async (
           spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
           useStoredQuery,
+          storedQuery,
         }),
   };
 
