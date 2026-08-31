@@ -91,6 +91,13 @@ Returns an object ready to drop into an apm-metrics attachment:
 Provide baselineStart/baselineEnd to get the comparison; omit them for current-only.`,
     schema: getApmMetricsSchema,
     tags: ['observability', 'apm', 'metrics', 'latency'],
+    annotations: {
+      title: 'Get APM Metrics',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {

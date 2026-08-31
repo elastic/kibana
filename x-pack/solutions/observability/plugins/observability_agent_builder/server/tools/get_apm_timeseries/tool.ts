@@ -78,6 +78,13 @@ Returns an object ready to drop into an apm-timeseries attachment:
 The alert threshold and alert-start time are NOT returned here; the caller adds them to the attachment from the alert context.`,
     schema: getApmTimeseriesSchema,
     tags: ['observability', 'apm', 'timeseries', 'latency', 'metrics'],
+    annotations: {
+      title: 'Get APM Timeseries',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
