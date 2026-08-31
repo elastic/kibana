@@ -7,13 +7,18 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 
+/** Cold Security `gotoApp` after a custom-role login can exceed Playwright's 10s default. */
+const POLICY_DETAILS_READY_TIMEOUT_MS = 30_000;
+
 export class PolicyDetailsPage {
   readonly pageContainer: Locator;
+  readonly loading: Locator;
   readonly settingsTab: Locator;
   readonly backToOrigin: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.pageContainer = this.page.testSubj.locator('policyDetailsPage');
+    this.loading = this.page.testSubj.locator('policyDetailsLoading');
     this.settingsTab = this.page.testSubj.locator('policySettingsTab');
     this.backToOrigin = this.page.testSubj.locator('backToOrigin');
   }
@@ -43,16 +48,27 @@ export class PolicyDetailsPage {
   }
 
   async waitForPolicyDetailsVisible() {
-    await this.pageContainer.waitFor({ state: 'visible' });
+    await this.pageContainer.waitFor({
+      state: 'visible',
+      timeout: POLICY_DETAILS_READY_TIMEOUT_MS,
+    });
   }
 
   private async waitForPolicyDetailsReady() {
-    await this.pageContainer.waitFor({ state: 'visible' });
-    await this.settingsTab.waitFor({ state: 'visible' });
+    await this.waitForPolicyDetailsVisible();
+    // Detached counts as hidden, so this is a no-op when the fetch is already done.
+    await this.loading.waitFor({
+      state: 'hidden',
+      timeout: POLICY_DETAILS_READY_TIMEOUT_MS,
+    });
+    await this.settingsTab.waitFor({
+      state: 'visible',
+      timeout: POLICY_DETAILS_READY_TIMEOUT_MS,
+    });
   }
 
   async clickBackToOrigin() {
     await this.backToOrigin.click();
-    await this.pageContainer.waitFor({ state: 'visible' });
+    await this.waitForPolicyDetailsVisible();
   }
 }
