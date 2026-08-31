@@ -60,7 +60,7 @@ describe('rebalance shards enabled setting', () => {
       expect.any(Function)
     );
     const mapper = taskManager.bulkUpdateState.mock.calls[0][1];
-    expect(mapper({ keep: 1 })).toEqual({
+    expect(mapper({ keep: 1 }, REBALANCE_SHARDS_TASK_ID)).toEqual({
       keep: 1,
       [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
     });
