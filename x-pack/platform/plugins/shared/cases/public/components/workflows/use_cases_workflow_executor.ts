@@ -10,12 +10,18 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import { useAppUrl, useHttp, useKibana, useToasts } from '../../common/lib/kibana';
+import {
+  useWorkflowRunTriggeredEBT,
+  getWorkflowRunOriginType,
+} from '../../analytics/use_workflow_run_ebt';
 import { runCaseWorkflow } from './api';
 import { buildViewExecutionText } from './use_run_workflow_on_cases';
 import * as i18n from './translations';
 
 type Http = ReturnType<typeof useHttp>;
 type Toasts = ReturnType<typeof useToasts>;
+
+type ReportWorkflowRunTriggered = ReturnType<typeof useWorkflowRunTriggeredEBT>;
 
 /**
  * Single source of truth for the Cases-routed execution call. Deliberately not a
@@ -28,17 +34,25 @@ const createCasesWorkflowExecutor =
     toasts,
     caseId,
     origin,
+    reportWorkflowRunTriggered,
   }: {
     http: Http;
     toasts: Toasts;
     caseId: string;
     origin: CaseWorkflowRunOrigin;
+    reportWorkflowRunTriggered: ReportWorkflowRunTriggered;
   }): RunWorkflowExecutor =>
   async ({ workflowId, inputs }) => {
     const response = await runCaseWorkflow({
       http,
       workflowId,
       body: { caseIds: [caseId], inputs, origin },
+    });
+
+    // Report after the API resolves so only confirmed starts are counted.
+    reportWorkflowRunTriggered({
+      originType: getWorkflowRunOriginType(origin),
+      caseCount: 1,
     });
 
     if (response.activityStatus === 'failed') {
@@ -59,7 +73,12 @@ export interface UseCasesWorkflowExecutorParams {
  * recording are all handled server-side.
  *
  * The executor owns the success or activity-write warning toast so the caller
- * can suppress the panel's built-in success toast.
+ * can suppress the panel's built-in success toast. When the activity record
+ * fails to write, a warning toast is shown without blocking the caller.
+ *
+ * Fires a `cases_workflow_run_triggered` EBT event after the run is confirmed
+ * to have started (i.e. after the API call resolves) so a failed request is
+ * not counted as a trigger.
  */
 export const useCasesWorkflowExecutor = ({
   caseId,
@@ -69,6 +88,7 @@ export const useCasesWorkflowExecutor = ({
   const toasts = useToasts();
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const { rendering } = useKibana().services;
+  const reportWorkflowRunTriggered = useWorkflowRunTriggeredEBT();
 
   return useCallback(
     async ({ workflowId, inputs }) => {
@@ -80,6 +100,12 @@ export const useCasesWorkflowExecutor = ({
           inputs,
           origin,
         },
+      });
+
+      // Report after the API resolves so only confirmed starts are counted.
+      reportWorkflowRunTriggered({
+        originType: getWorkflowRunOriginType(origin),
+        caseCount: 1,
       });
 
       const executionHref = response.workflowExecutionId
@@ -97,7 +123,7 @@ export const useCasesWorkflowExecutor = ({
 
       return { workflowExecutionId: response.workflowExecutionId };
     },
-    [caseId, getAppUrl, http, origin, rendering, toasts]
+    [caseId, getAppUrl, http, origin, rendering, reportWorkflowRunTriggered, toasts]
   );
 };
 
@@ -120,12 +146,13 @@ export const useOptionalCasesWorkflowExecutor = ({
 }: UseOptionalCasesWorkflowExecutorParams): RunWorkflowExecutor | undefined => {
   const http = useHttp();
   const toasts = useToasts();
+  const reportWorkflowRunTriggered = useWorkflowRunTriggeredEBT();
 
   return useMemo(
     () =>
       caseId === undefined || origin === undefined
         ? undefined
-        : createCasesWorkflowExecutor({ http, toasts, caseId, origin }),
-    [caseId, http, origin, toasts]
+        : createCasesWorkflowExecutor({ http, toasts, caseId, origin, reportWorkflowRunTriggered }),
+    [caseId, http, origin, reportWorkflowRunTriggered, toasts]
   );
 };
