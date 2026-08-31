@@ -371,7 +371,10 @@ describe('createSmlIndexer', () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
       const realBulkGet = jest.fn().mockResolvedValue({ saved_objects: [] });
-      const mockRepo = { get: jest.fn(), bulkGet: realBulkGet } as unknown as ISavedObjectsRepository;
+      const mockRepo = {
+        get: jest.fn(),
+        bulkGet: realBulkGet,
+      } as unknown as ISavedObjectsRepository;
 
       await indexer.indexAttachment(
         createIndexerParams({
@@ -398,9 +401,7 @@ describe('createSmlIndexer', () => {
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
-      const getSmlEntry = jest
-        .fn()
-        .mockResolvedValue({ type: 'lens', title: 'T', content: 'c' });
+      const getSmlEntry = jest.fn().mockResolvedValue({ type: 'lens', title: 'T', content: 'c' });
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const contextLogger = createMockLogger();
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
@@ -417,7 +418,9 @@ describe('createSmlIndexer', () => {
       );
 
       expect(contextLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("'clientHasSpacesExtension' is true but space 'my-space' is non-default")
+        expect.stringContaining(
+          "'clientHasSpacesExtension' is true but space 'my-space' is non-default"
+        )
       );
     });
 
