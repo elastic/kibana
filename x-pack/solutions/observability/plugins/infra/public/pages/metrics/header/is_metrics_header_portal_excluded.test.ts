@@ -16,6 +16,14 @@ describe('isMetricsHeaderPortalExcluded', () => {
     expect(isMetricsHeaderPortalExcluded('/detail/host/web-01')).toBe(false);
   });
 
+  it('excludes Inventory redirect aliases so the portal does not flash', () => {
+    expect(isMetricsHeaderPortalExcluded('/')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/snapshot')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/snapshot/x')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/snapshot-other')).toBe(false);
+    expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
+  });
+
   it('matches a parent path and its nested segments', () => {
     expect(isMetricsHeaderPortalExcluded('/inventory', [METRICS_INVENTORY_PATH])).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/inventory/extra', [METRICS_INVENTORY_PATH])).toBe(true);
