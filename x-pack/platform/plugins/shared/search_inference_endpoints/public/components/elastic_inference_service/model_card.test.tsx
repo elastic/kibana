@@ -35,14 +35,14 @@ describe('ModelCard', () => {
     expect(container.querySelector('[data-euiicon-type]')).not.toBeNull();
   });
 
-  it('renders avatar with fallback icon for an unknown creator', () => {
+  it('renders fallback icon for an unknown creator', () => {
     const unknownModel: GroupedModel = {
       ...baseModel,
       modelCreator: 'UnknownCorp',
     };
     const { container } = render(<ModelCard model={unknownModel} onClick={jest.fn()} />);
 
-    expect(container.querySelectorAll('.euiAvatar')).toHaveLength(1);
+    expect(container.querySelector('[data-euiicon-type="machineLearningApp"]')).not.toBeNull();
   });
 
   it('renders unknown task types as-is', () => {
