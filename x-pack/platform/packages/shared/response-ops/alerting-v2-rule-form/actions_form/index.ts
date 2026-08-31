@@ -10,7 +10,11 @@ export {
   buildInlineWorkflowYaml,
   InvalidInlineWorkflowError,
 } from './helpers/build_inline_workflow_yaml';
-export { buildRuleScopedMatcher } from './helpers/rule_scoped_action_policies';
+export {
+  buildRuleScopedMatcher,
+  buildRuleNotificationTag,
+  resolveRuleNotificationTag,
+} from './helpers/rule_scoped_action_policies';
 export {
   DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,

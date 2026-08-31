@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiCallOut,
   EuiIcon,
   EuiLoadingSpinner,
   EuiSelectable,
@@ -18,6 +17,7 @@ import {
 import type { MatchedActionPolicyCategory } from '@kbn/alerting-v2-schemas';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { useWatch } from 'react-hook-form';
 import type { FormValues } from '../../../form/types';
@@ -50,27 +50,18 @@ const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit
 const SECTION_CONFIG: Array<{
   category: MatchedActionPolicyCategory;
   title: string;
-  description: string;
 }> = [
   {
     category: 'global',
     title: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalTitle', {
-      defaultMessage: 'Global policies',
+      defaultMessage: 'Global policies matching all rules',
     }),
-    description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalDescription',
-      { defaultMessage: 'Matching all rules' }
-    ),
   },
   {
     category: 'global-filtered',
     title: i18n.translate(
       'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalFilteredTitle',
-      { defaultMessage: 'Matching global policies' }
-    ),
-    description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalFilteredGroupLabel',
-      { defaultMessage: 'Matching this rule' }
+      { defaultMessage: 'Policies matching this rule' }
     ),
   },
 ];
@@ -101,15 +92,12 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
       {isLoading && <EuiLoadingSpinner size="m" data-test-subj="linkedActionPoliciesLoading" />}
 
       {error && (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={errorTitle}
-          color="danger"
-          iconType="error"
           data-test-subj="linkedActionPoliciesError"
-        >
-          <p>{error.message}</p>
-        </EuiCallOut>
+          text={error.message}
+        />
       )}
 
       {!isLoading && !error && (
@@ -119,7 +107,7 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
               <p>{emptyStateLabel}</p>
             </EuiText>
           )}
-          {SECTION_CONFIG.map(({ category, title, description }) => {
+          {SECTION_CONFIG.map(({ category, title }) => {
             const sectionItems = items.filter((item) => item.category === category);
             if (sectionItems.length === 0) return null;
 
@@ -128,11 +116,6 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
                 key: `${category}-header`,
                 label: title,
                 isGroupLabel: true,
-                append: (
-                  <EuiText size="xs" color="subdued">
-                    {description}
-                  </EuiText>
-                ),
               },
               ...sectionItems.map(({ actionPolicy }) => ({
                 key: actionPolicy.id,
