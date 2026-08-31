@@ -14,7 +14,6 @@ import type {
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settings';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
 import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
@@ -25,9 +24,13 @@ import {
 } from '../synthetics_service/private_location/plan_rebalance';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
+import {
+  isRebalancePrivateLocationShardsEnabled,
+  REBALANCE_SHARDS_TASK_ID,
+  REBALANCE_SHARDS_TASK_TYPE,
+} from './rebalance_shards_enabled';
 
-const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
-export const REBALANCE_SHARDS_TASK_ID = `${TASK_TYPE}-single-instance`;
+export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 
 interface RebalanceTaskState extends Record<string, unknown> {
@@ -55,7 +58,7 @@ export class RebalancePrivateLocationShardsTask {
 
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
-      [TASK_TYPE]: {
+      [REBALANCE_SHARDS_TASK_TYPE]: {
         title: 'Synthetics Rebalance Private Location Shards Task',
         description:
           'Reassigns monitors across the healthy agents of scalable private locations (by rewriting per-monitor agent conditions) for at-most-once execution and failover.',
@@ -86,15 +89,12 @@ export class RebalancePrivateLocationShardsTask {
 
     try {
       signal.throwIfAborted();
-      const soClient = coreStart.savedObjects.createInternalRepository();
-
-      // Live layer on top of the boot-time config kill-switch: lets an already
-      // scheduled task be paused/resumed without a Kibana restart.
-      const dynamicSettings = await getSyntheticsDynamicSettings(soClient);
-      if (dynamicSettings.rebalancePrivateLocationShardsEnabled === false) {
-        this.debugLog('Rebalance private location shards disabled by dynamic setting; skipping.');
+      if (!isRebalancePrivateLocationShardsEnabled(taskInstance)) {
+        this.debugLog('Rebalance private location shards disabled; skipping.');
         return { state: taskInstance.state, schedule };
       }
+
+      const soClient = coreStart.savedObjects.createInternalRepository();
 
       const scalableLocations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
         isConditionShardedLocation
@@ -201,18 +201,8 @@ export class RebalancePrivateLocationShardsTask {
 
   async start() {
     const {
-      config,
       pluginsStart: { taskManager },
     } = this.serverSetup;
-
-    if (!config.rebalancePrivateLocationShardsTaskEnabled) {
-      // Actively unschedule a previously-scheduled instance (not just skip
-      // scheduling), so flipping the kill-switch off stops the task firing
-      // instead of leaving a zombie that keeps running every cycle.
-      this.debugLog('Rebalance private location shards task disabled by config; unscheduling');
-      await taskManager.removeIfExists(REBALANCE_SHARDS_TASK_ID);
-      return;
-    }
 
     // Read the existing task schedule so ensureScheduled doesn't reset a
     // user-configured interval on every Kibana restart. Falls back to
@@ -231,7 +221,7 @@ export class RebalancePrivateLocationShardsTask {
       id: REBALANCE_SHARDS_TASK_ID,
       state: {},
       schedule,
-      taskType: TASK_TYPE,
+      taskType: REBALANCE_SHARDS_TASK_TYPE,
       params: {},
     });
     this.debugLog('Rebalance private location shards task scheduled');

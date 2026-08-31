@@ -20,8 +20,6 @@ import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
-import * as syntheticsSettingsModule from '../../saved_objects/synthetics_settings';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { agentIdCondition, assignAgentById } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
@@ -771,10 +769,6 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('does not add a condition when shard rebalance is disabled in settings', async () => {
-      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
-        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
-        rebalancePrivateLocationShardsEnabled: false,
-      });
       const policyId = `testId-${conditionLocation.id}`;
       const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -786,6 +780,9 @@ describe('SyntheticsPrivateLocation', () => {
             ...serverMock.fleet.packagePolicyService,
             buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
           },
+        },
+        pluginsStart: {
+          taskManager: { get: jest.fn().mockResolvedValue({ enabled: false }) },
         },
       } as unknown as SyntheticsServerSetup);
       const config = { ...testConfig, locations: [conditionLocation] };
@@ -816,10 +813,6 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('keeps an existing pin on edit when shard rebalance is disabled in settings', async () => {
-      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
-        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
-        rebalancePrivateLocationShardsEnabled: false,
-      });
       const policyId = `testId-${conditionLocation.id}`;
       const existingCondition = agentIdCondition('agent-a');
       const listAgents = jest.fn().mockResolvedValue({
@@ -835,6 +828,9 @@ describe('SyntheticsPrivateLocation', () => {
             ...serverMock.fleet.packagePolicyService,
             buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
           },
+        },
+        pluginsStart: {
+          taskManager: { get: jest.fn().mockResolvedValue({ enabled: false }) },
         },
       } as unknown as SyntheticsServerSetup);
       const config = { ...testConfig, locations: [conditionLocation] };
@@ -864,10 +860,6 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('does not add a condition on create when shard rebalance is disabled in settings', async () => {
-      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
-        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
-        rebalancePrivateLocationShardsEnabled: false,
-      });
       const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
@@ -878,6 +870,9 @@ describe('SyntheticsPrivateLocation', () => {
             ...serverMock.fleet.packagePolicyService,
             buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
           },
+        },
+        pluginsStart: {
+          taskManager: { get: jest.fn().mockResolvedValue({ enabled: false }) },
         },
       } as unknown as SyntheticsServerSetup);
       const bulkCreate = jest
@@ -1060,10 +1055,6 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('omits condition when inspecting while shard rebalance is disabled', async () => {
-      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
-        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
-        rebalancePrivateLocationShardsEnabled: false,
-      });
       const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
@@ -1074,6 +1065,9 @@ describe('SyntheticsPrivateLocation', () => {
             ...serverMock.fleet.packagePolicyService,
             buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
           },
+        },
+        pluginsStart: {
+          taskManager: { get: jest.fn().mockResolvedValue({ enabled: false }) },
         },
       } as unknown as SyntheticsServerSetup);
       const inspect = jest

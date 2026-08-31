@@ -13,7 +13,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
-import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
+import { getRebalancePrivateLocationShardsEnabled } from '../../tasks/rebalance_shards_enabled';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -333,15 +333,12 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Live settings kill-switch shared with the rebalance task. When this is off,
-   * monitor create/edit/inspect must not stamp a new agent `condition`.
-   * Defaults to on so a settings-read failure does not change CRUD behavior.
+   * Cluster-wide kill-switch stored on the rebalance Task Manager task.
+   * Defaults to on so a task-read failure does not change CRUD behavior.
    */
   private async isShardRebalanceEnabled(): Promise<boolean> {
     try {
-      const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-      const settings = await getSyntheticsDynamicSettings(soClient);
-      return settings.rebalancePrivateLocationShardsEnabled !== false;
+      return await getRebalancePrivateLocationShardsEnabled(this.server.pluginsStart.taskManager);
     } catch (e) {
       this.server.logger.error(e);
       return true;

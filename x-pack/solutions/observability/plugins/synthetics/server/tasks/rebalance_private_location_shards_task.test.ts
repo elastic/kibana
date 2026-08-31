@@ -22,7 +22,6 @@ import * as getPrivateLocationsModule from '../synthetics_service/get_private_lo
 import * as getAgentInfoModule from '../synthetics_service/private_location/get_agent_info';
 import type { AgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import * as getActiveAgentIdsModule from '../synthetics_service/private_location/get_active_agent_ids';
-import * as syntheticsSettingsModule from '../saved_objects/synthetics_settings';
 import {
   RECOVERY_STABILITY_MS,
   STALE_CHECKIN_MS,
@@ -47,17 +46,9 @@ const coreStart = coreMock.createStart() as CoreStart;
 const mockServerSetup = {
   coreStart,
   logger: mockLogger,
-  config: { rebalancePrivateLocationShardsTaskEnabled: true },
+  config: { enabled: true },
   pluginsStart: { taskManager: mockTaskManagerStart },
 } as unknown as SyntheticsServerSetup;
-
-// Config fields are readonly (config-schema TypeOf), so toggle the kill-switch
-// by replacing the whole config object rather than mutating the property.
-const setTaskEnabled = (enabled: boolean) => {
-  mockServerSetup.config = {
-    rebalancePrivateLocationShardsTaskEnabled: enabled,
-  } as SyntheticsServerSetup['config'];
-};
 
 const location = (over: Partial<Record<string, unknown>> = {}) =>
   ({
@@ -75,31 +66,28 @@ const agentInfo = (lastCheckin: number, memoryMib: number | null = null): AgentI
   memoryMib,
 });
 
-const taskInstance = (state: Record<string, unknown> = {}): ConcreteTaskInstance =>
-  ({ id: REBALANCE_SHARDS_TASK_ID, state, params: {} } as unknown as ConcreteTaskInstance);
-
-const dynamicSettings = (over: Partial<Record<string, unknown>> = {}) =>
-  ({ rebalancePrivateLocationShardsEnabled: true, ...over } as unknown as Awaited<
-    ReturnType<typeof syntheticsSettingsModule.getSyntheticsDynamicSettings>
-  >);
+const taskInstance = (
+  state: Record<string, unknown> = {},
+  over: Partial<ConcreteTaskInstance> = {}
+): ConcreteTaskInstance =>
+  ({ id: REBALANCE_SHARDS_TASK_ID, state, params: {}, ...over } as unknown as ConcreteTaskInstance);
 
 const makeTask = () =>
   new RebalancePrivateLocationShardsTask(mockServerSetup, mockSyntheticsMonitorClient);
 
 const openSignal = () => new AbortController().signal;
 
-const run = (state: Record<string, unknown> = {}, signal: AbortSignal = openSignal()) =>
-  makeTask().runTask({ taskInstance: taskInstance(state), signal });
+const run = (
+  state: Record<string, unknown> = {},
+  signal: AbortSignal = openSignal(),
+  taskOver: Partial<ConcreteTaskInstance> = {}
+) => makeTask().runTask({ taskInstance: taskInstance(state, taskOver), signal });
 
 describe('RebalancePrivateLocationShardsTask', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
-    setTaskEnabled(true);
     mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
-    jest
-      .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-      .mockResolvedValue(dynamicSettings());
   });
 
   afterEach(() => jest.useRealTimers());
@@ -128,34 +116,20 @@ describe('RebalancePrivateLocationShardsTask', () => {
         expect.objectContaining({ schedule: { interval: '5m' } })
       );
     });
-
-    it('unschedules the task (removeIfExists) when disabled by config', async () => {
-      setTaskEnabled(false);
-
-      await makeTask().start();
-
-      expect(mockTaskManagerStart.removeIfExists).toHaveBeenCalledWith(REBALANCE_SHARDS_TASK_ID);
-      expect(mockTaskManagerStart.ensureScheduled).not.toHaveBeenCalled();
-    });
   });
 
   describe('runTask', () => {
-    it('skips work and returns early when the dynamic rebalance setting is off', async () => {
-      jest
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(dynamicSettings({ rebalancePrivateLocationShardsEnabled: false }));
+    it('skips work and returns early when the rebalance task is disabled', async () => {
       const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
       const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
 
-      const result = await run({ keep: 1 });
+      const result = await run({ keep: 1 }, openSignal(), { enabled: false });
 
       expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
       expect(result.state).toEqual({ keep: 1 });
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('disabled by dynamic setting')
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('disabled; skipping'));
     });
 
     it('early-exits and does not read agents when there are no scalable locations', async () => {
