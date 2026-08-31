@@ -198,4 +198,29 @@ describe('<RolesGridPage />', () => {
     });
     expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
   });
+
+  it('shows the create action after a non-403 load error', async () => {
+    apiClientMock.queryRoles.mockRejectedValue({
+      body: { statusCode: 500, message: 'boom' },
+    });
+
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
+  });
 });

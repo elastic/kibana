@@ -138,6 +138,7 @@ export const RolesGridPage: FC<Props> = ({
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasCompletedLoad, setHasCompletedLoad] = useState<boolean>(false);
 
   const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
@@ -167,6 +168,7 @@ export const RolesGridPage: FC<Props> = ({
       }
     } finally {
       setIsLoading(false);
+      setHasCompletedLoad(true);
     }
   };
 
@@ -436,8 +438,7 @@ export const RolesGridPage: FC<Props> = ({
       'data-test-subj': 'showReservedRolesSwitch',
     };
   }
-  const hasLoadedList = rolesResponse.roles != null;
-  if (!readOnly && hasLoadedList) {
+  if (!readOnly && hasCompletedLoad) {
     menu.primaryActionItem = {
       id: 'createRole',
       label: createRoleButtonLabel,
