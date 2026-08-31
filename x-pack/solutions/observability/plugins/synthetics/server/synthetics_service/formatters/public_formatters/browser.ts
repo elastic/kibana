@@ -41,6 +41,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayFormatter,
   [ConfigKey.TEXT_ASSERTION]: null,
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,

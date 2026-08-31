@@ -19,7 +19,6 @@ import type {
   AiIndexFeedbackAnalysis,
   AiIndexProperties,
   CreateAiIndexResponse,
-  GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
@@ -53,20 +52,6 @@ export const getAiIndex = (
 ): Promise<GetAiIndexResponse> =>
   http.get<GetAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
-    ...(signal ? { signal } : {}),
-  });
-
-interface GetAiIndexKiSummaryArgs {
-  aiIndexId: string;
-  signal?: AbortSignal;
-}
-
-export const getAiIndexKiSummary = (
-  http: HttpStart,
-  { aiIndexId, signal }: GetAiIndexKiSummaryArgs
-): Promise<GetAiIndexKiSummaryResponse> =>
-  http.get<GetAiIndexKiSummaryResponse>(buildPath(aiIndexKiSummaryPath, { aiIndexId }), {
-    version: AI_INDEX_INTERNAL_API_VERSION,
     ...(signal ? { signal } : {}),
   });
 
