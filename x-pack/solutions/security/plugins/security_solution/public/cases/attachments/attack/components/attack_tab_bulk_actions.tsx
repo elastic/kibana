@@ -19,12 +19,12 @@ import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
 import { ConnectedRemoveAttackModal } from './connected_remove_attack_modal';
 
 const REMOVE_FROM_CASE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.cases.tab.bulkRemove',
+  'xpack.securitySolution.attackDiscovery.cases.tab.bulkRemoveButtonLabel',
   { defaultMessage: 'Remove from case' }
 );
 
 const getSelectedLabel = (attackCount: number): string =>
-  i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectedAttacks', {
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectedAttacksLabel', {
     defaultMessage: '{attackCount, plural, one {# attack selected} other {# attacks selected}}',
     values: { attackCount },
   });

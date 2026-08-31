@@ -134,14 +134,14 @@ const TABLE_CAPTION = i18n.translate('xpack.securitySolution.attackDiscovery.cas
 });
 
 const SELECT_ALL_LABEL = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.cases.tab.selectAllAttacks',
+  'xpack.securitySolution.attackDiscovery.cases.tab.selectAllAttacksAriaLabel',
   {
     defaultMessage: 'Select all attacks',
   }
 );
 
 const getSelectAttackLabel = (attackTitle: string): string =>
-  i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectAttack', {
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectAttackAriaLabel', {
     defaultMessage: 'Select {attackTitle}',
     values: { attackTitle },
   });
