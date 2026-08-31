@@ -70,15 +70,18 @@ const createIndexerParams = (
     esClient?: jest.Mocked<ElasticsearchClient>;
     logger?: ReturnType<typeof createMockLogger>;
     action?: 'create' | 'update' | 'delete';
+    savedObjectsClient?: ISavedObjectsRepository;
+    clientHasSpacesExtension?: boolean;
   } = {}
 ): SmlIndexerOriginParams => ({
   originId: overrides.originId ?? 'att-123',
   attachmentType: overrides.attachmentType ?? 'lens',
   spaces: overrides.spaces ?? ['default'],
   esClient: overrides.esClient ?? createMockEsClient(),
-  savedObjectsClient: {} as unknown as ISavedObjectsRepository,
+  savedObjectsClient: overrides.savedObjectsClient ?? ({} as unknown as ISavedObjectsRepository),
   logger: overrides.logger ?? createMockLogger(),
   action: overrides.action ?? 'create',
+  clientHasSpacesExtension: overrides.clientHasSpacesExtension,
 });
 
 describe('createSmlIndexer', () => {
@@ -160,11 +163,13 @@ describe('createSmlIndexer', () => {
         esClient,
         savedObjectsClient: {},
         logger: contextLogger,
+        spaces: ['default', 'space-2'],
       });
       expect(getPermissions).toHaveBeenCalledWith('att-2', {
         esClient,
         savedObjectsClient: {},
         logger: contextLogger,
+        spaces: ['default', 'space-2'],
       });
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.deleteByQuery).toHaveBeenCalledWith({
@@ -292,6 +297,66 @@ describe('createSmlIndexer', () => {
       expect(getSmlEntry).toHaveBeenCalledTimes(1);
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(bulkMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('non-default space without spaces extension: getSmlEntry receives a client that injects namespace on .get()', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const capturedClient: { get?: Function } = {};
+      const getSmlEntry = jest.fn().mockImplementation((_id: string, ctx: any) => {
+        capturedClient.get = ctx.savedObjectsClient.get;
+        return Promise.resolve({ type: 'lens', title: 'T', content: 'c' });
+      });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
+      const realGet = jest.fn().mockResolvedValue({ id: 'att-9', type: 'lens', attributes: {} });
+      const mockRepo = { get: realGet } as unknown as ISavedObjectsRepository;
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-9',
+          attachmentType: 'lens',
+          action: 'create',
+          spaces: ['my-space'],
+          savedObjectsClient: mockRepo,
+          clientHasSpacesExtension: false,
+        })
+      );
+
+      // The proxy should have forwarded the call to the underlying client
+      // with namespace injected, so the real .get is invoked with namespace.
+      await capturedClient.get!('lens', 'att-9');
+      expect(realGet).toHaveBeenCalledWith('lens', 'att-9', { namespace: 'my-space' });
+    });
+
+    it('spaces-extension client: getSmlEntry receives the client as-is (no namespace injection)', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const capturedClient: { current?: object } = {};
+      const getSmlEntry = jest.fn().mockImplementation((_id: string, ctx: any) => {
+        capturedClient.current = ctx.savedObjectsClient;
+        return Promise.resolve({ type: 'lens', title: 'T', content: 'c' });
+      });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
+      const mockRepo = {} as unknown as ISavedObjectsRepository;
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-10',
+          attachmentType: 'lens',
+          action: 'create',
+          spaces: ['my-space'],
+          savedObjectsClient: mockRepo,
+          clientHasSpacesExtension: true,
+        })
+      );
+
+      expect(capturedClient.current).toBe(mockRepo);
     });
 
     it('unknown type in origin mode: throws SmlUnregisteredTypeError without touching ES', async () => {

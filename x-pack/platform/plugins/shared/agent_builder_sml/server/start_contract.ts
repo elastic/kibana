@@ -48,6 +48,7 @@ export const buildIndexAttachment =
       savedObjectsClient: soClient,
       logger,
       force: params.force,
+      clientHasSpacesExtension: true,
     });
   };
 

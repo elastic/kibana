@@ -61,6 +61,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
       esClient,
       savedObjectsClient,
       logger: this.logger,
+      spaces: [],
     };
 
     const storage = createSmlStorage({ logger: this.logger, esClient });

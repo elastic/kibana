@@ -119,6 +119,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       savedObjectsClient,
       logger: contextLogger,
+      clientHasSpacesExtension = false,
     } = params;
     const originUri = `${attachmentType}://${originId}`;
 
@@ -159,10 +160,30 @@ class SmlIndexerImpl implements SmlIndexer {
       }
     }
 
+    // Internal repos need an explicit namespace to access non-default spaces;
+    // scoped clients handle it themselves and throw if one is passed.
+    const [firstSpace] = spaces;
+    const internalNamespace =
+      !clientHasSpacesExtension && firstSpace && firstSpace !== 'default'
+        ? firstSpace
+        : undefined;
+    const wrappedClient = internalNamespace
+      ? (new Proxy(savedObjectsClient, {
+          get(target, prop) {
+            if (prop === 'get') {
+              return (type: string, id: string, opts?: object) =>
+                (target as any).get(type, id, { namespace: internalNamespace, ...opts });
+            }
+            return (target as any)[prop];
+          },
+        }) as SavedObjectsClientContract)
+      : (savedObjectsClient as SavedObjectsClientContract);
+
     const context: SmlContext = {
       esClient,
-      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
+      savedObjectsClient: wrappedClient,
       logger: contextLogger,
+      spaces,
     };
 
     this.logger.info(
