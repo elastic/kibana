@@ -601,7 +601,16 @@ describe('Data Loader', () => {
       },
       {
         attributes: getLensAttributesMock({
-          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+          state: {
+            ...baseAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: { query: { esql: 'from index | where $foo > 0' }, columns: [] },
+                },
+              },
+            },
+          },
         }),
       }
     );
@@ -620,7 +629,16 @@ describe('Data Loader', () => {
       },
       {
         attributes: getLensAttributesMock({
-          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+          state: {
+            ...baseAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: { query: { esql: 'from index | where $foo > 0' }, columns: [] },
+                },
+              },
+            },
+          },
         }),
       },
       {

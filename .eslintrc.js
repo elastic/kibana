@@ -2845,6 +2845,43 @@ module.exports = {
       },
     },
     {
+      // @rspack/* packages are pure ESM. Direct value imports work in
+      // production (Node require(esm)) but break any Jest test that loads
+      // them, so the optimizer must go through its rspack_runtime shim, which
+      // loads them natively via createRequire (see rspack_runtime.ts).
+      files: [
+        'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
+        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+      ],
+      rules: {
+        '@typescript-eslint/no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@rspack/core',
+                allowTypeImports: true,
+                message:
+                  'Import the `rspack` runtime value from the optimizer rspack_runtime shim instead (@rspack/core is pure ESM and breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rspack/plugin-react-refresh',
+                allowTypeImports: true,
+                message:
+                  'Load via loadReactRefreshRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rsdoctor/rspack-plugin',
+                allowTypeImports: true,
+                message:
+                  'Load via loadRsdoctorRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ['x-pack/**/cypress/**/*.ts'],
       rules: {
         'no-restricted-imports': [
@@ -3222,7 +3259,6 @@ module.exports.overrides.push({
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
