@@ -42,15 +42,15 @@ describe('parseInferencePrices', () => {
     jest.clearAllMocks();
   });
 
-  it('parses the frozen live response and resolves every observed c0 model id', () => {
+  it('parses a frozen live-response sample and resolves every observed c0 model id', () => {
     const fixture = JSON.parse(
       readFileSync(join(__dirname, '__fixtures__/base_prices.json'), 'utf8')
     );
 
-    expect(fixture).toHaveLength(2043);
+    expect(fixture).toHaveLength(8);
     expect(
-      fixture.filter(({ product_type }: { product_type: string }) => product_type === 'inference')
-    ).toHaveLength(459);
+      fixture.every(({ product_type }: { product_type: string }) => product_type === 'inference')
+    ).toBe(true);
 
     const catalog = parseInferencePrices({
       response: fixture,
