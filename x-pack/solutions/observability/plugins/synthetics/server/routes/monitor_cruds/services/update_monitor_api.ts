@@ -122,8 +122,8 @@ export class UpdateMonitorAPI {
     decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     patchById: Map<string, Partial<EncryptedSyntheticsMonitor>>
   ): Promise<MaintenanceWindow[] | undefined> {
-    // Do not skip non-`ui` monitors: an enabled-only patch lets them through
-    // to normalizeMonitor, which resolves MW refs the same as single-edit.
+    // Bulk updates can include non-`ui` monitors that still need MW ref
+    // resolution (e.g. enable/disable), matching the single-edit route.
     const hasMaintenanceWindowRefs = decryptedMonitors.some((monitor) => {
       const patch = patchById.get(monitor.id);
       const refs =
