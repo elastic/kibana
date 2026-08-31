@@ -148,7 +148,7 @@ describe('AuthenticateAndDeployStep', () => {
     // storage, so the local state does not reset on remount.
 
     it('hasFailed=true when hook returns non-empty failedInstances on first render (no deploy attempted)', () => {
-      // Simulates the hook having been seeded from persisted deployAndDetectStep.failedInstances.
+      // Simulates the hook having been seeded from persisted detectAndReviewStep.failedInstances.
       mockUseDeploy.mockReturnValue(
         makeDeployReturn({ failedInstances: ['guardduty'], isDeploying: false })
       );

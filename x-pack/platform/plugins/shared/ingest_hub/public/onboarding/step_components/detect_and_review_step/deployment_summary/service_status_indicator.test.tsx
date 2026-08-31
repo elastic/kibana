@@ -20,14 +20,19 @@ function renderIndicator(status: ServiceChipState) {
 }
 
 describe('ServiceStatusIndicator', () => {
-  it('shows spinner for instantiating', () => {
+  it('shows label for instantiating', () => {
     renderIndicator('instantiating');
-    expect(screen.getByText('Setting up')).toBeInTheDocument();
+    expect(screen.getByText('Setting up...')).toBeInTheDocument();
   });
 
-  it('shows spinner for detecting', () => {
+  it('shows label for detecting', () => {
     renderIndicator('detecting');
-    expect(screen.getByText('Detecting data')).toBeInTheDocument();
+    expect(screen.getByText('Detecting data...')).toBeInTheDocument();
+  });
+
+  it('does not render its own spinner — the tile owns the loading indicator', () => {
+    const { container } = renderIndicator('detecting');
+    expect(container.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
   });
 
   it('shows success for receiving', () => {

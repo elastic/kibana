@@ -164,5 +164,17 @@ export default function (providerContext: FtrProviderContext) {
       const { status } = await getHasData(logsPattern, 'x'.repeat(100));
       expect(status).to.eql(400);
     });
+
+    it('rejects a start value that is not a valid timestamp', async () => {
+      const { status } = await getHasData(logsPattern, 'not-a-timestamp');
+      expect(status).to.eql(400);
+    });
+
+    it('accepts a date-only start value', async () => {
+      // Date.parse accepts more than strict ISO8601; the route intentionally allows any form
+      // ES can interpret as a date bound.
+      const { status } = await getHasData(logsPattern, '2015-01-01');
+      expect(status).to.eql(200);
+    });
   });
 }

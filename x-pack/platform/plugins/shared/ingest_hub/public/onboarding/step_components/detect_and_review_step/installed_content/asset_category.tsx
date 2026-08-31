@@ -23,11 +23,18 @@ interface AssetCategoryProps {
   categoryId: string;
   titleId: string;
   defaultTitle: string;
-  iconType?: string;
+  /** EUI icon shown beside the category title. Caller-supplied so this stays generic. */
+  iconType: string;
   assets: Array<{ id: string; title: string; appLink?: string }>;
 }
 
-export function AssetCategory({ categoryId, titleId, defaultTitle, assets }: AssetCategoryProps) {
+export function AssetCategory({
+  categoryId,
+  titleId,
+  defaultTitle,
+  iconType,
+  assets,
+}: AssetCategoryProps) {
   const installedLabel = i18n.translate(
     'xpack.ingestHub.detectAndReviewStep.installedContent.category.installedCount',
     {
@@ -47,7 +54,7 @@ export function AssetCategory({ categoryId, titleId, defaultTitle, assets }: Ass
       }
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiIcon type="dashboardApp" size="m" aria-hidden />
+          <EuiIcon type={iconType} size="m" aria-hidden />
           <EuiTitle size="xxs">
             <h4>
               <FormattedMessage id={titleId} defaultMessage={defaultTitle} />

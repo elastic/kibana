@@ -139,11 +139,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
-  // Note: session key deliberately kept as 'deployAndDetectStep' — no migration needed
-  // (sessionStorage, one tab, dies on close, behind off-by-default feature flag).
   const [persistedDetectAndReviewStep, setPersistedDetectAndReviewStep] =
     useSessionStorage<PersistedDetectAndReviewStep>(
-      getOnboardingSessionKey('aws', 'deployAndDetectStep'),
+      getOnboardingSessionKey('aws', 'detectAndReviewStep'),
       {
         serviceStatuses: {},
         policyIdsByInstance: {},

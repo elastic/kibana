@@ -6,12 +6,10 @@
  */
 
 // Keep this list in sync with every useSessionStorage call that uses getOnboardingSessionKey.
-// Note: 'deployAndDetectStep' is kept as-is (step 4 was renamed to 'detect-and-review' but
-// migrating a sessionStorage key is not worth the complexity — the key string is internal).
 export const SESSION_KEY_SUFFIXES = [
   'authenticateAndDeployStep',
   'servicesStep',
-  'deployAndDetectStep',
+  'detectAndReviewStep',
   'serviceSettingsStep',
   'stepState',
 ] as const;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 
@@ -16,7 +16,7 @@ const STATUS_CONFIG: Record<ServiceChipState, { color: string; label: React.Reac
     label: (
       <FormattedMessage
         id="xpack.ingestHub.detectAndReviewStep.serviceStatus.instantiating"
-        defaultMessage="Setting up"
+        defaultMessage="Setting up..."
       />
     ),
   },
@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<ServiceChipState, { color: string; label: React.Reac
     label: (
       <FormattedMessage
         id="xpack.ingestHub.detectAndReviewStep.serviceStatus.detecting"
-        defaultMessage="Detecting data"
+        defaultMessage="Detecting data..."
       />
     ),
   },
@@ -64,21 +64,16 @@ interface ServiceStatusIndicatorProps {
 
 export function ServiceStatusIndicator({ status }: ServiceStatusIndicatorProps) {
   const { color, label } = STATUS_CONFIG[status];
-  const isAnimated = status === 'detecting' || status === 'instantiating';
+  // In-progress states are indicated by the tile's leading spinner (see ServiceTile), so the
+  // label here stays plain text — a second spinner beside it would read as two activities.
+  const isPending = status === 'detecting' || status === 'instantiating';
 
   return (
     <span aria-live="polite">
-      {isAnimated ? (
-        <EuiFlexGroup gutterSize="s" direction="row" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="s" aria-hidden />{' '}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color={color}>
-              {label}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      {isPending ? (
+        <EuiText size="xs" color={color}>
+          {label}
+        </EuiText>
       ) : (
         <EuiHealth color={color}>{label}</EuiHealth>
       )}

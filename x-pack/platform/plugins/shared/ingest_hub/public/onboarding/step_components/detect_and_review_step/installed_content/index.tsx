@@ -133,6 +133,7 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
                   categoryId="dashboards"
                   titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.dashboards"
                   defaultTitle="Dashboards"
+                  iconType="dashboardApp"
                   assets={filteredDashboards}
                 />
                 <EuiSpacer size="m" />
@@ -145,6 +146,7 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
                   categoryId="detectionRules"
                   titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.detectionRules"
                   defaultTitle="Detection rules"
+                  iconType="securityApp"
                   assets={filteredRules}
                 />
                 <EuiSpacer size="m" />

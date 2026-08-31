@@ -98,11 +98,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENTS.ALL,
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-            FLEET_API_PRIVILEGES.SETTINGS.ALL,
-          ],
+          // Read-only: the handler runs a search and mutates nothing. Index-level access is
+          // enforced by Elasticsearch since the query runs as the current user.
+          requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.READ],
         },
       },
       summary: 'Check if data streams have data',
@@ -121,8 +119,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               // Comma-joined list of index patterns. Bounded to cap the fan-out of the
               // msearch the handler builds from it (one sub-query per pattern).
               dataStreams: schema.string({ maxLength: 4096 }),
-              // Single ISO8601 timestamp.
-              start: schema.string({ maxLength: 64 }),
+              // ISO8601 timestamp, passed to ES as the `@timestamp` range lower bound.
+              start: schema.string({
+                maxLength: 64,
+                validate: (value) =>
+                  Number.isNaN(Date.parse(value))
+                    ? `start must be a valid ISO8601 timestamp, got "${value}"`
+                    : undefined,
+              }),
             }),
           },
           response: {
