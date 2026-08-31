@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import type {
   BoundInferenceClient,
@@ -241,18 +240,10 @@ export class InferencePlugin
       };
     };
 
-    // these checks enforce internal restrictions, so they must not depend on the
-    // end user's privileges to read ui settings
-    const getInternalUiSettingsClient = (request: KibanaRequest) => {
-      const internalSavedObjectsClient = core.savedObjects.getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-      });
-      return core.uiSettings.asScopedToClient(internalSavedObjectsClient);
-    };
-
     const createDefaultConnectorOnlyCheck = (request: KibanaRequest) => {
       return async () => {
-        const uiSettingsClient = getInternalUiSettingsClient(request);
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
         return await uiSettingsClient.get<boolean>(
           GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
           { request }
@@ -262,7 +253,8 @@ export class InferencePlugin
 
     const createDefaultConnectorIdGetter = (request: KibanaRequest) => {
       return async () => {
-        const uiSettingsClient = getInternalUiSettingsClient(request);
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
         const defaultConnector = await loadDefaultConnector({
           actions: pluginsStart.actions,
           request,
