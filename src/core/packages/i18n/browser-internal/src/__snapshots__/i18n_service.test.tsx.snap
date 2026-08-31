@@ -309,7 +309,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiFlyoutMenu.pagination.first\\": \\"First\\",
     \\"euiFlyoutMenu.pagination.previous\\": \\"Previous\\",
     \\"euiFlyoutMenu.pagination.next\\": \\"Next\\",
-    \\"euiFlyoutMenu.pagination.last\\": \\"Last\\"
+    \\"euiFlyoutMenu.pagination.last\\": \\"Last\\",
+    \\"euiTimeWindowButtons.label\\": \\"Time window controls\\"
   }
 }"
 `;

@@ -1896,5 +1896,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Back to {previousPage}',
         values: { previousPage },
       }),
+    'euiTimeWindowButtons.label': i18n.translate('core.euiTimeWindowButtons.label', {
+      defaultMessage: 'Time window controls',
+    }),
   };
 };
