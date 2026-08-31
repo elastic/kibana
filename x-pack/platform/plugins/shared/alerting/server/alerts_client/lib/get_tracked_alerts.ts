@@ -118,7 +118,7 @@ async function fetchTrackedAlerts<AlertData extends RuleAlertData>({
   search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
 }) {
   const alerts = await search({
-    size: maxAlertLimit,
+    size: maxAlertLimit * 2,
     seq_no_primary_term: true,
     query: {
       bool: {

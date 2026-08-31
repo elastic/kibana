@@ -530,7 +530,7 @@ describe('get_tracked_alerts', () => {
       });
 
       expect(search.mock.calls[0][0]).toEqual({
-        size: 500,
+        size: 1000,
         seq_no_primary_term: true,
         query: {
           bool: {
