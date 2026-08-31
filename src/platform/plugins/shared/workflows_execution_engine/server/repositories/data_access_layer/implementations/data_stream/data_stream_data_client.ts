@@ -174,99 +174,23 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   }
 
   public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    if (request.items.length === 0) {
-      return { items: [], errors: false };
-    }
-    const meta = await this.deps.versionManager.getMeta();
-    const backingIndexes = meta.backingIndexes.slice(-2);
+    const bulkResponse = await this.privateBulk(request);
 
-    const result = new Array<BulkItemResponse>(request.items.length);
-    let hasErrors = false;
-
-    const updaterItemsWithIndex: Array<{
-      item: BulkUpdaterItem<TExecution>;
-      requestIndex: number;
-    }> = [];
-    const plainItemsWithIndex: Array<{ item: BulkPlainItem<TExecution>; requestIndex: number }> =
-      [];
-
-    for (let i = 0; i < request.items.length; i++) {
-      const item = request.items[i];
-      if (isBulkUpdaterItem(item)) {
-        updaterItemsWithIndex.push({ item, requestIndex: i });
-      } else {
-        plainItemsWithIndex.push({ item, requestIndex: i });
-      }
-    }
-
-    // Updater items: sharedBulk handles the mget + updater call + OCC retry loop.
-    if (updaterItemsWithIndex.length > 0) {
-      const updaterResponse = await sharedBulk(
-        this.deps.esClient,
-        { refresh: request.refresh, items: updaterItemsWithIndex.map(({ item }) => item) },
-        this.deps.logger,
-        backingIndexes
-      );
-
-      updaterResponse.items.forEach((responseItem, idx) => {
-        result[updaterItemsWithIndex[idx].requestIndex] = responseItem;
-        hasErrors = hasErrors || !!responseItem.error;
-        if (
-          !responseItem.error &&
-          responseItem.seqNo !== undefined &&
-          responseItem.primaryTerm !== undefined
-        ) {
-          this.deps.versionManager.setVersion(responseItem.id, {
-            index: responseItem.index,
-            seqNo: responseItem.seqNo,
-            primaryTerm: responseItem.primaryTerm,
-          });
-        }
-      });
-    }
-
-    // Plain items: resolve backing-index + seqNo via the version manager, then bulk.
-    if (plainItemsWithIndex.length > 0) {
-      // resolveBulkItemVersions uses positional indexes into the array it receives,
-      // so pass only the items; look up requestIndex separately via plainItemsWithIndex.
-      const { sendable, preFailed } = await this.resolveBulkItemVersions(
-        plainItemsWithIndex.map(({ item }) => item)
-      );
-
-      preFailed.forEach(({ id, originalIndex, error }) => {
-        result[plainItemsWithIndex[originalIndex].requestIndex] = { id, index: '', error };
-        hasErrors = true;
-      });
-
-      if (sendable.length > 0) {
-        const bulkResponse = await sharedBulk(
-          this.deps.esClient,
-          { ...request, items: sendable.map(({ item }) => item) },
-          this.deps.logger,
-          backingIndexes
-        );
-
-        // bulkResponse.items is 1:1 with sendable; sendable[idx].originalIndex is the
-        // position in the plainItems array passed to resolveBulkItemVersions.
-        bulkResponse.items.forEach((responseItem, idx) => {
-          result[plainItemsWithIndex[sendable[idx].originalIndex].requestIndex] = responseItem;
-          hasErrors = hasErrors || !!responseItem.error;
-          if (
-            !responseItem.error &&
-            responseItem.seqNo !== undefined &&
-            responseItem.primaryTerm !== undefined
-          ) {
-            this.deps.versionManager.setVersion(responseItem.id, {
-              index: responseItem.index,
-              seqNo: responseItem.seqNo,
-              primaryTerm: responseItem.primaryTerm,
-            });
-          }
+    bulkResponse.items.forEach((responseItem) => {
+      if (
+        !responseItem.error &&
+        responseItem.seqNo !== undefined &&
+        responseItem.primaryTerm !== undefined
+      ) {
+        this.deps.versionManager.setVersion(responseItem.id, {
+          index: responseItem.index,
+          seqNo: responseItem.seqNo,
+          primaryTerm: responseItem.primaryTerm,
         });
       }
-    }
+    });
 
-    return { items: result, errors: hasErrors };
+    return bulkResponse;
   }
 
   public async scriptUpdate(_request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
@@ -284,7 +208,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       _source: false,
     });
 
-    const bulkResponse = await this.bulk({
+    const bulkResponse = await this.privateBulk({
       items: searchResponse.hits.hits.map((hit) => ({
         operation: 'update',
         document: { id: hit._id, deleted: true } as unknown as Partial<TExecution> & { id: string },
@@ -304,6 +228,71 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       task: '',
       failures: [],
     };
+  }
+
+  private async privateBulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
+    if (request.items.length === 0) {
+      return { items: [], errors: false };
+    }
+    const { backingIndexes } = await this.deps.versionManager.getMeta();
+    const fallbackIndexes = backingIndexes.slice(-2);
+
+    const result = new Array<BulkItemResponse>(request.items.length);
+    let hasErrors = false;
+
+    const plainItemsWithIndex: Array<{ item: BulkPlainItem<TExecution>; requestIndex: number }> =
+      [];
+    const updaterItemsWithIndex: Array<{
+      item: BulkUpdaterItem<TExecution>;
+      requestIndex: number;
+    }> = [];
+
+    for (let i = 0; i < request.items.length; i++) {
+      const item = request.items[i];
+      if (isBulkUpdaterItem(item)) {
+        updaterItemsWithIndex.push({ item, requestIndex: i });
+      } else {
+        plainItemsWithIndex.push({ item, requestIndex: i });
+      }
+    }
+
+    // Resolve data-stream-specific backing index, seqNo, and @timestamp for plain items.
+    const { sendable, preFailed } =
+      plainItemsWithIndex.length > 0
+        ? await this.resolveBulkItemVersions(plainItemsWithIndex.map(({ item }) => item))
+        : { sendable: [], preFailed: [] };
+
+    preFailed.forEach(({ id, originalIndex, error }) => {
+      result[plainItemsWithIndex[originalIndex].requestIndex] = { id, index: '', error };
+      hasErrors = true;
+    });
+
+    // Merge resolved plain items and raw updater items for a single sharedBulk call.
+    // sharedBulk handles the updater mget+callback+OCC flow internally.
+    const mergedItems = [
+      ...sendable.map(({ item }) => item),
+      ...updaterItemsWithIndex.map(({ item }) => item),
+    ];
+    const mergedRequestIndexes = [
+      ...sendable.map(({ originalIndex }) => plainItemsWithIndex[originalIndex].requestIndex),
+      ...updaterItemsWithIndex.map(({ requestIndex }) => requestIndex),
+    ];
+
+    if (mergedItems.length > 0) {
+      const bulkResponse = await sharedBulk(
+        this.deps.esClient,
+        { ...request, items: mergedItems },
+        this.deps.logger,
+        fallbackIndexes
+      );
+
+      bulkResponse.items.forEach((responseItem, idx) => {
+        result[mergedRequestIndexes[idx]] = responseItem;
+        hasErrors = hasErrors || !!responseItem.error;
+      });
+    }
+
+    return { items: result, errors: hasErrors };
   }
 
   // Classifies plain items into sendable or preFailed, resolves the backing-index +
