@@ -33,7 +33,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     >
       <EuiToolTip position="top" content={tooltip} disableScreenReaderOutput>
         <EuiButtonIcon
-          iconType="returnKey"
+          iconType="return"
           display="fill"
           color="primary"
           size="s"
