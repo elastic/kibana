@@ -14,10 +14,13 @@ import type {
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import {
+  getAlertingV2ManagementNavPanel,
+} from '@kbn/alerting-v2-utils';
+
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
-import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
+import { getAlertsNavPanel, NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 export function filterForFeatureAvailability<
   T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
@@ -87,12 +90,7 @@ export const createNavigationTree = ({
         icon: 'flask',
       },
       ...getWorkflowsNavPanel(core),
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
-      },
+      ...getAlertsNavPanel(core),
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,

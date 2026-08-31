@@ -149,9 +149,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('uses a single Alerts link when alerting v2 is disabled', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
@@ -163,6 +161,48 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         icon: 'warning',
+      })
+    );
+  });
+
+  it('opens Alerts as a flyout with notifications and operations when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+
+    expect(alertsPanel).toEqual(
+      expect.objectContaining({
+        id: 'alerting',
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+        renderAs: 'panelOpener',
+        children: [
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              expect.objectContaining({
+                link: 'observability-overview:alerts',
+                title: 'Alerts',
+              }),
+            ],
+          },
+          {
+            title: 'Notifications and Suppressions',
+            breadcrumbStatus: 'hidden',
+            children: [
+              { link: 'management:action_policies' },
+              { link: 'management:maintenanceWindows' },
+            ],
+          },
+          {
+            title: 'Operations',
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:execution_history' }],
+          },
+        ],
       })
     );
   });
