@@ -35,6 +35,7 @@ const mockManagement = {
   getWorkflow: jest.fn(),
   runWorkflow: jest.fn(),
   getWorkflowExecutions: jest.fn(),
+  searchStepExecutions: jest.fn(),
 };
 
 const mockWorkflowsManagement = {
@@ -58,7 +59,9 @@ const makeExecution = (overrides: Record<string, unknown> = {}) => ({
   startedAt: '2024-01-01T00:00:00Z',
   finishedAt: undefined as string | undefined,
   context: undefined as Record<string, unknown> | undefined,
-  stepExecutions: undefined as Array<{ output: unknown }> | undefined,
+  stepExecutions: undefined as
+    | Array<{ stepId?: string; stepType?: string; startedAt?: string; output: unknown }>
+    | undefined,
   error: undefined as { message: string } | undefined,
   ...overrides,
 });
@@ -75,6 +78,7 @@ const makeClient = () =>
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
+  mockManagement.searchStepExecutions.mockResolvedValue({ results: [], total: 0 });
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
@@ -484,6 +488,110 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
+  describe('severity', () => {
+    it('returns the severity reported in structured_output', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            { output: { structured_output: { summary: 'Summary.', severity: '60-high' } } },
+          ],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.severity).toBe('60-high');
+    });
+
+    it('returns undefined when structured_output carries no severity', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { structured_output: { conclusion: 'All clear.' } } }],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.severity).toBeUndefined();
+    });
+
+    it('drops and logs a severity outside the canonical tiers', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            { output: { structured_output: { summary: 'Summary.', severity: 'critical' } } },
+          ],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.severity).toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('unrecognized severity "critical"')
+      );
+    });
+
+    it('reads the newest attempt when a retry produced a second investigate step', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            {
+              stepId: 'investigate',
+              stepType: 'ai.agent',
+              startedAt: '2024-01-01T02:00:00Z',
+              output: { structured_output: { conclusion: 'Second.', severity: '40-medium' } },
+            },
+            {
+              stepId: 'investigate',
+              stepType: 'ai.agent',
+              startedAt: '2024-01-01T01:00:00Z',
+              output: { structured_output: { conclusion: 'First.', severity: '80-critical' } },
+            },
+          ],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.severity).toBe('40-medium');
+      expect(result.conclusion).toBe('Second.');
+    });
+
+    it('ignores the step-level timeout wrapper sharing the investigate step id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            {
+              stepId: 'investigate',
+              stepType: 'step_level_timeout',
+              startedAt: '2024-01-01T03:00:00Z',
+              output: { structured_output: { severity: '80-critical' } },
+            },
+            {
+              stepId: 'investigate',
+              stepType: 'ai.agent',
+              startedAt: '2024-01-01T01:00:00Z',
+              output: { structured_output: { conclusion: 'Agent.', severity: '20-low' } },
+            },
+          ],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.severity).toBe('20-low');
+    });
+
+    it('does not return severity when status is not completed', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.RUNNING,
+          stepExecutions: [
+            { output: { structured_output: { summary: 'Summary.', severity: '20-low' } } },
+          ],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.severity).toBeUndefined();
+    });
+  });
+
   describe('error masking', () => {
     it('returns generic error string (not raw message) when failed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
@@ -634,6 +742,177 @@ describe('NightshiftInvestigationsClient.list()', () => {
       );
       const result = await makeClient().list({});
       expect(result.results[0].completed_at).toBeUndefined();
+    });
+  });
+
+  describe('severity', () => {
+    const makeSeverityExecResult = (id: string, status: ExecutionStatus) => ({
+      id,
+      status,
+      startedAt: '2024-01-01T00:00:00Z',
+      finishedAt: '2024-01-02T00:00:00Z',
+      concurrencyGroupKey: undefined,
+      executedBy: undefined,
+    });
+
+    const makeStep = (
+      workflowRunId: string,
+      startedAt: string,
+      structuredOutput: Record<string, unknown>
+    ) => ({
+      workflowRunId,
+      startedAt,
+      stepType: 'ai.agent',
+      output: { structured_output: structuredOutput },
+    });
+
+    it('maps each investigate step output onto its own investigation', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [
+            makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED),
+            makeSeverityExecResult('exec-2', ExecutionStatus.COMPLETED),
+          ],
+          total: 2,
+        })
+      );
+      mockManagement.searchStepExecutions.mockResolvedValue({
+        results: [
+          makeStep('exec-2', '2024-01-01T01:00:00Z', { severity: '20-low' }),
+          makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '80-critical' }),
+        ],
+        total: 2,
+      });
+
+      const result = await makeClient().list({});
+
+      expect(mockManagement.searchStepExecutions).toHaveBeenCalledWith(
+        {
+          workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+          stepId: 'investigate',
+          stepType: 'ai.agent',
+          workflowExecutionIds: ['exec-1', 'exec-2'],
+          sourceIncludes: ['workflowRunId', 'startedAt', 'output.structured_output.severity'],
+          size: 4,
+        },
+        SPACE_ID
+      );
+      expect(result.results.map(({ severity }) => severity)).toEqual(['80-critical', '20-low']);
+    });
+
+    it('keeps the newest attempt when a run produced several', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
+          total: 1,
+        })
+      );
+      mockManagement.searchStepExecutions.mockResolvedValue({
+        results: [
+          makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '80-critical' }),
+          makeStep('exec-1', '2024-01-01T02:00:00Z', { severity: '40-medium' }),
+        ],
+        total: 2,
+      });
+
+      const result = await makeClient().list({});
+      expect(result.results[0].severity).toBe('40-medium');
+    });
+
+    // The search filters on stepType, so a wrapper never reaches this code in practice. Asserted
+    // anyway so the resolver stays correct on its own if that filter is ever relaxed.
+    it('ignores a step-level timeout wrapper if one reaches the resolver', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
+          total: 1,
+        })
+      );
+      mockManagement.searchStepExecutions.mockResolvedValue({
+        results: [
+          {
+            workflowRunId: 'exec-1',
+            startedAt: '2024-01-01T03:00:00Z',
+            stepType: 'step_level_timeout',
+            output: { structured_output: { severity: '80-critical' } },
+          },
+          makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '20-low' }),
+        ],
+        total: 2,
+      });
+
+      const result = await makeClient().list({});
+      expect(result.results[0].severity).toBe('20-low');
+    });
+
+    it('leaves severity unset when the step output carries none', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
+          total: 1,
+        })
+      );
+      mockManagement.searchStepExecutions.mockResolvedValue({
+        results: [makeStep('exec-1', '2024-01-01T01:00:00Z', {})],
+        total: 1,
+      });
+
+      const result = await makeClient().list({});
+      expect(result.results[0].severity).toBeUndefined();
+    });
+
+    it('does not search step executions when no investigation on the page completed', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [
+            makeSeverityExecResult('exec-1', ExecutionStatus.RUNNING),
+            makeSeverityExecResult('exec-2', ExecutionStatus.FAILED),
+          ],
+          total: 2,
+        })
+      );
+
+      const result = await makeClient().list({});
+
+      expect(mockManagement.searchStepExecutions).not.toHaveBeenCalled();
+      expect(result.results.every(({ severity }) => severity === undefined)).toBe(true);
+    });
+
+    it('returns the list without severities when the severity lookup fails', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
+          total: 1,
+        })
+      );
+      mockManagement.searchStepExecutions.mockRejectedValue(new Error('step index unavailable'));
+
+      const result = await makeClient().list({});
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].severity).toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not resolve investigation severities')
+      );
+    });
+
+    it('warns when the step search returned fewer documents than matched', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({
+          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
+          total: 1,
+        })
+      );
+      mockManagement.searchStepExecutions.mockResolvedValue({
+        results: [makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '60-high' })],
+        total: 9,
+      });
+
+      await makeClient().list({});
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('read 1 of 9 matching step executions')
+      );
     });
   });
 
