@@ -499,7 +499,8 @@ export class WorkflowCrudService {
   async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { nameFallback?: string }
   ): Promise<WorkflowDetailDto> {
     if (workflow.id) {
       validateWorkflowId(workflow.id);
@@ -526,6 +527,7 @@ export class WorkflowCrudService {
       now,
       spaceId,
       triggerDefinitions,
+      nameFallback: options?.nameFallback,
     });
 
     let id = baseId;
@@ -960,7 +962,8 @@ export class WorkflowCrudService {
       spaceId,
       force: options?.force ?? false,
       storage: this.deps.workflowStorage,
-      esClient: this.deps.esClient,
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       getWorkflowExecutions: (params, sp) =>

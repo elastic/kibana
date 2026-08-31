@@ -57,7 +57,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
 
-export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
+const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
   // @ts-expect-error update types
   produce<SavedQueryFormData>(payload, (draft: Draft<SavedQuerySOFormData>) => {
     if (isArray(draft.version)) {
