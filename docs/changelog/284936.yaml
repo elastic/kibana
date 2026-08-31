@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/284936
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix Fleet agent API space isolation
-description: Fixes space awareness so Fleet agent tags, uploads, and diagnostic files are no longer listed, downloaded, or deleted across spaces.
