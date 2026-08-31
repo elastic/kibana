@@ -359,13 +359,22 @@ export class WorkflowExecutionQueryService {
     if (!params.includeInput) sourceExcludes.push('input');
     if (!params.includeOutput) sourceExcludes.push('output');
 
+    // An explicitly empty array means "no runs", so the clause is built whenever the caller
+    // supplied one at all — an empty `terms` matches nothing, which is what was asked for.
+    const workflowRunFilter = params.workflowExecutionIds && {
+      terms: { workflowRunId: params.workflowExecutionIds },
+    };
+
     return searchStepExecutions({
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
       workflowId: params.workflowId,
       stepId: params.stepId,
+      stepType: params.stepType,
+      additionalQuery: workflowRunFilter || undefined,
       spaceId,
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
+      sourceIncludes: params.sourceIncludes,
       page: params.page,
       size: params.size,
       startedAfter: params.startedAfter,
