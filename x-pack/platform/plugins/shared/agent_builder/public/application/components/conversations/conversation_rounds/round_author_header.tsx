@@ -53,13 +53,15 @@ const RoundAuthorSeparator: React.FC = () => {
 };
 
 const RoundAgentBadge: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiBadge
       color="hollow"
       iconType="productAgent"
       css={css`
-        background-color: #f2e6ff;
-        color: #5e2ca5;
+        background-color: ${euiTheme.colors.backgroundLightAssistance};
+        color: ${euiTheme.colors.backgroundFilledAssistance};
         border: none;
         box-shadow: none;
       `}
