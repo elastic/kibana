@@ -47,14 +47,6 @@ export function initializeHistoryManager({
       disableUndoRedo$.next(disableUndoRedo);
     });
 
-  function getSortedPanelsState() {
-    const state = getState();
-    return {
-      ...state,
-      panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
-    };
-  }
-
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
       onStateChange$: combineLatest([anyStateChange$, dataLoading$]).pipe(
@@ -62,13 +54,18 @@ export function initializeHistoryManager({
         withLatestFrom(hasOverlays$),
         // do not push to history while a child is loading or an editor is open
         filter(([[, loading], hasOverlays]) => !loading && !hasOverlays),
-        map(getSortedPanelsState),
+        map(() => {
+          const state = getState();
+          return {
+            ...state,
+            panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
+          };
+        }),
         tap(() => {
           historyUpdated$.next();
         })
       ),
       setState,
-      getLatestState: getSortedPanelsState,
       maxSize: 100,
     }
   );

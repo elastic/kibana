@@ -15,12 +15,10 @@ import { BehaviorSubject, filter, pairwise } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   onStateChange$,
-  getLatestState,
   setState,
   maxSize,
 }: {
   onStateChange$: Observable<T | undefined>;
-  getLatestState: () => T;
   setState: (state: T) => Promise<void>;
   maxSize: number;
 }) {
@@ -28,12 +26,14 @@ export function startTrackingHistory<T extends object = {}>({
   const pointer$ = new BehaviorSubject<number>(-1);
   let undoOrRedoAction = false;
 
+  let latestState: T | undefined;
   const stateSubscription = onStateChange$
     .pipe(
       filter((state): state is T => Boolean(state)),
       pairwise()
     )
     .subscribe(([previous, current]) => {
+      latestState = current;
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;
@@ -66,26 +66,22 @@ export function startTrackingHistory<T extends object = {}>({
   });
 
   const undoPatch = async () => {
-    const pointer = pointer$.getValue();
-    if (pointer <= -1) return; // cannot undo - already at the bottom of the stack
-
     canRedo$.next(false);
     canUndo$.next(false);
+    const pointer = pointer$.getValue();
     const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
     undoOrRedoAction = true;
-    await setState(jsondiffpatch.patch(cloneDeep(getLatestState()), reversedPatch) as T);
+    await setState(jsondiffpatch.patch(cloneDeep(latestState), reversedPatch) as T);
     pointer$.next(pointer - 1);
   };
 
   const redoPatch = async () => {
-    const pointer = pointer$.getValue();
-    if (pointer + 1 >= history.length) return; // cannot redo - already at the top of the stack
-
     canRedo$.next(false);
     canUndo$.next(false);
+    const pointer = pointer$.getValue();
     const patch = history[pointer + 1]; // must apply the **next** patch
     undoOrRedoAction = true;
-    await setState(jsondiffpatch.patch(cloneDeep(getLatestState()), patch) as T);
+    await setState(jsondiffpatch.patch(cloneDeep(latestState), patch) as T);
     pointer$.next(pointer + 1);
   };
 
@@ -101,9 +97,11 @@ export function startTrackingHistory<T extends object = {}>({
     const isModifier = event.ctrlKey || event.metaKey;
     if (isModifier) {
       const key = event.key.toLocaleLowerCase();
-      if (key === 'z') {
+      if (key === 'z' && canUndo$.getValue()) {
+        // no need to await since undoPatch synchronously sets canUndo$ to false
         undoPatch();
-      } else if (key === 'y') {
+      } else if (key === 'y' && canRedo$.getValue()) {
+        // no need to await since redoPatch synchronously sets canRedo$ to false
         redoPatch();
         event.preventDefault();
       }
