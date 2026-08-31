@@ -661,6 +661,7 @@ describe('Alerts Client', () => {
 
           spy.mockRestore();
         });
+
         test('should call retryTransientEsErrors when querying for tracked alerts', async () => {
           const retrySpy = jest
             .spyOn(RetryTransientEsErrorsModule, 'retryTransientEsErrors')

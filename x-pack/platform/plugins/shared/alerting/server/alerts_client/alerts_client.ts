@@ -169,8 +169,7 @@ export class AlertsClient<
           maxAlertLimit: this.legacyAlertsClient.getMaxAlertLimit() || DEFAULT_MAX_ALERTS,
           activeAlertsFromState: opts.activeAlertsFromState,
           recoveredAlertsFromState: opts.recoveredAlertsFromState,
-          search: (queryBody) =>
-            retryTransientEsErrors(() => this.search(queryBody), { logger: this.options.logger }),
+          search: (queryBody) => this.search(queryBody),
           logger: this.options.logger,
           ruleInfoMessage: this.ruleInfoMessage,
           logTags: this.logTags,
