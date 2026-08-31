@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../fixtures';
+import { spaceTest } from '../../../../common/ui/fixtures';
 
 const COPY_SESSION_TITLE = 'Checkbox copy session';
 const EXISTING_DASHBOARD_TITLE = 'Existing target dashboard for standalone session';

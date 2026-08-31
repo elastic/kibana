@@ -8,10 +8,10 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../fixtures';
+import { spaceTest } from '../../../../common/ui/fixtures';
 
 const LEGACY_LOG_STREAM_DASHBOARD_ARCHIVE =
-  'src/platform/plugins/shared/discover/test/scout/core2/ui/fixtures/kbn_archives/log_stream_dashboard_saved_object.ndjson';
+  'src/platform/plugins/shared/discover/test/scout/core/ui/fixtures/kbn_archives/log_stream_dashboard_saved_object.ndjson';
 
 spaceTest.describe(
   'Dashboard with legacy log stream embeddable',

@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest, testData } from '../../../../common/ui/fixtures';
 
 const COPIED_SESSION_TITLE = 'Copied Discover session';
 
