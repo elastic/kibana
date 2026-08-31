@@ -79,29 +79,126 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('0 matching action policies')).toBeInTheDocument();
   });
 
-  it('renders policy names with category badges in an EuiSelectable', () => {
+  it('renders a catch-all badge for a global policy', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
         {
-          actionPolicy: { id: 'ap-1', name: 'Global Policy' } as any,
+          actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
           category: 'global',
         },
-        {
-          actionPolicy: { id: 'ap-2', name: 'Tag Filtered Policy' } as any,
-          category: 'global-filtered',
-        },
       ],
-      total: 2,
+      total: 1,
     });
 
     renderComponent();
 
     expect(screen.getByText('Global Policy')).toBeInTheDocument();
-    expect(screen.getByText('Tag Filtered Policy')).toBeInTheDocument();
-    expect(screen.getByText('Global policies')).toBeInTheDocument();
-    expect(screen.getByText('Matching global policies')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonCatchAll')).toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonTags')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonExpression')).not.toBeInTheDocument();
+  });
+
+  it('renders a tags badge for a global-filtered policy matched by tags', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          actionPolicy: {
+            id: 'ap-2',
+            name: 'Tag Policy',
+            matcher: { tags: ['env:prod', 'team:sre'] },
+          } as any,
+          category: 'global-filtered',
+        },
+      ],
+      total: 1,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
+    expect(screen.getByText('Tags (1)')).toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
+  });
+
+  it('renders an expression badge for a global-filtered policy matched by expression', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          actionPolicy: {
+            id: 'ap-3',
+            name: 'Expression Policy',
+            matcher: { expression: 'rule.name: "checkout"' },
+          } as any,
+          category: 'global-filtered',
+        },
+      ],
+      total: 1,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonTags')).not.toBeInTheDocument();
+  });
+
+  it('renders both tags and expression badges when the matcher has both clauses', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          actionPolicy: {
+            id: 'ap-4',
+            name: 'Combined Policy',
+            matcher: { tags: ['env:prod'], expression: 'rule.name: "checkout*"' },
+          } as any,
+          category: 'global-filtered',
+        },
+      ],
+      total: 1,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
+  });
+
+  it('renders the edit link for each policy row with the correct href', () => {
+    const http = httpServiceMock.createStartContract();
+    // createStartContract uses a real BasePath instance with basePath='', so prepend() is a pass-through.
+
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        {
+          actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'global',
+        },
+      ],
+      total: 1,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <LinkedActionPoliciesStep http={http} ruleId="rule-1" />
+      </IntlProvider>
+    );
+
+    const editBtn = screen.getByTestId('linkedActionPolicyEdit-ap-1');
+    expect(editBtn).toBeInTheDocument();
+    expect(editBtn).toHaveAttribute('href', '/app/management/alertingV2/action_policies/edit/ap-1');
+    expect(editBtn).toHaveAttribute('target', '_blank');
   });
 
   it('shows an error callout when the fetch fails', () => {

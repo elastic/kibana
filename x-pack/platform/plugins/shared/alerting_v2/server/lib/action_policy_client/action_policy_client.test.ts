@@ -19,8 +19,6 @@ import {
   createMockEncryptedSavedObjects,
   createActionPolicySavedObjectService,
 } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
-import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
@@ -38,7 +36,6 @@ describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let rulesSavedObjectService: RulesSavedObjectService;
   let userService: UserService;
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
@@ -56,13 +53,6 @@ describe('ActionPolicyClient', () => {
 
     ({ actionPolicySavedObjectService, mockSavedObjectsClient } =
       createActionPolicySavedObjectService());
-    ({ rulesSavedObjectService } = createRulesSavedObjectService());
-    // Default: every rule lookup succeeds so happy-path tests don't need to wire it up.
-    jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValue({
-      id: 'rule-default',
-      attributes: {} as never,
-      version: 'v1',
-    });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
     ({ loggerService, mockLogger } = createLoggerService());
@@ -78,7 +68,6 @@ describe('ActionPolicyClient', () => {
 
     client = new ActionPolicyClient(
       actionPolicySavedObjectService,
-      rulesSavedObjectService,
       userService,
       apiKeyService,
       mockEsoClient as any,
@@ -3119,37 +3108,11 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    const ruleAttributes = {
-      metadata: {
-        name: 'my-rule',
-        tags: ['prod'],
-      },
-    };
-
     beforeEach(() => {
       (evaluateKql as jest.Mock).mockReset();
     });
 
-    it('returns empty list when ruleId is provided and rule is not found', async () => {
-      jest
-        .spyOn(rulesSavedObjectService, 'get')
-        .mockRejectedValueOnce(
-          SavedObjectsErrorHelpers.createGenericNotFoundError('rule', 'missing-rule')
-        );
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'missing-rule' });
-
-      expect(result.items).toHaveLength(0);
-      expect(result.total).toBe(0);
-    });
-
     it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
           [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
@@ -3166,12 +3129,6 @@ describe('ActionPolicyClient', () => {
     });
 
     it('returns global-filtered APs for policies where evaluateKql returns true', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: ['rule-1'] },
@@ -3191,12 +3148,6 @@ describe('ActionPolicyClient', () => {
     });
 
     it('skips APs where evaluateKql returns false', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: ['staging'] },
@@ -3214,12 +3165,6 @@ describe('ActionPolicyClient', () => {
     });
 
     it('skips APs where evaluateKql throws and does not re-throw', async () => {
-      jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
-        id: 'rule-1',
-        attributes: ruleAttributes as never,
-        version: 'v1',
-      });
-
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { expression: 'invalid kql !!!' },
@@ -3250,7 +3195,7 @@ describe('ActionPolicyClient', () => {
       expect(warnMessage).not.toContain('KQL parse error');
     });
 
-    it('uses provided ruleName and ruleTags to evaluate matchers without fetching from DB', async () => {
+    it('uses provided ruleName and ruleTags to evaluate matchers', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: ['prod'] },
@@ -3267,7 +3212,6 @@ describe('ActionPolicyClient', () => {
         ruleTags: ['prod'],
       });
 
-      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('global-filtered');
     });

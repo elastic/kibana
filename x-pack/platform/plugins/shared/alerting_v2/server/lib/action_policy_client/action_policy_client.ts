@@ -50,8 +50,6 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
-import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -150,8 +148,6 @@ export class ActionPolicyClient {
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
-    @inject(RulesSavedObjectServiceScopedToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
     @inject(EncryptedSavedObjectsClientToken)
@@ -402,23 +398,6 @@ export class ActionPolicyClient {
   ): Promise<MatchActionPoliciesForRuleResponse> {
     const { ruleId, ruleName, ruleTags } = params;
 
-    let resolvedName = ruleName ?? '';
-    let resolvedTags = ruleTags ?? [];
-
-    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
-    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
-      try {
-        const rule = await this.rulesSavedObjectService.get(ruleId);
-        resolvedName = ruleName ?? rule.attributes.metadata.name;
-        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
-      } catch (e) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return { items: [], total: 0 };
-        }
-        throw e;
-      }
-    }
-
     const context: MatcherContext = {
       last_event_timestamp: '',
       group_hash: '',
@@ -426,8 +405,8 @@ export class ActionPolicyClient {
       episode_status: ALERT_EPISODE_STATUS.ACTIVE,
       rule: {
         id: ruleId ?? '',
-        name: resolvedName,
-        tags: resolvedTags,
+        name: ruleName ?? '',
+        tags: ruleTags ?? [],
       },
     };
 
