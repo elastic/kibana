@@ -23,7 +23,7 @@ jest.mock('@kbn/agent-builder-server/skills', () => {
 });
 
 jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
-  isAllowedBuiltinSkill: jest.fn().mockReturnValue(true),
+  isAllowedSkillRegistration: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('../execution/runner/store/volumes/skills/utils', () => ({
@@ -77,8 +77,10 @@ describe('createSkillService', () => {
     });
 
     it('throws when registering a skill id not in the allow-list', () => {
-      const { isAllowedBuiltinSkill } = jest.requireMock('@kbn/agent-builder-server/allow_lists');
-      isAllowedBuiltinSkill.mockReturnValueOnce(false);
+      const { isAllowedSkillRegistration } = jest.requireMock(
+        '@kbn/agent-builder-server/allow_lists'
+      );
+      isAllowedSkillRegistration.mockReturnValueOnce(false);
 
       const service = createSkillService();
       const { registerSkill } = service.setup();

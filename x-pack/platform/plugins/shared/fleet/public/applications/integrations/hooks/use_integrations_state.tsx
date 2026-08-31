@@ -11,25 +11,33 @@ import React, { createContext, useContext, useRef, useCallback } from 'react';
 import type { IntegrationsAppBrowseRouteState } from '../../../types';
 import { useIntraAppState } from '../../../hooks';
 import type { CollectionStateRef } from '../sections/epm/screens/home/card_utils';
+import type { ReturnParams } from '../sections/epm/components/return_params';
 
 interface IntegrationsStateContextValue {
   getFromIntegrations(): string | undefined;
   getFromCollection(): CollectionStateRef | undefined;
+  getCatalogReturn(): ReturnParams | undefined;
 }
 
 const IntegrationsStateContext = createContext<IntegrationsStateContextValue>({
   getFromIntegrations: () => undefined,
   getFromCollection: () => undefined,
+  getCatalogReturn: () => undefined,
 });
 
 export const IntegrationsStateContextProvider: FunctionComponent<{
   children?: React.ReactNode;
 }> = ({ children }) => {
   const maybeState = useIntraAppState<
-    undefined | (IntegrationsAppBrowseRouteState & { fromCollection?: CollectionStateRef })
+    | undefined
+    | (IntegrationsAppBrowseRouteState & {
+        fromCollection?: CollectionStateRef;
+        catalogReturn?: ReturnParams;
+      })
   >();
   const fromIntegrationsRef = useRef<undefined | string>(maybeState?.fromIntegrations);
   const fromCollectionRef = useRef<CollectionStateRef | undefined>(maybeState?.fromCollection);
+  const catalogReturnRef = useRef<ReturnParams | undefined>(maybeState?.catalogReturn);
 
   const getFromIntegrations = useCallback(() => {
     return fromIntegrationsRef.current;
@@ -39,8 +47,14 @@ export const IntegrationsStateContextProvider: FunctionComponent<{
     return fromCollectionRef.current;
   }, []);
 
+  const getCatalogReturn = useCallback(() => {
+    return catalogReturnRef.current;
+  }, []);
+
   return (
-    <IntegrationsStateContext.Provider value={{ getFromIntegrations, getFromCollection }}>
+    <IntegrationsStateContext.Provider
+      value={{ getFromIntegrations, getFromCollection, getCatalogReturn }}
+    >
       {children}
     </IntegrationsStateContext.Provider>
   );

@@ -58,13 +58,19 @@ export class SignificantEventsAppPlugin
     coreSetup.application.register({
       id: SIGNIFICANT_EVENTS_APP_ID,
       title: i18n.translate('xpack.significantEventsApp.appTitle', {
-        defaultMessage: 'Significant Events',
+        defaultMessage: 'Nightshift Management',
       }),
       euiIconType: 'logoElastic',
       appRoute: SIGNIFICANT_EVENTS_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.management,
       visibleIn: [],
-      keywords: ['significant events', 'sig events', 'discovery'],
+      keywords: [
+        'nightshift management',
+        'nightshift',
+        'significant events',
+        'sig events',
+        'discovery',
+      ],
       deepLinks: [
         {
           id: 'knowledge_indicators' satisfies SignificantEventsLinkId,
