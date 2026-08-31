@@ -38300,6 +38300,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -50639,6 +50656,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -92881,6 +92915,16 @@ components:
       description: The description for the case.
       maxLength: 30000
       type: string
+    Cases_case_extended_fields:
+      additionalProperties:
+        maxLength: 30000
+        type: string
+      description: |
+        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+      maxProperties: 500
+      title: Case extended fields
+      type: object
+      x-state: Technical preview; added in 9.5.0
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -93221,6 +93265,13 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -93728,6 +93779,8 @@ components:
           type: array
         description:
           $ref: '#/components/schemas/Cases_case_description'
+        extended_fields:
+          $ref: '#/components/schemas/Cases_case_extended_fields'
         owner:
           $ref: '#/components/schemas/Cases_owner'
         settings:
@@ -94769,6 +94822,8 @@ components:
                 type: array
               description:
                 $ref: '#/components/schemas/Cases_case_description'
+              extended_fields:
+                $ref: '#/components/schemas/Cases_case_extended_fields'
               id:
                 description: The identifier for the case.
                 maxLength: 30000
@@ -141360,7 +141415,7 @@ components:
           metadata:
             execution_context:
               name: osquery
-              url: /app/osquery/live_queries/new
+              url: /app/osquery/new
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
@@ -142987,7 +143042,7 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.
@@ -145793,6 +145848,12 @@ components:
         - additionalProperties: true
           type: object
           properties:
+            certificate_error_spki_allowlist:
+              default: []
+              description: PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium's trust store.
+              items:
+                type: string
+              type: array
             ignore_https_errors:
               default: false
               description: Ignore HTTPS errors.

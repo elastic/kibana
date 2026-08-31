@@ -61,6 +61,9 @@
     // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
     // knip can't trace dynamic require.resolve() calls.
     "typescript-7",
+    // @rsdoctor/rspack-plugin is loaded lazily via nativeRequire() in the
+    // @kbn/rspack-optimizer rspack_runtime shim; knip can't trace dynamic require.
+    "@rsdoctor/rspack-plugin",
     // Owned by @kbn/connector-specs (which declares its own graphql) and referenced
     // as a dynamic string by @kbn/evals-phoenix-executor's codegen script; the root
     // declaration backs that untraceable usage, so knip's partial graph flags it.

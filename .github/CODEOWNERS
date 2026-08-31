@@ -505,6 +505,7 @@ src/platform/packages/shared/deeplinks/agent_builder @elastic/workchat-eng
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/context-engine @elastic/context-eng
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
+src/platform/packages/shared/deeplinks/evals @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/search-ml-ux
@@ -1411,6 +1412,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/conte
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engineering
@@ -1427,6 +1429,8 @@ x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
+x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
@@ -2642,6 +2646,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitoring/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
@@ -3138,6 +3143,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
+# Nightshift investigations managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+
 # PND managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
 # Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
@@ -3157,6 +3165,8 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @e
 
 # Threat intel supply pipeline
 src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-threat-hunting

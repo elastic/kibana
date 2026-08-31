@@ -181,17 +181,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`
-          "invalid params: [
-            {
-              \\"code\\": \\"custom\\",
-              \\"path\\": [
-                \\"browserTimezone\\"
-              ],
-              \\"message\\": \\"Invalid timezone\\"
-            }
-          ]"
-        `)
+        expect(body.message).toEqual('invalid params: browserTimezone: Invalid timezone')
       );
   });
 
