@@ -15,6 +15,47 @@ import type { AttackAttachmentPayload } from '../../../../common/cases/attachmen
 export type CaseAttachment = CaseUI['comments'][number];
 
 /**
+ * Column ids for the attacks section of the case Attachments tab.
+ *
+ * Stable identifiers rather than field paths: the user's persisted column selection is keyed
+ * off them, so renaming one silently discards a saved selection.
+ */
+export const ATTACK_TAB_COLUMN_ID = {
+  actions: 'actions',
+  detectedOn: 'detectedOn',
+  title: 'title',
+  alerts: 'alerts',
+  summary: 'summary',
+  riskScore: 'riskScore',
+  status: 'status',
+  attachedBy: 'attachedBy',
+  attachedAt: 'attachedAt',
+} as const;
+
+export type AttackTabColumnId = (typeof ATTACK_TAB_COLUMN_ID)[keyof typeof ATTACK_TAB_COLUMN_ID];
+
+/**
+ * The columns shown before the user picks their own, in render order.
+ *
+ * `actions` is absent because it is a leading control column, which the grid renders outside
+ * the visible-column list; risk score, status and the attachment-provenance columns are
+ * available from the column picker.
+ */
+export const DEFAULT_ATTACK_TAB_COLUMN_IDS: readonly AttackTabColumnId[] = [
+  ATTACK_TAB_COLUMN_ID.detectedOn,
+  ATTACK_TAB_COLUMN_ID.title,
+  ATTACK_TAB_COLUMN_ID.alerts,
+  ATTACK_TAB_COLUMN_ID.summary,
+];
+
+/**
+ * localStorage key for the persisted column selection, namespaced to the case attachment so it
+ * cannot collide with the same columns on the Attacks page or with the entities section.
+ */
+export const ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY =
+  'securitySolution.attackDiscovery.cases.attachment.columns';
+
+/**
  * A `security.attack` attachment narrowed to the fields the attachments section renders: the
  * attack document id, the snapshot metadata, and who attached it when.
  */
