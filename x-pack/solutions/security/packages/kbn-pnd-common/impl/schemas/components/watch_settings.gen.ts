@@ -217,21 +217,48 @@ export const WatchLedgerEntry = lazySchema(() =>
 export type WatchLedgerEntry = z.infer<typeof WatchLedgerEntry>;
 
 /**
- * Per-watch settings. Optional sections are absent when a watch does not offer them, which is what lets each watch legitimately render a different set of sections.
+ * Legacy per-watch settings projection. Watches are grouping-only; durable settings live on WorkerSettings. Kept so unused mock fixtures continue to parse.
  */
 export const WatchSettings = lazySchema(() =>
   z.object({
     watchId: z.string(),
-    /**
-     * The selected level. The scale itself is shared across every watch, so it is not repeated per watch — see WATCH_AUTONOMY_LEVELS.
-     */
     autonomy: WatchAutonomyLevel,
-    triggers: WatchTriggersSettings.optional(),
-    scopeRouting: WatchScopeRoutingSettings.optional(),
-    workers: z.array(WatchWorkerAttachment).optional(),
-    skills: z.array(WatchSkillAttachment).optional(),
-    approvalGates: z.array(WatchApprovalGate).optional(),
-    runsLedger: z.array(WatchLedgerEntry).optional(),
   })
 );
 export type WatchSettings = z.infer<typeof WatchSettings>;
+
+/**
+ * Durable per-Worker settings stored as managed template values.
+ */
+export const WorkerSettings = lazySchema(() =>
+  z.object({
+    workerId: z.string(),
+    autonomy: WatchAutonomyLevel,
+  })
+);
+export type WorkerSettings = z.infer<typeof WorkerSettings>;
+
+/**
+ * A live registered Worker with Watch membership and durable settings.
+ */
+export const Worker = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    /**
+     * Catalog Watch ids this Worker belongs to, derived from YAML tags
+     */
+    watchIds: z.array(z.string()),
+    enabled: z.boolean(),
+    lastRun: z.string().nullable(),
+    state: WorkerRunState,
+    stateReason: z.string().optional(),
+    lifecycle: Lifecycle.optional(),
+    settings: WorkerSettings,
+    /**
+     * Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.
+     */
+    settingsRevision: z.number().int().min(0).nullable(),
+  })
+);
+export type Worker = z.infer<typeof Worker>;

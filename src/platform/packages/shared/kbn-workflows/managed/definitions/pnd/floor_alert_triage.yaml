@@ -1,0 +1,18 @@
+version: "1"
+name: Alert Triage
+description: Watch Floor alert triage worker stub.
+enabled: false
+tags:
+  - watch
+  - watch-floor
+triggers:
+  - type: manual
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+steps:
+  - name: stub
+    type: console
+    with:
+      message: "Alert Triage worker stub"

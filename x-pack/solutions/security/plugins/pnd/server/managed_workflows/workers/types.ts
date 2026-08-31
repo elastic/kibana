@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { UpdateWatchRequestBody, WatchSettings } from '@kbn/pnd-common';
+import type { UpdateWorkerRequestBody, WorkerSettings } from '@kbn/pnd-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
-export type WatchSettingsPatch = Pick<
-  UpdateWatchRequestBody,
-  'autonomyLevel' | 'triggers' | 'scopeRouting' | 'approvalGate' | 'worker' | 'skill'
->;
+export type WorkerSettingsPatch = Pick<UpdateWorkerRequestBody, 'autonomyLevel'>;
 
-export interface WatchSettingsRegistration {
+export interface WorkerSettingsRegistration {
   createDefaultValues(): ManagedWorkflowTemplateValues;
   migrate(values: Record<string, unknown>): {
     values: ManagedWorkflowTemplateValues;
@@ -21,8 +18,8 @@ export interface WatchSettingsRegistration {
   };
   applyPatch(
     values: ManagedWorkflowTemplateValues,
-    patch: WatchSettingsPatch
+    patch: WorkerSettingsPatch
   ): { values: ManagedWorkflowTemplateValues } | { rejected: string };
   /** Return the raw projection; the registry test guards against API schema stripping. */
-  toSettings(values: ManagedWorkflowTemplateValues): WatchSettings;
+  toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

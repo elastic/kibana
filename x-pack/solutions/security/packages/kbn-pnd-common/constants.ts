@@ -130,6 +130,47 @@ export const WATCH_TIER_TAGS = [
   WATCH_DETECTION_TAG,
 ] as const;
 
+/** Managed Worker workflow ids — tagged Watch members. Dark CTH is the externally settled id. */
+export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
+  'system-security-floor-alert-triage' as const;
+export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
+  'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
+  'system-security-dark-continuous-threat-hunt' as const;
+
+export const SYSTEM_SECURITY_WORKER_IDS = [
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+] as const;
+
+/**
+ * Static Worker catalog: Watch membership and display names for not-yet-installed Workers.
+ * Rendered YAML must still carry the matching `watch` + tier tags.
+ */
+export const SYSTEM_SECURITY_WORKER_CATALOG = [
+  {
+    id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    name: 'Alert Triage',
+    watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    watchTag: WATCH_FLOOR_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+    name: 'Attack Discovery',
+    watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    watchTag: WATCH_FLOOR_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+    name: 'Continuous Threat Hunt',
+    watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
+    watchTag: WATCH_DARK_TAG,
+  },
+] as const;
+
+export type SystemSecurityWorkerCatalogEntry = (typeof SYSTEM_SECURITY_WORKER_CATALOG)[number];
+
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;

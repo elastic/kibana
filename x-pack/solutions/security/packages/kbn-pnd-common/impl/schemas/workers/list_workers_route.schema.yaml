@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: ListWorkers
-      description: List the global worker catalog shared across Security Watches
+      description: List live registered Workers with Watch membership, enablement, settings, and revision
       summary: List workers
       tags:
         - PND API
@@ -23,6 +23,6 @@ paths:
                   workers:
                     type: array
                     items:
-                      $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchWorker'
+                      $ref: '../components/watch_settings.schema.yaml#/components/schemas/Worker'
                 required:
                   - workers

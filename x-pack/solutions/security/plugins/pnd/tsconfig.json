@@ -29,6 +29,5 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/logging-mocks",
-    "@kbn/core-http-server-mocks"
   ]
 }

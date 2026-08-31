@@ -67,7 +67,7 @@ describe('PndPlugin feature-flag gating', () => {
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
     });
 
-    it('does not install managed watch workflows on start', () => {
+    it('does not install managed worker workflows on start', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: false })));
       const coreStart = coreMock.createStart();
 
@@ -111,7 +111,7 @@ describe('PndPlugin feature-flag gating', () => {
       expect(registerRoutes).toHaveBeenCalled();
     });
 
-    it('installs managed watch workflows during start', () => {
+    it('installs managed worker workflows during start', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
       const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };

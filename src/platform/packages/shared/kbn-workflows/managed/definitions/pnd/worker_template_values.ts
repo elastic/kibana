@@ -9,7 +9,15 @@
 
 import type { ManagedWorkflowTemplateValues } from '../../types';
 
-export interface PndWatchTemplateValues extends ManagedWorkflowTemplateValues {
+export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
 }
+
+export const renderCommonWorkerYaml = (
+  yaml: string,
+  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
+): string =>
+  yaml
+    .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
+    .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);

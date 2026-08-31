@@ -32,6 +32,7 @@ import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
+import { WorkersService } from './services/workers/workers_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 
 export class PndPlugin
@@ -42,8 +43,9 @@ export class PndPlugin
   private spaces?: PndStartDependencies['spaces'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
-  /** Created during `start`; routes resolve it lazily after managed-workflow initialization. */
+  /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
+  private workersService?: WorkersService;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -95,6 +97,7 @@ export class PndPlugin
       config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
+      getWorkersService: () => this.requireWorkersService(),
     });
 
     return {};
@@ -122,13 +125,9 @@ export class PndPlugin
       return undefined;
     });
 
-    // Mock mode changes presentation data only; durable settings and enablement still use Workflows.
-    this.watchesService = new WatchesService(
-      management,
-      managedWorkflows,
-      this.logger,
-      this.config.ui.useMockData
-    );
+    // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
+    this.watchesService = new WatchesService();
+    this.workersService = new WorkersService(management, managedWorkflows, this.logger);
 
     return {};
   }
@@ -138,6 +137,13 @@ export class PndPlugin
       throw new Error('Watches service is not available until the PND plugin has started');
     }
     return this.watchesService;
+  }
+
+  private requireWorkersService(): WorkersService {
+    if (!this.workersService) {
+      throw new Error('Workers service is not available until the PND plugin has started');
+    }
+    return this.workersService;
   }
 
   private getSpaceId(request: KibanaRequest): string {
