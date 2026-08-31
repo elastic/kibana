@@ -39,7 +39,7 @@ const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
  * A promise-like rejection whose derived promises are already handled.
  * `retrieve` is fire-and-forget and drops its internal chain, so a plain
  * rejected mock would surface as an unhandled rejection in the test runner;
- * this keeps the failure-path test focused on the emission semantics.
+ * this keeps the failure-path test focused on generation semantics.
  */
 class HandledRejection {
   private readonly promise: Promise<unknown>;

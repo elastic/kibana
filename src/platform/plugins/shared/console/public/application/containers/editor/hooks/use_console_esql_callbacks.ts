@@ -26,6 +26,7 @@ interface UseConsoleEsqlCallbacksParams {
   http: ContextValue['services']['http'];
   licensing: ContextValue['services']['licensing'];
   data: ContextValue['services']['data'];
+  /** Reads the latest autocomplete_entities refresh generation for lazy cache invalidation. */
   getEntitiesRefreshGeneration: () => number;
 }
 

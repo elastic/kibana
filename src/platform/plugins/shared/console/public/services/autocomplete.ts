@@ -95,6 +95,10 @@ export class AutocompleteInfo {
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   public readonly isLoading$ = this._isLoading$.asObservable();
 
+  /**
+   * Advances after every successful autocomplete_entities refresh, so consumers
+   * can lazily invalidate caches on the same clock as REST autocomplete.
+   */
   private entitiesRefreshGeneration = 0;
   public readonly getEntitiesRefreshGeneration = (): number => this.entitiesRefreshGeneration;
 
