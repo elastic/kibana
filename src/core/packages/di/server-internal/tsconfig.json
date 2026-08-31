@@ -16,12 +16,24 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-capabilities-server-mocks",
     "@kbn/core-di",
     "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
     "@kbn/core-di-server",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
+    "@kbn/core-http-server-mocks",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-lifecycle-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-security-common",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-user-profile-common",
   ]
 }

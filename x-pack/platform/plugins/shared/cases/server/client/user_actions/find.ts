@@ -18,7 +18,12 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
-import { formatSavedObject, formatSavedObjects, matchesSearch } from './utils';
+import {
+  formatSavedObject,
+  formatSavedObjects,
+  matchesSearch,
+  projectUserActionForSearch,
+} from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
@@ -131,7 +136,27 @@ const findWithSearch = async ({
     allUserActions.map((so) => ({ owner: so.attributes.owner, id: so.id }))
   );
 
-  const filtered = allUserActions.filter((so) => matchesSearch(so.attributes, search));
+  /**
+   * Document-level match first, then project extended_fields payloads so a
+   * multi-field save only returns the fields that explain the hit (author hits
+   * keep the full map). Projection is response-only — stored SOs are untouched.
+   */
+  const filtered = allUserActions.flatMap((so) => {
+    if (!matchesSearch(so.attributes, search)) {
+      return [];
+    }
+
+    const projectedAttributes = projectUserActionForSearch(so.attributes, search);
+    if (projectedAttributes == null) {
+      return [];
+    }
+
+    if (projectedAttributes === so.attributes) {
+      return [so];
+    }
+
+    return [{ ...so, attributes: projectedAttributes }];
+  });
 
   const currentPage = page ?? DEFAULT_PAGE;
   const currentPerPage = perPage ?? DEFAULT_PER_PAGE;

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom-v5-compat';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
@@ -33,6 +33,7 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
           agentId="agent-1"
           conversationId={conversationId}
           title="My conversation"
+          icon="comment"
           isActive={false}
           routeConversationId={conversationId}
           permissions={{

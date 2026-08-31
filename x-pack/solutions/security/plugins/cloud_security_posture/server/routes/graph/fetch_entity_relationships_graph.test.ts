@@ -54,8 +54,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       // ENTITY_RELATIONSHIP_FIELDS has more than 8 entries, so the query is batched into
@@ -80,8 +79,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: false,
+        entityStoreIndexName: null,
       });
 
       // Should not call ESQL when index does not exist
@@ -101,8 +99,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds: [{ id: 'entity-1', isOrigin: false }],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
@@ -129,8 +126,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const batchCount = Math.ceil(
@@ -182,8 +178,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const batchCount = Math.ceil(
@@ -213,8 +208,7 @@ describe('fetchEntityRelationships', () => {
           esClient,
           logger,
           entityIds,
-          spaceId: 'default',
-          entityStoreIndexExists: true,
+          entityStoreIndexName: '.entities.v2.latest.default-00001',
         })
       ).rejects.toThrow('Connection refused');
     });
@@ -237,8 +231,7 @@ describe('fetchEntityRelationships', () => {
           esClient,
           logger,
           entityIds: [{ id: 'entity-1', isOrigin: true }],
-          spaceId: 'default',
-          entityStoreIndexExists: true,
+          entityStoreIndexName: '.entities.v2.latest.default-00001',
         })
       ).rejects.toThrow('Batch 2 failed');
     });
@@ -257,8 +250,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds: [{ id: 'entity-1', isOrigin: true }],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
@@ -300,8 +292,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds: [{ id: 'entity-1', isOrigin: true }],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       expect(result.records).toEqual([...batch1Records, ...batch2Records]);
@@ -323,8 +314,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];

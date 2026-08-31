@@ -121,7 +121,7 @@ export const PrivateLocationsTable = ({
             <EuiButtonIcon
               data-test-subj="syntheticsExpandLocationAgents"
               size="xs"
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               aria-label={label}
               onClick={() => toggleRow(item.id)}
             />

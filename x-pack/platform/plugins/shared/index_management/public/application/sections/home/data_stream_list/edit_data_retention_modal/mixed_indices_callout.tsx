@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -30,16 +31,13 @@ export const MixedIndicesCallout = ({
   const { core } = useAppContext();
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate(
         'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMTitle',
         { defaultMessage: 'Some indices are managed by ILM' }
       )}
-      color="warning"
-      iconType="warning"
       data-test-subj="someIndicesAreManagedByILMCallout"
-    >
-      <p>
+      text={
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
           defaultMessage="One or more indices are managed by an ILM policy ({viewAllIndicesLink}). Updating data retention for this data stream won't affect these indices. Instead you will have to update the {ilmPolicyLink} policy."
@@ -68,7 +66,7 @@ export const MixedIndicesCallout = ({
             ),
           }}
         />
-      </p>
-    </EuiCallOut>
+      }
+    />
   );
 };

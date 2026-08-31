@@ -79,7 +79,7 @@ const getDeleteLabelFromRegistry = ({
   };
 
   const attachmentType = registry.get(attachmentTypeId);
-  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+  const attachmentLabel = attachmentType.getRemovalActivity?.(props).event ?? null;
 
   return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
 };
@@ -119,6 +119,7 @@ const getCreateCommentUserAction = ({
   userProfiles,
   caseData,
   unifiedAttachmentTypeRegistry,
+  permissions,
   attachment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -152,6 +153,7 @@ const getCreateCommentUserAction = ({
       userProfiles,
       attachment,
       unifiedAttachmentTypeRegistry,
+      permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
       handleDeleteComment,
@@ -174,6 +176,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   casesConfiguration,
   userProfiles,
   unifiedAttachmentTypeRegistry,
+  permissions,
   userAction,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -210,6 +213,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userProfiles,
         userAction: attachmentUserAction,
         unifiedAttachmentTypeRegistry,
+        permissions,
         attachment,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

@@ -12,10 +12,9 @@ import type {
   FormBasedLayer,
   FramePublicAPI,
   LensLayerType,
+  OriginalColumn,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
-
-import type { OriginalColumn } from '../../../../common/types';
 
 /**
  * Output from ES|QL query generation containing column mappings and partial row info.

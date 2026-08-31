@@ -107,6 +107,7 @@ import {
 } from './maintenance_windows/maintenance_windows_service.mock';
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { repairUiamApiKey } from './lib/repair_uiam_api_key';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -119,6 +120,14 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 jest.mock('../monitoring/rule_result_service');
+
+// The real detection helpers are kept so these tests exercise the actual matching; only the
+// side-effecting re-grant is stubbed.
+jest.mock('./lib/repair_uiam_api_key', () => ({
+  ...jest.requireActual('./lib/repair_uiam_api_key'),
+  repairUiamApiKey: jest.fn(),
+}));
+const mockRepairUiamApiKey = repairUiamApiKey as jest.MockedFunction<typeof repairUiamApiKey>;
 
 jest.mock('../rules_client/lib/get_alert_from_raw');
 const mockGetRuleFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
@@ -3520,6 +3529,77 @@ describe('Task Runner', () => {
         tags: ['rule-run-failed', 'framework-error'],
       }
     );
+  });
+
+  test('re-grants the UIAM API key when the rule type throws a missing key error', async () => {
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    ruleType.executor.mockImplementation(async () => {
+      throw Object.assign(new Error('security_exception'), {
+        statusCode: 401,
+        body: {
+          error: {
+            type: 'security_exception',
+            caused_by: { authentication_error_code: '0x28D520' },
+          },
+        },
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+
+    await taskRunner.run();
+
+    expect(mockRepairUiamApiKey).toHaveBeenCalledTimes(1);
+    expect(mockRepairUiamApiKey).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleId: '1', spaceId: 'default' })
+    );
+  });
+
+  test('re-grants the UIAM API key when a rule reports a missing key without throwing', async () => {
+    // Security Solution's detection rules record a failed run rather than throwing, so the error
+    // never reaches the catch in run() and only survives as the recorded message.
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const taskRunner = createTaskRunner();
+
+    ruleResultService.getLastRunResults.mockImplementation(() => ({
+      errors: [
+        {
+          message:
+            'unable to fetch exception list items, message: "security_exception\n\tCaused by:\n\t\tsecurity_exception: failed to authenticate cloud API key: [0x28D520]"',
+          userError: false,
+        },
+      ],
+      warnings: [],
+      outcomeMessage: '',
+    }));
+
+    await taskRunner.run();
+
+    expect(mockRepairUiamApiKey).toHaveBeenCalledTimes(1);
+    expect(mockRepairUiamApiKey).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleId: '1', spaceId: 'default' })
+    );
+  });
+
+  test('does not re-grant the UIAM API key for an unrelated reported failure', async () => {
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const taskRunner = createTaskRunner();
+
+    ruleResultService.getLastRunResults.mockImplementation(() => ({
+      errors: [{ message: 'an error occurred', userError: false }],
+      warnings: [],
+      outcomeMessage: '',
+    }));
+
+    await taskRunner.run();
+
+    expect(mockRepairUiamApiKey).not.toHaveBeenCalled();
   });
 
   test('returns user error if all the errors reported by getLastRunResults are user error', async () => {

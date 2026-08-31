@@ -1,5 +1,8 @@
 {
   "sha1": "aa22bdd03f2f5f2b7fe230d95a6d21603487142f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d2014f4df575e52-44c5e30280778f9",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 122,
-        "column": 10
+        "line": 121,
+        "column": 17
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 152,
-        "column": 10
+        "line": 138,
+        "column": 7
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 79,
+        "column": 1
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 103,
+        "column": 27
       }
     }
   ]

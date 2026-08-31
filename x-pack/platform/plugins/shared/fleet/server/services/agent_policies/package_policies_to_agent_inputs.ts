@@ -7,6 +7,7 @@
 import apm from 'elastic-apm-node';
 import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
@@ -33,7 +34,7 @@ import {
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
-import { FleetError, PackagePolicyValidationError } from '../../errors';
+import { PackagePolicyValidationError } from '../../errors';
 import {
   packagePolicyInputAllowsUndefinedDataStreamType,
   getInputEffectiveName,
@@ -288,6 +289,96 @@ export const recompileInputsWithAgentVersion = async (
   return inputs;
 };
 
+/**
+ * Compile inputs for `agentVersion` and persist them into `inputs_for_versions` so later reads do
+ * not pay the compile cost again.
+ *
+ * This can run from read only endpoints, since `getFullAgentPolicy` is reachable from the agent
+ * policy GET handlers, so the write is best effort in two ways. The caller still gets the freshly
+ * compiled inputs when persisting fails, and the update is guarded by the version that was read so
+ * a concurrent backfill of a different agent version is never dropped by our stale copy of
+ * `inputs_for_versions`.
+ *
+ * No variant `.fleet-policies` document is written from here. Only the deploy path writes those,
+ * and it compiles through the same helper, so a policy backfilled by a read is picked up on the
+ * next deploy rather than being left inconsistent.
+ */
+const backfillInputsForVersion = async ({
+  packageInfo,
+  packagePolicy,
+  agentVersion,
+  soClient,
+  savedObjectType,
+  inputsForVersions,
+  version,
+}: {
+  packageInfo: PackageInfo;
+  packagePolicy: PackagePolicy;
+  agentVersion: string;
+  soClient: SavedObjectsClientContract;
+  savedObjectType: string;
+  inputsForVersions?: Record<string, PackagePolicyInput[]>;
+  version?: string;
+}): Promise<PackagePolicyInput[] | undefined> => {
+  const logger = appContextService.getLogger();
+  const span = apm.startSpan(
+    `compile packagePolicySO inputs_for_versions ${packageInfo.name}-${packageInfo.version} ${agentVersion}`,
+    'full-agent-policy'
+  );
+
+  try {
+    let versionInputs: PackagePolicyInput[];
+
+    try {
+      versionInputs = await recompileInputsWithAgentVersion(
+        packageInfo,
+        packagePolicy,
+        agentVersion,
+        soClient
+      );
+    } catch (error) {
+      // Missing package assets or a malformed template would otherwise abort the whole agent policy
+      // read with the same failure mode this change set out to remove.
+      logger.warn(
+        `Failed to compile inputs for agent version ${agentVersion} in package policy ${packagePolicy.id}, falling back to its default inputs: ${error.message}`
+      );
+      return undefined;
+    }
+
+    try {
+      await soClient.update<PackagePolicySOAttributes>(
+        savedObjectType,
+        packagePolicy.id,
+        {
+          inputs_for_versions: {
+            ...inputsForVersions,
+            [agentVersion]: versionInputs,
+          },
+        },
+        { version }
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+        // Another request backfilled a version between our read and this write, so the entry we
+        // would have written is stale. Whatever is still missing is backfilled by the next read.
+        logger.debug(
+          `Skipped persisting inputs for agent version ${agentVersion} in package policy ${packagePolicy.id}, the saved object changed concurrently`
+        );
+      } else {
+        // Read only routes pass a request scoped client that may not be allowed to write, which
+        // would otherwise recompile on every request with nothing in the logs to show for it.
+        logger.warn(
+          `Failed to persist inputs for agent version ${agentVersion} in package policy ${packagePolicy.id}, they will be recompiled on the next read: ${error.message}`
+        );
+      }
+    }
+
+    return versionInputs;
+  } finally {
+    span?.end();
+  }
+};
+
 export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
@@ -322,37 +413,60 @@ export const storedPackagePoliciesToAgentInputs = async (
       appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
       hasAgentVersionConditions
     ) {
-      const span = apm.startSpan(
+      const savedObjectType = await getPackagePolicySavedObjectType();
+      const readSpan = apm.startSpan(
         `read packagePolicySO inputs_for_versions ${packageInfo!.name}-${
           packageInfo!.version
         } ${agentVersion}`,
         'full-agent-policy'
       );
       const packagePolicySO = await soClient?.get<PackagePolicySOAttributes>(
-        await getPackagePolicySavedObjectType(),
+        savedObjectType,
         packagePolicy.id
       );
-      const inputsForVersions = packagePolicySO?.attributes.inputs_for_versions;
-      const hasVersionSpecificInputs =
-        inputsForVersions && Object.keys(inputsForVersions).length > 0;
+      readSpan?.end();
 
-      if (hasVersionSpecificInputs) {
-        // Package has version conditions - we should have compiled inputs for this version
-        const versionInputs = inputsForVersions[agentVersion];
+      const inputsForVersions = packagePolicySO?.attributes.inputs_for_versions;
+      const hasVersionSpecificInputs = Boolean(
+        inputsForVersions && Object.keys(inputsForVersions).length > 0
+      );
+      // `hasAgentVersionConditions` is computed once per agent policy, so it is true for every
+      // package policy on a policy where at least one package has version conditions. Narrow it to
+      // this package policy so we never compile and persist version specific inputs for a package
+      // that has none. Template level conditions only become visible once `inputs_for_versions`
+      // exists, which is why both signals are checked.
+      const packageHasVersionCondition = Boolean(
+        packagePolicy.package_agent_version_condition ?? packageInfo?.conditions?.agent?.version
+      );
+
+      if (hasVersionSpecificInputs || packageHasVersionCondition) {
+        let versionInputs = inputsForVersions?.[agentVersion];
+
         if (!versionInputs) {
-          span?.end();
-          throw new FleetError(
-            `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}. ` +
-              `Available versions: ${Object.keys(inputsForVersions).join(', ')}`
-          );
+          // Not backfilled yet, e.g. right after a Kibana upgrade widens the default version set
+          // (see getAgentVersionsForVersionSpecificPolicies) before this package policy has been
+          // recompiled for it, or the package policy predates `enableVersionSpecificPolicies` and
+          // has no `inputs_for_versions` at all. Compile on the fly so the read still succeeds.
+          versionInputs = await backfillInputsForVersion({
+            packageInfo: packageInfo!,
+            packagePolicy,
+            agentVersion,
+            soClient: soClient!,
+            savedObjectType,
+            inputsForVersions,
+            version: packagePolicySO?.version,
+          });
         }
-        packagePolicyWithUpdatedInputs = {
-          ...packagePolicy,
-          inputs: versionInputs,
-        };
+
+        // `versionInputs` is undefined only when the compile itself failed. Fall back to the
+        // package policy's default inputs rather than failing the whole agent policy read.
+        if (versionInputs) {
+          packagePolicyWithUpdatedInputs = {
+            ...packagePolicy,
+            inputs: versionInputs,
+          };
+        }
       }
-      // If no version-specific inputs exist, package doesn't have version conditions - use default inputs
-      span?.end();
     }
 
     fullInputs.push(

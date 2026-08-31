@@ -13,7 +13,12 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerList } from './list';
-import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
+import {
+  ProjectPickerStateProvider,
+  useProjectPickerActions,
+  type ProjectPickerStateProviderProps,
+} from '../../state';
+import { FilterOperator, type FilterExpressionValue } from '../../utils/filter_input_codec';
 
 class MockIntersectionObserver {
   static instances: MockIntersectionObserver[] = [];
@@ -57,19 +62,27 @@ const createProject = (id: string, tags: Record<string, string> = {}): CPSProjec
   ...tags,
 });
 
-const defaultProps: Pick<ProjectPickerStateProviderProps, 'availableProjects'> = {
+const defaultProps = {
   availableProjects: Array.from({ length: 10 }, () => ({
     _id: faker.string.uuid(),
     _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
     _alias: faker.company.name(),
     _organisation: faker.company.name(),
     _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
-    _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+    _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+  })),
+  originProjectId: 'p1',
+  defaultProjectRoutingGetter: () => '',
+  currentProjectRoutingGetter: () => '',
+  onProjectRoutingChange: jest.fn(),
+  fetchProjectsByRouting: jest.fn(async () => ({
+    origin: null,
+    linkedProjects: [],
   })),
 };
 
 const renderComponent = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>> = {}
+  props: Partial<Omit<ProjectPickerStateProviderProps, 'children'>> = {}
 ) => {
   return render(
     <ProjectPickerStateProvider {...defaultProps} {...props}>
@@ -79,7 +92,7 @@ const renderComponent = (
 };
 
 const ProjectPickerListWithScrollContainer = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>>
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'controlsState'>>
 ) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -93,9 +106,35 @@ const ProjectPickerListWithScrollContainer = (
 };
 
 const renderComponentWithScrollContainer = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>> = {}
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'controlsState'>> = {}
 ) => {
   return render(<ProjectPickerListWithScrollContainer {...props} />);
+};
+
+const AddFilterExpression = ({ expression }: { expression: FilterExpressionValue }) => {
+  const actions = useProjectPickerActions();
+
+  return (
+    <button
+      type="button"
+      data-test-subj="addFilterExpression"
+      onClick={() => actions.addFilterExpression({ expression })}
+    />
+  );
+};
+
+const createDeferredFetch = () => {
+  let resolve!: (value: { origin: CPSProject | null; linkedProjects: CPSProject[] }) => void;
+  const fetchProjectsByRouting = jest.fn(
+    () =>
+      new Promise<{ origin: CPSProject | null; linkedProjects: CPSProject[] }>((res) => {
+        resolve = res;
+      })
+  );
+  return {
+    fetchProjectsByRouting,
+    resolve: (...args: Parameters<typeof resolve>) => resolve(...args),
+  };
 };
 
 describe('ProjectPickerList', () => {
@@ -141,7 +180,7 @@ describe('ProjectPickerList', () => {
       await user.click(lastIncludedProjectSwitchElement);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
-      expect(error.message).toContain('Unable to perform pointer interaction');
+      expect((error as Error).message).toContain('Unable to perform pointer interaction');
     } finally {
       expect(lastIncludedProjectSwitchElement).toHaveAttribute('aria-checked', 'true');
     }
@@ -389,32 +428,102 @@ describe('ProjectPickerList', () => {
     });
   });
 
-  describe('read-only mode', () => {
+  describe('controls state', () => {
     const taggedProjects = [
       createProject('project-a', { env: 'prod-a' }),
       createProject('project-b', { env: 'prod-b' }),
     ];
 
-    const renderReadOnlyList = () =>
-      renderComponent({ availableProjects: taggedProjects, isReadOnly: true });
+    describe('disabled controls state', () => {
+      it('renders inclusion switches and per-project context menus as disabled', () => {
+        renderComponent({
+          availableProjects: taggedProjects,
+          controlsState: 'disabled',
+        });
 
-    it('does not render inclusion switches or per-project context menus', () => {
-      renderReadOnlyList();
+        expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
+        expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).toBeDisabled();
+        expect(screen.queryByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
+        expect(screen.queryByTestId('projectPickerListItemContextMenu-project-b')).toBeDisabled();
+      });
 
-      expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
-      expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).toBeDisabled();
-      expect(screen.queryByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
-      expect(screen.queryByTestId('projectPickerListItemContextMenu-project-b')).toBeDisabled();
+      it('still opens the tags popover when the tags badge is clicked', async () => {
+        const user = userEvent.setup();
+        renderComponent({
+          availableProjects: taggedProjects,
+          controlsState: 'disabled',
+        });
+
+        const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+        await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
+
+        await expect(screen.findByLabelText('Project tags')).resolves.toBeInTheDocument();
+      });
     });
 
-    it('still opens the tags popover when the tags badge is clicked', async () => {
+    describe('hidden controls state', () => {
+      it('does not render the project inclusion switches', () => {
+        renderComponent({
+          availableProjects: taggedProjects,
+          controlsState: 'hidden',
+        });
+
+        expect(
+          screen.queryByTestId('projectPickerListItemSwitch-project-a')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('projectPickerListItemSwitch-project-b')
+        ).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('pending filter proposal', () => {
+    const taggedProjects = [
+      createProject('project-a', { env: 'prod-a' }),
+      createProject('project-b', { env: 'prod-b' }),
+    ];
+
+    it('shows a loader and disables row interactions while a proposal is in flight, then re-enables them once it resolves', async () => {
       const user = userEvent.setup();
-      renderReadOnlyList();
+      const { fetchProjectsByRouting, resolve } = createDeferredFetch();
 
-      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
-      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
+      render(
+        <ProjectPickerStateProvider
+          {...defaultProps}
+          availableProjects={taggedProjects}
+          fetchProjectsByRouting={fetchProjectsByRouting}
+        >
+          <AddFilterExpression
+            expression={{ operator: FilterOperator.EQUALS, tagName: 'env', tagValue: 'prod-a' }}
+          />
+          <ProjectPickerList />
+        </ProjectPickerStateProvider>
+      );
 
-      await expect(screen.findByLabelText('Project tags')).resolves.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerListLoadingIndicator')).not.toBeInTheDocument();
+      expect(screen.getByTestId('projectPickerListItemSwitch-project-a')).not.toBeDisabled();
+
+      await user.click(screen.getByTestId('addFilterExpression'));
+
+      await waitFor(() => {
+        expect(fetchProjectsByRouting).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('projectPickerListLoadingIndicator')).toBeInTheDocument();
+      expect(screen.getByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
+      expect(screen.getByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
+
+      resolve({ origin: null, linkedProjects: [taggedProjects[0]] });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('projectPickerListLoadingIndicator')).not.toBeInTheDocument();
+      });
+
+      // project-a is now the only visible project (env:prod-a matched only it), so its own
+      // switch is separately disabled by the "last included project" guard; assert re-enablement
+      // via its context menu button instead, which isn't subject to that guard.
+      expect(screen.getByTestId('projectPickerListItemContextMenu-project-a')).not.toBeDisabled();
     });
   });
 });

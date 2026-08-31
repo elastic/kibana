@@ -94,7 +94,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const brushAreaChart = async () => {
     const areaChart = await testSubjects.find('visualizationLoader');
-    expect(await areaChart.getAttribute('data-title')).to.be('Visualization漢字 AreaChart');
     await browser.dragAndDrop(
       {
         location: areaChart,

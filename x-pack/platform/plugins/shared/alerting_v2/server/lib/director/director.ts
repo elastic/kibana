@@ -10,6 +10,7 @@ import { inject, injectable } from 'inversify';
 import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
@@ -126,7 +127,15 @@ export class DirectorService {
 
       return { alertEvents: processed, stats: { newEpisodeIds } };
     } finally {
-      await scope.disposeAll();
+      try {
+        await scope.disposeAll();
+      } catch (error) {
+        logger.warn({
+          message: 'Failed to release alert state cache',
+          error,
+          code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
+        });
+      }
     }
   }
 
@@ -192,10 +201,12 @@ export class DirectorService {
 
     if (currentStatus !== result.status) {
       logger.debug({
-        message: `State Transition [${currentAlertEvent.group_hash}]: ${
-          currentStatus ?? 'unknown'
-        } -> ${result.status} (Episode: ${episodeId})`,
-        labels: { group_hash: currentAlertEvent.group_hash, episode_id: episodeId },
+        message: 'Episode status transition',
+        labels: {
+          group_hash: currentAlertEvent.group_hash,
+          episode_id: episodeId,
+          resource: `${currentStatus ?? 'unknown'}->${result.status}`,
+        },
       });
     }
 

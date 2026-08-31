@@ -48,7 +48,13 @@ describe('confirmedEvidencesEvaluator', () => {
       {
         status: 'open',
         severity: '80-critical',
-        signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
+        signals: [
+          {
+            type: 'detection',
+            description: 'confirms.',
+            verdict: 'confirms',
+          },
+        ],
       },
     ];
     expect((await evaluate(events, [esqlStep])).score).toBe(1);
@@ -76,7 +82,13 @@ describe('confirmedEvidencesEvaluator', () => {
       {
         status: 'open',
         severity: '80-critical',
-        signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
+        signals: [
+          {
+            type: 'detection',
+            description: 'confirms.',
+            verdict: 'confirms',
+          },
+        ],
       },
     ];
     expect((await evaluate(events, [])).score).toBe(0);
@@ -87,12 +99,24 @@ describe('confirmedEvidencesEvaluator', () => {
       {
         status: 'open',
         severity: '80-critical',
-        signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
+        signals: [
+          {
+            type: 'detection',
+            description: 'confirms.',
+            verdict: 'confirms',
+          },
+        ],
       },
       {
         status: 'open',
         severity: '80-critical',
-        signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
+        signals: [
+          {
+            type: 'detection',
+            description: 'confirms.',
+            verdict: 'confirms',
+          },
+        ],
       },
     ];
     // Only 1 esql call for 2 critical-open events — insufficient per-event coverage
@@ -104,7 +128,13 @@ describe('confirmedEvidencesEvaluator', () => {
       {
         status: 'open',
         severity: '80-critical',
-        signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
+        signals: [
+          {
+            type: 'detection',
+            description: 'confirms.',
+            verdict: 'confirms',
+          },
+        ],
       },
       {
         status: 'open',
