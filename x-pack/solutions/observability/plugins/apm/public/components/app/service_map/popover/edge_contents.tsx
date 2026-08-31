@@ -107,7 +107,10 @@ export function EdgeContents({
         });
       }
     },
-    [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled]
+    [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled],
+    // Popovers surface their own empty state; suppress the global error toast
+    // (e.g. 403 when embedded outside a platinum-gated APM page).
+    { showToastOnError: false }
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
