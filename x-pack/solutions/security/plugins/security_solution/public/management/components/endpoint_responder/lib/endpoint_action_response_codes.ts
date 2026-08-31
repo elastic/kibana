@@ -188,7 +188,12 @@ const CODES = Object.freeze({
     { defaultMessage: 'Failed to kill the process' }
   ),
 
-  // ---------------[ Codes for descendant processes ]------------ \\
+  // ---------------[ Codes for kill-process descendant processes ]------------ \\
+
+  'ra_kill-process_descendant_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantSuccessDone',
+    { defaultMessage: 'Process was killed successfully' }
+  ),
 
   /**
    * Used with descendant processes. The Process was identified as a descendant of the provided root
@@ -203,11 +208,6 @@ const CODES = Object.freeze({
   'ra_kill-process_descendant_error_failure': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantFailureGeneric',
     { defaultMessage: 'Failed to kill process' }
-  ),
-
-  'ra_kill-process_descendant_success_done': i18n.translate(
-    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantSuccessDone',
-    { defaultMessage: 'Process was killed successfully' }
   ),
 
   'ra_kill-process_descendant_error_not-permitted': i18n.translate(

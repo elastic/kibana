@@ -51,6 +51,23 @@ import {
 } from '../service/response_actions/constants';
 import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
+const KILL_PROCESS_RESPONSE_CODES = Object.freeze([
+  'ra_kill-process_success_done',
+  'ra_kill-process_success_partial-descendants',
+  'ra_kill-process_error_not-found',
+  'ra_kill-process_success_no-action',
+  'ra_kill-process_error_not-permitted',
+  'ra_kill-process_error_not-supported',
+  'ra_kill-process_error_invalid-input',
+  'ra_kill-process_error_failure',
+  'ra_kill-process_descendant_error_not-found',
+  'ra_kill-process_descendant_error_failure',
+  'ra_kill-process_descendant_success_done',
+  'ra_kill-process_descendant_error_not-permitted',
+  'ra_kill-process_descendant_error_not-supported',
+  'ra_kill-process_descendant_error_invalid-input',
+]);
+
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate<
@@ -229,8 +246,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         type: 'json',
         content: {
           code: overrides.error
-            ? 'ra_kill-process_error_not-found'
-            : 'ra_kill-process_success_done',
+            ? this.randomKillProcessResponseCode('error')
+            : this.randomKillProcessResponseCode('success'),
           ...(!overrides.error
             ? {
                 command: 'some_command.exe',
@@ -654,6 +671,38 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_scan_error_processing',
       'ra_scan_error_processing-interrupted',
     ]);
+  }
+
+  /**
+   * Returns a random kill-process code for the "main" process
+   */
+  randomKillProcessResponseCode(type?: 'error' | 'success'): string {
+    const codeList = KILL_PROCESS_RESPONSE_CODES.filter((code) => {
+      if (!/_descendant_/.test(code)) {
+        return false;
+      }
+
+      if (!type) {
+        return true;
+      }
+
+      if (type === 'error') {
+        return /_error_/.test(code);
+      }
+
+      return !/_success_/.test(code);
+    });
+
+    return this.randomChoice(codeList);
+  }
+
+  /**
+   * Returns a random kill-process code for a descendant process
+   */
+  randomKillProcessDescendantResponseCode(): string {
+    return this.randomChoice(
+      KILL_PROCESS_RESPONSE_CODES.filter((code) => /_descendant_/.test(code))
+    );
   }
 
   generateActivityLogAction(
