@@ -199,7 +199,6 @@ function PipelineRoutingEdge({
               }
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="add-processing"

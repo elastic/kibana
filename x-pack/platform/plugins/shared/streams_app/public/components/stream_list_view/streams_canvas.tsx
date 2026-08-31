@@ -725,7 +725,7 @@ function StreamsCanvasInner() {
   );
 
   const onNodeDrag = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
+    (_event: MouseEvent | TouchEvent, node: Node) => {
       if (node.type !== 'routingEndpoint') {
         return;
       }
@@ -771,7 +771,7 @@ function StreamsCanvasInner() {
   );
 
   const onNodeDragStop = useCallback(
-    (_event: React.MouseEvent, node: Node, draggedNodes?: Node[]) => {
+    (_event: MouseEvent | TouchEvent, node: Node, draggedNodes?: Node[]) => {
       // Final center-snap (matches the live snap, so nothing jumps on release).
       centerSnapDragged(node, draggedNodes);
 

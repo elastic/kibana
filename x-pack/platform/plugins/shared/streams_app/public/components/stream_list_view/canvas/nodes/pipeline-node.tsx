@@ -32,7 +32,10 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
   const restingShadowClassName = useRestingShadowClassName();
-  const statClassName = statTextClassName(euiTheme.colors.textSubdued, euiTheme.font.familyCode);
+  const statClassName = statTextClassName(
+    euiTheme.colors.textSubdued,
+    euiTheme.font.familyCode ?? euiTheme.font.family
+  );
 
   // The inline pipeline node from the design: a compact pill holding the
   // processor icon and its throughput/latency stats, with the pipeline name

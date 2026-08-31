@@ -138,7 +138,7 @@ export function CanvasContextMenu({
     </EuiContextMenuItem>
   );
 
-  let items: React.ReactNode[];
+  let items: React.ReactElement[];
   if (isPane) {
     // Empty-canvas menu: whole-graph actions only.
     items = [tidyUpAllItem];

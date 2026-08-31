@@ -387,13 +387,7 @@ export function StreamListView() {
           onClose={() => setIsMarketingToastVisible(false)}
         />
       )}
-      <StreamsAppHeader
-        title={pageTitle}
-        tabs={tabs}
-        menu={menu}
-        docLink={streamsDocsLink}
-        padding="m"
-      />
+      <StreamsAppHeader title={pageTitle} tabs={tabs} menu={menu} docLink={streamsDocsLink} />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
         {activeTab === 'canvas' && <StreamsCanvas />}
         {activeTab === 'sources' && <SourcesTable />}

@@ -243,7 +243,7 @@ export function StreamsTreeTable({
     pageIndex: 0,
     pageSize: 25,
   });
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedTypes] = useState<string[]>([]);
   const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
 
   const handleQualityFilterChange = useCallback((keys: string[]) => setSelectedQualities(keys), []);

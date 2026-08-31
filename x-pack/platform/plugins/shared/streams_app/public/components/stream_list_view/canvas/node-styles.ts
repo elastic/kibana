@@ -106,7 +106,6 @@ export const inflateClassName = css`
 // higher-specificity rules in streams_canvas.tsx and should win — so the raise
 // is expressed as a transform plus a shadow only in the resting/hover states.
 export function useRaiseOnHoverClassName() {
-  const { euiTheme } = useEuiTheme();
   return css`
     transition: transform 120ms ease-out, box-shadow 120ms ease-out;
     will-change: transform;
