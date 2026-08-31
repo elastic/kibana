@@ -14,7 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { body?: { status?: string } };
+  with?: { body?: { status?: string }; path?: string };
 }
 
 const investigation = parse(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.yaml) as {
@@ -48,5 +48,19 @@ describe('investigation lifecycle contracts', () => {
       type: 'workflow.fail',
       if: '${{ steps.investigate.error != null }}',
     });
+  });
+
+  it('space-scopes the path of every kibana.request step', () => {
+    // Only generated `kibana.*` connector steps get a space prefix from the engine; a raw
+    // `kibana.request` is sent verbatim, so an unprefixed path writes to the default space and
+    // still returns 200. Asserting over every request step, rather than the ones that exist
+    // today, keeps steps added later covered too.
+    const requestSteps = investigation.steps.filter((step) => step.type === 'kibana.request');
+    const unscoped = requestSteps.filter(
+      (step) => !step.with?.path?.startsWith('/s/{{ workflow.spaceId }}/')
+    );
+
+    expect(requestSteps.length).toBeGreaterThan(0);
+    expect(unscoped.map((step) => `${step.name}: ${step.with?.path}`)).toEqual([]);
   });
 });

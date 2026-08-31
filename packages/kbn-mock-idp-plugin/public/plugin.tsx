@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
+import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
@@ -26,6 +27,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   cloud?: CloudStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
 
 export const plugin: PluginInitializer<
@@ -33,47 +35,57 @@ export const plugin: PluginInitializer<
   void,
   PluginSetupDependencies,
   PluginStartDependencies
-> = (initializerContext: PluginInitializerContext<ConfigType>) => ({
-  setup(coreSetup, plugins) {
-    // Register Mock IDP login page
-    coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
-    coreSetup.application.register({
-      id: 'mock_idp',
-      title: 'Mock IDP',
-      chromeless: true,
-      appRoute: MOCK_IDP_LOGIN_PATH,
-      visibleIn: [],
-      mount: async (params) => {
-        const [[coreStart], { LoginPage }] = await Promise.all([
-          coreSetup.getStartServices(),
-          import('./login_page'),
-        ]);
+> = (initializerContext: PluginInitializerContext<ConfigType>) => {
+  let unregisterRoleSwitcher: (() => void) | undefined;
 
-        ReactDOM.render(
-          <KibanaThemeProvider {...coreStart}>
-            <KibanaContextProvider services={coreStart}>
-              <I18nProvider>
-                <LoginPage config={initializerContext.config.get()} />
-              </I18nProvider>
-            </KibanaContextProvider>
-          </KibanaThemeProvider>,
-          params.element
-        );
+  return {
+    setup(coreSetup, plugins) {
+      // Register Mock IDP login page
+      coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
+      coreSetup.application.register({
+        id: 'mock_idp',
+        title: 'Mock IDP',
+        chromeless: true,
+        appRoute: MOCK_IDP_LOGIN_PATH,
+        visibleIn: [],
+        mount: async (params) => {
+          const [[coreStart], { LoginPage }] = await Promise.all([
+            coreSetup.getStartServices(),
+            import('./login_page'),
+          ]);
 
-        return () => ReactDOM.unmountComponentAtNode(params.element);
-      },
-    });
-  },
-  start(coreStart, plugins) {
-    // Register role switcher dropdown menu in the top right navigation of the Kibana UI
-    coreStart.chrome.navControls.registerRight({
-      order: 4000 + 1, // Make sure it comes after the user menu
-      content: (
-        <KibanaContextProvider services={coreStart}>
-          <RoleSwitcher />
-        </KibanaContextProvider>
-      ),
-    });
-  },
-  stop() {},
-});
+          ReactDOM.render(
+            <KibanaThemeProvider {...coreStart}>
+              <KibanaContextProvider services={coreStart}>
+                <I18nProvider>
+                  <LoginPage config={initializerContext.config.get()} />
+                </I18nProvider>
+              </KibanaContextProvider>
+            </KibanaThemeProvider>,
+            params.element
+          );
+
+          return () => ReactDOM.unmountComponentAtNode(params.element);
+        },
+      });
+    },
+    start(coreStart, plugins) {
+      if (!plugins.developerToolbar) {
+        return;
+      }
+
+      unregisterRoleSwitcher = plugins.developerToolbar.registerItem({
+        id: 'Role Switcher',
+        priority: 1,
+        children: (
+          <KibanaContextProvider services={coreStart}>
+            <RoleSwitcher />
+          </KibanaContextProvider>
+        ),
+      });
+    },
+    stop() {
+      unregisterRoleSwitcher?.();
+    },
+  };
+};
