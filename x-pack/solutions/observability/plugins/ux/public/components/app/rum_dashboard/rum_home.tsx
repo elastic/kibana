@@ -8,12 +8,11 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
@@ -31,13 +30,9 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 export function RumHome() {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
     useKibanaServices();
-
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
-
   const { hasData, loading: isLoading, dataViewTitle } = useHasRumData();
-  // const { loading: isLoading, dataViewTitle } = useHasRumData();
-  // const hasData = true;
-
+  
   const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
         action: {
@@ -104,7 +99,6 @@ export function RumHome() {
         paddingSize: 'none',
       }}
     >
-      <div> FOOOOOOOOO</div>
       <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="standard" />
       
       <EuiPageSection paddingSize="m" restrictWidth={false}>
@@ -114,40 +108,13 @@ export function RumHome() {
           <RumOverview />
         </div>
       </EuiPageSection>
-      {isLoading && <EmptyStateLoading />}
-      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-        <RumOverview />
-      </div>
     </PageTemplateComponent>
   );
 }
 
 function DashboardToolbar() {
-
   return (
     <>
-   <EuiFlexGroup wrap alignItems="flexEnd" gutterSize="s" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <RumDatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <WebApplicationSelect />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UserPercentile />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UxEnvironmentFilter />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
-          <RumDatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
         <EuiFlexItem>
@@ -159,7 +126,11 @@ function DashboardToolbar() {
         <EuiFlexItem>
           <UxEnvironmentFilter />
         </EuiFlexItem>
+        <EuiFlexItem>
+          <RumDatePicker />
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
+      <EuiSpacer size="m" />
+    </>
   );
 }

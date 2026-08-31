@@ -52,19 +52,20 @@ export function useAppMenu(enableInspector: boolean) {
     const items = [
       {
         id: 'addData',
-        label: {i18n.translate('xpack.ux.addDataButtonLabel', {
-                defaultMessage: 'Add data',
-              })}
+        label: i18n.translate('xpack.ux.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        }),
         href: application.getUrlForApp('/apm/tutorial'),
         iconType: 'plus',
       },
     ] as AppMenuItemType[];
+
     if (enableInspector) {
       items.unshift({
         id: 'inspect',
-        label: {i18n.translate('xpack.ux.inspectButtonText', {
-        defaultMessage: 'Inspect',
-      })},
+        label: i18n.translate('xpack.ux.inspectButtonText', {
+          defaultMessage: 'Inspect'
+        }),
         iconType: 'inspect',
         run: () => inspector.open(inspectorAdapters),
         overflow: true,
