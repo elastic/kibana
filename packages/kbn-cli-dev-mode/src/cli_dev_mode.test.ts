@@ -119,6 +119,7 @@ it('passes correct args to sub-classes', () => {
     Array [
       Array [
         Object {
+          "allowlistPluginGroups": undefined,
           "basePath": undefined,
           "cache": true,
           "dist": true,

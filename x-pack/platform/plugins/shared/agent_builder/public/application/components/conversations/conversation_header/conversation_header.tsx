@@ -6,41 +6,32 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConversationRightActions } from './conversation_actions_right';
 import { ConversationTitle } from './conversation_title';
 
-const headerGridStyles = css`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  width: 100%;
-`;
-
-const rightActionsStyles = css`
-  justify-self: end;
+const titleSlotStyles = css`
+  min-width: 0;
 `;
 
 interface ConversationHeaderProps {
-  onClose?: () => void;
   ariaLabelledBy?: string;
 }
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
-  onClose,
-  ariaLabelledBy,
-}) => {
+export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) => {
   return (
-    <div css={headerGridStyles}>
-      {/* Left column — reserved for future controls */}
-      <div />
-
-      {/* Center column — always exactly centered */}
-      <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
-
-      {/* Right column — right-aligned within its 1fr column */}
-      <div css={rightActionsStyles}>
-        <ConversationRightActions onClose={onClose} />
-      </div>
-    </div>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem grow={true} css={titleSlotStyles}>
+        <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ConversationRightActions />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

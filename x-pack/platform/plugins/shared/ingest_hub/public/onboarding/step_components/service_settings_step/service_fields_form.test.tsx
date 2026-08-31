@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyPackagePolicyInputVarField: jest.fn(() => null),
+  DataStreamTypeSelector: jest.fn(() => null),
+  useGetDataStreams: jest.fn(() => ({ data: undefined })),
 }));
 
 import { ServiceFieldsForm } from './service_fields_form';
@@ -129,5 +132,94 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
     const cwSwitchB = screen.getByTestId('serviceSettingsFlyout-inputToggle-ds_b-aws-cloudwatch');
     expect(s3SwitchB).not.toBeChecked();
     expect(cwSwitchB).toBeChecked();
+  });
+});
+
+describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
+  const ECF_SERVICE: AwsServiceMatrixEntry = {
+    id: 'cloudtrail',
+    name: 'AWS CloudTrail',
+    category: 'management_governance',
+    signalTypes: ['logs'],
+    dataStreams: ['cloudtrail'],
+    packageName: 'aws',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    inputs: ['aws-s3', 'aws-cloudwatch'],
+    requiredConfig: ['bucket_arn', 'log_group_arn'],
+    defaultEnabled: true,
+    defaultEnabledInputs: ['aws-s3', 'aws-cloudwatch'],
+    showInUI: true,
+    varDefsByDataStream: {
+      cloudtrail: {
+        title: 'CloudTrail',
+        type: 'logs',
+        inputs: ['aws-s3', 'aws-cloudwatch'],
+        defaultEnabledInputs: ['aws-s3', 'aws-cloudwatch'],
+        requiredConfig: ['bucket_arn', 'log_group_arn'],
+        varDefsByInput: {
+          'aws-s3': {
+            bucket_arn: {
+              name: 'bucket_arn',
+              type: 'text',
+              title: 'Bucket ARN',
+              required: true,
+              show_user: true,
+            },
+          },
+          'aws-cloudwatch': {
+            log_group_arn: {
+              name: 'log_group_arn',
+              type: 'text',
+              title: 'Log Group ARN',
+              required: true,
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: {
+          name: 'bucket_arn',
+          type: 'text',
+          title: 'Bucket ARN',
+          required: true,
+          show_user: true,
+        },
+      },
+      'aws-cloudwatch': {
+        log_group_arn: {
+          name: 'log_group_arn',
+          type: 'text',
+          title: 'Log Group ARN',
+          required: true,
+          show_user: true,
+        },
+      },
+    },
+  };
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('shows both ECF inputs enabled by default for a single data stream', () => {
+    renderForm(ECF_SERVICE);
+    expect(screen.getByTestId('serviceSettingsFlyout-inputToggle-aws-s3')).toBeChecked();
+    expect(screen.getByTestId('serviceSettingsFlyout-inputToggle-aws-cloudwatch')).toBeChecked();
+  });
+
+  it('forces ECF trigger vars to multi-value fields for the no-duplicate flow', () => {
+    renderForm(ECF_SERVICE);
+    const varDefs = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.map(
+      ([props]) => props.varDef
+    );
+
+    const bucketVar = varDefs.find((v: { name?: string }) => v.name === 'bucket_arn');
+    const logGroupVar = varDefs.find((v: { name?: string }) => v.name === 'log_group_arn');
+
+    expect(bucketVar).toMatchObject({ multi: true, required: true });
+    expect(logGroupVar).toMatchObject({ multi: true, required: true });
   });
 });
