@@ -108,5 +108,6 @@ describe('useLensAttributes hook', () => {
     });
 
     expect(extraActions).toHaveLength(1);
+    expect(extraActions[0].id).toBe('openInLens');
   });
 });

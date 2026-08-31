@@ -85184,6 +85184,16 @@ components:
       description: The description for the case.
       maxLength: 30000
       type: string
+    Cases_case_extended_fields:
+      additionalProperties:
+        maxLength: 30000
+        type: string
+      description: |
+        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+      maxProperties: 500
+      title: Case extended fields
+      type: object
+      x-state: Technical preview; added in 9.5.0
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -85524,6 +85534,13 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -86031,6 +86048,8 @@ components:
           type: array
         description:
           $ref: '#/components/schemas/Cases_case_description'
+        extended_fields:
+          $ref: '#/components/schemas/Cases_case_extended_fields'
         owner:
           $ref: '#/components/schemas/Cases_owner'
         settings:
@@ -87072,6 +87091,8 @@ components:
                 type: array
               description:
                 $ref: '#/components/schemas/Cases_case_description'
+              extended_fields:
+                $ref: '#/components/schemas/Cases_case_extended_fields'
               id:
                 description: The identifier for the case.
                 maxLength: 30000
@@ -99546,15 +99567,6 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
-                          documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -99571,17 +99583,6 @@ components:
                                   - auto
                                 type: string
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
-                          json_mode_settings:
-                            additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
-                            type: object
-                            properties:
-                              hide_nulls:
-                                description: When true, fields with null values are hidden while in JSON mode.
-                                type: boolean
-                              wrap_lines:
-                                description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
-                                type: boolean
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -99675,15 +99676,6 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
-                          documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -99693,17 +99685,6 @@ components:
                                   - auto
                                 type: string
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
-                          json_mode_settings:
-                            additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
-                            type: object
-                            properties:
-                              hide_nulls:
-                                description: When true, fields with null values are hidden while in JSON mode.
-                                type: boolean
-                              wrap_lines:
-                                description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
-                                type: boolean
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -99844,15 +99825,6 @@ components:
                             - normal
                           type: string
                       description: 'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
-                    documents_display_mode:
-                      anyOf:
-                        - enum:
-                            - table
-                          type: string
-                        - enum:
-                            - json
-                          type: string
-                      description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -99862,17 +99834,6 @@ components:
                             - auto
                           type: string
                       description: 'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
-                    json_mode_settings:
-                      additionalProperties: false
-                      description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
-                      type: object
-                      properties:
-                        hide_nulls:
-                          description: When true, fields with null values are hidden while in JSON mode.
-                          type: boolean
-                        wrap_lines:
-                          description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
-                          type: boolean
                     row_height:
                       anyOf:
                         - maximum: 20
