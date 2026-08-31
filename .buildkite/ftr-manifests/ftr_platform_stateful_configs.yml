@@ -219,7 +219,6 @@ enabled:
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
-  - x-pack/platform/test/functional/apps/lens/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group4/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
@@ -273,8 +272,6 @@ enabled:
   - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
-  - x-pack/platform/test/search_sessions_integration/config.ts
-  - x-pack/platform/test/search_sessions_integration/config.discover.ts
   - x-pack/platform/test/security_api_integration/anonymous_es_anonymous.config.ts
   - x-pack/platform/test/security_api_integration/anonymous.config.ts
   - x-pack/platform/test/security_api_integration/api_keys.config.ts
