@@ -28,6 +28,7 @@ const getRuleSignals = (event: SignificantEvent) =>
 export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
   name: 'confirmation_alignment',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output, expected }) => {
     const expectedByEvent = expected?.expected_confirmed_rule_uuids;
     if (!expectedByEvent || Object.keys(expectedByEvent).length === 0) {
