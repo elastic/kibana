@@ -17,3 +17,15 @@ export const getConnectorSpecParamsSchema = schema.object({
     },
   }),
 });
+
+export const getConnectorSpecQuerySchema = schema.object({
+  version: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 64,
+      meta: {
+        description: 'An exact historical connector specification version.',
+      },
+    })
+  ),
+});

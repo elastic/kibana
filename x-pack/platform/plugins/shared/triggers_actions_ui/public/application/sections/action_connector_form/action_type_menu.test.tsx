@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionTypeMenu } from './action_type_menu';
+import { ActionTypeMenu, getConnectorIcon } from './action_type_menu';
 import type { GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { AppMockRenderer } from '../test_utils';
@@ -26,6 +26,11 @@ const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+it('uses a catalog-provided connector icon', () => {
+  const icon = 'data:image/svg+xml;base64,dGVzdA==';
+  expect(getConnectorIcon('.declarative-okta', icon)).toBe(icon);
+});
 
 describe('connector_add_flyout', () => {
   let appMockRenderer: AppMockRenderer;

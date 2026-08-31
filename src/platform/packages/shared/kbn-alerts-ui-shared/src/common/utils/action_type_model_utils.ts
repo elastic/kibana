@@ -46,11 +46,15 @@ export function shouldHideWorkflowsOnlyConnector(
 export async function fetchConnectorSpec(
   http: HttpSetup,
   connectorTypeId: string,
+  version?: string,
   signal?: AbortSignal
 ): Promise<ConnectorSpecResponse> {
   const wire = await http.get<ConnectorSpecWireResponse>(
     `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
-    { signal }
+    {
+      signal,
+      ...(version !== undefined ? { query: { version } } : {}),
+    }
   );
   return transformConnectorSpecResponse(wire);
 }

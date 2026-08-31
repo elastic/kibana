@@ -47,6 +47,7 @@ interface Props {
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
+  readOnly?: boolean;
 }
 
 const ConnectorFormComponent: React.FC<Props> = ({
@@ -56,6 +57,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onChange,
   onFormModifiedChange,
   setResetForm,
+  readOnly = false,
 }) => {
   const { form } = useForm({
     defaultValue: connector,
@@ -101,6 +103,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
       <ConnectorFormFields
         actionTypeModel={actionTypeModel}
         isEdit={isEdit}
+        readOnly={readOnly}
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
       />

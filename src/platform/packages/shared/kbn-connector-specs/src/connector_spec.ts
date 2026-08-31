@@ -333,6 +333,12 @@ export interface AuthTypeDef {
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
+  /**
+   * Immutable catalog version for out-of-band connector specifications.
+   * Built-in TypeScript specifications omit this field.
+   */
+  version?: string;
+
   auth?: {
     types: Array<string | AuthTypeDef>;
     headers?: Record<string, AxiosHeaderValue>;

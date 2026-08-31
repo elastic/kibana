@@ -6,37 +6,31 @@
  */
 
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionsClientContext } from '../../../../actions_client';
 import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 
-// All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
-// synthetic non-testable spec to cover the isTestable: false branch.
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
-  return {
-    ...actual,
-    connectorsSpecs: {
-      ...actual.connectorsSpecs,
-      StubNoTest: {
-        metadata: {
-          id: '.stub-no-test',
-          displayName: 'Stub (no test)',
-          minimumLicense: 'basic',
-          supportedFeatureIds: [],
-        },
-        auth: null,
-        schema: null,
-        actions: {},
-        test: { handler: async () => ({}), enabled: false },
-      },
-    },
-  };
-});
-
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const stubNoTestSpec: ConnectorSpec = {
+  version: '1.0.0',
+  metadata: {
+    id: '.stub-no-test',
+    displayName: 'Stub (no test)',
+    description: 'Synthetic connector for tests',
+    minimumLicense: 'basic',
+    supportedFeatureIds: ['workflows'],
+  },
+  actions: {},
+  test: { handler: async () => ({}), enabled: false },
+};
+const specsById = new Map<string, ConnectorSpec>([
+  ...Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec] as const),
+  [stubNoTestSpec.metadata.id, stubNoTestSpec],
+]);
 
 const configurationUtilities = {
   getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
@@ -45,7 +39,17 @@ const configurationUtilities = {
 } as unknown as ActionsConfigurationUtilities;
 
 function createContext(): ActionsClientContext {
-  return { authorization, auditLogger } as unknown as ActionsClientContext;
+  return {
+    authorization,
+    auditLogger,
+    actionTypeRegistry: {
+      tryResolveActionType: (id: string) => ({
+        registeredActionTypeId: id,
+        actionType: {},
+        connectorSpec: specsById.get(id),
+      }),
+    },
+  } as unknown as ActionsClientContext;
 }
 
 describe('getConnectorSpecAsJsonSchema', () => {
@@ -117,6 +121,40 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('schema');
   });
 
+  it('resolves an exact historical version and reports the active version', async () => {
+    const historicalSpec = {
+      ...stubNoTestSpec,
+      version: '1.0.0',
+    };
+    const activeSpec = {
+      ...stubNoTestSpec,
+      version: '2.0.0',
+    };
+    const context = createContext();
+    context.actionTypeRegistry.tryResolveActionType = jest.fn((_id: string, version?: string) => ({
+      registeredActionTypeId: '.declarative',
+      actionType: {},
+      connectorSpec: version === '1.0.0' ? historicalSpec : activeSpec,
+    })) as never;
+
+    const result = await getConnectorSpecAsJsonSchema({
+      context,
+      id: stubNoTestSpec.metadata.id,
+      version: '1.0.0',
+      configurationUtilities,
+    });
+
+    expect(context.actionTypeRegistry.tryResolveActionType).toHaveBeenNthCalledWith(
+      1,
+      stubNoTestSpec.metadata.id,
+      '1.0.0'
+    );
+    expect(result).toMatchObject({
+      version: '1.0.0',
+      activeVersion: '2.0.0',
+    });
+  });
+
   it('returns isTestable true when the spec opts in to testing', async () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
@@ -140,6 +178,28 @@ describe('getConnectorSpecAsJsonSchema', () => {
       getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: '__no_such_spec_connector__',
+        configurationUtilities,
+      })
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('rejects with 404 when an exact historical version is unavailable', async () => {
+    const context = createContext();
+    context.actionTypeRegistry.tryResolveActionType = jest.fn((_id: string, version?: string) =>
+      version
+        ? undefined
+        : {
+            registeredActionTypeId: '.declarative',
+            actionType: {},
+            connectorSpec: stubNoTestSpec,
+          }
+    ) as never;
+
+    await expect(
+      getConnectorSpecAsJsonSchema({
+        context,
+        id: stubNoTestSpec.metadata.id,
+        version: '0.1.0',
         configurationUtilities,
       })
     ).rejects.toMatchObject({ output: { statusCode: 404 } });

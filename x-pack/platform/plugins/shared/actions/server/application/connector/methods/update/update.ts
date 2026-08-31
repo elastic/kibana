@@ -102,18 +102,38 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
+  const connectorValidation =
+    attributes.specVersion && actionType.getConnectorValidation
+      ? attributes.specId
+        ? await actionType.getConnectorValidation(attributes.specVersion, attributes.specId)
+        : await actionType.getConnectorValidation(attributes.specVersion)
+      : undefined;
+  if (attributes.specVersion && actionType.getConnectorValidation && !connectorValidation) {
+    throw Boom.badRequest(
+      `Connector specification "${attributes.specId ?? actionTypeId}" version "${
+        attributes.specVersion
+      }" is unavailable.`
+    );
+  }
+  const actionTypeForValidation = connectorValidation
+    ? { ...actionType, validate: connectorValidation }
+    : actionType;
   const configurationUtilities = context.actionTypeRegistry.getUtils();
-  const validatedActionTypeConfig = validateConfig(actionType, config, {
+  const validatedActionTypeConfig = validateConfig(actionTypeForValidation, config, {
     configurationUtilities,
   });
-  const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+  const validatedActionTypeSecrets = validateSecrets(actionTypeForValidation, secrets, {
     configurationUtilities,
   });
-  if (actionType.validate?.connector) {
-    validateConnector(actionType, { config, secrets });
+  if (actionTypeForValidation.validate?.connector) {
+    validateConnector(actionTypeForValidation, { config, secrets });
   }
 
-  context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  if (attributes.specId) {
+    context.actionTypeRegistry.ensureActionTypeEnabled(attributes.specId, attributes.specVersion);
+  } else {
+    context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  }
 
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
@@ -226,10 +246,13 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const resolvedAuthMode = getAuthMode(
     result.attributes.authMode as Connector['authMode'] | undefined
   );
+  const activeSpecVersion = attributes.specId
+    ? context.actionTypeRegistry.tryResolveActionType(attributes.specId)?.connectorSpec?.version
+    : undefined;
 
   return {
     id,
-    actionTypeId: result.attributes.actionTypeId as string,
+    actionTypeId: attributes.specId ?? (result.attributes.actionTypeId as string),
     isMissingSecrets: result.attributes.isMissingSecrets as boolean,
     name: result.attributes.name as string,
     config: result.attributes.config as Record<string, unknown>,
@@ -238,5 +261,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(attributes.specId ? { specId: attributes.specId } : {}),
+    ...(attributes.specVersion ? { specVersion: attributes.specVersion } : {}),
+    ...(activeSpecVersion ? { activeSpecVersion } : {}),
   };
 }

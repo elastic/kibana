@@ -27,6 +27,7 @@ describe('transformConnectorTypesResponse', () => {
         description: 'Card subtitle from list API',
         is_experimental: true,
         is_testable: true,
+        icon: 'data:image/svg+xml;base64,dGVzdA==',
       },
       {
         id: 'actionType2Id',
@@ -58,6 +59,7 @@ describe('transformConnectorTypesResponse', () => {
         description: 'Card subtitle from list API',
         isExperimental: true,
         isTestable: true,
+        icon: 'data:image/svg+xml;base64,dGVzdA==',
       },
       {
         id: 'actionType2Id',

@@ -26,4 +26,8 @@ export interface ConnectorType {
   description?: ConnectorTypeSchemaType['description'];
   isExperimental?: ConnectorTypeSchemaType['isExperimental'];
   isTestable: ConnectorTypeSchemaType['isTestable'];
+  specActionNames?: ConnectorTypeSchemaType['specActionNames'];
+  specActionSchemas?: ConnectorTypeSchemaType['specActionSchemas'];
+  specActionSchemasByVersion?: ConnectorTypeSchemaType['specActionSchemasByVersion'];
+  icon?: ConnectorTypeSchemaType['icon'];
 }

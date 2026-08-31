@@ -18,7 +18,10 @@ import type {
   GetAvailableConnectorsResponse,
 } from '@kbn/workflows/types/v1';
 
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../../common/connector_sub_actions_map';
+import {
+  CONNECTOR_SUB_ACTIONS_MAP,
+  formatSubActionName,
+} from '../../../common/connector_sub_actions_map';
 
 const getConnectorInstanceConfig = (
   connector: FindActionResult
@@ -51,9 +54,18 @@ export const getAvailableConnectors = async (params: {
   ]);
 
   const connectorTypes: Record<string, ConnectorTypeInfo> = {};
+  const actionTypesById = new Map(actionTypes.map((actionType) => [actionType.id, actionType]));
 
   actionTypes.forEach((actionType) => {
-    const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+    const subActions = actionType.specActionNames
+      ? actionType.specActionNames.map((name) => ({
+          name,
+          displayName: formatSubActionName(name),
+          ...(actionType.specActionSchemas?.[name]
+            ? { inputSchema: actionType.specActionSchemas[name] }
+            : {}),
+        }))
+      : CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
 
     connectorTypes[actionType.id] = {
       actionTypeId: actionType.id,
@@ -69,11 +81,18 @@ export const getAvailableConnectors = async (params: {
 
   connectors.forEach((connector: FindActionResult) => {
     if (connectorTypes[connector.actionTypeId]) {
+      const actionType = actionTypesById.get(connector.actionTypeId);
+      const actionInputSchemas = connector.specVersion
+        ? actionType?.specActionSchemasByVersion?.[connector.specVersion]
+        : actionType?.specActionSchemas;
       connectorTypes[connector.actionTypeId].instances.push({
         id: connector.id,
         name: connector.name,
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: connector.isDeprecated,
+        ...(connector.specVersion ? { specVersion: connector.specVersion } : {}),
+        ...(connector.activeSpecVersion ? { activeSpecVersion: connector.activeSpecVersion } : {}),
+        ...(actionInputSchemas ? { actionInputSchemas } : {}),
         ...getConnectorInstanceConfig(connector),
       });
     }

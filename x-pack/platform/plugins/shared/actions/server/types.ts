@@ -19,7 +19,7 @@ import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
-import type { AuthMode } from '@kbn/connector-specs';
+import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -101,6 +101,8 @@ export interface ActionTypeExecutorOptions<
   authMode?: AuthMode;
   profileUid?: string;
   connectorVersion?: string;
+  specId?: string;
+  specVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -222,6 +224,17 @@ export type ActionType<
   | ClassicActionType<Config, Secrets, Params, ExecutorResultData>
   | WorkflowActionType<Config, Secrets, Params, ExecutorResultData>;
 
+export interface ActionTypeValidation<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+> {
+  params?: ValidatorType<Params>;
+  config: ValidatorType<Config>;
+  secrets: ValidatorType<Secrets>;
+  connector?: (config: Config, secrets: Secrets) => string | null;
+}
+
 export interface ActionTypeCoreFields<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -256,6 +269,25 @@ export interface ActionTypeCoreFields<
    */
   isExperimental?: boolean;
   /**
+   * Returns the active specification used for generated forms and connector
+   * version pinning. Dynamic providers may return undefined while their
+   * catalog is still loading.
+   */
+  getConnectorSpec?: () => ConnectorSpec | undefined;
+  getConnectorSpecs?: () => ConnectorSpec[];
+  getConnectorSpecById?: (id: string, version?: string) => ConnectorSpec | undefined;
+  getConnectorSpecsById?: (id: string) => ConnectorSpec[];
+  getConnectorSpecsForDiscovery?: () => ConnectorSpec[];
+  getConnectorValidation?: (
+    version: string,
+    specId?: string
+  ) => Promise<
+    | (ActionTypeValidation<Config, Secrets, Params> & {
+        params: ValidatorType<Params>;
+      })
+    | undefined
+  >;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute
@@ -286,12 +318,7 @@ export type WorkflowActionType<
   ExecutorResultData = void
 > = ActionTypeCoreFields<Config, Secrets, Params> & {
   executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
-  validate: {
-    params?: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
-  };
+  validate: ActionTypeValidation<Config, Secrets, Params>;
 };
 
 export type ClassicActionType<
@@ -301,11 +328,8 @@ export type ClassicActionType<
   ExecutorResultData = void
 > = ActionTypeCoreFields<Config, Secrets, Params> & {
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
-  validate: {
+  validate: ActionTypeValidation<Config, Secrets, Params> & {
     params: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
   };
 };
 
@@ -316,6 +340,8 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  specId?: string;
+  specVersion?: string;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

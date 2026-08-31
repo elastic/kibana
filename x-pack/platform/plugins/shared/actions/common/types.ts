@@ -36,6 +36,10 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
+  specActionNames?: string[];
+  specActionSchemas?: Record<string, Record<string, unknown>>;
+  specActionSchemasByVersion?: Record<string, Record<string, Record<string, unknown>>>;
+  icon?: string;
 }
 
 export enum InvalidEmailReason {

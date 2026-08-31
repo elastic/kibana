@@ -40,6 +40,7 @@ describe('listTypesRoute', () => {
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
         subFeature: 'endpointSecurity',
+        icon: 'data:image/svg+xml;base64,dGVzdA==',
       }),
     ];
 
@@ -56,6 +57,7 @@ describe('listTypesRoute', () => {
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
+            "icon": "data:image/svg+xml;base64,dGVzdA==",
             "id": "1",
             "is_deprecated": false,
             "is_experimental": undefined,
@@ -77,6 +79,7 @@ describe('listTypesRoute', () => {
       body: [
         {
           id: '1',
+          icon: 'data:image/svg+xml;base64,dGVzdA==',
           name: 'name',
           enabled: true,
           enabled_in_config: true,

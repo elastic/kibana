@@ -553,6 +553,10 @@ export function registerInternalToolsRoutes({
               ? OAUTH_STATUS.AUTHORIZED
               : OAUTH_STATUS.DISCONNECTED
             : undefined,
+          connectorSpec: pluginsStart.actions.getConnectorSpec(
+            connector.actionTypeId,
+            connector.specVersion
+          ),
         });
       });
 
@@ -603,7 +607,13 @@ export function registerInternalToolsRoutes({
 
       return response.ok<GetConnectorResponse>({
         body: {
-          connector: toConnectorItem(connector, { oauthStatus }),
+          connector: toConnectorItem(connector, {
+            oauthStatus,
+            connectorSpec: pluginsStart.actions.getConnectorSpec(
+              connector.actionTypeId,
+              connector.specVersion
+            ),
+          }),
         },
       });
     })

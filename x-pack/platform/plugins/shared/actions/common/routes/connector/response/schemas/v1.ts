@@ -50,6 +50,18 @@ export const connectorResponseSchema = schema.object(
         },
       })
     ),
+    spec_version: schema.maybe(
+      schema.string({
+        meta: { description: 'The connector specification version pinned to this connector.' },
+      })
+    ),
+    active_spec_version: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The currently active specification version for this connector type.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_response' } }
 );
@@ -162,6 +174,13 @@ export const connectorTypeResponseSchema = schema.object(
         description: 'Indicates whether the connector type supports testing.',
       },
     }),
+    icon: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional icon key or data URL for this connector type in the UI.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_type_response' } }
 );
@@ -328,4 +347,18 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
+  version: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The resolved connector specification version.',
+      },
+    })
+  ),
+  active_version: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The currently active connector specification version.',
+      },
+    })
+  ),
 });

@@ -59,7 +59,7 @@ import {
 import { connectorsSpecs } from '@kbn/connector-specs';
 
 // Helper function to format sub-action names for display
-function formatSubActionName(action: string): string {
+export function formatSubActionName(action: string): string {
   // Handle both snake_case and camelCase
   return (
     action

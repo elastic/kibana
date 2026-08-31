@@ -19,6 +19,7 @@ import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
+  readOnly?: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
   authMode?: 'shared' | 'per-user';
 }
@@ -26,13 +27,14 @@ interface ConnectorFormFieldsProps {
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
+  readOnly = false,
   registerPreSubmitValidator,
   authMode,
 }) => {
   const {
     application: { capabilities },
   } = useKibana().services;
-  const canSave = hasSaveActionsCapability(capabilities);
+  const canSave = hasSaveActionsCapability(capabilities) && !readOnly;
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
 
   return (

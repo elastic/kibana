@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawConnectorSchemaV1, rawConnectorSchemaV2 } from '../schemas/raw_connector';
+import {
+  rawConnectorSchemaV1,
+  rawConnectorSchemaV2,
+  rawConnectorSchemaV3,
+} from '../schemas/raw_connector';
 
 export const connectorModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -30,6 +34,13 @@ export const connectorModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       create: rawConnectorSchemaV2,
       forwardCompatibility: rawConnectorSchemaV2.extends({}, { unknowns: 'ignore' }),
+    },
+  },
+  '3': {
+    changes: [],
+    schemas: {
+      create: rawConnectorSchemaV3,
+      forwardCompatibility: rawConnectorSchemaV3.extends({}, { unknowns: 'ignore' }),
     },
   },
 };

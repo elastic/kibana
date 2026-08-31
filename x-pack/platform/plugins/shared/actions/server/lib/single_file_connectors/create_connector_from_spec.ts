@@ -24,7 +24,7 @@ import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
 import { createConnectorNetworkSettings } from './create_connector_network_settings';
 
-const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
+export const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
     throw new Error(
       `Connector spec "${spec.metadata.id}" defines a reserved action key "${TEST_CONNECTOR_SUB_ACTION}".`
@@ -88,5 +88,6 @@ export const createConnectorTypeFromSpec = (
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
+    getConnectorSpec: () => spec,
   };
 };

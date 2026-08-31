@@ -24,6 +24,8 @@ describe('transformConnectorSpecResponse', () => {
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
+      version: '1.0.0',
+      active_version: '2.0.0',
     });
 
     expect(result.metadata).toEqual({
@@ -38,6 +40,8 @@ describe('transformConnectorSpecResponse', () => {
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
     expect(result.isTestable).toBe(true);
+    expect(result.version).toBe('1.0.0');
+    expect(result.activeVersion).toBe('2.0.0');
   });
 
   it('omits optional metadata fields when absent on the wire', () => {

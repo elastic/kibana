@@ -26,6 +26,8 @@ export interface ConnectorSpecWireResponse {
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
+  version?: string;
+  active_version?: string;
 }
 
 /** Client-side connector spec after normalising API casing. */
@@ -33,6 +35,8 @@ export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  version?: string;
+  activeVersion?: string;
 }
 
 export function transformConnectorSpecResponse(
@@ -62,5 +66,7 @@ export function transformConnectorSpecResponse(
     },
     schema: wire.schema,
     isTestable: wire.is_testable,
+    ...(wire.version !== undefined ? { version: wire.version } : {}),
+    ...(wire.active_version !== undefined ? { activeVersion: wire.active_version } : {}),
   };
 }

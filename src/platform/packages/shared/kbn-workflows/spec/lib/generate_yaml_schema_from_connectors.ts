@@ -168,28 +168,59 @@ function generateStepSchemaForConnector(
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
+  const buildSchema = (paramsSchema: z.ZodType, connectorIdSchema: Record<string, z.ZodType>) =>
+    BaseConnectorStepSchema.extend({
+      type: connector.description
+        ? z.literal(connector.type).describe(connector.description)
+        : z.literal(connector.type),
+      with: hasNoRequiredFields(paramsSchema) ? paramsSchema.optional() : paramsSchema,
+      ...connectorIdSchema,
+      'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+      ...(connector.configSchema && connector.configSchema.shape),
+    });
+
+  const versionedSchemas = Object.entries(connector.paramsSchemasByConnectorId ?? {});
+  if (versionedSchemas.length === 1) {
+    const [[connectorId, paramsSchema]] = versionedSchemas;
+    return buildSchema(paramsSchema, { 'connector-id': z.literal(connectorId) });
+  }
+  if (versionedSchemas.length > 1) {
+    const connectorIds = versionedSchemas.map(([connectorId]) => connectorId) as [
+      string,
+      ...string[]
+    ];
+    const paramsSchemas = versionedSchemas.map(([, paramsSchema]) => paramsSchema) as [
+      z.ZodType,
+      z.ZodType,
+      ...z.ZodType[]
+    ];
+    return buildSchema(z.union(paramsSchemas), {
+      'connector-id': z.enum(connectorIds),
+    }).superRefine((value, context) => {
+      const connectorId = (value as Record<string, unknown>)['connector-id'];
+      const paramsSchema =
+        typeof connectorId === 'string'
+          ? connector.paramsSchemasByConnectorId?.[connectorId]
+          : undefined;
+      const result = paramsSchema?.safeParse(value.with);
+      if (result?.success === false) {
+        for (const issue of result.error.issues) {
+          context.addIssue({
+            code: 'custom',
+            path: ['with', ...issue.path],
+            message: issue.message,
+          });
+        }
+      }
+    });
+  }
+
   const connectorIdSchema: Record<string, z.ZodType> = {};
-  // Add connector-id schema if hasConnectorId has a value
   if (connector.hasConnectorId) {
     connectorIdSchema['connector-id'] =
       connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
   }
-
-  // If all params are optional (or there are none), `with` itself should be optional so users
-  // don't have to write an empty `with: {}` block for steps that need no inputs.
-  const withSchema = hasNoRequiredFields(connector.paramsSchema)
-    ? connector.paramsSchema.optional()
-    : connector.paramsSchema;
-
-  return BaseConnectorStepSchema.extend({
-    type: connector.description
-      ? z.literal(connector.type).describe(connector.description)
-      : z.literal(connector.type),
-    with: withSchema,
-    ...connectorIdSchema,
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
-    ...(connector.configSchema && connector.configSchema.shape),
-  });
+  return buildSchema(connector.paramsSchema, connectorIdSchema);
 }
 
 /**

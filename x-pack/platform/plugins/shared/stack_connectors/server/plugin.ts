@@ -9,6 +9,7 @@ import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kb
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/logging';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -26,6 +27,12 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
+import {
+  DeclarativeConnectorCatalogService,
+  createDeclarativeConnectorCatalogStorage,
+  registerDeclarativeConnectorCatalogRoutes,
+  registerDeclarativeConnectorType,
+} from './declarative_connectors';
 
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
@@ -52,10 +59,20 @@ export class StackConnectorsPlugin
   private isServerless = false;
   private isServerlessTrial = false;
   private licensing?: LicensingPluginStart;
+  private readonly declarativeCatalog?: DeclarativeConnectorCatalogService;
+  private readonly declarativeCatalogStorageLogger: Logger;
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.declarativeCatalogStorageLogger = context.logger.get('declarativeCatalogStorage');
+    if (this.config.declarativeCatalog.enabled) {
+      this.declarativeCatalog = new DeclarativeConnectorCatalogService({
+        registryUrl: this.config.declarativeCatalog.registryUrl,
+        refreshIntervalMs: this.config.declarativeCatalog.refreshIntervalMs,
+        logger: context.logger.get('declarativeCatalog'),
+      });
+    }
   }
 
   // Trial detection for the Elastic-managed email SMTP relay (the `elastic_cloud` service).
@@ -96,6 +113,14 @@ export class StackConnectorsPlugin
       registerConnectorTypesFromSpecs({ actions });
     }
 
+    if (this.declarativeCatalog) {
+      registerDeclarativeConnectorType({ actions, catalog: this.declarativeCatalog });
+      registerDeclarativeConnectorCatalogRoutes({
+        router,
+        catalog: this.declarativeCatalog,
+      });
+    }
+
     if (plugins.usageCollection) {
       registerInferenceConnectorsUsageCollector(plugins.usageCollection, core);
     }
@@ -103,7 +128,16 @@ export class StackConnectorsPlugin
 
   public start(core: CoreStart, plugins: ConnectorsPluginsStart) {
     this.licensing = plugins.licensing;
+    if (this.declarativeCatalog) {
+      const storage = createDeclarativeConnectorCatalogStorage(
+        core.elasticsearch.client.asInternalUser,
+        this.declarativeCatalogStorageLogger
+      );
+      this.declarativeCatalog.start(storage);
+    }
   }
 
-  public stop() {}
+  public stop() {
+    this.declarativeCatalog?.stop();
+  }
 }

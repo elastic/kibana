@@ -56,6 +56,8 @@ export interface ActionConnectorProps<Config, Secrets> {
   source?: ActionTypeSource;
   authMode?: 'shared' | 'per-user';
   userAuthStatus?: ConnectorUserAuthStatus;
+  specVersion?: string;
+  activeSpecVersion?: string;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {

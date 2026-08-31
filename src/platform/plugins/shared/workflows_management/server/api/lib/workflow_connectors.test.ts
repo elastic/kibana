@@ -71,6 +71,87 @@ describe('getAvailableConnectors', () => {
     expect(result.totalConnectors).toBe(0);
   });
 
+  it('uses runtime specification action names for declarative connectors', async () => {
+    const actionsClient = {
+      getAll: jest.fn().mockResolvedValue([
+        mockConnector({
+          id: 'okta-v1',
+          actionTypeId: '.declarative-okta',
+          specVersion: '1.0.0',
+          activeSpecVersion: '1.1.0',
+        }),
+      ]),
+    };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([
+        mockActionType({
+          id: '.declarative-okta',
+          name: 'Okta (Declarative PoC)',
+          specActionNames: ['listUsers', 'getLogs', 'legacyAction'],
+          specActionSchemas: {
+            listUsers: { type: 'object', properties: { limit: { type: 'integer' } } },
+            getLogs: { type: 'object', properties: { since: { type: 'string' } } },
+          },
+          specActionSchemasByVersion: {
+            '1.0.0': {
+              listUsers: {
+                type: 'object',
+                properties: { limit: { type: 'integer', maximum: 100 } },
+              },
+              getLogs: { type: 'object', properties: { since: { type: 'string' } } },
+              legacyAction: {
+                type: 'object',
+                properties: { message: { type: 'string' } },
+              },
+            },
+          },
+        }),
+      ]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.declarative-okta'].subActions).toEqual([
+      {
+        name: 'listUsers',
+        displayName: 'List Users',
+        inputSchema: { type: 'object', properties: { limit: { type: 'integer' } } },
+      },
+      {
+        name: 'getLogs',
+        displayName: 'Get Logs',
+        inputSchema: { type: 'object', properties: { since: { type: 'string' } } },
+      },
+      {
+        name: 'legacyAction',
+        displayName: 'Legacy Action',
+      },
+    ]);
+    expect(result.connectorTypes['.declarative-okta'].instances).toEqual([
+      expect.objectContaining({
+        id: 'okta-v1',
+        specVersion: '1.0.0',
+        activeSpecVersion: '1.1.0',
+        actionInputSchemas: {
+          listUsers: {
+            type: 'object',
+            properties: { limit: { type: 'integer', maximum: 100 } },
+          },
+          getLogs: { type: 'object', properties: { since: { type: 'string' } } },
+          legacyAction: {
+            type: 'object',
+            properties: { message: { type: 'string' } },
+          },
+        },
+      }),
+    ]);
+  });
+
   it('drops connectors whose actionTypeId is not in the allowed action-types list', async () => {
     const actionsClient = {
       getAll: jest

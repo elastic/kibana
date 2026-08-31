@@ -453,13 +453,25 @@ export class ActionExecutor {
           };
         }
 
-        if (
-          !actionTypeRegistry.isActionExecutable(actionId, actionTypeId, {
-            notifyUsage: true,
-          })
-        ) {
+        const connectorTypeId = rawAction.specId ?? actionTypeId;
+        const executable =
+          rawAction.specId && rawAction.specVersion
+            ? actionTypeRegistry.isActionExecutable(
+                actionId,
+                connectorTypeId,
+                { notifyUsage: true },
+                rawAction.specVersion
+              )
+            : actionTypeRegistry.isActionExecutable(actionId, connectorTypeId, {
+                notifyUsage: true,
+              });
+        if (!executable) {
           try {
-            actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+            if (rawAction.specId && rawAction.specVersion) {
+              actionTypeRegistry.ensureActionTypeEnabled(connectorTypeId, rawAction.specVersion);
+            } else {
+              actionTypeRegistry.ensureActionTypeEnabled(connectorTypeId);
+            }
           } catch (e) {
             throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
           }
@@ -546,10 +558,27 @@ export class ActionExecutor {
         let validatedConfig;
         let validatedSecrets;
         try {
+          let actionTypeForValidation = actionType;
+          if (rawAction.specVersion && actionType.getConnectorValidation) {
+            const validation = rawAction.specId
+              ? await actionType.getConnectorValidation(rawAction.specVersion, rawAction.specId)
+              : await actionType.getConnectorValidation(rawAction.specVersion);
+            if (!validation) {
+              const message = `Connector specification "${connectorTypeId}" version "${rawAction.specVersion}" is unavailable.`;
+              throw new ActionExecutionError(message, ActionExecutionErrorReason.Validation, {
+                actionId,
+                status: 'error',
+                message,
+                retry: !!taskInfo,
+                errorSource: TaskErrorSource.FRAMEWORK,
+              });
+            }
+            actionTypeForValidation = { ...actionType, validate: validation };
+          }
           const validationResult = validateAction(
             {
               actionId,
-              actionType,
+              actionType: actionTypeForValidation,
               params,
               config,
               secrets,
@@ -561,6 +590,16 @@ export class ActionExecutor {
           validatedConfig = validationResult.validatedConfig;
           validatedSecrets = validationResult.validatedSecrets;
         } catch (err) {
+          const result =
+            err instanceof ActionExecutionError
+              ? err.result
+              : {
+                  actionId,
+                  status: 'error' as const,
+                  message: err.message,
+                  retry: Boolean(taskInfo),
+                  errorSource: TaskErrorSource.FRAMEWORK,
+                };
           eventLogger.stopTiming(event);
           span?.setOutcome('failure');
           event.event!.outcome = 'failure';
@@ -576,7 +615,7 @@ export class ActionExecutor {
             },
           });
           eventLogger.logEvent(event);
-          return err.result;
+          return result;
         }
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
@@ -605,6 +644,8 @@ export class ActionExecutor {
             ...(actionType.source === ACTION_TYPE_SOURCES.spec
               ? {
                   connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
+                  ...(rawAction.specVersion ? { specVersion: rawAction.specVersion } : {}),
+                  ...(rawAction.specId ? { specId: rawAction.specId } : {}),
                 }
               : {}),
           });

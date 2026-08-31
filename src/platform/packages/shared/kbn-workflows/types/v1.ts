@@ -563,6 +563,7 @@ export interface WorkflowAggsDto {
 export interface ConnectorSubAction {
   name: string;
   displayName: string;
+  inputSchema?: Record<string, unknown>;
 }
 
 export interface ConnectorInstance {
@@ -571,6 +572,9 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  specVersion?: string;
+  activeSpecVersion?: string;
+  actionInputSchemas?: Record<string, Record<string, unknown>>;
 }
 
 export interface ConnectorInstanceConfig {
@@ -597,6 +601,7 @@ export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
+  paramsSchemasByConnectorId?: Record<string, z.ZodType>;
   hasConnectorId?: 'required' | 'optional' | false;
   outputSchema: z.ZodType;
   configSchema?: z.ZodObject;

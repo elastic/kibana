@@ -153,6 +153,51 @@ describe('useActionTypeModel', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('keys and fetches spec-based models by exact version', async () => {
+    actionTypeRegistry.has.mockReturnValue(false);
+    mockHttp.get.mockResolvedValue(mockSpecResponse);
+
+    const { result, rerender } = renderHook(
+      ({ specVersion }: { specVersion: string }) =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionTypeId: 'spec-connector',
+          http: mockHttp as any,
+          docLinks: mockDocLinks,
+          uiSettings: mockUiSettings as any,
+          specVersion,
+        }),
+      {
+        wrapper: createWrapper(),
+        initialProps: { specVersion: '1.0.0' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    expect(mockHttp.get).toHaveBeenLastCalledWith(
+      '/internal/actions/connector_types/spec-connector/spec',
+      expect.objectContaining({
+        query: { version: '1.0.0' },
+        signal: expect.any(AbortSignal),
+      })
+    );
+
+    rerender({ specVersion: '2.0.0' });
+
+    await waitFor(() => {
+      expect(mockHttp.get).toHaveBeenCalledTimes(2);
+    });
+    expect(mockHttp.get).toHaveBeenLastCalledWith(
+      '/internal/actions/connector_types/spec-connector/spec',
+      expect.objectContaining({
+        query: { version: '2.0.0' },
+        signal: expect.any(AbortSignal),
+      })
+    );
+  });
+
   it('surfaces error when connector spec schema cannot be parsed', async () => {
     actionTypeRegistry.has.mockReturnValue(false);
     mockHttp.get.mockResolvedValue({

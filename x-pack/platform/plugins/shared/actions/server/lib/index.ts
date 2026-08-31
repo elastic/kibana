@@ -44,6 +44,10 @@ export { mergeConfigHeadersWithSecretHeaders } from './merge_config_headers_with
 export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
 export { createConnectorTypeFromSpec } from './single_file_connectors/create_connector_from_spec';
+export {
+  createConnectorTypeFromSpecProvider,
+  type ConnectorSpecProvider,
+} from './single_file_connectors/create_connector_from_spec_provider';
 export { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 export { OAuthAuthorizationService } from './oauth_authorization_service';
 export type { OAuthConfig } from './oauth_authorization_service';

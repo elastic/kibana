@@ -103,7 +103,8 @@ async function getAllHelper({
     const connector = connectorFromSavedObject(
       rawAction,
       isConnectorDeprecated(rawAction.attributes),
-      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId),
+      connectorTypeRegistry
     );
     return omit(connector, 'secrets');
   });

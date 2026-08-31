@@ -88,6 +88,35 @@ describe('getConnectorRoute', () => {
     });
   });
 
+  it('returns declarative connector spec versions in snake_case', async () => {
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.declarative-example',
+        specId: '.declarative-example',
+        specVersion: '1.0.0',
+        activeSpecVersion: '2.0.0',
+      })
+    );
+    getConnectorRoute(router, licenseStateMock.create());
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        spec_version: '1.0.0',
+        active_spec_version: '2.0.0',
+      }),
+    });
+    expect((res.ok as jest.Mock).mock.calls[0][0].body).not.toHaveProperty('specId');
+  });
+
   it('ensures the license allows getting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

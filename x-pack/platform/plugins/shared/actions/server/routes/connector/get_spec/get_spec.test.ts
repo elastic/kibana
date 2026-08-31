@@ -91,6 +91,8 @@ describe('getConnectorSpecRoute', () => {
         },
       },
       isTestable: true,
+      version: '1.0.0',
+      activeVersion: '2.0.0',
     };
     const responseBody = {
       metadata: {
@@ -103,6 +105,8 @@ describe('getConnectorSpecRoute', () => {
       },
       schema: clientResult.schema,
       is_testable: true,
+      version: '1.0.0',
+      active_version: '2.0.0',
     };
     actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
 
@@ -112,7 +116,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'test-connector' } },
+      { params: { id: 'test-connector' }, query: { version: '1.0.0' } },
       ['ok', 'notFound']
     );
 
@@ -122,6 +126,7 @@ describe('getConnectorSpecRoute', () => {
     expect(res.ok).toHaveBeenCalled();
     expect(actionsClient.getConnectorSpec).toHaveBeenCalledWith({
       id: 'test-connector',
+      version: '1.0.0',
       configurationUtilities: actionsConfigUtils,
     });
   });
@@ -308,8 +313,11 @@ describe('getConnectorSpecRoute', () => {
     const [config] = router.get.mock.calls[0];
 
     expect(config.validate).toBeDefined();
-    const validateConfig = config.validate as { request?: { params?: unknown } };
+    const validateConfig = config.validate as {
+      request?: { params?: unknown; query?: unknown };
+    };
     expect(validateConfig.request?.params).toBeDefined();
+    expect(validateConfig.request?.query).toBeDefined();
   });
 
   it('has proper response schema validation', async () => {

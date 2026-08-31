@@ -69,4 +69,31 @@ describe('transformConnectorsResponse', () => {
       },
     ]);
   });
+
+  test('should map connector spec versions', () => {
+    const [result] = transformConnectorResponse([
+      {
+        id: 'spec-connector',
+        name: 'Spec connector',
+        connector_type_id: 'spec-connector',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        referenced_by_count: 0,
+        secrets: {},
+        config: {},
+        is_connector_type_deprecated: false,
+        spec_version: '1.0.0',
+        active_spec_version: '2.0.0',
+      },
+    ]);
+
+    expect(result).toMatchObject({
+      specVersion: '1.0.0',
+      activeSpecVersion: '2.0.0',
+    });
+    expect(result).not.toHaveProperty('spec_version');
+    expect(result).not.toHaveProperty('active_spec_version');
+  });
 });

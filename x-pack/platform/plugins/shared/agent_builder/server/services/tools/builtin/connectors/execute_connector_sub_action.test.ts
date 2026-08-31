@@ -20,6 +20,7 @@ import {
   OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   EARS_AUTH_ID,
 } from '@kbn/connector-specs';
+import { z } from '@kbn/zod/v4';
 import {
   createExecuteConnectorSubActionTool,
   executeConnectorSubActionArgsSchema,
@@ -37,12 +38,14 @@ const isToolActionMock = isToolAction as jest.MockedFunction<typeof isToolAction
 
 const mockExecute = jest.fn();
 const mockGet = jest.fn();
+const mockGetRuntimeConnectorSpec = jest.fn();
 const mockGetActionsClientWithRequest = jest.fn(() =>
   Promise.resolve({ execute: mockExecute, get: mockGet })
 );
 const getActions: ConnectorToolsOptions['getActions'] = jest.fn(() =>
   Promise.resolve({
     getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    getConnectorSpec: mockGetRuntimeConnectorSpec,
   })
 ) as unknown as ConnectorToolsOptions['getActions'];
 
@@ -78,6 +81,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     jest.clearAllMocks();
     // Default: connector resolves to .slack2, spec found, action is a tool
     mockGet.mockResolvedValue({ id: 'conn-123', actionTypeId: '.slack2' });
+    mockGetRuntimeConnectorSpec.mockReturnValue(undefined);
     getConnectorSpecMock.mockReturnValue({
       metadata: {
         id: '.slack2',
@@ -244,6 +248,44 @@ describe('createExecuteConnectorSubActionTool', () => {
       ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
     ).toContain("Sub-action 'internalAction' is not available as a tool");
     expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  it('uses the runtime catalog specification for declarative connectors', async () => {
+    const declarativeSpec = {
+      metadata: {
+        id: '.declarative-okta',
+        displayName: 'Okta',
+        description: 'Catalog connector',
+        minimumLicense: 'enterprise' as const,
+        supportedFeatureIds: ['agentBuilder' as const],
+      },
+      actions: {
+        listUsers: { isTool: true, input: z.object({}), handler: jest.fn() },
+      },
+      test: { handler: jest.fn(), enabled: false as const },
+      version: '1.0.0',
+    };
+    mockGet.mockResolvedValue({
+      id: 'conn-123',
+      actionTypeId: '.declarative-okta',
+      specVersion: '1.0.0',
+    });
+    mockGetRuntimeConnectorSpec.mockReturnValue(declarativeSpec);
+    getConnectorSpecMock.mockReturnValue(undefined);
+    mockExecute.mockResolvedValue({ status: 'ok', data: { users: [] } });
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    await tool.handler(
+      {
+        connectorId: 'conn-123',
+        subAction: 'listUsers',
+        params: {},
+      },
+      mockContext
+    );
+
+    expect(mockGetRuntimeConnectorSpec).toHaveBeenCalledWith('.declarative-okta', '1.0.0');
+    expect(mockExecute).toHaveBeenCalled();
   });
 
   it('returns error when no connector spec is found for the type', async () => {

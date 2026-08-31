@@ -12,19 +12,37 @@ import type { AsApiContract } from '@kbn/actions-types';
 import type { ActionConnectorProps, ActionConnector } from '../../types';
 import { BASE_ACTION_API_PATH } from '../../constants';
 
+type FullConnectorWireResponse = AsApiContract<
+  ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>
+>;
+
+export type ConnectorWireResponse = Omit<FullConnectorWireResponse, 'config' | 'secrets'> &
+  Partial<Pick<FullConnectorWireResponse, 'config' | 'secrets'>>;
+
+export type TransformedConnectorResponse = Omit<
+  ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>,
+  'config' | 'secrets'
+> &
+  Partial<
+    Pick<
+      ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>,
+      'config' | 'secrets'
+    >
+  >;
+
 export async function fetchConnector(
   id: string,
   { http }: { http: HttpSetup }
 ): Promise<ActionConnector> {
   const path = `${BASE_ACTION_API_PATH}/connector/${id}`;
 
-  const res = await http.get<Parameters<typeof transformConnectorResponse>[0]>(path);
+  const res = await http.get<ConnectorWireResponse>(path);
   return transformConnectorResponse(res) as ActionConnector;
 }
 
 export const transformConnectorResponse = (
-  result: AsApiContract<ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>>
-): ActionConnectorProps<Record<string, unknown>, Record<string, unknown>> => {
+  result: ConnectorWireResponse
+): TransformedConnectorResponse => {
   const {
     connector_type_id: actionTypeId,
     is_preconfigured: isPreconfigured,
@@ -34,6 +52,8 @@ export const transformConnectorResponse = (
     is_system_action: isSystemAction,
     is_connector_type_deprecated: isConnectorTypeDeprecated,
     auth_mode: authMode,
+    spec_version: specVersion,
+    active_spec_version: activeSpecVersion,
     ...res
   } = result;
   return {
@@ -45,6 +65,8 @@ export const transformConnectorResponse = (
     isSystemAction,
     isConnectorTypeDeprecated,
     ...(authMode !== undefined ? { authMode } : {}),
+    ...(specVersion !== undefined ? { specVersion } : {}),
+    ...(activeSpecVersion !== undefined ? { activeSpecVersion } : {}),
     ...res,
   };
 };

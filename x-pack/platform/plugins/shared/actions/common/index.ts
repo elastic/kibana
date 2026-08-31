@@ -104,6 +104,7 @@ export type {
   CancelOAuthPathParams,
   CancelOAuthBody,
 } from './routes/connector/apis/oauth';
+export type { UpgradeConnectorResponse } from './routes/connector/apis/upgrade';
 export {
   OAuthAuthorizationStatus,
   OAUTH_CALLBACK_QUERY_PARAMS,
