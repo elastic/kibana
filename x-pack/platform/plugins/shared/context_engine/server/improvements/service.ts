@@ -31,6 +31,9 @@ import { createImprovementsStorageClient } from './storage';
 /** Only the newest revision of each lineage is a live improvement. */
 const LATEST_ONLY: QueryDslQueryContainer = { term: { latest: true } };
 
+/** A bulk item carrying this lost its OCC race; anything else is a genuine failure. */
+const VERSION_CONFLICT = 'version_conflict_engine_exception';
+
 interface HeadRevision {
   document: Improvement;
   seqNo: number;
@@ -51,7 +54,11 @@ export interface ListImprovementsOptions {
 export interface ImprovementsServiceApi {
   ensureIndex(): Promise<void>;
 
-  /** Appends a revision per improvement and clears `latest` on the prior one. */
+  /**
+   * Appends a revision per improvement and clears `latest` on the prior one. Returns what was
+   * written, which may be a subset: a lineage someone transitioned mid-batch keeps its head and is
+   * left for the next run rather than failing the whole batch.
+   */
   write(improvements: ImprovementRevisionInput[]): Promise<Improvement[]>;
 
   /** Latest revision per `improvement_id`, paginated. */
@@ -114,20 +121,37 @@ export class ImprovementsService implements ImprovementsServiceApi {
     }
 
     const heads = await this.loadHeads([...byImprovementId.keys()]);
-    await this.clearLatest([...heads.values()]);
+    const conflicted = await this.clearLatest([...heads.values()]);
+
+    // A lineage that lost the race kept its head — its retire operation is the one that failed —
+    // so it is left for the next run rather than appended to here. Only the losers are skipped:
+    // dropping the whole batch would strand the lineages whose heads were retired successfully.
+    if (conflicted.size > 0) {
+      this.logger.debug(
+        `Skipped ${conflicted.size} improvement lineage(s) transitioned concurrently: ${[
+          ...conflicted,
+        ].join(', ')}`
+      );
+    }
 
     const now = new Date().toISOString();
-    const revisions = [...byImprovementId.values()].map((input): Improvement => {
-      const head = heads.get(input.improvement_id);
-      return {
-        ...input,
-        revision_id: uuidv4(),
-        ...(head ? { previous_revision_id: head.document.revision_id } : {}),
-        latest: true,
-        '@timestamp': now,
-        suggested_at: input.suggested_at ?? now,
-      };
-    });
+    const revisions = [...byImprovementId.values()]
+      .filter(({ improvement_id: improvementId }) => !conflicted.has(improvementId))
+      .map((input): Improvement => {
+        const head = heads.get(input.improvement_id);
+        return {
+          ...input,
+          revision_id: uuidv4(),
+          ...(head ? { previous_revision_id: head.document.revision_id } : {}),
+          latest: true,
+          '@timestamp': now,
+          suggested_at: input.suggested_at ?? now,
+        };
+      });
+
+    if (revisions.length === 0) {
+      return [];
+    }
 
     await this.indexRevisions(revisions);
     return revisions;
@@ -189,7 +213,10 @@ export class ImprovementsService implements ImprovementsServiceApi {
       throw new ImprovementNotFoundError(improvementId);
     }
 
-    await this.clearLatest([head]);
+    const conflicted = await this.clearLatest([head]);
+    if (conflicted.has(improvementId)) {
+      throw new ImprovementConflictError([improvementId]);
+    }
 
     const now = new Date().toISOString();
     const revision: Improvement = {
@@ -281,34 +308,68 @@ export class ImprovementsService implements ImprovementsServiceApi {
   /**
    * Retires the given heads under optimistic concurrency, before any new revision is written.
    *
-   * Doing this first is what serializes concurrent transitions: a losing writer fails here and
-   * appends nothing, instead of leaving the log holding both an `applied` and a `rejected` head
+   * Doing this first is what serializes concurrent transitions: a losing writer appends nothing
+   * for that lineage, instead of leaving the log holding both an `applied` and a `rejected` head
    * for the same improvement — with the change actually applied.
+   *
+   * Reports the lineages that lost the race rather than throwing, because a bulk applies each
+   * operation independently: one conflicting head does not stop the others from being retired. If
+   * the caller abandoned the whole batch on the first conflict, those already-retired lineages
+   * would be left with no head at all — invisible to every read, and orphaned from the successor
+   * a later run would append.
    */
-  private async clearLatest(heads: HeadRevision[]): Promise<void> {
+  private async clearLatest(heads: HeadRevision[]): Promise<Set<string>> {
     if (heads.length === 0) {
-      return;
+      return new Set();
     }
 
-    try {
-      await this.storageClient.bulk({
-        operations: heads.map(({ document, seqNo, primaryTerm }) => ({
-          index: {
-            _id: document.revision_id,
-            document: { ...document, latest: false },
-            if_seq_no: seqNo,
-            if_primary_term: primaryTerm,
-          },
-        })),
-        refresh: 'wait_for',
-        throwOnFail: true,
-      });
-    } catch (error) {
-      if (!isVersionConflict(error)) {
-        throw error;
-      }
-      throw new ImprovementConflictError(heads.map(({ document }) => document.improvement_id));
+    const response = await this.storageClient.bulk({
+      operations: heads.map(({ document, seqNo, primaryTerm }) => ({
+        index: {
+          _id: document.revision_id,
+          document: { ...document, latest: false },
+          if_seq_no: seqNo,
+          if_primary_term: primaryTerm,
+        },
+      })),
+      refresh: 'wait_for',
+      throwOnFail: false,
+    });
+
+    if (!response.errors) {
+      return new Set();
     }
+
+    const lineageByRevisionId = new Map(
+      heads.map(({ document }) => [document.revision_id, document.improvement_id])
+    );
+    const conflicted = new Set<string>();
+    const failures: unknown[] = [];
+
+    for (const item of response.items) {
+      for (const action of Object.values(item)) {
+        if (!action?.error) {
+          continue;
+        }
+        const improvementId = action._id ? lineageByRevisionId.get(action._id) : undefined;
+        if (action.error.type === VERSION_CONFLICT && improvementId) {
+          conflicted.add(improvementId);
+          continue;
+        }
+        // Anything that is not a lost race keeps its own meaning, and leaves the head it names in
+        // an unknown state, so it has to surface rather than be reported as contention.
+        failures.push(item);
+      }
+    }
+
+    if (failures.length > 0) {
+      throw new BulkOperationError(
+        `Failed to retire ${failures.length} improvement head(s): ${JSON.stringify(failures)}`,
+        response
+      );
+    }
+
+    return conflicted;
   }
 
   /**
@@ -358,18 +419,3 @@ const buildHeadFilter = ({
 
 const toDocuments = (hits: Array<{ _source?: Improvement }>): Improvement[] =>
   hits.map((hit) => hit._source).filter((source): source is Improvement => source != null);
-
-/**
- * Distinguishes a lost OCC race from a genuine failure. Only the former means "someone else
- * transitioned first"; anything else has to keep its own error.
- */
-const isVersionConflict = (error: unknown): boolean => {
-  if (!(error instanceof BulkOperationError)) {
-    return false;
-  }
-  return error.response.items.some((item) =>
-    Object.values(item).some(
-      (action) => action?.error?.type === 'version_conflict_engine_exception'
-    )
-  );
-};

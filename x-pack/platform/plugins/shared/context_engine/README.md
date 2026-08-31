@@ -114,6 +114,10 @@ record of what the loop did to a user's index survives every transition:
   `if_seq_no`/`if_primary_term` before appending. A reviewer who loses that race
   appends nothing and gets a conflict, so the log can never hold both an
   `applied` and a `rejected` head for the same improvement.
+- A batch `write` skips only the lineages that lost that race, rather than
+  abandoning the batch. A bulk applies each operation independently, so the
+  other heads are already retired by then; dropping them would leave those
+  lineages with no `latest` revision at all.
 - `failed` is a status, not an error return: an approval whose apply step errors
   stays visible and retryable, with the reason on `resolution.error`.
 - A rejection keeps the reviewer's rationale on `resolution.reason`, so the next

@@ -185,11 +185,61 @@ describe('ImprovementsService', () => {
       ]);
     });
 
-    it('appends nothing when the head moved under it', async () => {
+    it('appends nothing for a lineage whose head moved under it', async () => {
       search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
-      bulk.mockRejectedValueOnce(versionConflict());
+      bulk.mockResolvedValueOnce(clearResponse({ conflicted: ['rev-1'] }));
 
-      await expect(service.write([makeInput()])).rejects.toBeInstanceOf(ImprovementConflictError);
+      // The retire failed, so this lineage still has its head; the re-proposal is stale anyway
+      // now that someone has acted on it, so it is left for the next run.
+      await expect(service.write([makeInput()])).resolves.toEqual([]);
+      expect(bulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('still appends the rest of the batch when one lineage loses its race', async () => {
+      search.mockResolvedValue(
+        searchResponse([
+          hitOf(makeHead({ improvement_id: 'imp-1', revision_id: 'rev-1' })),
+          hitOf(makeHead({ improvement_id: 'imp-2', revision_id: 'rev-2' })),
+        ])
+      );
+      bulk.mockResolvedValueOnce(clearResponse({ ok: ['rev-2'], conflicted: ['rev-1'] }));
+
+      const written = await service.write([
+        makeInput({ improvement_id: 'imp-1' }),
+        makeInput({ improvement_id: 'imp-2' }),
+      ]);
+
+      // imp-2's head was retired even though imp-1's operation conflicted, because a bulk applies
+      // each operation independently. Abandoning the batch would leave imp-2 with no `latest`
+      // revision at all: invisible to every read, and orphaned from any later successor.
+      expect(written.map(({ improvement_id: improvementId }) => improvementId)).toEqual(['imp-2']);
+      const [append] = bulk.mock.calls[1];
+      expect(append.operations).toHaveLength(1);
+      expect(append.operations[0].index.document).toMatchObject({
+        improvement_id: 'imp-2',
+        previous_revision_id: 'rev-2',
+        latest: true,
+      });
+    });
+
+    it('surfaces a non-conflict retire failure instead of reading it as contention', async () => {
+      search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
+      bulk.mockResolvedValueOnce({
+        errors: true,
+        took: 1,
+        items: [
+          {
+            index: {
+              _index: IMPROVEMENTS_INDEX,
+              _id: 'rev-1',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'bad field' },
+            },
+          },
+        ],
+      });
+
+      await expect(service.write([makeInput()])).rejects.toBeInstanceOf(BulkOperationError);
       expect(bulk).toHaveBeenCalledTimes(1);
     });
 
@@ -337,7 +387,7 @@ describe('ImprovementsService', () => {
 
     it('lets only one of two concurrent reviewers win', async () => {
       search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
-      bulk.mockRejectedValueOnce(versionConflict());
+      bulk.mockResolvedValueOnce(clearResponse({ conflicted: ['rev-1'] }));
 
       await expect(service.transition('imp-1', 'rejected')).rejects.toBeInstanceOf(
         ImprovementConflictError
@@ -387,17 +437,24 @@ const indexNotFound = () =>
     statusCode: 404,
   });
 
-const versionConflict = () =>
-  new BulkOperationError('conflict', {
-    errors: true,
-    took: 1,
-    items: [
-      {
-        index: {
-          _index: IMPROVEMENTS_INDEX,
-          status: 409,
-          error: { type: 'version_conflict_engine_exception', reason: 'conflict' },
-        },
+/**
+ * A head-retirement bulk response. ES applies each operation independently, so a batch can come
+ * back with some heads retired and others left alone because they lost their OCC race.
+ */
+const clearResponse = ({ ok = [], conflicted = [] }: { ok?: string[]; conflicted?: string[] }) => ({
+  errors: conflicted.length > 0,
+  took: 1,
+  items: [
+    ...ok.map((revisionId) => ({
+      index: { _index: IMPROVEMENTS_INDEX, _id: revisionId, status: 200 },
+    })),
+    ...conflicted.map((revisionId) => ({
+      index: {
+        _index: IMPROVEMENTS_INDEX,
+        _id: revisionId,
+        status: 409,
+        error: { type: 'version_conflict_engine_exception', reason: 'conflict' },
       },
-    ],
-  });
+    })),
+  ],
+});
