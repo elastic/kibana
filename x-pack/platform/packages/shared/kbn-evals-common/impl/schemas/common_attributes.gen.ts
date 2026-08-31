@@ -224,7 +224,12 @@ export const EvaluatorOriginEnum = EvaluatorOrigin.enum;
 /**
  * A 128-bit OpenTelemetry trace identifier encoded as 32 hexadecimal characters.
  */
-export const EvaluationTraceId = lazySchema(() => z.string().regex(/^[0-9a-fA-F]{32}$/));
+export const EvaluationTraceId = lazySchema(() =>
+  z
+    .string()
+    .max(32)
+    .regex(/^[0-9a-fA-F]{32}$/)
+);
 export type EvaluationTraceId = z.infer<typeof EvaluationTraceId>;
 
 export const EvaluationInstrumentationProfile = lazySchema(() =>

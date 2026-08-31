@@ -371,6 +371,7 @@ components:
 
     EvaluationTraceId:
       type: string
+      maxLength: 32
       pattern: '^[0-9a-fA-F]{32}$'
       description: A 128-bit OpenTelemetry trace identifier encoded as 32 hexadecimal characters.
 
