@@ -129,7 +129,8 @@
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.3"
+    "globby/fast-glob": "3.3.3",
+    "redux-thunk-v2/redux": "npm:redux@4.2.1"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
