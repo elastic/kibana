@@ -42,11 +42,13 @@ import {
   type EpisodeAction,
 } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { EPISODE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { useQueryClient } from '@kbn/react-query';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { SECURITY_EPISODE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { APP_ID, DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
@@ -124,6 +126,11 @@ const ADD_TO_EXISTING_CASE_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.addToExistingCase',
   { defaultMessage: 'Add to existing case' }
 );
+const ADD_TO_CHAT_LABEL = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.addToChat', {
+  defaultMessage: 'Add to chat',
+});
+const ADD_TO_CHAT_PROMPT =
+  'Help me triage the attached alert episode: assess it, review its status and context, and recommend next steps. Respond in markdown.';
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -286,6 +293,48 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const canRunWorkflow = workflowUIEnabled && canExecuteWorkflow;
 
+  // Add to chat: opens the agent-builder chat with the episode attached. We pass `origin` (the
+  // episode id) and let the server-side episode attachment `resolve` fetch the full episode — the
+  // dedicated `platform.alerting.episode` attachment (not the SIEM alert one).
+  const { isAgentBuilderEnabled, hasValidAgentBuilderLicense } = useAgentBuilderAvailability();
+  const canAddToChat = isAgentBuilderEnabled && hasValidAgentBuilderLicense;
+  const agentBuilder = services.agentBuilder;
+  const addToChatActions = useMemo<EpisodeAction[]>(() => {
+    if (!canAddToChat || !agentBuilder?.openChat) {
+      return [];
+    }
+    const openChat = agentBuilder.openChat;
+    return [
+      {
+        id: 'ALERTS_V2_ADD_TO_CHAT',
+        order: 70,
+        displayName: ADD_TO_CHAT_LABEL,
+        iconType: 'editorComment',
+        isCompatible: () => true,
+        execute: async ({ episodes }) => {
+          const episodeId = String((episodes[0] as Record<string, unknown>)['episode.id'] ?? '');
+          if (!episodeId) {
+            return;
+          }
+          openChat({
+            autoSendInitialMessage: false,
+            newConversation: true,
+            initialMessage: ADD_TO_CHAT_PROMPT,
+            attachments: [
+              {
+                id: `episode-${episodeId}`,
+                type: EPISODE_ATTACHMENT_TYPE,
+                origin: episodeId,
+                description: `Alert episode ${episodeId}`,
+              },
+            ],
+            sessionTag: 'security',
+          });
+        },
+      },
+    ];
+  }, [canAddToChat, agentBuilder]);
+
   const casesUi = services.cases;
   const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
   // The unified attachment framework (and thus the `security.episode` type) is gated behind
@@ -348,8 +397,14 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   // Everything the per-row "…" (More actions) menu offers — v2 mutations plus add-to-case, ordered
   // by `order`. Mirrors the v1 alerts table's per-row take-action menu.
   const episodeActions = useMemo(
-    () => [...statusActions, editTagsAction, editAssigneeAction, ...addToCaseActions],
-    [statusActions, editTagsAction, editAssigneeAction, addToCaseActions]
+    () => [
+      ...statusActions,
+      editTagsAction,
+      editAssigneeAction,
+      ...addToCaseActions,
+      ...addToChatActions,
+    ],
+    [statusActions, editTagsAction, editAssigneeAction, addToCaseActions, addToChatActions]
   );
 
   // Side-fetch the current assignee per visible episode (the view doesn't carry it).
