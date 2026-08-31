@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { apiTest, tags } from '@kbn/scout-security';
+import { apiTest, internalApiHeaders, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { EsClient } from '@kbn/scout-security';
 
@@ -58,9 +58,8 @@ const PROJECT_ROUTING_ALL = '_alias:*';
 
 const INTERNAL_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...internalApiHeaders,
 };
 
 interface FieldsForWildcardResponse {

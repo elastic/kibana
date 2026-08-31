@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { elasticInternalOriginHeader } from '@kbn/scout-security';
 import type { KibanaRole } from '@kbn/scout-security';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...elasticInternalOriginHeader,
 };
 
 export const CRIBL_ROUTING_PIPELINE = 'cribl-routing-pipeline';

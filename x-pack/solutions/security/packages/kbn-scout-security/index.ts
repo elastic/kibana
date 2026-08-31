@@ -25,6 +25,11 @@ export {
 export { INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ } from './src/playwright/constants/take_action';
 export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
 export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
+export {
+  elasticInternalOriginHeader,
+  publicApiHeaders,
+  internalApiHeaders,
+} from './src/playwright/constants/api_headers';
 
 // Security-specific test enums
 export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
