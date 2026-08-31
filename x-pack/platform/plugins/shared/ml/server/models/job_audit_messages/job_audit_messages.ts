@@ -413,6 +413,9 @@ export function jobAuditMessagesProvider(
       },
     };
 
+    // The update_by_query and index APIs do not accept `project_routing`. The ES client forwards
+    // unrecognised parameters into the request body, so passing it here makes update_by_query fail
+    // with a parsing_exception and adds a stray field to the indexed notification document.
     const promises: Array<Promise<unknown>> = [
       asInternalUser.updateByQuery(
         {
@@ -425,9 +428,6 @@ export function jobAuditMessagesProvider(
             source: 'ctx._source.cleared = true',
             lang: 'painless',
           },
-          ...(serverless.isServerless && serverless.cpsEnabled
-            ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
-            : {}),
         },
         { maxRetries: 0 }
       ),
@@ -437,9 +437,6 @@ export function jobAuditMessagesProvider(
             index,
             body: newClearedMessage,
             refresh: 'wait_for',
-            ...(serverless.isServerless && serverless.cpsEnabled
-              ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
-              : {}),
           },
           { maxRetries: 0 }
         )
