@@ -208,7 +208,7 @@ export const UploadSamplesToDataStreamRequestBody = lazySchema(() =>
       /**
        * Log lines to upload when the source is a file (omit when using sourceIndex).
        */
-      samples: z.array(z.string().max(10000)).max(1000).optional(),
+      samples: z.array(z.string().max(100000)).max(1000).optional(),
       /**
        * Index name to pick samples from.
        */
