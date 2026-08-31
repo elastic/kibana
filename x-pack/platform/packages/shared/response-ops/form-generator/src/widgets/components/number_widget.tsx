@@ -15,7 +15,8 @@ import type { BaseWidgetProps } from '../types';
 type NumberWidgetProps = BaseWidgetProps<z.ZodNumber, EuiFieldNumberProps>;
 
 const numberSerializer = (v: unknown) => {
-  if (typeof v === 'string' && v !== '') {
+  if (typeof v === 'string') {
+    if (v === '') return undefined;
     const n = Number(v);
     if (!Number.isNaN(n)) return n;
   }

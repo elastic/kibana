@@ -21,8 +21,8 @@
  * in `lib/clients/mysql.ts` decodes them from the Authorization header that
  * the framework's credential accessor produces.
  *
- * `query` accepts SELECT/WITH only (enforced by `assertReadOnly`) and wraps
- * the statement in a bounded subquery so `maxRows` is applied server-side.
+ * `query` accepts SELECT/WITH only (enforced by `assertReadOnly`) and runs the
+ * statement as-is; include a `LIMIT` in the SQL to bound the result size.
  * Use `listDatabases`, `listTables`, and `describeTable` for SHOW/DESCRIBE.
  * `executeSql` is unrestricted and carries `scope: 'destroy'`.
  */
