@@ -87,7 +87,7 @@ export class CloudExperimentsPlugin
    */
   public start(core: CoreStart, { dataViews }: CloudExperimentsPluginStartDeps) {
     this.metadataService.start({
-      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
+      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasDataView() }),
     });
   }
 

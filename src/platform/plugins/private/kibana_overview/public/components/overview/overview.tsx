@@ -94,10 +94,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
       const checkData = async () => {
-        const hasUserDataViewValue = await dataViews.hasData.hasUserDataView();
+        const hasDataViewValue = await dataViews.hasData.hasDataView();
         const hasESDataValue = await dataViews.hasData.hasESData();
-        setNewKibanaInstance((!hasUserDataViewValue && hasESDataValue) || !hasESDataValue);
-        setHasDataView(hasUserDataViewValue);
+        setNewKibanaInstance((!hasDataViewValue && hasESDataValue) || !hasESDataValue);
+        setHasDataView(hasDataViewValue);
         setHasESData(hasESDataValue);
       };
 
@@ -221,7 +221,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
           hasESData: () => Promise.resolve(hasESData),
-          hasUserDataView: () => Promise.resolve(hasDataView),
+          hasDataView: () => Promise.resolve(hasDataView),
         },
       },
       dataViewEditor,

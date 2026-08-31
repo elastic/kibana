@@ -28,16 +28,16 @@ export const KibanaNoDataPage = ({
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
-  const { hasESData, hasUserDataView } = services;
+  const { hasESData, hasDataView } = services;
 
   const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
-  const [hasUserDataViews, setHasUserDataViews] = useState(false);
+  const [hasDataViews, setHasDataViews] = useState(false);
 
   useEffect(() => {
     const checkData = async () => {
       setDataExists(await hasESData());
-      setHasUserDataViews(await hasUserDataView());
+      setHasDataViews(await hasDataView());
       setIsLoading(false);
     };
     checkData().catch((e) => {
@@ -45,7 +45,7 @@ export const KibanaNoDataPage = ({
       // eslint-disable-next-line no-console
       console.error(e);
     });
-  }, [hasESData, hasUserDataView]);
+  }, [hasESData, hasDataView]);
 
   if (isLoading) {
     return showPlainSpinner ? (
@@ -55,7 +55,7 @@ export const KibanaNoDataPage = ({
     );
   }
 
-  if (!hasUserDataViews && dataExists) {
+  if (!hasDataViews && dataExists) {
     return (
       <NoDataViewsPrompt
         onDataViewCreated={onDataViewCreated}

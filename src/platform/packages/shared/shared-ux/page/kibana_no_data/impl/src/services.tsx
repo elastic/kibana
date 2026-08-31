@@ -31,10 +31,10 @@ export const KibanaNoDataPageProvider: FC<PropsWithChildren<KibanaNoDataPageServ
   children,
   ...services
 }) => {
-  const { hasESData, hasUserDataView } = services;
+  const { hasESData, hasDataView } = services;
 
   return (
-    <KibanaNoDataPageContext.Provider value={{ hasESData, hasUserDataView }}>
+    <KibanaNoDataPageContext.Provider value={{ hasESData, hasDataView }}>
       <NoDataViewsPromptProvider {...services}>
         <NoDataCardProvider {...services}>{children}</NoDataCardProvider>
       </NoDataViewsPromptProvider>
@@ -51,7 +51,7 @@ export const KibanaNoDataPageKibanaProvider: FC<
   const { dataViews } = dependencies;
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,
-    hasUserDataView: dataViews.hasData.hasUserDataView,
+    hasDataView: dataViews.hasData.hasDataView,
   };
 
   return (

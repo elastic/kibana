@@ -26,7 +26,7 @@ const AnalyticsNoDataPage = withSuspense(
 
 export const NoDataPage = ({
   hasESData,
-  hasUserDataView,
+  hasDataView,
   onDataViewCreated,
   onESQLNavigationComplete,
 }: DiscoverInternalState['initializationState'] & AnalyticsNoDataPageProps) => {
@@ -42,11 +42,11 @@ export const NoDataPage = ({
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
           hasESData: () => Promise.resolve(hasESData),
-          hasUserDataView: () => Promise.resolve(hasUserDataView),
+          hasDataView: () => Promise.resolve(hasDataView),
         },
       },
     }),
-    [hasESData, hasUserDataView, services]
+    [hasESData, hasDataView, services]
   );
 
   return (
