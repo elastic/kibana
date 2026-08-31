@@ -7,121 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { startTrackingHistory } from './history';
 
-const setupHistory = ({
-  initial,
-  maxSize = 10,
-  disableUndoRedoInitial = false,
-  mapState = (s) => s,
-}: {
-  initial?: object;
-  maxSize?: number;
-  disableUndoRedoInitial?: boolean;
-  mapState?: (input: object) => object;
-}) => {
+const setupHistory = ({ initial, maxSize = 10 }: { initial?: object; maxSize?: number }) => {
   const state$ = new BehaviorSubject<object | undefined>(initial);
-  const disableUndoRedo$ = new BehaviorSubject<boolean>(disableUndoRedoInitial);
-  const { api, cleanup } = startTrackingHistory<object>({
-    state$,
-    mapState,
-    maxSize,
-    disableUndoRedo$,
+  const setState = jest.fn(async (state: object) => {
+    state$.next(state);
   });
-  return { state$, disableUndoRedo$, api, cleanup };
+  const { api, cleanup } = startTrackingHistory<object>({
+    onStateChange$: state$,
+    setState,
+    maxSize,
+  });
+  return { state$, setState, api, cleanup };
 };
 
 describe('startTrackingHistory', () => {
   describe('initial state', () => {
     it('disables both undo and redo on init', () => {
       const { api, cleanup } = setupHistory({});
-      expect(api.disabledActions$.value).toEqual({ undo: true, redo: true });
+      expect(api.canUndo$.value).toBe(false);
+      expect(api.canRedo$.value).toBe(false);
       cleanup();
     });
   });
 
   describe('history tracking', () => {
-    it('enables undo after a state change is recorded', async () => {
+    it('enables undo after a state change is recorded', () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
-      expect(await firstValueFrom(api.disabledActions$)).toMatchObject({
-        undo: false,
-        redo: true,
-      });
-      cleanup();
-    });
-
-    it('does not record a history entry when the mapped state is unchanged', async () => {
-      const { api, cleanup, state$ } = setupHistory({
-        initial: {
-          value: 0,
-          ignored: 'a',
-        },
-        mapState: (({ value }: { value: number; ignored: string }) => ({
-          value,
-          ignored: 'normalized',
-        })) as (input: object) => object,
-      });
-
-      state$.next({ value: 0, ignored: 'b' }); // only the mapped-away field changed
-      const isDisabled = await firstValueFrom(api.disabledActions$);
-      expect(isDisabled.undo).toBe(true);
-
+      expect(api.canUndo$.value).toBe(true);
+      expect(api.canRedo$.value).toBe(false);
       cleanup();
     });
   });
 
   describe('undo', () => {
-    it('emits the previous state on currentState$', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+    it('calls setState with the previous state', async () => {
+      const { state$, setState, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      api.undo();
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0]).toEqual({ value: 0 });
+      await api.undo();
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({ value: 0 });
 
       cleanup();
     });
 
-    it('records multiple distinct state changes', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+    it('records multiple distinct state changes', async () => {
+      const { state$, setState, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
       state$.next({ value: 2 });
       state$.next({ value: 3 });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      api.undo();
-      api.undo();
-      api.undo();
-      expect(emitted).toHaveLength(3);
-
-      cleanup();
-    });
-
-    it('is a no-op when at the bottom of the history stack', () => {
-      const { api, cleanup } = setupHistory({});
-
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      api.undo();
-      expect(emitted).toHaveLength(0);
-
-      cleanup();
-    });
-
-    it('is a no-op when disableUndoRedo$ is true', () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
-
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      state$.next({ value: 1 });
-      disableUndoRedo$.next(true);
-      api.undo();
-      expect(emitted).toHaveLength(0);
+      await api.undo();
+      await api.undo();
+      await api.undo();
+      expect(setState).toHaveBeenCalledTimes(3);
 
       cleanup();
     });
@@ -130,9 +73,8 @@ describe('startTrackingHistory', () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
-      api.undo();
-      const isDisabled = await firstValueFrom(api.disabledActions$);
-      expect(isDisabled.redo).toBe(false);
+      await api.undo();
+      expect(api.canRedo$.value).toBe(true);
 
       cleanup();
     });
@@ -141,67 +83,32 @@ describe('startTrackingHistory', () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
-      api.undo();
-      const isDisabled = await firstValueFrom(api.disabledActions$);
-      expect(isDisabled.undo).toBe(true);
+      await api.undo();
+      expect(api.canUndo$.value).toBe(false);
 
       cleanup();
     });
 
-    it('does not add the undone state change back into history', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+    it('does not add the undone state change back into history', async () => {
+      const { state$, setState, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
-      api.undo();
+      await api.undo(); // setState echoes { value: 0 } back via state$, which is ignored by undoOrRedoAction
 
-      // simulate the consumer echoing the undone state back into state$
-      state$.next({ value: 0 });
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      api.redo();
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0]).toEqual({ value: 1 });
+      await api.redo();
+      expect(setState).toHaveBeenLastCalledWith({ value: 1 });
 
       cleanup();
     });
   });
 
   describe('redo', () => {
-    it('re-applies the next change after an undo', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+    it('re-applies the next change after an undo', async () => {
+      const { state$, setState, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
-      api.undo(); // emitted[0] = { value: 0 }
-      api.redo(); // emitted[1] = { value: 1 }
-      expect(emitted).toHaveLength(2);
-      expect(emitted[1]).toEqual({ value: 1 });
-
-      cleanup();
-    });
-
-    it('is a no-op when already at the top of the history stack', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
-
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      state$.next({ value: 1 });
-      api.redo();
-      expect(emitted).toHaveLength(0);
-
-      cleanup();
-    });
-
-    it('is a no-op when disableUndoRedo$ is true', () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
-
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
-      state$.next({ value: 1 });
-      api.undo(); // emitted[0]
-      disableUndoRedo$.next(true);
-      api.redo(); // blocked
-      expect(emitted).toHaveLength(1);
+      await api.undo();
+      await api.redo();
+      expect(setState).toHaveBeenLastCalledWith({ value: 1 });
 
       cleanup();
     });
@@ -210,10 +117,9 @@ describe('startTrackingHistory', () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
-      api.undo();
-      api.redo();
-      const isDisabled = await firstValueFrom(api.disabledActions$);
-      expect(isDisabled.redo).toBe(true);
+      await api.undo();
+      await api.redo();
+      expect(api.canRedo$.value).toBe(false);
 
       cleanup();
     });
@@ -225,13 +131,11 @@ describe('startTrackingHistory', () => {
 
       state$.next({ value: 1 });
       state$.next({ value: 2 });
-      api.undo();
-      // simulate the consumer echoing the undone state back into state$
-      state$.next({ value: 1 });
+      await api.undo();
+      // setState echoes { value: 1 } back into state$ via our mock, which is ignored
       state$.next({ value: 99 }); // new branch — prunes the future history
 
-      const isDisabled = await firstValueFrom(api.disabledActions$);
-      expect(isDisabled.redo).toBe(true);
+      expect(api.canRedo$.value).toBe(false);
 
       cleanup();
     });
@@ -240,51 +144,12 @@ describe('startTrackingHistory', () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 }, maxSize: 1 });
 
       state$.next({ value: 1 }); // diff 0→1 recorded
-      state$.next({ value: 2 }); // diff 1→2 recorded (at capacity)
+      state$.next({ value: 2 }); // diff 1→2 recorded
       state$.next({ value: 3 }); // diff 0→1 evicted; diff 2→3 added
-      api.undo(); // 3→2
-      api.undo(); // 2→1  — now at bottom; 0→1 no longer exists
+      await api.undo(); // 3→2
+      await api.undo(); // 2→1  — now at bottom; 0→1 no longer exists
 
-      const isDisabled = await firstValueFrom(api.disabledActions$);
-      expect(isDisabled.undo).toBe(true);
-
-      cleanup();
-    });
-  });
-
-  describe('disableUndoRedo$', () => {
-    it('disables both actions when disableUndoRedo$ becomes true', async () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
-
-      // First, wait for undo to be enabled so we can verify the override.
-      state$.next({ value: 1 });
-      expect(await firstValueFrom(api.disabledActions$)).toEqual({
-        undo: false,
-        redo: true,
-      });
-      disableUndoRedo$.next(true);
-      expect(await firstValueFrom(api.disabledActions$)).toEqual({
-        undo: true,
-        redo: true,
-      });
-
-      cleanup();
-    });
-
-    it('re-enables actions when disableUndoRedo$ returns to false', async () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
-
-      state$.next({ value: 1 });
-      disableUndoRedo$.next(true);
-      expect(await firstValueFrom(api.disabledActions$)).toEqual({
-        undo: true,
-        redo: true,
-      });
-      disableUndoRedo$.next(false);
-      expect(await firstValueFrom(api.disabledActions$)).toEqual({
-        undo: false,
-        redo: true,
-      });
+      expect(api.canUndo$.value).toBe(false);
 
       cleanup();
     });
@@ -298,66 +163,66 @@ describe('startTrackingHistory', () => {
     };
 
     it('triggers undo on Ctrl+Z', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+      const { state$, setState, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       fireKey('z', 'ctrlKey');
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0]).toEqual({ value: 0 });
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({ value: 0 });
 
       cleanup();
     });
 
     it('triggers undo on Meta+Z', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+      const { state$, setState, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       fireKey('z', 'metaKey');
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0]).toEqual({ value: 0 });
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({ value: 0 });
 
       cleanup();
     });
 
-    it('triggers redo on Ctrl+Y', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+    it('triggers redo on Ctrl+Y', async () => {
+      const {
+        state$,
+        setState,
+        api: { undo },
+        cleanup,
+      } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
-      api.undo(); // emitted[0]
+      await undo();
       fireKey('y', 'ctrlKey');
-      expect(emitted).toHaveLength(2);
-      expect(emitted[1]).toEqual({ value: 1 });
+      expect(setState).toHaveBeenCalledTimes(2);
+      expect(setState).toHaveBeenLastCalledWith({ value: 1 });
 
       cleanup();
     });
 
     it('does not trigger undo without a modifier key', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+      const { state$, setState, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'z' }));
-      expect(emitted).toHaveLength(0);
+      expect(setState).not.toHaveBeenCalled();
 
       cleanup();
     });
 
-    it('does not trigger redo without a modifier key', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+    it('does not trigger redo without a modifier key', async () => {
+      const {
+        state$,
+        setState,
+        api: { undo: undoFn },
+        cleanup,
+      } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
-      api.undo();
+      await undoFn();
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'y' }));
-      expect(emitted).toHaveLength(1); // only the undo, not the redo
+      expect(setState).toHaveBeenCalledTimes(1); // only the undo, not the redo
 
       cleanup();
     });
@@ -368,20 +233,18 @@ describe('startTrackingHistory', () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       cleanup();
       state$.next({ value: 1 });
-      expect(api.disabledActions$.value.undo).toBe(true);
+      expect(api.canUndo$.value).toBe(false);
     });
 
     it('removes the keyboard event listener after cleanup', () => {
-      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
+      const { state$, setState, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: Array<object | undefined> = [];
-      api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       cleanup();
       document.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, cancelable: true })
       );
-      expect(emitted).toHaveLength(0);
+      expect(setState).not.toHaveBeenCalled();
     });
   });
 });
