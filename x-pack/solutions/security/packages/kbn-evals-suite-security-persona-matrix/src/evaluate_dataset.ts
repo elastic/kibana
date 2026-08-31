@@ -84,6 +84,7 @@ export const toDatasetExample = (ex: PersonaMatrixExample): PersonaMatrixDataset
 export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected, metadata }) => {
     // Try tool_sequence from expected output first, then expectedTools from metadata
     const toolSequence = (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence;
@@ -126,6 +127,7 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
 export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => ({
   name: 'FinalAnswerPresent',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const taskOutput = output as { messages?: Array<{ message?: unknown }> } | undefined;
     if (!taskOutput) {
@@ -162,6 +164,7 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
 export const createPersonaMatrixMinExpectedStepsEvaluator = (): Evaluator => ({
   name: 'MinExpectedSteps',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected, metadata }) => {
     const toolSequence = (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence;
     const meta = metadata as { expectedTools?: string[] } | undefined;
@@ -256,6 +259,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
 }): Evaluator => ({
   name: 'SkillInvoked',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
     const meta = metadata as { expectedSkill?: string; allowSkills?: string[] } | undefined;
     const acceptedSkills = [meta?.expectedSkill, ...(meta?.allowSkills ?? [])].filter(

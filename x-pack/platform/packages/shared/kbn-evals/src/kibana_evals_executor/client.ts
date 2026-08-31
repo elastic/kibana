@@ -304,6 +304,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       result,
                       evaluatorTraceId,
                       kind: evaluator.kind,
+                      direction: evaluator.direction,
                       // Read after `evaluate` so evaluators that learn their model from
                       // the `_evaluate` response have it by now.
                       model: evaluator.getModel?.(),
@@ -337,6 +338,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
               for (const {
                 evaluatorName,
+                direction,
                 result,
                 evaluatorTraceId,
                 kind,
@@ -350,6 +352,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
+                  direction: direction ?? 'neutral',
                   kind,
                   ...(model && { model }),
                 };
