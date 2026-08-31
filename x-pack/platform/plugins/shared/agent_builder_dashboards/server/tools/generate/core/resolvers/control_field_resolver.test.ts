@@ -5,36 +5,84 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { ToolResultStore } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createControlFieldResolver } from './control_field_resolver';
 
-const sampleLogsFields = {
-  host: { text: { aggregatable: false, type: 'text' } },
-  'host.keyword': { keyword: { aggregatable: true, type: 'keyword' } },
+const sampleLogsFieldsText = '- host [text]\n- host.keyword [keyword]';
+
+const createResultStore = ({
+  resources,
+}: {
+  resources?: Record<string, unknown>;
+} = {}): Pick<ToolResultStore, 'listEntries' | 'getEntry'> => {
+  const dir = '/platform_core_get_index_mapping_call-1';
+  return {
+    listEntries: jest.fn(async (dirPath: string) => {
+      if (resources === undefined || dirPath !== '/') {
+        return [];
+      }
+      return [{ type: 'dir' as const, path: dir }];
+    }),
+    getEntry: jest.fn(async (path: string) => {
+      if (path === `${dir}/meta.json`) {
+        return {
+          path,
+          type: 'file' as const,
+          content: {
+            raw: {
+              tool_id: platformCoreTools.getIndexMapping,
+              results: [{ file: 'result.json' }],
+            },
+          },
+          metadata: {} as never,
+        };
+      }
+      if (path === `${dir}/result.json`) {
+        return {
+          path,
+          type: 'file' as const,
+          content: { raw: { resources } },
+          metadata: {} as never,
+        };
+      }
+      return undefined;
+    }),
+  };
 };
 
 describe('createControlFieldResolver', () => {
-  it('rewrites a text field using field_caps for that index', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({ fields: sampleLogsFields });
+  it('rewrites a text field using a prior get_index_mapping result', async () => {
     const resolve = createControlFieldResolver({
-      esClient: { asCurrentUser: { fieldCaps } } as never,
+      resultStore: createResultStore({
+        resources: {
+          kibana_sample_data_logs: {
+            type: 'index',
+            fields: sampleLogsFieldsText,
+          },
+        },
+      }),
       logger: loggerMock.create(),
     });
 
     await expect(resolve({ fieldName: 'host', index: 'kibana_sample_data_logs' })).resolves.toEqual(
-      { fieldName: 'host.keyword' }
+      {
+        fieldName: 'host.keyword',
+      }
     );
-    expect(fieldCaps).toHaveBeenCalledWith({
-      index: 'kibana_sample_data_logs',
-      fields: '*',
-      include_unmapped: false,
-    });
   });
 
   it('rejects an unknown field after looking up the mapping', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({ fields: sampleLogsFields });
     const resolve = createControlFieldResolver({
-      esClient: { asCurrentUser: { fieldCaps } } as never,
+      resultStore: createResultStore({
+        resources: {
+          kibana_sample_data_logs: {
+            type: 'index',
+            fields: sampleLogsFieldsText,
+          },
+        },
+      }),
       logger: loggerMock.create(),
     });
 
@@ -45,28 +93,34 @@ describe('createControlFieldResolver', () => {
     });
   });
 
-  it('reuses one field_caps lookup per index', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({ fields: sampleLogsFields });
+  it('reuses one mapping load for multiple fields on the same index', async () => {
+    const resultStore = createResultStore({
+      resources: {
+        kibana_sample_data_logs: {
+          type: 'index',
+          fields: sampleLogsFieldsText,
+        },
+      },
+    });
     const resolve = createControlFieldResolver({
-      esClient: { asCurrentUser: { fieldCaps } } as never,
+      resultStore,
       logger: loggerMock.create(),
     });
 
     await resolve({ fieldName: 'host', index: 'kibana_sample_data_logs' });
     await resolve({ fieldName: 'method', index: 'kibana_sample_data_logs' });
 
-    expect(fieldCaps).toHaveBeenCalledTimes(1);
+    expect(resultStore.listEntries).toHaveBeenCalledTimes(1);
   });
 
-  it('fails the field when field_caps cannot be loaded', async () => {
-    const fieldCaps = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));
+  it('passes the field through when no get_index_mapping result covers the index', async () => {
     const resolve = createControlFieldResolver({
-      esClient: { asCurrentUser: { fieldCaps } } as never,
+      resultStore: createResultStore(),
       logger: loggerMock.create(),
     });
 
     await expect(resolve({ fieldName: 'host', index: 'missing-*' })).resolves.toEqual({
-      error: 'Could not verify field "host" on index "missing-*".',
+      fieldName: 'host',
     });
   });
 });

@@ -5,48 +5,48 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ToolResultStore } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { getErrorMessage } from '../utils';
 import {
   resolveAggregatableControlField,
-  type FieldCapsFields,
+  type ControlFieldTypes,
 } from '../operations/resolve_aggregatable_control_field';
 import type { ResolveControlField } from '../operations/types';
+import { loadIndexMappingFieldsFromResultStore } from './index_mapping_tool_fields';
 
 export const createControlFieldResolver = ({
-  esClient,
+  resultStore,
   logger,
-  projectRouting,
 }: {
-  esClient: IScopedClusterClient;
+  resultStore?: Pick<ToolResultStore, 'listEntries' | 'getEntry'>;
   logger: Logger;
-  projectRouting?: string;
 }): ResolveControlField => {
-  const fieldsByIndex = new Map<string, FieldCapsFields>();
+  let fieldsByIndexPromise: Promise<Map<string, ControlFieldTypes>> | undefined;
+
+  const loadFieldsByIndex = (): Promise<Map<string, ControlFieldTypes>> => {
+    if (!fieldsByIndexPromise) {
+      fieldsByIndexPromise = resultStore
+        ? loadIndexMappingFieldsFromResultStore(resultStore).catch((error) => {
+            logger.warn(
+              `Could not load get_index_mapping results for control fields: ${getErrorMessage(
+                error
+              )}`
+            );
+            return new Map();
+          })
+        : Promise.resolve(new Map());
+    }
+    return fieldsByIndexPromise;
+  };
 
   return async ({ fieldName, index }) => {
-    try {
-      let fields = fieldsByIndex.get(index);
-      if (!fields) {
-        const response = await esClient.asCurrentUser.fieldCaps({
-          index,
-          fields: '*',
-          include_unmapped: false,
-          ...(projectRouting ? { project_routing: projectRouting } : {}),
-        });
-        fields = (response.fields ?? {}) as FieldCapsFields;
-        fieldsByIndex.set(index, fields);
-      }
-
-      return resolveAggregatableControlField({ fieldName, fields });
-    } catch (error) {
-      logger.warn(
-        `Could not verify control field "${fieldName}" on ${index}: ${getErrorMessage(error)}`
-      );
-      return {
-        error: `Could not verify field "${fieldName}" on index "${index}".`,
-      };
+    const fieldsByIndex = await loadFieldsByIndex();
+    const fields = fieldsByIndex.get(index);
+    if (!fields) {
+      return { fieldName };
     }
+
+    return resolveAggregatableControlField({ fieldName, fields });
   };
 };

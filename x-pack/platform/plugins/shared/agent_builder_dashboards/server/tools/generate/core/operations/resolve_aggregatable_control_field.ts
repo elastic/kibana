@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-export type FieldCapsTypeMap = Record<string, { aggregatable?: boolean; type?: string }>;
-
-export type FieldCapsFields = Record<string, FieldCapsTypeMap>;
+export type ControlFieldTypes = Record<string, string>;
 
 export type ResolveAggregatableControlFieldResult =
   | { fieldName: string; error?: never }
   | { fieldName?: never; error: string };
 
-const isAggregatable = (fields: FieldCapsFields, fieldName: string): boolean => {
-  const types = fields[fieldName];
-  if (!types) {
-    return false;
-  }
-  return Object.values(types).some((type) => type.aggregatable === true);
+const NON_AGGREGATABLE_TYPES = new Set([
+  'text',
+  'match_only_text',
+  'annotated_text',
+  'search_as_you_type',
+  'semantic_text',
+]);
+
+const isAggregatable = (fields: ControlFieldTypes, fieldName: string): boolean => {
+  const type = fields[fieldName];
+  return type !== undefined && !NON_AGGREGATABLE_TYPES.has(type);
 };
 
 /**
@@ -30,7 +33,7 @@ export const resolveAggregatableControlField = ({
   fields,
 }: {
   fieldName: string;
-  fields: FieldCapsFields;
+  fields: ControlFieldTypes;
 }): ResolveAggregatableControlFieldResult => {
   if (isAggregatable(fields, fieldName)) {
     return { fieldName };

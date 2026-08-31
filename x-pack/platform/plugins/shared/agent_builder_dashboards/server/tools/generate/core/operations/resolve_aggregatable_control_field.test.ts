@@ -8,12 +8,12 @@
 import { resolveAggregatableControlField } from './resolve_aggregatable_control_field';
 
 const sampleLogsFields = {
-  host: { text: { aggregatable: false, type: 'text' } },
-  'host.keyword': { keyword: { aggregatable: true, type: 'keyword' } },
-  response: { text: { aggregatable: false, type: 'text' } },
-  'response.keyword': { keyword: { aggregatable: true, type: 'keyword' } },
-  clientip: { ip: { aggregatable: true, type: 'ip' } },
-  bytes: { long: { aggregatable: true, type: 'long' } },
+  host: 'text',
+  'host.keyword': 'keyword',
+  response: 'text',
+  'response.keyword': 'keyword',
+  clientip: 'ip',
+  bytes: 'long',
 };
 
 describe('resolveAggregatableControlField', () => {
@@ -59,7 +59,7 @@ describe('resolveAggregatableControlField', () => {
     expect(
       resolveAggregatableControlField({
         fieldName: 'message',
-        fields: { message: { text: { aggregatable: false, type: 'text' } } },
+        fields: { message: 'text' },
       })
     ).toEqual({
       error: 'Field "message" is not an aggregatable field on this index.',
