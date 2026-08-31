@@ -58,6 +58,8 @@ export class ComposeDiscoverPage {
   public readonly noAlertConditionCallout: Locator;
   /** Callout shown after Apply when the query is empty. */
   public readonly emptyQueryCallout: Locator;
+  public readonly confirmBuilderToEsqlModal: Locator;
+  public readonly switchToEsqlToggle: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -92,6 +94,10 @@ export class ComposeDiscoverPage {
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.noAlertConditionCallout = this.page.testSubj.locator('esqlSummaryNoAlertConditionCallout');
     this.emptyQueryCallout = this.page.testSubj.locator('esqlSummaryEmptyCallout');
+    this.confirmBuilderToEsqlModal = this.page.testSubj.locator(
+      'alertingV2ConfirmBuilderToEsqlModal'
+    );
+    this.switchToEsqlToggle = this.page.testSubj.locator('composeDiscoverSwitchToEsql');
   }
 
   /**
@@ -126,6 +132,16 @@ export class ComposeDiscoverPage {
 
   async openEditFlyout(ruleId: string) {
     await this.editRuleButton(ruleId).click();
+  }
+
+  async clickSwitchToEsql() {
+    await this.switchToEsqlToggle.locator('[data-test-subj="esql"]').click();
+  }
+
+  async confirmBuilderToEsql() {
+    await this.confirmBuilderToEsqlModal
+      .locator('[data-test-subj="confirmModalConfirmButton"]')
+      .click();
   }
 
   /**
