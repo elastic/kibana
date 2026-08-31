@@ -5,19 +5,50 @@
  * 2.0.
  */
 
-export type InvestigationSubjectType = 'significant_event' | 'alert';
+import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { InvestigationTriggerType } from './workflows/triggers';
 
-export interface InvestigationSubject {
-  type: InvestigationSubjectType;
-  id: string;
-}
+export {
+  INVESTIGATION_SUBJECT_TYPES,
+  type InvestigationSubjectType,
+  INVESTIGATION_TRIGGER_TYPES,
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  type InvestigationTriggerType,
+} from './workflows/triggers';
 
-export interface InvestigationContext {
-  [key: string]: unknown;
-}
+/**
+ * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
+ * caller is held to and the type the code is written against cannot disagree.
+ */
+export type {
+  AlertInvestigationContext,
+  AlertSnapshot,
+  AlertSnapshotEvaluation,
+  AlertSnapshotGroup,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
+
+export {
+  alertInvestigationContextSchema,
+  alertSnapshotSchema,
+  freeFormContextSchema,
+  investigationSubjectSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from './schemas';
+
+import type {
+  AlertInvestigationContext,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
+  /**
+   * What initiated the investigation. Defaults to "manual" when omitted.
+   */
+  trigger_type?: InvestigationTriggerType;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
@@ -34,7 +65,7 @@ export interface StartInvestigationRequest {
    * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
    */
   concurrency_key?: string;
-  context?: InvestigationContext;
+  context?: InvestigationContext | AlertInvestigationContext;
 }
 
 export interface StartInvestigationResponse {
@@ -52,12 +83,35 @@ export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
 export interface GetInvestigationResponse {
   investigation_id: string;
-  subject: InvestigationSubject;
+  /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
+  subject?: InvestigationSubject;
+  trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
-  conclusions?: string;
+  /**
+   * The conclusion narrative on its own, for a caller that wants the answer and nothing else.
+   * Falls back to the summary while no hypothesis is confirmed yet. Also the only output a caller
+   * gets when `result` had to be dropped for failing validation.
+   */
+  conclusion?: string;
+  /**
+   * Everything the investigation produced: the hypotheses it considered with the evidence and
+   * ES|QL behind each verdict, the gaps it could not see past, and what it recommends doing.
+   *
+   * This is the same `InvestigationState` the progress-report tool streams while the run is live,
+   * so one renderer serves a finished investigation and a running one. Only the list endpoint
+   * stays narrow — it omits step runs entirely, because this payload runs to several kilobytes
+   * and no list view needs it per row.
+   */
+  result?: InvestigationState;
   error?: string;
+}
+
+export interface InvestigationStatusEvent {
+  type: 'investigation_status';
+  investigation_id: string;
+  status: InvestigationStatus;
 }
 
 export interface ListInvestigationsRequest {
@@ -87,3 +141,14 @@ export interface ListInvestigationsResponse {
   size: number;
   total: number;
 }
+
+export {
+  INVESTIGATION_STARTED_TRIGGER_ID,
+  INVESTIGATION_COMPLETED_TRIGGER_ID,
+  INVESTIGATION_FAILED_TRIGGER_ID,
+  type InvestigationsTriggerId,
+  type InvestigationsTriggerPayloadMap,
+  type InvestigationsTriggerBasePayload,
+  type InvestigationCompletedTriggerPayload,
+  type InvestigationFailedTriggerPayload,
+} from './workflows/triggers';
