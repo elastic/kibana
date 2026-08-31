@@ -15,14 +15,17 @@ export const RRF_RANK_CONSTANT = 20;
  * Parameters for the ES|QL recall query and its authoritative body filter.
  *
  * Recall enforces authoritative space and user-scope filters that are
- * never overridable by tool params.
+ * never overridable by tool params. Both personal and space-scoped memories
+ * for the caller are always searched in a single OR clause.
  */
 export interface BuildRecallQueryParams {
   query: string;
   /** Mandatory scope filter — injected unconditionally (G3). */
   space_id: string;
-  scope_kind: 'user';
+  /** The calling user's identity key (profile_uid or username). */
   scope_id: string;
+  /** Consumer namespace filter. Default 'agent_memory'. */
+  namespace?: string;
   /** Optional category filter applied on top of the belief filter. */
   category?: string;
   /** Optional exact tags; every supplied tag must be present. */
@@ -40,22 +43,48 @@ export interface BuildRecallQueryParams {
  *
  * Always adds:
  *  - `space_id` scope (G3)
- *  - `memory.scope_kind` and `memory.scope_id` (G3)
+ *  - `namespace` filter to prevent cross-consumer data collision
+ *  - OR clause covering both personal (`scope_kind: 'user'`) and
+ *    space-shared (`scope_kind: 'space'`) memories (G3)
  */
 const buildBeliefFilterClauses = (
   space_id: string,
-  scope_kind: 'user',
   scope_id: string,
+  namespace: string,
   category?: string,
   tags?: string[]
 ): QueryDslQueryContainer[] => {
   const now = new Date().toISOString();
 
   const filters: QueryDslQueryContainer[] = [
-    // G3: mandatory scope filters — never optional
+    // G3: mandatory space and namespace guards — never optional
     { term: { space_id } },
-    { term: { 'memory.scope_kind': scope_kind } },
-    { term: { 'memory.scope_id': scope_id } },
+    { term: { namespace } },
+
+    // G3: OR clause — personal memories for this user OR space-shared memories for this space
+    {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            bool: {
+              filter: [
+                { term: { 'memory.scope_kind': 'user' } },
+                { term: { 'memory.scope_id': scope_id } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { term: { 'memory.scope_kind': 'space' } },
+                { term: { 'memory.scope_id': space_id } },
+              ],
+            },
+          },
+        ],
+      },
+    },
 
     // Belief-state filters
     { term: { deleted: false } },
@@ -85,13 +114,19 @@ const buildBeliefFilterClauses = (
 
 export const buildBeliefFilter = ({
   space_id,
-  scope_kind,
   scope_id,
+  namespace,
   category,
   tags,
 }: Omit<BuildRecallQueryParams, 'query' | 'limit'>): QueryDslQueryContainer => ({
   bool: {
-    filter: buildBeliefFilterClauses(space_id, scope_kind, scope_id, category, tags),
+    filter: buildBeliefFilterClauses(
+      space_id,
+      scope_id,
+      namespace ?? 'agent_memory',
+      category,
+      tags
+    ),
   },
 });
 
@@ -124,12 +159,13 @@ export const buildHybridRecallPipeline = ({
     | WHERE _score >= ${minScore}
     | SORT _score DESC, _id ASC
     | LIMIT ${limit}
-    | EVAL category = memory.category,
+    | EVAL scope = memory.scope_kind,
+           category = memory.category,
            memory_type = memory.type,
            author = memory.provenance.author,
            author_kind = memory.provenance.author_kind,
            revision = memory.revision
-    | KEEP _id, title, description, category, memory_type, tags, created_at,
+    | KEEP _id, title, description, scope, category, memory_type, tags, created_at,
            author, author_kind, revision
   `;
 };
@@ -147,11 +183,12 @@ export const buildKeywordRecallPipeline = ({
     | WHERE _score >= 1
     | SORT _score DESC, _id ASC
     | LIMIT ${limit}
-    | EVAL category = memory.category,
+    | EVAL scope = memory.scope_kind,
+           category = memory.category,
            memory_type = memory.type,
            author = memory.provenance.author,
            author_kind = memory.provenance.author_kind,
            revision = memory.revision
-    | KEEP _id, title, description, category, memory_type, tags, created_at,
+    | KEEP _id, title, description, scope, category, memory_type, tags, created_at,
            author, author_kind, revision
   `;

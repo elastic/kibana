@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isOccConflictError, OccWriter, type OccMetadata } from '@kbn/occ';
 import { AGENT_MEMORY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
-import { AGENT_MEMORY_INDEX, type MemoryPermissions } from '../../common';
+import { AGENT_MEMORY_INDEX, type MemoryPermissions, type MemoryScopeKind } from '../../common';
 import type { CallSource, MemoryCategory } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
 import type { ResolvedIdentity } from './resolve_identity';
@@ -27,6 +27,12 @@ export interface WriteMemoryParams {
   call_source?: CallSource;
   space_id: string;
   identity: ResolvedIdentity;
+  /** 'user' (default) for personal memories; 'space' for team-shared within the Kibana space. */
+  scope?: 'user' | 'space';
+  /** Consumer namespace. Default 'agent_memory'. */
+  namespace?: string;
+  /** IDs of recalled memories that informed this write (attribution-grade; stored on create only). */
+  used_memory_ids?: string[];
 }
 
 export interface WriteMemoryResult {
@@ -61,7 +67,7 @@ const deterministicDocumentId = ({
   hash,
 }: {
   spaceId: string;
-  scopeKind: 'user';
+  scopeKind: MemoryScopeKind;
   scopeId: string;
   hash: string;
 }): string =>
@@ -94,10 +100,21 @@ export const writeMemory = async ({
   esClient: ElasticsearchClient;
   params: WriteMemoryParams;
 }): Promise<WriteMemoryResult> => {
-  const { title, description, category, tags, expires_at, call_source, space_id, identity } =
-    params;
-  const scopeKind = 'user' as const;
-  const scopeId = identity.author;
+  const {
+    title,
+    description,
+    category,
+    tags,
+    expires_at,
+    call_source,
+    space_id,
+    identity,
+    scope,
+    used_memory_ids,
+  } = params;
+  const namespace = params.namespace ?? 'agent_memory';
+  const scopeKind: MemoryScopeKind = scope === 'space' ? 'space' : 'user';
+  const scopeId = scopeKind === 'space' ? space_id : identity.author;
   const hash = contentHash(description);
   const id = deterministicDocumentId({ spaceId: space_id, scopeKind, scopeId, hash });
   const now = new Date().toISOString();
@@ -152,6 +169,7 @@ export const writeMemory = async ({
     '@timestamp': now,
     created_at: now,
     space_id,
+    namespace,
     permissions: buildMemoryPermissions(space_id),
     memory: {
       category,
@@ -163,6 +181,7 @@ export const writeMemory = async ({
         author: identity.author,
         author_kind: identity.author_kind,
         call_source,
+        ...(used_memory_ids?.length ? { used_memory_ids } : {}),
       },
     },
   };
@@ -189,6 +208,7 @@ export const writeMemory = async ({
         description,
         content: `${title}\n\n${description}`,
         tags: tags ?? previous.tags,
+        namespace,
         expires_at:
           expires_at ?? (previous.deleted || previousIsExpired ? undefined : previous.expires_at),
         permissions: buildMemoryPermissions(space_id),
@@ -203,6 +223,7 @@ export const writeMemory = async ({
             author: previous.memory.provenance.author,
             author_kind: previous.memory.provenance.author_kind,
             call_source: call_source ?? previous.memory.provenance.call_source,
+            // used_memory_ids is intentionally not propagated on supersede
           },
         },
       };

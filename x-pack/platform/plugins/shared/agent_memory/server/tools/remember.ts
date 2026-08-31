@@ -54,13 +54,23 @@ Returns { id, revision, action } where action is 'created' or 'updated'.
         defaultMessage: 'Remember "{title}"',
         values: { title: toolParams.title },
       }),
-      message: i18n.translate(
-        'xpack.agentMemory.agentBuilder.tools.remember.confirmationDescription',
-        {
-          defaultMessage: 'Save this memory for future conversations?\n\n{content}',
-          values: { content: toolParams.description },
-        }
-      ),
+      message:
+        toolParams.scope === 'space'
+          ? i18n.translate(
+              'xpack.agentMemory.agentBuilder.tools.remember.confirmationDescriptionSpace',
+              {
+                defaultMessage:
+                  'Save this for everyone with Memory access in this space?\n\n{content}',
+                values: { content: toolParams.description },
+              }
+            )
+          : i18n.translate(
+              'xpack.agentMemory.agentBuilder.tools.remember.confirmationDescription',
+              {
+                defaultMessage: 'Save this memory for future conversations?\n\n{content}',
+                values: { content: toolParams.description },
+              }
+            ),
       confirm_text: i18n.translate(
         'xpack.agentMemory.agentBuilder.tools.remember.confirmationButtonLabel',
         { defaultMessage: 'Remember' }
@@ -75,7 +85,10 @@ Returns { id, revision, action } where action is 'created' or 'updated'.
     idempotentHint: false,
     openWorldHint: false,
   },
-  handler: async ({ title, description, category, tags, expires_at }, context) => {
+  handler: async (
+    { title, description, category, tags, expires_at, scope, used_memory_ids },
+    context
+  ) => {
     const identity = resolveIdentity({
       request: context.request,
       security: getCoreSecurity(),
@@ -105,6 +118,8 @@ Returns { id, revision, action } where action is 'created' or 'updated'.
         category,
         tags,
         expires_at,
+        scope,
+        used_memory_ids,
         call_source: context.callContext.callSource,
         space_id: context.spaceId,
         identity,

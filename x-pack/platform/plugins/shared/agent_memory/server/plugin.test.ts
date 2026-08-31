@@ -102,6 +102,7 @@ describe('AgentMemoryPlugin', () => {
     ).toEqual({
       ...rememberInput,
       category: 'procedures',
+      scope: 'user',
     });
 
     const registeredSkill = agentBuilder.skills.register.mock.calls[0]?.[0];

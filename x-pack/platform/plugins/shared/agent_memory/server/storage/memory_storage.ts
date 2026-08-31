@@ -70,6 +70,9 @@ export const agentMemoryMappingsComponentProperties = {
     },
   }),
 
+  /** Consumer namespace. Default 'agent_memory'. Prevents cross-consumer data collision. */
+  namespace: types.keyword({}),
+
   // ── Memory payload ─────────────────────────────────────────────────────
   memory: types.object({
     properties: {
@@ -85,7 +88,7 @@ export const agentMemoryMappingsComponentProperties = {
       content_hash: types.keyword({}),
 
       // Authoritative application visibility and ownership scope.
-      /** 'user' today; 'team' is reserved for future use. */
+      /** 'user' for personal memories, 'space' for team-shared memories. */
       scope_kind: types.keyword({}),
       /** Identifier for the scoped user or future team. */
       scope_id: types.keyword({}),

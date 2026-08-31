@@ -36,23 +36,49 @@ export const recallInputSchema = z.object({
     .describe('Maximum number of memories to return. Default 10.'),
 });
 
-export const rememberInputSchema = z.object({
-  title: z
-    .string()
-    .max(500)
-    .describe('Short label for this memory. Displayed to the user and used in keyword search.'),
-  description: z
-    .string()
-    .max(10000)
-    .describe('Full content of the memory. Write in clear, complete sentences.'),
-  category: memoryCategorySchema.describe('Memory category.'),
-  tags: memoryTagsSchema.optional(),
-  expires_at: z
-    .string()
-    .datetime()
-    .optional()
-    .describe('ISO-8601 datetime after which this memory should no longer be recalled.'),
-});
+export const rememberInputSchema = z
+  .object({
+    title: z
+      .string()
+      .max(500)
+      .describe('Short label for this memory. Displayed to the user and used in keyword search.'),
+    description: z
+      .string()
+      .max(10000)
+      .describe('Full content of the memory. Write in clear, complete sentences.'),
+    category: memoryCategorySchema.describe('Memory category.'),
+    tags: memoryTagsSchema.optional(),
+    expires_at: z
+      .string()
+      .datetime()
+      .optional()
+      .describe('ISO-8601 datetime after which this memory should no longer be recalled.'),
+    scope: z
+      .enum(['user', 'space'])
+      .default('user')
+      .describe(
+        "'user' (default) keeps this memory private to you. " +
+          "'space' shares it with everyone who has Agent Memory access in this Kibana space. " +
+          "Use 'space' only for durable, team-relevant knowledge: workarounds, runbook entries, " +
+          'proposal outcomes, environment quirks. Never space-scope user-specific preferences.'
+      ),
+    used_memory_ids: z
+      .array(z.string().max(512))
+      .max(20)
+      .optional()
+      .describe(
+        'IDs of recalled memories that informed this write (optional). ' +
+          'Attribution-grade only — the model self-reports; do not rely on this for security checks.'
+      ),
+  })
+  .superRefine((val, ctx) => {
+    if (val.scope === 'space' && (val.category === 'preferences' || val.category === 'profile')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "scope 'space' is not allowed for category 'preferences' or 'profile'",
+      });
+    }
+  });
 
 export const forgetInputSchema = z.object({
   id: z

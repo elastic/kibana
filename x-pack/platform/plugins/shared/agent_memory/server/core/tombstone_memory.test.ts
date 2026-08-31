@@ -53,6 +53,7 @@ describe('tombstoneMemory', () => {
       '@timestamp': '2026-08-02T00:00:00.000Z',
       created_at: '2026-08-01T00:00:00.000Z',
       space_id: 'default',
+      namespace: 'agent_memory',
       permissions: permissionsForSpace('default'),
       memory: {
         revision: 2,
@@ -112,12 +113,28 @@ describe('tombstoneMemory', () => {
     });
   });
 
-  it('does not mutate foreign, team, or malformed scopes even when provenance matches', async () => {
+  it('does not mutate foreign, non-creator space, or malformed scopes', async () => {
     const scopeVariants = [
-      { space_id: 'default', scope_kind: 'user', scope_id: 'user-2' },
-      { space_id: 'default', scope_kind: 'team', scope_id: 'team-1' },
-      { space_id: 'another-space', scope_kind: 'user', scope_id: 'user-1' },
-    ] as const;
+      {
+        space_id: 'default',
+        scope_kind: 'user' as const,
+        scope_id: 'user-2',
+        provenanceAuthor: 'user-1',
+      },
+      // Space-scoped memory where the caller is NOT the original creator
+      {
+        space_id: 'default',
+        scope_kind: 'space' as const,
+        scope_id: 'default',
+        provenanceAuthor: 'other-user',
+      },
+      {
+        space_id: 'another-space',
+        scope_kind: 'user' as const,
+        scope_id: 'user-1',
+        provenanceAuthor: 'user-1',
+      },
+    ];
 
     for (const scope of scopeVariants) {
       const existingDocument: MemoryDocument = {
@@ -129,6 +146,7 @@ describe('tombstoneMemory', () => {
         deleted: false,
         created_at: '2026-08-01T00:00:00.000Z',
         space_id: scope.space_id,
+        namespace: 'agent_memory',
         permissions: permissionsForSpace(scope.space_id),
         memory: {
           revision: 1,
@@ -136,7 +154,7 @@ describe('tombstoneMemory', () => {
           scope_kind: scope.scope_kind,
           scope_id: scope.scope_id,
           provenance: {
-            author: 'user-1',
+            author: scope.provenanceAuthor,
             author_kind: 'profile_uid',
           },
         },
@@ -220,6 +238,7 @@ describe('tombstoneMemory', () => {
       deleted: false,
       created_at: '2026-08-01T00:00:00.000Z',
       space_id: 'default',
+      namespace: 'agent_memory',
       permissions: permissionsForSpace('default'),
       memory: {
         revision: 1,

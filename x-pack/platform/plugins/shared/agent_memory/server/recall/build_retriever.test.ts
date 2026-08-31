@@ -26,7 +26,6 @@ const expiryFilter = {
 const buildTestFilter = (category?: string, tags?: string[]) => {
   const params = {
     space_id: 'space-1',
-    scope_kind: 'user',
     scope_id: 'user-1',
     category,
     tags,
@@ -46,12 +45,36 @@ describe('Agent Memory ES|QL recall builders', () => {
   });
 
   it('builds the authoritative body filter independently from the ES|QL pipeline', () => {
+    const scopeOrClause = {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            bool: {
+              filter: [
+                { term: { 'memory.scope_kind': 'user' } },
+                { term: { 'memory.scope_id': 'user-1' } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { term: { 'memory.scope_kind': 'space' } },
+                { term: { 'memory.scope_id': 'space-1' } },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
     expect(buildTestFilter('preferences', ['project:phoenix', 'source:workflow'])).toEqual({
       bool: {
         filter: [
           { term: { space_id: 'space-1' } },
-          { term: { 'memory.scope_kind': 'user' } },
-          { term: { 'memory.scope_id': 'user-1' } },
+          { term: { namespace: 'agent_memory' } },
+          scopeOrClause,
           { term: { deleted: false } },
           expiryFilter,
           { term: { 'memory.category': 'preferences' } },

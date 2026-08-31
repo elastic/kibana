@@ -10,13 +10,15 @@ export type MemoryType = 'episodic' | 'semantic' | 'procedural';
 export type MemoryCategory = 'profile' | 'preferences' | 'events' | 'trajectories' | 'procedures';
 export type AuthorKind = 'profile_uid' | 'username';
 export type CallSource = 'agent' | 'user' | 'mcp' | 'workflow' | 'unknown';
-export type MemoryScopeKind = 'user' | 'team';
+export type MemoryScopeKind = 'user' | 'space';
 
 /** Creator metadata for display and audit; scope controls visibility and ownership. */
 export interface MemoryProvenance {
   readonly author: string;
   readonly author_kind: AuthorKind;
   readonly call_source?: CallSource;
+  /** IDs of recalled memories that informed this write (attribution-grade; model self-reports). */
+  readonly used_memory_ids?: readonly string[];
 }
 
 export interface MemoryKibanaPrivilegeGroup {
@@ -55,6 +57,8 @@ export interface MemoryDocumentEnvelope {
   readonly created_at: string;
   readonly space_id: string;
   readonly permissions: MemoryPermissions;
+  /** Consumer namespace. Default 'agent_memory'. Prevents cross-consumer data collision. */
+  readonly namespace: string;
 }
 
 export interface MemoryDocument extends MemoryDocumentEnvelope {

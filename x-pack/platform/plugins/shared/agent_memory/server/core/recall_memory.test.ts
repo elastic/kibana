@@ -104,6 +104,7 @@ describe('recallMemory', () => {
     expect(esql.mock.calls[1][0].pipeline.toRequest().query).not.toContain('FUSE');
     expect(esql.mock.calls[0][0].metadata).toEqual(['_id', '_index', '_score']);
     expect(JSON.stringify(esql.mock.calls[0][0].filter)).toContain('memory.scope_id');
+    // Tags remain at the top-level filter (not inside the scope OR)
     expect(esql.mock.calls[0][0].filter.bool.filter).toEqual(
       expect.arrayContaining([
         { term: { tags: 'project:phoenix' } },
@@ -111,6 +112,112 @@ describe('recallMemory', () => {
       ])
     );
     expect(JSON.stringify(esql.mock.calls[0][0].filter)).not.toContain('memory.provenance.author');
+  });
+
+  it('searches both personal and space-scoped memories, isolating by user within the same space', async () => {
+    const esql = jest.fn().mockResolvedValue({ columns: [], values: [] });
+    const logger = { warn: jest.fn() };
+    const storage = { getClient: () => ({ esql }) } as never;
+    const spaceId = 'shared-space';
+    const aliceScopeId = 'alice-profile-uid';
+    const bobScopeId = 'bob-profile-uid';
+
+    await recallMemory({
+      storage,
+      params: {
+        ...recallParams,
+        space_id: spaceId,
+        identity: { author: aliceScopeId, author_kind: 'profile_uid' },
+      },
+      logger: logger as never,
+    });
+    await recallMemory({
+      storage,
+      params: {
+        ...recallParams,
+        space_id: spaceId,
+        identity: { author: bobScopeId, author_kind: 'profile_uid' },
+      },
+      logger: logger as never,
+    });
+
+    expect(esql).toHaveBeenCalledTimes(2);
+    const [aliceFilter, bobFilter] = esql.mock.calls.map(([request]) => request.filter);
+
+    // Both filters must include the space_id and namespace guards at the top level
+    expect(aliceFilter.bool.filter).toEqual(
+      expect.arrayContaining([
+        { term: { space_id: spaceId } },
+        { term: { namespace: 'agent_memory' } },
+      ])
+    );
+    expect(bobFilter.bool.filter).toEqual(
+      expect.arrayContaining([
+        { term: { space_id: spaceId } },
+        { term: { namespace: 'agent_memory' } },
+      ])
+    );
+
+    // The scope OR clause must exist: personal branch for alice, space branch for the space
+    const aliceScopeOr = aliceFilter.bool.filter.find(
+      (f: { bool?: { minimum_should_match?: number } }) => f.bool?.minimum_should_match === 1
+    );
+    expect(aliceScopeOr).toBeDefined();
+    expect(JSON.stringify(aliceScopeOr)).toContain(aliceScopeId);
+    expect(JSON.stringify(aliceScopeOr)).toContain(spaceId);
+    expect(JSON.stringify(aliceScopeOr)).not.toContain(bobScopeId);
+
+    const bobScopeOr = bobFilter.bool.filter.find(
+      (f: { bool?: { minimum_should_match?: number } }) => f.bool?.minimum_should_match === 1
+    );
+    expect(JSON.stringify(bobScopeOr)).toContain(bobScopeId);
+    expect(JSON.stringify(bobScopeOr)).toContain(spaceId);
+    expect(JSON.stringify(bobScopeOr)).not.toContain(aliceScopeId);
+
+    expect(JSON.stringify([aliceFilter, bobFilter])).not.toContain('memory.provenance.author');
+  });
+
+  it('includes scope field in recalled memory output', async () => {
+    const esqlWithScope = jest.fn().mockResolvedValue({
+      columns: [
+        { name: '_id', type: 'keyword' },
+        { name: 'title', type: 'text' },
+        { name: 'description', type: 'text' },
+        { name: 'category', type: 'keyword' },
+        { name: 'memory_type', type: 'keyword' },
+        { name: 'tags', type: 'keyword' },
+        { name: 'created_at', type: 'date' },
+        { name: 'author', type: 'keyword' },
+        { name: 'author_kind', type: 'keyword' },
+        { name: 'revision', type: 'long' },
+        { name: 'scope', type: 'keyword' },
+      ],
+      values: [
+        [
+          'mem-space-1',
+          'Team fix',
+          'Use TO_DOUBLE()',
+          'procedures',
+          null,
+          null,
+          '2026-08-31T00:00:00.000Z',
+          'alice',
+          'profile_uid',
+          1,
+          'space',
+        ],
+      ],
+    });
+    const logger = { warn: jest.fn() };
+    const storage = { getClient: () => ({ esql: esqlWithScope }) } as never;
+
+    const result = await recallMemory({
+      storage,
+      params: recallParams,
+      logger: logger as never,
+    });
+
+    expect(result.memories[0].scope).toBe('space');
   });
 
   it('fails open after both recall attempts fail without logging memory content', async () => {

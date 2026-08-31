@@ -70,6 +70,18 @@ Use the \`category\` field to classify memories:
 - \`events\` — Completed occurrences, decisions, and outcomes, including relevant dates.
 - \`trajectories\` — Goals, plans, deadlines, progress changes, and milestones.
 - \`procedures\` — Verified reusable methods, successful tool sequences, corrections, and known pitfalls.
+
+## Personal vs shared memories
+
+Use \`scope: 'user'\` (the default) for preferences, corrections, and user-specific observations.
+These stay private to you.
+
+Use \`scope: 'space'\` for durable, team-relevant knowledge that anyone in this Kibana space
+could benefit from: query workarounds, runbook entries, proposal outcomes, environment quirks.
+Never use \`scope: 'space'\` for \`profile\` or \`preferences\` categories — those are always personal.
+
+When writing a memory that was directly informed by a recalled one, include \`used_memory_ids\`
+set to the IDs of those recalled memories (available as the \`id\` field in recall output).
 `.trim();
 
 // `defineSkillType` is a no-op identity helper not exported from the package.

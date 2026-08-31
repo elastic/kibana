@@ -53,6 +53,7 @@ const RecallOutputSchema = z.object({
       author: z.string(),
       author_kind: z.string(),
       revision: z.number(),
+      scope: z.string().optional(),
     })
   ),
 });
@@ -127,7 +128,8 @@ export const registerMemoryWorkflowSteps = (
       inputSchema: rememberInputSchema,
       outputSchema: RememberOutputSchema,
       handler: async (context) => {
-        const { title, description, category, tags, expires_at } = context.input;
+        const { title, description, category, tags, expires_at, scope, used_memory_ids } =
+          context.input;
         const request = context.contextManager.getFakeRequest();
         const spaceId = context.contextManager.getContext().workflow.spaceId;
         const identity = resolveIdentity({
@@ -149,6 +151,8 @@ export const registerMemoryWorkflowSteps = (
             category,
             tags,
             expires_at,
+            scope,
+            used_memory_ids,
             call_source: 'workflow',
             space_id: spaceId,
             identity,

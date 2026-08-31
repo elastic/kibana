@@ -78,6 +78,7 @@ describe('memoryStorageSettings', () => {
       expires_at: dateMapping,
       created_at: dateMapping,
       space_id: keywordMapping,
+      namespace: keywordMapping,
       permissions: {
         properties: {
           kibana: {
@@ -123,6 +124,7 @@ describe('memoryStorageSettings', () => {
       expires_at: dateMapping,
       created_at: dateMapping,
       space_id: keywordMapping,
+      namespace: keywordMapping,
       permissions: rootProperties.permissions,
       memory: rootProperties.memory,
     });

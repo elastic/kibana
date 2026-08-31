@@ -24,6 +24,8 @@ export interface RecallMemoryParams {
   limit?: number;
   space_id: string;
   identity: ResolvedIdentity;
+  /** Consumer namespace filter. Default 'agent_memory'. */
+  namespace?: string;
 }
 
 export interface RecalledMemory {
@@ -37,6 +39,8 @@ export interface RecalledMemory {
   author: string;
   author_kind: string;
   revision: number;
+  /** 'user' for personal memories, 'space' for team-shared memories. */
+  scope?: string;
 }
 
 export interface RecallMemoryResult {
@@ -66,14 +70,14 @@ export const recallMemory = async ({
   params: RecallMemoryParams;
   logger: Pick<Logger, 'warn'>;
 }): Promise<RecallMemoryResult> => {
-  const { query, category, tags, space_id, identity } = params;
+  const { query, category, tags, space_id, identity, namespace } = params;
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const client = storage.getClient();
 
   const filter = buildBeliefFilter({
     space_id,
-    scope_kind: 'user',
     scope_id: identity.author,
+    namespace,
     category,
     tags,
   });
@@ -112,6 +116,7 @@ export const recallMemory = async ({
         author: String(read(row, 'author') ?? ''),
         author_kind: String(read(row, 'author_kind') ?? ''),
         revision: typeof revision === 'number' ? revision : Number(revision ?? 0),
+        scope: read(row, 'scope') == null ? undefined : String(read(row, 'scope')),
       };
     });
 

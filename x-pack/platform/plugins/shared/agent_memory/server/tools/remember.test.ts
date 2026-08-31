@@ -65,6 +65,7 @@ describe('createRememberTool', () => {
         title: 'Preferred editor',
         description: 'The user prefers Vim.',
         category: 'preferences',
+        scope: 'user',
       },
       context: mockContext,
     });
@@ -81,6 +82,7 @@ describe('createRememberTool', () => {
         title: "User's name is Susah",
         description: "The user's name is Susah.",
         category: 'profile',
+        scope: 'user',
       },
       mockContext
     );
@@ -118,6 +120,7 @@ describe('createRememberTool', () => {
           title: "User's name is Susah",
           description: "The user's name is Susah.",
           category: 'profile',
+          scope: 'user',
         },
         mockContext
       )

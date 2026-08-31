@@ -75,7 +75,15 @@ export const tombstoneMemory = async ({
   const scopeKind = existing.memory?.scope_kind;
   const scopeId = existing.memory?.scope_id;
   const docSpaceId = existing.space_id;
-  if (scopeKind !== 'user' || scopeId !== identity.author || docSpaceId !== space_id) {
+
+  const isPersonalOwner =
+    scopeKind === 'user' && scopeId === identity.author && docSpaceId === space_id;
+  const isSpaceCreator =
+    scopeKind === 'space' &&
+    docSpaceId === space_id &&
+    existing.memory?.provenance?.author === identity.author;
+
+  if (!isPersonalOwner && !isSpaceCreator) {
     // Treat as not-found to avoid leaking existence of foreign memories.
     return { result: 'not_found' };
   }

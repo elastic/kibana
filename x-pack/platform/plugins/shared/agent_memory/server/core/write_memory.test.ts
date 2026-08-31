@@ -460,6 +460,69 @@ describe('writeMemory', () => {
     expect(harness.get).toHaveBeenCalledTimes(3);
   });
 
+  it('writes space-scoped memories with correct scope fields and namespace', async () => {
+    const harness = createHarness();
+    const result = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ scope: 'space', namespace: 'alertzero' }),
+    });
+
+    expect(result.action).toBe('created');
+    const doc = harness.documents.get(result.id)!.source;
+    expect(doc.memory.scope_kind).toBe('space');
+    expect(doc.memory.scope_id).toBe('default'); // space_id
+    expect(doc.namespace).toBe('alertzero');
+    // Personal copy must NOT exist: only one doc
+    expect(harness.documents.size).toBe(1);
+  });
+
+  it('defaults namespace to agent_memory when not provided', async () => {
+    const harness = createHarness();
+    const result = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams(),
+    });
+    expect(harness.documents.get(result.id)!.source.namespace).toBe('agent_memory');
+  });
+
+  it('stores used_memory_ids in provenance on create only', async () => {
+    const harness = createHarness();
+    const result = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ used_memory_ids: ['mem-a', 'mem-b'] }),
+    });
+    const doc = harness.documents.get(result.id)!.source;
+    expect(doc.memory.provenance.used_memory_ids).toEqual(['mem-a', 'mem-b']);
+
+    // used_memory_ids must NOT be copied on supersede
+    await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ title: 'Updated' }),
+    });
+    const updated = harness.documents.get(result.id)!.source;
+    expect(updated.memory.provenance.used_memory_ids).toBeUndefined();
+  });
+
+  it('space-scoped and user-scoped memories for identical content get distinct deterministic IDs', async () => {
+    const harness = createHarness();
+    const userResult = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams(),
+    });
+    const spaceResult = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ scope: 'space' }),
+    });
+    expect(userResult.id).not.toBe(spaceResult.id);
+    expect(harness.documents.size).toBe(2);
+  });
+
   it('propagates non-conflict create and update errors without retries', async () => {
     const createHarnessWithError = createHarness();
     const createError = responseError(500);
