@@ -9,6 +9,7 @@
 
 import type { Duration, Moment } from 'moment';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+
 export interface NewsfeedPluginStartDependencies {
   screenshotMode: ScreenshotModePluginStart;
 }

@@ -188,6 +188,17 @@ describe('APM service template', () => {
         });
         expect(result.current.map((tab) => tab.label)).toEqual(standardTabOrder);
       });
+
+      it('maps technical preview tabs to AppHeader flask badges', () => {
+        const { result } = renderHook(() => useTabs({ selectedTab: 'overview' }), {
+          wrapper,
+        });
+        const dashboardsTab = result.current.find((tab) => tab.id === 'dashboards');
+        expect(dashboardsTab?.badge).toEqual({
+          iconType: 'flask',
+          tooltip: expect.any(String),
+        });
+      });
     });
   });
 });

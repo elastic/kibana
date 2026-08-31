@@ -1,0 +1,14 @@
+notify:
+  - slack: '#kibana-mission-control'
+    if: build.state == "failed"
+
+steps:
+  - label: ':mag: Evaluate release readiness signals'
+    command: ts-node .buildkite/scripts/pipelines/release_readiness/notify_release_readiness.ts
+    env:
+      DRY_RUN: ${DRY_RUN:-false}
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

@@ -41,3 +41,6 @@ steps:
           workflow-id: "system-significant-events-discovery"
           inputs:
             detectionBatchMax: __DISCOVERY_BATCH_SIZE__
+            flakyRuleDetectionThreshold: __FLAKY_RULE_DETECTION_THRESHOLD__
+            flakyRuleProbeAfterMinutes: __FLAKY_RULE_PROBE_AFTER_MINUTES__
+            flakyRuleExemptSeverityScore: __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__

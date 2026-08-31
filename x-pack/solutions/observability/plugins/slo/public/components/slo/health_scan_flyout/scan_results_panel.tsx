@@ -308,7 +308,7 @@ export function ScanResultsPanel({ scanId }: Props) {
               defaultMessage: 'Some SLOs have issues',
             })}
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               {i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesBody', {

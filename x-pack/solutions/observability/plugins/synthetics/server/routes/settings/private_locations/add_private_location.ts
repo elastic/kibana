@@ -18,6 +18,7 @@ import { migrateLegacyPrivateLocations } from './migrate_legacy_private_location
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
+import { assertCanEnableAgentSharding } from './agent_sharding_license';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = schema.object({
@@ -31,6 +32,7 @@ export const PrivateLocationSchema = schema.object({
     })
   ),
   spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -46,9 +48,17 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, server, spaceId } = routeContext;
-    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+    const { response, request, server, spaceId, context } = routeContext;
     const location = request.body as PrivateLocationObject;
+    const licenseError = assertCanEnableAgentSharding(
+      (await context.licensing).license,
+      location.isAgentSharding
+    );
+    if (licenseError) {
+      return response.forbidden({ body: { message: licenseError } });
+    }
+
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
     const { agentPolicy, validationError } = await validateAgentPolicy(
       server,
       location.agentPolicyId,

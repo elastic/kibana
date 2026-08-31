@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-pnd-common
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/i18n'
+  - '@kbn/deeplinks-security'
 tags:
   - shared-common
   - package

@@ -310,8 +310,13 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     } else {
       delete viz.curveType; // curveType only preserved for line/area charts
     }
-    if (hasAreas) viz.fillOpacity ??= 0.3;
-    if (!hasAreas) delete viz.fillOpacity; // fillOpacity only preserved for area charts
+    if (hasAreas) {
+      viz.areaFill ??= 'solid';
+      viz.fillOpacity ??= 0.3;
+    } else {
+      delete viz.fillOpacity; // fillOpacity only preserved for area charts
+      delete viz.areaFill;
+    }
 
     // xExtent: X axis only supports fit/custom (full is coerced to fit=dataBounds by the transform)
     if (!viz.xExtent || viz.xExtent.mode === 'full') {

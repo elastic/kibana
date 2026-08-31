@@ -38,14 +38,14 @@ interface EditorSettingsPopoverProps {
 const directionOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'TB',
-    iconType: 'arrowDown',
+    iconType: 'chevronSingleDown',
     label: i18n.translate('workflows.yamlEditor.editorSettings.directionVertical', {
       defaultMessage: 'Vertical',
     }),
   },
   {
     id: 'LR',
-    iconType: 'arrowRight',
+    iconType: 'chevronSingleRight',
     label: i18n.translate('workflows.yamlEditor.editorSettings.directionHorizontal', {
       defaultMessage: 'Horizontal',
     }),
@@ -127,7 +127,7 @@ export function EditorSettingsPopover({
       button={
         <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="controlsHorizontal"
+            iconType="controls"
             size="s"
             data-test-subj={BUTTON_TEST_SUBJ}
             onClick={() => setIsOpen(!isOpen)}

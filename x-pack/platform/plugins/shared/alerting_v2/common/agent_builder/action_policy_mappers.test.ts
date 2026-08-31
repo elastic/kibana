@@ -25,9 +25,9 @@ describe('attachmentDataToActionPolicyPayload', () => {
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: 'rule.tags: "prod"',
-      groupBy: ['host.name'],
+      group_by: ['host.name'],
       tags: ['tag1'],
-      groupingMode: 'per_field',
+      grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
     };
 
@@ -38,9 +38,9 @@ describe('attachmentDataToActionPolicyPayload', () => {
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: 'rule.tags: "prod"',
-      groupBy: ['host.name'],
+      group_by: ['host.name'],
       tags: ['tag1'],
-      groupingMode: 'per_field',
+      grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
   });

@@ -13,10 +13,12 @@ import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
+import { getSpaceIdsFromEnv } from '../../utils/space_ids';
+import { readSpaceIdsFlag } from '../run_helpers';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
-const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
+const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -37,13 +39,23 @@ export const compareCmd: Command<void> = {
     --kibana-url       Kibana URL for generating compare page links in markdown
     --output           Append markdown output to a file instead of stdout
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
+    --space-ids        Spaces the experiments were run in (same value as "evals run")
 
   Environment:
-    EVALUATIONS_KBN_URL      Target Kibana URL (defaults to localhost)
-    EVALUATIONS_KBN_API_KEY  API key for authenticating to the target Kibana
+    EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
+    EVAL_KBN_API_KEY  API key for authenticating to the target Kibana
+    EVAL_SPACE_IDS    Spaces the experiments were run in (same as --space-ids)
   `,
   flags: {
-    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output', 'refresh-url'],
+    string: [
+      'baseline-branch',
+      'suite',
+      'format',
+      'kibana-url',
+      'output',
+      'refresh-url',
+      'space-ids',
+    ],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
       --suite            Suite ID filter for baseline lookup and score filtering
@@ -51,6 +63,7 @@ export const compareCmd: Command<void> = {
       --kibana-url       Kibana URL for generating compare page links in markdown
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
+      --space-ids        Spaces the experiments were run in
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -61,24 +74,27 @@ export const compareCmd: Command<void> = {
     const kibanaUrl = flagsReader.string('kibana-url');
     const outputPath = flagsReader.string('output');
     const refreshUrl = flagsReader.string('refresh-url');
+    // Scores are only readable from the spaces they were ingested into, so a
+    // comparison has to be made from where the runs put them.
+    const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
 
-    const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL;
+    const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
-      log.warning(`EVALUATIONS_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
+      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
     }
 
-    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVALUATIONS_KBN_URL });
+    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL });
     const kbnClient = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,
       log,
       evaluationsKbnUrl,
-      evaluationsKbnApiKey: process.env.EVALUATIONS_KBN_API_KEY,
+      evaluationsKbnApiKey: process.env.EVAL_KBN_API_KEY,
     });
-    const evalsClient = new EvalsClient(kbnClient, log);
+    const evalsClient = new EvalsClient(kbnClient, log, { spaceIds });
 
     try {
       await evalsClient.assertPluginEnabled();
@@ -86,10 +102,16 @@ export const compareCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVALUATIONS_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
-          'Set EVALUATIONS_KBN_API_KEY when authenticating to a non-local target.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );
+    }
+
+    try {
+      await evalsClient.assertSpacesExist();
+    } catch (error) {
+      throw createFlagError(error instanceof Error ? error.message : String(error));
     }
 
     let firstExperimentId: string;
@@ -156,7 +178,7 @@ export const compareCmd: Command<void> = {
       [firstExperimentId, secondExperimentId] = positionals;
       if (!firstExperimentId || !secondExperimentId) {
         throw createFlagError(
-          'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
+          'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVAL_KBN_URL and EVAL_KBN_API_KEY.'
         );
       }
 
@@ -268,7 +290,7 @@ export const compareCmd: Command<void> = {
           urlObj.username = '';
           urlObj.password = '';
           const baseUrl = urlObj.toString().replace(/\/+$/, '');
-          comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?type=execution&baseline=${encodeURIComponent(
+          comparePageUrl = `${baseUrl}/app/evals/compare?type=execution&baseline=${encodeURIComponent(
             secondExperimentId
           )}&target=${encodeURIComponent(firstExperimentId)}`;
         } catch {

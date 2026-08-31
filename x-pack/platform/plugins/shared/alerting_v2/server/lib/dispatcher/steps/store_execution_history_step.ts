@@ -11,6 +11,8 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../../services/event_log_service/tokens';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { EpisodeTriage, RuleCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -19,7 +21,6 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  Rule,
   RuleId,
 } from '../types';
 import {
@@ -27,7 +28,7 @@ import {
   type ActionPolicyEventAction,
   type DispatchFailureReason,
 } from './constants';
-import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { getUnmatchedEpisodes } from './utils/unmatched_episodes';
 import { episodeSubject } from './utils/subject';
 
 /** Index of workflow ids that recorded a dispatch failure, keyed by action group id. */
@@ -100,21 +101,24 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     private readonly eventLogService: EventLogServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const {
       dispatch = [],
       throttled = [],
-      dispatchable = [],
+      triage = EpisodeTriage.empty(),
       dispatchedExecutions,
       dispatchFailures = [],
-      rules,
+      rules = RuleCatalog.empty(),
       input,
     } = state;
 
     if (
       dispatch.length === 0 &&
       throttled.length === 0 &&
-      dispatchable.length === 0 &&
+      !triage.hasDispatchable() &&
       dispatchFailures.length === 0
     ) {
       return { type: 'continue' };
@@ -153,7 +157,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     // their episodes are not double-reported as `unmatched`. Those episodes did
     // match a policy; `dispatch_failed` already carries their episode_ids.
     const unmatched = aggregateUnmatchedBySubject(
-      getUnmatchedEpisodes(dispatchable, dispatch, throttled)
+      getUnmatchedEpisodes(triage.dispatchable, dispatch, throttled)
     );
     for (const group of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, group });
@@ -177,7 +181,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     executionUuid: string;
     summary: PolicySummary;
     action: ActionPolicyEventAction;
-    rules: Map<RuleId, Rule> | undefined;
+    rules: RuleCatalog;
   }): void {
     const ruleIds = Array.from(summary.ruleIds);
     const { refs, spillOver } = buildPolicyAndRuleRefs(
@@ -243,7 +247,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     timestamp: string;
     executionUuid: string;
     failure: DispatchFailure;
-    rules: Map<RuleId, Rule> | undefined;
+    rules: RuleCatalog;
   }): void {
     const ruleIdSet = new Set<string>();
     const episodeIdSet = new Set<string>();
@@ -284,6 +288,11 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   }
 }
 
+/**
+ * Aggregate dispatched groups into per-policy summaries, excluding workflow
+ * destinations that recorded a DispatchFailure. Groups where every destination
+ * failed are skipped entirely so they do not appear in the `dispatched` event.
+ */
 function aggregateByPolicy(
   groups: readonly ActionGroup[],
   dispatchedExecutions?: Map<ActionGroupId, string[]>,
@@ -342,13 +351,13 @@ function buildPolicyAndRuleRefs(
   policyId: ActionPolicyId,
   spaceId: string,
   ruleIds: string[],
-  rules: Map<RuleId, Rule> | undefined
+  rules: RuleCatalog
 ): { refs: SavedObjectRef[]; spillOver: string[] } {
   const capped = ruleIds.slice(0, RULE_REF_CAP);
   const spillOver = ruleIds.slice(RULE_REF_CAP);
   const refs: SavedObjectRef[] = [
     policyRef({ id: policyId, spaceId }),
-    ...capped.map((id) => ruleRef({ id, spaceId: rules?.get(id)?.spaceId ?? spaceId })),
+    ...capped.map((id) => ruleRef({ id, spaceId: rules.spaceIdOf(id) ?? spaceId })),
   ];
   return { refs, spillOver };
 }

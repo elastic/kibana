@@ -1,8 +1,7 @@
 {
-  "sha1": "4cfe042af0f42707e899a01c5a171eb1750d5aef",
+  "sha1": "50d921bdc5648542005f2042dd471f1f4aaa7fc0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 97,
+        "line": 100,
         "column": 7
       }
     },
@@ -33,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 125,
+        "line": 128,
         "column": 9
       }
     },
@@ -49,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 137,
+        "line": 140,
         "column": 15
       }
     },
@@ -65,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 146,
+        "line": 149,
         "column": 11
       }
     },
@@ -81,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 158,
+        "line": 161,
         "column": 59
       }
     },
@@ -97,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 169,
+        "line": 172,
         "column": 9
       }
     },
@@ -113,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 178,
+        "line": 181,
         "column": 9
       }
     },
@@ -129,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 202,
+        "line": 205,
         "column": 10
       }
     },
@@ -161,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 50,
+        "line": 54,
         "column": 7
       }
     },
@@ -177,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 54,
+        "line": 58,
         "column": 63
       }
     },
@@ -193,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 65,
+        "line": 69,
         "column": 24
       }
     },
@@ -209,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 87,
+        "line": 91,
         "column": 20
       }
     },
@@ -225,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 89,
+        "line": 93,
         "column": 24
       }
     },
@@ -257,7 +256,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/logs_link_to.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 30
       }
     },
@@ -289,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 75,
+        "line": 84,
         "column": 21
       }
     },
@@ -305,7 +304,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 79,
+        "line": 88,
         "column": 7
       }
     },
@@ -321,7 +320,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 83,
+        "line": 92,
         "column": 52
       }
     },
@@ -337,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 100,
+        "line": 109,
         "column": 27
       }
     },
@@ -347,14 +346,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 111,
-        "column": 5
+        "line": 122,
+        "column": 27
       }
     },
     {
@@ -367,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 126,
-        "column": 71
+        "line": 135,
+        "column": 90
       }
     },
     {

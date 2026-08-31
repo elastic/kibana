@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,63 +22,44 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
   const { docsUrl, externalDocsUrl, name } = nativeConnector;
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={
         <FormattedMessage
           id="xpack.contentConnectors.researchConfiguration.euiText.checkRequirementsLabel"
           defaultMessage="Check Requirements"
         />
       }
-      iconType="info"
-    >
-      <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.contentConnectors.researchConfiguration.p.referToTheDocumentationLabel"
-                defaultMessage="Refer to the documentation for this connector to learn about prerequisites for connecting to {serviceType} and configuration requirements."
-                values={{
-                  serviceType: name,
-                }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="enterpriseSearchResearchConfigurationDocumentationLink"
-              target="_blank"
-              href={docsUrl}
-            >
-              {i18n.translate(
-                'xpack.contentConnectorscontent.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
-                {
-                  defaultMessage: 'Documentation',
-                }
-              )}
-            </EuiLink>
-          </EuiFlexItem>
-          {externalDocsUrl && (
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                data-test-subj="enterpriseSearchResearchConfigurationNameDocumentationLink"
-                target="_blank"
-                href={externalDocsUrl}
-              >
-                {i18n.translate(
-                  'xpack.contentConnectorscontent.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
-                  {
-                    defaultMessage: '{name} documentation',
-                    values: { name },
-                  }
-                )}
-              </EuiLink>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.contentConnectors.researchConfiguration.p.referToTheDocumentationLabel"
+          defaultMessage="Refer to the documentation for this connector to learn about prerequisites for connecting to {serviceType} and configuration requirements."
+          values={{
+            serviceType: name,
+          }}
+        />
+      }
+      actionProps={{
+        primary: {
+          href: docsUrl,
+          target: '_blank',
+          'data-test-subj': 'enterpriseSearchResearchConfigurationDocumentationLink',
+          children: i18n.translate(
+            'xpack.contentConnectorscontent.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
+            { defaultMessage: 'Documentation' }
+          ),
+        },
+        secondary: externalDocsUrl
+          ? {
+              href: externalDocsUrl,
+              target: '_blank',
+              'data-test-subj': 'enterpriseSearchResearchConfigurationNameDocumentationLink',
+              children: i18n.translate(
+                'xpack.contentConnectorscontent.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                { defaultMessage: '{name} documentation', values: { name } }
+              ),
+            }
+          : undefined,
+      }}
+    />
   );
 };

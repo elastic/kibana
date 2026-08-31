@@ -15,7 +15,7 @@ import type {
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type { ApiKeyAttributes } from '../services/api_key_service/api_key_service';
 
 const isoDateTimeString = z.string().datetime();
@@ -24,7 +24,7 @@ export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);
   if (!result.success) {
     throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`, {
-      code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+      code: ALERTING_ERROR_CODES.INVALID_DATE_STRING,
       details: { value: dateString },
     });
   }
@@ -66,7 +66,7 @@ const toAuthResponse = (
 ): ActionPolicyResponse['auth'] => {
   return {
     owner: attributes.apiKeyOwner,
-    createdByUser: attributes.apiKeyCreatedByUser,
+    created_by_user: attributes.apiKeyCreatedByUser,
   };
 };
 
@@ -91,9 +91,9 @@ export const buildCreateActionPolicyAttributes = ({
     enabled: true,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
-    groupBy: data.groupBy ?? null,
+    groupBy: data.group_by ?? null,
     tags: data.tags ?? null,
-    groupingMode: data.groupingMode ?? null,
+    groupingMode: data.grouping_mode ?? null,
     throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
     ...toApiKeyAttributes(auth),
@@ -123,9 +123,9 @@ export const buildUpdateActionPolicyAttributes = ({
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
-    groupBy: resolveNextNullableField(update.groupBy, existing.groupBy),
+    groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
     tags: resolveNextNullableField(update.tags, existing.tags),
-    groupingMode: resolveNextNullableField(update.groupingMode, existing.groupingMode),
+    groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     ...toApiKeyAttributes(auth),
@@ -153,15 +153,15 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeNullableField(attributes.matcher),
-    groupBy: normalizeNullableField(attributes.groupBy),
+    group_by: normalizeNullableField(attributes.groupBy),
     tags: normalizeNullableField(attributes.tags),
-    groupingMode: normalizeNullableField(attributes.groupingMode),
+    grouping_mode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
-    snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
+    snoozed_until: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes),
-    createdBy: attributes.createdBy,
-    createdAt: attributes.createdAt,
-    updatedBy: attributes.updatedBy,
-    updatedAt: attributes.updatedAt,
+    created_by: attributes.createdBy,
+    created_at: attributes.createdAt,
+    updated_by: attributes.updatedBy,
+    updated_at: attributes.updatedAt,
   };
 };

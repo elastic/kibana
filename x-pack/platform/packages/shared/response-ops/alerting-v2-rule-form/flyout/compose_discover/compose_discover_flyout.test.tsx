@@ -13,9 +13,10 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -84,7 +85,6 @@ jest.mock('./compose_discover_form', () => {
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
       readRecoveryStrategy = () => getValues('recoveryStrategy');
-      readNoDataStrategy = () => getValues('noDataStrategy');
       readTimeField = () => getValues('timeField');
       return (
         <div data-test-subj="composeDiscoverFormMock">
@@ -103,6 +103,19 @@ jest.mock('./compose_discover_form', () => {
             type="button"
           >
             Set form time field
+          </button>
+          <button
+            data-test-subj="mockSetNonRepresentableQuery"
+            onClick={() =>
+              setValue(
+                'query',
+                { format: 'standalone', breach: { query: 'FROM logs-*' } },
+                { shouldDirty: true }
+              )
+            }
+            type="button"
+          >
+            Set non-representable query
           </button>
         </div>
       );
@@ -125,7 +138,6 @@ interface SandboxFlyoutMockProps {
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
-let readNoDataStrategy: (() => FormValues['noDataStrategy']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
@@ -237,6 +249,8 @@ const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreMock.createStart().featureFlags,
   lens: lensPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
 });
@@ -317,7 +331,6 @@ describe('ComposeDiscoverFlyout', () => {
     sandboxFlyoutProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
-    readNoDataStrategy = undefined;
     readTimeField = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
@@ -493,10 +506,10 @@ describe('ComposeDiscoverFlyout', () => {
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: '' } },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -632,6 +645,45 @@ describe('ComposeDiscoverFlyout', () => {
     const timeLiteralVariable: ESQLControlVariable[] = [
       { key: 'window', value: '15m', type: ESQLVariableType.TIME_LITERAL },
     ];
+
+    it('treats a populated base-only query as committed', () => {
+      renderFlyout({ initialQuery: 'FROM logs-* | LIMIT 500' });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: 'FROM logs-* | LIMIT 500',
+        breach: { segment: '' },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('keeps a populated base-only query committed when Discover updates it', async () => {
+      const props = {
+        ...defaultProps,
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      };
+      const { rerender } = render(
+        <TestWrapper>
+          <ComposeDiscoverFlyout {...props} />
+        </TestWrapper>
+      );
+
+      rerender(
+        <TestWrapper>
+          <ComposeDiscoverFlyout {...props} initialQuery="FROM metrics-* | LIMIT 500" />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(getLatestFormProps().state.queryCommitted).toBe(true);
+        expect(readCommittedQuery?.()).toEqual({
+          format: 'composed',
+          base: 'FROM metrics-* | LIMIT 500',
+          breach: { segment: '' },
+        });
+      });
+    });
 
     it('shows unresolved variables in a callout and disables YAML Create rule', () => {
       renderFlyout({
@@ -859,6 +911,56 @@ describe('ComposeDiscoverFlyout', () => {
     });
   });
 
+  describe('create from template rule', () => {
+    const templateRule = {
+      id: '',
+      kind: 'alert' as const,
+      enabled: false,
+      metadata: {
+        name: '[Kubernetes OTel] Pod CrashLoopBackOff',
+        description: 'Alerts when containers have a high restart count',
+        tags: ['Kubernetes'],
+        version: 1,
+      },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '15m' },
+      query: {
+        format: 'composed' as const,
+        base: 'TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
+        breach: { segment: 'WHERE restarts > 0 | SORT restarts DESC | LIMIT 50' },
+      },
+      created_by: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_by: null,
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+
+    it('commits the template query in create mode so the flyout shows it', () => {
+      renderFlyout({ mode: 'create', rule: templateRule as any });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: templateRule.query.base,
+        breach: { segment: templateRule.query.breach.segment },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not commit an empty template query in create mode', () => {
+      renderFlyout({
+        mode: 'create',
+        rule: {
+          ...templateRule,
+          query: { format: 'composed' as const, base: '', breach: { segment: '' } },
+        } as any,
+      });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(false);
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+  });
+
   describe('handleSandboxApply', () => {
     it('runs heuristic split and commits the result in create + alert unified editor', () => {
       renderFlyout({ mode: 'create' });
@@ -900,10 +1002,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -969,10 +1071,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1032,14 +1134,15 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
     });
 
-    it('falls back to conditionless standalone when manual split is applied with an empty alert condition', () => {
+    it('keeps composed with an empty segment when manual split is applied without an alert condition', () => {
       renderFlyout({ mode: 'create' });
       openSandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: '' },
         });
       });
       clickSplitBaseAndAlert();
@@ -1056,11 +1159,12 @@ describe('ComposeDiscoverFlyout', () => {
         fireEvent.click(screen.getByTestId('mockSandboxApply'));
       });
 
+      // Do not coerce to standalone — empty segment is rejected at save for alerts.
       expect(readCommittedQuery?.()).toEqual({
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        breach: { segment: '' },
       });
-      expect(readNoDataStrategy?.()).toBe('none');
     });
 
     it('preserves custom recovery when applying manual split edits', () => {
@@ -1086,10 +1190,10 @@ describe('ComposeDiscoverFlyout', () => {
             breach: { segment: '| WHERE count > 100' },
             recovery: { segment: '| WHERE count < 50' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1259,10 +1363,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1402,6 +1506,7 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('forced YAML mode for non-representable rules', () => {
+    // Any alert + standalone is YAML-only, including breach-only rules.
     const nonRepresentableRule = {
       id: 'test-rule-id',
       kind: 'alert' as const,
@@ -1411,10 +1516,8 @@ describe('ComposeDiscoverFlyout', () => {
       schedule: { every: '5m', lookback: '1m' },
       query: {
         format: 'standalone' as const,
-        breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h | WHERE c > 100' },
-        recovery: { query: 'FROM logs-* | WHERE c < 10' },
+        breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h' },
       },
-      recovery_strategy: 'query' as const,
     };
 
     const representableRule = {
@@ -1468,6 +1571,108 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
       expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+    });
+  });
+
+  describe('step clamping after a YAML-edited kind change', () => {
+    it('clamps step back into range when YAML changes kind to one with fewer steps', () => {
+      renderFlyout({ mode: 'create' });
+
+      // Notifications (step 3) only exists for alert kind — reachable before the
+      // YAML edit below drops the rule to signal (3 steps: indices 0-2).
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 3 });
+      });
+      expect(getLatestFormProps().state.step).toBe(3);
+
+      // Enabling YAML mode applies the mocked parse, which returns kind: 'signal'.
+      clickEditMode('yaml');
+      // Disabling re-parses the same buffer through the fix's clamp logic.
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.step).toBe(2);
+    });
+
+    it('still clamps when the buffer is unparseable at the moment of toggling back to Form', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 3 });
+      });
+      expect(getLatestFormProps().state.step).toBe(3);
+
+      // Enabling YAML mode's own parse succeeds and applies kind: 'signal' to RHF.
+      clickEditMode('yaml');
+
+      // The buffer is now broken (e.g. a mid-edit typo) at the exact moment the
+      // user toggles back to Form — this parse attempt fails, but RHF's kind is
+      // already 'signal' from the successful parse above.
+      mockParseYamlToFormValues = () => ({ values: null, error: 'bad yaml' });
+
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.step).toBe(2);
+    });
+  });
+
+  describe('YAML lock for a non-representable live form state', () => {
+    const toggleToFormWith = (values: FormValues) => {
+      renderFlyout({ mode: 'create' });
+      clickEditMode('yaml');
+      mockParseYamlToFormValues = () => ({ values, error: null });
+      clickEditMode('form');
+    };
+
+    it('stays in YAML mode and disables the toggle for alert + standalone', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      });
+
+      expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+    });
+
+    it('stays in YAML mode and disables the toggle for signal + composed', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'signal',
+        query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE a > 1' } },
+      });
+
+      expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+    });
+
+    it('returns to Form view for a representable alert + composed state', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE a > 1' } },
+      });
+
+      expect(screen.queryByTestId('composeDiscoverYamlBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('does not lock the toggle when a non-representable query is set from Form mode', () => {
+      // Not reachable via any real UI path today (Form-mode controls always keep kind/query.format
+      // paired) — this pins the escape hatch in case that ever changes.
+      renderFlyout({ mode: 'create' });
+
+      fireEvent.click(screen.getByTestId('mockSetNonRepresentableQuery'));
+
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).not.toBeDisabled());
     });
   });
 

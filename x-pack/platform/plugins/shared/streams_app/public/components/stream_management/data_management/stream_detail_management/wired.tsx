@@ -20,7 +20,7 @@ import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
-import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
+import { PendingRootDataStreamEmptyPrompt } from './pending_root_data_stream_empty_prompt';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
@@ -171,7 +171,7 @@ function WiredStreamDetailManagementContent({
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
-          <PendingRootDataStreamCallout
+          <PendingRootDataStreamEmptyPrompt
             streamName={definition.stream.name}
             canManage={definition.privileges.manage}
             refreshDefinition={refreshDefinition}

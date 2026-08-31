@@ -9,9 +9,9 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { HttpLogic } from '../../../../../../shared/http';
 
@@ -24,17 +24,22 @@ export const TextExpansionErrors = ({ error }: { error: { title: string; message
   return (
     <>
       <SendEnterpriseSearchTelemetry action="error" metric="textExpansionModel-error" />
-      <EuiCallOut color="danger" iconType="error" title={error.title}>
-        <p>{error.message}</p>
-        <EuiLink href={http.basePath.prepend(ML_NOTIFICATIONS_PATH)} target="_blank">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.mlNotificationsLink',
-            {
-              defaultMessage: 'Machine Learning notifications',
-            }
-          )}
-        </EuiLink>
-      </EuiCallOut>
+      <KbnDangerCallout
+        title={error.title}
+        text={error.message}
+        actionProps={{
+          primary: {
+            href: http.basePath.prepend(ML_NOTIFICATIONS_PATH),
+            target: '_blank',
+            children: i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.mlNotificationsLink',
+              {
+                defaultMessage: 'Machine Learning notifications',
+              }
+            ),
+          },
+        }}
+      />
     </>
   );
 };

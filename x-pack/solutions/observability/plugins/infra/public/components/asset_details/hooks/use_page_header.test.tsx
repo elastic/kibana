@@ -37,7 +37,7 @@ const mockUseHistory = jest.fn<MockHistory, []>(() => ({
 const mockUseLocation = jest.fn<MockLocation, []>(() => ({
   state: null,
 }));
-const mockChromeNextIsEnabled = jest.fn<boolean, []>(() => false);
+const mockChromeStyle = jest.fn<'classic' | 'project', []>(() => 'classic');
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => mockUseHistory(),
@@ -55,11 +55,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
         navigateToApp: jest.fn(),
       },
       chrome: {
-        next: {
-          get isEnabled() {
-            return mockChromeNextIsEnabled();
-          },
-        },
+        getChromeStyle: () => mockChromeStyle(),
       },
     },
   }),
@@ -107,7 +103,7 @@ describe('usePageHeader', () => {
     mockUseLocation.mockReturnValue({
       state: null,
     });
-    mockChromeNextIsEnabled.mockReturnValue(false);
+    mockChromeStyle.mockReturnValue('classic');
 
     useTabSwitcherContextMock.mockReturnValue({
       showTab: jest.fn(),
@@ -220,8 +216,8 @@ describe('usePageHeader', () => {
   });
 
   describe('return breadcrumb visibility', () => {
-    it('should hide the Return breadcrumb when Chrome Next is enabled', () => {
-      mockChromeNextIsEnabled.mockReturnValue(true);
+    it('should hide the Return breadcrumb in the project layout', () => {
+      mockChromeStyle.mockReturnValue('project');
       mockUseLocation.mockReturnValue({
         state: mockOriginRouteState,
       });
@@ -231,8 +227,7 @@ describe('usePageHeader', () => {
       expect(result.current.breadcrumbs).toEqual([]);
     });
 
-    it('should show the Return breadcrumb for classic chrome when origin state exists', () => {
-      mockChromeNextIsEnabled.mockReturnValue(false);
+    it('should show the Return breadcrumb in the classic layout', () => {
       mockUseLocation.mockReturnValue({
         state: mockOriginRouteState,
       });

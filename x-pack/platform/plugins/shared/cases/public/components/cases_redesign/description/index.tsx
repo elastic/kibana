@@ -274,7 +274,7 @@ export const Description = ({
                   announceOnMount
                   size="s"
                   color="warning"
-                  iconType="documentEdit"
+                  iconType="pencil"
                   title={i18n.UNSAVED_DRAFT_DESCRIPTION}
                   data-test-subj="description-unsaved-draft"
                 >

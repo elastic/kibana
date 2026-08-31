@@ -43,6 +43,22 @@ const createServicesMock = ({
     get: jest.fn().mockResolvedValue(dataSets),
   },
   toasts: createToastsMock(),
+  docLinks: {
+    links: {
+      dataFederation: {
+        overview: '',
+        quickstart: '',
+        dataSources: '',
+        datasets: '',
+        datasetSettings: '',
+        authentication: '',
+        staticCredentials: '',
+        federatedIdentity: '',
+        querying: '',
+        security: '',
+      },
+    },
+  },
 });
 
 describe('Main', () => {

@@ -64,37 +64,3 @@ export const durationFormatSchema = z
     title: 'Duration Format',
     description: 'Duration format between time units.',
   });
-
-/**
- * Legacy duration format schema accepting pre-GA free-form string values for `to` and `from`.
- * Used as a fallback when `asCode.useGASchemas` is disabled.
- * @see AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG
- */
-export const legacyDurationFormatSchema = z
-  .object({
-    type: z.literal('duration'),
-    /**
-     * Unit of the original field value
-     * (i.e. 'picoseconds', 'nanoseconds', 'microseconds', 'milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years')
-     */
-    from: z.string().meta({
-      description:
-        'Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.',
-    }),
-    /**
-     * Unit of the formatted value
-     * (i.e. 'humanize', 'humanizePrecise', 'asMilliseconds', 'asSeconds', 'asMinutes', 'asHours', 'asDays', 'asWeeks', 'asMonths', 'asYears')
-     */
-    to: z.string().meta({
-      description:
-        'Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.',
-    }),
-    suffix: durationFormatSuffixSchema,
-  })
-  .strict()
-  .meta({
-    id: 'legacyDurationFormat',
-    title: 'Duration Format (Legacy)',
-    description:
-      'Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.',
-  });

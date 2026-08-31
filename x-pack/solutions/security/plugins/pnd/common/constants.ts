@@ -24,3 +24,12 @@ export {
 
 /** API privilege for read-only PND internal routes. */
 export const PND_API_PRIVILEGE_READ = 'pnd_read' as const;
+
+/**
+ * API privilege for PND internal routes that mutate state. Only granted by the `all` feature
+ * privilege. This route-level check is the authorization boundary for managed settings installs.
+ */
+export const PND_API_PRIVILEGE_WRITE = 'pnd_write' as const;
+
+/** Owner id registered for all PND managed workflow definitions. */
+export const PND_MANAGED_WORKFLOW_OWNER_ID = 'pnd' as const;

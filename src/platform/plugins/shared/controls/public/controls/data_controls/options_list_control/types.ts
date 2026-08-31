@@ -24,6 +24,7 @@ import type {
   PublishesUnsavedChanges,
   PublishingSubject,
   SupportsJsonExport,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -73,6 +74,7 @@ export type DSLOptionsListComponentApi = HasType &
   DSLOptionsListComponentStateSetters &
   OptionsListSelectionsApi & {
     loadMoreSubject: Subject<void>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
 
 export interface OptionsListCustomStrings {

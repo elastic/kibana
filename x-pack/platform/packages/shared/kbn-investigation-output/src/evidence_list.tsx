@@ -13,10 +13,19 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationEvidence } from '@kbn/significant-events-schema';
-import { buildEvidenceDiscoverParams, type InvestigationDiscoverParams } from './evidence_links';
+import {
+  buildCodeReferenceUrl,
+  buildEvidenceDiscoverParams,
+  formatCodeReferenceDetail,
+  formatCodeReferenceLabel,
+  type InvestigationDiscoverParams,
+} from './evidence_links';
 
 export interface EvidenceListProps {
   evidence: InvestigationEvidence[];
@@ -37,6 +46,8 @@ export interface EvidenceListProps {
  * view, and navigating away in-tab would drop that live state.
  */
 export const EvidenceList: React.FC<EvidenceListProps> = ({ evidence, getQueryHref }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (evidence.length === 0) {
     return null;
   }
@@ -44,12 +55,22 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidence, getQueryHr
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="investigationEvidenceList">
       {evidence.map((item, index) => {
-        const { description, esql_query: esqlQuery } = item;
+        const { description, esql_query: esqlQuery, code } = item;
         const discoverParams = buildEvidenceDiscoverParams(item);
         const queryHref = discoverParams ? getQueryHref?.(discoverParams) : undefined;
+        const codeHref = code ? buildCodeReferenceUrl(code) : undefined;
+        const isLast = index === evidence.length - 1;
 
         return (
-          <EuiFlexItem key={index} grow={false} data-test-subj="investigationEvidenceItem">
+          <EuiFlexItem
+            key={index}
+            grow={false}
+            data-test-subj="investigationEvidenceItem"
+            css={css`
+              border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+              padding-bottom: ${isLast ? '0' : euiTheme.size.s};
+            `}
+          >
             <EuiText size="xs" color="subdued">
               {description}
             </EuiText>
@@ -63,23 +84,56 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidence, getQueryHr
               </>
             )}
 
-            {queryHref && (
+            {code && !codeHref && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="investigationEvidenceCodeText"
+                  css={css`
+                    overflow-wrap: anywhere;
+                  `}
+                >
+                  {formatCodeReferenceDetail(code)}
+                </EuiText>
+              </>
+            )}
+
+            {(queryHref || codeHref) && (
               <>
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="hollow"
-                      iconType="discoverApp"
-                      href={queryHref}
-                      target="_blank"
-                      data-test-subj="investigationEvidenceQueryLink"
-                    >
-                      {i18n.translate('xpack.investigationOutput.evidence.openInDiscoverLabel', {
-                        defaultMessage: 'Open in Discover',
-                      })}
-                    </EuiBadge>
-                  </EuiFlexItem>
+                  {queryHref && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge
+                        color="hollow"
+                        iconType="discoverApp"
+                        href={queryHref}
+                        target="_blank"
+                        data-test-subj="investigationEvidenceQueryLink"
+                      >
+                        {i18n.translate('xpack.investigationOutput.evidence.openInDiscoverLabel', {
+                          defaultMessage: 'Open in Discover',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  {code && codeHref && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={formatCodeReferenceDetail(code)}>
+                        <EuiBadge
+                          color="hollow"
+                          iconType="code"
+                          href={codeHref}
+                          target="_blank"
+                          data-test-subj="investigationEvidenceCodeLink"
+                        >
+                          {formatCodeReferenceLabel(code)}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </>
             )}

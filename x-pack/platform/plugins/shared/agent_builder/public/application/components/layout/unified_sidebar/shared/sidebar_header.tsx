@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiButtonEmpty,
@@ -57,7 +57,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   onToggleCondensed,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const navigate = useNavigate();
+  const history = useHistory();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const headerStyles = css`
@@ -132,13 +132,13 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         ) : (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               size="s"
               flush="both"
               color="text"
               onClick={() => {
-                navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
+                history.push(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.sidebar,

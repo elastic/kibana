@@ -8,6 +8,7 @@
  */
 
 export {
+  LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
   ProfileStateRegistry,
   ProfileStateType,
   type ProfileStateDefaultsHandling,
@@ -21,4 +22,7 @@ export {
   EXAMPLE_PROFILE_STATE_DEF,
   type ExampleProfileState,
 } from './profile_state_definitions/example_profile_state';
-export { METRICS_GRID_SETTINGS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
+export {
+  METRICS_STATE_DEF,
+  type MetricsState,
+} from './profile_state_definitions/metrics_grid_profile_state';

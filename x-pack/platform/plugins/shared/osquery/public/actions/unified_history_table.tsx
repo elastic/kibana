@@ -190,12 +190,7 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
 
   return (
     <EuiToolTip position="top" content={detailsText} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="visTable"
-        {...navProps}
-        isDisabled={!path}
-        aria-label={detailsText}
-      />
+      <EuiButtonIcon iconType="table" {...navProps} isDisabled={!path} aria-label={detailsText} />
     </EuiToolTip>
   );
 };
@@ -344,20 +339,28 @@ const UnifiedHistoryTableComponent = () => {
 
   // Empty deps: callback derives output solely from the row argument and module-level helpers
   const renderQueryColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
-    // Scheduled rows: show query name with pack badge
-    if (isScheduledRow(row) && (row.queryName || row.packName)) {
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>{row.queryName ?? row.packName}</EuiFlexItem>
-          {row.packName && row.queryName && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" iconType="package">
-                {row.packName}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
+    // Scheduled rows: show query name with pack badge.
+    // The pack saved object holding these names is project-local and does not fan out,
+    // so cross-project rows resolve neither name. Fall back to the ids the documents do
+    // carry rather than rendering an empty cell.
+    if (isScheduledRow(row)) {
+      const queryLabel = row.queryName || row.scheduleId;
+      const packLabel = row.packName || row.packId;
+
+      if (queryLabel || packLabel) {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{queryLabel || packLabel}</EuiFlexItem>
+            {packLabel && queryLabel && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" iconType="package">
+                  {packLabel}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      }
     }
 
     // Live pack rows: show pack name
@@ -404,6 +407,8 @@ const UnifiedHistoryTableComponent = () => {
 
     const success = row.successCount ?? 0;
     const errors = row.errorCount ?? 0;
+    // All distinct-agent counts; an agent with both outcomes is in both buckets,
+    // so the sum can exceed agentCount — the clamp keeps pending at 0 then.
     const pending = Math.max(0, row.agentCount - success - errors);
 
     const badges: Array<{ key: string; color: string; count: number }> = [];
@@ -432,7 +437,9 @@ const UnifiedHistoryTableComponent = () => {
   }, []);
 
   const renderTimestampColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <>{formatDate(row.timestamp)}</>,
+    (_: unknown, row: UnifiedHistoryRow) => (
+      <>{formatDate(isScheduledRow(row) ? row.plannedTime ?? row.timestamp : row.timestamp)}</>
+    ),
     []
   );
 
@@ -629,7 +636,7 @@ const UnifiedHistoryTableComponent = () => {
 
     if (visibleSet.has('created_at')) {
       cols.push({
-        field: 'timestamp',
+        field: 'plannedTime',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
           defaultMessage: 'Created at',
         }),

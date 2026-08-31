@@ -16,6 +16,7 @@ import {
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
@@ -34,8 +35,15 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import {
+  RuleTemplatesClient,
+  RuleTemplateSavedObjectsClientToken,
+} from '../lib/rule_templates_client';
 import {
   createChangeHistoryClient,
+  ChangeHistoryClientToken,
+  RuleChangesHistoryClient,
   RuleChangesHistoryClientToken,
   RuleChangesHistoryService,
   RuleChangesHistoryServiceToken,
@@ -99,6 +107,7 @@ import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
 import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
@@ -106,12 +115,14 @@ import {
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type { PluginConfig } from '../config';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -129,6 +140,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
@@ -139,7 +151,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(RuleChangesHistoryClientToken)
+  bind(ChangeHistoryClientToken)
     .toDynamicValue(({ get }) => {
       const logger = get(Logger).get('rule_changes_history');
       const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
@@ -148,6 +160,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
   bind(RuleChangesHistoryService).toSelf().inSingletonScope();
   bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
+  bind(RuleChangesHistoryClient).toSelf().inRequestScope();
+  bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);
 
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {
@@ -210,6 +224,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  // The `alerting_rule_template` type is hidden and owned by the alerting (v1)
+  // plugin, so it has to be opted into explicitly here.
+  bind(RuleTemplateSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_TEMPLATE_SAVED_OBJECT_TYPE] }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();
@@ -286,7 +310,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      return new QueryService(esClient, loggerService);
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inRequestScope();
 
@@ -295,7 +322,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      return new QueryService(esClient, loggerService);
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inRequestScope();
 
@@ -303,7 +333,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new QueryService(esClient, loggerService);
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inSingletonScope();
 

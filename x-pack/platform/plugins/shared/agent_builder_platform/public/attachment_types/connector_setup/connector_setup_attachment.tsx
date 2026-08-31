@@ -189,7 +189,7 @@ export const createConnectorSetupAttachmentDefinition = (
             'xpack.agentBuilderPlatform.attachments.connectorSetup.manageButton',
             { defaultMessage: 'Manage connector' }
           ),
-          icon: 'popout',
+          icon: 'external',
           type: ActionButtonType.SECONDARY,
           href: deps.application.getUrlForApp(AGENTBUILDER_APP_ID, {
             path: CONNECTORS_MANAGE_PATH,
