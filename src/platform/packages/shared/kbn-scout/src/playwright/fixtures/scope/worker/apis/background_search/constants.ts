@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
+/** Base path for the background search (search session) API. */
+export const BACKGROUND_SEARCH_API_PATH = 'internal/session';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
+/** `elastic-api-version` header value for the background search API. */
+export const BACKGROUND_SEARCH_API_VERSION = '1';
 
-export {
-  SESSION_API_PATH,
-  ESE_API_PATH,
-  COMMON_HEADERS,
-  SESSION_VERSION_HEADER,
-} from './constants';
-export { waitFor, randomSessionId, randomHash, submitSearch, saveSession } from './helpers';
+/** Upper bound for a single `_find` page — high enough that cleanup never has to paginate. */
+export const BACKGROUND_SEARCH_FIND_PER_PAGE = 10_000;
