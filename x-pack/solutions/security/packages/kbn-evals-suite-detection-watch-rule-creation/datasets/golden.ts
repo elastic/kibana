@@ -183,7 +183,7 @@ export const goldenDataset: RuleCreationExample[] = [
 | WHERE host.os.type == "windows"
   AND event.type == "start"
   AND process.name == "rundll32.exe"
-  AND (process.args : "javascript" OR process.args : "RunHtmlApplication")`,
+  AND process.command_line LIKE "*javascript*"`,
     },
   },
 ];

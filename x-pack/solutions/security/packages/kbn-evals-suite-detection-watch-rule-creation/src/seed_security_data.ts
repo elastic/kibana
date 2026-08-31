@@ -217,7 +217,7 @@ export const buildFixtures = (): SeededIndex[] => [
         event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
         process: {
           name: 'rundll32.exe',
-          args: ['rundll32.exe', `${JS_PROTO}:\\..\\RunHtmlApplication`],
+          args: ['rundll32.exe', JS_PROTO, 'RunHtmlApplication'],
           command_line: `rundll32.exe ${JS_PROTO}:\\..\\RunHtmlApplication`,
           executable: 'C:\\Windows\\System32\\rundll32.exe',
           parent: { name: 'cmd.exe', args: ['cmd.exe'], command_line: 'cmd.exe' },
