@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 
 export interface InferenceDocument {
   _id?: string;
@@ -38,10 +38,20 @@ export const DEFAULT_INFERENCE_DOCUMENT_LIMITS: InferenceDocumentLimits = {
 
 const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
 
+const DUPLICATE_FIELD_GROUPS = new Map([
+  ['message', 'log_body'],
+  ['body.text', 'log_body'],
+  ['error.stack_trace', 'stack_trace'],
+  ['exception.stacktrace', 'stack_trace'],
+]);
+
 const isTagField = (key: string): boolean => key.includes('tags');
 
 const getSerializedByteLength = (value: unknown): number =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
+
+const getDuplicateFieldGroup = (key: string): string | undefined =>
+  DUPLICATE_FIELD_GROUPS.get(key.replace(OTEL_FIELD_PREFIX, ''));
 
 const truncateValue = (
   value: unknown,
@@ -130,6 +140,7 @@ export function formatRawDocument({
   const orderedEntries = orderFieldsByPriority(Object.entries(rawFields), priorityFields);
 
   const document: InferenceDocument = { _id: hit._id, fields: {} };
+  const retainedGroupedValues = new Map<string, unknown[]>();
   for (const [key, rawValue] of orderedEntries) {
     if (Object.keys(document.fields).length >= limits.maxFields) {
       break;
@@ -138,6 +149,13 @@ export function formatRawDocument({
       continue;
     }
     const unwrapped = Array.isArray(rawValue) && rawValue.length === 1 ? rawValue[0] : rawValue;
+    const duplicateFieldGroup = getDuplicateFieldGroup(key);
+    if (
+      duplicateFieldGroup &&
+      retainedGroupedValues.get(duplicateFieldGroup)?.some((value) => isEqual(value, unwrapped))
+    ) {
+      continue;
+    }
     const candidateFields = {
       ...document.fields,
       [key]: truncateValue(unwrapped, key, limits, 0),
@@ -146,6 +164,12 @@ export function formatRawDocument({
       getSerializedByteLength({ ...document, fields: candidateFields }) <= limits.maxDocumentBytes
     ) {
       document.fields = candidateFields;
+      if (duplicateFieldGroup) {
+        retainedGroupedValues.set(duplicateFieldGroup, [
+          ...(retainedGroupedValues.get(duplicateFieldGroup) ?? []),
+          unwrapped,
+        ]);
+      }
     }
   }
 

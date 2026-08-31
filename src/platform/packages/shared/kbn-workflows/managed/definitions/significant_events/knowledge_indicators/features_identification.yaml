@@ -1,8 +1,6 @@
 # KI Features Identification Workflow
 #
 # On-demand workflow that identifies KI features for a single stream.
-# Each iteration samples documents, then runs LLM inference and reconciles
-# features.
 #
 # Flow:
 #   init → while(iterationCount < max) {

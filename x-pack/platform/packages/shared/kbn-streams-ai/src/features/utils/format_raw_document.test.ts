@@ -118,6 +118,41 @@ describe('formatRawDocument', () => {
     expect(document?.fields.noise).toBeUndefined();
   });
 
+  it('retains only one copy of equivalent log body and stack trace values', () => {
+    const document = formatRawDocument({
+      hit: hitWith({
+        message: 'duplicate log body',
+        'body.text': 'duplicate log body',
+        'error.stack_trace': 'duplicate stack trace',
+        'attributes.exception.stacktrace': 'duplicate stack trace',
+      }),
+      priorityFields: ['message', 'body.text', 'error.stack_trace', 'exception.stacktrace'],
+    });
+
+    expect(document?.fields).toEqual({
+      message: 'duplicate log body',
+      'error.stack_trace': 'duplicate stack trace',
+    });
+  });
+
+  it('retains equivalent fields when their values differ', () => {
+    const document = formatRawDocument({
+      hit: hitWith({
+        message: 'ECS log body',
+        'body.text': 'OTel log body',
+        'error.stack_trace': 'ECS stack trace',
+        'exception.stacktrace': 'OTel stack trace',
+      }),
+    });
+
+    expect(document?.fields).toEqual({
+      message: 'ECS log body',
+      'body.text': 'OTel log body',
+      'error.stack_trace': 'ECS stack trace',
+      'exception.stacktrace': 'OTel stack trace',
+    });
+  });
+
   it('caps the number of retained fields', () => {
     const document = formatRawDocument({
       hit: hitWith(
