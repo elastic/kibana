@@ -262,6 +262,7 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
  */
 export interface RelayActionClient {
   trigger(input: {
+    surface: string;
     tenantKey: string;
     channel: string;
     message: string;

@@ -227,7 +227,12 @@ describe('RelayClient', () => {
       } as never);
 
       await expect(
-        createClient().trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+        createClient().trigger({
+          surface: 'slack',
+          tenantKey: 'team-A',
+          channel: 'C123',
+          message: 'hello',
+        })
       ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A' });
 
       expect(requestMock).toHaveBeenCalledWith(
@@ -240,6 +245,26 @@ describe('RelayClient', () => {
       );
     });
 
+    it('sends the surface the caller asked for', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000300', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        surface: 'teams',
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'hello',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ surface: 'teams' }),
+        })
+      );
+    });
+
     it('includes thread_ts only when replying in a thread', async () => {
       requestMock.mockResolvedValue({
         status: 202,
@@ -247,6 +272,7 @@ describe('RelayClient', () => {
       } as never);
 
       await createClient().trigger({
+        surface: 'slack',
         tenantKey: 'team-A',
         channel: 'C123',
         message: 'in thread',
@@ -266,7 +292,7 @@ describe('RelayClient', () => {
         requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
 
         const error = await createClient()
-          .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+          .trigger({ surface: 'slack', tenantKey: 'team-A', channel: 'C123', message: 'hello' })
           .then(() => undefined)
           .catch((cause) => cause);
 

@@ -150,13 +150,14 @@ export class RelayClient implements RelayClientContract {
 
   /** Post to a bound channel. One this deployment does not own is rejected with a 403, not delivered. */
   async trigger({
+    surface,
     tenantKey,
     channel,
     message,
     threadTs,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
     const response = await this.post('/v1/trigger', {
-      surface: 'slack',
+      surface,
       tenant_key: tenantKey,
       channel,
       message,
