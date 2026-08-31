@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mergeWith } from 'lodash';
 import { parse } from 'yaml';
 
 import type { Logger } from '@kbn/logging';
@@ -783,8 +784,19 @@ function generateOtelcolExporter(
       );
       // Batching, queueing, retry and compression settings translated from the Fleet output,
       // so this exporter behaves like the one the agent generates for Beats-based inputs.
-      // User-supplied exporter YAML still wins over the translated values.
+      // User-supplied exporter YAML wins over the translated values at the individual field
+      // level (deep merge). Arrays in the user YAML are replaced wholesale rather than merged
+      // position-by-position (e.g. retry_on_status is replaced, not extended).
       const outputExporterConfig = buildOtelEsExporterConfig(dataOutput);
+      // Deep-merge: translated settings are the base; user YAML overrides individual fields;
+      // arrays from user YAML replace rather than position-merge. endpoints/auth are forced
+      // last so they always take precedence regardless of what the user YAML contains.
+      const mergedExporterConfig = mergeWith(
+        {},
+        outputExporterConfig,
+        extraExporterConfig,
+        (_dst: unknown, src: unknown) => (Array.isArray(src) ? src : undefined)
+      ) as Record<string, unknown>;
 
       // When otel_disable_beatsauth is set, skip the beatsauth extension entirely. The
       // output's own exporter settings still apply — beatsauth only carries transport
@@ -794,8 +806,7 @@ function generateOtelcolExporter(
           extensions: {},
           exporters: {
             [`elasticsearch/${outputID}`]: {
-              ...outputExporterConfig,
-              ...extraExporterConfig,
+              ...mergedExporterConfig,
               endpoints: dataOutput.hosts,
             },
           },
@@ -809,8 +820,7 @@ function generateOtelcolExporter(
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {
           [`elasticsearch/${outputID}`]: {
-            ...outputExporterConfig,
-            ...extraExporterConfig,
+            ...mergedExporterConfig,
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),

@@ -3782,14 +3782,21 @@ describe('generateOtelcolConfig', () => {
       expect(exporter).not.toHaveProperty('index');
     });
 
-    it('should let otel_exporter_config_yaml override the translated settings', () => {
+    it('should let otel_exporter_config_yaml override individual translated settings', () => {
       const exporter = getExporter({
         ...defaultOutput,
         preset: 'balanced',
         otel_exporter_config_yaml: 'sending_queue:\n  queue_size: 99\n',
       });
 
-      expect(exporter.sending_queue).toEqual({ queue_size: 99 });
+      // Deep merge: user's queue_size wins; the rest of the translated sending_queue is preserved.
+      expect(exporter.sending_queue).toMatchObject({
+        queue_size: 99,
+        enabled: true,
+        block_on_overflow: true,
+        wait_for_result: true,
+        num_consumers: 2,
+      });
     });
 
     it('should translate output settings even when beatsauth is disabled', () => {
