@@ -98,7 +98,9 @@ async function waitForStepRegistry(
         const count = steps.length;
         if (count > 0 && count === previousCount) {
           log.debug(
-            `Step registry stable at ${count} step(s) after ${attempts} attempt(s) (${Date.now() - start}ms)`
+            `Step registry stable at ${count} step(s) after ${attempts} attempt(s) (${
+              Date.now() - start
+            }ms)`
           );
           return;
         }
