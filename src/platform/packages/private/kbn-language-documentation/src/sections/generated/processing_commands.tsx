@@ -142,10 +142,10 @@ FROM movies
 | SORT rating DESC
 | LIMIT 10
 | EVAL prompt = CONCAT(
-   "Summarize this movie using the following information: \\n",
-   "Title: ", title, "\\n",
-   "Synopsis: ", synopsis, "\\n",
-   "Actors: ", MV_CONCAT(actors, ", "), "\\n",
+   "Summarize this movie using the following information: \\\\n",
+   "Title: ", title, "\\\\n",
+   "Synopsis: ", synopsis, "\\\\n",
+   "Actors: ", MV_CONCAT(actors, ", "), "\\\\n",
   )
 | COMPLETION summary = prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP title, summary, rating
