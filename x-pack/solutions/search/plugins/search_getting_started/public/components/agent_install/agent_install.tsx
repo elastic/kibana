@@ -178,16 +178,20 @@ export const AgentInstallSection = () => {
               <AgentInstallPanel
                 icon="commandLine"
                 title={
-                  <span>
-                    {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.title', {
-                      defaultMessage: 'Build from your terminal ',
-                    })}
-                    <EuiBadge css={{ marginLeft: 8 }} color="primary">
-                      {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.newBadge', {
-                        defaultMessage: 'NEW',
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.title', {
+                        defaultMessage: 'Build from your terminal',
                       })}
-                    </EuiBadge>
-                  </span>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="accent" fill data-test-subj="agentInstallCliNewBadge">
+                        {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.newBadge', {
+                          defaultMessage: 'New',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 }
                 description={i18n.translate(
                   'xpack.searchGettingStarted.agentInstall.cli.description',
