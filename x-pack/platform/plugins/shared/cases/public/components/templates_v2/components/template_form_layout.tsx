@@ -328,8 +328,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   ]);
 
   const yamlValidationResult = useMemo(
-    () => validateTemplateDefinitionYaml(normalizedYamlValue),
-    [normalizedYamlValue]
+    () =>
+      validateTemplateDefinitionYaml(
+        normalizedYamlValue,
+        isEdit ? initialDefinitionYaml : undefined
+      ),
+    [normalizedYamlValue, isEdit, initialDefinitionYaml]
   );
   const isYamlDefinitionValid = yamlValidationResult.success;
 
@@ -485,7 +489,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       { settings: settingsRef.current, connector: connectorRef.current }
     );
 
-    const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
+    const validationResult = validateTemplateDefinitionYaml(
+      mergedDefinition,
+      isEdit ? initialDefinitionYaml : undefined
+    );
     if (
       !validationResult.success ||
       hasTemplateMetadataErrors(validateTemplateMetadata(normalizedMetadata))
@@ -523,6 +530,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     onCreate,
     isEnabled,
     isEdit,
+    initialDefinitionYaml,
     clearDraft,
     setStoredMetadataState,
     setStoredConfigState,

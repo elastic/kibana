@@ -9,9 +9,10 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Compiler, type Stats } from '@rspack/core';
+import type { Compiler, Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import { rspack } from './rspack_runtime';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
@@ -29,6 +30,9 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
   /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+  // Scout/Playwright output (test artifacts, reports, server configs) written
+  // into plugin dirs during test runs; must not trigger watch rebuilds.
+  /[\\/]\.scout[\\/]/,
 ];
 
 export interface BuildOptions {
@@ -39,6 +43,10 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
@@ -87,6 +95,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -124,6 +134,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      pluginPaths,
+      pluginScanDirs,
       themeTags,
       log,
       profile,

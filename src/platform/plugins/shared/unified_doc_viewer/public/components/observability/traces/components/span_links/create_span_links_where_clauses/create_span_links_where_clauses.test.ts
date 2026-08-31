@@ -8,18 +8,23 @@
  */
 
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import { from } from '@kbn/esql-composer';
-
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import {
   createServiceNameWhereClause,
   createSpanNameWhereClause,
   createTraceIdWhereClause,
 } from '.';
 
-describe('span links where clauses', () => {
-  const indexPattern = 'apm-traces-*';
-  const source = from(indexPattern);
+const indexPattern = 'apm-traces-*';
 
+const render = (condition: ESQLAstExpression): string => {
+  const query = esql.from(indexPattern);
+  query.where`${condition}`;
+  return query.print('pipe-multiline');
+};
+
+describe('span links where clauses', () => {
   describe('createSpanNameWhereClause', () => {
     it('uses transaction id when available', () => {
       const item = {
@@ -28,8 +33,7 @@ describe('span links where clauses', () => {
         details: { transactionId: 'transaction999' },
       } as unknown as SpanLinkDetails;
 
-      const pipeline = source.pipe(createSpanNameWhereClause(item));
-      expect(pipeline.toString()).toEqual(
+      expect(render(createSpanNameWhereClause(item))).toEqual(
         'FROM apm-traces-*\n  | WHERE transaction.id == "transaction999"'
       );
     });
@@ -41,8 +45,9 @@ describe('span links where clauses', () => {
         details: undefined,
       } as unknown as SpanLinkDetails;
 
-      const pipeline = source.pipe(createSpanNameWhereClause(item));
-      expect(pipeline.toString()).toEqual('FROM apm-traces-*\n  | WHERE span.id == "span123"');
+      expect(render(createSpanNameWhereClause(item))).toEqual(
+        'FROM apm-traces-*\n  | WHERE span.id == "span123"'
+      );
     });
   });
 
@@ -64,8 +69,7 @@ describe('span links where clauses', () => {
         details: { serviceName: 'myService' },
       } as unknown as SpanLinkDetails;
 
-      const pipeline = source.pipe(createServiceNameWhereClause(item)!);
-      expect(pipeline.toString()).toEqual(
+      expect(render(createServiceNameWhereClause(item)!)).toEqual(
         'FROM apm-traces-*\n  | WHERE service.name == "myService"'
       );
     });
@@ -79,8 +83,22 @@ describe('span links where clauses', () => {
         details: undefined,
       } as unknown as SpanLinkDetails;
 
-      const pipeline = source.pipe(createTraceIdWhereClause(item));
-      expect(pipeline.toString()).toEqual('FROM apm-traces-*\n  | WHERE trace.id == "trace456"');
+      expect(render(createTraceIdWhereClause(item))).toEqual(
+        'FROM apm-traces-*\n  | WHERE trace.id == "trace456"'
+      );
+    });
+
+    it('preserves backslash-then-letter sequences without double-escaping', () => {
+      const item = {
+        spanId: 'span123',
+        traceId: String.raw`trace\n456`,
+        details: undefined,
+      } as unknown as SpanLinkDetails;
+
+      expect(render(createTraceIdWhereClause(item))).toEqual(
+        String.raw`FROM apm-traces-*
+  | WHERE trace.id == "trace\\n456"`
+      );
     });
   });
 });

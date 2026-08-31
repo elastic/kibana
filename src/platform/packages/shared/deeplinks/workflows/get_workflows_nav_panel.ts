@@ -62,15 +62,15 @@ export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavN
 
   const links: NonNullable<WorkflowsNavNode['children']> = [];
 
-  if (libraryEnabled) {
-    links.push({ link: workflowsDeepLink(WorkflowsPageName.library), breadcrumbStatus: 'hidden' });
-  }
-
   if (executionsViewEnabled) {
     links.push({
       link: workflowsDeepLink(WorkflowsPageName.executions),
       breadcrumbStatus: 'hidden',
     });
+  }
+
+  if (libraryEnabled) {
+    links.push({ link: workflowsDeepLink(WorkflowsPageName.library), breadcrumbStatus: 'hidden' });
   }
 
   if (!links.length) {

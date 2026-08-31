@@ -30,8 +30,8 @@ import {
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useMemo, useState } from 'react';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useIsCpsMultiProject } from '../../../../hooks/use_is_cps_multi_project';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../components/badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
@@ -87,6 +87,7 @@ export function StreamsTreeTable({
   const {
     dependencies: {
       start: {
+        cps,
         share: {
           url: { locators },
         },
@@ -95,7 +96,7 @@ export function StreamsTreeTable({
   } = useKibana();
   const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
   const { euiTheme } = useEuiTheme();
-  const isCpsMultiProject = useIsCpsMultiProject();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
 
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');

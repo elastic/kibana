@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ConverseStep, Evaluator, Example } from '@kbn/evals';
+import type { ConverseStep, Evaluator } from '@kbn/evals';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { DiscoveryEvaluationExample } from '../../types';
+import { scoreContinuationTopologyStability } from '../grouping/topology_correctness';
 
 /** Minimal event fields captured per continuation cycle for severity stability checks. */
 export interface ContinuationProducedEvent {
@@ -25,10 +28,12 @@ export interface ContinuationCycle {
 
   /** Whether this cycle should reuse an established event ID. Defaults to true. */
   expectReuse?: boolean;
-  /** Whether this cycle must perform a topology-filtered event search. */
+  /** Whether follow-up cycles must perform a topology-filtered event search. */
   expectTopologyEventSearch?: boolean;
   /** Event IDs explicitly supplied by the agent to events_write, before handler deduplication. */
   requestedEventIds?: string[];
+  /** Raw events_write request items — used to verify topology fields were sent. */
+  writeItems?: Partial<SignificantEvent>[];
 
   steps?: ConverseStep[];
 }
@@ -190,12 +195,16 @@ export interface ContinuationStabilityOutput {
   cycles: ContinuationCycle[];
 }
 
-export type ContinuationEvaluator = Evaluator<Example, ContinuationStabilityOutput>;
+export type ContinuationEvaluator = Evaluator<
+  DiscoveryEvaluationExample,
+  ContinuationStabilityOutput
+>;
 
 /** CODE evaluator: scores whether re-arriving detections reuse one stable event ID. */
 export const continuationStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_stability',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
 
@@ -203,5 +212,15 @@ export const continuationStabilityEvaluator: ContinuationEvaluator = {
 export const continuationRoutingEvaluator: ContinuationEvaluator = {
   name: 'continuation_routing',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationRouting(output.cycles ?? [])),
+};
+
+/** CODE evaluator: scores topology-field stability across continuation events_write payloads. */
+export const continuationTopologyStabilityEvaluator: ContinuationEvaluator = {
+  name: 'continuation_topology_stability',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: ({ output }) =>
+    Promise.resolve(scoreContinuationTopologyStability(output.cycles ?? [])),
 };

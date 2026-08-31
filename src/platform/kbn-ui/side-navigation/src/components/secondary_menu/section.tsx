@@ -63,6 +63,7 @@ export const SecondaryMenuSectionComponent = ({
   const listStyles = css`
     display: flex;
     flex-direction: column;
+    gap: ${euiTheme.size.xs};
     width: 100%;
   `;
 

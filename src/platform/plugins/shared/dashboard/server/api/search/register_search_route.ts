@@ -9,10 +9,9 @@
 
 import { once } from 'lodash';
 
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest } from '@kbn/as-code-utils';
-import { z, ZodError, prettifyError } from '@kbn/zod';
+import { ZodError, prettifyError } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
@@ -20,11 +19,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import {
-  legacySearchRequestParamsSchema,
-  legacySearchResponseBodySchema,
-  searchResponseBodySchema,
-} from './schemas';
+import { searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
 export function registerSearchRoute(
@@ -65,7 +60,7 @@ export function registerSearchRoute(
             description: 'bad request',
           },
           200: {
-            body: () => z.union([searchResponseBodySchema, legacySearchResponseBodySchema]),
+            body: () => searchResponseBodySchema,
             description: 'success',
           },
           403: {
@@ -80,25 +75,7 @@ export function registerSearchRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
-          const {
-            core: { featureFlags },
-          } = await ctx.resolve(['core']);
-          // Fallback is `true` so the on-prem stack (which has no remote feature-flag service and so uses
-          // this default) ships the GA schemas. Serverless sets the flag explicitly via phased rollout.
-          const useAsCodeSearchSchemas = await featureFlags.getBooleanValue(
-            AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-            true
-          );
-          const searchParams = useAsCodeSearchSchemas
-            ? asCodeSearchRequestSchema.parse(req.query)
-            : legacySearchRequestParamsSchema.parse(req.query);
-
-          const result = await search(
-            ctx,
-            searchParams,
-            getCachedDashboardStateSchema(),
-            useAsCodeSearchSchemas
-          );
+          const result = await search(ctx, req.query, getCachedDashboardStateSchema());
 
           return res.ok({ body: result });
         } catch (e) {

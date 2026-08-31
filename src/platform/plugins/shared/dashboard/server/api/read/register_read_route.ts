@@ -18,7 +18,6 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { read } from './read';
 import { getReadResponseBodySchema } from './schemas';
-import { getUseGASchemas } from '../get_use_ga_schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -85,12 +84,10 @@ export function registerReadRoute(
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { core } = await ctx.resolve(['core']);
-          const useGASchemas = await getUseGASchemas(core);
           const { body, resolveHeaders } = await read(
             core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
-            useGASchemas,
             req.serverTiming,
             isDashboardAppRequest
           );
