@@ -21,7 +21,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
+import { agentIdCondition, assignAgentById } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
 
 describe('SyntheticsPrivateLocation', () => {
@@ -541,7 +541,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
     });
 
-    it('uses the unassigned sentinel when no agent is enrolled', async () => {
+    it('omits condition when no agent is enrolled instead of stamping a sentinel pin', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
 
       const policy = await syntheticsPrivateLocation.generateNewPolicy(
@@ -556,7 +556,7 @@ describe('SyntheticsPrivateLocation', () => {
         { agentIds: [] }
       );
 
-      expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
+      expect(policy?.condition).toBeUndefined();
     });
 
     it('preserves the classic payload when no scalable-location condition exists', async () => {
@@ -685,6 +685,46 @@ describe('SyntheticsPrivateLocation', () => {
           ],
         })
       );
+    });
+
+    it('does not stamp a sentinel condition when enabling sharding with no enrolled agents', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const config = { ...testConfig, locations: [conditionLocation] };
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      const updated = bulkUpdate.mock.calls[0][0].policiesToUpdate[0];
+      expect(updated.id).toBe(policyId);
+      expect(updated.condition).toBeUndefined();
     });
 
     it('resolves a scalable location once per batch and paginates its enrolled agents', async () => {

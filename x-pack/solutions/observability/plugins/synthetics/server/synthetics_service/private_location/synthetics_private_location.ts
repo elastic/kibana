@@ -45,7 +45,6 @@ import {
   assignAgentById,
   isConditionShardedLocation,
   isEqlSafeLiteral,
-  UNASSIGNED_CONDITION,
 } from './assign_by_condition';
 
 export interface PrivateConfig {
@@ -231,13 +230,12 @@ export class SyntheticsPrivateLocation {
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
         } else if (agentIds.length > 0) {
-          newPolicy.condition =
-            assignAgentById(config.id, agentIds)?.condition ?? UNASSIGNED_CONDITION;
-        } else {
-          // An absent condition runs on every agent. Explicitly disable the
-          // monitor until an enrolled agent is available to own it.
-          newPolicy.condition = UNASSIGNED_CONDITION;
+          const assigned = assignAgentById(config.id, agentIds);
+          if (assigned) {
+            newPolicy.condition = assigned.condition;
+          }
         }
+        // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
       } else {
         // Preserve the classic payload exactly as it was unless this edit is
         // explicitly turning off a previously stamped scalable-location pin.
