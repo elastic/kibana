@@ -8,7 +8,11 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEffect } from 'react';
-import { formatHasRumResult, hasRumDataQuery } from '../../../../services/data/has_rum_data_query';
+import {
+  formatHasRumResult,
+  hasRumDataQuery,
+  HAS_RUM_DATA_TIERS,
+} from '../../../../services/data/has_rum_data_query';
 import { useDataView } from '../local_uifilters/use_data_view';
 
 export function useHasRumData() {
@@ -16,16 +20,37 @@ export function useHasRumData() {
 
   const { dataViewTitle } = useDataView();
 
-  const { data: response, loading } = useEsSearch(
+  const { data: tiered, loading } = useEsSearch(
     {
       index: dataViewTitle,
-      ...hasRumDataQuery({}),
+      ...hasRumDataQuery({ dataTiers: HAS_RUM_DATA_TIERS }),
     },
     [dataViewTitle],
     {
-      name: 'UXHasRumData',
+      name: 'UXHasRumDataInHotOrWarmTiers',
     }
   );
+
+  const needsFallback = !loading && tiered !== undefined && tiered.hits.total.value === 0;
+
+  const { data: fallback, error: fallbackError } = useEsSearch(
+    {
+      index: needsFallback ? dataViewTitle : undefined,
+      ...hasRumDataQuery({}),
+    },
+    [dataViewTitle, needsFallback],
+    {
+      name: 'UXHasRumDataUnbounded',
+    }
+  );
+
+  const response = needsFallback ? fallback : tiered;
+
+  // `useEsSearch` reports `loading: false` for the render where the fallback becomes enabled: its
+  // effect starts the request only afterwards. Gate on a definitive result instead, or the
+  // onboarding screen flashes.
+  const fallbackHasResult = fallback !== undefined || fallbackError !== undefined;
+  const isLoading = loading || (needsFallback && !fallbackHasResult);
 
   useEffect(() => {
     if (response) {
@@ -34,11 +59,11 @@ export function useHasRumData() {
     }
   }, [dataViewTitle, response, setHasData]);
 
-  if (!response) return { loading, hasData };
+  if (!response) return { loading: isLoading, hasData };
 
   return {
     hasData: formatHasRumResult(response, dataViewTitle).hasData,
-    loading,
+    loading: isLoading,
     dataViewTitle,
   };
 }

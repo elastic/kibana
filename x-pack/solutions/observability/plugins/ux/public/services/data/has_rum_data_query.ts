@@ -6,6 +6,7 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
 import {
   SERVICE_NAME,
@@ -14,6 +15,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';
+
+export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
 
 export function formatHasRumResult<T>(
   esResult: ESSearchResponse<T, ReturnType<typeof hasRumDataQuery>, { restTotalHitsAsInt: false }>,
@@ -30,9 +33,11 @@ export function formatHasRumResult<T>(
 export function hasRumDataQuery({
   start = moment().subtract(24, 'h').valueOf(),
   end = moment().valueOf(),
+  dataTiers,
 }: {
   start?: number;
   end?: number;
+  dataTiers?: DataTier[];
 }) {
   return {
     size: 0,
@@ -41,6 +46,7 @@ export function hasRumDataQuery({
         filter: [
           { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          ...(dataTiers?.length ? [{ terms: { _tier: dataTiers } }] : []),
         ],
       },
     },
