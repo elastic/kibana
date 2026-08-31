@@ -12,7 +12,6 @@ import {
   cancelLensInlineEditorAndWaitClosed,
   createLogstashLensEditorSuiteSetup,
   createXyLensPanelFromDashboard,
-  getDashboardChartDebugState,
   openPanelInlineEditorAndWaitVisible,
   saveLensAsNewCopyToNewDashboard,
   spaceTest,
@@ -92,7 +91,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
     });
   });
 
-  spaceTest('applies inline edits to a by-reference panel', async ({ page, pageObjects }) => {
+  spaceTest('applies inline edits to a by-reference panel', async ({ pageObjects }) => {
     const { dashboard, lens, visualize, saveModal } = pageObjects;
 
     await spaceTest.step(
@@ -115,7 +114,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
     });
 
     await spaceTest.step('the panel renders a single y-axis series', async () => {
-      const debugState = await getDashboardChartDebugState(page, 'xyVisChart');
+      const debugState = await lens.workspace.getDashboardChartDebugState('xyVisChart');
       expect(debugState.axes?.y).toHaveLength(1);
     });
   });
@@ -172,7 +171,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
       });
 
       await spaceTest.step('the panel still renders the breakdown series', async () => {
-        const debugState = await getDashboardChartDebugState(page, 'xyVisChart');
+        const debugState = await lens.workspace.getDashboardChartDebugState('xyVisChart');
         expect((debugState.bars ?? []).length).toBeGreaterThan(1);
       });
 
@@ -201,7 +200,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
         await cancelLensInlineEditorAndWaitClosed({ lens });
         await dashboard.waitForRenderComplete();
 
-        const debugState = await getDashboardChartDebugState(page, 'xyVisChart');
+        const debugState = await lens.workspace.getDashboardChartDebugState('xyVisChart');
         expect((debugState.bars ?? []).length).toBeGreaterThan(1);
 
         await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
@@ -216,7 +215,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
         await applyLensInlineEditorAndWaitClosed({ lens });
         await dashboard.waitForRenderComplete();
 
-        const debugState = await getDashboardChartDebugState(page, 'xyVisChart');
+        const debugState = await lens.workspace.getDashboardChartDebugState('xyVisChart');
         expect(debugState.bars ?? []).toHaveLength(1);
       });
     }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DebugState } from '@elastic/charts';
 import {
   extendPlaywrightPage,
   KibanaCodeEditorWrapper,
@@ -224,28 +223,6 @@ export async function buildMetricVisualization({ visualize, lens }: VisualizeAnd
     operation: 'average',
     field: 'bytes',
   });
-}
-
-/**
- * Reads `@elastic/charts` debug state from a chart rendered inside a dashboard panel.
- * The Lens-editor equivalent (`lens.workspace.getCurrentChartDebugState`) scopes its
- * locators under `lnsWorkspace`, which does not exist on dashboards. Requires
- * `enableElasticChartDebug` (or equivalent init script) before navigation.
- */
-export async function getDashboardChartDebugState(
-  page: ScoutPage,
-  chartTestSubj: string
-): Promise<DebugState> {
-  const chart = page.testSubj.locator(chartTestSubj);
-  // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
-  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-    state: 'attached',
-  });
-  const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-  if (!debugJson) {
-    throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
-  }
-  return JSON.parse(debugJson) as DebugState;
 }
 
 /**

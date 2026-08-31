@@ -341,6 +341,25 @@ export class LensWorkspace {
     return JSON.parse(debugJson) as DebugState;
   }
 
+  /**
+   * Reads `@elastic/charts` debug state from a chart rendered inside a dashboard panel.
+   * Unlike {@link getCurrentChartDebugState}, it does not scope its locators under
+   * `lnsWorkspace`, which does not exist on dashboards. Requires `enableElasticChartDebug`
+   * (or equivalent init script) before navigation.
+   */
+  async getDashboardChartDebugState(chartTestSubj: string): Promise<DebugState> {
+    const chart = this.page.testSubj.locator(chartTestSubj);
+    // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
+    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+      state: 'attached',
+    });
+    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+    if (!debugJson) {
+      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
+    }
+    return JSON.parse(debugJson) as DebugState;
+  }
+
   async openMessageList() {
     await this.messageListTrigger.click();
   }
