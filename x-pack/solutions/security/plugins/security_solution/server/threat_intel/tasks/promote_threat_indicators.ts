@@ -27,6 +27,7 @@ import {
   THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { normalizeProvenanceUrl } from '../services/provenance_url';
 
 export const PROMOTE_THREAT_INDICATORS_TASK_TYPE = 'threat_intel:promote_threat_indicators';
 export const PROMOTE_THREAT_INDICATORS_TASK_ID = 'threat_intel:promote_threat_indicators:default';
@@ -381,7 +382,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     const spaceId = report._source?.space_id ?? GLOBAL_SPACE_ID;
     const iocs = report._source?.extracted?.iocs ?? [];
     const provider = report._source?.source?.name ?? 'unknown';
-    const reportUrl = report._source?.source?.url;
+    const reportUrl = normalizeProvenanceUrl(report._source?.source?.url);
     const severity = report._source?.severity?.level;
     const trailLabel = report._source?.content?.title ?? null;
     const firstSeen = report._source?.lineage?.extracted_at ?? now;
@@ -402,7 +403,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
       // Per-IOC reference: use the Maltrail nearest-ref URL when present,
       // fall back to the report's source.url, absent otherwise.
-      const reference = ioc.reference ?? reportUrl ?? null;
+      const reference = normalizeProvenanceUrl(ioc.reference) ?? reportUrl ?? null;
 
       const sourceEntry: SourceEntry = {
         report_id: reportId,

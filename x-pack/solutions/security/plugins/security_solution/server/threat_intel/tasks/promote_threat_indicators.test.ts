@@ -300,6 +300,48 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt'
       );
     });
+
+    it('removes credentials from report and IOC provenance before promotion', () => {
+      const [op] = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-credentialed',
+            iocs: [
+              {
+                type: 'ip',
+                value: '1.2.3.4',
+                reference: 'https://ioc-user:ioc-password@references.example.com/report',
+              },
+            ],
+            sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
+          }),
+        ],
+        NOW
+      );
+
+      expect(op.scriptParams.reference).toBe('https://references.example.com/report');
+      expect(op.upsert.source_report_url).toBe('https://feeds.example.com/source');
+      expect(op.upsert.sources).toEqual([
+        expect.objectContaining({ reference: 'https://references.example.com/report' }),
+      ]);
+      expect(JSON.stringify(op)).not.toContain('password');
+      expect(JSON.stringify(op)).not.toContain('user');
+    });
+
+    it('rejects unsupported references and falls back to sanitized source provenance', () => {
+      const [op] = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-unsafe-reference',
+            iocs: [{ type: 'ip', value: '1.2.3.4', reference: 'file:///etc/passwd' }],
+            sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
+          }),
+        ],
+        NOW
+      );
+
+      expect(op.scriptParams.reference).toBe('https://feeds.example.com/source');
+    });
   });
 
   describe('non-maltrail report (back-compat)', () => {

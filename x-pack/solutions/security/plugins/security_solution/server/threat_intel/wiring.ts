@@ -103,10 +103,6 @@ export const setupThreatIntel = ({
     registerThreatIntelWorkflowSteps({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: logger.get('threatIntel'),
-      getActionsStart: async () => {
-        const [, startPlugins] = await core.getStartServices();
-        return startPlugins.actions;
-      },
     });
   } else {
     logger.debug(
