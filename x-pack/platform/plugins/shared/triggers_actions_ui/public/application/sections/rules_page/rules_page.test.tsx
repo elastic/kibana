@@ -27,6 +27,10 @@ jest.mock('../rules_list/components/rules_list', () => {
   return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
 });
 
+jest.mock('../rule_details/components/global_rule_event_log_list', () => {
+  return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
+});
+
 jest.mock('../../components/rules_setting/rules_settings_flyout', () => ({
   RulesSettingsFlyout: () => (
     <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
@@ -145,6 +149,54 @@ describe('rulesPage', () => {
       // The create rule button is the primary action and is never rendered when unauthorized, so it
       // is genuinely absent (not merely hidden in the overflow popover).
       expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when the Alerting v2 rules tab is enabled', () => {
+    beforeEach(() => {
+      (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
+      useKibanaMock().services.application.capabilities = {
+        ...useKibanaMock().services.application.capabilities,
+        alerting_v2_rules: { read: true },
+      };
+    });
+
+    it('replaces the Rules/Logs tabs with V1 rules/V2 rules tabs', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+      renderRulesPage(history);
+
+      expect(await screen.findByTestId('v1RulesTab')).toBeInTheDocument();
+      expect(await screen.findByTestId('v2RulesTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('rulesTab')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('logsTab')).not.toBeInTheDocument();
+      expect(await screen.findAllByRole('tab')).toHaveLength(2);
+    });
+
+    it('selects the V1 rules tab on both the v1 Rules page routes', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/logs'] });
+      renderRulesPage(history);
+
+      expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
+      expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('moves Logs into the header menu instead of a tab', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+      renderRulesPage(history);
+
+      await openAppMenuOverflow();
+      expect(await screen.findByTestId('rulesLogsLink')).toBeInTheDocument();
+    });
+
+    it('omits the Logs menu item if the read rules privilege is missing', async () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadAnyRules: false,
+      });
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+      renderRulesPage(history);
+
+      await openAppMenuOverflow();
+      expect(screen.queryByTestId('rulesLogsLink')).not.toBeInTheDocument();
     });
   });
 });

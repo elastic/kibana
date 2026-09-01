@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
+  shouldShowAlertingV2RulesTab,
 } from './is_alerting_v2_enabled';
 
 describe('isAlertingV2Enabled', () => {
@@ -85,5 +86,51 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(false);
+  });
+});
+
+describe('shouldShowAlertingV2RulesTab', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+  });
+
+  it('returns true when alerting v2 is enabled and the user can read rules', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { read: true },
+    };
+
+    expect(shouldShowAlertingV2RulesTab(core)).toBe(true);
+  });
+
+  it('returns true when the user can only write rules', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { all: true },
+    };
+
+    expect(shouldShowAlertingV2RulesTab(core)).toBe(true);
+  });
+
+  it('returns false when alerting v2 rules capabilities are unavailable', () => {
+    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+      core.application.capabilities;
+
+    core.application.capabilities = capabilitiesWithoutRules;
+
+    expect(shouldShowAlertingV2RulesTab(core)).toBe(false);
+  });
+
+  it('returns false when alerting v2 is disabled by the advanced setting', () => {
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { read: true },
+    };
+
+    expect(shouldShowAlertingV2RulesTab(core)).toBe(false);
   });
 });

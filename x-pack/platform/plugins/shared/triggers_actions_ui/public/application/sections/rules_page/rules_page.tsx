@@ -22,6 +22,8 @@ import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { EuiSpacer } from '@elastic/eui';
+import { shouldShowAlertingV2RulesTab } from '@kbn/alerting-v2-utils';
+import { RULES_PAGE_TAB_IDS, getRulesPageHeaderTabs } from '@kbn/response-ops-rules-page-tabs';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -35,6 +37,7 @@ const RulesList = lazy(() => import('../rules_list/components/rules_list'));
 const RulesPage = () => {
   const history = useHistory();
   const location = useLocation();
+  const kibanaServices = useKibana().services;
   const {
     chrome: { docTitle },
     application: {
@@ -48,7 +51,7 @@ const RulesPage = () => {
     cps,
     docLinks,
     setBreadcrumbs,
-  } = useKibana().services;
+  } = kibanaServices;
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -61,6 +64,7 @@ const RulesPage = () => {
 
   const currentSection: Section = location.pathname.endsWith('/logs') ? 'logs' : 'rules';
   const backButtonHref = getUrlForApp('observability-overview', { path: '/alerts' });
+  const showV2Tabs = shouldShowAlertingV2RulesTab(kibanaServices);
 
   const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
   const canShowSettings = show && (readFlappingSettingsUI || readQueryDelaySettingsUI);
@@ -70,6 +74,14 @@ const RulesPage = () => {
   }, []);
 
   const tabs: AppHeaderTab[] = useMemo(() => {
+    if (showV2Tabs) {
+      return getRulesPageHeaderTabs({
+        selectedTab: RULES_PAGE_TAB_IDS.v1,
+        prepend: http.basePath.prepend,
+        showV2Tab: true,
+      });
+    }
+
     const result: AppHeaderTab[] = [
       {
         id: 'rules',
@@ -93,7 +105,7 @@ const RulesPage = () => {
       });
     }
     return result;
-  }, [currentSection, authorizedToReadAnyRules, history]);
+  }, [showV2Tabs, currentSection, authorizedToReadAnyRules, history, http.basePath]);
 
   const appMenu = useMemo<AppMenuConfig>(
     () => ({
@@ -123,9 +135,30 @@ const RulesPage = () => {
               },
             ]
           : []),
+        ...(showV2Tabs && authorizedToReadAnyRules
+          ? [
+              {
+                id: 'rulesLogs',
+                order: 200,
+                label: i18n.translate('xpack.triggersActionsUI.rulesPage.logsLink.title', {
+                  defaultMessage: 'Logs',
+                }),
+                iconType: 'logsApp',
+                run: () => history.push('/logs'),
+                testId: 'rulesLogsLink',
+              },
+            ]
+          : []),
       ],
     }),
-    [authorizedToCreateAnyRules, canShowSettings, openRuleTypeModal]
+    [
+      authorizedToCreateAnyRules,
+      canShowSettings,
+      openRuleTypeModal,
+      showV2Tabs,
+      authorizedToReadAnyRules,
+      history,
+    ]
   );
 
   // Use ref to store latest location to avoid recreating callbacks when search/hash changes

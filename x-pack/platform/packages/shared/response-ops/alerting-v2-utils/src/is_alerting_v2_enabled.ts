@@ -14,12 +14,24 @@ const ALERTING_V2_RULES_FEATURE_ID = 'alerting_v2_rules';
 /** UI capability key for write access from `ALERTING_V2_UI_CAPABILITIES.rules.all`. */
 const ALERTING_V2_RULES_WRITE_UI_CAPABILITY = 'all';
 
-const hasAlertingV2RulesWriteCapability = (core: CoreStart): boolean => {
-  const rulesCapabilities = core.application.capabilities[ALERTING_V2_RULES_FEATURE_ID] as
+/** UI capability key for read access from `ALERTING_V2_UI_CAPABILITIES.rules.read`. */
+const ALERTING_V2_RULES_READ_UI_CAPABILITY = 'read';
+
+const getAlertingV2RulesCapabilities = (core: CoreStart): Record<string, boolean> | undefined =>
+  core.application.capabilities[ALERTING_V2_RULES_FEATURE_ID] as
     | Record<string, boolean>
     | undefined;
 
-  return rulesCapabilities?.[ALERTING_V2_RULES_WRITE_UI_CAPABILITY] === true;
+const hasAlertingV2RulesWriteCapability = (core: CoreStart): boolean => {
+  return getAlertingV2RulesCapabilities(core)?.[ALERTING_V2_RULES_WRITE_UI_CAPABILITY] === true;
+};
+
+const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean => {
+  const rulesCapabilities = getAlertingV2RulesCapabilities(core);
+  return (
+    rulesCapabilities?.[ALERTING_V2_RULES_READ_UI_CAPABILITY] === true ||
+    rulesCapabilities?.[ALERTING_V2_RULES_WRITE_UI_CAPABILITY] === true
+  );
 };
 
 /**
@@ -45,4 +57,13 @@ export const isAlertingV2Enabled = (core: CoreStart): boolean => {
  */
 export const shouldShowAlertingV2CreateRuleFlyout = (core: CoreStart): boolean => {
   return isAlertingV2Enabled(core) && hasAlertingV2RulesWriteCapability(core);
+};
+
+/**
+ * Returns whether the Alerting v2 Rules tab should be shown on the classic Rules page:
+ * the advanced-setting gate ({@link isAlertingV2Enabled}) plus read (or write) access to
+ * Alerting v2 rules, so the tab never points at a privileges wall.
+ */
+export const shouldShowAlertingV2RulesTab = (core: CoreStart): boolean => {
+  return isAlertingV2Enabled(core) && hasAlertingV2RulesReadCapability(core);
 };

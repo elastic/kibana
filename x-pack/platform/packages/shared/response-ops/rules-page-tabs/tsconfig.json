@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/app-header",
+    "@kbn/i18n",
+    "@kbn/rule-data-utils",
+    "@kbn/alerting-v2-constants",
+    "@kbn/core-capabilities-common"
+  ]
+}

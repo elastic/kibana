@@ -2149,6 +2149,8 @@
       "@kbn/response-ops-rule-params/*": ["./x-pack/platform/packages/shared/response-ops/rule_params/*"],
       "@kbn/response-ops-rules-apis": ["./x-pack/platform/packages/shared/response-ops/rules-apis"],
       "@kbn/response-ops-rules-apis/*": ["./x-pack/platform/packages/shared/response-ops/rules-apis/*"],
+      "@kbn/response-ops-rules-page-tabs": ["./x-pack/platform/packages/shared/response-ops/rules-page-tabs"],
+      "@kbn/response-ops-rules-page-tabs/*": ["./x-pack/platform/packages/shared/response-ops/rules-page-tabs/*"],
       "@kbn/response-ops-schedule-schema": ["./x-pack/platform/packages/shared/response-ops/schedule-schema"],
       "@kbn/response-ops-schedule-schema/*": ["./x-pack/platform/packages/shared/response-ops/schedule-schema/*"],
       "@kbn/response-ops-scheduling-types": ["./x-pack/platform/packages/shared/response-ops/scheduling-types"],
