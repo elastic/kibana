@@ -75,6 +75,33 @@ const makeDetectionExecutions = ({
   },
 ];
 
+const makeKiExecutions = ({
+  spaceId = 'default',
+  streamName = 'logs.test',
+}: {
+  spaceId?: string;
+  streamName?: string;
+} = {}): RunQuotaWorkflowExecution[] => [
+  {
+    id: 'ki-child',
+    workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+    spaceId,
+    status: ExecutionStatus.RUNNING,
+    context: {
+      parentWorkflowExecutionId: 'ki-parent',
+      inputs: { streamName },
+    },
+  },
+  {
+    id: 'ki-parent',
+    workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    spaceId,
+    status: ExecutionStatus.RUNNING,
+    triggeredBy: 'scheduled',
+    taskRunAt: '2026-08-31T10:00:00.000Z',
+  },
+];
+
 describe('validateWorkerProvenance', () => {
   it.each([
     ['forged emitter id', makeDetectionExecutions(), makeRequest('other'), 'detection', 'space-a'],
@@ -159,36 +186,35 @@ describe('validateWorkerProvenance', () => {
   });
 
   it('rejects an invalid KI stream name', async () => {
-    const executions: RunQuotaWorkflowExecution[] = [
-      {
-        id: 'ki-child',
-        workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        spaceId: 'default',
-        status: ExecutionStatus.RUNNING,
-        context: {
-          parentWorkflowExecutionId: 'ki-parent',
-          inputs: { streamName: 'Logs Invalid' },
-        },
-      },
-      {
-        id: 'ki-parent',
-        workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        spaceId: 'default',
-        status: ExecutionStatus.RUNNING,
-        triggeredBy: 'scheduled',
-        taskRunAt: '2026-08-31T10:00:00.000Z',
-      },
-    ];
-
     await expect(
       validateWorkerProvenance({
         request: makeRequest('ki-child'),
         executionId: 'ki-child',
         group: 'ki_extraction',
         spaceId: 'default',
-        executionReader: makeExecutionReader(executions),
+        executionReader: makeExecutionReader(makeKiExecutions({ streamName: 'Logs Invalid' })),
       })
     ).rejects.toMatchObject({ output: { statusCode: 403 } });
+  });
+
+  it('uses distinct KI grant keys for the same stream in different spaces', async () => {
+    const grantKeyForSpace = async (spaceId: string) => {
+      const { grantKey } = await validateWorkerProvenance({
+        request: makeRequest('ki-child'),
+        executionId: 'ki-child',
+        group: 'ki_extraction',
+        spaceId,
+        executionReader: makeExecutionReader(makeKiExecutions({ spaceId })),
+      });
+      return grantKey;
+    };
+
+    const [spaceAKey, spaceBKey] = await Promise.all([
+      grantKeyForSpace('space-a'),
+      grantKeyForSpace('space-b'),
+    ]);
+
+    expect(spaceAKey).not.toBe(spaceBKey);
   });
 });
 

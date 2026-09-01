@@ -181,7 +181,7 @@ export const validateWorkerProvenance = async ({
   const discriminator = getWorkerGrantDiscriminator(group, execution);
   const grantKey = buildGrantKey({
     group,
-    ...(group === 'detection' ? { spaceId } : {}),
+    spaceId,
     parentWorkflowId: parent.workflowId,
     taskRunAt,
     ...discriminator,
