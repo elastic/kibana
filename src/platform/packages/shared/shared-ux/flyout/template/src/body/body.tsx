@@ -130,6 +130,7 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
 
     return (
       <ActiveTabPanel
+        key={activeTab.id}
         activeTab={activeTab}
         activePanel={activePanel}
         bodyTestSubj={bodyTestSubj}
