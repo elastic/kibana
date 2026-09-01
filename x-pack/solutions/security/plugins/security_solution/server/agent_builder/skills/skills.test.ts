@@ -259,6 +259,7 @@ describe('Security Skills', () => {
         'SIEM migration'
       );
     });
+
   });
 
   describe('automatic-migration-rules-stop-migration skill', () => {

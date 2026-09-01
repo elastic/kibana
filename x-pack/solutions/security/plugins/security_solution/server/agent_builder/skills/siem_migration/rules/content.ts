@@ -73,7 +73,7 @@ the name instead and resolve it to the id internally when calling tools.
    items) is invisible to name resolution. If the user pastes a migration id directly (e.g. copied
    from the UI), verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` before acting on it (stats returns the same fields plus status/counts, using fewer tokens).
 5. **Rule item ids**: some actions (install specific rules, reprocess a subset) need a **rule item
-   id** — never a migration id. Resolve a user-provided rule **title** to its item id by calling
+   id**, in addition to the migration id. Resolve a user-provided rule **title** to its item id by calling
    \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` and matching on the original or translated title.
    Never ask the user for a rule item id; always work from the title.
 `;
@@ -119,4 +119,47 @@ export const AUTOMATIC_MIGRATION_GENERAL_GUIDELINES = `
 - EVERY question with finite defined answers (For example yes, no) MUST be presented as a multiple choice question.
 - Detection Rules is different from Automatic Rule Migration or SIEM Rule Migration. You must not confuse between them. This skill is ONLY about Automatic Rule Migration and NOT for Detection Rules.
 - When responding to the user, highlight important information in code segments(\`\`) or code blocks in case of multiline (\`\`\`) or bold text (**).  For example, migration name, rule titles, statuses, counts, queries, prebuilt rule Id or integration ID. Do not do highlighting in the table.
+`;
+
+/**
+ * Freshness contract for server-state reads. Injected into every mutating sibling skill.
+ *
+ * Two orthogonal rules:
+ *  1. Answers carry over — within one run only, not conversation-wide.
+ *  2. Tool reads never carry over — adjacency (read is the last action) is the only safe gate.
+ *
+ * The block is intentionally phrased without referencing any platform-internal marker format
+ * (e.g. "[Sent: …]") so it remains correct if the message formatting changes.
+ */
+export const MIGRATION_STATE_FRESHNESS_BLOCK = `
+## Server State Must Be Re-Read, Not Remembered
+
+Two different things can be "already known", and they follow opposite rules.
+
+**The user's answers carry over — within one run.** Once the user has answered a pre-flight
+question for the run you are setting up — which connector, whether to skip prebuilt matching,
+whether to proceed despite missing resources — do not ask it again while setting up that same
+run. The answers belong to that one attempt, not to the conversation. Ask them again from
+scratch whenever the user asks for a different migration, a different action, or another run
+after one has already been executed.
+
+**Tool reads never carry over.** Migration state is server data you do not own. Between your
+read and your next action, the user can start or stop a migration from the Kibana UI, upload
+the macros and lookups you reported as missing, or let a run finish. None of that appears in
+this conversation.
+
+### Two rules for reads
+
+**1. Read immediately before you act.** Before any mutating call, the state read must be the last
+action you took. Server state can go stale in the time between your read and your next action.
+
+**2. Read again for every new request.** Anything you read before the user's latest request is
+stale, no matter what it said. A follow-up like "try again", "run it again", or "retry" is a new
+request: re-read before acting on it.
+
+Both rules apply to migration task status, item counts, translation counts, and missing resources alike.
+
+Never write or think "I already have the migration details from an earlier check" or "the
+migration is still \`ready\` from my earlier check". Judge a read by *when you made it*, never by
+how confident the value feels.
 `;

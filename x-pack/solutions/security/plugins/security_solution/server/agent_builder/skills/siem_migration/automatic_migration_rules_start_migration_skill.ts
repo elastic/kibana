@@ -22,6 +22,7 @@ import {
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
+  MIGRATION_STATE_FRESHNESS_BLOCK,
 } from './rules/content';
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
@@ -41,6 +42,8 @@ Resolves the inference endpoint (AI connector) and picks the right request body 
 - ${MIGRATION_TYPE_DISAMBIGUATION_BLOCK}
 
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
+
+${MIGRATION_STATE_FRESHNESS_BLOCK}
 
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 
@@ -98,15 +101,27 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 **Rules:**
 1. **Missing resources comes first** — resolve the missing-resources question before asking about the connector or skip-prebuilt setting. Once the user has answered the missing-resources question, the connector and skip-prebuilt questions can be asked together.
-2. **Ask each question at most once** — before executing any check, scan the conversation history for the user's prior answers. If this question already has an answer, treat it as answered and skip to the next check. Never re-ask.
-3. Treat these pre-flight checks as todo list and once all are answered, Don't ask them again.
+2. **Ask each question at most once per run** — while setting up a single run, if the user has
+   already answered one of these questions, treat it as answered and move on. Never re-ask
+   within that run.
+3. Treat these pre-flight questions as a todo list for **the run you are setting up right now**.
+   The list is not conversation-wide: start it fresh whenever the user names a different
+   migration, asks for a different action (START / REPROCESS / RESUME), or asks for another run
+   after one has already been executed. Do not carry answers from a previous run into a new one.
+4. **Rules 2 and 3 govern questions only — never tool reads.** They let you reuse *the user's
+   answer*. They never let you reuse *a tool result*. Status, item counts, translation counts and
+   missing resources are all re-read every time, per the freshness rules above.
 
 ### Pre-flight: Missing Resources
 
 - Applicable only for **fresh START** (task status \`ready\`) and **REPROCESS**. Skip entirely on **RESUME**.
-- **Always call \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` on START or REPROCESS.** This call is unconditional — do not skip it before making it.
+- **Always call \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` fresh** before starting or
+  reprocessing. This call is unconditional — the user may have uploaded resources since you last
+  checked, so an earlier result is never a substitute, no matter how recent it feels.
 
-> **Already answered**: if the user already replied to the missing-resources question earlier in this same conversation, use their answer and do not call the tool again.
+> **Already answered**: if the user already chose how to proceed with missing resources for
+> *this* run, do not ask again — but still make the call, and tell them if the picture changed
+> (e.g. the resources they were warned about are now present).
 
 - **Empty array** → no missing resources; proceed silently to the next pre-flight check.
 - **Non-empty array** → group the results by \`type\` and show the user a summary, for example:
@@ -126,7 +141,10 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ### Pre-flight: Connector Selection
 
-> **Skip if already answered** — if the user has already chosen a connector in this conversation, use that choice directly without calling \`${platformCoreTools.listInferenceEndpoints}\` again.
+> **Skip if already answered (the user's answer only)** — if the user has already chosen a
+> connector for the run you are setting up, use that choice directly without calling
+> \`${platformCoreTools.listInferenceEndpoints}\` again. Ask again for a different migration, a
+> different action, or a later run. This never licenses reusing migration state you read earlier.
 
 - Applicable for **fresh START** only. For **REPROCESS** and **RESUME**, skip this check and reuse
   the connector from \`last_execution.connector_id\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
@@ -136,7 +154,9 @@ Call \`${platformCoreTools.listInferenceEndpoints}\` and present the options as 
 
 ### Pre-flight: Skip Prebuilt Rules Matching
 
-> **Skip if already answered** — if the user has already stated their preference in this conversation, use it directly.
+> **Skip if already answered (the user's answer only)** — if the user has already stated their
+> preference for the run you are setting up, use it directly. Ask again for a different migration,
+> a different action, or a later run. This never licenses reusing migration state you read earlier.
 
 - Applicable for **fresh START** only. For **REPROCESS** and **RESUME**, skip this check and reuse
   the value from \`last_execution.skip_prebuilt_rules_matching\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
@@ -146,15 +166,26 @@ Call \`${platformCoreTools.listInferenceEndpoints}\` and present the options as 
 
 1. **Resolve the migration**: get the migration id from the name (Name→ID block). If the user
    pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
-2. **Inspect state**: call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` and \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\`
-   to read the task status and translation counts. Use the decision matrix below to pick the
-   request body.
+2. **Inspect state (unconditional)**: call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — and
+   \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` when the decision matrix needs
+   translation counts. This call is unconditional: make it for every request, including a follow-up
+   such as "try again", "run it again", or "retry" on a migration you already inspected. Then use
+   the decision matrix.
 3. **Pre-flight checks** — for each check (missing resources → connector → skip-prebuilt), first
    verify the todo list if all question are answered. If not,  **Only ask unanswered questions.**
    If all are already answered, proceed directly to step 4.
 4. **Report**: state exactly what you will do (START / REPROCESS / RESUME), which rules are
    affected, and that it consumes connector credits. Show the complete request body in a table before proceeding.
-5. **Execute**: call \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\`.
+5. **Re-check immediately before executing**: call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`
+   again here — after the step-4 report, not before it — so it is the last action ahead of the
+   mutating call.
+   - **Unchanged** → go straight to step 6 in this same reply. Do not ask anything further; the
+     step-4 report already told the user what you are about to do.
+   - **Changed** (now \`running\` or \`finished\`, or \`items.pending\` is 0) → do **not** call
+     \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\`. Tell the user exactly what changed and
+     re-run the decision matrix. If the new state needs their decision, ask — and then repeat this
+     step after they answer, because their reply reopens the window.
+6. **Execute**: call \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\`.
 
 ## START vs REPROCESS vs RESUME Decision Matrix
 
@@ -210,7 +241,12 @@ Never skip step 2 — you must resolve titles to item ids; titles are not accept
 - \`started: true\` — the task was started/resumed. Your response MUST include the word
   **asynchronously** (e.g. "The migration is running asynchronously"). Direct the user to the
   \`${RULE_MIGRATION_SKILLS.SUMMARIZE}\` skill to track progress.
-- \`started: false\` — the task did not start (e.g. already running(\`status\` field in migration stats), or no matching items for the retry filter). Report this plainly and suggest re-inspecting the state.
+- \`started: false\` — the task did not start. Do **not** speculate about why — never blame ELSER,
+  semantic search, the connector, or the migration "still resetting after a previous failure".
+  Instead, call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`, then act on the status it
+  returns: re-run the decision matrix, report the live state via the
+  \`${RULE_MIGRATION_SKILLS.SUMMARIZE}\` skill, and tell the user what you found. If the migration
+  has already finished, say so plainly — do not describe it as a failure.
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 

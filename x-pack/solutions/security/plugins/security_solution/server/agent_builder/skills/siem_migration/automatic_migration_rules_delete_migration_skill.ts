@@ -19,6 +19,7 @@ import {
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
+  MIGRATION_STATE_FRESHNESS_BLOCK,
 } from './rules/content';
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
@@ -38,6 +39,8 @@ This action is irreversible. The skill resolves the migration by name, checks it
 - ${MIGRATION_TYPE_DISAMBIGUATION_BLOCK}
 
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
+
+${MIGRATION_STATE_FRESHNESS_BLOCK}
 
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 
@@ -59,13 +62,17 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 1. **Resolve the migration** by name using \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` (Name→ID block).
    If the user pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
-2. **Check status**: if the migration is currently \`running\`, do NOT call \`${SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID}\`.
-   Echo the migration's **full name verbatim** and tell the user it cannot be deleted while running.
-   Ask: "Would you like me to stop it first?"
-   - If the user confirms: call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\`. Inform the user
-     the migration has been stopped. **Do not proceed to step 3 in the same turn** — wait for the
-     user to explicitly request deletion.
-   - If the user declines: end the workflow.
+2. **Check status (unconditional)**: call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` to
+   read the live status before acting. Do not rely on the status from step 1 — that read may
+   precede a user interaction.
+   - If \`running\`: do NOT call \`${SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID}\`. Echo the
+     migration's **full name verbatim** and tell the user it cannot be deleted while running.
+     Ask: "Would you like me to stop it first?"
+     - If the user confirms: call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\`. Inform the user
+       the migration has been stopped. **Do not proceed to step 3 in the same turn** — wait for the
+       user to explicitly request deletion. When they return, start from step 2 (re-read status).
+     - If the user declines: end the workflow.
+   - If not \`running\`: proceed to step 3.
 3. **Warn**: your response MUST use the word **irreversible** and MUST echo the migration's full
    name verbatim. Example: "I found 'Splunk Q1 Stopped'. This action is permanent and
    **irreversible** — all translated rule items will be deleted. There is no undo."

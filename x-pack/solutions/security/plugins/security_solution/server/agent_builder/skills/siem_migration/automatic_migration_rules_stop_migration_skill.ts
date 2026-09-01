@@ -18,6 +18,7 @@ import {
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
+  MIGRATION_STATE_FRESHNESS_BLOCK,
 } from './rules/content';
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
@@ -38,6 +39,8 @@ Resolves the migration by name and stops the run. Use when the user wants to pau
 
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
 
+${MIGRATION_STATE_FRESHNESS_BLOCK}
+
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 
 ${NAME_NEVER_ID_BLOCK}
@@ -56,12 +59,16 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 1. **Resolve the migration** by name using \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` (Name→ID block).
    If the user pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
-2. **Check status**: if the migration is not currently \`running\`, tell the user — there is nothing
-   to stop. Do NOT call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` on a non-running migration.
+2. **Check status (unconditional)**: call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` to
+   read the live status. If the migration is not currently \`running\`, tell the user — there is
+   nothing to stop. Do NOT call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` on a non-running
+   migration. Do not rely on the status returned by step 1 — that read may precede a user
+   interaction; this read must be the last action before the mutating call.
 3. **Report intent**: state the migration's exact full name and that the running translation will be paused.
 4. **Execute**: call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` with the resolved migration id.
-5. **Report**: show the returned \`{ stopped: boolean }\`. If \`stopped: false\`, tell the user the
-   migration may have already finished or stopped on its own.
+5. **Report**: show the returned \`{ stopped: boolean }\`. If \`stopped: false\`, call
+   \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` and report the live status — do not speculate
+   about the cause.
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
