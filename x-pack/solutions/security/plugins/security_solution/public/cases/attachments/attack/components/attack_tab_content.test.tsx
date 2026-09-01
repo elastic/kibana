@@ -31,6 +31,7 @@ import {
   ATTACK_TAB_ROW_UNRESOLVED_TEST_ID,
   ATTACK_TAB_SELECT_ALL_TEST_ID,
   ATTACK_TAB_TABLE_TEST_ID,
+  INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
   REMOVE_ATTACK_BUTTON_TEST_ID,
   REMOVE_ATTACK_MODAL_TEST_ID,
@@ -43,6 +44,7 @@ import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
+import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
 import { STATUS_BUTTON_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
 import {
   ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
@@ -55,6 +57,7 @@ jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
 jest.mock('../../../../assistant/use_assistant_availability');
 jest.mock('../hooks/use_remove_attack_attachment');
 jest.mock('../hooks/use_removable_alert_attachments');
+jest.mock('../hooks/use_investigate_attack_in_timeline');
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
 }));
@@ -88,8 +91,10 @@ const useFindAttackDiscoveriesMock = useFindAttackDiscoveries as jest.Mock;
 const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
 const useRemoveAttackAttachmentMock = useRemoveAttackAttachment as jest.Mock;
 const useRemovableAlertAttachmentsMock = useRemovableAlertAttachments as jest.Mock;
+const useInvestigateAttackInTimelineMock = useInvestigateAttackInTimeline as jest.Mock;
 const mockedUseKibana = mockUseKibana();
 const removeAttack = jest.fn();
+const investigateAttackInTimeline = jest.fn();
 
 const buildAttachment = (overrides: Record<string, unknown> = {}) => ({
   id: 'so-1',
@@ -163,6 +168,9 @@ const showAttackButton = (savedObjectId: string) =>
 const removeAttackButton = (savedObjectId: string) =>
   screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-${savedObjectId}`);
 
+const investigateInTimelineButton = (savedObjectId: string) =>
+  screen.getByTestId(`${INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID}-${savedObjectId}`);
+
 /** The grid cell wrapping a rendered cell body, which is where the grid puts column order. */
 const gridCellOf = (testId: string): HTMLElement => {
   const cell = screen.getByTestId(testId).closest('[role="gridcell"]');
@@ -194,6 +202,10 @@ describe('AttackTabContent', () => {
       .fn()
       .mockReturnValue(allCasesPermissions());
     useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: false });
+    useInvestigateAttackInTimelineMock.mockReturnValue({
+      canInvestigateInTimeline: true,
+      investigateAttackInTimeline,
+    });
     useRemovableAlertAttachmentsMock.mockReturnValue({
       isLoading: false,
       isResolvable: true,
@@ -654,6 +666,42 @@ describe('AttackTabContent', () => {
     });
   });
 
+  describe('the title column', () => {
+    const titleCell = () => screen.getByTestId(ATTACK_TAB_COLUMN_TITLE_TEST_ID);
+
+    it('renders the title as a link, like the rule cell of the alerts grid', () => {
+      renderTab();
+
+      expect(titleCell().tagName).toBe('BUTTON');
+      expect(titleCell()).toHaveClass('euiLink');
+    });
+
+    it('opens the attack flyout when the title is clicked', async () => {
+      renderTab();
+
+      await user.click(titleCell());
+
+      expect(mockOpenAttackFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attackId: 'attack-id-1',
+          attackTitle: 'Live attack title',
+        })
+      );
+    });
+
+    it('renders plain text rather than a link when the attack cannot be resolved', async () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(titleCell().tagName).not.toBe('BUTTON');
+
+      await user.click(titleCell());
+
+      expect(mockOpenAttackFlyout).not.toHaveBeenCalled();
+    });
+  });
+
   describe('unresolved attacks', () => {
     it('falls back to the snapshotted metadata and disables navigation', () => {
       mockFindResult([]);
@@ -719,7 +767,7 @@ describe('AttackTabContent', () => {
       await user.click(screen.getByText('Remove'));
     };
 
-    it('renders both actions on every row', () => {
+    it('renders every action on every row', () => {
       renderAttachments([
         buildAttachment(),
         buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
@@ -727,8 +775,10 @@ describe('AttackTabContent', () => {
 
       expect(screen.getAllByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID)).toHaveLength(2);
       expect(showAttackButton('so-1')).toBeInTheDocument();
+      expect(investigateInTimelineButton('so-1')).toBeInTheDocument();
       expect(removeAttackButton('so-1')).toBeInTheDocument();
       expect(showAttackButton('so-2')).toBeInTheDocument();
+      expect(investigateInTimelineButton('so-2')).toBeInTheDocument();
       expect(removeAttackButton('so-2')).toBeInTheDocument();
     });
 
@@ -756,7 +806,7 @@ describe('AttackTabContent', () => {
       expect(removeAttackButton('so-1')).toBeEnabled();
     });
 
-    it('keeps both actions in the keyboard tab order', async () => {
+    it('keeps every action in the keyboard tab order', async () => {
       renderTab();
 
       showAttackButton('so-1').focus();
@@ -764,7 +814,44 @@ describe('AttackTabContent', () => {
 
       await user.tab();
 
+      expect(investigateInTimelineButton('so-1')).toHaveFocus();
+
+      await user.tab();
+
       expect(removeAttackButton('so-1')).toHaveFocus();
+    });
+
+    it('opens Timeline on the attack when the investigate action is used', async () => {
+      renderTab();
+
+      await user.click(investigateInTimelineButton('so-1'));
+
+      expect(investigateAttackInTimeline).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'attack-id-1' })
+      );
+    });
+
+    it('disables the investigate action for an attack that could not be resolved', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(investigateInTimelineButton('so-1')).toBeDisabled();
+    });
+
+    it('omits the investigate action from every row when the user cannot read timelines', () => {
+      useInvestigateAttackInTimelineMock.mockReturnValue({
+        canInvestigateInTimeline: false,
+        investigateAttackInTimeline,
+      });
+
+      renderTab();
+
+      expect(
+        screen.queryByTestId(`${INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID}-so-1`)
+      ).not.toBeInTheDocument();
+      expect(showAttackButton('so-1')).toBeInTheDocument();
+      expect(removeAttackButton('so-1')).toBeInTheDocument();
     });
 
     it('opens the attack flyout when the show action is activated by keyboard', async () => {

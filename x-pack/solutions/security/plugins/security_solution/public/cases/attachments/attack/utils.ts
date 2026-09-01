@@ -6,9 +6,11 @@
  */
 
 import { SECURITY_ATTACK_ATTACHMENT_TYPE, type CaseUI } from '@kbn/cases-plugin/common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+  getOriginalAlertIds,
 } from '@kbn/elastic-assistant-common';
 import type { AttackAttachmentPayload } from '../../../../common/cases/attachments/attack';
 
@@ -142,6 +144,25 @@ export const matchesSearchTerm = (
   }`.toLowerCase();
   return searchableText.includes(searchTerm.toLowerCase());
 };
+
+/**
+ * An attack's constituent detection alert ids, de-anonymised and deduplicated — distinct
+ * anonymised ids can resolve to the same original alert.
+ *
+ * Empty for an attack the live query could not resolve: the ids live on the attack document, and
+ * the attachment snapshot records only how many there were.
+ */
+export const getAttackAlertIds = (attack: AttackDiscoveryAlert | undefined): string[] =>
+  attack == null
+    ? []
+    : [
+        ...new Set(
+          getOriginalAlertIds({
+            alertIds: attack.alertIds ?? [],
+            replacements: attack.replacements,
+          })
+        ),
+      ];
 
 /**
  * Maps the index snapshotted on the attachment to a pattern the attack flyout can actually read.

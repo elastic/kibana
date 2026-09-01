@@ -22,7 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
-  EuiText,
+  EuiTextColor,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -56,12 +56,17 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { getSummaryPlainText } from '../../../../attack_discovery/components/attack_entity_summary';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import { getActionsColumnWidth } from '../../../../common/components/header_actions/helpers';
+import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
+import { AttackTitleLink } from './attack_title_link';
 import { ShowAttackButton } from './show_attack_button';
 import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
+import { InvestigateAttackInTimelineButton } from './investigate_attack_in_timeline_button';
 import { RemoveAttackButton } from './remove_attack_button';
+import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
 import type { SelectedAttack } from './attack_tab_bulk_actions';
 import { AttackTabBulkActions } from './attack_tab_bulk_actions';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
@@ -69,6 +74,7 @@ import type { AttackCaseAttachmentRow, AttackTabColumnId, CaseAttachment } from 
 import {
   ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
   ATTACK_TAB_COLUMN_ID,
+  getAttackAlertIds,
   isAttackAttachment,
   matchesSearchTerm,
   toVisibleAttackTabColumnIds,
@@ -97,7 +103,9 @@ interface AttackRow {
  */
 interface AttackGridCellContextValue {
   areAllRowsSelected: boolean;
+  canInvestigateInTimeline: boolean;
   comments: readonly CaseAttachment[];
+  investigateAttackInTimeline: (attack: AttackDiscoveryAlert | undefined) => void;
   isRemoving: boolean;
   onRemoveConfirmed: (savedObjectId: string, confirmation: RemoveAttackConfirmation) => void;
   rows: AttackRow[];
@@ -140,7 +148,11 @@ const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
 const DEFAULT_PAGE_SIZE = 50;
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-const ACTIONS_COLUMN_WIDTH = 96;
+/**
+ * Wide enough for the three row actions, sized by the helper the alerts grid's actions column
+ * uses so the two columns line up.
+ */
+const ACTIONS_COLUMN_WIDTH = getActionsColumnWidth(3);
 
 /**
  * The selection control column's id. It is deliberately not an `ATTACK_TAB_COLUMN_ID`: those
@@ -300,6 +312,13 @@ const truncateCss = css`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+/**
+ * The fields the date cells name in their tooltip, so a date reads the same here as it does in
+ * the alerts grid: the attack document's own timestamp, and the attachment's creation time.
+ */
+const DETECTED_ON_FIELD_NAME = '@timestamp';
+const ATTACHED_AT_FIELD_NAME = 'created_at';
 
 const getAttachedBy = (createdBy: AttackCaseAttachmentRow['createdBy']): string =>
   createdBy?.fullName || createdBy?.username || createdBy?.email || UNKNOWN_USER;
@@ -493,7 +512,14 @@ const AttackActionsHeaderCell = () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.act
 AttackActionsHeaderCell.displayName = 'AttackActionsHeaderCell';
 
 const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-  const { comments, isRemoving, onRemoveConfirmed, rows } = useAttackGridCellContext();
+  const {
+    canInvestigateInTimeline,
+    comments,
+    investigateAttackInTimeline,
+    isRemoving,
+    onRemoveConfirmed,
+    rows,
+  } = useAttackGridCellContext();
 
   const row = rows[rowIndex];
 
@@ -519,6 +545,17 @@ const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
           isDisabled={row.isUnresolved}
         />
       </EuiFlexItem>
+      {canInvestigateInTimeline ? (
+        <EuiFlexItem grow={false}>
+          {/* Disabled rather than hidden for an unresolved attack, so the row keeps the shape
+              every other row has and the tooltip can say why. */}
+          <InvestigateAttackInTimelineButton
+            id={row.savedObjectId}
+            isDisabled={getAttackAlertIds(row.attack).length === 0}
+            onClick={() => investigateAttackInTimeline(row.attack)}
+          />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         {/* Removal stays available for an unresolved attack — the attachment can always be taken
             off the case; only the "also remove its alerts" offer needs the document. */}
@@ -630,6 +667,9 @@ const AttackTabTable = ({
   const { http, storage } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
   const { mutate: removeAttack, isLoading: isRemoving } = useRemoveAttackAttachment();
+  // Resolved once for the whole grid rather than per row — see the hook.
+  const { canInvestigateInTimeline, investigateAttackInTimeline } =
+    useInvestigateAttackInTimeline();
 
   const { id: caseId, comments } = caseData;
 
@@ -789,7 +829,9 @@ const AttackTabTable = ({
   const cellContext = useMemo<AttackGridCellContextValue>(
     () => ({
       areAllRowsSelected,
+      canInvestigateInTimeline,
       comments,
+      investigateAttackInTimeline,
       isRemoving,
       onRemoveConfirmed,
       rows,
@@ -800,7 +842,9 @@ const AttackTabTable = ({
     }),
     [
       areAllRowsSelected,
+      canInvestigateInTimeline,
       comments,
+      investigateAttackInTimeline,
       isRemoving,
       onRemoveConfirmed,
       rows,
@@ -887,6 +931,10 @@ AttackTabTable.displayName = 'AttackTabTable';
  * Renders one grid cell. Every value prefers the live attack document and falls back to the
  * snapshot persisted on the attachment, so a row is never blank because a field arrived in a
  * later release.
+ *
+ * Cell text is coloured with `EuiTextColor` rather than wrapped in `EuiText`, which would
+ * override the font size and line height the grid sets from `gridStyle` and leave the rows
+ * taller and tighter than the alerts grid's.
  */
 const AttackCell = ({
   row,
@@ -906,70 +954,78 @@ const AttackCell = ({
     case ATTACK_TAB_COLUMN_ID.detectedOn: {
       const detectedOn = getDetectedOn(attack, metadata);
       return (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
+        <EuiTextColor color={color} data-test-subj={testSubj}>
           {detectedOn != null ? (
-            <FormattedRelativePreferenceDate value={detectedOn} />
+            <FormattedDate fieldName={DETECTED_ON_FIELD_NAME} value={detectedOn} />
           ) : (
             getEmptyValue()
           )}
-        </EuiText>
+        </EuiTextColor>
       );
     }
 
     case ATTACK_TAB_COLUMN_ID.title: {
-      const title = (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
-          <span data-test-subj={ATTACK_TAB_ROW_TITLE_TEST_ID}>{getTitle(attack, metadata)}</span>
-        </EuiText>
-      );
+      const title = getTitle(attack, metadata);
 
+      // Degrades to plain text when the attack could not be resolved, the way the alerts grid's
+      // rule cell does when there is no rule to open.
       return isUnresolved ? (
         <EuiToolTip content={UNRESOLVED_TOOLTIP}>
-          {/* Focusable so the explanation is reachable by keyboard: the title is not interactive. */}
-          <span data-test-subj={ATTACK_TAB_ROW_UNRESOLVED_TEST_ID} tabIndex={0}>
-            {title}
-          </span>
+          {/* Focusable so the explanation is reachable by keyboard: the title is not a link here. */}
+          <EuiTextColor
+            color={color}
+            data-test-subj={ATTACK_TAB_ROW_UNRESOLVED_TEST_ID}
+            tabIndex={0}
+          >
+            <TruncatableText dataTestSubj={testSubj}>
+              <span data-test-subj={ATTACK_TAB_ROW_TITLE_TEST_ID}>{title}</span>
+            </TruncatableText>
+          </EuiTextColor>
         </EuiToolTip>
       ) : (
-        title
+        <AttackTitleLink
+          attackId={row.attachmentId}
+          indexName={attack?.index ?? metadata.index}
+          title={title}
+        />
       );
     }
 
     case ATTACK_TAB_COLUMN_ID.alerts: {
       const alertCount = getAlertCount(attack, metadata);
       return (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
+        <EuiTextColor color={color} data-test-subj={testSubj}>
           {alertCount ?? getEmptyValue()}
-        </EuiText>
+        </EuiTextColor>
       );
     }
 
     case ATTACK_TAB_COLUMN_ID.summary: {
       const summary = getSummary(attack, metadata);
       return (
-        <EuiText
+        <EuiTextColor
           color={color}
+          component="div"
           css={isDetails ? undefined : truncateCss}
           data-test-subj={testSubj}
-          size="s"
         >
           {summary ?? getEmptyValue()}
-        </EuiText>
+        </EuiTextColor>
       );
     }
 
     case ATTACK_TAB_COLUMN_ID.riskScore: {
       const riskScore = getRiskScore(attack, metadata);
       return (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
+        <EuiTextColor color={color} data-test-subj={testSubj}>
           {riskScore ?? getEmptyValue()}
-        </EuiText>
+        </EuiTextColor>
       );
     }
 
     case ATTACK_TAB_COLUMN_ID.status:
       return (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
+        <EuiTextColor color={color} data-test-subj={testSubj}>
           <span data-test-subj={ATTACK_TAB_ROW_STATUS_TEST_ID}>
             {attack?.alertWorkflowStatus != null ? (
               <RuleStatus value={attack.alertWorkflowStatus} />
@@ -977,21 +1033,21 @@ const AttackCell = ({
               getEmptyValue()
             )}
           </span>
-        </EuiText>
+        </EuiTextColor>
       );
 
     case ATTACK_TAB_COLUMN_ID.attachedBy:
       return (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
+        <EuiTextColor color={color} data-test-subj={testSubj}>
           {row.attachedBy}
-        </EuiText>
+        </EuiTextColor>
       );
 
     case ATTACK_TAB_COLUMN_ID.attachedAt:
       return (
-        <EuiText color={color} data-test-subj={testSubj} size="s">
-          <FormattedRelativePreferenceDate value={row.createdAt} />
-        </EuiText>
+        <EuiTextColor color={color} data-test-subj={testSubj}>
+          <FormattedDate fieldName={ATTACHED_AT_FIELD_NAME} value={row.createdAt} />
+        </EuiTextColor>
       );
 
     default:

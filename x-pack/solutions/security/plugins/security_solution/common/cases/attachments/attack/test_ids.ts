@@ -32,6 +32,7 @@ export const ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID = 'adCasesAttackTabColumnRiskS
 export const ATTACK_TAB_COLUMN_STATUS_TEST_ID = 'adCasesAttackTabColumnStatus';
 export const ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID = 'adCasesAttackTabColumnAttachedBy';
 export const ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID = 'adCasesAttackTabColumnAttachedAt';
+export const INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID = 'adCasesInvestigateAttackInTimeline';
 export const REMOVE_ATTACK_BUTTON_TEST_ID = 'adCasesRemoveAttack';
 export const REMOVE_ATTACK_MODAL_TEST_ID = 'adCasesRemoveAttackModal';
 export const REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID = 'adCasesRemoveAttackAlertsCheckbox';

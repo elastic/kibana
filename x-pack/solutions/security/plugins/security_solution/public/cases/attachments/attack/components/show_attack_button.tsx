@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { SHOW_ATTACK_BUTTON_TEST_ID } from '../../../../../common/cases/attachments/attack/test_ids';
-import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
-import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
-import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
-import { toReadableAttackIndexPattern } from '../utils';
+import { useOpenAttackFlyout } from '../hooks/use_open_attack_flyout';
 
 const SHOW_ATTACK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.showAttackDetails',
@@ -56,46 +51,22 @@ export const ShowAttackButton = ({
   attackTitle,
   isDisabled = false,
 }: ShowAttackButtonProps) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openAttackFlyout } = useFlyoutApi();
-  const { openFlyout } = useExpandableFlyoutApi();
-
-  // The flyout looks the attack up by id against this index, so it needs a pattern the user can
-  // read — not the concrete backing index the attachment snapshotted. See
-  // {@link toReadableAttackIndexPattern}.
-  const flyoutIndexName = useMemo(() => toReadableAttackIndexPattern(indexName), [indexName]);
-
-  const onClick = useCallback(() => {
-    if (enableNewFlyout) {
-      openAttackFlyout({
-        attackId,
-        indexName: flyoutIndexName,
-        attackTitle,
-        origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
-      });
-    } else {
-      // Legacy expandable flyout path. No telemetry here — the new-flyout path reports
-      // telemetry internally via openAttackFlyout, and the legacy path is being deprecated.
-      openFlyout({
-        right: {
-          id: AttackDetailsRightPanelKey,
-          params: { attackId, indexName: flyoutIndexName },
-        },
-      });
-    }
-  }, [attackId, attackTitle, enableNewFlyout, flyoutIndexName, openAttackFlyout, openFlyout]);
+  const onClick = useOpenAttackFlyout({ attackId, indexName, attackTitle });
 
   return (
     <EuiToolTip
       position="top"
       content={<p>{isDisabled ? ATTACK_UNAVAILABLE_TOOLTIP : SHOW_ATTACK_TOOLTIP}</p>}
     >
+      {/* `maximize`, which is what the alerts grid and the Attacks page both use to open a
+          document's details. */}
       <EuiButtonIcon
         aria-label={SHOW_ATTACK_TOOLTIP}
+        color="text"
         data-test-subj={`${SHOW_ATTACK_BUTTON_TEST_ID}-${id}`}
         disabled={isDisabled}
         onClick={onClick}
-        iconType="chevronSingleRight"
+        iconType="maximize"
         id={`${id}-show-attack`}
       />
     </EuiToolTip>
