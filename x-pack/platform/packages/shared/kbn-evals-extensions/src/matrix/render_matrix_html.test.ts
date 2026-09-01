@@ -546,3 +546,44 @@ describe('renderMatrixHtml tie tiers', () => {
     expect(html).not.toContain('Tie tier');
   });
 });
+
+describe('renderMatrixHtml saturation disclosure', () => {
+  it('states which evaluators Overall dropped, so the score change is not silent', () => {
+    const html = renderMatrixHtml(
+      {
+        ...mockMatrix,
+        evaluatorSaturation: [
+          {
+            evaluatorName: 'FinalAnswerPresent',
+            mean: 0.885,
+            stdev: 0.05,
+            range: 0.19,
+            distinctValues: 12,
+            observations: 20,
+            saturated: true,
+          },
+          {
+            evaluatorName: 'Factuality',
+            mean: 0.355,
+            stdev: 0.1,
+            range: 0.324,
+            distinctValues: 19,
+            observations: 20,
+            saturated: false,
+          },
+        ],
+      },
+      mockConfig
+    );
+
+    expect(html).toContain('Overall excludes 1 non-discriminating evaluator(s)');
+    expect(html).toContain('FinalAnswerPresent (spread 0.19 across 20 models)');
+    // A discriminating evaluator must not be named as excluded.
+    expect(html).not.toContain('Factuality (spread');
+  });
+
+  it('omits the note entirely when nothing is saturated', () => {
+    const html = renderMatrixHtml({ ...mockMatrix, evaluatorSaturation: [] }, mockConfig);
+    expect(html).not.toContain('non-discriminating evaluator');
+  });
+});

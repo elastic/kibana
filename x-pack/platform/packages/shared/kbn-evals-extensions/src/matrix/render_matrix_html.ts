@@ -592,8 +592,32 @@ export const renderMatrixHtml = (
     .filter(Boolean)
     .join(' · ');
 
-  const methodologyBlock = provenance.methodologyNotes?.length
-    ? `<details class="methodology"><summary>Methodology &amp; scoring-semantics notes</summary><ul>${provenance.methodologyNotes
+  // The saturated-evaluator exclusion changes what Overall means, so it has to
+  // be stated on the page rather than only in matrix.json. A reader comparing
+  // this artifact to an older one otherwise sees every score drop with no
+  // explanation.
+  const saturated = matrix.evaluatorSaturation.filter((entry) => entry.saturated);
+  const saturationNote =
+    saturated.length > 0
+      ? [
+          `Overall excludes ${saturated.length} non-discriminating evaluator(s): ` +
+            `${saturated
+              .map(
+                (entry) =>
+                  `${entry.evaluatorName} (spread ${entry.range.toFixed(2)} across ${
+                    entry.observations
+                  } models)`
+              )
+              .join(', ')}. ` +
+            `These score every model within a narrow band, so averaging them into Overall ` +
+            `divides the discriminating evaluators' signal without adding ranking information. ` +
+            `Per-column cells are unaffected.`,
+        ]
+      : [];
+
+  const allNotes = [...(provenance.methodologyNotes ?? []), ...saturationNote];
+  const methodologyBlock = allNotes.length
+    ? `<details class="methodology"><summary>Methodology &amp; scoring-semantics notes</summary><ul>${allNotes
         .map((note) => `<li>${esc(note)}</li>`)
         .join('')}</ul></details>`
     : '';
