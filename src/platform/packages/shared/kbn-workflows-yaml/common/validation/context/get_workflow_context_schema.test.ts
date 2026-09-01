@@ -11,7 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
-import { triggerSchemas } from '../../../trigger_schemas';
+import { resetWorkflowContextRegistry, setWorkflowContextRegistry } from './registry';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
   it('should handle nested object inputs for variable validation', () => {
@@ -425,9 +425,11 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       triggers: [{ type: 'some.unknown_trigger' }],
     } as unknown as WorkflowYaml;
 
-    const getTriggerDefinitionSpy = jest
-      .spyOn(triggerSchemas, 'getTriggerDefinition')
-      .mockReturnValue(undefined);
+    setWorkflowContextRegistry({
+      getStepOutput: () => undefined,
+      getConnector: () => undefined,
+      getTriggerDefinition: () => undefined,
+    });
 
     try {
       const eventKeys = getEventKeys(workflow);
@@ -436,7 +438,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       expect(eventKeys).not.toContain('timestamp');
       expect(eventKeys).toHaveLength(1);
     } finally {
-      getTriggerDefinitionSpy.mockRestore();
+      resetWorkflowContextRegistry();
     }
   });
 
@@ -457,11 +459,12 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       eventSchema: customEventSchema,
     };
 
-    const getTriggerDefinitionSpy = jest
-      .spyOn(triggerSchemas, 'getTriggerDefinition')
-      .mockImplementation((triggerType: string) =>
-        triggerType === 'example.custom_trigger' ? mockTriggerDefinition : undefined
-      );
+    setWorkflowContextRegistry({
+      getStepOutput: () => undefined,
+      getConnector: () => undefined,
+      getTriggerDefinition: (triggerType: string) =>
+        triggerType === 'example.custom_trigger' ? mockTriggerDefinition : undefined,
+    });
 
     try {
       const eventKeys = getEventKeys(workflow);
@@ -475,7 +478,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       expect(getSchemaAtPath(contextSchema, 'event.severity').schema).toBeDefined();
       expect(getSchemaAtPath(contextSchema, 'event.message').schema).toBeDefined();
     } finally {
-      getTriggerDefinitionSpy.mockRestore();
+      resetWorkflowContextRegistry();
     }
   });
 });

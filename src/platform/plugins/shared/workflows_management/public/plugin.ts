@@ -27,6 +27,7 @@ import {
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { setWorkflowContextRegistry } from '@kbn/workflows-yaml';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
@@ -42,6 +43,7 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { createWorkflowContextRegistry } from '../common/lib/create_workflow_context_registry';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -127,6 +129,7 @@ export class WorkflowsPlugin
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
     triggerSchemas.initialize(plugins.workflowsExtensions);
+    setWorkflowContextRegistry(createWorkflowContextRegistry(plugins.workflowsExtensions));
 
     this.subscribeToWorkflowsSettingChange(core);
 

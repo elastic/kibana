@@ -38,7 +38,6 @@ function addNodesToStepsSchema(
 
   for (const node of nodes) {
     if (seenStepIds.has(node.stepId) || node.type === 'trigger') {
-      // eslint-disable-next-line no-continue
       continue;
     }
     seenStepIds.add(node.stepId);

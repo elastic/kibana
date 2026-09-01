@@ -9,14 +9,15 @@
 
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
-import type { VariableItem, YamlValidationResult } from '@kbn/workflows-yaml';
-import { getDetailedTypeDescription, parseVariablePath } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
+import type { VariableItem, YamlValidationResult } from '../types';
+import { getDetailedTypeDescription } from '../../zod/zod_type_description';
+import { parseVariablePath } from '../parse_variable_path';
+import { InvalidForeachParameterError } from '../context/errors';
 import {
   FOREACH_ITEM_SCHEMA_DESC,
   getForeachItemSchema,
-} from '../../workflow_context/lib/get_foreach_state_schema';
+} from '../context/get_foreach_state_schema';
 
 export function validateVariable(
   variableItem: VariableItem,

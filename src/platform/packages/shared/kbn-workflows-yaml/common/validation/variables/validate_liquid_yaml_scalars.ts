@@ -14,14 +14,12 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { YamlValidationErrorSeverity, YamlValidationResult } from '@kbn/workflows-yaml';
-import {
-  extractLiquidErrorPosition,
-  parseTemplateString,
-  parseVariablePath,
-} from '@kbn/workflows-yaml';
-import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
-import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
+import type { YamlValidationErrorSeverity, YamlValidationResult } from '../types';
+import { extractLiquidErrorPosition } from '../../liquid/extract_liquid_error_position';
+import { parseTemplateString } from '../../liquid/liquid_parse_cache';
+import { parseVariablePath } from '../parse_variable_path';
+import { InvalidForeachParameterError } from '../context/errors';
+import { getContextSchemaWithTemplateLocals } from '../context/extend_context_with_template_locals';
 import {
   type ForLoopScope,
   getAllForLoopScopes,
@@ -29,14 +27,14 @@ import {
   isLiquidRangeLiteral,
   isLiquidStringLiteral,
   resolveAssignChain,
-} from '../../workflow_context/lib/extract_template_local_context';
-import { getContextSchemaForStep } from '../../workflow_context/lib/get_context_for_path';
+} from '../context/extract_template_local_context';
+import { getContextSchemaForStep } from '../context/get_context_for_path';
 import {
   getForeachCollectionDiagnostic,
   getForeachItemSchema,
-} from '../../workflow_context/lib/get_foreach_state_schema';
-import { getNearestStepPath } from '../../workflow_context/lib/get_nearest_step_path';
-import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
+} from '../context/get_foreach_state_schema';
+import { getNearestStepPath } from '../context/get_nearest_step_path';
+import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
@@ -205,7 +203,6 @@ function collectForLoopCollectionResults(
   const forLoopScopes = getAllForLoopScopes(templateString);
   for (const scope of forLoopScopes) {
     if (!scope.collectionPath || isLiquidRangeLiteral(scope.collectionPath)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -218,7 +215,7 @@ function collectForLoopCollectionResults(
       // A literal collection has no context path to check. `{% assign acc = "" | split: "" %}`
       // — the idiomatic empty accumulator — resolves to a bare string literal, and its real
       // type comes from the filter chain, so there is nothing to validate statically.
-      // eslint-disable-next-line no-continue
+
       continue;
     }
     const absRange = resolveCollectionRange(ctx.yamlString, node, scope);

@@ -16,7 +16,7 @@ import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { LineParseResult } from '@kbn/workflows-yaml';
-import { parseLineForCompletion } from '@kbn/workflows-yaml';
+import { getContextSchemaForPath, parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
@@ -30,7 +30,6 @@ import {
   isInWorkflowInputsPath,
 } from './triggers_utils';
 import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
-import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
 import { findEsqlRegionContainingCursor } from '../../esql_validation/extract_esql_region';
 import { getRegisteredTriggerConditionDefinition } from '../get_registered_trigger_condition_definition';
 
