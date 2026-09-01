@@ -8,11 +8,14 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
+import { DISCOVER_KBN_ARCHIVE } from '../fixtures/constants';
 
 globalTeardownHook(
-  'Unset defaultIndex for discover_customization_examples',
+  'Unload discover archives for discover_customization_examples',
   async ({ kbnClient, log }) => {
     log.debug('[teardown:discover_customization_examples] unsetting defaultIndex...');
     await kbnClient.uiSettings.unset('defaultIndex');
+    log.debug('[teardown:discover_customization_examples] unloading discover saved objects...');
+    await kbnClient.importExport.unload(DISCOVER_KBN_ARCHIVE);
   }
 );
