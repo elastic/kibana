@@ -44,11 +44,7 @@ export const AddToCase: FC<AddToCaseProps> = ({
   const handleClick = useAddToCase({ entity, onClick });
 
   return (
-    <EuiContextMenuItem
-      data-test-subj={dataTestSubj}
-      icon="briefcase"
-      onClick={handleClick}
-    >
+    <EuiContextMenuItem data-test-subj={dataTestSubj} icon="briefcase" onClick={handleClick}>
       {ADD_TO_CASE}
     </EuiContextMenuItem>
   );
