@@ -19,6 +19,7 @@ import {
   findFirstNonWhitespaceIndex,
   getTrailingIdentifier,
   isOnlyWhitespace,
+  matchesWildcardPattern,
   normalizeWhitespace,
   startsWithWordChar,
 } from './regex';
@@ -102,6 +103,13 @@ describe('regex utilities', () => {
 
       expect(new RegExp(`^${escaped}$`).test(text)).toBe(true);
       expect(new RegExp(`^${escaped}$`).test('fieldXname[0]*')).toBe(false);
+    });
+
+    it('matches wildcard patterns', () => {
+      expect(matchesWildcardPattern('*-City.mmdb', 'GeoLite2-City.mmdb')).toBe(true);
+      expect(matchesWildcardPattern('ipinfo*asn*.mmdb', 'ipinfo_standard_asn.mmdb')).toBe(true);
+      expect(matchesWildcardPattern('*-City.mmdb', 'GeoLite2-Country.mmdb')).toBe(false);
+      expect(matchesWildcardPattern('field.name[0]*', 'field.name[0]suffix')).toBe(true);
     });
 
     it('extracts trailing identifiers', () => {

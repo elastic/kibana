@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT.
+ */
+
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group1/_discover.ts
+
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -199,23 +205,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async function () {
           expect(await discover.getHitCount()).to.be('1');
-        });
-      });
-    });
-
-    describe('data-shared-item', function () {
-      it('should have correct data-shared-item title and description', async () => {
-        const expected = {
-          title: 'A Saved Search',
-          description: 'A Saved Search Description',
-        };
-
-        await retry.try(async () => {
-          await discover.loadSavedSearch(expected.title);
-          await discover.waitUntilTabIsLoaded();
-          const { title, description } = await common.getSharedItemTitleAndDescription();
-          expect(title).to.eql(expected.title);
-          expect(description).to.eql(expected.description);
         });
       });
     });

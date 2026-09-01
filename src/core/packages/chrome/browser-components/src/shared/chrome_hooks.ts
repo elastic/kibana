@@ -41,7 +41,7 @@ export function useClassicBreadcrumbs(): ChromeBreadcrumb[] {
 
 /**
  * Returns the current project-style breadcrumbs derived from the active
- * navigation tree node. Used by `ProjectHeader`.
+ * navigation tree node.
  */
 export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
@@ -263,17 +263,6 @@ export function useHasAppMenuConfig(): boolean {
 }
 
 /**
- * Returns `true` when an app menu is currently active — either a legacy action
- * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
- * registered via `chrome.setAppMenu()`.
- */
-export function useHasAppMenu(): boolean {
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const hasAppMenuConfig = useHasAppMenuConfig();
-  return hasLegacyActionMenu || hasAppMenuConfig;
-}
-
-/**
  * Returns the current global search configuration, or `undefined` if none is set.
  * Used by `SearchButton` (global header).
  */
@@ -293,6 +282,16 @@ export function useContextSwitcher(): ReactNode {
   return useObservable(content$, null);
 }
 
+/**
+ * Returns the current project picker content set via
+ * `chrome.next.projectPicker.set()`, or null if not set.
+ */
+export function useProjectPicker(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.projectPicker.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
@@ -303,4 +302,14 @@ export function useHasInlineAppHeader(): boolean {
 export function useInternalLegacyActionMenu(): MountPoint | undefined {
   const { legacyActionMenu$ } = useChromeService().componentDeps;
   return useObservable(legacyActionMenu$, undefined);
+}
+
+/**
+ * Returns the current user menu content set via
+ * `chrome.next.userMenu.set()`, or null if not set.
+ */
+export function useUserMenu(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
 }

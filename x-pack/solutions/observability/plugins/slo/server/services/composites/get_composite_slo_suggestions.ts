@@ -5,48 +5,43 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetCompositeSLOSuggestionsResponse } from '@kbn/slo-schema';
+import type { StoredCompositeSLODefinition } from '../../domain/models';
 import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
-
-type Buckets = Array<{
-  key: string;
-  doc_count: number;
-}>;
 
 interface AggsResponse {
   tagsAggs: {
-    buckets: Buckets;
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
   };
 }
 
-export interface CompositeSLOSuggestionsResponse {
-  tags: Array<{ label: string; value: string; count: number }>;
-}
-
-export class GetCompositeSLOSuggestions {
-  constructor(private soClient: SavedObjectsClientContract) {}
-
-  public async execute(): Promise<CompositeSLOSuggestionsResponse> {
-    const findResponse = await this.soClient.find({
-      type: SO_SLO_COMPOSITE_TYPE,
-      perPage: 0,
-      aggs: {
-        tagsAggs: {
-          terms: {
-            field: `${SO_SLO_COMPOSITE_TYPE}.attributes.tags`,
-            size: 10000,
-          },
+export async function getCompositeSloSuggestions(
+  soClient: SavedObjectsClientContract
+): Promise<GetCompositeSLOSuggestionsResponse> {
+  const response = await soClient.find<StoredCompositeSLODefinition, AggsResponse>({
+    type: SO_SLO_COMPOSITE_TYPE,
+    perPage: 0,
+    aggs: {
+      tagsAggs: {
+        terms: {
+          field: `${SO_SLO_COMPOSITE_TYPE}.attributes.tags`,
+          size: 1000,
         },
       },
-    });
-    const { tagsAggs } = (findResponse?.aggregations as AggsResponse) ?? {};
+    },
+  });
 
-    return {
-      tags:
-        tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
-          value: key,
-          count,
-        })) ?? [],
-    };
-  }
+  const { tagsAggs } = response.aggregations ?? {};
+
+  return {
+    tags:
+      tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+        label: key,
+        value: key,
+        count,
+      })) ?? [],
+  };
 }

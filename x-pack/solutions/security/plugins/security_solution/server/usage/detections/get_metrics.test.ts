@@ -33,10 +33,12 @@ import {
   getEventLogElasticRules,
   getElasticLogCustomRules,
   getAllEventLogTransform,
+  getMockChangesHistoryUsageResponse,
 } from './rules/get_metrics.mocks';
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
 import {
+  getInitialChangesHistoryUsage,
   getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   initialAlertSuppression,
@@ -82,6 +84,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled non-customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -223,6 +228,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled non-customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -369,6 +377,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -515,6 +526,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled customized rule with upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -661,6 +675,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled non-customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -821,6 +838,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled non-customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -967,6 +987,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with disabled customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1113,6 +1136,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with enabled customized rule without upgrade, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1259,6 +1285,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information on custom rule', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1364,6 +1393,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with rule, no alerts and no cases, when no upgrades possible', async () => {
+      esClient.search.mockResponseOnce(
+        getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+      );
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1511,6 +1543,9 @@ describe('Detections Usage and Metrics', () => {
     describe('threat match rules', () => {
       let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
       beforeEach(() => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+        );
         esClient.search.mockResponseOnce(getEventLogAllRules());
         esClient.search.mockResponseOnce(getEventLogElasticRules());
         esClient.search.mockResponseOnce(getElasticLogCustomRules()); // this is needed to get the custom rules
@@ -1610,6 +1645,9 @@ describe('Detections Usage and Metrics', () => {
     describe('deprecated rules', () => {
       let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
       beforeEach(() => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 0, ruleRestoredCount: 0 })
+        );
         esClient.search.mockResponseOnce(getEventLogAllRules());
         esClient.search.mockResponseOnce(getEventLogElasticRules());
         esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -1675,6 +1713,88 @@ describe('Detections Usage and Metrics', () => {
         expect(result).toHaveProperty(
           'detection_rules.elastic_detection_rule_deprecated_status.total',
           0
+        );
+      });
+    });
+
+    describe('changes history usage', () => {
+      it('reports revision_saved and rule_restored as returned by the change-history query', async () => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 3, ruleRestoredCount: 2 })
+        );
+        esClient.search.mockResponseOnce(getEventLogAllRules());
+        esClient.search.mockResponseOnce(getEventLogElasticRules());
+        esClient.search.mockResponseOnce(getElasticLogCustomRules());
+        esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
+        savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+
+        const logger = loggingSystemMock.createLogger();
+        const result = await getDetectionsMetrics({
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        });
+
+        expect(result).toHaveProperty('detection_rules.changes_history_usage', {
+          revision_saved: 3,
+          rule_restored: 2,
+        });
+      });
+
+      it('populates changes_history_usage even when the cluster has zero detection rules', async () => {
+        esClient.search.mockResponseOnce(
+          getMockChangesHistoryUsageResponse({ revisionSavedCount: 4, ruleRestoredCount: 0 })
+        );
+        // Let getDetectionRules() resolve to a genuinely empty rule list (not an
+        // unmocked-PIT exception) so the "zero rules" branch, not the outer catch, is exercised.
+        savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
+          id: 'changes-history-usage-test-pit',
+        });
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
+        const logger = loggingSystemMock.createLogger();
+        const result = await getDetectionsMetrics({
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        });
+
+        expect(result).toHaveProperty('detection_rules.changes_history_usage', {
+          revision_saved: 4,
+          rule_restored: 0,
+        });
+      });
+
+      it('degrades to false/false when the change-history query errors', async () => {
+        esClient.search.mockImplementationOnce(() => {
+          throw new Error('index_not_found_exception');
+        });
+
+        const logger = loggingSystemMock.createLogger();
+        const result = await getDetectionsMetrics({
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        });
+
+        expect(result).toHaveProperty(
+          'detection_rules.changes_history_usage',
+          getInitialChangesHistoryUsage()
         );
       });
     });

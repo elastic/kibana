@@ -39,7 +39,7 @@ import {
 import { sortUsingDataGridBtn } from '../../../../tasks/table_pagination';
 import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
 import { openKibanaNavigation } from '../../../../tasks/kibana_navigation';
-import { ALERTS_PAGE } from '../../../../screens/kibana_navigation';
+import { DETECTIONS_PAGE } from '../../../../screens/kibana_navigation';
 
 const usersToCreate = [rulesAllUser, rulesAllWithCasesUser, rulesReadUser, rulesNoneUser];
 const rolesToCreate = [rulesAll, rulesAllWithCases, rulesRead, rulesNone];
@@ -137,9 +137,9 @@ describe('Alerts page - privileges', { tags: ['@ess'] }, () => {
       cy.get(NO_PRIVILEGES_BOX).should('exist');
     });
 
-    it('should not see the "alerts" link in the sidebar', () => {
+    it('should not see the "detections" link in the sidebar', () => {
       openKibanaNavigation();
-      cy.get(ALERTS_PAGE).should('not.exist');
+      cy.get(DETECTIONS_PAGE).should('not.exist');
     });
   });
 });

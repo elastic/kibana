@@ -543,6 +543,7 @@ exports[`XYChart component it renders area 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -572,7 +573,6 @@ exports[`XYChart component it renders area 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -671,6 +671,8 @@ exports[`XYChart component it renders area 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -680,6 +682,8 @@ exports[`XYChart component it renders area 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -690,7 +694,9 @@ exports[`XYChart component it renders area 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -1041,9 +1047,10 @@ exports[`XYChart component it renders area 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -1238,6 +1245,7 @@ exports[`XYChart component it renders area 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -2011,6 +2019,7 @@ exports[`XYChart component it renders bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -2040,7 +2049,6 @@ exports[`XYChart component it renders bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -2139,6 +2147,8 @@ exports[`XYChart component it renders bar 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -2148,6 +2158,8 @@ exports[`XYChart component it renders bar 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -2158,7 +2170,9 @@ exports[`XYChart component it renders bar 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -2509,9 +2523,10 @@ exports[`XYChart component it renders bar 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -2706,6 +2721,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -3479,6 +3495,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -3508,7 +3525,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -3607,6 +3623,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -3616,6 +3634,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -3626,7 +3646,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -3977,9 +3999,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -4174,13 +4197,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          tickLabelMaxLength="40%"
-          tickLabelTruncate="middle"
           title="c"
         />
         <Component
@@ -4949,6 +4971,7 @@ exports[`XYChart component it renders line 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -4978,7 +5001,6 @@ exports[`XYChart component it renders line 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -5077,6 +5099,8 @@ exports[`XYChart component it renders line 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -5086,6 +5110,8 @@ exports[`XYChart component it renders line 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -5096,7 +5122,9 @@ exports[`XYChart component it renders line 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -5447,9 +5475,10 @@ exports[`XYChart component it renders line 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -5644,6 +5673,7 @@ exports[`XYChart component it renders line 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -6417,6 +6447,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -6446,7 +6477,6 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -6545,6 +6575,8 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -6554,6 +6586,8 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -6564,7 +6598,9 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -6915,9 +6951,10 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -7112,6 +7149,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -7885,6 +7923,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -7914,7 +7953,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -8013,6 +8051,8 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -8022,6 +8062,8 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -8032,7 +8074,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -8383,9 +8427,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -8580,6 +8625,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -9353,6 +9399,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -9382,7 +9429,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -9481,6 +9527,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -9490,6 +9538,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -9500,7 +9550,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -9851,9 +9903,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -10048,13 +10101,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          tickLabelMaxLength="40%"
-          tickLabelTruncate="middle"
           title="c"
         />
         <Component
@@ -10842,6 +10894,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -10871,7 +10924,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -10970,6 +11022,8 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -10979,6 +11033,8 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -10989,7 +11045,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -11340,9 +11398,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -11537,6 +11596,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -12400,6 +12460,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -12429,7 +12490,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -12528,6 +12588,8 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -12537,6 +12599,8 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -12547,7 +12611,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -12898,9 +12964,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -13095,6 +13162,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -13951,6 +14019,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -13980,7 +14049,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -14079,6 +14147,8 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "visible": true,
                   },
                 },
+                "maxExtent": "100%",
+                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -14088,6 +14158,8 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
+                  "lineHeight": 1.2,
+                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -14098,7 +14170,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "outer": 8,
                   },
                   "rotation": 0,
+                  "truncate": false,
                   "visible": true,
+                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -14449,9 +14523,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 64,
+                "minHeight": 80,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -14646,6 +14721,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
+                "truncate": undefined,
                 "visible": true,
               },
             }

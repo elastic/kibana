@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { once } from 'lodash';
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { getRouteConfig } from '../get_route_config';
-import { getReadResponseBodySchema } from './schemas';
-import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { logRequest } from '../log_request';
+import { getRouteConfig } from '../get_route_config';
+import { read } from './read';
+import { getReadResponseBodySchema } from './schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -37,21 +37,25 @@ export function registerReadRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest, true);
+    return getDashboardStateSchema(false, true);
   });
 
   readRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).readDashboardOASOperationObject,
+      },
       validate: () => ({
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              id: z.string().meta({
                 description: 'The dashboard ID, as returned by the create or search endpoints.',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
         },
         response: {
           200: {
@@ -74,12 +78,11 @@ export function registerReadRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
           const { body, resolveHeaders } = await read(
-            (
-              await ctx.resolve(['core'])
-            ).core.savedObjects.client,
+            core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.serverTiming,
@@ -105,13 +108,10 @@ export function registerReadRoute(
             return res.forbidden({ body: { message: e.message } });
           }
 
-          if (e.isBoom && e.output.statusCode === 400) {
-            logRequest(logger, req, 'warn', e.message);
-            return res.badRequest({ body: { message: e.message } });
-          }
-
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
+          throw e;
         }
       })
   );

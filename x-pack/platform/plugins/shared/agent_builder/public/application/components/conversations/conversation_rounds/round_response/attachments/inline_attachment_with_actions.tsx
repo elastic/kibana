@@ -13,10 +13,13 @@ import type {
 import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import type { AttachmentsService } from '../../../../../../services';
+import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -31,10 +34,26 @@ interface InlineAttachmentWithActionsProps {
   previewBadgeState?: AttachmentPreviewState;
 }
 
+const areInlineAttachmentPropsEqual = (
+  prevProps: InlineAttachmentWithActionsProps,
+  nextProps: InlineAttachmentWithActionsProps
+): boolean =>
+  prevProps.attachment.id === nextProps.attachment.id &&
+  prevProps.attachment.type === nextProps.attachment.type &&
+  prevProps.attachment.hidden === nextProps.attachment.hidden &&
+  prevProps.attachment.origin === nextProps.attachment.origin &&
+  prevProps.attachmentsService === nextProps.attachmentsService &&
+  prevProps.conversationId === nextProps.conversationId &&
+  prevProps.isSidebar === nextProps.isSidebar &&
+  prevProps.previewBadgeState === nextProps.previewBadgeState &&
+  prevProps.screenContext === nextProps.screenContext &&
+  prevProps.attachment.versionData?.version === nextProps.attachment.versionData?.version &&
+  prevProps.attachment.versionData?.versionCount === nextProps.attachment.versionData?.versionCount;
+
 /**
  * Component that renders an inline attachment with its action buttons.
  */
-export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsProps> = ({
+const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActionsProps> = ({
   attachment,
   attachmentsService,
   isSidebar,
@@ -49,6 +68,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     setPreviewedAttachmentKey,
   } = useCanvasContext();
   const { conversationActions } = useConversationContext();
+  const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
@@ -69,7 +89,10 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(
+    attachment.id,
+    attachment.versionData?.version
+  );
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -87,6 +110,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       uiDefinition?.getActionButtons?.({
         attachment,
         isSidebar,
+        agentId,
         updateOrigin,
         openCanvas,
         openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
@@ -101,6 +125,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       uiDefinition,
       attachment,
       isSidebar,
+      agentId,
       updateOrigin,
       openCanvas,
       setPreviewedAttachmentKey,
@@ -128,6 +153,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
+  const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
+  const isHeaderOnly = !uiDefinition.renderInlineContent;
 
   return (
     <EuiSplitPanel.Outer
@@ -136,6 +163,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       hasBorder={true}
       css={css`
         overflow: visible; // allow vis actions to overflow
+        border-radius: ${AB_PANEL_RADIUS}px;
+        ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
       `}
     >
       <AttachmentHeader
@@ -146,20 +175,45 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
         onClosePreview={closeCanvas}
+        isHeaderOnly={isHeaderOnly}
       />
-      <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.(
-          {
-            attachment,
-            isSidebar,
-            screenContext,
-            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-          },
-          {
-            registerActionButtons,
-          }
-        )}
-      </EuiSplitPanel.Inner>
+      {!isHeaderOnly && (
+        <EuiSplitPanel.Inner
+          grow={false}
+          paddingSize="none"
+          css={css`
+            border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            overflow: hidden;
+
+            /* Nested panels default to EUI medium radius (6px); match the card shell (12px). */
+            > .euiPanel {
+              border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            }
+          `}
+        >
+          <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+            {() =>
+              uiDefinition.renderInlineContent?.(
+                {
+                  attachment,
+                  isSidebar,
+                  screenContext,
+                  openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                },
+                {
+                  registerActionButtons,
+                }
+              )
+            }
+          </AttachmentRenderErrorBoundary>
+        </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 };
+
+export const InlineAttachmentWithActions = React.memo(
+  InlineAttachmentWithActionsComponent,
+  areInlineAttachmentPropsEqual
+);
+InlineAttachmentWithActions.displayName = 'InlineAttachmentWithActions';

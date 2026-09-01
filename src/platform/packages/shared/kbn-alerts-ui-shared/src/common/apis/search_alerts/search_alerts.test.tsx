@@ -312,4 +312,26 @@ describe('searchAlerts', () => {
       })
     );
   });
+
+  it('does not throw when the raw response has no `_shards` (empty strategy response)', async () => {
+    // The rule registry search strategy returns this shape (without `_shards`)
+    // when it short-circuits, e.g. for internally managed rule types such as
+    // the Streams significant events rule.
+    const obs$ = of<IKibanaSearchResponse>({
+      rawResponse: {
+        hits: { total: 0, hits: [] },
+      },
+    } as unknown as IKibanaSearchResponse);
+    mockDataPlugin.search.search.mockReturnValue(obs$);
+
+    const result = await searchAlerts(params);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        alerts: [],
+        total: 0,
+        error: undefined,
+      })
+    );
+  });
 });

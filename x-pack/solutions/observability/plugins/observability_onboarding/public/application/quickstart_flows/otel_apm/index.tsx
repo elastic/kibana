@@ -47,11 +47,11 @@ const FETCH_INTERVAL = 2000;
 const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
 export function OtelApmQuickstartFlow() {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.otelApm.breadcrumbs.k8sOtel', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.otelApm.breadcrumbs.k8sOtel', {
       defaultMessage: 'Application: OpenTelemetry',
-    }),
-  });
+    })
+  );
   const {
     services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -174,7 +174,7 @@ export function OtelApmQuickstartFlow() {
                             defaultMessage: 'Waiting for data to be shipped',
                           })
                     }
-                    iconType="checkInCircleFilled"
+                    iconType="checkCircleFill"
                     isLoading={!hasData}
                     css={css`
                       max-width: 40%;

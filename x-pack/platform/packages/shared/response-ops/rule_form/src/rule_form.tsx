@@ -38,11 +38,12 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
-  showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
   initialEditStep?: RuleFormStepId;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+  /** The id of the rule template this rule is being created from, when known. Telemetry only. */
+  templateId?: string;
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -64,11 +65,11 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     filteredRuleTypes,
     shouldUseRuleProducer,
     canShowConsumerSelection,
-    showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
     initialEditStep,
     focusTrapProps,
+    templateId,
   } = props;
 
   const {
@@ -125,7 +126,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           onSubmit={onSubmit}
           onChangeMetaData={retypedOnChangeMetaData}
           isFlyout={isFlyout}
-          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
           initialMetadata={initialMetadata}
           initialEditStep={initialEditStep}
@@ -150,10 +150,10 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           filteredRuleTypes={filteredRuleTypes}
           shouldUseRuleProducer={shouldUseRuleProducer}
           canShowConsumerSelection={canShowConsumerSelection}
-          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
           initialMetadata={initialMetadata}
           focusTrapProps={focusTrapProps}
+          templateId={templateId}
         />
       );
     }
@@ -193,7 +193,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     onCancel,
     onSubmit,
     isFlyout,
-    showMustacheAutocompleteSwitch,
     connectorFeatureId,
     initialMetadata,
     initialEditStep,
@@ -206,6 +205,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
+    templateId,
   ]);
 
   return (

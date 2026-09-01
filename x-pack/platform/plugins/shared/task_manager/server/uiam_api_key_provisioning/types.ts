@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart, ISavedObjectsRepository } from '@kbn/core/server';
+import type {
+  CoreStart,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { TaskUiamProvisioningStatusDoc } from './lib/task_uiam_provisioning_observability_status';
 import type { TaskUserScope } from '../task';
@@ -59,7 +63,15 @@ export interface TaskApiKeyToConvertAttributes {
 export interface TaskManagerUiamProvisioningRunContext {
   coreStart: CoreStart;
   taskManager: TaskManagerStartContract;
+  /** Plain internal repository for reads and the non-encrypted provisioning status SO. */
   savedObjectsClient: ISavedObjectsRepository;
+  /**
+   * Encryption-aware client (carries the ESO encryption extension) for writes that
+   * touch encrypted attributes: the `task` `uiamApiKey` bulk update and the
+   * `api_key_to_invalidate` `uiamApiKey` bulk create. Using the plain repository for
+   * these would persist the secret unencrypted and break later decryption.
+   */
+  unsafeSavedObjectsClient: SavedObjectsClientContract;
   uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
@@ -77,6 +89,10 @@ export interface ApiKeyToConvert {
  */
 export interface UiamKeyResult {
   taskId: string;
+  /**
+   * Raw `essu_…` secret, the format persisted on the task SO and presented as the credential.
+   * The key id belongs on `uiamApiKeyId`, not encoded into this value.
+   */
   uiamApiKey: string;
   uiamApiKeyId: string;
   /** Decrypted task fields for merge; required for ESO/SO `bulkUpdate` */

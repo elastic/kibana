@@ -30,6 +30,9 @@ export async function deleteRuleByName(
   const rules = await apiServices.alerting.rules.find({ search: ruleName });
   const match = rules?.data?.data?.find((r: { name: string }) => r.name === ruleName);
   if (match) {
-    await apiServices.alerting.rules.delete(match.id).catch(() => {});
+    await apiServices.alerting.rules.delete(match.id).catch((err: unknown) => {
+      const status = (err as any)?.status ?? (err as any)?.response?.status;
+      if (status !== 404) throw err;
+    });
   }
 }

@@ -28,7 +28,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
    *
    * 2. **Golden cluster** (set LEAD_GENERATION_DATASET_NAME):
    *    Fetches the named dataset from the upstream golden cluster
-   *    (EVALUATIONS_KBN_URL must also be configured).
+   *    (EVAL_KBN_URL must also be configured).
    *    Run `scripts/upload_dataset.js` first to publish the dataset.
    *
    * 3. **Bundled default dataset** (no env vars required):
@@ -85,7 +85,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
     evaluate('basic: pipeline error → score 0', async ({ executorClient }) => {
       await executorClient.runExperiment(
         {
-          dataset: CALIBRATION_DATASET,
+          datasets: [CALIBRATION_DATASET],
           task: async (): Promise<LeadGenerationTaskOutput> => ({
             leads: null,
             errors: ['Simulated pipeline error for calibration'],
@@ -98,7 +98,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
     evaluate('basic: lead missing required field (title) → score 0', async ({ executorClient }) => {
       await executorClient.runExperiment(
         {
-          dataset: CALIBRATION_DATASET,
+          datasets: [CALIBRATION_DATASET],
           task: async (): Promise<LeadGenerationTaskOutput> => ({
             leads: [
               {
@@ -106,7 +106,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
                 title: '', // empty title — isValidLead requires title.length > 0
                 byline: 'User jdoe performed suspicious actions',
                 description: 'Investigation needed',
-                entities: [{ type: 'user', name: 'jdoe' }],
+                entity: { type: 'user', name: 'jdoe', id: 'user:jdoe' },
                 tags: ['lateral-movement'],
                 priority: 7,
                 chatRecommendations: ['What did jdoe access in the past 24h?'],
@@ -127,7 +127,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
     evaluate('basic: priority out of range (>10) → score 0', async ({ executorClient }) => {
       await executorClient.runExperiment(
         {
-          dataset: CALIBRATION_DATASET,
+          datasets: [CALIBRATION_DATASET],
           task: async (): Promise<LeadGenerationTaskOutput> => ({
             leads: [
               {
@@ -135,7 +135,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
                 title: 'Lateral Movement Detected',
                 byline: 'Host web-server-01 shows lateral movement patterns',
                 description: 'Multiple lateral movement indicators observed',
-                entities: [{ type: 'host', name: 'web-server-01' }],
+                entity: { type: 'host', name: 'web-server-01', id: 'host:web-server-01' },
                 tags: ['lateral-movement'],
                 priority: 15, // out of 1–10 range — isValidLead fails
                 chatRecommendations: ['What processes ran on web-server-01?'],
@@ -162,7 +162,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, inferenceClient, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: CALIBRATION_DATASET,
+            datasets: [CALIBRATION_DATASET],
             task: async (): Promise<LeadGenerationTaskOutput> => ({
               leads: null,
               errors: ['Simulated pipeline error for rubric calibration'],
@@ -182,7 +182,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, inferenceClient, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: CALIBRATION_DATASET,
+            datasets: [CALIBRATION_DATASET],
             task: async (): Promise<LeadGenerationTaskOutput> => ({
               leads: null,
             }),
@@ -205,7 +205,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
         });
         await executorClient.runExperiment(
           {
-            dataset: CALIBRATION_DATASET,
+            datasets: [CALIBRATION_DATASET],
             task: async (): Promise<LeadGenerationTaskOutput> => ({
               leads: [
                 {
@@ -213,7 +213,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
                   title: 'Something happened',
                   byline: 'A user did something',
                   description: 'There might be an issue. Please investigate.',
-                  entities: [{ type: 'user', name: 'unknown' }],
+                  entity: { type: 'user', name: 'unknown', id: 'user:unknown' },
                   tags: [],
                   priority: 5,
                   chatRecommendations: ['Check logs'],
@@ -246,16 +246,18 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, leadGenerationClient, connector, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'lead generation: e2e smoke',
-              description: 'Basic smoke test for the lead generation pipeline',
-              examples: [
-                {
-                  input: {},
-                  output: { leads: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'lead generation: e2e smoke',
+                description: 'Basic smoke test for the lead generation pipeline',
+                examples: [
+                  {
+                    input: {},
+                    output: { leads: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) =>
               runLeadGeneration({
                 leadGenerationClient,
@@ -268,6 +270,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
             {
               name: 'Ran',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => ({
                 score: Array.isArray(output?.leads) && !output?.errors?.length ? 1 : 0,
               }),
@@ -290,16 +293,18 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, leadGenerationClient, connector, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'lead generation: status smoke',
-              description: 'Verifies that the status endpoint tracks the last execution UUID',
-              examples: [
-                {
-                  input: {},
-                  output: { leads: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'lead generation: status smoke',
+                description: 'Verifies that the status endpoint tracks the last execution UUID',
+                examples: [
+                  {
+                    input: {},
+                    output: { leads: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) => {
               const result = await runLeadGeneration({
                 leadGenerationClient,
@@ -329,6 +334,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
             {
               name: 'StatusMatchesExecution',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => {
                 const typedOutput = output as
                   | (typeof output & {

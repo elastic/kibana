@@ -14,6 +14,7 @@ import {
 } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
+import { withoutSecurityTestEndpoints } from './utils';
 
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
@@ -30,12 +31,26 @@ export const servers: ScoutServerConfig = {
     uiam: true,
     cps: true,
   },
+  esTestCluster: {
+    ...uiamConfig.esTestCluster,
+    serverArgs: [
+      ...uiamConfig.esTestCluster.serverArgs,
+      // Feature flags to enable CPS compatibility for anomaly detection jobs and transforms.
+      'es.transform_cross_project_feature_flag_enabled=true',
+      'es.ml_cross_project_feature_flag_enabled=true',
+    ],
+  },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      ...uiamConfig.kbnTestServer.serverArgs,
+      ...withoutSecurityTestEndpoints(uiamConfig.kbnTestServer.serverArgs),
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
+      // UIAM API keys for task-manager: required for background tasks to be eligible
+      // for CPS fan-out (stock ES API keys don't carry x-client-authentication).
+      '--xpack.task_manager.api_key_type=uiam',
+      '--xpack.task_manager.grant_uiam_api_keys=true',
+      '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
     ],
   },
 };

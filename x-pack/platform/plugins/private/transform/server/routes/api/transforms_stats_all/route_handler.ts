@@ -29,7 +29,6 @@ export const routeHandler: RequestHandler<
       {
         size: 1000,
         transform_id: '_all',
-        // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
         basic,
       },
       { maxRetries: 0 }

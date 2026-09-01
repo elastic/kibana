@@ -16,10 +16,10 @@ import {
   isBuiltInStepType,
   resolveKibanaStepTypeAlias,
 } from '@kbn/workflows';
+import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { stepSchemas } from '../../../../../common/step_schemas';
-import { getBaseConnectorType } from '../../../../shared/ui/step_icons/get_base_connector_type';
 
 const isTechPreviewStep = (connectorType: string): boolean => {
   const connector = getCachedAllConnectorsMap()?.get(connectorType);

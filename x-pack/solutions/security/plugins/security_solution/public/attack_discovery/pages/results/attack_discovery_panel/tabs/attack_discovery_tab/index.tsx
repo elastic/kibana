@@ -7,7 +7,7 @@
 
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
@@ -15,7 +15,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { AttackChain } from './attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../../../detections/components/alerts_table/actions';
-import { getTacticMetadata } from '../../../../../helpers';
+import { getTacticMetadata, getOriginalAlertIds } from '../../../../../helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
@@ -51,7 +51,6 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
     [capabilities, showAnonymized]
   );
 
-  const { euiTheme } = useEuiTheme();
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => attackDiscovery, [attackDiscovery]);
 
   const summaryMarkdownWithReplacements = useMemo(
@@ -78,7 +77,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   );
 
   const originalAlertIds = useMemo(
-    () => attackDiscovery.alertIds.map((id) => replacements?.[id] ?? id),
+    () => getOriginalAlertIds(attackDiscovery.alertIds, replacements),
     [attackDiscovery.alertIds, replacements]
   );
 
@@ -98,6 +97,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -112,6 +112,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -128,7 +129,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         </>
       )}
 
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
             <NewAgentBuilderAttachment
@@ -142,28 +143,17 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
             <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
           )}
         </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            margin-left: ${euiTheme.size.m};
-            margin-top: ${euiTheme.size.xs};
-          `}
-          grow={false}
-        >
-          <InvestigateInTimelineButton asEmptyButton={true} dataProviders={null} filters={filters}>
-            <EuiFlexGroup
-              alignItems="center"
-              data-test-subj="investigateInTimelineButton"
-              gutterSize="xs"
-              responsive={false}
-              wrap={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon data-test-subj="timelineIcon" type="timeline" />
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj="investigateInTimelineLabel" grow={false}>
-                {i18n.INVESTIGATE_IN_TIMELINE}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <InvestigateInTimelineButton
+            asEmptyButton={true}
+            data-test-subj="investigateInTimelineButton"
+            dataProviders={null}
+            filters={filters}
+            flush="both"
+            iconType="timeline"
+            size="m"
+          >
+            {i18n.INVESTIGATE_IN_TIMELINE}
           </InvestigateInTimelineButton>
         </EuiFlexItem>
       </EuiFlexGroup>

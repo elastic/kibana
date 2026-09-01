@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/group1/_discover.ts
+
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -208,24 +210,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
-        });
-      });
-    });
-
-    describe('data-shared-item', function () {
-      it('should have correct data-shared-item title and description', async () => {
-        const expected = {
-          title: 'A Saved Search',
-          description: 'A Saved Search Description',
-        };
-
-        await retry.try(async () => {
-          await PageObjects.discover.loadSavedSearch(expected.title);
-          await PageObjects.discover.waitUntilTabIsLoaded();
-          const { title, description } =
-            await PageObjects.common.getSharedItemTitleAndDescription();
-          expect(title).to.eql(expected.title);
-          expect(description).to.eql(expected.description);
         });
       });
     });

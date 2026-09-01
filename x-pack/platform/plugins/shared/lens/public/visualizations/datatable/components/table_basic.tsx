@@ -25,7 +25,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -74,7 +74,11 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
+import {
+  getSupportedColumnAlignment,
+  hasIncompatibleColorConfig,
+  getColorByValuePalette,
+} from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -309,7 +313,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const alignments: Map<string, 'left' | 'right' | 'center'> = useMemo(() => {
     return columnConfig.columns.reduce((acc, column) => {
-      acc.set(column.columnId, getColumnAlignment(column, isNumericMap.get(column.columnId)));
+      acc.set(
+        column.columnId,
+        getSupportedColumnAlignment(column, isNumericMap.get(column.columnId))
+      );
       return acc;
     }, new Map<string, 'left' | 'right' | 'center'>());
   }, [columnConfig.columns, isNumericMap]);
@@ -505,13 +512,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       DataContext,
       isDarkMode,
       getCellColor,
-      props.args.fitRowToContent
+      props.paletteService,
+      props.args.fitRowToContent,
+      props.args.density
     );
   }, [
     formatters,
     columnConfig,
     isDarkMode,
     props.args.fitRowToContent,
+    props.args.density,
     props.paletteService,
     palettes,
     sortedTable,

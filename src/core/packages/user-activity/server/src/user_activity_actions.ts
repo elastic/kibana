@@ -32,13 +32,63 @@ export const userActivityActions = {
     description: 'User logged in to Kibana.',
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Authentication',
-    versionAddedAt: '9.4',
+    versionAddedAt: '9.5',
   },
   log_out_user: {
     description: 'User logged out of Kibana.',
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Authentication',
-    versionAddedAt: '9.4',
+    versionAddedAt: '9.5',
+  },
+  dashboard_create: {
+    description: 'User saved a dashboard for the first time.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_update: {
+    description: 'User edited an existing dashboard and saved the changes.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_delete: {
+    description: 'User deleted a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_view: {
+    description:
+      'User opened a dashboard. This action can also trigger `dashboard_refresh` when Kibana needs to query panel data, such as when the dashboard uses a relative time range.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_refresh: {
+    description:
+      'Dashboard panels refreshed after a user action, such as applying a filter, changing the time range, or opening a dashboard with a relative time range. Panels can also refresh automatically at the configured interval. The event measures the time from when the query starts until the last panel finishes loading.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  discover_session_create: {
+    description: 'User created a Discover session.',
+    ownerTeam: '@elastic/kibana-data-discovery',
+    groupName: 'Discover',
+    versionAddedAt: '9.6',
+  },
+  discover_session_update: {
+    description: 'User updated an existing Discover session.',
+    ownerTeam: '@elastic/kibana-data-discovery',
+    groupName: 'Discover',
+    versionAddedAt: '9.6',
+  },
+  discover_session_delete: {
+    description: 'User deleted a Discover session.',
+    ownerTeam: '@elastic/kibana-data-discovery',
+    groupName: 'Discover',
+    versionAddedAt: '9.6',
   },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 

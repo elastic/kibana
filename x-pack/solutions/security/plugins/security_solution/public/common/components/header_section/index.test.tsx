@@ -11,7 +11,7 @@ import 'jest-styled-components';
 // Make sure expect().toHaveStyleRule is using emotion's matchers
 import { matchers as emotionMatchers } from '@emotion/jest';
 expect.extend(emotionMatchers);
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../mock';
@@ -79,7 +79,7 @@ describe('HeaderSection', () => {
     expect(screen.queryByText(tooltipTitle)).not.toBeInTheDocument();
     expect(screen.queryByText(tooltipContent)).not.toBeInTheDocument();
 
-    await userEvent.hover(tooltip);
+    fireEvent.mouseOver(tooltip);
 
     expect(await screen.findByText(tooltipTitle)).toBeInTheDocument();
     expect(await screen.findByText(tooltipContent)).toBeInTheDocument();
@@ -300,6 +300,7 @@ describe('HeaderSection', () => {
     });
 
     expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-label', 'Open');
+    expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('header-section-supplements')).toBeInTheDocument();
     expect(screen.getByTestId('header-section-subtitle')).toBeInTheDocument();
     expect(screen.getByTestId('header-section-filters')).toBeInTheDocument();
@@ -332,13 +333,14 @@ describe('HeaderSection', () => {
     });
 
     expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-label', 'Closed');
+    expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByTestId('header-section-supplements')).not.toBeInTheDocument();
     expect(screen.queryByTestId('header-section-filters')).not.toBeInTheDocument();
     expect(screen.queryByTestId('header-section-subtitle')).not.toBeInTheDocument();
     expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
   });
 
-  test('renders "Chart Closed" when toggleAriaLabel="Chart" and toggleStatus=false', () => {
+  test('renders toggleAriaLabel as aria-label and sets aria-expanded when toggleAriaLabel is provided', () => {
     renderHeaderSection({
       id: 'id',
       title: 'T',
@@ -349,7 +351,8 @@ describe('HeaderSection', () => {
       toggleAriaLabel: 'Chart',
       children: null,
     });
-    expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-label', 'Chart Closed');
+    expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-label', 'Chart');
+    expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('it toggles query when icon is clicked', async () => {

@@ -53,3 +53,16 @@ Cloud pipelines do not build Kibana from source — they use a Kibana commit tha
 
 - **Serverless Cloud projects:** under `Project information`. The log group starts with `Create {security|observability|...} project`.
 - **Stateful Cloud deployments:** under `Deployment information`. The log group starts with `Create deployment`.
+
+### Did a post-fix Cloud failure actually run the fix?
+
+Because a Cloud image trails `main`, a failure reported soon after a fix merged may have run a checkout that **predates the fix** — CI lag, not a recurrence. Before treating such a failure as the fix failing (or applying `failure:fix-did-not-hold`), resolve the run's `Build hash` and check whether that commit contains the fix. Use the GitHub compare API — one call, no local `git fetch` needed (a full Kibana fetch is slow):
+
+```
+gh api repos/elastic/kibana/compare/<fix-merge-sha>...<build-hash> --jq '.status'
+```
+
+- `ahead` or `identical` → the build **contains the fix**, so the failure counts.
+- `behind` or `diverged` → the build **predates the fix** → the failure ran pre-fix code. It is expected propagation lag, not a recurrence: classify it `ci-environment` and don't treat the fix as regressed.
+
+(Equivalently, the build has the fix iff `.merge_base_commit.sha` equals the fix's merge commit.)

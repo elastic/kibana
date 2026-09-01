@@ -7,105 +7,117 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { Suspense } from 'react';
+import userEvent from '@testing-library/user-event';
+import { act, screen } from '@testing-library/react';
 import { getTableViewDescription } from '..';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { TablesAdapter } from '@kbn/expressions-plugin/common';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { TablesAdapter, type Datatable } from '@kbn/expressions-plugin/common';
 
 jest.mock('@kbn/share-plugin/public', () => ({
   downloadMultipleAs: jest.fn(),
 }));
+
 jest.mock('../../../../common', () => ({
   datatableToCSV: jest.fn().mockReturnValue('csv'),
   tableHasFormulas: jest.fn().mockReturnValue(false),
 }));
 
 describe('Inspector Data View', () => {
-  let DataView: any;
+  let DataView: InspectorViewDescription;
+
+  const createDatatable = (value: number): Datatable => ({
+    columns: [{ id: '1', name: 'column1', meta: { type: 'number' } }],
+    rows: [{ '1': value }],
+    type: 'datatable',
+  });
 
   beforeEach(() => {
     DataView = getTableViewDescription(() => ({
-      uiActions: {} as any,
-      uiSettings: { get: (key: string, value: string) => value } as any,
       fieldFormats: {
         deserialize: jest.fn().mockReturnValue({ convertToText: (v: string) => v }),
-      } as any,
+      } as unknown as FieldFormatsStart,
       isFilterable: jest.fn(),
+      uiActions: {} as UiActionsStart,
+      uiSettings: { get: (_key: string, value: string) => value } as IUiSettingsClient,
     }));
   });
 
   it('should only show if data adapter is present', () => {
     const adapter = new TablesAdapter();
 
-    expect(DataView.shouldShow({ tables: adapter })).toBe(true);
-    expect(DataView.shouldShow({})).toBe(false);
+    expect(DataView.shouldShow?.({ tables: adapter })).toBe(true);
+    expect(DataView.shouldShow?.({})).toBe(false);
   });
 
   describe('component', () => {
-    let adapters: any;
+    let adapters: { tables: TablesAdapter };
+    let InspectorDataView: NonNullable<InspectorViewDescription['component']>;
+
+    const renderInspectorDataView = (
+      ui: React.ReactElement,
+      options?: { fallback?: React.ReactNode }
+    ) => renderWithI18n(<Suspense fallback={options?.fallback ?? null}>{ui}</Suspense>);
 
     beforeEach(() => {
       adapters = { tables: new TablesAdapter() };
+      InspectorDataView = DataView.component!;
     });
 
-    it('should render loading state', () => {
-      const DataViewComponent = DataView.component;
-      const component = mountWithIntl(
-        <Suspense fallback={<div>loading</div>}>
-          <DataViewComponent title="Test Data" adapters={adapters} />
-        </Suspense>
-      );
+    it('should render loading state', async () => {
+      renderInspectorDataView(<InspectorDataView adapters={adapters} title="Test Data" />, {
+        fallback: <div>loading</div>,
+      });
 
-      expect(component).toMatchSnapshot();
+      expect(screen.getByText('loading')).toBeVisible();
+      expect(await screen.findByText('No data available')).toBeVisible();
     });
 
     it('should render empty state', async () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
-      adapters.tables.logDatatable({ columns: [{ id: '1' }], rows: [{ '1': 123 }] });
-      // After the loader has resolved we'll still need one update, to "flush" the state changes
-      component.update();
-      expect(component.render()).toMatchSnapshot();
+      renderInspectorDataView(<InspectorDataView adapters={adapters} title="Test Data" />);
+
+      expect(await screen.findByText('No data available')).toBeVisible();
+      expect(screen.getByText('The element did not provide any data.')).toBeVisible();
     });
 
     it('should render single table without selector', async () => {
-      const component = mountWithIntl(
-        // eslint-disable-next-line react/jsx-pascal-case
-        <DataView.component title="Test Data" adapters={adapters} />
-      );
-      adapters.tables.logDatatable('table1', {
-        columns: [{ id: '1', name: 'column1', meta: { type: 'number' } }],
-        rows: [{ '1': 123 }],
-        type: 'datatable',
-      });
-      // After the loader has resolved we'll still need one update, to "flush" the state changes
-      component.update();
-      expect(component.find('[data-test-subj="inspectorDataViewSelectorLabel"]')).toHaveLength(0);
+      renderInspectorDataView(<InspectorDataView adapters={adapters} title="Test Data" />);
 
-      expect(component.render()).toMatchSnapshot();
+      act(() => {
+        adapters.tables.logDatatable('table1', createDatatable(123));
+      });
+
+      expect(await screen.findByText('column1')).toBeVisible();
+
+      expect(screen.queryByText(/There are \d+ tables? in total/)).not.toBeInTheDocument();
+      expect(screen.getByText('123')).toBeVisible();
+      expect(screen.getByRole('button', { name: /Download CSV/i })).toBeVisible();
     });
 
     it('should support multiple datatables', async () => {
       const multitableAdapter = { tables: new TablesAdapter() };
+      const user = userEvent.setup();
 
-      const component = mountWithIntl(
-        // eslint-disable-next-line react/jsx-pascal-case
-        <DataView.component title="Test Data" adapters={multitableAdapter} />
-      );
-      multitableAdapter.tables.logDatatable('table1', {
-        columns: [{ id: '1', name: 'column1', meta: { type: 'number' } }],
-        rows: [{ '1': 123 }],
-        type: 'datatable',
-      });
-      multitableAdapter.tables.logDatatable('table2', {
-        columns: [{ id: '1', name: 'column1', meta: { type: 'number' } }],
-        rows: [{ '1': 456 }],
-        type: 'datatable',
-      });
-      // After the loader has resolved we'll still need one update, to "flush" the state changes
-      component.update();
-      expect(component.find('[data-test-subj="inspectorDataViewSelectorLabel"]')).toHaveLength(1);
+      renderInspectorDataView(<InspectorDataView adapters={multitableAdapter} title="Test Data" />);
 
-      expect(component.render()).toMatchSnapshot();
+      act(() => {
+        multitableAdapter.tables.logDatatable('table1', createDatatable(123));
+        multitableAdapter.tables.logDatatable('table2', createDatatable(456));
+      });
+
+      expect(await screen.findByText('There are 2 tables in total')).toBeVisible();
+      expect(screen.getByText('Table 1')).toBeVisible();
+      expect(screen.getByText('column1')).toBeVisible();
+      expect(screen.getByText('123')).toBeVisible();
+
+      await user.click(screen.getByText('Table 1'));
+      await user.click(await screen.findByText('Table 2'));
+
+      expect(screen.getByText('456')).toBeVisible();
     });
   });
 });

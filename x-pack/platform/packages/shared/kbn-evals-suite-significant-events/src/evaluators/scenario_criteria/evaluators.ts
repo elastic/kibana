@@ -9,12 +9,20 @@ import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/e
 
 export interface CreateScenarioCriteriaLlmEvaluatorOptions<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
+  TJudgedOutput extends TaskOutput = TTaskOutput
 > {
-  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator<TExample, TTaskOutput>;
+  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator<TExample, TJudgedOutput>;
   criteria?: EvaluationCriterion[];
-  transformOutput?: (output: TTaskOutput) => TTaskOutput;
+  /** Reshapes the task output before judging. `context.input` exposes the example input. */
+  transformOutput?: (output: TTaskOutput, context: { input: TExample['input'] }) => TJudgedOutput;
   name?: string;
+  /**
+   * Optional guard for outputs there is nothing to judge in. Return a reason to abstain
+   * (`score: null`) instead of asking the judge to score an empty output, which produces a
+   * low score that reads as poor quality rather than as a missing result.
+   */
+  skipWhen?: (output: TTaskOutput) => string | undefined;
 }
 
 /**
@@ -36,27 +44,47 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions<
  */
 export const createScenarioCriteriaLlmEvaluator = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
+  TJudgedOutput extends TaskOutput = TTaskOutput
 >({
   name = 'scenario_criteria',
   criteria,
   criteriaFn,
   transformOutput,
-}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TTaskOutput>): Evaluator<
+  skipWhen,
+}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TTaskOutput, TJudgedOutput>): Evaluator<
   TExample,
   TTaskOutput
 > => ({
   name,
   kind: 'LLM' as const,
+  direction: 'maximize',
   evaluate: async (params) => {
     const { input, output, expected, metadata } = params;
+
+    const skipReason = skipWhen?.(output);
+    if (skipReason) {
+      return { score: null, label: 'unavailable', explanation: skipReason };
+    }
+
     const resolvedCriteria =
       criteria ?? (expected as Record<string, unknown> | null)?.criteria ?? [];
+
+    if (!Array.isArray(resolvedCriteria) || resolvedCriteria.length === 0) {
+      return {
+        score: null,
+        label: 'unavailable',
+        explanation: 'No scenario criteria specified — skipping scenario criteria check',
+      };
+    }
 
     return criteriaFn(resolvedCriteria as EvaluationCriterion[]).evaluate({
       input,
       expected,
-      output: transformOutput ? transformOutput(output) : output,
+      output: transformOutput
+        ? transformOutput(output, { input })
+        : // identity when TJudgedOutput takes its default of TTaskOutput
+          (output as unknown as TJudgedOutput),
       metadata,
     });
   },

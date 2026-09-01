@@ -15,6 +15,445 @@ servers:
       port:
         default: '5601'
 paths:
+  /api/detection_engine/attacks/assignees:
+    post:
+      description: >
+        Assign users to attack discovery alerts, and unassign them from alerts.
+
+        Optionally cascade the change to related detection alerts via
+        `kibana.alert.attack_discovery.alert_ids`.
+
+        > info
+
+        > You cannot add and remove the same assignee in the same request.
+      operationId: SetAttacksAssignees
+      requestBody:
+        content:
+          application/json:
+            examples:
+              add:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+              remove:
+                value:
+                  assignees:
+                    add: []
+                    remove:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+              withRelatedAlerts:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/SetAttacksAssigneesByIds'
+              description: Set attacks assignees by IDs request
+        description: An object containing assignees to add or remove and attack ids the
+          changes will be applied to
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 76
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body].ids: at least one attack id is required to update
+                      assignees'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Assign and unassign users from attack discovery alerts
+      tags:
+        - Security Detections API
+        - Attacks API
+      x-state: added in 9.5.0
+  /api/detection_engine/attacks/search:
+    post:
+      description: Find and/or aggregate attack discovery alerts that match the given
+        query. Searches scheduled and ad hoc attack discovery alert indices for
+        the active space only.
+      operationId: SearchAttacks
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byIds:
+                value:
+                  query:
+                    ids:
+                      values:
+                        - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+            schema:
+              $ref: '#/components/schemas/QueryAlertsBodyParams'
+              description: Elasticsearch query and aggregation request
+        description: Search and/or aggregation query
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    _shards:
+                      failed: 0
+                      skipped: 0
+                      successful: 1
+                      total: 1
+                    hits:
+                      hits:
+                        - _id: 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                          _index: .internal.adhoc.alerts-security.attack.discovery.alerts-default-000001
+                          _score: 1
+                          _source:
+                            '@timestamp': '2025-06-23T15:16:52.984Z'
+                            kibana.alert.attack_discovery.alert_ids:
+                              - ee183cf525d7e9d0f47d1b2bb928d760a0f53756ffa61edcf0672f71c986ac21
+                              - 46ebac989ca72439b14b57d32102543c17d5f33e0f6532d8a5c148949d8ff7b5
+                            kibana.alert.attack_discovery.title_with_replacements: Widespread Malware Campaign via Compromised Account
+                            kibana.alert.workflow_status: open
+                      max_score: 1
+                      total:
+                        relation: eq
+                        value: 1
+                    timed_out: false
+                    took: 1
+              schema:
+                additionalProperties: true
+                description: Elasticsearch search response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: 'Failed to parse search request: unknown query clause in bool filter'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Find and/or aggregate attack discovery alerts
+      tags:
+        - Security Detections API
+        - Attacks API
+      x-state: added in 9.5.0
+  /api/detection_engine/attacks/status:
+    post:
+      description: Set the workflow status of one or more attack discovery alerts by
+        IDs, optionally cascading the status to their related detection alerts.
+      operationId: SetAttacksStatus
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byId:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: acknowledged
+              closedWithReason:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  reason: false_positive
+                  status: closed
+              withRelatedAlerts:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: closed
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/SetAttacksStatusByIds'
+              description: Set attacks status by IDs request
+        description: An object containing the desired status and explicit attack ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 81
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body].ids: at least one attack id is required to update
+                      status'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Set attack discovery alerts workflow status
+      tags:
+        - Security Detections API
+        - Attacks API
+      x-state: added in 9.5.0
+  /api/detection_engine/attacks/tags:
+    post:
+      description: Add tags to attack discovery alerts, and remove them from alerts,
+        by attack IDs in a single request. Optionally cascade tag changes to
+        related detection alerts.
+      operationId: SetAttacksTags
+      requestBody:
+        content:
+          application/json:
+            examples:
+              add:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add:
+                      - investigation
+                    tags_to_remove: []
+              remove:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove:
+                      - investigation
+              withRelatedAlerts:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add:
+                      - investigation
+                    tags_to_remove: []
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/SetAttacksTagsByIds'
+              description: Set attacks tags by IDs request
+        description: An object containing tags to add or remove and attack ids the
+          changes will be applied to
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 68
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    message:
+                      - Duplicate tags ["duplicate"] were found in the
+                        tags_to_add and tags_to_remove parameters.
+                    status_code: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Add and remove attack discovery alert tags
+      tags:
+        - Security Detections API
+        - Attacks API
+      x-state: added in 9.5.0
   /api/detection_engine/privileges:
     get:
       description: >
@@ -1936,7 +2375,7 @@ paths:
                             interval: 15m
                             license: Elastic License v2
                             machine_learning_job_id:
-                              - packetbeat_dns_tunneling_ea
+                              - dns_tunneling_ea
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
@@ -2579,7 +3018,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
@@ -2907,7 +3346,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
@@ -4575,12 +5014,41 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Reason'
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry,
+            the server defines a runtime field of the given type that reads its
+            value from `_source[fieldName]` and attaches it to the underlying
+            `_update_by_query` as `runtime_mappings`. Allows the `query` to
+            reference non-ECS fields stored on the alert `_source` but not in
+            the alerts index mapping — for example, runtime fields the rule's
+            source index defined at the time the alerts were created. Limited to
+            100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
           type: string
       required:
         - query
+        - status
+    CloseAttacksByIds:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+        reason:
+          $ref: '#/components/schemas/Reason'
+        status:
+          enum:
+            - closed
+          type: string
+        update_related_alerts:
+          $ref: '#/components/schemas/UpdateRelatedAlerts'
+      required:
+        - ids
         - status
     ConcurrentSearches:
       minimum: 1
@@ -5692,6 +6160,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     ExternalRuleCustomizedFields:
       description: An array of customized field names — that is, fields that the user
@@ -5822,6 +6291,41 @@ components:
     ItemsPerSearch:
       minimum: 1
       type: integer
+    KillProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the
+            command field. Example: "command": "kill-process"'
+          enum:
+            - kill-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find
+            your comment in the response actions history log. Example:
+            "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of `process.pid`
+              maxLength: 2000
+              type: string
+            kill_descendants:
+              description: Whether to also terminate the descendant processes of the targeted
+                process.
+              type: boolean
+              x-state: Added in 9.6.0
+            overwrite:
+              default: true
+              description: Whether to overwrite field with `process.pid`
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     KqlQueryLanguage:
       enum:
         - kuery
@@ -6339,9 +6843,8 @@ components:
             - severity
         - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
     MaxSignals:
-      default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value). Defaults to `100`.
         > info
         > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
@@ -6996,35 +7499,14 @@ components:
         - error
         - message
     ProcessesParams:
-      type: object
-      properties:
-        command:
-          description: 'To run an endpoint response action, specify a value for the
-            command field. Example: "command": "isolate"'
-          enum:
-            - kill-process
-            - suspend-process
-          type: string
-        comment:
-          description: 'Add a note that explains or describes the action. You can find
-            your comment in the response actions history log. Example:
-            "comment": "Check processes"'
-          type: string
-        config:
-          type: object
-          properties:
-            field:
-              description: Field to use instead of process.pid
-              type: string
-            overwrite:
-              default: true
-              description: Whether to overwrite field with process.pid
-              type: boolean
-          required:
-            - field
-      required:
-        - command
-        - config
+      discriminator:
+        mapping:
+          kill-process: '#/components/schemas/KillProcessParams'
+          suspend-process: '#/components/schemas/SuspendProcessParams'
+        propertyName: command
+      oneOf:
+        - $ref: '#/components/schemas/KillProcessParams'
+        - $ref: '#/components/schemas/SuspendProcessParams'
     QueryAlertsBodyParams:
       type: object
       properties:
@@ -7581,7 +8063,9 @@ components:
         by the user through the advanced settings.'
       oneOf:
         - $ref: '#/components/schemas/ReasonEnum'
-        - type: string
+        - maxLength: 1024
+          minLength: 1
+          type: string
     ReasonEnum:
       enum:
         - false_positive
@@ -8401,6 +8885,18 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
       required:
         - command
+    RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field
+        value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -8995,6 +9491,18 @@ components:
         query:
           additionalProperties: true
           type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a
+            runtime field of the specified type is created reading its value
+            from `_source[fieldName]` and included in the query as
+            `runtime_mappings`. Use this to reference fields stored on the alert
+            `_source` that are not part of the Elastic Common Schema (ECS) of
+            the alerts index mapping, for example, custom fields that the rule's
+            source index defined when the alerts were created.
+          maxProperties: 100
+          type: object
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
@@ -9018,6 +9526,50 @@ components:
           $ref: '#/components/schemas/AlertIds'
         tags:
           $ref: '#/components/schemas/SetAlertTags'
+      required:
+        - ids
+        - tags
+    SetAttacksAssigneesByIds:
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/AlertAssignees'
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+        update_related_alerts:
+          $ref: '#/components/schemas/UpdateRelatedAlerts'
+      required:
+        - ids
+        - assignees
+    SetAttacksStatusByIds:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/CloseAttacksByIds'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/CloseAttacksByIds'
+        - $ref: '#/components/schemas/SetAttacksStatusByIdsBase'
+    SetAttacksStatusByIdsBase:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+        status:
+          $ref: '#/components/schemas/AlertStatusExceptClosed'
+        update_related_alerts:
+          $ref: '#/components/schemas/UpdateRelatedAlerts'
+      required:
+        - ids
+        - status
+    SetAttacksTagsByIds:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+        tags:
+          $ref: '#/components/schemas/SetAlertTags'
+        update_related_alerts:
+          $ref: '#/components/schemas/UpdateRelatedAlerts'
       required:
         - ids
         - tags
@@ -9083,6 +9635,36 @@ components:
         - asc
         - desc
       type: string
+    SuspendProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the
+            command field. Example: "command": "suspend-process"'
+          enum:
+            - suspend-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find
+            your comment in the response actions history log. Example:
+            "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of process.pid
+              maxLength: 2000
+              type: string
+            overwrite:
+              default: true
+              description: Whether to overwrite field with process.pid
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     Threat:
       description: >
         > info
@@ -10390,6 +10972,11 @@ components:
       type: string
     TimestampOverrideFallbackDisabled:
       description: Disables the fallback to the event's @timestamp field
+      type: boolean
+    UpdateRelatedAlerts:
+      default: false
+      description: When `true`, the change is also applied to detection alerts related
+        to the attacks via `kibana.alert.attack_discovery.alert_ids`.
       type: boolean
     UUID:
       description: A universally unique identifier

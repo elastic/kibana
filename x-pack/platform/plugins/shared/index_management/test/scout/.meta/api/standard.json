@@ -1,0 +1,2060 @@
+{
+  "sha1": "1fbd8237e9b1615fbf7672ce963504c28b31aca2",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1c06492ac6f39e0-28f5b7dd75ea4a5",
+      "title": "Cluster nodes API fetches the nodes plugins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/cluster_nodes.spec.ts",
+        "line": 23,
+        "column": 30
+      }
+    },
+    {
+      "id": "369fcfaa557a681-2056d97f6df375a",
+      "title": "Component templates API returns an array of component templates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 95,
+        "column": 11
+      }
+    },
+    {
+      "id": "369fcfaa557a681-182944f1ea5ad70",
+      "title": "Component templates API returns a single component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 111,
+        "column": 17
+      }
+    },
+    {
+      "id": "369fcfaa557a681-172570b0f56c1af",
+      "title": "Component templates API creates a component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 133,
+        "column": 46
+      }
+    },
+    {
+      "id": "369fcfaa557a681-e0540b1cae02ad0",
+      "title": "Component templates API creates a component template with a frozen_after lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 148,
+        "column": 14
+      }
+    },
+    {
+      "id": "369fcfaa557a681-6c77278ab7b5001",
+      "title": "Component templates API creates a component template with only required fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 158,
+        "column": 98
+      }
+    },
+    {
+      "id": "369fcfaa557a681-407c48c373fa36a",
+      "title": "Component templates API rejects creating a component template that already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 160,
+        "column": 89
+      }
+    },
+    {
+      "id": "369fcfaa557a681-6f2e83d5d93dee8",
+      "title": "Component templates API updates an existing component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 172,
+        "column": 12
+      }
+    },
+    {
+      "id": "369fcfaa557a681-11bf3e96cae6232",
+      "title": "Component templates API rejects updating a component template that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 177,
+        "column": 12
+      }
+    },
+    {
+      "id": "369fcfaa557a681-e008432608ee8dd",
+      "title": "Component templates API updates a deprecated component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 198,
+        "column": 11
+      }
+    },
+    {
+      "id": "369fcfaa557a681-937962368e02b67",
+      "title": "Component templates API deletes a component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 210,
+        "column": 13
+      }
+    },
+    {
+      "id": "369fcfaa557a681-72efc6181c74b48",
+      "title": "Component templates API deletes multiple component templates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 221,
+        "column": 79
+      }
+    },
+    {
+      "id": "369fcfaa557a681-b0319d26b38537e",
+      "title": "Component templates API reports the component templates it could not delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 231,
+        "column": 68
+      }
+    },
+    {
+      "id": "369fcfaa557a681-8294627f717e130",
+      "title": "Component templates API returns no data streams for an unused component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 250,
+        "column": 5
+      }
+    },
+    {
+      "id": "369fcfaa557a681-a9cb70b400a143b",
+      "title": "Component templates API returns the data streams of a component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/component_templates/component_templates.spec.ts",
+        "line": 271,
+        "column": 29
+      }
+    },
+    {
+      "id": "8db1f8ed2ad3caf-0f157db6d4035ef",
+      "title": "Data streams disable lifecycle API disables the lifecycle of a data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_disable_lifecycle.spec.ts",
+        "line": 28,
+        "column": 25
+      }
+    },
+    {
+      "id": "6b1025ac4f5bcfd-06badc4f79a5bca",
+      "title": "Data streams API - Get (serverless) lists the data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
+        "line": 43,
+        "column": 27
+      }
+    },
+    {
+      "id": "6b1025ac4f5bcfd-57cfd888c19962a",
+      "title": "Data streams API - Get (serverless) includes stats when asked for them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
+        "line": 57,
+        "column": 68
+      }
+    },
+    {
+      "id": "6b1025ac4f5bcfd-3142d83a42315c3",
+      "title": "Data streams API - Get (serverless) returns a single data stream by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
+        "line": 81,
+        "column": 37
+      }
+    },
+    {
+      "id": "83408411fd238ac-d0f779b5b0291eb",
+      "title": "Data streams API - Get (stateful) lists the data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
+        "line": 38,
+        "column": 5
+      }
+    },
+    {
+      "id": "83408411fd238ac-7daf56dad24bc02",
+      "title": "Data streams API - Get (stateful) includes stats when asked for them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
+        "line": 52,
+        "column": 21
+      }
+    },
+    {
+      "id": "83408411fd238ac-3e412c92edd5863",
+      "title": "Data streams API - Get (stateful) returns a single data stream by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
+        "line": 75,
+        "column": 52
+      }
+    },
+    {
+      "id": "8ad7525e05f0604-f6a17aebfdd7c3f",
+      "title": "Data streams index mode API correctly returns index mode property based on index settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 20,
+        "column": 11
+      }
+    },
+    {
+      "id": "5927f3171a389d7-4f01d6fdde67a33",
+      "title": "Data streams logsdb cluster settings API - serverless returns logsdb index mode if logsdb.enabled setting is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings_serverless.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "5927f3171a389d7-45816b3a7ded49c",
+      "title": "Data streams logsdb cluster settings API - serverless returns standard index mode if logsdb.enabled setting is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings_serverless.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "5927f3171a389d7-69aaa21c66c9ff5",
+      "title": "Data streams logsdb cluster settings API - serverless returns logsdb index mode if logsdb.enabled setting is null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings_serverless.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "8d57bc67afe6a02-0040bb5ad4e0f75",
+      "title": "Data streams logsdb cluster settings API returns logsdb index mode if logsdb.enabled setting is true and logs.prior_logs_usage is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings.spec.ts",
+        "line": 41,
+        "column": 11
+      }
+    },
+    {
+      "id": "8d57bc67afe6a02-a605dfc6826eb1e",
+      "title": "Data streams logsdb cluster settings API returns standard index mode if logsdb.enabled setting is false and logs.prior_logs_usage is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings.spec.ts",
+        "line": 41,
+        "column": 11
+      }
+    },
+    {
+      "id": "8d57bc67afe6a02-04b116f4a4026a2",
+      "title": "Data streams logsdb cluster settings API returns standard index mode if logsdb.enabled setting is null and logs.prior_logs_usage is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings.spec.ts",
+        "line": 41,
+        "column": 11
+      }
+    },
+    {
+      "id": "8d57bc67afe6a02-f2ceb4a898657de",
+      "title": "Data streams logsdb cluster settings API returns logsdb index mode if logsdb.enabled setting is null and logs.prior_logs_usage is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings.spec.ts",
+        "line": 41,
+        "column": 11
+      }
+    },
+    {
+      "id": "0540a7eded9df07-fb5341b14d3c6a7",
+      "title": "Data streams API - Security MKI lists the data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_mki_security.spec.ts",
+        "line": 49,
+        "column": 13
+      }
+    },
+    {
+      "id": "0540a7eded9df07-93e31130726ae7a",
+      "title": "Data streams API - Security MKI includes stats when asked for them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_mki_security.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "0540a7eded9df07-75bbb36f49e1a98",
+      "title": "Data streams API - Security MKI returns a single data stream by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_mki_security.spec.ts",
+        "line": 88,
+        "column": 14
+      }
+    },
+    {
+      "id": "8f252721ed484f8-eda9482a41006bb",
+      "title": "Data streams API updates the data retention of a data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 32,
+        "column": 25
+      }
+    },
+    {
+      "id": "8f252721ed484f8-e5bd1419341b0be",
+      "title": "Data streams API updates the data retention of multiple data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 47,
+        "column": 35
+      }
+    },
+    {
+      "id": "8f252721ed484f8-193a87d4f25b63d",
+      "title": "Data streams API sets the data retention to infinite",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 62,
+        "column": 37
+      }
+    },
+    {
+      "id": "8f252721ed484f8-00aad50b3b9b6ca",
+      "title": "Data streams API updates the failure store configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 76,
+        "column": 22
+      }
+    },
+    {
+      "id": "8f252721ed484f8-658b99f78336d69",
+      "title": "Data streams API deletes multiple data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 89,
+        "column": 35
+      }
+    },
+    {
+      "id": "8f252721ed484f8-2b82f3403e2bf18",
+      "title": "Data streams API applies the mappings of the index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "8f252721ed484f8-aadf1385940b09f",
+      "title": "Data streams API rolls a data stream over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
+        "line": 132,
+        "column": 37
+      }
+    },
+    {
+      "id": "fca6797885c236c-615c3a2d7412f56",
+      "title": "Failure store settings API falls back to the cluster default failed data retention when no override is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/failure_store_settings.spec.ts",
+        "line": 25,
+        "column": 48
+      }
+    },
+    {
+      "id": "fca6797885c236c-56835eaea8d2102",
+      "title": "Failure store settings API reflects the persistent cluster default failed data retention override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/failure_store_settings.spec.ts",
+        "line": 40,
+        "column": 43
+      }
+    },
+    {
+      "id": "fdc7bbf74ec13a7-60d34115ecfe237",
+      "title": "Create enrich policy API allows to create an enrich policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/create_enrich_policy.spec.ts",
+        "line": 59,
+        "column": 11
+      }
+    },
+    {
+      "id": "fdc7bbf74ec13a7-ec18b7d736d19b2",
+      "title": "Create enrich policy API can retrieve fields from indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/create_enrich_policy.spec.ts",
+        "line": 78,
+        "column": 72
+      }
+    },
+    {
+      "id": "fdc7bbf74ec13a7-abbe82f5bdff6f0",
+      "title": "Create enrich policy API can retrieve matching indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/create_enrich_policy.spec.ts",
+        "line": 141,
+        "column": 68
+      }
+    },
+    {
+      "id": "fdc7bbf74ec13a7-c48397bee7e79e2",
+      "title": "Create enrich policy API can retrieve matching data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/create_enrich_policy.spec.ts",
+        "line": 223,
+        "column": 27
+      }
+    },
+    {
+      "id": "4ab68633df5a056-eaaceb2ef6fa386",
+      "title": "Enrich policies API lists the enrich policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/enrich_policies.spec.ts",
+        "line": 70,
+        "column": 45
+      }
+    },
+    {
+      "id": "4ab68633df5a056-6a8223c55c3e003",
+      "title": "Enrich policies API executes an enrich policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/enrich_policies.spec.ts",
+        "line": 90,
+        "column": 13
+      }
+    },
+    {
+      "id": "4ab68633df5a056-d8053bf88ce6731",
+      "title": "Enrich policies API deletes an enrich policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/enrich_policies/enrich_policies.spec.ts",
+        "line": 98,
+        "column": 68
+      }
+    },
+    {
+      "id": "333d1f352700717-6e54e62fe30b71b",
+      "title": "Index templates ILM policy API lists an index template carrying its ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_ilm_policy.spec.ts",
+        "line": 47,
+        "column": 11
+      }
+    },
+    {
+      "id": "333d1f352700717-b036b84882a5706",
+      "title": "Index templates ILM policy API returns an index template carrying its ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_ilm_policy.spec.ts",
+        "line": 56,
+        "column": 87
+      }
+    },
+    {
+      "id": "48620c7d396ca0b-017599919e7f13b",
+      "title": "Index templates index mode API lists an index template carrying its index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_index_mode.spec.ts",
+        "line": 42,
+        "column": 11
+      }
+    },
+    {
+      "id": "48620c7d396ca0b-1a044aede955c47",
+      "title": "Index templates index mode API returns an index template carrying its index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_index_mode.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "84f898b4c7620f6-c5aebcb76409b90",
+      "title": "Legacy index templates API lists the legacy index templates with the expected parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_legacy.spec.ts",
+        "line": 55,
+        "column": 25
+      }
+    },
+    {
+      "id": "84f898b4c7620f6-cbb4efa4e39ac08",
+      "title": "Legacy index templates API returns a legacy index template with the expected parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_legacy.spec.ts",
+        "line": 78,
+        "column": 12
+      }
+    },
+    {
+      "id": "84f898b4c7620f6-835c9dbaaadb51b",
+      "title": "Legacy index templates API returns a legacy index template carrying an index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_legacy.spec.ts",
+        "line": 134,
+        "column": 11
+      }
+    },
+    {
+      "id": "84f898b4c7620f6-badc7d64667950d",
+      "title": "Legacy index templates API creates a legacy index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_legacy.spec.ts",
+        "line": 137,
+        "column": 5
+      }
+    },
+    {
+      "id": "84f898b4c7620f6-c6875c7d9c4bfd9",
+      "title": "Legacy index templates API updates a legacy index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_legacy.spec.ts",
+        "line": 139,
+        "column": 81
+      }
+    },
+    {
+      "id": "84f898b4c7620f6-66921d3c5e1ffae",
+      "title": "Legacy index templates API deletes a legacy index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_legacy.spec.ts",
+        "line": 153,
+        "column": 11
+      }
+    },
+    {
+      "id": "bb7903bea4b707b-e7f29ca6b59aeef",
+      "title": "Index templates logsdb cluster settings API - serverless returns logsdb index mode if logsdb.enabled setting is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings_serverless.spec.ts",
+        "line": 54,
+        "column": 23
+      }
+    },
+    {
+      "id": "bb7903bea4b707b-4c5971562a95456",
+      "title": "Index templates logsdb cluster settings API - serverless returns undefined index mode if logsdb.enabled setting is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings_serverless.spec.ts",
+        "line": 54,
+        "column": 23
+      }
+    },
+    {
+      "id": "bb7903bea4b707b-c3bd365840bc0b2",
+      "title": "Index templates logsdb cluster settings API - serverless returns logsdb index mode if logsdb.enabled setting is null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings_serverless.spec.ts",
+        "line": 54,
+        "column": 23
+      }
+    },
+    {
+      "id": "70d26f8f7c98504-98ebe4dad1e2b8b",
+      "title": "Index templates logsdb cluster settings API returns logsdb index mode if logsdb.enabled setting is true and logs.prior_logs_usage is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "70d26f8f7c98504-69ff86287465d2e",
+      "title": "Index templates logsdb cluster settings API returns undefined index mode if logsdb.enabled setting is false and logs.prior_logs_usage is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "70d26f8f7c98504-4d6a8537cac1532",
+      "title": "Index templates logsdb cluster settings API returns undefined index mode if logsdb.enabled setting is null and logs.prior_logs_usage is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "70d26f8f7c98504-1959c104f2f9cc7",
+      "title": "Index templates logsdb cluster settings API returns logsdb index mode if logsdb.enabled setting is null and logs.prior_logs_usage is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-e342f76789c084f",
+      "title": "Index templates API lists the index templates with the expected parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 48,
+        "column": 5
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-f7418843122e9e7",
+      "title": "Index templates API returns an index template with the expected parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 71,
+        "column": 30
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-f5a7d29ad8fd8d3",
+      "title": "Index templates API creates an index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 126,
+        "column": 12
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-e957c182882db67",
+      "title": "Index templates API rejects creating two templates with the same name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 134,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-d87528ff8a4e790",
+      "title": "Index templates API validates the request payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 142,
+        "column": 26
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-2fd74e164ca5b86",
+      "title": "Index templates API parses the Elasticsearch error of a create and returns its cause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 154,
+        "column": 5
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-795ab5f8058cbaa",
+      "title": "Index templates API updates an index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 175,
+        "column": 14
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-a058fe2acf496df",
+      "title": "Index templates API parses the Elasticsearch error of an update and returns its cause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 194,
+        "column": 51
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-2e1d09097de0f42",
+      "title": "Index templates API deletes an index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 217,
+        "column": 54
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-7f5796a4865cb93",
+      "title": "Index templates API simulates an index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 239,
+        "column": 68
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-f5a1944298368da",
+      "title": "Index templates API simulates an index template by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 250,
+        "column": 35
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-b8d80eab271c072",
+      "title": "Index templates API simulates an index template by name with a related data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 263,
+        "column": 82
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-e2bfaa9f40762f6",
+      "title": "Index templates API round-trips a data stream template with a frozen_after lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 288,
+        "column": 39
+      }
+    },
+    {
+      "id": "eb7459c1c419b1b-5a31a36958608ff",
+      "title": "Index templates API updates a deprecated index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates.spec.ts",
+        "line": 308,
+        "column": 25
+      }
+    },
+    {
+      "id": "a31db2204a76589-0f04f2a49c1df81",
+      "title": "Indices ILM data enricher API reports the ILM policy of a managed index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/data_enrichers_ilm.spec.ts",
+        "line": 39,
+        "column": 81
+      }
+    },
+    {
+      "id": "a31db2204a76589-bfb6204af8b987a",
+      "title": "Indices ILM data enricher API reports ILM data for an unmanaged index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/data_enrichers_ilm.spec.ts",
+        "line": 50,
+        "column": 96
+      }
+    },
+    {
+      "id": "d945ff8c0d5e3b4-c30cebebee2e6a7",
+      "title": "Index doc count API returns counts per index and fills missing buckets with 0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
+        "line": 48,
+        "column": 30
+      }
+    },
+    {
+      "id": "d945ff8c0d5e3b4-918059dbd8060fa",
+      "title": "Index doc count API returns counts for more than 10 indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
+        "line": 69,
+        "column": 71
+      }
+    },
+    {
+      "id": "d945ff8c0d5e3b4-02b6f187c319b50",
+      "title": "Index doc count API supports 255 character index names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
+        "line": 86,
+        "column": 46
+      }
+    },
+    {
+      "id": "d945ff8c0d5e3b4-9ec5e4084fb5726",
+      "title": "Index doc count API rejects an empty list of index names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
+        "line": 109,
+        "column": 61
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-62977dd4510b0b7",
+      "title": "Indices actions API closes an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 42,
+        "column": 5
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-0a04c7987afe818",
+      "title": "Indices actions API opens an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 46,
+        "column": 27
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-8396764f9e9d483",
+      "title": "Indices actions API flushes an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 51,
+        "column": 5
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-99e466688ae25c8",
+      "title": "Indices actions API refreshes an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-6d158f8f9ce5043",
+      "title": "Indices actions API force merges an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 61,
+        "column": 47
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-b3d3b4a4df3d28e",
+      "title": "Indices actions API force merges an index into a given number of segments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 62,
+        "column": 27
+      }
+    },
+    {
+      "id": "7613ebd9f75262b-29807207d6c5043",
+      "title": "Indices actions API clears the cache of an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-7622450c87a8eaf",
+      "title": "Indices API lists the indices with the expected properties",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 72,
+        "column": 52
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-0c81ee453ef1845",
+      "title": "Indices API reloads the indices with the expected properties",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 84,
+        "column": 83
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-e6b159683b824f7",
+      "title": "Indices API reloads only the requested indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-3f7ab4b7f0cf559",
+      "title": "Indices API returns the details of a single index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-005ceaea34fda90",
+      "title": "Indices API returns 404 for an index that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 117,
+        "column": 66
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-5251881f1db01ee",
+      "title": "Indices API creates an index with an index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 127,
+        "column": 16
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-fd8162de844ea72",
+      "title": "Indices API creates an index without an index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 138,
+        "column": 27
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-ece3d41158ad677",
+      "title": "Indices API rejects creating an index without a name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 148,
+        "column": 16
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-bba886f9b08053c",
+      "title": "Indices API rejects creating an index that already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 157,
+        "column": 11
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-9b7bcef5c44562d",
+      "title": "Indices API deletes an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "5b9400cc2b5ac41-12a0837c46a91d8",
+      "title": "Indices API rejects a delete without an index name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
+        "line": 178,
+        "column": 11
+      }
+    },
+    {
+      "id": "3e4bbc639f7c6a1-3fac7d4db9e5967",
+      "title": "Index mappings API gets the index mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/mappings.spec.ts",
+        "line": 38,
+        "column": 30
+      }
+    },
+    {
+      "id": "3e4bbc639f7c6a1-0ed5dae4856215b",
+      "title": "Index mappings API updates the index mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/mappings.spec.ts",
+        "line": 43,
+        "column": 22
+      }
+    },
+    {
+      "id": "7c26d4e0968650c-7e68688cf71feef",
+      "title": "Index settings API fetches an index settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/settings.spec.ts",
+        "line": 128,
+        "column": 27
+      }
+    },
+    {
+      "id": "7c26d4e0968650c-2dd5e0f4c39b838",
+      "title": "Index settings API updates an index settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/settings.spec.ts",
+        "line": 142,
+        "column": 27
+      }
+    },
+    {
+      "id": "c79682d37967bab-049ea69364d9e2b",
+      "title": "Snapshot repositories API (Cloud) reports no default repository when none is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_cloud.spec.ts",
+        "line": 28,
+        "column": 5
+      }
+    },
+    {
+      "id": "c79682d37967bab-7e4ca5b47630031",
+      "title": "Snapshot repositories API (Cloud) reports the configured default repository",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_cloud.spec.ts",
+        "line": 39,
+        "column": 22
+      }
+    },
+    {
+      "id": "ba15523bdf4e006-c7dc783b449b6df",
+      "title": "Snapshot repositories API (local) reports no default repository when none is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
+        "line": 32,
+        "column": 31
+      }
+    },
+    {
+      "id": "ba15523bdf4e006-80d971c4441c5bc",
+      "title": "Snapshot repositories API (local) reports the configured default repository",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
+        "line": 43,
+        "column": 22
+      }
+    },
+    {
+      "id": "2484050f9b304f8-7df2dea7167201b",
+      "title": "Index stats API fetches the index stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/stats.spec.ts",
+        "line": 57,
+        "column": 66
+      }
+    }
+  ]
+}

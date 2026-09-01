@@ -7,7 +7,13 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import {
+  AnomalyDetectionSetupState,
+  getIsAnomalyDetectionConfiguredForEnvironment,
+} from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import type { Environment } from '../../../../common/environment_rt';
+import { ENVIRONMENT_ALL, getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import type { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
@@ -16,6 +22,25 @@ export enum TimeRangeComparisonEnum {
   DayBefore = 'day',
   PeriodBefore = 'period',
   ExpectedBounds = 'expected_bounds',
+}
+
+/**
+ * Stable `data-test-subj` values for the "Expected bounds" option. Each value
+ * encodes the option state so tests can assert behaviour without depending on
+ * the (translated) option copy.
+ */
+export const EXPECTED_BOUNDS_TEST_SUBJ = {
+  enabled: 'comparisonSelectExpectedBounds',
+  allEnvironmentsDisabled: 'comparisonSelectExpectedBoundsAllEnvironments',
+  environmentDisabled: 'comparisonSelectExpectedBoundsEnvironmentDisabled',
+  kueryDisabled: 'comparisonSelectExpectedBoundsKueryDisabled',
+} as const;
+
+interface ComparisonOption {
+  value: string;
+  text: string;
+  disabled?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const isTimeComparison = (v: string | undefined) =>
@@ -61,7 +86,7 @@ function getSelectOptions({
   start: moment.Moment;
   end: moment.Moment;
   msDiff: number;
-}): Array<{ value: string; text: string; disabled?: boolean }> {
+}): ComparisonOption[] {
   return comparisonTypes
     .map((value) => {
       switch (value) {
@@ -104,20 +129,81 @@ function getSelectOptions({
     .filter(isDefined);
 }
 
+function getExpectedBoundsText({
+  isAllEnvironments,
+  hasJobForEnvironment,
+  kuery,
+  environment,
+}: {
+  isAllEnvironments: boolean;
+  hasJobForEnvironment: boolean;
+  kuery?: string;
+  environment: string;
+}) {
+  if (isAllEnvironments) {
+    return i18n.translate('xpack.apm.comparison.mlExpectedBoundsAllEnvironmentsText', {
+      defaultMessage: 'Expected bounds (Select a specific environment to use Expected bounds)',
+    });
+  }
+
+  if (!hasJobForEnvironment) {
+    return i18n.translate('xpack.apm.comparison.mlExpectedBoundsEnvironmentDisabledText', {
+      defaultMessage:
+        'Expected bounds (Anomaly detection must be enabled for environment "{environment}")',
+      values: { environment: getEnvironmentLabel(environment) },
+    });
+  }
+
+  if (!isEmpty(kuery)) {
+    return i18n.translate('xpack.apm.comparison.mlExpectedBoundsKueryFilterText', {
+      defaultMessage:
+        'Expected bounds (Anomaly detection is hidden while a search bar filter is applied)',
+    });
+  }
+
+  return i18n.translate('xpack.apm.comparison.mlExpectedBoundsText', {
+    defaultMessage: 'Expected bounds',
+  });
+}
+
+function getExpectedBoundsTestSubj({
+  isAllEnvironments,
+  hasJobForEnvironment,
+  kuery,
+}: {
+  isAllEnvironments: boolean;
+  hasJobForEnvironment: boolean;
+  kuery?: string;
+}) {
+  if (isAllEnvironments) {
+    return EXPECTED_BOUNDS_TEST_SUBJ.allEnvironmentsDisabled;
+  }
+
+  if (!hasJobForEnvironment) {
+    return EXPECTED_BOUNDS_TEST_SUBJ.environmentDisabled;
+  }
+
+  if (!isEmpty(kuery)) {
+    return EXPECTED_BOUNDS_TEST_SUBJ.kueryDisabled;
+  }
+
+  return EXPECTED_BOUNDS_TEST_SUBJ.enabled;
+}
+
 export function getComparisonOptions({
   start,
   end,
   showSelectedBoundsOption,
-  anomalyDetectionJobsStatus,
-  anomalyDetectionJobsData,
+  anomalyDetectionSetupState,
   preferredEnvironment,
+  kuery,
 }: {
-  showSelectedBoundsOption?: boolean;
-  anomalyDetectionJobsStatus?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
-  anomalyDetectionJobsData?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'];
-  preferredEnvironment?: Environment;
   start?: string;
   end?: string;
+  showSelectedBoundsOption: boolean;
+  anomalyDetectionSetupState?: AnomalyDetectionJobsContextValue['anomalyDetectionSetupState'];
+  preferredEnvironment?: Environment;
+  kuery?: string;
 }) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
@@ -137,8 +223,6 @@ export function getComparisonOptions({
     comparisonTypes = [TimeRangeComparisonEnum.PeriodBefore];
   }
 
-  const hasMLJob = isDefined(anomalyDetectionJobsData) && anomalyDetectionJobsData.jobs.length > 0;
-
   const comparisonOptions = getSelectOptions({
     comparisonTypes,
     start: momentStart,
@@ -146,20 +230,28 @@ export function getComparisonOptions({
     msDiff,
   });
 
-  if (showSelectedBoundsOption && hasMLJob) {
-    const disabled =
-      anomalyDetectionJobsStatus === 'success' &&
-      !anomalyDetectionJobsData.jobs.some((j) => j.environment === preferredEnvironment);
+  if (showSelectedBoundsOption) {
+    const isAllEnvironments = preferredEnvironment === ENVIRONMENT_ALL.value;
+    const hasJobForEnvironment = getIsAnomalyDetectionConfiguredForEnvironment(
+      anomalyDetectionSetupState ?? AnomalyDetectionSetupState.Unknown
+    );
+
+    const disabled = isAllEnvironments || !hasJobForEnvironment || !isEmpty(kuery);
+
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,
-      text: disabled
-        ? i18n.translate('xpack.apm.comparison.mlExpectedBoundsDisabledText', {
-            defaultMessage: 'Expected bounds (Anomaly detection must be enabled for env)',
-          })
-        : i18n.translate('xpack.apm.comparison.mlExpectedBoundsText', {
-            defaultMessage: 'Expected bounds',
-          }),
+      text: getExpectedBoundsText({
+        isAllEnvironments,
+        hasJobForEnvironment,
+        kuery,
+        environment: preferredEnvironment ?? ENVIRONMENT_ALL.value,
+      }),
       disabled,
+      'data-test-subj': getExpectedBoundsTestSubj({
+        isAllEnvironments,
+        hasJobForEnvironment,
+        kuery,
+      }),
     });
   }
 

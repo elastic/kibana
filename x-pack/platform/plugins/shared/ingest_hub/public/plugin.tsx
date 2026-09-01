@@ -75,7 +75,7 @@ export class IngestHubPlugin
       title: i18n.translate('xpack.ingestHub.appTitle', {
         defaultMessage: 'Ingest Hub',
       }),
-      euiIconType: 'launch',
+      euiIconType: 'rocket',
       appRoute: '/app/ingest-hub',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: from(startServicesPromise).pipe(
@@ -83,7 +83,7 @@ export class IngestHubPlugin
           coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
             map((enabled): AppUpdater => {
               return () => ({
-                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
+                visibleIn: enabled ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
               });
             })
           )

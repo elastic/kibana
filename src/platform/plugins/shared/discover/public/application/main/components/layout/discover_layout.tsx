@@ -15,18 +15,14 @@ import {
   EuiProgress,
   EuiDelayRender,
   useEuiBreakpoint,
+  useEuiTheme,
+  mathWithUnits,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import {
-  appendWhereClauseToESQLQuery,
-  hasTransformationalCommand,
-  appendFilteringWhereClauseForCascadeLayout,
-} from '@kbn/esql-utils';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { generateFilters } from '@kbn/data-plugin/public';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -35,13 +31,15 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -61,6 +59,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
   internalStateActions,
   useCurrentDataView,
@@ -71,9 +70,10 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { isCascadedDocumentsVisible } from './cascaded_documents';
+import { useIsChromeNextProjectHeader } from '../chrome_app_header';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -101,12 +101,16 @@ export function DiscoverLayout() {
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
   } = useDiscoverServices();
+  const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
+  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+
   const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
@@ -116,6 +120,7 @@ export function DiscoverLayout() {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  useRegisterDiscoverEsqlFeedback();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -128,14 +133,6 @@ export function DiscoverLayout() {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
-  const isCascadeLayoutSelected = useCurrentTabSelector(
-    (tab) =>
-      isCascadedDocumentsVisible(
-        tab.cascadedDocumentsState.availableCascadeGroups,
-        tab.appState.query
-      ) && tab.cascadedDocumentsState.selectedCascadeGroups.length > 0
-  );
 
   const fetchCounter = useRef<number>(0);
 
@@ -180,6 +177,11 @@ export function DiscoverLayout() {
     settings: grid,
   });
 
+  const sidebarColumns = useMemo(
+    () => currentColumns.filter((column) => column !== SOURCE_COLUMN),
+    [currentColumns]
+  );
+
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
@@ -206,94 +208,13 @@ export function DiscoverLayout() {
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
+  const addFilter = useCurrentTabAction(internalStateActions.addFilter);
   const onAddFilter = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
-      if (!field) {
-        return;
-      }
-      const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(dataView, fieldName, dataViews, capabilities);
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-      }
-      void scopedEBTManager.trackFilterAddition({
-        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-        fieldsMetadata,
-      });
-      return filterManager.addFilters(newFilters);
+      dispatch(addFilter({ field, value: values, mode: operation }));
     },
-    [
-      dataView,
-      dataViews,
-      capabilities,
-      filterManager,
-      trackUiMetric,
-      scopedEBTManager,
-      fieldsMetadata,
-    ]
+    [addFilter, dispatch]
   );
-
-  const onPopulateWhereClause = useCallback<DocViewFilterFn>(
-    (field, values, operation) => {
-      if (!field || !isOfAggregateQueryType(query)) {
-        return;
-      }
-      const fieldName = typeof field === 'string' ? field : field.name;
-      // send the field type for casting
-      const fieldType = typeof field !== 'string' ? field.type : undefined;
-      const esFieldType = typeof field !== 'string' ? field.esTypes?.[0] : undefined;
-      // weird existence logic from Discover components
-      // in the field it comes the operator _exists_ and in the value the field
-      // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = isCascadeLayoutSelected
-        ? appendFilteringWhereClauseForCascadeLayout(
-            query.esql,
-            esqlVariables,
-            dataView,
-            fieldName === '_exists_' ? String(values) : fieldName,
-            fieldName === '_exists_' || values == null ? undefined : values,
-            getOperator(fieldName, values, operation),
-            fieldType
-          )
-        : appendWhereClauseToESQLQuery(
-            query.esql,
-            fieldName === '_exists_' ? String(values) : fieldName,
-            fieldName === '_exists_' || values == null ? undefined : values,
-            getOperator(fieldName, values, operation),
-            fieldType,
-            esFieldType
-          );
-
-      if (!updatedQuery) {
-        return;
-      }
-      data.query.queryString.setQuery({
-        esql: updatedQuery,
-      });
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
-      }
-      void scopedEBTManager.trackFilterAddition({
-        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-        fieldsMetadata,
-      });
-    },
-    [
-      query,
-      isCascadeLayoutSelected,
-      esqlVariables,
-      dataView,
-      data.query.queryString,
-      trackUiMetric,
-      scopedEBTManager,
-      fieldsMetadata,
-    ]
-  );
-
-  const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
   const canSetBreakdownField = useMemo(
     () =>
@@ -393,10 +314,9 @@ export function DiscoverLayout() {
           dataView={dataView}
           columns={currentColumns}
           viewMode={viewMode}
-          onAddFilter={onFilter}
+          onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
-          sidebarToggleState$={sidebarToggleState$}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -406,10 +326,9 @@ export function DiscoverLayout() {
     dataView,
     currentColumns,
     viewMode,
-    onFilter,
+    onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
-    sidebarToggleState$,
     dataStateContainer,
   ]);
 
@@ -450,6 +369,15 @@ export function DiscoverLayout() {
     [dispatch, onDataViewCreatedAction]
   );
 
+  const fullBodyHeightOffset = useMemo(() => {
+    const isStandalone = customizationContext.displayMode === 'standalone';
+    if (isChromeNextProjectHeader && isStandalone) {
+      return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
+    }
+
+    return `${TABS_BAR_HEIGHT + 1}px`;
+  }, [customizationContext.displayMode, euiTheme.size.xxl, isChromeNextProjectHeader]);
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -460,7 +388,7 @@ export function DiscoverLayout() {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss('40px')}
+            ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
           }
         `,
       ]}
@@ -489,11 +417,11 @@ export function DiscoverLayout() {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                columns={currentColumns}
+                columns={sidebarColumns}
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
-                onAddFilter={onFilter}
+                onAddFilter={onAddFilter}
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
@@ -508,12 +436,7 @@ export function DiscoverLayout() {
                 {resultState === 'none' ? (
                   <>
                     <div css={styles.mainPanel}>
-                      <PanelsToggle
-                        sidebarToggleState$={sidebarToggleState$}
-                        omitChartButton
-                        omitTableButton
-                        dataTestSubjSuffix="InPage"
-                      />
+                      <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
                       <ErrorCallout
@@ -560,24 +483,16 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
+      <DiscoverDocumentFlyout
+        dataView={dataView}
+        columns={currentColumns}
+        onAddColumn={onAddColumnWithTracking}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddFilter={onAddFilter}
+      />
     </EuiPage>
   );
 }
-
-const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
-  if (fieldName === '_exists_') {
-    return 'is_not_null';
-  }
-  if (values == null && operation === '-') {
-    return 'is_not_null';
-  }
-
-  if (values == null && operation === '+') {
-    return 'is_null';
-  }
-
-  return operation;
-};
 
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>

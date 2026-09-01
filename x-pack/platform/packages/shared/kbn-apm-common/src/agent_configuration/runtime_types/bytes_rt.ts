@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { either } from 'fp-ts/Either';
+import { z } from '@kbn/zod/v4';
 import { amountAndUnitToObject } from '../amount_and_unit';
 import { getRangeTypeMessage } from './get_range_type_message';
 
@@ -30,24 +29,16 @@ function amountAndUnitToBytes(value?: string): number | undefined {
   }
 }
 
-export function getBytesRt({ min, max }: { min?: string; max?: string }) {
+export function getBytesSchema({ min, max }: { min?: string; max?: string }) {
   const minAsBytes = amountAndUnitToBytes(min) ?? -Infinity;
   const maxAsBytes = amountAndUnitToBytes(max) ?? Infinity;
   const message = getRangeTypeMessage(min, max);
 
-  return new t.Type<string, string, unknown>(
-    'bytesRt',
-    t.string.is,
-    (input, context) => {
-      return either.chain(t.string.validate(input, context), (inputAsString) => {
-        const inputAsBytes = amountAndUnitToBytes(inputAsString);
-
-        const isValidAmount =
-          inputAsBytes !== undefined && inputAsBytes >= minAsBytes && inputAsBytes <= maxAsBytes;
-
-        return isValidAmount ? t.success(inputAsString) : t.failure(input, context, message);
-      });
+  return z.string().refine(
+    (inputAsString) => {
+      const inputAsBytes = amountAndUnitToBytes(inputAsString);
+      return inputAsBytes !== undefined && inputAsBytes >= minAsBytes && inputAsBytes <= maxAsBytes;
     },
-    t.identity
+    { message }
   );
 }

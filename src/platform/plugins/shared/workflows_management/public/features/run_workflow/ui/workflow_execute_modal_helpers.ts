@@ -10,8 +10,12 @@
 import type { Query } from '@kbn/es-query';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  applyInputDefaults,
+  getInputsFromDefinition,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { ENABLED_TRIGGER_TABS } from './constants';
 import type { WorkflowTriggerTab } from './types';
 
 export type NormalizedWorkflowInputs = JsonModelSchemaType | undefined;
@@ -20,6 +24,68 @@ export type NormalizedWorkflowInputs = JsonModelSchemaType | undefined;
 export function hasWorkflowInputFields(normalized?: NormalizedWorkflowInputs): boolean {
   const props = normalized?.properties;
   return Boolean(props && Object.keys(props).length > 0);
+}
+
+const OMITTED_DEFAULT = Symbol('omittedDefault');
+
+const omitUnchangedDefault = (
+  value: unknown,
+  defaultValue: unknown
+): unknown | typeof OMITTED_DEFAULT => {
+  if (Object.is(value, defaultValue)) {
+    return OMITTED_DEFAULT;
+  }
+
+  if (Array.isArray(value) && Array.isArray(defaultValue)) {
+    const isUnchanged =
+      value.length === defaultValue.length &&
+      value.every(
+        (nestedValue, index) =>
+          omitUnchangedDefault(nestedValue, defaultValue[index]) === OMITTED_DEFAULT
+      );
+    return isUnchanged ? OMITTED_DEFAULT : value;
+  }
+
+  if (
+    value === null ||
+    defaultValue === null ||
+    typeof value !== 'object' ||
+    typeof defaultValue !== 'object' ||
+    Array.isArray(value) ||
+    Array.isArray(defaultValue)
+  ) {
+    return value;
+  }
+
+  const defaultRecord = defaultValue as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (Object.hasOwn(defaultRecord, key)) {
+      const nestedResult = omitUnchangedDefault(nestedValue, defaultRecord[key]);
+      if (nestedResult !== OMITTED_DEFAULT) {
+        result[key] = nestedResult;
+      }
+    } else {
+      result[key] = nestedValue;
+    }
+  }
+
+  return Object.keys(result).length === 0 ? OMITTED_DEFAULT : result;
+};
+
+/**
+ * Removes values copied unchanged from schema defaults by the manual-run form.
+ * The execution engine can then apply and render those values as defaults while
+ * retaining user-edited values as caller-provided runtime data.
+ */
+export function omitUnchangedWorkflowInputDefaults(
+  inputs: Record<string, unknown>,
+  inputsSchema: NormalizedWorkflowInputs
+): Record<string, unknown> {
+  const defaults = applyInputDefaults(undefined, inputsSchema) ?? {};
+  const result = omitUnchangedDefault(inputs, defaults);
+  return result === OMITTED_DEFAULT ? {} : (result as Record<string, unknown>);
 }
 
 /** True when the RAC alerts index API failed due to missing `rac` / auth. */
@@ -50,6 +116,84 @@ export function isRacAlertsApiForbiddenError(error: unknown): boolean {
     msg.includes('Kibana privileges [rac]') ||
     msg.includes('/internal/rac/alerts')
   );
+}
+
+export function workflowDefinitionHasTriggerType(
+  definition: WorkflowYaml | null,
+  triggerType: string
+): boolean {
+  return Boolean(definition?.triggers?.some((trigger) => trigger.type === triggerType));
+}
+
+/** Run-modal tabs to show based on triggers declared in the workflow definition. */
+export function getVisibleWorkflowTriggerTabs(
+  definition: WorkflowYaml | null,
+  { includeHistorical = true }: { includeHistorical?: boolean } = {}
+): readonly WorkflowTriggerTab[] {
+  if (!definition?.triggers?.length) {
+    return includeHistorical
+      ? ENABLED_TRIGGER_TABS
+      : ENABLED_TRIGGER_TABS.filter((tab) => tab !== 'historical');
+  }
+
+  const visible: WorkflowTriggerTab[] = [];
+
+  if (workflowDefinitionHasTriggerType(definition, 'alert')) {
+    visible.push('alert');
+  }
+  if (hasCustomEventTrigger(definition)) {
+    visible.push('event');
+  }
+  if (workflowDefinitionHasTriggerType(definition, 'manual')) {
+    visible.push('index');
+  }
+  visible.push('manual');
+  if (includeHistorical) {
+    visible.push('historical');
+  }
+
+  return visible;
+}
+
+export interface WorkflowTriggerTabAvailability {
+  hasAlertRacAccess: boolean;
+  canReadWorkflowExecution: boolean;
+  eventDrivenExecutionEnabled: boolean;
+}
+
+export function isWorkflowTriggerTabDisabled(
+  trigger: WorkflowTriggerTab,
+  availability: WorkflowTriggerTabAvailability
+): boolean {
+  if (trigger === 'alert' && !availability.hasAlertRacAccess) {
+    return true;
+  }
+  if (trigger === 'historical' && !availability.canReadWorkflowExecution) {
+    return true;
+  }
+  if (
+    trigger === 'event' &&
+    (!availability.canReadWorkflowExecution || !availability.eventDrivenExecutionEnabled)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function ensureSelectedTriggerTabVisible(
+  selected: WorkflowTriggerTab,
+  visibleTabs: readonly WorkflowTriggerTab[],
+  availability?: WorkflowTriggerTabAvailability
+): WorkflowTriggerTab {
+  const isEnabled = (tab: WorkflowTriggerTab) =>
+    !availability || !isWorkflowTriggerTabDisabled(tab, availability);
+
+  if (visibleTabs.includes(selected) && isEnabled(selected)) {
+    return selected;
+  }
+
+  const firstEnabledVisible = visibleTabs.find(isEnabled);
+  return firstEnabledVisible ?? visibleTabs[0] ?? 'manual';
 }
 
 export function hasCustomEventTrigger(definition: WorkflowYaml | null): boolean {
@@ -113,6 +257,21 @@ export function buildDefaultTriggerEventSearchQuery(workflowTriggerIds: readonly
   return { query: scopeKql ?? '', language: 'kuery' };
 }
 
+function normalizeTriggerEventSearchKql(query: Query): string {
+  return typeof query.query === 'string' ? query.query.trim() : '';
+}
+
+/** True when the submitted KQL matches the workflow's default trigger scope (not user-filtered). */
+export function isDefaultTriggerEventSearchScope(
+  submittedQuery: Query,
+  workflowTriggerIds: readonly string[]
+): boolean {
+  return (
+    normalizeTriggerEventSearchKql(submittedQuery) ===
+    normalizeTriggerEventSearchKql(buildDefaultTriggerEventSearchQuery(workflowTriggerIds))
+  );
+}
+
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';
@@ -145,38 +304,44 @@ export function resolveInitialSelectedTrigger(
   initialExecutionId: string | undefined,
   hasAlertRacAccess: boolean,
   canReadWorkflowExecution: boolean,
-  normalizedInputs: NormalizedWorkflowInputs | undefined
+  normalizedInputs: NormalizedWorkflowInputs | undefined,
+  eventDrivenExecutionEnabled = true,
+  { includeHistorical = true }: { includeHistorical?: boolean } = {}
 ): WorkflowTriggerTab {
+  const visibleTabs = getVisibleWorkflowTriggerTabs(definition, { includeHistorical });
+
+  let selected: WorkflowTriggerTab;
+
   if (initialExecutionId) {
-    return canReadWorkflowExecution
+    selected = canReadWorkflowExecution
       ? 'historical'
       : getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+  } else {
+    const hasAlertTrigger = workflowDefinitionHasTriggerType(definition, 'alert');
+    const hasEventTrigger = hasCustomEventTrigger(definition);
+
+    if (hasAlertTrigger) {
+      selected = hasAlertRacAccess
+        ? 'alert'
+        : getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+    } else if (hasEventTrigger && canReadWorkflowExecution) {
+      selected = 'event';
+    } else if (hasEventTrigger && !canReadWorkflowExecution) {
+      selected = getFallbackTriggerTab(normalizedInputs, definition, false);
+    } else if (hasWorkflowInputFields(normalizedInputs)) {
+      selected = getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+    } else {
+      const preferred = getDefaultTrigger(definition);
+      selected =
+        preferred === 'alert' && !hasAlertRacAccess
+          ? getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution)
+          : preferred;
+    }
   }
 
-  const hasAlertTrigger = Boolean(definition?.triggers?.some((t) => t.type === 'alert'));
-  const hasEventTrigger = hasCustomEventTrigger(definition);
-
-  if (hasAlertTrigger) {
-    return hasAlertRacAccess
-      ? 'alert'
-      : getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-  }
-
-  if (hasEventTrigger && canReadWorkflowExecution) {
-    return 'event';
-  }
-
-  if (hasEventTrigger && !canReadWorkflowExecution) {
-    return getFallbackTriggerTab(normalizedInputs, definition, false);
-  }
-
-  if (hasWorkflowInputFields(normalizedInputs)) {
-    return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-  }
-
-  const preferred = getDefaultTrigger(definition);
-  if (preferred === 'alert' && !hasAlertRacAccess) {
-    return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
-  }
-  return preferred;
+  return ensureSelectedTriggerTabVisible(selected, visibleTabs, {
+    hasAlertRacAccess,
+    canReadWorkflowExecution,
+    eventDrivenExecutionEnabled,
+  });
 }

@@ -36,7 +36,11 @@ const buildApplicationMock = (): ApplicationStart =>
 
 const renderActions = (
   identifier: EntityAttachmentIdentifier,
-  providerProps: { application?: ApplicationStart; searchSession?: ISessionService } = {}
+  providerProps: {
+    application?: ApplicationStart;
+    searchSession?: ISessionService;
+    isNewFlyoutEnabled?: boolean;
+  } = {}
 ) => {
   const application = providerProps.application ?? buildApplicationMock();
   const utils = render(
@@ -44,6 +48,7 @@ const renderActions = (
       <EntityAnalyticsAgentNavigationProvider
         application={application}
         searchSession={providerProps.searchSession}
+        isNewFlyoutEnabled={providerProps.isNewFlyoutEnabled}
       >
         <EntityCardActions identifier={identifier} />
       </EntityAnalyticsAgentNavigationProvider>
@@ -169,6 +174,23 @@ describe('EntityCardActions', () => {
 
       expect(mockedNavigateToFlyout).toHaveBeenCalledWith(
         expect.objectContaining({ searchSession })
+      );
+    });
+
+    it('uses the new flyout URL contract when enabled by the navigation provider', () => {
+      renderActions(
+        {
+          identifierType: 'host',
+          identifier: 'macbook-01',
+          entityStoreId: 'host:macbook-01@default',
+        },
+        { isNewFlyoutEnabled: true }
+      );
+
+      clickOpen();
+
+      expect(mockedNavigateToFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ isNewFlyoutEnabled: true })
       );
     });
   });

@@ -46,7 +46,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     queryClient.clear();
   });
 
-  it('renders the header with rule title, tags and status badges on success', async () => {
+  it('renders the header with rule title and status badges on success', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -79,14 +79,42 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeDetailsRuleTitle')).toHaveTextContent('My rule')
-    );
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTags')).toBeInTheDocument()
+      expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('My rule')
     );
   });
 
-  it('renders the loading title fallback while data is loading', () => {
+  it('surfaces episode severity in the header after status', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+        { name: 'severity', type: 'keyword' },
+      ],
+      values: [
+        ['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1', 'critical'],
+      ],
+    });
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeDetailsHeaderSection episodeId="ep-1" services={mockServices} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-critical')).toHaveTextContent(
+        'Critical'
+      )
+    );
+  });
+
+  it('renders a skeleton title while data is loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
     fetchEpisodeActionsMock.mockImplementation(() => new Promise(() => {}));
     fetchGroupActionsMock.mockImplementation(() => new Promise(() => {}));
@@ -98,6 +126,41 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderLoadingTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitleSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeDetailsHeaderTitle')).not.toBeInTheDocument();
+  });
+
+  it('renders the episode fallback title when the rule fetch returns 404', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'deleted-rule', 'gh-1']],
+    });
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 404 },
+      body: { code: 'RULE_NOT_FOUND', error: 'Not Found', message: 'Rule not found' },
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeDetailsHeaderSection episodeId="ep-1" services={mockServices} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent(
+        'Alert episode'
+      )
+    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDeletedRuleId')
+    ).not.toBeInTheDocument();
   });
 });

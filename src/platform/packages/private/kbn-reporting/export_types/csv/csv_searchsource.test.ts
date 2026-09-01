@@ -36,7 +36,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 const mockLogger = loggingSystemMock.createLogger();
@@ -46,6 +45,9 @@ const taskInstanceFields = { startedAt: null, retryAt: null };
 let encryptedHeaders: string;
 let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
+const esClient = elasticsearchServiceMock.createClusterClient();
+const data = dataPluginMock.createStartContract();
+const searchSourceAsScoped = jest.spyOn(data.search.searchSource, 'asScoped');
 
 beforeAll(async () => {
   // use fieldFormats plugin for csv formats
@@ -75,16 +77,14 @@ beforeAll(async () => {
     context
   );
 
-  mockCsvSearchSourceExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockCsvSearchSourceExportType.setup({});
 
   mockCsvSearchSourceExportType.start({
-    esClient: elasticsearchServiceMock.createClusterClient(),
+    esClient,
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
-    data: dataPluginMock.createStartContract(),
+    data,
     licensing: licensingMock.createStart(),
   });
 });
@@ -116,6 +116,9 @@ test('gets the csv content from job parameters', async () => {
           "size": 123,
         }
       `);
+  expect(esClient.asScoped).toHaveBeenCalledWith(fakeRawRequest, { projectRouting: 'space' });
+  expect(data.search.asScoped).toHaveBeenCalledWith(fakeRawRequest, { projectRouting: 'space' });
+  expect(searchSourceAsScoped).toHaveBeenCalledWith(fakeRawRequest, { projectRouting: 'space' });
 });
 
 test('uses the provided logger', async () => {

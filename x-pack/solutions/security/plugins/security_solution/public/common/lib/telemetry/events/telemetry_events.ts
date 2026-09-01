@@ -7,6 +7,7 @@
 import { trialCompanionTelemetryEvents } from './trial_companion';
 import { alertsTelemetryEvents } from './alerts_grouping';
 import { appTelemetryEvents } from './app';
+import { attackDiscoveryTelemetryEvents } from './attack_discovery';
 import { dataQualityTelemetryEvents } from './data_quality';
 import { documentTelemetryEvents } from './document_details';
 import { entityTelemetryEvents } from './entity_analytics';
@@ -19,13 +20,16 @@ import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
 import { ruleDeprecationTelemetryEvents } from './rule_deprecation';
 import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
+import { ruleChangesHistoryTelemetryEvents } from './rule_changes_history';
 import { ruleCreationTelemetryEvents } from './rule_creation';
 import { aiValueReportTelemetryEvents } from './ai_value_report';
 import { attacksTelemetryEvents } from './attacks';
 import { attackDiscoverySchedulesTelemetryEvents } from './attack_discovery_schedules';
 import { siemReadinessTelemetryEvents } from './siem_readiness';
+import { flyoutV2TelemetryEvents } from './flyout_v2';
 
 export const telemetryEvents = [
+  ...attackDiscoveryTelemetryEvents,
   ...ruleCreationTelemetryEvents,
   ...attacksTelemetryEvents,
   ...attackDiscoverySchedulesTelemetryEvents,
@@ -38,6 +42,7 @@ export const telemetryEvents = [
   ...manualRuleRunTelemetryEvents,
   ...ruleDeprecationTelemetryEvents,
   ...ruleUpgradeTelemetryEvents,
+  ...ruleChangesHistoryTelemetryEvents,
   ...bulkFillRuleGapsTelemetryEvents,
   ...eventLogTelemetryEvents,
   ...notesTelemetryEvents,
@@ -46,4 +51,5 @@ export const telemetryEvents = [
   ...aiValueReportTelemetryEvents,
   ...trialCompanionTelemetryEvents,
   ...siemReadinessTelemetryEvents,
+  ...flyoutV2TelemetryEvents,
 ];

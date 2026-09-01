@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useIsDarkMode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { getInteractivePanelStyles } from './interactive_panel_styles';
@@ -23,6 +23,8 @@ interface LifecyclePhaseButtonProps {
   size?: string;
   testSubjPrefix?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   showWarningIcon?: boolean;
 }
 
@@ -37,9 +39,15 @@ export const LifecyclePhaseButton = ({
   size,
   testSubjPrefix,
   isEditLifecycleFlyoutOpen = false,
+  disableInteractions = false,
   showWarningIcon = false,
 }: LifecyclePhaseButtonProps) => {
+  const isDarkMode = useIsDarkMode();
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  const backgroundColor = phaseColor ?? euiTheme.colors.backgroundBaseSubdued;
+  // While any lifecycle-editing flyout is open the timeline is in preview mode, where the stored
+  // sizes (which describe the currently applied lifecycle) would be misleading.
+  const showSize = Boolean(size) && !isEditLifecycleFlyoutOpen && !disableInteractions;
 
   return (
     <EuiPanel
@@ -65,9 +73,11 @@ export const LifecyclePhaseButton = ({
       onClick={onClick}
       css={getInteractivePanelStyles({
         euiTheme,
-        backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
+        isDarkMode,
+        backgroundColor,
         isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '48px',
+        fullSize: true,
         ...(isDelete
           ? {
               minWidth: '50px',
@@ -83,7 +93,7 @@ export const LifecyclePhaseButton = ({
           justifyContent="center"
           alignItems="center"
           responsive={false}
-          style={{ width: '100%', height: '100%' }}
+          css={{ width: '100%', height: '100%' }}
         >
           <EuiFlexItem grow={false}>
             <EuiIcon
@@ -122,34 +132,30 @@ export const LifecyclePhaseButton = ({
               <EuiText
                 size="xs"
                 color={euiTheme.colors.plainDark}
-                data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
-                style={{
+                css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   maxWidth: '100%',
                   fontWeight: euiTheme.font.weight.semiBold,
                 }}
+                data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
               >
                 {capitalize(label)}
               </EuiText>
               <EuiText
                 size="xs"
                 color={euiTheme.colors.plainDark}
-                data-test-subj={
-                  size && !isEditLifecycleFlyoutOpen
-                    ? `${prefix}lifecyclePhase-${label}-size`
-                    : undefined
-                }
-                title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
-                style={{
+                css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   maxWidth: '100%',
                 }}
+                data-test-subj={showSize ? `${prefix}lifecyclePhase-${label}-size` : undefined}
+                title={showSize ? size : undefined}
               >
-                {size && !isEditLifecycleFlyoutOpen ? size : null}
+                {showSize ? size : null}
               </EuiText>
             </EuiFlexGroup>
           </EuiFlexItem>

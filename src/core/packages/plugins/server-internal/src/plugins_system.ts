@@ -290,8 +290,7 @@ export class PluginsSystem<T extends PluginType> {
             configPath: plugin.manifest.configPath,
             requiredPlugins: plugin.manifest.requiredPlugins.filter(filterUiPlugins),
             optionalPlugins: plugin.manifest.optionalPlugins.filter(filterUiPlugins),
-            runtimePluginDependencies:
-              plugin.manifest.runtimePluginDependencies.filter(filterUiPlugins),
+            runtimePluginDependencies: plugin.manifest.runtimePluginDependencies,
             requiredBundles: plugin.manifest.requiredBundles,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },

@@ -85,18 +85,12 @@ export const UserActionsList = React.memo(
     currentUserProfile,
     data: caseData,
     casesConfiguration,
-    actionsNavigation,
     commentRefs,
     handleManageQuote,
     bottomActions = [],
     isExpandable = false,
   }: UserActionListProps) => {
-    const {
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
-      unifiedAttachmentTypeRegistry,
-    } = useCasesContext();
-    const { owner } = useCasesContext();
+    const { unifiedAttachmentTypeRegistry, owner, permissions } = useCasesContext();
     const { commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const { euiTheme } = useEuiTheme();
@@ -132,9 +126,8 @@ export const UserActionsList = React.memo(
           caseData,
           casesConfiguration,
           caseConnectors,
-          externalReferenceAttachmentTypeRegistry,
-          persistableStateAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
+          permissions,
           userAction,
           userProfiles,
           currentUserProfile,
@@ -146,7 +139,6 @@ export const UserActionsList = React.memo(
           euiTheme,
           handleOutlineComment,
           handleDeleteComment,
-          actionsNavigation,
         });
         return [...userActions, ...userActionBuilder.build()];
       }, []);
@@ -156,9 +148,8 @@ export const UserActionsList = React.memo(
       caseData,
       casesConfiguration,
       caseConnectors,
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
+      permissions,
       userProfiles,
       currentUserProfile,
       attachments,
@@ -168,7 +159,6 @@ export const UserActionsList = React.memo(
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
-      actionsNavigation,
     ]);
 
     const comments = bottomActions?.length

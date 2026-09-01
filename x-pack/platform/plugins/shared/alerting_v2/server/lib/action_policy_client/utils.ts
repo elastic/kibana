@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
-  ActionPolicyType,
   CreateActionPolicyData,
   ThrottleStrategy,
   UpdateActionPolicyData,
@@ -16,7 +15,8 @@ import type {
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import type { ApiKeyAttributes } from '../services/api_key_service/api_key_service';
 
 const isoDateTimeString = z.string().datetime();
 
@@ -24,18 +24,13 @@ export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);
   if (!result.success) {
     throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`, {
-      code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+      code: ALERTING_ERROR_CODES.INVALID_DATE_STRING,
       details: { value: dateString },
     });
   }
 }
 
 const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
-
-const resolveRuleIdForType = (
-  type: ActionPolicyType,
-  ruleId: string | null | undefined
-): string | null => (type === 'single_rule' ? ruleId ?? null : null);
 
 const resolveNextNullableField = <T>(
   value: T | null | undefined,
@@ -60,12 +55,18 @@ const normalizeThrottle = (
   };
 };
 
+export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
+  apiKey: auth.apiKey,
+  apiKeyOwner: auth.owner,
+  apiKeyCreatedByUser: auth.createdByUser,
+});
+
 const toAuthResponse = (
-  auth: ActionPolicySavedObjectAttributes['auth']
+  attributes: Pick<ActionPolicySavedObjectAttributes, 'apiKeyOwner' | 'apiKeyCreatedByUser'>
 ): ActionPolicyResponse['auth'] => {
   return {
-    owner: auth.owner,
-    createdByUser: auth.createdByUser,
+    owner: attributes.apiKeyOwner,
+    created_by_user: attributes.apiKeyCreatedByUser,
   };
 };
 
@@ -78,7 +79,7 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt,
 }: {
   data: CreateActionPolicyData;
-  auth: ActionPolicySavedObjectAttributes['auth'];
+  auth: ApiKeyAttributes;
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;
@@ -87,17 +88,15 @@ export const buildCreateActionPolicyAttributes = ({
   return {
     name: data.name,
     description: data.description,
-    type: data.type,
-    ruleId: resolveRuleIdForType(data.type, data.ruleId),
     enabled: true,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
-    groupBy: data.groupBy ?? null,
+    groupBy: data.group_by ?? null,
     tags: data.tags ?? null,
-    groupingMode: data.groupingMode ?? null,
+    groupingMode: data.grouping_mode ?? null,
     throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
-    auth,
+    ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
     updatedBy,
@@ -114,24 +113,22 @@ export const buildUpdateActionPolicyAttributes = ({
 }: {
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
-  auth: ActionPolicySavedObjectAttributes['auth'];
+  auth: ApiKeyAttributes;
   updatedBy: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,
-    type: existing.type,
-    ruleId: resolveRuleIdForType(existing.type, existing.ruleId),
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
-    groupBy: resolveNextNullableField(update.groupBy, existing.groupBy),
+    groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
     tags: resolveNextNullableField(update.tags, existing.tags),
-    groupingMode: resolveNextNullableField(update.groupingMode, existing.groupingMode),
+    groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
-    auth,
+    ...toApiKeyAttributes(auth),
     createdBy: existing.createdBy,
     updatedBy,
     createdAt: existing.createdAt,
@@ -153,20 +150,18 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     version,
     name: attributes.name,
     description: attributes.description,
-    type: attributes.type,
-    ruleId: resolveRuleIdForType(attributes.type, attributes.ruleId),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeNullableField(attributes.matcher),
-    groupBy: normalizeNullableField(attributes.groupBy),
+    group_by: normalizeNullableField(attributes.groupBy),
     tags: normalizeNullableField(attributes.tags),
-    groupingMode: normalizeNullableField(attributes.groupingMode),
+    grouping_mode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
-    snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
-    auth: toAuthResponse(attributes.auth),
-    createdBy: attributes.createdBy,
-    createdAt: attributes.createdAt,
-    updatedBy: attributes.updatedBy,
-    updatedAt: attributes.updatedAt,
+    snoozed_until: normalizeNullableField(attributes.snoozedUntil),
+    auth: toAuthResponse(attributes),
+    created_by: attributes.createdBy,
+    created_at: attributes.createdAt,
+    updated_by: attributes.updatedBy,
+    updated_at: attributes.updatedAt,
   };
 };

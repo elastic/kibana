@@ -11,9 +11,17 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { encodeFlyout, FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
+  encodeFlyoutV2UrlParam,
+  FLYOUT_DESCRIPTOR_KIND,
+  FLYOUT_V2_URL_PARAM,
+  type FlyoutDescriptor,
+  type FlyoutV2UrlParamValue,
+} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../../common/agent_builder_navigation_gate';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 
 import { SecurityPageName, ENTITY_ANALYTICS_HOME_PAGE_PATH } from '../../../common/constants';
 import {
@@ -21,6 +29,10 @@ import {
   ServicePanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
+import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
+import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
+import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
+import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
 
@@ -39,9 +51,175 @@ const getEntityAnalyticsStateSearchParams = (): URLSearchParams => {
   return new URLSearchParams(window.location.search);
 };
 
+/**
+ * Expandable-flyout URL state used when navigating from Agent Builder into Entity Analytics.
+ * `right` is required (entity overview). `left` is optional (investigation / details panel).
+ */
+export interface EntityAnalyticsFlyoutNavigationState {
+  preview: unknown[];
+  right: {
+    id: string;
+    params: Record<string, unknown>;
+  };
+  left?: {
+    id: string;
+    params: Record<string, unknown>;
+  };
+}
+
+interface EntityDescriptorContext {
+  entityType: 'host' | 'user' | 'service';
+  entityName: string;
+  entityId?: string;
+  scopeId?: string;
+}
+
+const getEntityDescriptorContext = (
+  right: EntityAnalyticsFlyoutNavigationState['right']
+): { descriptor: FlyoutDescriptor; context: EntityDescriptorContext } | null => {
+  const { id, params } = right;
+  const entityId = params.entityId as string | undefined;
+  const scopeId = params.scopeId as string | undefined;
+
+  if (id === HostPanelKey) {
+    const hostName = params.hostName as string | undefined;
+    if (!hostName) return null;
+    return {
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName, entityId, scopeId },
+      context: { entityType: 'host', entityName: hostName, entityId, scopeId },
+    };
+  }
+
+  if (id === UserPanelKey) {
+    const userName = params.userName as string | undefined;
+    if (!userName) return null;
+    return {
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.user, userName, entityId, scopeId },
+      context: { entityType: 'user', entityName: userName, entityId, scopeId },
+    };
+  }
+
+  if (id === ServicePanelKey) {
+    const serviceName = params.serviceName as string | undefined;
+    if (!serviceName) return null;
+    return {
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.service, serviceName, entityId, scopeId },
+      context: { entityType: 'service', entityName: serviceName, entityId, scopeId },
+    };
+  }
+
+  return null;
+};
+
+const getEntityToolDescriptor = (
+  left: EntityAnalyticsFlyoutNavigationState['left'],
+  context: EntityDescriptorContext
+): FlyoutDescriptor | null => {
+  const path = left?.params.path as { tab?: string; subTab?: string } | undefined;
+  if (!path?.tab) return null;
+
+  const { entityType, entityName, entityId, scopeId } = context;
+  switch (path.tab) {
+    case 'risk_inputs':
+      return {
+        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+        entityType,
+        entityName,
+        entityId,
+        ...(path.subTab ? { subTab: path.subTab } : {}),
+      };
+    case 'anomalies':
+      return entityType === 'host' || entityType === 'user'
+        ? {
+            kind: FLYOUT_DESCRIPTOR_KIND.entityAnomalyInsights,
+            entityType,
+            value: entityName,
+            entityId,
+          }
+        : null;
+    case 'csp_insights':
+      if (path.subTab === 'vulnerabilitiesTabId') {
+        return {
+          kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
+          value: entityName,
+          entityId,
+          entityType,
+        };
+      }
+      if (path.subTab === 'alertsTabId') {
+        return {
+          kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
+          entityType,
+          value: entityName,
+          entityId,
+        };
+      }
+      return {
+        kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
+        entityType,
+        value: entityName,
+        entityId,
+      };
+    case 'graph_view':
+      return entityId && scopeId
+        ? {
+            kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView,
+            entityId,
+            scopeId,
+            entityName,
+            entityType,
+          }
+        : null;
+    case 'resolution_group':
+      return entityId && scopeId
+        ? {
+            kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
+            entityId,
+            entityType,
+            entityName,
+            scopeId,
+          }
+        : null;
+    default:
+      return null;
+  }
+};
+
+/**
+ * Converts the entity-only legacy panel payload used by Agent Builder into the equivalent
+ * flyout-v2 descriptor stack. Tool views are restored as the root with the entity overview as
+ * its child, matching the v2 URL restore contract.
+ */
+export const buildEntityFlyoutV2NavigationState = (
+  flyout: EntityAnalyticsFlyoutNavigationState
+): FlyoutV2UrlParamValue | null => {
+  const entity = getEntityDescriptorContext(flyout.right);
+  if (!entity) return null;
+
+  const toolDescriptor = getEntityToolDescriptor(flyout.left, entity.context);
+  const withAiChatOrigin = (descriptor: FlyoutDescriptor): FlyoutDescriptor => ({
+    ...descriptor,
+    origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+  });
+  const entityDescriptor = withAiChatOrigin(entity.descriptor);
+  return toolDescriptor ? [withAiChatOrigin(toolDescriptor), entityDescriptor] : [entityDescriptor];
+};
+
 const getEntityAnalyticsNavigationPathWithFlyout = (
-  flyout: Record<string, unknown>
+  flyout: EntityAnalyticsFlyoutNavigationState,
+  isNewFlyoutEnabled: boolean,
+  descriptors?: FlyoutV2UrlParamValue | null
 ): string | undefined => {
+  const searchParams = getEntityAnalyticsStateSearchParams();
+  searchParams.delete(FLYOUT_PARAM_KEY);
+  searchParams.delete(FLYOUT_V2_URL_PARAM);
+
+  if (isNewFlyoutEnabled) {
+    if (!descriptors) return undefined;
+    searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
+    return `?${searchParams.toString()}`;
+  }
+
   const encodedFlyoutSearch = encodeFlyout(flyout);
   if (encodedFlyoutSearch == null) {
     return undefined;
@@ -52,7 +230,6 @@ const getEntityAnalyticsNavigationPathWithFlyout = (
     return undefined;
   }
 
-  const searchParams = getEntityAnalyticsStateSearchParams();
   searchParams.set(FLYOUT_PARAM_KEY, flyoutValue);
   return `?${searchParams.toString()}`;
 };
@@ -141,6 +318,70 @@ export const buildEntityRightPanel = (
       return {
         id: ServicePanelKey,
         params: { contextID, scopeId, serviceName: displayName, entityId: entityStoreId },
+      };
+    default:
+      return null;
+  }
+};
+
+/**
+ * Builds the expandable-flyout `left` (details) panel for a host/user/service
+ * entity. Parameterized by `scopeId`, left-tab `path`, and `isRiskScoreExist`
+ *
+ * Returns `null` for generic entities and when `entityStoreId` is missing.
+ */
+export const buildEntityLeftPanel = ({
+  identifier,
+  scopeId,
+  path,
+  isRiskScoreExist,
+}: {
+  identifier: EntityAttachmentIdentifier;
+  scopeId: string;
+  path: Partial<EntityDetailsPath>;
+  isRiskScoreExist: boolean;
+}): EntityAnalyticsFlyoutNavigationState['left'] | null => {
+  const { identifierType, identifier: displayName, entityStoreId } = identifier;
+  if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
+    return null;
+  }
+
+  switch (identifierType) {
+    case 'host':
+      return {
+        id: HostDetailsPanelKey,
+        params: {
+          hostName: displayName,
+          entityId: entityStoreId,
+          entityStoreEntityId: entityStoreId,
+          scopeId,
+          isRiskScoreExist,
+          path,
+        },
+      };
+    case 'user':
+      return {
+        id: UserDetailsPanelKey,
+        params: {
+          userName: displayName,
+          identityFields: { 'user.name': displayName },
+          entityId: entityStoreId,
+          entityStoreEntityId: entityStoreId,
+          scopeId,
+          isRiskScoreExist,
+          path,
+        },
+      };
+    case 'service':
+      return {
+        id: ServiceDetailsPanelKey,
+        params: {
+          identityFields: { 'service.name': displayName },
+          entityStoreEntityId: entityStoreId,
+          scopeId,
+          isRiskScoreExist,
+          path,
+        },
       };
     default:
       return null;
@@ -272,10 +513,11 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   chrome,
   openSidebarConversation,
   searchSession,
+  isNewFlyoutEnabled = false,
 }: {
   application: ApplicationStart;
   appId: string;
-  flyout: Record<string, unknown>;
+  flyout: EntityAnalyticsFlyoutNavigationState;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
@@ -284,8 +526,11 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
    * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
    */
   searchSession?: ISessionService;
+  /** Whether to encode the destination using the new EUI flyout URL contract. */
+  isNewFlyoutEnabled?: boolean;
 }): void => {
-  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout);
+  const descriptors = isNewFlyoutEnabled ? buildEntityFlyoutV2NavigationState(flyout) : null;
+  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout, isNewFlyoutEnabled, descriptors);
   if (path == null) {
     return;
   }

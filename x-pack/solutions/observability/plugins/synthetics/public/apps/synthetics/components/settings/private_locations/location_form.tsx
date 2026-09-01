@@ -9,7 +9,7 @@ import type { Ref } from 'react';
 import React from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { selectAgentPolicies } from '../../../state/agent_policies';
@@ -18,6 +18,7 @@ import { SpaceSelector } from '../components/spaces_select';
 import { TagsField } from '../components/tags_field';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
+import { AgentShardingField } from './agent_sharding_field';
 import { PolicyHostsField } from './policy_hosts';
 
 export const LocationForm = ({
@@ -68,6 +69,9 @@ export const LocationForm = ({
         </EuiFormRow>
         <EuiSpacer />
         <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
+        <AgentShardingField
+          isEditingShardedLocation={privateLocationToEdit?.isAgentSharding === true}
+        />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />

@@ -43,10 +43,29 @@ export const NewConversationSendButton = css({
   justifyContent: 'flex-end',
 });
 
-export const NewConversationContainer = ({ euiTheme }: UseEuiTheme) =>
+export const PromptsContainer = ({ euiTheme }: UseEuiTheme) =>
   css({
     paddingRight: euiTheme.size.l,
+    containerType: 'inline-size',
   });
+
+export const SuggestedPromptsGrid = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: euiTheme.size.m,
+    [`@container (max-width: ${euiTheme.breakpoint.s}px)`]: {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+    },
+  });
+
+export const SuggestedPromptText = css({
+  display: '-webkit-box',
+  WebkitLineClamp: 3,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+  wordBreak: 'break-word',
+});
 
 export const ChatColumnsGrid = ({ euiTheme }: UseEuiTheme) =>
   css({

@@ -33,6 +33,18 @@ exports.EcsCustomPropertyMappings = {
           schedule_delay: {
             type: 'long',
           },
+          execution: {
+            properties: {
+              uuid: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+          // arbitrary consumer-provided data for the current task run, owned by task manager.
+          data: {
+            type: 'flattened',
+          },
         },
       },
       // alerting specific fields
@@ -470,6 +482,10 @@ exports.EcsCustomPropertyMappings = {
         properties: {
           dispatcher: {
             properties: {
+              failure_reason: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               episode_count: {
                 type: 'long',
               },

@@ -94,6 +94,7 @@ export type StreamEnrichmentEvent =
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
   | { type: 'simulation.refresh' }
+  | { type: 'simulation.fetchMore' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }

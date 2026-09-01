@@ -1,0 +1,8 @@
+in: query
+name: author
+description: Filters the returned templates by author username.
+schema:
+  oneOf:
+    - $ref: '../schemas/string.yaml'
+    - $ref: '../schemas/string_array.yaml'
+example: elastic

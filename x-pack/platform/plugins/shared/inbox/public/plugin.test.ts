@@ -43,7 +43,7 @@ describe('InboxPublicPlugin', () => {
         expect.objectContaining({
           id: PLUGIN_ID,
           appRoute: APP_PATH,
-          euiIconType: 'email',
+          euiIconType: 'mail',
           mount: expect.any(Function),
         })
       );
@@ -56,7 +56,9 @@ describe('InboxPublicPlugin', () => {
       plugin.setup(coreSetup, noopSetupDeps);
 
       const [registration] = coreSetup.application.register.mock.calls[0];
-      expect(registration.visibleIn).toEqual(expect.arrayContaining(['sideNav', 'globalSearch']));
+      expect(registration.visibleIn).toEqual(
+        expect.arrayContaining(['classicSideNav', 'projectSideNav', 'globalSearch'])
+      );
     });
 
     it('exposes registerActionDetailRenderer regardless of enabled state', () => {

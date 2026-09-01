@@ -118,7 +118,7 @@ export const createEvaluateLeadGenerationDataset = ({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task: async ({ input }) => task({ input }),
         concurrency: resolveConcurrency(),
         trustUpstreamDataset,

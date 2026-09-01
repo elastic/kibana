@@ -6,51 +6,37 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { getEbtProps } from '@kbn/ebt-click';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { MoreActionsButton } from './more_actions_button';
+import { ConversationShareButton } from './conversation_share_button';
+import { ChatInfoButton } from './chat_info_button';
+import { useConversation } from '../../../hooks/use_conversation';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
     defaultMessage: 'Conversation actions',
   }),
-  close: i18n.translate('xpack.agentBuilder.conversationActions.close', {
-    defaultMessage: 'Close',
-  }),
 };
 
-export interface ConversationRightActionsProps {
-  onClose?: () => void;
-}
-
-export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
-  const { isEmbeddedContext } = useConversationContext();
+export const ConversationRightActions = () => {
+  const { conversation } = useConversation();
+  const hasTemplate = Boolean(conversation?.template_id);
 
   return (
     <EuiFlexGroup
-      gutterSize="xs"
+      gutterSize="s"
       justifyContent="flexEnd"
       alignItems="center"
       aria-label={labels.container}
       responsive={false}
     >
-      <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
-      {isEmbeddedContext && (
-        <EuiButtonIcon
-          color="text"
-          iconType="cross"
-          size="m"
-          onClick={onClose}
-          aria-label={labels.close}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.conversation.CLOSE,
-            detail: 'conversation',
-          })}
-        />
+      <EuiFlexItem grow={false}>
+        <ConversationShareButton />
+      </EuiFlexItem>
+      {hasTemplate && (
+        <EuiFlexItem grow={false}>
+          <ChatInfoButton />
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );

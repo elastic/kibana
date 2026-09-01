@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   EcsDataQualityDashboardPluginSetup,
   EcsDataQualityDashboardPluginStart,

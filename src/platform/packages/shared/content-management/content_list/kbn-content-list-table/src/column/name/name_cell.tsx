@@ -98,14 +98,21 @@ export const NameCell = memo(
       [euiTheme]
     );
 
-    // Switches the name cell from column to row layout on wide viewports,
-    // and adds a gap between items in that layout.
+    // At ≥ 2560px (~4K), pull title/description/tags onto a shared row so
+    // sparse rows don't strand the populated cells in a tiny pocket on the
+    // left of an otherwise empty Name column. `flex-wrap: wrap` lets rich
+    // rows fall back to the column stack — a long description (or a long
+    // title) wraps to the next line instead of being squeezed by a sibling
+    // ({@link https://github.com/elastic/kibana/issues/271707}). `row-gap: 0`
+    // preserves the original column-stack visual when wrapping kicks in.
     const wideRowCss = useMemo(
       () => css`
         @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
           flex-direction: row;
+          flex-wrap: wrap;
           align-items: center;
-          gap: ${euiTheme.size.s};
+          column-gap: ${euiTheme.size.s};
+          row-gap: 0;
         }
       `,
       [euiTheme]

@@ -36,9 +36,15 @@ Each `change` has the following (see [Usage examples](#usage-examples) below):
 
 There is also an `opts` object that contains the `action` that took place, and relevant `username` and other contextual information.
 
+#### Capturing the right timestamp
+
+Pass the Saved Object's `updated_at` field (assigned by Elasticsearch at write time) rather than a clock reading taken before the write. For delete operations where no post-write SO is available, capture `Date.now()` immediately after the delete resolves. Taking the timestamp before the write means concurrent writes can land in Elasticsearch in the opposite order to what change-history records.
+
 **Query history** with `getHistory(spaceId, objectType, objectId, opts?)`:
 
 - Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`.
+
+**Facet distinct field values** with `getHistoryByFields(spaceId, objectType, objectId, fields, opts?)` — terms buckets on mapped keyword fields (`user.name`, `event.action`, etc.).
 
 All persisted documents follow the same schema (see below).
 
@@ -81,6 +87,10 @@ Each persisted document gets a unique `event.id` assigned by the package (UUID v
 
 UUID v7 values are monotonically increasing within the same millisecond. That matters when two change history events are written back-to-back with the same timestamp (for example `rule_install` and `rule_enable` when a user chooses "Install and enable"): `getHistory()` sorts by `sequence`, then `@timestamp`, then `event.id`, so ordering stays deterministic.
 
+### Backwards/forwards compatibility in `object.snapshot`
+
+`object.snapshot` is stored unmapped in the `.kibana_change_history` data stream, separate from the original tracked object. Because of this, it is recommended that callers store an application-layer type rather than a raw on-disk format. If/when there are underlying changes in tracked object storage format, using an application-layer type will likely save on having to introduce a compensating storage-layer transform to keep old snapshots readable. See [#273561](https://github.com/elastic/kibana/pull/273561) for more context and a concrete example.
+
 ## API
 
 ### Client
@@ -92,7 +102,7 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
 - **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
 
 - **`initialize(elasticsearchClient)`**
-  Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory`.
+  Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory` / `getHistoryByFields`.
 
 - **`log(change, opts)`**
   Writes one `change` document with given `opts` context (`action`, `username`, etc) in `LogChangeHistoryOptions`.
@@ -106,7 +116,8 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
     - `userProfileId` [user profile](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) from auth realm,
     - `correlationId` to groups bulk events in a common span when set,
     - change `data` overrides (partial `event`, `tags`, and `metadata` to merge into the document),
-    - `fieldsToHash` a nested key/value map of fields to hash in the stored snapshot (PII, secrets, large base64 blobs, etc. — only string values are hashed),
+    - `fieldsToHash` a nested key/value map of fields to hash in the stored snapshot (only string values are hashed). Hash **high-entropy secrets only** — the digest is a deterministic, `object.id`-salted SHA-256, so low-entropy values (emails, names, etc.) stay brute-forceable. See [Sensitive fields in the snapshot](#sensitive-fields-in-the-snapshot),
+    - `fieldsToRedact` a nested key/value map of fields to replace with a `[redacted]` placeholder (only string values). Use for **low-entropy** sensitive data where hashing isn't safe. See [Sensitive fields in the snapshot](#sensitive-fields-in-the-snapshot),
     - `refresh` an optional indicator to force ES shard refresh after changes (affects performance).
 
 - **`getHistory(spaceId, objectType, objectId, opts?)`**
@@ -116,6 +127,15 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
   - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100).
   - Results are sorted by `object.sequence` (if available), then `@timestamp`, and `event.id` as the tie-breaker.
 
+- **`getHistoryByFields(spaceId, objectType, objectId, fields, opts?)`**
+  - Returns `{ results }` — one `{ field, buckets, sumOtherDocCount }` entry per requested field (duplicates removed, first-seen order preserved).
+  - Aggregates **one or more fields in a single Elasticsearch search** (sibling terms aggs).
+  - Uses the same object scope as `getHistory` (`spaceId`, client `module`/`dataset`, `object.type`, `object.id`).
+  - Each `fields` entry must be a `ChangeHistoryAggregateField` (`user.name`, `user.id`, `event.action`, `event.type`). See `CHANGE_HISTORY_AGGREGATE_FIELDS`.
+  - Optional `opts.additionalFilters` — extra ES filter clauses merged into the query. **Build these server-side** from validated route params; do not pass user-controlled query DSL.
+  - Optional `opts.size` — max distinct bucket count **per field** (default `DEFAULT_FIELD_AGGREGATION_SIZE`, currently `100`).
+  - `sumOtherDocCount` mirrors Elasticsearch `sum_other_doc_count`: the **document** count in terms buckets omitted when `size` is exceeded. Use it to signal truncated facet lists (for example “showing top 100 authors”).
+  - Common uses: author facets (`user.name`), change-type facets (`event.action`), or both in one call.
 
 ### Elasticsearch mapping schema
 
@@ -124,8 +144,6 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | Field                   | Type        | Description                                                                 |
 | ----------------------- | ----------- | --------------------------------------------------------------------------- |
 | `@timestamp`            | `date`      | ISO8601 timestamp of the change.                                           |
-| `ecs`                   | `object`    | ECS version.                                                                |
-| `ecs.version`           | `keyword`   | ECS schema version (e.g. `9.3.0`).                                         |
 | `user`                  | `object`    | User who performed the change.                                                   |
 | `user.id`               | `keyword`   | Optional user profile ID from auth realm. Refer to ES [User Profiles](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles).      |
 | `user.name`             | `keyword`   | Current login name. (Required)        |
@@ -135,43 +153,42 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `event.dataset`         | `keyword`   | Feature dataset (e.g. `alerting-rules`). Used to scope writes and queries.           |
 | `event.action`          | `keyword`   | Action that triggered the change (e.g. `rule_create`, `rule_update`, `rule_delete`). See additional [examples](https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging).  |
 | `event.type`            | `keyword`   | ECS categorization: `creation`, `change`, `deletion`.                         |
-| `event.reason`          | `text`      | User-specified reason for the change. (Optional)                            |
-| `event.created`         | `date`      | ISO8601 timestamp of the event creation time. Generated by library.        |
 | `span`                  | `object`    | Logic span for bulk operations. (Optional)                                 |
 | `span.id`               | `keyword`   | ID shared between events that take place in a bulk operation. (Optional)                           |
 | `object`                | `object`    | The tracked object.                                                         |
 | `object.id`             | `keyword`   | Unique id of the target object in Kibana.                                   |
 | `object.type`           | `keyword`   | Type of the target object (e.g. `alert`). Allows tracking multiple types in the same change history stream. |
-| `object.hash`           | `keyword`   | SHA256 of the object snapshot to identify the payload.                     |
 | `object.sequence`       | `long`      | Optional monotonically increasing integer determining changes order for the tracked object (see [Ordering and versioning](#ordering-and-versioning)). |
-| `object.fields`         | `object`    | Field data for the stored snapshot.                                     |
-| `object.fields.hashed`  | `keyword`   | List of fields (full paths) whose values were replaced with hashes (SHA-256).  |
-| `object.snapshot`       | (unmapped)  | Full snapshot after the change.                                             |
+| `object.snapshot`       | (unmapped)  | Full snapshot after the change. Including sanitized fields.                                            |
 | `tags`                  | `keyword`   | Optional list of tags for the event.                                       |
 | `metadata`              | `flattened` | Optional structured metadata; does not form part of the ECS schema. |
 | `kibana.space_ids`      | `keyword`   | Injected by `@kbn/data-streams` (not part of this package’s index mappings). Space IDs the document belongs to (e.g. `['default']`). |
 | `service`               | `object`    | Service context.                                                            |
-| `service.type`          | `keyword`   | Service type (e.g. `kibana`).                                               |
 | `service.version`       | `keyword`   | Version of Kibana.                                                           |
 
 Variable-shape field `object.snapshot` is stored but unmapped; `metadata` uses the `flattened` type so arbitrary keys can be stored and indexed without dynamic mapping.
 
-### Index Lifecycle Management (ILM)
+#### Fields written but not indexed
 
-The data stream is linked to a managed ILM policy named:
+Several fields are still written to documents (preserved in `_source` for forensic inspection) but are intentionally not mapped, since no consumer queries, filters, sorts, or aggregates on them. With `dynamic: false`, these fields land in `_source` without consuming inverted-index or doc-values storage:
 
-```
-.kibana-change-history-ilm-policy
-```
+- `ecs.version` — hardcoded ECS schema constant, pinned to ECS [`9.3.0`]. 
+- `event.created` — very similar to `@timestamp` (set to the package serialisation moment vs. the caller-supplied write-confirmed moment). 
+- `event.reason` — optional user-specified reason for the change;
+- `object.hash` — SHA-256 of the original snapshot; can be used to check if a version of the object already exists.
+- `object.fields.hashed` — list of paths in `object.snapshot` whose string values were redacted with a SHA-256 digest.
+- `object.fields.redacted` - List of paths in `object.snapshot` whose values were replaced with a `[redacted]` placeholder. 
+- `service.type` — hardcoded `'kibana'`; the `.kibana_change_history` data stream identity already implies Kibana.
 
-The default policy ships with a single `hot` phase and no actions — change history documents are kept indefinitely with no automatic rollover or deletion. The policy is installed only when it does not already exist, so cluster admins can customize it in place without their changes being overwritten on the next Kibana startup.
+If a future consumer needs to filter or sort on any of these, add them back to the mapping (no document-shape change needed since they are still being written to `_source`).
 
-To adjust retention or add a rollover strategy, edit the policy via:
+### Retention
 
-- the Kibana UI: **Stack Management → Index Lifecycle Policies → `.kibana-change-history-ilm-policy`**, or
-- the Elasticsearch API: `PUT _ilm/policy/.kibana-change-history-ilm-policy`.
+`.kibana_change_history` is enrolled in data stream lifecycle with `enabled: true` and no `data_retention`. Change history documents are kept indefinitely by default.
 
-Edits take effect on existing backing indices on the next ILM poll.
+This stream must be registered as an Elasticsearch **system** data stream (`system: true`), not only as a Kibana hidden stream. Kibana `registerDataStream` / `@kbn/data-streams` cannot set that flag — it comes from the ES [`SystemDataStreamDescriptor`](https://github.com/elastic/elasticsearch/pull/154113) ([security-team#18291](https://github.com/elastic/security-team/issues/18291)). See [`@kbn/data-streams` README — System data streams](../../../../../src/platform/packages/private/kbn-data-streams/README.md#system-data-streams). Verify with `GET _data_stream/.kibana_change_history`.
+
+Cluster admins can add retention later via **Stack Management → Index Management → Data Streams** on both stateful and serverless deployments.
 
 ### Dependencies
 
@@ -217,6 +234,23 @@ console.log(
   `We have ${total} items, latest change at: \n${JSON.stringify(items[0]?.['@timestamp'])}`
 );
 ```
+
+### Field facets (authors, actions)
+
+Use `getHistoryByFields` for filter popovers (one or more fields in a single search). Build `additionalFilters` server-side from validated query params only.
+
+```ts
+const { results } = await client.getHistoryByFields(spaceId, 'workflow', workflowId, [
+  'user.name',
+  'event.action',
+]);
+const byField = Object.fromEntries(results.map((r) => [r.field, r]));
+
+const authors = byField['user.name'].buckets.map(({ key }) => key);
+const truncated = byField['user.name'].sumOtherDocCount > 0;
+```
+
+Supported fields are listed in `CHANGE_HISTORY_AGGREGATE_FIELDS` (`user.name`, `user.id`, `event.action`, `event.type`).
 
 ### Bulk changes with correlation ID
 
@@ -279,22 +313,40 @@ await client.log(
 );
 ```
 
-### Hashed fields in the snapshot
+### Sensitive fields in the snapshot
 
-Use `fieldsToHash` for sensitive string fields (PII, secrets, large base64 blobs) so stored values are SHA-256 digests.
+Use `fieldsToHash` for high-entropy secret string fields (secrets, API keys, tokens) that need version control. Matching string values are replaced with the last 12 hex chars of `sha256(object.id + value)`, so equal values for the same object hash identically ("did this field change?" scenarios).
+
+> [!IMPORTANT]
+> **Prefer not to store hashes at all** (Kibana Security guidance) — please avoid exposing hashes of tracked data where possible, most critically for low-entropy data but also for high-entropy keys and secrets. Before reaching for `fieldsToHash`, check whether a non-hash signal answers your question: if you only need "did this field change between two versions?", you may record a **change marker** (e.g. a timestamp or revision captured when the field changed) for the same diff-ability with zero secret material stored. Only hash genuinely high-entropy secrets, and only when a non-hash value can't give the same result.
 
 ```ts
 await client.log(change, {
   action: 'rule_update',
   username,
   spaceId,
-  // Fields containing sensitive data that should be masked
+  // High-entropy secrets only — see warning above
   fieldsToHash: {
-    user: { email: true },
     apiKey: true,
   },
 });
 ```
+
+For most secrets, **low-entropy** sensitive data (emails, names, IPs, short enums) and large base64 blobs use `fieldsToRedact` instead. Matching string values are replaced with a fixed `[redacted]` placeholder, so nothing about the original is stored or recoverable. When a field is listed in both maps, redaction wins.
+
+```ts
+await client.log(change, {
+  action: 'rule_update',
+  username,
+  spaceId,
+  fieldsToRedact: {
+    owner: { email: true, name: true },
+    source: { ip: true },
+  },
+});
+```
+
+Both `fieldsToHash` and `fieldsToRedact` only touch string values; the affected paths are recorded under `object.fields.hashed` and `object.fields.redacted` respectively.
 
 ### Logging a deletion
 

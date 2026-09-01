@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AlertingServerStartDependencies } from '../../types';
-import { TASK_ID } from './task_definition';
+import { TASK_ID } from './constants';
 import type { LatestTaskStateSchema } from './task_state';
 import type { AlertingV2Usage } from './types';
 import { AlertingV2UsageCollectorSchema } from './usage_collector_schema';

@@ -14,6 +14,7 @@ export interface BuildkiteMetadata {
   branch?: string;
   commit?: string;
   job_id?: string;
+  retry_count?: number;
   message?: string;
   build: {
     id?: string;
@@ -46,6 +47,11 @@ export interface BuildkiteMetadata {
   };
 }
 
+const parseRetryCount = (value: string | undefined): number => {
+  const parsed = Number.parseInt(value ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
 /**
  * Buildkite information extracted from environment variables
  *
@@ -57,6 +63,7 @@ export const buildkite: BuildkiteMetadata =
         branch: process.env.BUILDKITE_BRANCH,
         commit: process.env.BUILDKITE_COMMIT,
         job_id: process.env.BUILDKITE_JOB_ID,
+        retry_count: parseRetryCount(process.env.BUILDKITE_RETRY_COUNT),
         build: {
           id: process.env.BUILDKITE_BUILD_ID,
           number: process.env.BUILDKITE_BUILD_NUMBER,

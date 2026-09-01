@@ -1,5 +1,8 @@
 {
-  "sha1": "74acf6f6733efdc6b4665ae8b5292122e1b413bb",
+  "sha1": "a3ac9943c19c3e503672f1ff6d0ce5cf8ede0d93",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -8,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/global.setup.ts",
-        "line": 11,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -24,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 47,
-        "column": 14
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -40,13 +43,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 59,
-        "column": 14
+        "line": 51,
+        "column": 33
       }
     },
     {
-      "id": "d8e9d8aa0b28c46-e974817e68b0832",
-      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error",
+      "id": "d8e9d8aa0b28c46-f8faa754b641717",
+      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error from Attacks page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 31,
+        "column": 15
       }
     },
     {
@@ -72,8 +75,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "97e35cdc4d140e2-47e4d3edab4532d",
+      "title": "Attacks page filters filters attacks by type and persists selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 40,
+        "column": 20
       }
     },
     {
@@ -88,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_page_smoke.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 30,
+        "column": 15
       }
     },
     {
@@ -104,8 +123,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
-        "line": 34,
-        "column": 14
+        "line": 31,
+        "column": 15
+      }
+    },
+    {
+      "id": "f6efc9f182744e4-47742f95ac597e4",
+      "title": "Attacks schedule flyout opens the schedule details flyout from the attack table row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
+        "line": 36,
+        "column": 36
       }
     },
     {
@@ -120,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/navigation.spec.ts",
-        "line": 27,
-        "column": 14
+        "line": 23,
+        "column": 15
       }
     }
   ]

@@ -10,18 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import type { ImportResults } from '@kbn/file-upload-common';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
 import { getPartialImportMessage } from './utils';
 
@@ -60,19 +60,26 @@ export class ImportCompleteView extends Component<Props, {}> {
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={jsonAsString}>
               {(copy) => (
-                <EuiButtonIcon
-                  size="s"
-                  onClick={copy}
-                  iconType="copy"
-                  color="text"
-                  data-test-subj={copyButtonDataTestSubj}
-                  aria-label={i18n.translate(
-                    'xpack.fileUpload.importComplete.copyButtonAriaLabel',
-                    {
-                      defaultMessage: 'Copy to clipboard',
-                    }
-                  )}
-                />
+                <EuiToolTip
+                  content={i18n.translate('xpack.fileUpload.importComplete.copyButtonAriaLabel', {
+                    defaultMessage: 'Copy to clipboard',
+                  })}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={copy}
+                    iconType="copy"
+                    color="text"
+                    data-test-subj={copyButtonDataTestSubj}
+                    aria-label={i18n.translate(
+                      'xpack.fileUpload.importComplete.copyButtonAriaLabel',
+                      {
+                        defaultMessage: 'Copy to clipboard',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           </EuiFlexItem>
@@ -103,32 +110,29 @@ export class ImportCompleteView extends Component<Props, {}> {
   _getStatusMsg() {
     if (this.props.failedPermissionCheck) {
       return (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
-          color="danger"
-          iconType="warning"
+          text={i18n.translate('xpack.fileUpload.importComplete.permissionFailureMsg', {
+            defaultMessage:
+              'You do not have permission to create or import data into index "{indexName}".',
+            values: { indexName: this.props.indexName },
+          })}
+          actionProps={{
+            primary: {
+              children: i18n.translate('xpack.fileUpload.importComplete.permission.docLink', {
+                defaultMessage: 'View file import permissions',
+              }),
+              href: getDocLinks().links.maps.importGeospatialPrivileges,
+              target: '_blank',
+              iconType: 'external',
+              iconSide: 'right',
+            },
+          }}
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
-        >
-          <p>
-            {i18n.translate('xpack.fileUpload.importComplete.permissionFailureMsg', {
-              defaultMessage:
-                'You do not have permission to create or import data into index "{indexName}".',
-              values: { indexName: this.props.indexName },
-            })}
-          </p>
-          <EuiLink
-            href={getDocLinks().links.maps.importGeospatialPrivileges}
-            target="_blank"
-            external
-          >
-            {i18n.translate('xpack.fileUpload.importComplete.permission.docLink', {
-              defaultMessage: 'View file import permissions',
-            })}
-          </EuiLink>
-        </EuiCallOut>
+        />
       );
     }
 
@@ -148,57 +152,46 @@ export class ImportCompleteView extends Component<Props, {}> {
           })
         : '';
       return (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
-          color="danger"
-          iconType="warning"
+          text={errorMsg}
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
-        >
-          <p>{errorMsg}</p>
-        </EuiCallOut>
+        />
       );
     }
 
     if (this.props.importResults.failures?.length) {
       return (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessWithFailuresTitle', {
             defaultMessage: 'File upload complete with failures',
           })}
-          color="warning"
-          iconType="question"
+          text={getPartialImportMessage(
+            this.props.importResults.failures!.length,
+            this.props.importResults.docCount
+          )}
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
-        >
-          <p>
-            {getPartialImportMessage(
-              this.props.importResults.failures!.length,
-              this.props.importResults.docCount
-            )}
-          </p>
-        </EuiCallOut>
+        />
       );
     }
 
     return (
-      <EuiCallOut
+      <KbnInfoCallout
         title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessTitle', {
           defaultMessage: 'File upload complete',
         })}
+        text={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessMsg', {
+          defaultMessage: 'Indexed {numFeatures} features.',
+          values: {
+            numFeatures: this.props.importResults.docCount,
+          },
+        })}
         data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
-      >
-        <p>
-          {i18n.translate('xpack.fileUpload.importComplete.uploadSuccessMsg', {
-            defaultMessage: 'Indexed {numFeatures} features.',
-            values: {
-              numFeatures: this.props.importResults.docCount,
-            },
-          })}
-        </p>
-      </EuiCallOut>
+      />
     );
   }
 

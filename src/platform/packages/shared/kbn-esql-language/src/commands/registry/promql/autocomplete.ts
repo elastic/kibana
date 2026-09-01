@@ -28,6 +28,7 @@ import {
   getUsedPromqlParamNames,
   isAtValidColumnSuggestionPosition,
   isParamValueComplete,
+  isPromqlParamAvailable,
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { suggestForPromqlQuery } from '../../definitions/utils/autocomplete';
@@ -65,11 +66,8 @@ export async function autocomplete(
   switch (kind) {
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
-      const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
-        ({ label }) =>
-          !usedParams.has(label) &&
-          !(label === PromqlParamName.Step && usedParams.has(PromqlParamName.Buckets)) &&
-          !(label === PromqlParamName.Buckets && usedParams.has(PromqlParamName.Step))
+      const availableParamSuggestions = getPromqlParamKeySuggestions().filter(({ label }) =>
+        isPromqlParamAvailable(label, usedParams)
       );
 
       const canSuggestQuery = isAtValidColumnSuggestionPosition(

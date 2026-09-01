@@ -13,10 +13,8 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
 import { FileThumbnail } from './file_thumbnail';
 import { basicCase, basicFileMock } from '../../../containers/mock';
-import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
-import type { FileAttachmentMetadata } from '../../../../common/types/domain_zod/attachment/file/v2';
-
-type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+import { allCasesPermissions } from '../../../common/mock';
+import type { FileViewProps } from '.';
 
 jest.mock('@kbn/shared-ux-file-context', () => ({
   useFilesContext: () => ({
@@ -48,6 +46,7 @@ const attachmentProps: FileViewProps = {
   createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
   version: '1',
   caseData: { title: basicCase.title, id: basicCase.id },
+  permissions: allCasesPermissions(),
   rowContext: {
     appId: 'cases',
     manageMarkdownEditIds: [],

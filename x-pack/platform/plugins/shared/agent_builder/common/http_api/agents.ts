@@ -5,36 +5,81 @@
  * 2.0.
  */
 
-import type { AgentAcl, AgentAclEntry, AgentDefinition } from '@kbn/agent-builder-common';
+import type {
+  AgentAccessControl,
+  AgentAccessControlEntry,
+  AgentDefinition,
+} from '@kbn/agent-builder-common';
 
-export type GetAgentResponse = AgentDefinition;
-
-export interface ListAgentResponse {
-  results: AgentDefinition[];
+export interface AgentPermissions {
+  update_agent: boolean;
+  update_access_control: boolean;
 }
 
-export type UpdateAgentResponse = AgentDefinition;
+export type AgentDefinitionWithPermissions = AgentDefinition & {
+  permissions: AgentPermissions;
+};
 
-export type CreateAgentResponse = AgentDefinition;
+export type GetAgentResponse = AgentDefinitionWithPermissions;
+
+export type ListAgentResponseItem = AgentDefinitionWithPermissions;
+
+export interface ListAgentResponse {
+  results: ListAgentResponseItem[];
+}
+
+export type UpdateAgentResponse = AgentDefinitionWithPermissions;
+
+export type CreateAgentResponse = AgentDefinitionWithPermissions;
 
 export interface DeleteAgentResponse {
   success: boolean;
 }
 
 /**
- * Response shape for `GET /api/agent_builder/agents/{id}/acl`.
- *
- * `can_manage` indicates whether the requesting user can edit the ACL via PUT.
- * `acl` is always present and reflects the current persisted entries.
+ * The public agent APIs only return an agent's own configuration, so this is the only way
+ * a client can tell inherited AI indices from assigned ones.
  */
-export interface GetAgentAclResponse {
-  can_manage: boolean;
-  acl: AgentAcl;
+export interface AgentAiIndexEntry {
+  id: string;
+  is_default: boolean;
 }
 
-/** Body for `PUT /api/agent_builder/agents/{id}/acl`. */
-export interface UpdateAgentAclRequestBody {
-  entries: AgentAclEntry[];
+export interface AgentAiIndicesWarning {
+  message: string;
+  agent_type?: string;
 }
 
-export type UpdateAgentAclResponse = AgentAcl;
+export interface AgentAiIndicesItem {
+  agent_id: string;
+  ai_indices: AgentAiIndexEntry[];
+}
+
+export interface ListAgentAiIndicesResponse {
+  results: AgentAiIndicesItem[];
+  warnings?: AgentAiIndicesWarning[];
+}
+
+export interface GetAgentAiIndicesResponse {
+  ai_indices: AgentAiIndexEntry[];
+  warnings?: AgentAiIndicesWarning[];
+}
+
+/**
+ * Response shape for `GET /api/agent_builder/agents/{id}/access_control`.
+ *
+ * `permissions.update_access_control` indicates whether the requesting user can edit access
+ * control via PUT.
+ * `access_control` is always present and reflects the current persisted scope and entries.
+ */
+export interface GetAgentAccessControlResponse {
+  access_control: AgentAccessControl;
+  permissions: Pick<AgentPermissions, 'update_access_control'>;
+}
+
+/** Body for `PUT /api/agent_builder/agents/{id}/access_control`. */
+export interface UpdateAgentAccessControlRequestBody {
+  entries: AgentAccessControlEntry[];
+}
+
+export type UpdateAgentAccessControlResponse = AgentAccessControl;

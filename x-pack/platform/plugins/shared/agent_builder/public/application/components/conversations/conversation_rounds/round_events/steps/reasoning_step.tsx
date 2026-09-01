@@ -6,27 +6,42 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ReasoningStep as ReasoningStepData } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  ConversationRoundStep,
+  ReasoningStep as ReasoningStepData,
+} from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { StepLayout } from '../step_layout';
-
-const ariaLabel = i18n.translate('xpack.agentBuilder.roundEvents.steps.reasoning.ariaLabel', {
-  defaultMessage: 'Agent reasoning',
-});
+import { ChatMessageText } from '../../round_response/chat_message_text';
 
 interface ReasoningStepProps {
   step: ReasoningStepData;
+  steps: ConversationRoundStep[];
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationId?: string;
 }
 
-export const ReasoningStep: React.FC<ReasoningStepProps> = ({ step }) => (
+export const ReasoningStep: React.FC<ReasoningStepProps> = ({
+  step,
+  steps,
+  conversationAttachments,
+  attachmentRefs,
+  conversationId,
+}) => (
   <StepLayout
     label={
-      <EuiText color="inherit">
-        <p role="status" aria-label={ariaLabel}>
-          {step.reasoning}
-        </p>
-      </EuiText>
+      <ChatMessageText
+        content={step.reasoning}
+        steps={steps}
+        conversationAttachments={conversationAttachments}
+        attachmentRefs={attachmentRefs}
+        conversationId={conversationId}
+        isStreaming={false}
+      />
     }
   />
 );

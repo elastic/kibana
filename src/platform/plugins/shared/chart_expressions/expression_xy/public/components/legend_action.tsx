@@ -9,8 +9,13 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import {
+  getAccessorByDimension,
+  isFilterableColumnSet,
+  getFilterDrilldownWarningMessage,
+} from '@kbn/chart-expressions-common';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { LayerCellValueActions, FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import type { LegendCellValueActions } from './legend_action_popover';
@@ -52,6 +57,7 @@ export const getLegendAction = (
     }
 
     const { table } = layer;
+    const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
 
     const filterActionData: FilterEvent['data']['data'] = [];
     const cellValueActionData: CellValueContext['data'] = [];
@@ -81,18 +87,18 @@ export const getLegendAction = (
       return null;
     }
 
-    // Don't show filter actions for computed columns
-    const hasComputedColumn = filterActionData.some((data) => {
-      const column = data.table.columns[data.column];
-      return column?.isComputedColumn === true;
-    });
-
-    if (hasComputedColumn) {
-      return null;
-    }
+    const filterableColumns = filterActionData.map((data) => data.table.columns[data.column]);
+    // isFilterable gates the action (disabled state + whether it runs); warningMessage is
+    // display-only and can be suppressed (e.g. for dates) without affecting isFilterable.
+    const isFilterable = !isEsqlMode || isFilterableColumnSet(filterableColumns);
+    const warningMessage = isEsqlMode
+      ? getFilterDrilldownWarningMessage(filterableColumns)
+      : undefined;
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
-      onFilter({ data: filterActionData, negate });
+      if (isFilterable) {
+        onFilter({ data: filterActionData, negate });
+      }
     };
 
     const legendCellValueActions: LegendCellValueActions =
@@ -101,25 +107,28 @@ export const getLegendAction = (
         execute: () => action.execute(cellValueActionData),
       })) ?? [];
 
+    const label =
+      getSeriesName(
+        series,
+        {
+          splitAccessors: layer.splitAccessors,
+          accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
+          columns: table.columns,
+          splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
+          alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
+          columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+          multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
+        },
+        titles
+      )?.toString() ?? '';
+
     return (
       <LegendActionPopover
-        label={
-          getSeriesName(
-            series,
-            {
-              splitAccessors: layer.splitAccessors,
-              accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
-              columns: table.columns,
-              splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
-              alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
-              columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
-              multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
-            },
-            titles
-          )?.toString() || ''
-        }
+        label={label}
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
+        showDisabledFilterActions={!isFilterable}
+        footerMessage={warningMessage}
       />
     );
   });

@@ -33,7 +33,7 @@ jest.mock('../services/epm/archive', () => ({
 }));
 
 describe('ReindexIntegrationKnowledgeTask', () => {
-  const abortController = new AbortController();
+  const { signal } = new AbortController();
   beforeEach(() => {
     (appContextService.getLogger as jest.Mock).mockReturnValue({
       debug: jest.fn(),
@@ -63,7 +63,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
       items: [{ version: '1.0.0' }],
     });
 
-    await reindexIntegrationKnowledgeForInstalledPackages(abortController);
+    await reindexIntegrationKnowledgeForInstalledPackages(signal);
 
     expect(indexKnowledgeBase).not.toHaveBeenCalled();
   });
@@ -105,7 +105,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
       items: [{ version: '0.0.1' }],
     });
 
-    await reindexIntegrationKnowledgeForInstalledPackages(abortController);
+    await reindexIntegrationKnowledgeForInstalledPackages(signal);
 
     expect(indexKnowledgeBase).toHaveBeenCalledTimes(2);
     expect(indexKnowledgeBase).toHaveBeenCalledWith(

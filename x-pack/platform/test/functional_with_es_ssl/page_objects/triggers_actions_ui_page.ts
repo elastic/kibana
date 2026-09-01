@@ -147,7 +147,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
-      await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
+      await find.clickDisplayedByCssSelector(
+        `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${name}"]`
+      );
     },
     async maybeClickOnAlertTab() {
       if (await testSubjects.exists('ruleDetailsTabbedContent')) {
@@ -190,9 +192,8 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async saveAlert() {
       await testSubjects.click('rulePageFooterSaveButton');
-      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmCreateRuleModal');
-      expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('confirmCreateRuleModal');
+      await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
     },
     async ensureRuleActionStatusApplied(
       ruleName: string,

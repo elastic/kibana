@@ -27,10 +27,13 @@ import { css } from '@emotion/react';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  useStateFromPublishingSubject,
+  apiPublishesApproximation,
+} from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
@@ -99,6 +102,9 @@ export function LayerPanel(props: LayerPanelProps) {
     apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
+  );
+  const isApproximate = useStateFromPublishingSubject(
+    apiPublishesApproximation(parentApi) ? parentApi?.isApproximate$ : new BehaviorSubject(false)
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -321,13 +327,9 @@ export function LayerPanel(props: LayerPanelProps) {
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
-    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
-    false;
+    datasource?.isTextBasedLanguage() || isTextBasedAttributes(editorProps.attributes) || false;
   const shouldRenderESQLEditor =
-    isTextBasedLanguage &&
-    canEditTextBasedQuery &&
-    isOfAggregateQueryType(editorProps.attributes?.state.query);
+    isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -878,6 +880,10 @@ export function LayerPanel(props: LayerPanelProps) {
                 columnId: openColumnId,
                 groupId: openColumnGroup.groupId,
                 hideGrouping: openColumnGroup.hideGrouping,
+                activeVisualizationTypeId: activeVisualization?.getVisualizationTypeId?.(
+                  visualizationState,
+                  layerId
+                ),
                 filterOperations: openColumnGroup.filterOperations,
                 isMetricDimension: openColumnGroup?.isMetricDimension,
                 dimensionGroups,
@@ -891,6 +897,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
                 esqlVariables,
+                isApproximate,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

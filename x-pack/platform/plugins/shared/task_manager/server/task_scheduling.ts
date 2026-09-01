@@ -44,6 +44,9 @@ const scheduleOptionsToStoreApiKeyOptions = (
   if (options.onEsKey === true) {
     storeOpts.onEsKey = true;
   }
+  if (options.cloneApiKey === true) {
+    storeOpts.cloneApiKey = true;
+  }
   if (options.regenerateApiKey !== undefined) {
     storeOpts.regenerateApiKey = options.regenerateApiKey;
   }
@@ -157,7 +160,7 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance, i) => {
+      taskInstances.map(async (taskInstance, i, arr) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
@@ -165,10 +168,10 @@ export class TaskScheduling {
         const enabled = modifiedTask.enabled ?? true;
         let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
         if (enabled) {
-          // Run the first task now. Run all other tasks a random number of ms in the future,
-          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          // Run now if there is only a single task.
+          // Otherwise add jitter to avoid them firing together.
           scheduling =
-            i === 0
+            arr.length === 1
               ? { runAt: new Date(), scheduledAt: new Date() }
               : addJitter(modifiedTask.schedule?.interval) ?? {};
         }
@@ -216,11 +219,11 @@ export class TaskScheduling {
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: (task, i) => {
+      map: (task, i, arr) => {
         if (runSoon) {
-          // Run the first task now. Run all other tasks a random number of ms in the future,
-          // with a maximum of 5 minutes or the task interval, whichever is smaller.
-          return i === 0
+          // Run now if there is only a single task.
+          // Otherwise add jitter to avoid them firing together.
+          return arr.length === 1
             ? { ...task, enabled: true, runAt: new Date(), scheduledAt: new Date() }
             : { ...task, enabled: true, ...addJitter(task.schedule?.interval ?? '0s') };
         }
@@ -252,9 +255,9 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
-   * `schedule` and `runAt` will be recalculated after task run finishes
-   *
+   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
+   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
+   * the task run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @returns {Promise<BulkUpdateTaskResult>}
@@ -264,12 +267,20 @@ export class TaskScheduling {
     schedule: IntervalSchedule | RruleSchedule,
     options?: ApiKeyOptions
   ): Promise<BulkUpdateTaskResult> {
+    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
+      filter: (task) =>
+        task.status === TaskStatus.Idle &&
+        (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
+        if (isEqual(task.schedule, schedule)) {
+          return task;
+        }
+
         const newRunAtInMs = calculateNextRunAtFromSchedule({
           schedule,
           startDate: task.scheduledAt,
@@ -365,33 +376,50 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    // Scheduling grants the API keys before it writes the task, so scheduling an id that already
+    // exists mints a key pair that the version conflict below then throws away. Callers treat this
+    // as an idempotent "make sure this exists" and call it on a loop, so check first rather than
+    // leaking a key pair per call. Racing callers still land on the conflict path. The store's
+    // predicate keeps this guard aligned with the actual grant condition (and skips the lookup
+    // when no key would be granted anyway, e.g. security disabled).
+    if (this.store.willGrantApiKeys(options) && (await this.store.taskExists(taskInstance.id))) {
+      return this.updateScheduleOfExistingTask(taskInstance, options);
+    }
+
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
-        // check if task specifies a schedule interval
-        // if so,try to update the just the schedule
-        // only works for interval schedule
-        if (taskInstance.schedule && taskInstance.schedule.interval) {
-          const result = await this.bulkUpdateSchedules(
-            [taskInstance.id],
-            taskInstance.schedule,
-            options
-          );
-          if (
-            result.errors.length &&
-            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
-            result.errors[0].error.statusCode !== NOT_FOUND_STATUS
-          ) {
-            throw new Error(
-              `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
-            );
-          }
-        }
-        return taskInstance;
+        return this.updateScheduleOfExistingTask(taskInstance, options);
       }
       throw err;
     }
+  }
+
+  private async updateScheduleOfExistingTask(
+    taskInstance: TaskInstanceWithId,
+    options?: ScheduleOptions
+  ): Promise<TaskInstanceWithId> {
+    // check if task specifies a schedule interval
+    // if so,try to update the just the schedule
+    // only works for interval schedule
+    if (taskInstance.schedule && taskInstance.schedule.interval) {
+      const result = await this.bulkUpdateSchedules(
+        [taskInstance.id],
+        taskInstance.schedule,
+        options
+      );
+      if (
+        result.errors.length &&
+        result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
+        result.errors[0].error.statusCode !== NOT_FOUND_STATUS
+      ) {
+        throw new Error(
+          `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+        );
+      }
+    }
+    return taskInstance;
   }
 }
 

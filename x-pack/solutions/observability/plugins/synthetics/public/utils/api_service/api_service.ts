@@ -11,7 +11,7 @@ import type { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/publ
 import type { AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { kibanaService } from '../kibana_service';
 
 type Params = HttpFetchQuery & { version?: string; spaceId?: string };
@@ -72,6 +72,25 @@ class ApiService {
     return response;
   }
 
+  private getCpsHeaders(): Record<string, string> | undefined {
+    const projectRouting = kibanaService.startPlugins?.cps?.cpsManager?.getProjectRouting();
+    return projectRouting ? { 'x-project-routing': projectRouting } : undefined;
+  }
+
+  private withCpsHeaders(options?: FetchOptions): FetchOptions | undefined {
+    const cpsHeaders = this.getCpsHeaders();
+    if (!cpsHeaders) {
+      return options;
+    }
+    return {
+      ...options,
+      headers: {
+        ...options?.headers,
+        ...cpsHeaders,
+      },
+    };
+  }
+
   private parseApiUrl(apiUrl: string, spaceId?: string) {
     // `*` is the all-spaces marker used by saved object `namespaces`; it is not
     // a real space ID we can route to, so callers should fall back to the
@@ -106,7 +125,7 @@ class ApiService {
       path: this.parseApiUrl(apiUrl, spaceId),
       query: queryParams,
       version,
-      ...(options ?? {}),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
@@ -127,6 +146,7 @@ class ApiService {
       body: JSON.stringify(data),
       query: queryParams,
       version,
+      ...this.withCpsHeaders(),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
@@ -153,7 +173,7 @@ class ApiService {
       body: JSON.stringify(data),
       query: queryParams,
       version,
-      ...(options ?? {}),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
@@ -168,7 +188,7 @@ class ApiService {
       query: queryParams,
       body: JSON.stringify(data),
       version,
-      ...(options ?? {}),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 

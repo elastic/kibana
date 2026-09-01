@@ -13,9 +13,13 @@ import type { NormalizedWorkflowInputs } from './workflow_execute_modal_helpers'
 import {
   buildDefaultTriggerEventSearchQuery,
   buildWorkflowTriggerScopeKql,
+  ensureSelectedTriggerTabVisible,
   getFallbackTriggerTab,
+  getVisibleWorkflowTriggerTabs,
   getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
+  isDefaultTriggerEventSearchScope,
+  omitUnchangedWorkflowInputDefaults,
   resolveInitialSelectedTrigger,
 } from './workflow_execute_modal_helpers';
 
@@ -39,6 +43,62 @@ function workflowWithExtensionTriggers(
     triggers: triggers as WorkflowYaml['triggers'],
   };
 }
+
+describe('omitUnchangedWorkflowInputDefaults', () => {
+  const inputsSchema = normalizeFieldsToJsonSchema({
+    properties: {
+      dynamicDefault: { type: 'string', default: '{{ consts.expected }}' },
+      staticDefault: { type: 'string', default: 'blue' },
+      tags: { type: 'array', items: { type: 'string' }, default: ['one', 'two'] },
+      settings: {
+        type: 'object',
+        properties: {
+          theme: { type: 'string', default: '{{ consts.theme }}' },
+          locale: { type: 'string', default: 'en' },
+        },
+      },
+      provided: { type: 'string' },
+    },
+  });
+
+  it('omits unchanged defaults while retaining caller-provided values', () => {
+    expect(
+      omitUnchangedWorkflowInputDefaults(
+        {
+          dynamicDefault: '{{ consts.expected }}',
+          staticDefault: 'blue',
+          tags: ['one', 'two'],
+          settings: {
+            theme: '{{ consts.theme }}',
+            locale: 'fr',
+          },
+          provided: '{{ literal.data }}',
+        },
+        inputsSchema
+      )
+    ).toEqual({
+      settings: { locale: 'fr' },
+      provided: '{{ literal.data }}',
+    });
+  });
+
+  it('retains defaults that the caller changed', () => {
+    expect(
+      omitUnchangedWorkflowInputDefaults(
+        {
+          dynamicDefault: 'literal override',
+          staticDefault: 'red',
+          tags: ['three'],
+        },
+        inputsSchema
+      )
+    ).toEqual({
+      dynamicDefault: 'literal override',
+      staticDefault: 'red',
+      tags: ['three'],
+    });
+  });
+});
 
 describe('hasCustomEventTrigger', () => {
   it('returns false when definition is null', () => {
@@ -123,6 +183,22 @@ describe('buildWorkflowTriggerScopeKql', () => {
   });
 });
 
+describe('isDefaultTriggerEventSearchScope', () => {
+  it('returns true for the default workflow trigger scope query', () => {
+    const defaultQuery = buildDefaultTriggerEventSearchQuery(['custom.trigger']);
+    expect(isDefaultTriggerEventSearchScope(defaultQuery, ['custom.trigger'])).toBe(true);
+  });
+
+  it('returns false when the user changes the KQL query', () => {
+    const defaultQuery = buildDefaultTriggerEventSearchQuery(['custom.trigger']);
+    expect(
+      isDefaultTriggerEventSearchScope({ ...defaultQuery, query: 'eventId: abc' }, [
+        'custom.trigger',
+      ])
+    ).toBe(false);
+  });
+});
+
 describe('buildDefaultTriggerEventSearchQuery', () => {
   it('seeds the KQL bar with workflow trigger scope', () => {
     expect(buildDefaultTriggerEventSearchQuery(['custom.trigger'])).toEqual({
@@ -136,6 +212,45 @@ describe('buildDefaultTriggerEventSearchQuery', () => {
       query: '',
       language: 'kuery',
     });
+  });
+});
+
+describe('getVisibleWorkflowTriggerTabs', () => {
+  it('returns all tabs when the workflow has no triggers', () => {
+    expect(getVisibleWorkflowTriggerTabs(null)).toEqual([
+      'alert',
+      'index',
+      'event',
+      'manual',
+      'historical',
+    ]);
+  });
+
+  it('omits historical when previous executions are not available', () => {
+    expect(getVisibleWorkflowTriggerTabs(null, { includeHistorical: false })).toEqual([
+      'alert',
+      'index',
+      'event',
+      'manual',
+    ]);
+  });
+
+  it('returns alert, manual, and historical for alert-only workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'alert' }] })
+    ).toEqual(['alert', 'manual', 'historical']);
+  });
+
+  it('returns document, manual, and historical for manual-only workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'manual' }] })
+    ).toEqual(['index', 'manual', 'historical']);
+  });
+
+  it('returns event, manual, and historical for custom event-driven workflows', () => {
+    expect(
+      getVisibleWorkflowTriggerTabs(workflowWithExtensionTriggers([{ type: 'cases.created' }]))
+    ).toEqual(['event', 'manual', 'historical']);
   });
 });
 
@@ -165,6 +280,38 @@ describe('getFallbackTriggerTab', () => {
   });
 });
 
+describe('ensureSelectedTriggerTabVisible', () => {
+  const allEnabled = {
+    hasAlertRacAccess: true,
+    canReadWorkflowExecution: true,
+    eventDrivenExecutionEnabled: true,
+  };
+
+  it('keeps the selected tab when it is visible and enabled', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('manual', ['alert', 'manual', 'historical'], allEnabled)
+    ).toBe('manual');
+  });
+
+  it('chooses the first visible enabled tab when the selected tab is not visible', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('index', ['alert', 'manual', 'historical'], {
+        ...allEnabled,
+        hasAlertRacAccess: false,
+      })
+    ).toBe('manual');
+  });
+
+  it('skips event when execution read is denied', () => {
+    expect(
+      ensureSelectedTriggerTabVisible('index', ['event', 'manual', 'historical'], {
+        ...allEnabled,
+        canReadWorkflowExecution: false,
+      })
+    ).toBe('manual');
+  });
+});
+
 describe('resolveInitialSelectedTrigger', () => {
   const customOnly = workflowWithExtensionTriggers([{ type: 'example.custom_trigger' }]);
 
@@ -174,10 +321,22 @@ describe('resolveInitialSelectedTrigger', () => {
     );
   });
 
-  it('falls back when custom triggers exist but execution read is denied', () => {
+  it('falls back to manual when custom triggers exist but execution read is denied', () => {
     expect(resolveInitialSelectedTrigger(customOnly, undefined, true, false, undefined)).toBe(
-      'index'
+      'manual'
     );
+  });
+
+  it('falls back to manual for alert-only workflows without RAC access', () => {
+    expect(
+      resolveInitialSelectedTrigger(
+        { ...baseDefinition, triggers: [{ type: 'alert' }] },
+        undefined,
+        false,
+        true,
+        undefined
+      )
+    ).toBe('manual');
   });
 
   it('prefers alert when an alert trigger exists alongside custom triggers', () => {

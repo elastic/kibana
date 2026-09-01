@@ -24,6 +24,7 @@ import {
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
+  WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -72,7 +73,27 @@ export function generateYamlSchemaFromConnectors(
 
   return workflowBaseWithTriggers.extend({
     settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-    steps: z.array(recursiveStepSchema),
+    steps: z.array(recursiveStepSchema).min(1),
+  });
+}
+
+/**
+ * Generates a schema for trusted workflow definitions that need the shared workflow envelope
+ * validation without materializing the connector-expanded step union.
+ */
+export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+  // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
+  // not materialize connector or step-definition schemas.
+  const triggerSchema = getTriggerSchema(triggers);
+  const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
+    triggers: z.array(triggerSchema).min(1),
+  });
+
+  return workflowBaseWithTriggers.extend({
+    // WorkflowSchemaBase validates settings with step-aware fallback schemas. Keep the
+    // trusted startup path step-agnostic so it does not duplicate the step schema SOT.
+    settings: z.unknown().optional(),
+    steps: z.array(z.unknown()).min(1),
   });
 }
 
@@ -114,6 +135,7 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       WaitForInputStepSchema,
+      WaitForApprovalStepSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,

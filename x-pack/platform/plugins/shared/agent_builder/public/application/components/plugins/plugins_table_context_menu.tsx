@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -75,18 +75,21 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
 
   return (
     <EuiPopover
+      aria-label={labels.plugins.pluginContextMenuButtonLabel}
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={labels.plugins.pluginContextMenuButtonLabel}
-          onClick={togglePopover}
-          data-test-subj={`agentBuilderPluginContextMenuButton-${plugin.id}`}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
-            detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
-          })}
-        />
+        <EuiToolTip content={labels.plugins.pluginContextMenuButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={labels.plugins.pluginContextMenuButtonLabel}
+            onClick={togglePopover}
+            data-test-subj={`agentBuilderPluginContextMenuButton-${plugin.id}`}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
+              detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={closePopover}

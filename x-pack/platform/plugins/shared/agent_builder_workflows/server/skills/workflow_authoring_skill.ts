@@ -13,10 +13,9 @@ import { workflowTools } from '../../common/constants';
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',
   name: 'workflow-authoring',
-  experimental: true,
   basePath: 'skills/platform/workflows',
   description:
-    'Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating or editing workflows** — call `platform.core.generate_workflow` directly.',
+    'Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating, editing, or running workflows** — call `platform.core.generate_workflow` or `platform.core.execute_workflow` directly.',
   content: `## When to Use This Skill
 
 Load this skill when the user wants to:
@@ -41,14 +40,15 @@ These tools answer questions about *what's installed* on the user's Kibana. Use 
 - **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string. When validation fails, step definitions for referenced step types are automatically included.
 
 ### Execution & Debugging
-- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe steps with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Use this primarily to debug an existing step or test an \`if\` branch — not as a discovery step before generation.
+- **${platformCoreTools.executeWorkflow}**: Run a full workflow end-to-end. Use this for "run the workflow" requests.
+- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe steps with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Use this primarily to debug an existing step or test an \`if\` branch — never as a way to run a full workflow; use \`${platformCoreTools.executeWorkflow}\` for that.
 
 ### Discovering Existing Workflows (SML)
 
 To list or find existing workflows, use the SML (Semantic Metadata Layer) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
 
-1. **${platformCoreTools.smlSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`chunk_id\` values.
-2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
+1. **${platformCoreTools.smlSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`entry_id\` values.
+2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`entry_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
 
 ## Workflow YAML Reference
 
@@ -129,7 +129,59 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **console**: Log messages to execution output
 - **elasticsearch.search**: Query Elasticsearch indices
 - **elasticsearch.bulk**: Bulk index documents
-- **ai.agent**: Invoke an AI agent
+- **ai.prompt**: One-shot LLM call
+- **ai.summarize**: Summarize text
+- **ai.classify**: Classify text into one of a set of labels
+- **ai.agent**: Invoke an AI agent (multi-turn, tool-using)
+
+**AI steps: ONLY use the \`ai.*\` step family.** Discovery may also surface
+direct model-connector step types (\`inference.*\`, \`bedrock.*\`, \`gen-ai.*\`,
+\`gemini.*\`); these are deprecated and must NOT be used for new steps. Pick the
+narrowest \`ai.*\` step for the task: \`ai.summarize\` for summarization,
+\`ai.classify\` for classification/routing, \`ai.agent\` for tool-using flows,
+\`ai.prompt\` for everything else.
+
+**AI step example (PREFERRED):**
+\`\`\`yaml
+- name: triage_analysis
+  type: ai.prompt
+  with:
+    prompt: "Analyze the alert: {{ steps.fetch_alert.output }}"
+\`\`\`
+
+#### Context Engine Knowledge Indicator (KI) Steps
+
+These steps manage knowledge indicators (KIs) in Context Engine AI indices. All of them require the \`contextEngine:enabled\` advanced setting (fails with \`FeatureDisabledError\` when off) and the Context Engine write privilege (fails with \`PermissionError\` when the workflow user lacks it).
+
+- **context-engine.createKi**: Index a KI document into an AI index. Inputs: \`ai_index_id\`, \`ki\`. When the AI index does not exist yet, it is created automatically. Output: the document \`id\` of the created KI.
+- **context-engine.updateKi**: Partially update an existing KI. Inputs: \`ai_index_id\`, \`ki_id\`, \`ki\` (only the provided fields change). Output: \`id\` and \`result\` (\`updated\` or \`noop\`). Fails when the KI or AI index does not exist (unlike \`createKi\`, the index is not auto-created).
+- **context-engine.deleteKi**: Delete a KI. Inputs: \`ai_index_id\`, \`ki_id\`. Fails when the KI or AI index does not exist.
+- **context-engine.verifyKi**: Run all applicable Context Engine KI verifiers against a KI without writing anything — use it for report-only checks or before a write. Input: \`ki\`. Output: \`passed\` (true only when every applicable verifier passed) and \`results\`, one entry per verifier that ran, each with \`verifier\` (its id), \`passed\`, and a \`reason\` on failure. A verifier only applies when the KI carries the field it checks — for example, ES|QL verifiers read \`attributes.esql\` (a query string or an array of query strings). When no verifier applies, the step passes with empty \`results\`.
+
+The write steps do NOT run verifiers themselves. To avoid persisting a KI that fails verification, verify first and gate the write on the result:
+
+\`\`\`yaml
+- name: verify_ki
+  type: context-engine.verifyKi
+  with:
+    ki:
+      type: detection
+      title: Failed login burst
+      attributes:
+        esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
+- name: create_ki
+  type: context-engine.createKi
+  if: "steps.verify_ki.output.passed : true"
+  with:
+    ai_index_id: "my-ai-index"
+    ki:
+      type: detection
+      title: Failed login burst
+      attributes:
+        esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
+\`\`\`
+
+When verification fails, report \`steps.verify_ki.output.results\` — each failing entry names the verifier and the reason it failed.
 
 #### Connector-Based Step Types (PREFERRED for integrations!)
 
@@ -139,15 +191,22 @@ and require a \`connector-id\` to specify which configured connector to use.
 **ALWAYS prefer connector steps over raw HTTP for integrations like Slack, Jira, etc.**
 Connector steps are simpler, more secure, and handle authentication automatically.
 
-Available connector types include: slack, jira, pagerduty, email, webhook, servicenow, opsgenie, teams, and more.
+Available connector types include: slack2, jira, pagerduty, email, webhook, servicenow, opsgenie, teams, and more.
+
+**Slack steps: ONLY use the \`slack2.*\` namespace.** Discovery may also surface
+\`slack\` (legacy webhook) and \`slack_api.*\` step types; these must NOT be used
+for new steps. Use \`slack2.sendMessage\`, \`slack2.listChannels\`,
+\`slack2.resolveChannelId\`, or \`slack2.searchMessages\` with a \`.slack2\`
+connector instance.
 
 **Slack connector example (PREFERRED):**
 \`\`\`yaml
 - name: send_slack_notification
-  type: slack
+  type: slack2.sendMessage
   connector-id: my-slack-connector
   with:
-    message: "Hello from the workflow!"
+    channel: "C0123456789"
+    text: "Hello from the workflow!"
 \`\`\`
 
 When asked to add Slack/Jira/etc integration, ALWAYS use connector steps first! \`${platformCoreTools.generateWorkflow}\` already knows the connectors configured on the current Kibana — pass the user's request directly. Only call \`${workflowTools.getConnectors}\` if the user explicitly asks "what connectors do I have".
@@ -220,5 +279,9 @@ When fixing validation errors on an existing workflow:
 2. Use 2 spaces per indentation level
 3. Use \`on-failure\` with \`retry\`, \`fallback\`, and (optionally) \`continue\` for error handling
 4. Prefer connector steps over raw HTTP for integrations`,
-  getRegistryTools: () => [...Object.values(workflowTools), platformCoreTools.generateWorkflow],
+  getRegistryTools: () => [
+    ...Object.values(workflowTools),
+    platformCoreTools.generateWorkflow,
+    platformCoreTools.executeWorkflow,
+  ],
 });

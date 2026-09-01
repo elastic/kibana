@@ -28,7 +28,7 @@ import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latenc
 const txGroupsDroppedBucketName = '_other';
 export const MAX_NUMBER_OF_TX_GROUPS = 1_000;
 
-export interface TransactionGroups {
+interface TransactionGroups {
   alertsCount: number;
   name: string;
   transactionType: string;

@@ -17,12 +17,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
     'svlCommonPage',
     'header',
+    'context',
   ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
   const dataViews = getService('dataViews');
+  const retry = getService('retry');
+
+  const expectRowIndicator = async (rowIndex: number, title: string) => {
+    await retry.try(async () => {
+      const cell = await dataGrid.getCellElement(rowIndex, 0);
+      const indicator = await cell.findByTestSubject('unifiedDataTableRowColorIndicatorCell');
+      expect(await indicator.getAttribute('title')).to.be(title);
+    });
+  };
 
   describe('extension getRowIndicatorProvider', () => {
     before(async () => {
@@ -85,11 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // in this case it's matching the logs data source profile and has a log.level field, so the color indicator should be rendered
       await testSubjects.existOrFail('dataGridHeaderCell-colorIndicator');
-      const firstCell = await dataGrid.getCellElement(0, 0);
-      const firstColorIndicator = await firstCell.findByTestSubject(
-        'unifiedDataTableRowColorIndicatorCell'
-      );
-      expect(await firstColorIndicator.getAttribute('title')).to.be('Debug');
+      await expectRowIndicator(0, 'Debug');
     });
 
     it('should render log.level row indicators on Surrounding documents page', async () => {
@@ -100,34 +106,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [, surroundingActionEl] = await dataGrid.getRowActions();
       await surroundingActionEl.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      let anchorCell = await dataGrid.getCellElement(0, 0);
-      let anchorColorIndicator = await anchorCell.findByTestSubject(
-        'unifiedDataTableRowColorIndicatorCell'
-      );
-      expect(await anchorColorIndicator.getAttribute('title')).to.be('Debug');
-
-      let nextCell = await dataGrid.getCellElement(1, 0);
-      let nextColorIndicator = await nextCell.findByTestSubject(
-        'unifiedDataTableRowColorIndicatorCell'
-      );
-      expect(await nextColorIndicator.getAttribute('title')).to.be('Error');
+      await expectRowIndicator(0, 'Debug');
+      await expectRowIndicator(1, 'Error');
 
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      anchorCell = await dataGrid.getCellElement(0, 0);
-      anchorColorIndicator = await anchorCell.findByTestSubject(
-        'unifiedDataTableRowColorIndicatorCell'
-      );
-      expect(await anchorColorIndicator.getAttribute('title')).to.be('Debug');
-
-      nextCell = await dataGrid.getCellElement(1, 0);
-      nextColorIndicator = await nextCell.findByTestSubject(
-        'unifiedDataTableRowColorIndicatorCell'
-      );
-      expect(await nextColorIndicator.getAttribute('title')).to.be('Error');
+      await expectRowIndicator(0, 'Debug');
+      await expectRowIndicator(1, 'Error');
     });
   });
 }

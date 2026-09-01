@@ -12,13 +12,14 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
+import { getBreachEsqlQuery, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import * as i18n from './translations';
 
 export interface AlertEpisodeRuleOverviewPanelProps {
@@ -30,8 +31,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
   rule,
   ruleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelProps) => {
-  const ruleKindLabel =
-    rule.kind === 'signal' ? i18n.RULE_OVERVIEW_KIND_SIGNAL : i18n.RULE_OVERVIEW_KIND_ALERTING;
+  const ruleKindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
 
   const titleNode = (
     <EuiTitle size="xs">
@@ -67,16 +67,17 @@ export const AlertEpisodeRuleOverviewPanel = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="bell" size="s" aria-hidden />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {ruleKindLabel}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip content={RULE_KIND_TOOLTIPS[rule.kind] ?? ''}>
+            <EuiBadge
+              color="hollow"
+              iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
+              iconSide="left"
+              tabIndex={0}
+              data-test-subj="alertingV2EpisodeDetailsRuleKindBadge"
+            >
+              {ruleKindLabel}
+            </EuiBadge>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -101,13 +102,13 @@ export const AlertEpisodeRuleOverviewPanel = ({
         overflowHeight={240}
         data-test-subj="alertingV2EpisodeDetailsRuleQueryCodeBlock"
       >
-        {rule.evaluation.query.base}
+        {getBreachEsqlQuery(rule.query)}
       </EuiCodeBlock>
     </>
   );
 
   return (
-    <>
+    <div>
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"
@@ -125,6 +126,6 @@ export const AlertEpisodeRuleOverviewPanel = ({
       >
         {bodyInner}
       </EuiPanel>
-    </>
+    </div>
   );
 };

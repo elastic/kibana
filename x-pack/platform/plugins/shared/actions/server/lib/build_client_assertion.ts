@@ -19,7 +19,7 @@
  * client_secret. Different POST bodies, different subject semantics; keeping
  * them separate is intentional.
  */
-import { constants, createHash, createSign, randomUUID } from 'crypto';
+import { constants, createHash, sign as cryptoSign, randomUUID } from 'crypto';
 import type { JwtAlgorithm } from '@kbn/connector-specs';
 
 export type CertificateBinding =
@@ -81,7 +81,6 @@ function signingOptionsFor(algorithm: JwtAlgorithm) {
   switch (algorithm) {
     case 'PS256':
       return {
-        digest: 'sha256' as const,
         signOpts: {
           padding: constants.RSA_PKCS1_PSS_PADDING,
           saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
@@ -89,11 +88,10 @@ function signingOptionsFor(algorithm: JwtAlgorithm) {
       };
     case 'RS256':
       return {
-        digest: 'sha256' as const,
         signOpts: { padding: constants.RSA_PKCS1_PADDING },
       };
     case 'ES256':
-      return { digest: 'sha256' as const, signOpts: { dsaEncoding: 'ieee-p1363' as const } };
+      return { signOpts: { dsaEncoding: 'ieee-p1363' as const } };
   }
 }
 
@@ -126,10 +124,9 @@ export function buildClientAssertion({
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
   const signingInput = `${encodedHeader}.${encodedPayload}`;
 
-  const { digest, signOpts } = signingOptionsFor(algorithm);
-  const signer = createSign(digest);
-  signer.update(signingInput);
-  const signatureBuffer = signer.sign({
+  // Bare 'SHA256' prevents the FIPS provider from pre-binding the context to PKCS1 before PSS is applied.
+  const { signOpts } = signingOptionsFor(algorithm);
+  const signatureBuffer = cryptoSign('SHA256', Buffer.from(signingInput), {
     key: privateKey,
     ...signOpts,
     ...(passphrase ? { passphrase } : {}),

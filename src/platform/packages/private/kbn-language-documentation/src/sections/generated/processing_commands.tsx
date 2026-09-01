@@ -142,10 +142,10 @@ FROM movies
 | SORT rating DESC
 | LIMIT 10
 | EVAL prompt = CONCAT(
-   "Summarize this movie using the following information: \\n",
-   "Title: ", title, "\\n",
-   "Synopsis: ", synopsis, "\\n",
-   "Actors: ", MV_CONCAT(actors, ", "), "\\n",
+   "Summarize this movie using the following information: \\\\n",
+   "Title: ", title, "\\\\n",
+   "Synopsis: ", synopsis, "\\\\n",
+   "Actors: ", MV_CONCAT(actors, ", "), "\\\\n",
   )
 | COMPLETION summary = prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP title, summary, rating
@@ -188,7 +188,7 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 
 \`\`\` esql
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
-| DISSECT a "%'\{Y\}-%\{M\}-%\{D\}T%\{h\}:%\{m\}:%\{s\}Z - %\{msg\} - %\{ip\}'"
+| DISSECT a "%'{Y}'-%'{M}'-%'{D}'T%'{h}':%'{m}':%'{s}'Z - %'{msg}' - %'{ip}'"
 \`\`\`            `,
             ignoreTag: true,
             description:
@@ -397,7 +397,6 @@ FROM books METADATA _score
       label: i18n.translate('languageDocumentation.documentationESQL.fuse', {
         defaultMessage: 'FUSE',
       }),
-      preview: true,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.fuse.markdown', {
           defaultMessage: `### FUSE
@@ -483,7 +482,7 @@ Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elas
 
 \`\`\` esql
 ROW a = "12 15.5 15.6 true"
-| GROK a "%'\{NUMBER:b:int\} %\{NUMBER:c:float\} %\{NUMBER:d:double\} %\{WORD:e:boolean\}'"
+| GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
             `,
           description:

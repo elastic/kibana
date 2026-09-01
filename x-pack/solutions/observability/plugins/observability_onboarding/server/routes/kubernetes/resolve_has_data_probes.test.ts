@@ -55,28 +55,4 @@ describe('resolveProbe', () => {
       'Elasticsearch responded with an error. Request timed out'
     );
   });
-
-  describe('combined classic + wired stream probes', () => {
-    it('returns true when classic probe finds data and wired probe finds nothing', () => {
-      const hasLogs = resolveProbe(fulfilledWithHits(1)) || resolveProbe(fulfilledWithHits(0));
-      expect(hasLogs).toBe(true);
-    });
-
-    it('returns true when classic probe finds nothing but wired probe finds data', () => {
-      const hasLogs = resolveProbe(fulfilledWithHits(0)) || resolveProbe(fulfilledWithHits(1));
-      expect(hasLogs).toBe(true);
-    });
-
-    it('returns false when both probes find nothing', () => {
-      const hasLogs = resolveProbe(fulfilledWithHits(0)) || resolveProbe(fulfilledWithHits(0));
-      expect(hasLogs).toBe(false);
-    });
-
-    it('handles optional wired probe (undefined when no start time)', () => {
-      const wiredResult: PromiseSettledResult<estypes.SearchResponse> | undefined = undefined;
-      const hasLogs =
-        resolveProbe(fulfilledWithHits(0)) || (wiredResult ? resolveProbe(wiredResult) : false);
-      expect(hasLogs).toBe(false);
-    });
-  });
 });

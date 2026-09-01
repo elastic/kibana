@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
@@ -17,10 +19,21 @@ import { defaultConfig } from '../../default/stateful/base.config';
 const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
 
 /**
+ * Registers two fixture SML types — one with a `getPermissions` hook and one deliberately without
+ * — so `sml_type_permissions_api.spec.ts` can assert the hook's contract end to end. No currently
+ * shipped SML type omits the hook, so without this fixture nothing exercises that path.
+ */
+const SML_TEST_TYPES_PLUGIN_PATH = `--plugin-path=${resolve(
+  REPO_ROOT,
+  'x-pack/platform/test/agent_builder_sml/plugins/sml_test_types'
+)}`;
+
+/**
  * Stateful Kibana + Elasticsearch defaults with Agent Builder test settings:
- * experimental Agent Builder UI flags, verbose Agent Builder plugin logging,
- * `xpack.agentBuilder.githubBaseUrl` pointing at the local plugin registry mock,
- * AI agents feature flag, and AI Assistant chat experience set to agent mode.
+ * experimental Agent Builder UI flags, the Context Engine flag, verbose Agent
+ * Builder plugin logging, `xpack.agentBuilder.githubBaseUrl` pointing at the
+ * local plugin registry mock, AI agents feature flag, and AI Assistant chat
+ * experience set to agent mode.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -41,9 +54,19 @@ export const servers: ScoutServerConfig = {
         },
       ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      '--uiSettings.overrides.contextEngine:enabled=true',
+      '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
+      '--xpack.agentBuilder.tracing.scheduledDelay=500',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
+      SML_TEST_TYPES_PLUGIN_PATH,
     ],
   },
 };

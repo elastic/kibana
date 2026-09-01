@@ -57,6 +57,8 @@ describe('SentinelOne Connector', () => {
       expect(response).toEqual({ data: { success: true }, errors: null });
       expect(connectorInstance.requestSpy).toHaveBeenLastCalledWith({
         url: fetchFilesUrl,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         method: 'post',
         data: {
           data: {
@@ -102,6 +104,8 @@ describe('SentinelOne Connector', () => {
 
       expect(connectorInstance.requestSpy).toHaveBeenCalledWith({
         method: 'get',
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         url: `${connectorInstance.constructorParams.config.url}${API_PATH}/activities`,
         params: {
           APIToken: 'token-abc',

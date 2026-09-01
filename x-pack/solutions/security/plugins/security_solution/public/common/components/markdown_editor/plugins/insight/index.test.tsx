@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment';
 import { TestProviders } from '../../../../mock';
@@ -18,9 +18,15 @@ import type { DefaultTimeRangeSetting } from '../../../../utils/default_date_set
 import { plugin, renderer as Renderer } from '.';
 import type { InvestigateInTimelineButtonProps } from '../../../event_details/investigate_in_timeline_button';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
+import { useIsInSecurityApp } from '../../../../hooks/is_in_security_app';
+import { useOpenTimelineInNewTab } from '../../../../hooks/timeline/use_open_timeline_in_new_tab';
 
 jest.mock('../../../../lib/kibana');
 const mockGetServices = KibanaServices.get as jest.Mock;
+
+jest.mock('../../../../hooks/is_in_security_app');
+jest.mock('../../../../hooks/timeline/use_open_timeline_in_new_tab');
+const openAdHocTimelineInNewTab = jest.fn();
 
 jest.mock('../../../event_details/investigate_in_timeline_button', () => {
   const originalModule = jest.requireActual(
@@ -62,6 +68,12 @@ const mockTimeRange = (
 jest.mock('../../../../hooks/use_upselling');
 
 describe('insight component renderer', () => {
+  beforeEach(() => {
+    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    (useOpenTimelineInNewTab as jest.Mock).mockReturnValue({ openAdHocTimelineInNewTab });
+    openAdHocTimelineInNewTab.mockClear();
+  });
+
   describe('when there is no upselling message', () => {
     beforeAll(() => {
       (useUpsellingMessage as jest.Mock).mockReturnValue(null);
@@ -91,6 +103,31 @@ describe('insight component renderer', () => {
       } catch {
         expect(false).toBe(true);
       }
+    });
+  });
+
+  describe('when rendered outside of the Security Solution app (e.g. Discover)', () => {
+    beforeAll(() => {
+      (useUpsellingMessage as jest.Mock).mockReturnValue(null);
+      mockTimeRange(null);
+    });
+    beforeEach(() => {
+      (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+    });
+    it('opens the timeline in a new tab instead of in-place', () => {
+      render(
+        <TestProviders>
+          <Renderer
+            label={'test label'}
+            description={'test description'}
+            providers={
+              '[[{"field":"event.category","value":"network","queryType":"phrase", "excluded": "false"}]]'
+            }
+          />
+        </TestProviders>
+      );
+      fireEvent.click(screen.getByTestId('insight-investigate-in-timeline-button'));
+      expect(openAdHocTimelineInNewTab).toHaveBeenCalledTimes(1);
     });
   });
 

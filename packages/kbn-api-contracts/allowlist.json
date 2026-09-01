@@ -3,6 +3,21 @@
   "description": "Approved API breaking changes that should be ignored by the contract checker",
   "entries": [
     {
+      "path": "/api/alerting/rule/{id}",
+      "method": "post",
+      "reason": "Intentional: require exactly two criterion groups for log threshold ratio criteria so API validation matches executor validation and rejects malformed criteria (e.g. a single nested array) that previously saved but broke rule execution and the edit UI.",
+      "approvedBy": "@elastic/actionable-obs-team",
+      "oasdiffId": "request-property-min-items-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/283965"
+    },
+    {
+      "path": "/s/{spaceId}/internal/observability/slos/_definitions",
+      "method": "get",
+      "reason": "False-positive: oasdiff reports response-body-one-of-added when a property is added to a schema referenced by oneOf subschemas. Actual change is adding optional preventCrossProjectSearch to SLOs_settings — backwards-compatible.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-body-one-of-added"
+    },
+    {
       "path": "/api/fleet/outputs",
       "method": "get",
       "reason": "Nullable shipper/ssl fields now use allOf+$ref with nullable:true (OAS 3.0 canonical form) instead of inline objects. Kafka connection_type/username/password became optional to match runtime behavior. Coordinated with provider team.",
@@ -168,6 +183,59 @@
       "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
       "approvedBy": "@elastic/fleet",
       "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/security/entity_store/entities/{entityType}",
+      "method": "post",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "request-body-any-of-removed"
+    },
+    {
+      "path": "/api/security/entity_store/entities/{entityType}",
+      "method": "put",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "request-body-any-of-removed"
+    },
+    {
+      "path": "/api/security/entity_store/entities/bulk",
+      "method": "put",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "request-property-any-of-removed"
+    },
+    {
+      "path": "/api/detection_engine/rules/preview",
+      "method": "post",
+      "reason": "Security Solution sets max_signals default value in applyRuleDefaults and Zod schema. The latter started breaking rule PATCH API after Zod v4 migration by defaulting max_signals to 100 and overriding any existing value. Removing max_signals default value from the Zod schema to fix the issue,",
+      "approvedBy": "@elastic/security-detection-engineering",
+      "oasdiffId": "request-body-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/286518"
+    },
+    {
+      "path": "/api/agent_builder/converse",
+      "method": "post",
+      "reason": "Param was only used by the Kibana UI and feature is removed",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/converse/async",
+      "method": "post",
+      "reason": "Param was only used by the Kibana UI and feature is removed",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/conversations",
+      "method": "post",
+      "reason": "agent_id maxLength validation added to route, it was already done in the request.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/286654"
     }
   ]
 }

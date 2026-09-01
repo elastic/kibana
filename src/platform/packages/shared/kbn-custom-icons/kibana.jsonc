@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/custom-icons",
   "owner": [
-    "@elastic/obs-exploration-team"
+    "@elastic/obs-signals-traces-team"
   ],
   "group": "platform",
   "visibility": "shared"

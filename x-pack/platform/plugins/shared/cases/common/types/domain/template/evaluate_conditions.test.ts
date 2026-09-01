@@ -138,6 +138,47 @@ describe('evaluateCondition', () => {
     });
   });
 
+  describe('TOGGLE field boolean conditions', () => {
+    const typeMapWithToggle = { ...fieldTypeMap, requires_escalation: 'keyword' };
+    const controlMapWithToggle = { requires_escalation: 'TOGGLE' };
+
+    it('eq: accepts boolean literal true against string form value "true"', () => {
+      const rule: ConditionRule = { field: 'requires_escalation', operator: 'eq', value: true };
+      expect(
+        evaluateCondition(
+          rule,
+          { requires_escalation: 'true' },
+          typeMapWithToggle,
+          controlMapWithToggle
+        )
+      ).toBe(true);
+    });
+
+    it('eq: accepts boolean literal false against string form value "false"', () => {
+      const rule: ConditionRule = { field: 'requires_escalation', operator: 'eq', value: false };
+      expect(
+        evaluateCondition(
+          rule,
+          { requires_escalation: 'false' },
+          typeMapWithToggle,
+          controlMapWithToggle
+        )
+      ).toBe(true);
+    });
+
+    it('neq: accepts boolean literal against string form value', () => {
+      const rule: ConditionRule = { field: 'requires_escalation', operator: 'neq', value: true };
+      expect(
+        evaluateCondition(
+          rule,
+          { requires_escalation: 'false' },
+          typeMapWithToggle,
+          controlMapWithToggle
+        )
+      ).toBe(true);
+    });
+  });
+
   describe('CompoundCondition (all / any)', () => {
     const ruleRed: ConditionRule = { field: 'color', operator: 'eq', value: 'red' };
     const ruleNotEmpty: ConditionRule = { field: 'color', operator: 'not_empty' };

@@ -26,16 +26,8 @@ export const boundedString = (maxLength: number) =>
     t.identity
   );
 
-/**
- * RRULE schedule config — wire shape mirroring `RRuleScheduleConfig`
- * in `common/schedule.ts`. Field-level validity (RFC 3339, RRULE
- * parseability, splay cap) is enforced in the route handler so a single
- * error message is returned per offending field.
- *
- * On create the discriminator branch requires `rrule` + `start_date`;
- * see {@link rruleScheduleConfigPartialRt} for the update-body shape
- * that allows PATCH-style merges against the existing SO.
- */
+// Wire shape mirroring RRuleScheduleConfig; field-level validity is enforced
+// in the route handler.
 export const rruleScheduleConfigRt = t.intersection([
   t.type({
     rrule: boundedString(2048),
@@ -48,14 +40,6 @@ export const rruleScheduleConfigRt = t.intersection([
   }),
 ]);
 
-/**
- * Update-body variant of {@link rruleScheduleConfigRt}: every field is
- * optional so a client can change just `rrule` / `splay` / `start_date`
- * without restating the rest. The route handler merges the partial
- * against the existing SO before running `validatePackScheduleFields`,
- * which still enforces the strict shape post-merge (rrule + start_date
- * required, RFC 3339, parseability, splay cap, etc.).
- */
 export const rruleScheduleConfigPartialRt = t.partial({
   rrule: boundedString(2048),
   start_date: boundedString(64),
@@ -93,13 +77,6 @@ export const packQueryRecordRt = t.record(
   ])
 );
 
-/**
- * Update-body variant of {@link packQueryRecordRt}: per-query
- * `rrule_schedule` accepts a partial object so a same-mode override edit
- * (e.g. bumping only `splay`) round-trips through the API. The route
- * handler merges per-query partials against the existing per-query
- * `rrule_schedule` on the SO before validation.
- */
 export const packQueryRecordPartialRt = t.record(
   t.string,
   t.intersection([
@@ -108,6 +85,8 @@ export const packQueryRecordPartialRt = t.record(
     }),
     t.partial({
       ...basePackQueryFields,
+      // Existing stored id — lets a rename edit preserve the query's schedule_id.
+      id: boundedString(256),
       rrule_schedule: rruleScheduleConfigPartialRt,
     }),
   ])

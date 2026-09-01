@@ -24,6 +24,8 @@ import {
   Aggregation,
   Comparator,
   generateId,
+  reconcileAlertConditionMetrics,
+  DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
   type StatDefinition,
   type EvaluationDefinition,
@@ -428,5 +430,61 @@ export const parseThresholdEsql = (
     conditionOperator,
     groupByFields: statsResult.groupByFields,
     ...(recovery ? { recovery } : {}),
+  };
+};
+
+/**
+ * Best-effort parser for Discover ES|QL queries that may not match the full
+ * threshold builder structure. Falls back through increasingly loose extraction:
+ *
+ * 1. `parseThresholdEsql` — full builder state for complete threshold queries
+ * 2. Loose FROM + WHERE extraction — index pattern and optional pre-STATS filter
+ * 3. `null` — nothing extractable (invalid ES|QL, no FROM, etc.)
+ */
+export const parseDiscoverQueryForBuilder = (query: string): ThresholdFormValues | null => {
+  const full = parseThresholdEsql(query);
+  if (full) {
+    return {
+      ...full,
+      alertConditions: reconcileAlertConditionMetrics(
+        full.alertConditions,
+        full.stats,
+        full.evaluations
+      ),
+    };
+  }
+
+  if (!query.trim()) return null;
+
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0) return null;
+
+  const commands = root.commands;
+  if (commands.length === 0) return null;
+
+  const fromCmd = commands[0];
+  if (fromCmd.name !== 'from') return null;
+
+  const sourceArg = fromCmd.args.find((a) => isSource(a as ESQLSingleAstItem));
+  if (!sourceArg) return null;
+  const indexPattern = (sourceArg as ESQLSingleAstItem & { name: string }).name;
+  if (!indexPattern || typeof indexPattern !== 'string') return null;
+
+  let filterQuery: string | undefined;
+  if (commands.length > 1 && commands[1].name === 'where') {
+    filterQuery = commands[1].args.length > 0 ? printExpr(commands[1].args[0]) : undefined;
+  }
+
+  return {
+    ...DEFAULT_THRESHOLD_FORM_VALUES,
+    indexPattern,
+    filterQuery,
+    stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),
+    evaluations: [],
+    alertConditions: DEFAULT_THRESHOLD_FORM_VALUES.alertConditions.map((c) => ({
+      ...c,
+      id: generateId(),
+    })),
+    groupByFields: [],
   };
 };

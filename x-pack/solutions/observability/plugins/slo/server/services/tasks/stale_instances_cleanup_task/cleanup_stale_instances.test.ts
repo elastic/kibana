@@ -77,13 +77,13 @@ describe('cleanupStaleInstances', () => {
   let esClient: ElasticsearchClientMock;
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let logger: jest.Mocked<MockedLogger>;
-  let abortController: AbortController;
+  let signal: AbortSignal;
 
   beforeEach(() => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
-    abortController = new AbortController();
+    signal = new AbortController().signal;
     jest.clearAllMocks();
   });
 
@@ -96,7 +96,7 @@ describe('cleanupStaleInstances', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(result.nextState).toEqual({ deleteTaskId: 'task-123', searchAfter: 'space-1' });
@@ -117,13 +117,10 @@ describe('cleanupStaleInstances', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
-      expect(esClient.tasks.cancel).toHaveBeenCalledWith(
-        { task_id: 'task-123' },
-        { signal: abortController.signal }
-      );
+      expect(esClient.tasks.cancel).toHaveBeenCalledWith({ task_id: 'task-123' }, { signal });
     });
 
     it('should handle task 404 (assume completed)', async () => {
@@ -137,7 +134,7 @@ describe('cleanupStaleInstances', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(result.nextState).toEqual({});
@@ -156,7 +153,7 @@ describe('cleanupStaleInstances', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(result.nextState).toEqual({});
@@ -169,7 +166,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result.nextState).toEqual({});
@@ -193,7 +190,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result.nextState).toEqual({ deleteTaskId: 'delete-task-1' });
@@ -234,7 +231,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.search).toHaveBeenCalledTimes(2);
@@ -266,7 +263,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       // searchAfter should be undefined (reset) since it's the last batch
@@ -297,7 +294,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.search).toHaveBeenCalledTimes(10);
@@ -309,7 +306,7 @@ describe('cleanupStaleInstances', () => {
 
       await cleanupStaleInstances(
         { searchAfter: 'previous-space' },
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.search).toHaveBeenCalledWith(
@@ -350,7 +347,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.count).not.toHaveBeenCalled();
@@ -368,7 +365,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.count).not.toHaveBeenCalled();
@@ -390,10 +387,7 @@ describe('cleanupStaleInstances', () => {
       esClient.count.mockResolvedValueOnce({ count: 1 } as any);
       esClient.deleteByQuery.mockResolvedValueOnce({ task: 'task-1' } as any);
 
-      await cleanupStaleInstances(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupStaleInstances({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -447,10 +441,7 @@ describe('cleanupStaleInstances', () => {
       esClient.count.mockResolvedValueOnce({ count: 5 } as any);
       esClient.deleteByQuery.mockResolvedValueOnce({ task: 'task-1' } as any);
 
-      await cleanupStaleInstances(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupStaleInstances({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -490,7 +481,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result.nextState).toEqual({});
@@ -514,7 +505,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -538,7 +529,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
@@ -565,7 +556,7 @@ describe('cleanupStaleInstances', () => {
             },
           },
         },
-        expect.objectContaining({ signal: abortController.signal })
+        expect.objectContaining({ signal })
       );
       expect(result.nextState).toEqual({ deleteTaskId: 'delete-task-xyz' });
     });
@@ -590,7 +581,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         {},
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result.nextState).toEqual({
@@ -606,7 +597,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         { searchAfter: 'space-50' },
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result.nextState).toEqual({ searchAfter: 'space-50', deleteTaskId: undefined });
@@ -616,7 +607,7 @@ describe('cleanupStaleInstances', () => {
       esClient.search.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(
-        cleanupStaleInstances({}, { esClient, soClient: soClient as any, logger, abortController })
+        cleanupStaleInstances({}, { esClient, soClient: soClient as any, logger, signal })
       ).rejects.toThrow('Network error');
     });
 
@@ -625,7 +616,7 @@ describe('cleanupStaleInstances', () => {
 
       const result = await cleanupStaleInstances(
         { deleteTaskId: 'task-123' },
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result.nextState).toEqual({ deleteTaskId: 'task-123' });

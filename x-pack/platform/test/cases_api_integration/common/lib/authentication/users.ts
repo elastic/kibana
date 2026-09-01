@@ -199,6 +199,7 @@ export const users = [
   secOnlyNoCreateComment,
   secOnlyManageTemplates,
   secOnlyNoManageTemplates,
+  secOnlySpacesAll,
   obsOnly,
   obsOnlyRead,
   obsOnlyReadAlerts,

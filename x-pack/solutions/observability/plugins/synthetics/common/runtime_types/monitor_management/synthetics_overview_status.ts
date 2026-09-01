@@ -10,6 +10,7 @@ import { ObserverCodec } from '../ping/observer';
 import { ErrorStateCodec } from '../ping/error_state';
 import { AgentType, MonitorType, PingErrorType, UrlType } from '..';
 import { remoteMonitorInfoSchema } from '../remote';
+import { MonitorOriginCodec } from '../heartbeat_monitor';
 
 export const OverviewPingCodec = t.intersection([
   t.interface({
@@ -47,6 +48,11 @@ export const OverviewStatusMetaDataCodec = t.intersection([
           status: t.string,
         }),
         t.partial({
+          // The last-known up/down for this location before it was demoted to
+          // `stale` by the live-window freshness guard. Lets the UI optionally
+          // render the stale last run (via the "show last run" toggle) without a
+          // refetch. Only set when `status === 'stale'`.
+          lastStatus: t.string,
           // ISO timestamp of when this location entered its current state
           // segment. Only set when the location is currently down so the UI
           // can render "Down · 12m" without stale data.
@@ -77,6 +83,11 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     urls: t.string,
     maintenanceWindows: t.array(t.string),
     remote: remoteMonitorInfoSchema,
+    // Provenance for monitors that have no Synthetics saved object and are
+    // therefore read-only in the app. `heartbeat` marks a monitor discovered
+    // purely from local ping data (Heartbeat / Elastic Agent autodiscovery),
+    // mirroring how `remote` marks a CCS-only monitor.
+    origin: MonitorOriginCodec,
   }),
 ]);
 
@@ -87,17 +98,44 @@ export const OverviewStatusCodec = t.interface({
   up: t.number,
   down: t.number,
   pending: t.number,
+  stale: t.number,
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  staleConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   disabledConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),
 });
 
+// Response of the supplementary "stale before the window" lookup. The overview
+// status endpoint only classifies a monitor as `stale` when it has a run inside
+// the window that then went quiet; a monitor that stopped reporting *before* the
+// window starts has no in-window run, so it lands in `pending`. The client
+// fetches this separately (so the main overview request stays fast) to promote
+// those `pending` monitors to `stale` once their last-known run is resolved.
+//
+// The endpoint returns only the raw "latest run before the window" facts per
+// monitor/location — no saved-object reload and no `id:(…)` filter — so it stays
+// cheap regardless of how many monitors are pending. The client applies the
+// staleness threshold and rebuilds the metadata from the `pending` config it
+// already holds.
+export const OverviewStalePriorRunCodec = t.interface({
+  monitorQueryId: t.string,
+  locationId: t.string,
+  timestamp: t.string,
+  status: t.string,
+});
+
+export const OverviewStaleStatusCodec = t.interface({
+  priorRuns: t.array(OverviewStalePriorRunCodec),
+});
+
 export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
+export type OverviewStalePriorRun = t.TypeOf<typeof OverviewStalePriorRunCodec>;
+export type OverviewStaleStatus = t.TypeOf<typeof OverviewStaleStatusCodec>;

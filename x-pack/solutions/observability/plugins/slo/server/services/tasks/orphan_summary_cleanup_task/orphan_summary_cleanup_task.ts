@@ -17,6 +17,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
+import { cleanupOrphanPipelines } from './cleanup_orphan_pipelines';
 import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
 import { cleanupOrphanTransforms } from './cleanup_orphan_transforms';
 
@@ -42,18 +43,18 @@ export class OrphanSummaryCleanupTask {
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO orphan summary cleanup task',
-        timeout: '3m',
+        timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
           };
         },
@@ -101,11 +102,7 @@ export class OrphanSummaryCleanupTask {
     }
   }
 
-  public async runTask(
-    taskInstance: ConcreteTaskInstance,
-    core: CoreSetup,
-    abortController: AbortController
-  ) {
+  public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup, signal: AbortSignal) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -126,14 +123,15 @@ export class OrphanSummaryCleanupTask {
 
     this.logger.debug(`Task started with previous state: ${JSON.stringify(taskInstance.state)}`);
 
-    const { summaryParams, transformParams } = this.parseTaskInstanceState(taskInstance);
+    const { summaryParams, transformParams, pipelineParams } =
+      this.parseTaskInstanceState(taskInstance);
 
     try {
       const summaryResult = await cleanupOrphanSummaries(summaryParams, {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
-        abortController,
+        signal,
       });
 
       if (summaryResult.aborted) {
@@ -142,6 +140,7 @@ export class OrphanSummaryCleanupTask {
           state: {
             summary: summaryResult.nextState,
             transform: transformParams,
+            pipeline: pipelineParams,
           },
         };
       }
@@ -152,7 +151,7 @@ export class OrphanSummaryCleanupTask {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
-        abortController,
+        signal,
       });
 
       if (transformResult.aborted) {
@@ -160,6 +159,25 @@ export class OrphanSummaryCleanupTask {
         return {
           state: {
             transform: transformResult.nextState,
+            pipeline: pipelineParams,
+          },
+        };
+      }
+
+      this.logger.debug(`Transform cleanup completed, starting pipeline cleanup`);
+
+      const pipelineResult = await cleanupOrphanPipelines(pipelineParams, {
+        esClient,
+        soClient: internalSoClient,
+        logger: this.logger,
+        signal,
+      });
+
+      if (pipelineResult.aborted) {
+        this.logger.debug(`Pipeline cleanup aborted, will resume on next run`);
+        return {
+          state: {
+            pipeline: pipelineResult.nextState,
           },
         };
       }
@@ -177,10 +195,12 @@ export class OrphanSummaryCleanupTask {
     const legacySearchAfter = state.searchAfter;
     const summary = state.summary ?? (legacySearchAfter ? { searchAfter: legacySearchAfter } : {});
     const transform = state.transform ?? {};
+    const pipeline = state.pipeline ?? {};
 
     return {
       summaryParams: { searchAfter: summary.searchAfter },
       transformParams: { from: transform.from },
+      pipelineParams: { after: pipeline.after },
     };
   }
 }

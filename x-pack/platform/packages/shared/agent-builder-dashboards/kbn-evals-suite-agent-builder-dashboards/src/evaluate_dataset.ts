@@ -146,7 +146,7 @@ export function createEvaluateDataset({
       };
     };
 
-    await executorClient.runExperiment({ dataset, task }, [
+    await executorClient.runExperiment({ datasets: [dataset], task }, [
       ...(customEvaluators ?? []),
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
     ]);

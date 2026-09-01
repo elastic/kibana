@@ -25,7 +25,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
   const { monitor } = useSelectedMonitor();
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const selectedLocation = useSelectedLocation();
 
@@ -42,6 +42,14 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
 
   if (spaceId && spaceId !== space?.id) {
     params += `&spaceId=${spaceId}`;
+  }
+
+  // Preserve the remote cluster context across location switches; otherwise
+  // we navigate to /monitor/<configId>?locationId=... without remoteName and
+  // the detail page falls back to the local saved-object lookup, which 404s
+  // for monitors that only exist on the remote cluster.
+  if (remoteName) {
+    params += `&remoteName=${remoteName}`;
   }
 
   return (

@@ -225,6 +225,7 @@ export function initializeFetch({
               searchSessionId,
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
+              esqlApproximation: fetchContext.isApproximate,
             });
             return {
               columnsMeta: result.esqlQueryColumns
@@ -299,7 +300,11 @@ export function initializeFetch({
       }
     });
 
-  return () => {
-    fetchSubscription.unsubscribe();
+  return {
+    cleanup: () => fetchSubscription.unsubscribe(),
+    cancelRequests: () => {
+      abortController?.abort();
+      abortController = undefined;
+    },
   };
 }

@@ -176,6 +176,9 @@ export function ChatSharingMenu({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.popoverAriaLabel', {
+        defaultMessage: 'Sharing options',
+      })}
       button={
         <EuiBadge
           iconType={selectedValue === ConversationAccess.SHARED ? 'users' : 'lock'}
@@ -190,7 +193,12 @@ export function ChatSharingMenu({
           data-test-subj="observabilityAiAssistantChatAccessBadge"
         >
           {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
-          <EuiIcon type="chevronSingleDown" size="m" css={{ paddingLeft: euiTheme.size.xs }} />
+          <EuiIcon
+            type="chevronSingleDown"
+            size="m"
+            css={{ paddingLeft: euiTheme.size.xs }}
+            aria-hidden={true}
+          />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}

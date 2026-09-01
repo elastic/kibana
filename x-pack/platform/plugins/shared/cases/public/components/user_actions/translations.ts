@@ -29,20 +29,6 @@ export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate('xpack.cases.caseView.mov
   defaultMessage: 'Highlight the referenced comment',
 });
 
-export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
-  defaultMessage: 'submitted isolate request on host',
-});
-
-export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
-  defaultMessage: 'submitted release request on host',
-});
-
-export const OTHER_ENDPOINTS = (endpoints: number): string =>
-  i18n.translate('xpack.cases.caseView.otherEndpoints', {
-    values: { endpoints },
-    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
-  });
-
 export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
   defaultMessage: 'Cancel',
 });
@@ -71,6 +57,13 @@ export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
   'xpack.cases.caseView.description.unsavedDraftDescription',
   {
     defaultMessage: 'You have unsaved edits for the description',
+  }
+);
+
+export const RESUME_EDITING_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.description.resumeEditing',
+  {
+    defaultMessage: 'Resume editing',
   }
 );
 
@@ -147,6 +140,12 @@ export const APPLIED_TEMPLATE_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.appliedTemplateLabel',
   { defaultMessage: 'applied template' }
 );
+
+export const APPLIED_NAMED_TEMPLATE_LABEL = (name: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.appliedNamedTemplateLabel', {
+    values: { name },
+    defaultMessage: 'applied {name} template',
+  });
 
 export const REMOVED_TEMPLATE_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.removedTemplateLabel',

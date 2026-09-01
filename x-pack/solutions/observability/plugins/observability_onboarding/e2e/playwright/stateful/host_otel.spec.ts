@@ -10,24 +10,17 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
-import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
+import { assertDiscoverHasData } from '../lib/validation_helpers';
 
 test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
   await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
-test('Otel Host', async ({
-  page,
-  onboardingHomePage,
-  otelHostFlowPage,
-  hostsOverviewPage,
-  wiredStreamsSelector,
-}) => {
+test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOverviewPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
-  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_otel_host.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -36,10 +29,6 @@ test('Otel Host', async ({
 
   const osName = process.env.OS_NAME || os.platform();
   await otelHostFlowPage.selectPlatform(osName);
-
-  if (useWiredStreams) {
-    await wiredStreamsSelector.selectWiredStreamsMode();
-  }
 
   await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();
   const collectorDownloadSnippet = (await page.evaluate(
@@ -76,21 +65,7 @@ test('Otel Host', async ({
    */
   await page.waitForTimeout(2 * 60000);
 
-  /**
-   * Wired streams only reroutes logs (to logs.otel); metrics and traces are
-   * unaffected. So for wired streams we validate log delivery via Discover and
-   * the Streams page, and intentionally skip the Hosts Overview dashboard
-   * check. Dashboard validation is already covered by the non-wired test
-   * variants.
-   *
-   * Both "wired streams" and "wired streams + logs essentials" fall into this
-   * single branch because the validation path is identical for both.
-   */
-  if (useWiredStreams) {
-    await otelHostFlowPage.clickLogsExplorationCTA();
-    await assertDiscoverHasData(page, { assertHitCount: true });
-    await assertStreamHasData(page, 'logs.otel');
-  } else if (!isLogsEssentialsMode) {
+  if (!isLogsEssentialsMode) {
     await otelHostFlowPage.clickHostsOverviewCTA();
     const hostname = os.hostname();
     await hostsOverviewPage.assertHostCpuNotEmpty(hostname);

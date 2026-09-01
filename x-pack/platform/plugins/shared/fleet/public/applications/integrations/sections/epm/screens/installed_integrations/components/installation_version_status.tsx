@@ -12,12 +12,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiCallOut,
-  EuiButton,
   EuiToolTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useAuthz } from '../../../../../../../hooks';
 import type { InstallFailedAttempt } from '../../../../../../../../common/types';
@@ -158,6 +158,17 @@ function formatAttempt(attempt: InstallFailedAttempt): React.ReactNode {
       <p>
         {attempt.error?.name || ''} : {attempt.error?.message || ''}
       </p>
+      {attempt.missing_assets && attempt.missing_assets.length > 0 && (
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.installationVersionStatus.missingAssetsDescription"
+            defaultMessage="Missing assets: {assets}"
+            values={{
+              assets: attempt.missing_assets.map((a) => `${a.type}/${a.id}`).join(', '),
+            }}
+          />
+        </p>
+      )}
     </>
   );
 }
@@ -205,10 +216,16 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
   const latestAttempt = item.installationInfo?.latest_install_failed_attempts?.[0];
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
-      <EuiCallOut
+    <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.epmInstalledIntegrations.statusPopoverAriaLabel', {
+        defaultMessage: 'Installation status details',
+      })}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <KbnDangerCallout
         css={{ maxWidth: 400 }}
-        color="danger"
         title={
           isUpgradeFailed ? (
             <FormattedMessage
@@ -225,18 +242,24 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
             />
           )
         }
+        actionProps={
+          isUpgradeFailed
+            ? {
+                // TODO Implement on click https://github.com/elastic/kibana/issues/209867
+                primary: {
+                  children: (
+                    <FormattedMessage
+                      id="xpack.fleet.epmInstalledIntegrations.retryUpgradeButtonLabel"
+                      defaultMessage="Retry Upgrade"
+                    />
+                  ),
+                },
+              }
+            : undefined
+        }
       >
         {latestAttempt ? formatAttempt(latestAttempt) : null}
-        {isUpgradeFailed && (
-          // TODO Implement on click https://github.com/elastic/kibana/issues/209867
-          <EuiButton color="danger" fill={true}>
-            <FormattedMessage
-              id="xpack.fleet.epmInstalledIntegrations.retryUpgradeButtonLabel"
-              defaultMessage="Retry Upgrade"
-            />
-          </EuiButton>
-        )}
-      </EuiCallOut>
+      </KbnDangerCallout>
     </EuiPopover>
   );
 });

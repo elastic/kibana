@@ -1,0 +1,218 @@
+{
+  "sha1": "c73be1ce85ab04fd35a8b79481ea897b83527960",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "13941b13cbc180f-db28d60b21b5792",
+      "title": "API keys creation creates an API key from the empty prompt and shows it in the grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_create.spec.ts",
+        "line": 18,
+        "column": 23
+      }
+    },
+    {
+      "id": "13941b13cbc180f-c695aca48323836",
+      "title": "API keys creation creates an API key with a custom expiration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_create.spec.ts",
+        "line": 31,
+        "column": 5
+      }
+    },
+    {
+      "id": "933148518e11087-16259e7e3bea20d",
+      "title": "API keys deletion deletes an API key from its table row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_delete.spec.ts",
+        "line": 24,
+        "column": 23
+      }
+    },
+    {
+      "id": "933148518e11087-e0348f9796ff6ed",
+      "title": "API keys deletion deletes all API keys at once with the bulk action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_delete.spec.ts",
+        "line": 34,
+        "column": 69
+      }
+    },
+    {
+      "id": "350c56713f5ad3a-d0e1743d7cabeda",
+      "title": "API keys grid pagination pages through the full key set with the searchAfter cursor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_pagination.spec.ts",
+        "line": 42,
+        "column": 8
+      }
+    },
+    {
+      "id": "25cacb65443bf40-fcf9f92ef3d8008",
+      "title": "API keys management link is hidden for a user without API key cluster privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_privileges.spec.ts",
+        "line": 13,
+        "column": 14
+      }
+    },
+    {
+      "id": "25cacb65443bf40-36dccd8894e146b",
+      "title": "API keys management link is visible for a user who can manage their own API keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_privileges.spec.ts",
+        "line": 14,
+        "column": 100
+      }
+    },
+    {
+      "id": "4efd9811db3c0ea-b47633610badb6e",
+      "title": "API keys grid filtering shows only rest-type keys before any filter is touched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_query_filters.spec.ts",
+        "line": 81,
+        "column": 93
+      }
+    },
+    {
+      "id": "4efd9811db3c0ea-20067702ae8b0d0",
+      "title": "API keys grid filtering wires the type and expiry filter buttons to the grid query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_query_filters.spec.ts",
+        "line": 89,
+        "column": 8
+      }
+    },
+    {
+      "id": "4efd9811db3c0ea-577f9919b40eeaf",
+      "title": "API keys grid filtering narrows the grid to a selected owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_query_filters.spec.ts",
+        "line": 122,
+        "column": 7
+      }
+    },
+    {
+      "id": "4efd9811db3c0ea-d0609bb65c3079d",
+      "title": "API keys grid filtering narrows the grid by name from the search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_query_filters.spec.ts",
+        "line": 138,
+        "column": 11
+      }
+    },
+    {
+      "id": "fac64d755b826be-ea4d7d10cae8a5d",
+      "title": "API key read-only details flyout is read-only for a user who can only view API keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_readonly_details.spec.ts",
+        "line": 33,
+        "column": 42
+      }
+    },
+    {
+      "id": "fac64d755b826be-637e358434c1cf1",
+      "title": "API key read-only details flyout is read-only for an expired API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_readonly_details.spec.ts",
+        "line": 48,
+        "column": 23
+      }
+    },
+    {
+      "id": "fac64d755b826be-84e7fe61ae7c9cb",
+      "title": "API key read-only details flyout is read-only for an API key owned by another user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_readonly_details.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "59d91952ed5a0a3-dd014641c4b7ba4",
+      "title": "API key update edits the metadata and privileges of an own API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_update.spec.ts",
+        "line": 21,
+        "column": 42
+      }
+    }
+  ]
+}

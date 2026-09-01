@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { PluginSetup } from '@kbn/core-di';
+import { OnSetup, PluginSetup } from '@kbn/core-di';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
+import { TelemetryTaskDefinition } from '../lib/usage/task_definition';
 import {
   TaskDefinition,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { AlertingServerSetupDependencies } from '../types';
+import type { PluginConfig } from '../config';
 
 export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   // Register task with Task Manager when the binding is activated
   onActivation(TaskDefinition, ({ get }, definition) => {
+    const config = get<PluginInitializerContext<PluginConfig>['config']>(
+      PluginInitializer('config')
+    ).get<PluginConfig>();
+
     const taskManager = get(
       PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
     );
@@ -30,11 +38,17 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
       requiresFakeRequest: definition.requiresFakeRequest,
     });
 
+    let timeout = definition.timeout;
+    if (definition.resolveTimeout) {
+      timeout = definition.resolveTimeout(config);
+    }
+
     taskManager.registerTaskDefinitions({
       [definition.taskType]: {
         title: definition.title,
-        timeout: definition.timeout,
+        timeout,
         paramsSchema: definition.paramsSchema,
+        stateSchemaByVersion: definition.stateSchemaByVersion,
         maxAttempts: definition.maxAttempts,
         createTaskRunner,
       },
@@ -47,4 +61,11 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   bind(TaskDefinition).toConstantValue(RuleExecutorTaskDefinition);
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
   bind(TaskDefinition).toConstantValue(ApiKeyInvalidationTaskDefinition);
+  bind(TaskDefinition).toConstantValue(TelemetryTaskDefinition);
+
+  // Resolve every bound task definition during setup so the onActivation hook
+  // above runs once per task and registers it with Task Manager.
+  bind(OnSetup).toConstantValue((container) => {
+    container.getAll(TaskDefinition);
+  });
 }

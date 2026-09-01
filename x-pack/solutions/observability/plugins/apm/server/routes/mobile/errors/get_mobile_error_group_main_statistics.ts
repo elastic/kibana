@@ -9,6 +9,7 @@ import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { MobileErrorGroupMainStatisticsResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -25,16 +26,6 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-
-export type MobileErrorGroupMainStatisticsResponse = Array<{
-  groupId: string;
-  name: string;
-  lastSeen: number;
-  occurrences: number;
-  culprit: string | undefined;
-  handled: boolean | undefined;
-  type: string | undefined;
-}>;
 
 export async function getMobileErrorGroupMainStatistics({
   kuery,

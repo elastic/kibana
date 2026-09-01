@@ -1,0 +1,35 @@
+{
+  "network": [
+    {
+      "method": "GET",
+      "url": "https://kibana.example/internal/entity_analytics/monitoring/entity_source/poll",
+      "status": 200,
+      "ok": true,
+      "failure": null,
+      "requestedAt": 0,
+      "respondedAt": 40,
+      "resourceType": "fetch"
+    },
+    {
+      "method": "GET",
+      "url": "https://kibana.example/internal/entity_analytics/monitoring/entity_source/poll",
+      "status": 200,
+      "ok": true,
+      "failure": null,
+      "requestedAt": 400,
+      "respondedAt": 440,
+      "resourceType": "fetch"
+    },
+    {
+      "method": "GET",
+      "url": "https://kibana.example/internal/entity_analytics/monitoring/entity_source/poll",
+      "status": 200,
+      "ok": true,
+      "failure": null,
+      "requestedAt": 800,
+      "respondedAt": 840,
+      "resourceType": "fetch"
+    }
+  ],
+  "console": []
+}

@@ -30,7 +30,7 @@ export const ChatElasticsearchConnectionDetails = () => {
         <EuiTitle size="xxs">
           <h5>
             {i18n.translate(
-              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.serverless.title',
+              'xpack.searchGettingStarted.chat.elasticsearchConnectionDetails.serverless.title',
               {
                 defaultMessage: 'Connector to your project',
               }
@@ -42,7 +42,7 @@ export const ChatElasticsearchConnectionDetails = () => {
         <EuiBadgeGroup
           role="group"
           aria-label={i18n.translate(
-            'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadgeGroup.aria',
+            'xpack.searchGettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadgeGroup.aria',
             {
               defaultMessage: 'Select endpoint type',
             }
@@ -53,14 +53,14 @@ export const ChatElasticsearchConnectionDetails = () => {
             onClick={() => setUrlView(UrlView.elasticsearch)}
             data-test-subj="viewElasticsearchUrlBtn"
             onClickAriaLabel={i18n.translate(
-              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.elasticsearch.aria',
+              'xpack.searchGettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.elasticsearch.aria',
               {
                 defaultMessage: 'View the elasticsearch endpoint url',
               }
             )}
           >
             {i18n.translate(
-              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.elasticsearch',
+              'xpack.searchGettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.elasticsearch',
               {
                 defaultMessage: 'Elasticsearch',
               }
@@ -71,14 +71,14 @@ export const ChatElasticsearchConnectionDetails = () => {
             onClick={() => setUrlView(UrlView.mcp)}
             data-test-subj="viewMCPUrlBtn"
             onClickAriaLabel={i18n.translate(
-              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.mcp.aria',
+              'xpack.searchGettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.mcp.aria',
               {
                 defaultMessage: 'View the model context protocol server url',
               }
             )}
           >
             {i18n.translate(
-              'xpack.search.gettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.mcp',
+              'xpack.searchGettingStarted.chat.elasticsearchConnectionDetails.urlSelectBadge.mcp',
               {
                 defaultMessage: 'MCP',
               }

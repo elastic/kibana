@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useWatch } from 'react-hook-form';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -16,16 +17,21 @@ import type {
   StepDefinition,
   StepRenderProps,
 } from '../types';
+import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
-import type { ComposeFormValues } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
+import { ScheduleField } from '../../../form/fields/schedule_field';
+import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
-import { RecoveryConditionStep } from './recovery_condition_step';
+import { OutcomeStep } from './outcome_step';
+import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
+import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
   state: ComposeDiscoverState;
@@ -33,6 +39,7 @@ interface Props {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
   ruleId?: string;
   builderType?: string;
 }
@@ -41,37 +48,39 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
     title: i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.stepTitle', {
-      defaultMessage: 'Alert Condition',
+      defaultMessage: 'Condition',
     }),
     render: (props) => (
       <AlertConditionStep
         state={props.state}
         dispatch={props.dispatch}
         services={props.services}
-        onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
       />
     ),
-    validate: (_methods, s) => s.queryCommitted,
+    fields: ['query'],
+    meetsPrecondition: (s) => s.queryCommitted,
   },
   builderCondition: {
     id: 'builderCondition',
     title: i18n.translate('xpack.alertingV2.composeDiscover.step.builderCondition', {
-      defaultMessage: 'Alert Condition',
+      defaultMessage: 'Condition',
     }),
     render: () => null,
-    validate: (_methods, s) => s.queryCommitted,
   },
-  recoveryCondition: {
-    id: 'recoveryCondition',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.stepTitle', {
-      defaultMessage: 'Recovery Condition',
+  outcome: {
+    id: 'outcome',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.outcome.stepTitle', {
+      defaultMessage: 'Outcome',
     }),
     render: (props) => (
-      <RecoveryConditionStep
+      <OutcomeStep
         state={props.state}
         dispatch={props.dispatch}
         onRecoveryTypeChange={props.onRecoveryTypeChange}
-        renderBuilderRecovery={props.renderBuilderRecovery}
+        onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
+        renderCustomRecovery={props.renderCustomRecovery}
       />
     ),
   },
@@ -81,7 +90,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Details & Artifacts',
     }),
     render: () => <DetailsAndArtifactsStep />,
-    validate: async (methods) => methods.trigger(['metadata.name']),
+    fields: ['metadata.name'],
   },
   notifications: {
     id: 'notifications',
@@ -93,26 +102,17 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.state.mode !== 'edit' && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <NotificationsStep services={props.services} />
-          </>
-        )}
+        <EuiHorizontalRule margin="m" />
+        <NotificationsStep />
       </>
     ),
-    validate: (methods, state, services) => {
-      if (state.mode === 'edit') return true;
-      const notifs = methods.getValues('notifications');
-      if (!notifs) return true;
-      return services?.workflowForm?.isValid?.(notifs.workflow) ?? true;
-    },
+    fields: ['notifications'],
   },
 };
 
 interface ResolvedSteps {
   steps: StepDefinition[];
-  renderBuilderRecovery?: StepRenderProps['renderBuilderRecovery'];
+  renderCustomRecovery?: StepRenderProps['renderCustomRecovery'];
 }
 
 export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps => {
@@ -122,8 +122,16 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
-      const step: StepDefinition = {
-        ...base,
+      // Discard any ES|QL registry keys if the stub ever gains them.
+      const {
+        meetsPrecondition: _meetsPrecondition,
+        validate: _validate,
+        fields: _fields,
+        ...builderBase
+      } = base;
+      const builderValidate = definition.validate;
+      const builderStep: StepDefinition = {
+        ...builderBase,
         title: definition.stepTitle,
         render: (props) =>
           definition.renderStep({
@@ -131,16 +139,24 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             dispatch: props.dispatch,
             services: props.services,
           }),
-        validate: definition.validate
-          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
-          : base.validate,
+        ...(builderValidate
+          ? {
+              validate: (_methods, s, _services, bs) => builderValidate(s, bs),
+            }
+          : {}),
       };
-      return step;
+      return builderStep;
     }
     return base;
   });
 
-  return { steps, renderBuilderRecovery: definition?.renderRecoveryStep };
+  /*
+   * Pass a component (or registry render function). RecoveryConditionStep mounts
+   * it with createElement so hook-using recovery content keeps its own fiber.
+   */
+  const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
+
+  return { steps, renderCustomRecovery };
 };
 
 export const ComposeDiscoverForm = ({
@@ -149,19 +165,53 @@ export const ComposeDiscoverForm = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  isEditing,
   ruleId,
   builderType,
 }: Props) => {
-  const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const { steps, renderBuilderRecovery } = getSteps(isAlert, builderType);
+  const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const { steps, renderCustomRecovery } = useMemo(
+    () => getSteps(isAlert, builderType),
+    [isAlert, builderType]
+  );
+  const currentStep = steps[state.step];
+  const isAlertConditionStep = isAlertConditionStepId(currentStep.id);
 
-  return steps[state.step].render({
+  const stepContent = currentStep.render({
     state,
     dispatch,
     services,
     onRecoveryTypeChange,
     onKindChange,
+    isEditing,
     ruleId,
-    renderBuilderRecovery,
+    renderCustomRecovery,
   });
+
+  return (
+    <>
+      {/* Keep query rules mounted across steps so trigger(['query']) cannot no-op. */}
+      {!builderType && <QueryFieldRules queryCommitted={state.queryCommitted} />}
+      {!isAlertConditionStep ? (
+        stepContent
+      ) : (
+        <>
+          {stepContent}
+          <EuiHorizontalRule margin="m" />
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionTitle"
+                defaultMessage="Rule execution"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <ScheduleField />
+          <EuiSpacer size="m" />
+          <LookbackWindowField />
+        </>
+      )}
+    </>
+  );
 };

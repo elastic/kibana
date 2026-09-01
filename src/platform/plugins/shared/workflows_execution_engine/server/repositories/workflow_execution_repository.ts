@@ -8,15 +8,27 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import {
+  ConcurrencySlotOccupyingExecutionStatuses,
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
+import type { WorkflowExecutionsDataClient } from './data_access_layer';
+
+/**
+ * An execution document is written by several independent writers while the run is in flight:
+ * the run's own periodic state flush, inline flushes from the execution loop, and out-of-band
+ * writers such as the concurrency manager (`cancel-in-progress`), the cancel API and task
+ * recovery. Partial-doc updates are last-writer-wins per field, so letting Elasticsearch re-read
+ * and re-apply the merge is safe — and necessary, since an unretried 409 surfaces as a
+ * `version_conflict_engine_exception` that fails the workflow. `retryTransientEsErrors` does not
+ * cover 409, so the retry has to happen server-side.
+ */
+const UPDATE_RETRY_ON_CONFLICT = 3;
 
 export class WorkflowExecutionRepository {
-  private indexName = WORKFLOWS_EXECUTIONS_INDEX;
-
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -32,29 +44,16 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    try {
-      const response = await this.esClient.get<EsWorkflowExecution>({
-        index: this.indexName,
-        id: workflowExecutionId,
-      });
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId]);
+    const doc = items[0]?.document;
 
-      const doc = response._source;
-      // Verify spaceId matches for security/multi-tenancy
-      if (!doc || doc.spaceId !== spaceId) {
-        return null;
-      }
-      return doc;
-    } catch (error: unknown) {
+    // Verify spaceId matches for security/multi-tenancy
+    if (!doc || doc.spaceId !== spaceId) {
       // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
-        return null;
-      }
-      throw error;
+      return null;
     }
+
+    return doc;
   }
 
   /**
@@ -75,12 +74,27 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.esClient.index({
-      index: this.indexName,
-      id: workflowExecution.id,
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: [
+        {
+          operation: 'create',
+          document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+        },
+      ],
       refresh: options.refresh ?? false,
-      document: workflowExecution,
     });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document create, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. version conflict on duplicate ID).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to create workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**
@@ -106,17 +120,18 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
-      refresh: options.refresh ?? false,
-      index: this.indexName,
-      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
+    const bulkResponse = await this.workflowExecutionsDataClient.bulk({
+      items: executions.map((execution) => ({
+        operation: 'create',
+        document: execution as Partial<EsWorkflowExecution> & { id: string },
+      })),
+      refresh: options.refresh,
     });
 
-    return bulkResponse.items.map((item, idx) => {
-      const op = item.create ?? item.index;
+    return bulkResponse.items.map((item, idx: number) => {
       const id = executions[idx].id as string;
-      if (op?.error) {
-        return { id, error: op.error.reason ?? JSON.stringify(op.error) };
+      if (item.error) {
+        return { id, error: item.error.reason ?? JSON.stringify(item.error) };
       }
       return { id };
     });
@@ -135,18 +150,35 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when the update operation is complete.
    */
   public async updateWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>
+    workflowExecution: Partial<EsWorkflowExecution>,
+    options: { refresh?: boolean | 'wait_for' } = {}
   ): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: this.indexName,
-      id: workflowExecution.id,
-      refresh: false,
-      doc: workflowExecution,
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: [
+        {
+          operation: 'update',
+          document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+        },
+      ],
+      refresh: options.refresh ?? false,
     });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document update, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. doc-not-found, version conflict).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to update workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**
@@ -170,25 +202,18 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: updates.map((update) => ({
+        operation: 'update',
+        document: update as Partial<EsWorkflowExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+      })),
       refresh: true,
-      index: this.indexName,
-      body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
     });
-
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
+    if (response.errors) {
+      const errorCount = response.items.filter((item) => item.error).length;
       throw new Error(
-        `Failed to update ${erroredDocuments.length} workflow executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
+        `Bulk update failed for ${errorCount} of ${updates.length} workflow executions`
       );
     }
   }
@@ -201,9 +226,8 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves to the list of search hits.
    */
   public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
-      query,
+    const response = await this.workflowExecutionsDataClient.search({
+      query: query as estypes.QueryDslQueryContainer,
       size,
     });
 
@@ -245,8 +269,7 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
+    const response = await this.workflowExecutionsDataClient.search({
       size: 0, // Don't need the document, just checking existence
       terminate_after: 1, // Stop after finding 1 match
       track_total_hits: true,
@@ -295,8 +318,7 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
+    const response = await this.workflowExecutionsDataClient.search({
       size: 1,
       terminate_after: 1, // Stop after finding 1 match
       query: {
@@ -310,9 +332,8 @@ export class WorkflowExecutionRepository {
   }
 
   /**
-   * Retrieves non-terminal workflow execution IDs by concurrency group key.
-   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
-   * to make room for new executions.
+   * Retrieves concurrency-slot IDs by concurrency group key (excludes persisted `queued` backlog).
+   * Cancel-in-progress and drop strategies only consider executions that occupy a concurrency slot.
    *
    * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
    * Results are sorted by createdAt ascending (oldest first).
@@ -335,7 +356,7 @@ export class WorkflowExecutionRepository {
       // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: NonTerminalExecutionStatuses,
+          status: ConcurrencySlotOccupyingExecutionStatuses,
         },
       },
     ];
@@ -352,21 +373,111 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
+    const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses, // Filter context = no scoring = faster
         },
       },
       _source: ['id'], // Only fetch ID field for efficiency
-      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
+      sort: [
+        { createdAt: { order: 'asc' } },
+        { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
+      ],
       size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
     });
 
     return response.hits.hits
-      .map((hit) => hit._source?.id ?? hit._id)
+      .map((hit) => (hit._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
+  }
+
+  /**
+   * Counts workflow executions in a concurrency group constrained to explicit statuses (filter context).
+   */
+  public async countExecutionsByConcurrencyGroupAndStatuses(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    statuses: readonly ExecutionStatus[],
+    excludeExecutionId?: string
+  ): Promise<number> {
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { concurrencyGroupKey } },
+      { term: { spaceId } },
+      { terms: { status: statuses } },
+    ];
+    if (excludeExecutionId) {
+      filterClauses.push({
+        bool: {
+          must_not: [{ term: { id: excludeExecutionId } }],
+        },
+      });
+    }
+
+    const response = await this.workflowExecutionsDataClient.count({
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+    });
+
+    return response.count;
+  }
+
+  /**
+   * Oldest queued execution id for FIFO promotion (FIFO by createdAt ascending).
+   */
+  public async getOldestQueuedExecutionIdByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string
+  ): Promise<string | null> {
+    const response = await this.workflowExecutionsDataClient.search({
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { concurrencyGroupKey } },
+            { term: { spaceId } },
+            { term: { status: ExecutionStatus.QUEUED } },
+          ],
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+    });
+    const hit = response.hits.hits[0];
+    const id = (hit?._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit?._id;
+    return typeof id === 'string' ? id : null;
+  }
+
+  /**
+   * CAS: promotes `queued` → `pending` only when the document still carries `queued` status.
+   * Uses an atomic Painless script update so concurrent drain iterations cannot both promote
+   * the same execution (which would allow a concurrency group to exceed maxConcurrency).
+   */
+  public async tryCasPromoteQueuedWorkflowExecutionToPending(params: {
+    workflowExecutionId: string;
+    spaceId: string;
+  }): Promise<boolean> {
+    const { result } = await this.workflowExecutionsDataClient.scriptUpdate({
+      id: params.workflowExecutionId,
+      script:
+        'if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {' +
+        '  ctx._source.status = params.pendingStatus;' +
+        '} else {' +
+        "  ctx.op = 'noop';" +
+        '}',
+      params: {
+        queuedStatus: ExecutionStatus.QUEUED,
+        pendingStatus: ExecutionStatus.PENDING,
+        spaceId: params.spaceId,
+      },
+      // Near-real-time search must see this doc as PENDING before the next
+      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
+      refresh: 'wait_for',
+    });
+    return result === 'updated';
   }
 
   /**
@@ -402,8 +513,7 @@ export class WorkflowExecutionRepository {
 
     const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
 
-    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
+    const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses,
@@ -418,7 +528,7 @@ export class WorkflowExecutionRepository {
 
     const hits = response.hits.hits;
     const results = hits
-      .map((hit) => hit._source?.id ?? hit._id)
+      .map((hit) => (hit._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
 
     const rawTotal = response.hits.total;

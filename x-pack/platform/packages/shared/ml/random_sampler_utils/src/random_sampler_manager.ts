@@ -17,8 +17,17 @@ export const RANDOM_SAMPLER_PROBABILITIES = [
 
 /**
  * Default recommended minimum probability for default sampling
+ *
+ * Do not change without considering public REST API validation and persisted embeddable state.
  */
 export const MIN_SAMPLER_PROBABILITY = 0.00001;
+
+/**
+ * Maximum probability for random sampling (matches the ES random_sampler upper bound for useful results)
+ *
+ * Do not change without considering public REST API validation and persisted embeddable state.
+ */
+export const MAX_SAMPLER_PROBABILITY = 0.5;
 
 /**
  * Default step minimum probability for default sampling
@@ -32,6 +41,8 @@ export const DEFAULT_PROBABILITY = 0.001;
 
 /**
  * Default options for random sampler
+ *
+ * Do not change constant values - part of public REST APIs and persisted embeddable state.
  */
 export const RANDOM_SAMPLER_OPTION = {
   ON_AUTOMATIC: 'on_automatic',

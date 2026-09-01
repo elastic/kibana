@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiSplitPanel,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
@@ -25,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentActions } from './attachment_actions';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
@@ -58,6 +60,10 @@ interface AttachmentHeaderProps {
    * - previewing: show "Close preview" button and hide action buttons
    */
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
+  /** When true, uses canvas flyout corner radius (top-right only). */
+  isCanvas?: boolean;
+  /** When true, rounds all corners and omits the bottom border (no body content). */
+  isHeaderOnly?: boolean;
 }
 
 export const COMPACT_WIDTH_THRESHOLD = 560;
@@ -71,6 +77,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   onClose,
   onClosePreview,
   previewBadgeState = 'none',
+  isCanvas = false,
+  isHeaderOnly = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -91,10 +99,22 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     text-overflow: ellipsis;
   `;
 
+  const headerBorderRadius = isCanvas
+    ? `0 ${euiTheme.border.radius.small} 0 0`
+    : isHeaderOnly
+    ? `${AB_PANEL_RADIUS}px`
+    : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`;
+
   const headerStyles = css`
     position: relative;
-    border-bottom: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.borderBaseSubdued};
+    display: flex;
+    ${!isHeaderOnly
+      ? `
+      border-bottom: ${euiTheme.border.thin};
+      border-color: ${euiTheme.colors.borderBaseSubdued};
+    `
+      : ''}
+    border-radius: ${headerBorderRadius};
     min-height: ${HEADER_HEIGHT}px;
   `;
 
@@ -142,15 +162,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                   <EuiIcon type={icon} color="subdued" size="l" aria-hidden={true} />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem
-                grow={true}
-                style={{
-                  minWidth: 0,
-                  borderLeft: euiTheme.border.thin,
-                  borderColor: euiTheme.colors.borderBaseSubdued,
-                  paddingLeft: euiTheme.size.s,
-                }}
-              >
+              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
                 <EuiFlexGroup
                   direction="column"
                   gutterSize="none"
@@ -215,18 +227,20 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
               )}
               {onClose && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                    iconType="cross"
-                    onClick={onClose}
-                    size="s"
-                    color="text"
-                    {...getEbtProps({
-                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                      action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
-                      detail: 'attachment',
-                    })}
-                  />
+                  <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                      iconType="cross"
+                      onClick={onClose}
+                      size="s"
+                      color="text"
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
+                        detail: 'attachment',
+                      })}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

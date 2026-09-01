@@ -7,7 +7,11 @@
 
 import type { LensSerializedState } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
+import {
+  LENS_UNKNOWN_VIS,
+  dropLegacyAggregateQuerySlot,
+  type LensByValueSerializedState,
+} from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
@@ -32,7 +36,11 @@ export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
   isDashboardAppRequest: boolean
 ): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
+  return function transformOut(storedState, panelReferences, containerReferences, id) {
+    // Capture savedObjectId prior to stripInheritedContext
+    const legacySavedObjectId =
+      'savedObjectId' in storedState ? storedState.savedObjectId : undefined;
+
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -51,6 +59,11 @@ export const getTransformOut = (
       } satisfies LensByRefTransformOutResult;
     }
 
+    // Fallback to handle legacy SO with missing savedObjectRef reference
+    if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
+      return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
+    }
+
     const migratedAttributes = migrateAttributes(attributes);
     const injectedState = injectLensReferences(
       {
@@ -64,25 +77,55 @@ export const getTransformOut = (
       return injectedState as LensByValueTransformOutResult;
     }
 
-    const chartType = builder.getType(migratedAttributes);
+    // Use the reference-injected attributes (not `migratedAttributes`) so the
+    // resolved/remapped panel references win over the chart's embedded ones.
+    // When a dashboard is copied to another space, SO import remaps the panel
+    // `index-pattern` references; `toAPIFormat` reads data view ids from the
+    // attributes' references, so it must see the remapped ids. Otherwise the
+    // panel keeps the original (wrong-space) data view id and fails to render.
+    // See https://github.com/elastic/kibana/issues/268821.
+    const injectedAttributes = injectedState.attributes ?? migratedAttributes;
+
+    const chartType = builder.getType(injectedAttributes);
     // should be filtered out my unmapped panel check
     if (!builder.isSupported(chartType)) {
       throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
     const {
-      title: _, // ignore attributes title
-      description: __, // ignore attributes description
+      title: attributesTitle, // attributes title is only a legacy fallback (see below)
+      description: attributesDescription,
       ...apiConfig
     } = builder.toAPIFormat({
-      ...migratedAttributes,
-      visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
+      ...injectedAttributes,
+      visualizationType: injectedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
 
-    return {
+    // For by-value panels the panel-level title/description take precedence and the
+    // attributes title/description are ignored. Legacy by-value panels, however, were
+    // sometimes persisted with the title only inside `attributes` and no panel-level title.
+    // Without a fallback those panels would lose their title through the apiFormat
+    // round-trip (the non-apiFormat path keeps it via `defaultTitle$ = attributes.title`).
+    //
+    // `stripInheritedContext` already dropped any `undefined` title/description key, so a
+    // missing key here means the panel has no title (either absent or explicitly
+    // `undefined`) and we fall back to the attributes title. An explicit empty string
+    // survives stripping, so it is a real panel title and the fallback is NOT applied.
+    // See https://github.com/elastic/kibana/issues/268821
+    const titleFallback = !('title' in state) && attributesTitle ? { title: attributesTitle } : {};
+    const descriptionFallback =
+      !('description' in state) && attributesDescription
+        ? { description: attributesDescription }
+        : {};
+
+    const apiPanelConfig = {
+      ...titleFallback,
+      ...descriptionFallback,
       ...state,
       ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    return apiPanelConfig;
   };
 };
 
@@ -106,12 +149,12 @@ export function migrateAttributes(
   if (isLensAttributesV0(newAttributes) || isLensAttributesV1(newAttributes)) {
     const v1Attributes = transformToV1LensItemAttributes(newAttributes);
     const v2Attributes = transformToV2LensItemAttributes({ ...v1Attributes, visualizationType });
-    return {
+    return dropLegacyAggregateQuerySlot({
       ...attributes,
       ...v2Attributes,
       version: LENS_ITEM_VERSION_V2 as LensAttributes['version'],
-    };
+    });
   }
 
-  return newAttributes as LensAttributes;
+  return dropLegacyAggregateQuerySlot(newAttributes as LensAttributes);
 }

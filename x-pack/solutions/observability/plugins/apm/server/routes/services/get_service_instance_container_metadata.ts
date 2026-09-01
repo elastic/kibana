@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceInstanceContainerMetadataDetails } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   CONTAINER_ID,
@@ -20,15 +21,8 @@ import {
   KUBERNETES_CONTAINER_ID,
   KUBERNETES_NAMESPACE,
 } from '../../../common/es_fields/apm';
-import type { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
 import type { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
-
-export type ServiceInstanceContainerMetadataDetails =
-  | {
-      kubernetes: Kubernetes;
-    }
-  | undefined;
 
 export const getServiceInstanceContainerMetadata = async ({
   infraMetricsClient,

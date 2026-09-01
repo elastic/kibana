@@ -10,13 +10,21 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import type { ChromeBadge } from '@kbn/core-chrome-browser';
-import { AppHeaderView } from './app_header';
+import type { ChromeBadge, ChromeHelpExtension } from '@kbn/core-chrome-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
+import { AppHeader, AppHeaderView, DiscoverAppHeader } from './app_header';
+
+const createChromeWithIntegrationsAccess = (canAccessIntegrations: boolean) => {
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.componentDeps.capabilities.navLinks.integrations = canAccessIntegrations;
+  return chrome;
+};
 
 const renderAppHeader = (
   ui: React.ReactElement,
@@ -25,49 +33,37 @@ const renderAppHeader = (
   return render(<ChromeServiceProvider value={{ chrome }}>{ui}</ChromeServiceProvider>);
 };
 
-describe('AppHeaderView', () => {
-  it('renders legacy app menu share as a title action', () => {
-    const runShare = jest.fn();
+describe('AppHeader adapter', () => {
+  it('only treats exact base path prefixes as already prepended for back links', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.componentDeps.basePath.get.mockReturnValue('/base');
+    chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
     renderAppHeader(
-      <AppHeaderView
-        menu={{
-          items: [
-            {
-              id: 'share',
-              order: 0,
-              label: 'Share',
-              iconType: 'share',
-              testId: 'shareTopNavButton',
-              run: runShare,
-            },
-          ],
-        }}
-      />
+      <AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />,
+      chrome
     );
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
-
-    expect(runShare).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/base/base-other/app'
+    );
   });
 
-  it('renders when the only content is a favorite action', () => {
+  it('does not double-prefix back links that already include the base path', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.componentDeps.basePath.get.mockReturnValue('/base');
+    chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
+
     renderAppHeader(
-      <AppHeaderView
-        favorite={<EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />}
-      />
+      <AppHeaderView back={{ href: '/base/app/dashboards', label: 'Dashboards' }} />,
+      chrome
     );
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Favorite' })).toBeInTheDocument();
-  });
-
-  it('renders when the only content is a static app menu item', async () => {
-    renderAppHeader(<AppHeaderView showAddIntegrations />);
-
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
-    expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/base/app/dashboards'
+    );
   });
 
   it('renders legacy badge fallback content', () => {
@@ -78,54 +74,187 @@ describe('AppHeaderView', () => {
 
     renderAppHeader(<AppHeaderView />, chrome);
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });
 
-  it('renders tab badge and test subject metadata', () => {
-    renderAppHeader(
-      <AppHeaderView
-        tabs={[
-          {
-            id: 'alerts',
-            label: 'Alerts',
-            badge: 3,
-            'data-test-subj': 'alertsTab',
-          },
-        ]}
-      />
-    );
-
-    expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-  });
-
-  it('only treats exact base path prefixes as already prepended for back links', () => {
+  it('prefers explicit badges over the legacy badge fallback', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.componentDeps.basePath.get.mockReturnValue('/base');
-    chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
+    chrome.getBadge$.mockReturnValue(
+      new BehaviorSubject<ChromeBadge>({ text: 'Technical preview', tooltip: '' })
+    );
 
-    renderAppHeader(<AppHeaderView back="/base-other/app" />, chrome);
+    renderAppHeader(<AppHeaderView badges={[{ label: 'Beta' }]} />, chrome);
 
-    expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('href', '/base/base-other/app');
+    expect(screen.getByText('Beta')).toBeInTheDocument();
+    expect(screen.queryByText('Technical preview')).not.toBeInTheDocument();
   });
 
-  it('renders multiple back targets as a menu and closes it after selection', async () => {
-    const backClick = jest.fn((event: React.MouseEvent) => event.preventDefault());
+  it('shows Add integrations when capabilities.navLinks.integrations is true', async () => {
+    renderAppHeader(
+      <AppHeaderView title="Workflows" showAddIntegrations />,
+      createChromeWithIntegrationsAccess(true)
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations)).toHaveAttribute(
+      'href',
+      '/app/integrations/browse'
+    );
+  });
+
+  it('hides Add integrations when capabilities.navLinks.integrations is false', async () => {
+    renderAppHeader(
+      <AppHeaderView title="Workflows" showAddIntegrations docLink="https://example.com/docs" />,
+      createChromeWithIntegrationsAccess(false)
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(
+      screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations)
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render when Add integrations is the only content and access is denied', () => {
+    renderAppHeader(
+      <AppHeaderView showAddIntegrations />,
+      createChromeWithIntegrationsAccess(false)
+    );
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
+  });
+
+  it('adds a documentation item from docLink', async () => {
+    renderAppHeader(<AppHeaderView title="Workflows" docLink="https://example.com/docs" />);
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      'https://example.com/docs'
+    );
+  });
+
+  it('falls back to help-extension documentation when docLink is omitted', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getHelpExtension$.mockReturnValue(
+      new BehaviorSubject<ChromeHelpExtension | undefined>({
+        appName: 'Test',
+        links: [{ linkType: 'documentation', href: 'https://help.example.com' }],
+      })
+    );
+
+    renderAppHeader(<AppHeaderView title="Workflows" />, chrome);
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      'https://help.example.com'
+    );
+  });
+
+  it('adds a feedback item from the registered handler', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const feedbackHandler = jest.fn();
+    chrome.next.getFeedbackHandler$.mockReturnValue(
+      new BehaviorSubject<(() => void) | undefined>(feedbackHandler)
+    );
+
+    renderAppHeader(<AppHeaderView title="Workflows" docLink="https://example.com/docs" />, chrome);
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    fireEvent.click(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuFeedback));
+    expect(feedbackHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it('mounts the legacy action menu when no structured menu is provided', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const mount: MountPoint = jest.fn((el) => {
+      el.setAttribute('data-mounted', 'true');
+      return () => el.removeAttribute('data-mounted');
+    });
+    const chromeWithLegacyMenu = {
+      ...chrome,
+      componentDeps: {
+        ...chrome.componentDeps,
+        legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(mount),
+      },
+    };
+
+    renderAppHeader(<AppHeaderView />, chromeWithLegacyMenu);
+
+    expect(screen.getByTestId('headerAppActionMenu')).toHaveAttribute('data-mounted', 'true');
+    expect(mount).toHaveBeenCalled();
+  });
+
+  it('prefers a structured menu over the legacy action menu', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const mount: MountPoint = jest.fn((el) => {
+      el.setAttribute('data-mounted', 'true');
+      return () => undefined;
+    });
+    const chromeWithLegacyMenu = {
+      ...chrome,
+      componentDeps: {
+        ...chrome.componentDeps,
+        legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(mount),
+      },
+    };
 
     renderAppHeader(
       <AppHeaderView
-        back={[
-          { href: '/app/first', label: 'First app' },
-          { href: '/app/second', label: 'Second app', onClick: backClick },
-        ]}
-      />
+        title="Dashboard"
+        menu={{
+          items: [
+            {
+              id: 'settings',
+              order: 1,
+              label: 'Settings',
+              iconType: 'gear',
+              testId: 'settingsMenu',
+              run: jest.fn(),
+            },
+          ],
+        }}
+      />,
+      chromeWithLegacyMenu
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open back navigation menu' }));
-    fireEvent.click(screen.getByText('Second app'));
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId('settingsMenu')).toBeInTheDocument();
+    expect(screen.queryByTestId('headerAppActionMenu')).not.toBeInTheDocument();
+    expect(mount).not.toHaveBeenCalled();
+  });
 
-    expect(backClick).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
+  it('claims the inline app-header slot for AppHeader and releases it on unmount', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const { unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
+
+    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+
+    unmount();
+
+    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+  });
+
+  it('does not claim the slot when only the view is rendered', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    renderAppHeader(<AppHeaderView title="Dashboard" />, chrome);
+
+    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+  });
+
+  it('claims the inline slot for DiscoverAppHeader', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const { unmount } = renderAppHeader(
+      <DiscoverAppHeader title="Discover" tabsBar={<div data-test-subj="tabsBar">Tabs</div>} />,
+      chrome
+    );
+
+    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
+
+    unmount();
+
+    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 });

@@ -10,14 +10,14 @@
 import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   EsWorkflowExecution,
   WorkflowDetailDto,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
@@ -43,10 +43,8 @@ import {
   normalizeEventChainVisitedWorkflowIds,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { ScheduleWorkflow } from '../types';
-
-const SCHEDULE_CONCURRENCY = 20;
 
 export interface EmitEventParams {
   triggerId: string;
@@ -65,7 +63,10 @@ export interface TriggerEventHandlerDeps {
   config: EventTriggersConfig;
   logger: Logger;
   triggerEventsClientPromise?: Promise<TriggerEventsDataStreamClient | undefined>;
+  workflowExecutionRepository: WorkflowExecutionRepository;
 }
+
+const SCHEDULE_CONCURRENCY = 20;
 
 interface ScheduleEventParams {
   payload: Record<string, unknown>;
@@ -171,8 +172,7 @@ export class TriggerEventHandler {
     const coreStart = deps.coreStart;
     this.telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, deps.logger);
 
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    this.workflowExecutionRepository = deps.workflowExecutionRepository;
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }
@@ -508,14 +508,8 @@ export class TriggerEventHandler {
           }
           try {
             validateWorkflowForExecution(workflow, workflow.id);
-            const workflowToRun: WorkflowExecutionEngineModel = {
-              id: workflow.id,
-              name: workflow.name,
-              enabled: workflow.enabled,
-              definition: workflow.definition,
-              yaml: workflow.yaml,
-              ...pickManagedWorkflowFields(workflow),
-            };
+            const workflowToRun: WorkflowExecutionEngineModel =
+              toWorkflowExecutionEngineModel(workflow);
             const context: Record<string, unknown> = {
               event: scheduleResult.event,
               spaceId: eventParams.spaceId,

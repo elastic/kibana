@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDefaultTimeRange } from '../../../../../../hooks/use_default_time_range';
@@ -17,7 +18,6 @@ import type { ApmRoutes } from '../../../../../routing/apm_route_config';
 import { ServiceLink } from '../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
-import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
 import { AgentLatestVersion } from '../../agent_latest_version';
 

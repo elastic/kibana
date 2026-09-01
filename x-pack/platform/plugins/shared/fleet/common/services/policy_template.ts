@@ -29,7 +29,7 @@ import type {
   PackagePolicyInput,
 } from '../types';
 
-const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
   type: 'text',
   title: i18n.translate('xpack.fleet.policyTemplate.datasetVar.title', {
@@ -331,6 +331,25 @@ const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+/**
+ * Returns the data stream paths that scope stream resolution to a single policy template.
+ *
+ * - Integration templates: the explicit `data_streams` declared on the template (an empty
+ *   list means "all data streams" to the stream resolvers).
+ * - Input-only templates: each template synthesizes exactly one data stream whose `path`
+ *   equals the template's default dataset name (see `getNormalizedDataStreams`). Returning that
+ *   single path prevents templates that share the same input type (e.g. several `otelcol`
+ *   templates in one input package) from each picking up every template's stream, which would
+ *   otherwise duplicate stream-level vars such as `data_stream.dataset`.
+ */
+export const getPolicyTemplateDataStreamPaths = (
+  packageInfo: Pick<PackageInfo | InstallablePackage, 'name'>,
+  policyTemplate: RegistryPolicyTemplate
+): string[] =>
+  isIntegrationPolicyTemplate(policyTemplate)
+    ? policyTemplate.data_streams ?? []
+    : [createDefaultDatasetName(packageInfo, policyTemplate)];
 
 export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
   const enabledPolicyTemplates = new Set(

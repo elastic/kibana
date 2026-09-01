@@ -12,6 +12,10 @@ import { EditDeletePhaseFlyout } from './edit_delete_phase_flyout';
 
 const DATA_TEST_SUBJ = 'streamsEditDeletePhaseFlyout';
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 const renderFlyout = (props: Partial<React.ComponentProps<typeof EditDeletePhaseFlyout>> = {}) => {
   const onSave = jest.fn();
   const onClose = jest.fn();
@@ -75,17 +79,31 @@ describe('EditDeletePhaseFlyout', () => {
 
     expect(screen.getByTestId(`${DATA_TEST_SUBJ}DeleteAfterValue`)).toHaveValue(30);
     expect(screen.getByTestId(`${DATA_TEST_SUBJ}DeleteAfterUnit`)).toHaveValue('d');
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`)).toBeDisabled();
+    expect(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`)).not.toBeDisabled();
     expect(screen.queryByTestId(`${DATA_TEST_SUBJ}DeleteAfterError`)).not.toBeInTheDocument();
   });
 
-  it('disables apply until the retention changes', () => {
+  it('closes without saving when editing an existing phase without changes', () => {
     const { onSave } = renderFlyout();
 
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`)).toBeDisabled();
+    expect(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`)).not.toBeDisabled();
 
     fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`));
     expect(onSave).toHaveBeenCalledTimes(0);
+  });
+
+  it('saves the default retention when adding a new delete phase without edits', async () => {
+    const { onSave } = renderFlyout({ initialValue: { deletePhaseEnabled: false } });
+
+    expect(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`)).not.toBeDisabled();
+
+    fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`));
+
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ deletePhaseEnabled: true, dataRetention: '30d' })
+      )
+    );
   });
 
   it('shows a loading apply button while saving', () => {

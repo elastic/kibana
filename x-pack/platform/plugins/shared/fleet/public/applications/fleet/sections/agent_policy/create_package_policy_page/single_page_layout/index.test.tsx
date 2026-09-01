@@ -14,7 +14,7 @@ import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/a
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import {
-  FLEET_ROUTING_PATHS,
+  INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -100,6 +100,7 @@ jest.mock('../../../../hooks', () => {
         id: 'policy-1',
         inputs: [],
         policy_ids: ['agent-policy-1'],
+        package: { name: 'nginx', version: '1.3.0', title: 'Nginx' },
       },
     }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
@@ -137,6 +138,14 @@ jest.mock('../../../../hooks', () => {
     }),
   };
 });
+
+jest.mock('./components/package_documentation_modal', () => ({
+  PackageDocumentationModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="packageDocumentationModal" role="dialog">
+      <button onClick={onClose}>Close modal</button>
+    </div>
+  ),
+}));
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -178,7 +187,7 @@ describe('When on the package policy create page', () => {
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
-      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicySinglePage
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
@@ -478,6 +487,7 @@ describe('When on the package policy create page', () => {
         ...newPackagePolicy,
         policy_ids: ['agent-policy-1'],
         force: false,
+        create_dataset_templates: true,
       });
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
 
@@ -551,12 +561,15 @@ describe('When on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should navigate to agent policy if no route state is set', async () => {
+      test('should navigate to integration policies page if no route state and no queryParamsPolicyId', async () => {
         await setupSaveNavigate({});
 
-        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
-        });
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: '/detail/nginx-1.3.0/policies',
+          }
+        );
       });
     });
 
@@ -633,6 +646,7 @@ describe('When on the package policy create page', () => {
           ...newPackagePolicy,
           policy_ids: ['agent-policy-2'],
           force: false,
+          create_dataset_templates: true,
         });
 
         await waitFor(() => {
@@ -696,6 +710,7 @@ describe('When on the package policy create page', () => {
             ...newPackagePolicy,
             policy_ids: ['agent-policy-1'],
             force: false,
+            create_dataset_templates: true,
           });
 
           await waitFor(() => {
@@ -769,7 +784,62 @@ describe('When on the package policy create page', () => {
               },
             ],
             force: false,
+            create_dataset_templates: true,
           });
+        });
+      });
+    });
+
+    describe('Documentation callout', () => {
+      test('should not render documentation callout when packageInfo has no readme', async () => {
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('packageDocumentationCallout')).not.toBeInTheDocument();
+        });
+      });
+
+      test('should render documentation callout when packageInfo has a readme', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packageDocumentationCallout')).toBeInTheDocument();
+        });
+      });
+
+      test('should open documentation modal when View documentation button is clicked', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packageDocumentationButton')).toBeInTheDocument();
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByTestId('packageDocumentationButton'));
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packageDocumentationModal')).toBeInTheDocument();
         });
       });
     });
@@ -797,14 +867,17 @@ describe('When on the package policy create page', () => {
           item: {
             name: 'Nginx',
             id: 'policy-1',
-            inputs: [],
-            policy_ids: ['agent-policy-1'],
-            supports_agentless: true,
+            namespace: 'default',
+            inputs: {},
             package: {
               name: 'nginx',
               title: 'Nginx',
               version: '1.3.0',
             },
+            created_at: '2025-11-06T18:27:43.541Z',
+            created_by: 'test_user',
+            updated_at: '2025-11-06T18:27:43.541Z',
+            updated_by: 'test_user',
           },
         });
 
@@ -828,15 +901,14 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          }),
-          { format: 'legacy' }
+          })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         await waitFor(() => {
           expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
             INTEGRATIONS_PLUGIN_ID,
-            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
           );
         });
       });
@@ -846,7 +918,7 @@ describe('When on the package policy create page', () => {
           expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
         });
 
-        fireEvent.click(renderResult.getAllByText('Agentless')[0]);
+        fireEvent.click(renderResult.getAllByText(/elastic managed integration/i)[0]);
 
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
@@ -855,14 +927,13 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          }),
-          { format: 'legacy' }
+          })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
           INTEGRATIONS_PLUGIN_ID,
-          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
         );
       });
     });

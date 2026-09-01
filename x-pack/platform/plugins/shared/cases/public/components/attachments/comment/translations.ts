@@ -7,15 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COMMENT = i18n.translate('xpack.cases.attachments.comment.label', {
-  defaultMessage: 'comment',
+export const COMMENT = i18n.translate('xpack.cases.attachments.comment.displayName', {
+  defaultMessage: 'Comments',
 });
 
 export const ADDED_COMMENT = i18n.translate('xpack.cases.attachments.comment.addedComment', {
   defaultMessage: 'added a comment',
 });
 
-export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
+export const DELETE_COMMENT_SUCCESS_TOAST = i18n.translate(
   'xpack.cases.attachments.comment.deleteSuccessToasterTitle',
   { defaultMessage: 'Deleted comment' }
+);
+
+export const REMOVED_COMMENT_LABEL_TITLE = i18n.translate(
+  'xpack.cases.attachments.comment.removedCommentLabelTitle',
+  { defaultMessage: 'removed comment' }
 );

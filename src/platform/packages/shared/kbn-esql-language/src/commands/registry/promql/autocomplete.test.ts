@@ -158,6 +158,18 @@ describe('after PROMQL keyword', () => {
     );
   });
 
+  test('does not suggest time when range params are used', async () => {
+    await expectPromqlSuggestions('PROMQL step=5m ', {
+      textsNotContain: ['time = '],
+    });
+  });
+
+  test('does not suggest range params when time is used', async () => {
+    await expectPromqlSuggestions('PROMQL time="2026-01-13T11:30:00.000Z" ', {
+      textsNotContain: ['time = ', 'step = ', 'start = ', 'end = ', 'buckets = '],
+    });
+  });
+
   test('handles quoted param values correctly', async () => {
     await expectPromqlSuggestions(
       'PROMQL index="metrics" step="5m" ',
@@ -892,6 +904,14 @@ describe('param value suggestions', () => {
   test('suggests date literals for start=', async () => {
     await expectPromqlSuggestions(
       'PROMQL start=',
+      { textsContain: TIME_SYSTEM_PARAMS, labelsNotContain: promqlFunctionLabels },
+      mockCallbacks
+    );
+  });
+
+  test('suggests date literals for time=', async () => {
+    await expectPromqlSuggestions(
+      'PROMQL time=',
       { textsContain: TIME_SYSTEM_PARAMS, labelsNotContain: promqlFunctionLabels },
       mockCallbacks
     );

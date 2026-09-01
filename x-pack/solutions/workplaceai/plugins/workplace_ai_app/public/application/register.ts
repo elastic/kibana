@@ -28,7 +28,7 @@ export const registerApp = ({
       defaultMessage: 'Workplace AI',
     }),
     updater$: undefined,
-    visibleIn: ['sideNav', 'globalSearch'],
+    visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
     async mount({ element, history }) {
       const [coreStart, startPluginDeps] = await core.getStartServices();
       const services = getServices();

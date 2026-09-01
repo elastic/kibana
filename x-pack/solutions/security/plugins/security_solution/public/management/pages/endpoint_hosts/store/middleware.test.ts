@@ -6,8 +6,8 @@
  */
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
-import type { Store } from 'redux';
-import { applyMiddleware, createStore } from 'redux';
+import type { Store } from 'redux-v4';
+import { applyMiddleware, createStore } from 'redux-v4';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
@@ -156,7 +156,7 @@ describe('endpoint list middleware', () => {
           dispatchUserChangedUrlToEndpointList();
 
           await waitForAction('serverFinishedInitialization');
-          expect(mockSendBulkGetPackagePolicies).not.toBeCalled();
+          expect(mockSendBulkGetPackagePolicies).not.toHaveBeenCalled();
         });
 
         it('should fetch package policies with required privileges', async () => {
@@ -168,7 +168,7 @@ describe('endpoint list middleware', () => {
             waitForAction('serverFinishedInitialization'),
             waitForAction('serverReturnedEndpointNonExistingPolicies'),
           ]);
-          expect(mockSendBulkGetPackagePolicies).toBeCalled();
+          expect(mockSendBulkGetPackagePolicies).toHaveBeenCalled();
         });
       });
     });

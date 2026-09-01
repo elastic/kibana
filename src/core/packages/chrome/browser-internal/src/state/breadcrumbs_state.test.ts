@@ -17,7 +17,7 @@ const createExtension = (): ChromeBreadcrumbsAppendExtension => ({
 const createLegacyBadge = (text = 'Read only'): ChromeBadge => ({
   text,
   tooltip: `${text} tooltip`,
-  iconType: 'glasses',
+  iconType: 'readOnly',
 });
 
 const getBadgesContent = (extensions: ChromeBreadcrumbsAppendExtension[]) => {

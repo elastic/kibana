@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 const normalize = (value) => value.replace(/^@/, '').trim();
 
 const isHumanReviewer = (login) =>
@@ -8,9 +17,7 @@ const getOriginalPrNumber = ({ title, body }) => {
   const originalPrNumberFromMetadata =
     sourcePullRequestIndex === -1
       ? undefined
-      : body
-          .slice(sourcePullRequestIndex)
-          .match(/"number"\s*:\s*(\d+)/)?.[1];
+      : body.slice(sourcePullRequestIndex).match(/"number"\s*:\s*(\d+)/)?.[1];
   const originalPrNumberFromTitle = title.match(/\(#(\d+)\)\s*$/)?.[1];
 
   return Number(originalPrNumberFromMetadata ?? originalPrNumberFromTitle);
@@ -27,7 +34,9 @@ const REVIEW_TEAM_FIELDS = `onBehalfOf(first: 10) {
   }
 }`;
 
-const buildReviewHistoryQuery = ({ withTeams }) => `query($owner: String!, $repo: String!, $number: Int!) {
+const buildReviewHistoryQuery = ({
+  withTeams,
+}) => `query($owner: String!, $repo: String!, $number: Int!) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $number) {
       reviews(first: 100) {

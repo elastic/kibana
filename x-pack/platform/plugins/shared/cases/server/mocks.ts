@@ -8,7 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
-import { createCasesClientMock } from './client/mocks';
+import { createCasesClientMock, createCasesEventBusMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
 import type {
   ActionsAttachmentPayload,
@@ -773,11 +773,11 @@ const casesClientMock = createCasesClientMock();
 
 export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
-  getExternalReferenceAttachmentTypeRegistry: jest.fn(),
-  getPersistableStateAttachmentTypeRegistry: jest.fn(),
   getUnifiedAttachmentTypeRegistry: jest.fn(),
+  getCasesEventBus: jest.fn().mockReturnValue(createCasesEventBusMock()),
   config: {
     enabled: true,
+    assigneeIdentity: { enabled: true },
     stack: {
       enabled: true,
     },
@@ -791,12 +791,25 @@ export const mockCasesContract = (): CasesServerStart => ({
         enabled: true,
       },
     },
+    analyticsV2: {
+      enabled: false,
+      reconciliationIntervalMinutes: 30,
+      enableAdminRoutes: false,
+      resetTaskTimeoutMinutes: 60,
+      resetPageDelayMs: 0,
+    },
     incrementalId: {
       enabled: true,
       taskIntervalMinutes: 10,
       taskStartDelayMinutes: 10,
     },
     templates: {
+      enabled: true,
+    },
+    runWorkflows: {
+      enabled: true,
+    },
+    chat: {
       enabled: true,
     },
     casesRedesign: {

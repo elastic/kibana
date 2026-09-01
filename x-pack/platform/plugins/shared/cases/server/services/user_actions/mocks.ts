@@ -95,6 +95,24 @@ const originalCasesWithAssignee = [
   { ...createCaseSavedObjectResponse({ overrides: { assignees: [{ uid: '1' }] } }), id: '1' },
 ].map((so) => transformSavedObjectToExternalModel(so));
 
+const originalCasesWithEnrichedAssignee = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        assignees: [
+          {
+            uid: '1',
+            username: 'user_one',
+            full_name: 'User One',
+            email: 'user_one@example.com',
+          },
+        ],
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
 export const patchAssigneesCasesRequest = {
   cases: [
     {
@@ -130,6 +148,24 @@ export const patchAddRemoveAssigneesCasesRequest = {
         assignees: [{ uid: '2' }],
       },
       originalCase: originalCasesWithAssignee[0],
+    },
+  ],
+};
+
+/**
+ * Retains an identity-enriched assignee and adds a uid-only one. Used to assert that
+ * user-action diffs compare by uid (not deep equality), otherwise the retained assignee
+ * is incorrectly recorded as delete+add.
+ */
+export const patchAddAssigneeWithEnrichedOriginalRequest = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        assignees: [{ uid: '1' }, { uid: '2' }],
+      },
+      originalCase: originalCasesWithEnrichedAssignee[0],
     },
   ],
 };
@@ -1004,6 +1040,59 @@ export const patchUpdateExtendedFieldsCasesRequest: PatchCasesArgs = {
   ],
 };
 
+// A case with a linked pair: v1 `priority` ⇄ v2 `priority_as_keyword`.
+const originalCasesWithPairedFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
+        extended_fields: { priority_as_keyword: 'low' },
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+/**
+ * One paired edit: both representations of the linked field change, and the
+ * pairing adapter recorded the link. The extended_fields user action is
+ * canonical; the duplicate customFields action is suppressed (#282474).
+ */
+export const patchPairedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' }],
+        extended_fields: { priority_as_keyword: 'high' },
+      },
+      originalCase: originalCasesWithPairedFields[0],
+      pairedCustomFieldStorageKeys: { priority: 'priority_as_keyword' },
+    },
+  ],
+};
+
+/**
+ * A paired clear: the storage key is deleted from extended_fields, which the
+ * extended_fields activity does not record — the customFields action stays the
+ * only record of the edit and must not be suppressed.
+ */
+export const patchPairedClearCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }],
+        extended_fields: {},
+      },
+      originalCase: originalCasesWithPairedFields[0],
+      pairedCustomFieldStorageKeys: { priority: 'priority_as_keyword' },
+    },
+  ],
+};
+
 export const getExtendedFieldsUserActions = ({
   isMock,
   payload,
@@ -1078,7 +1167,7 @@ export const getTemplateUserActions = ({
   payload,
 }: {
   isMock: boolean;
-  payload: { id: string; version: number } | null;
+  payload: { id: string; version: number; name?: string } | null;
 }): UserActionsDict => ({
   '1': [
     {

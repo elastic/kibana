@@ -311,6 +311,116 @@ describe('WorkflowExecuteEventForm', () => {
     });
   });
 
+  it('shows an empty state when no trigger events match the default scope', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByTestId, getByText } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    expect(await findByTestId('workflowTriggerEventsEmptyState')).toBeInTheDocument();
+    expect(getByText('No events in the selected time range')).toBeInTheDocument();
+    expect(
+      getByText(/widening the time range or adjusting the query in the search bar/)
+    ).toBeInTheDocument();
+  });
+
+  it('shows the filtered empty state when custom KQL returns no events', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByTestId, getByTestId, getByText } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    const input = getByTestId('query-input');
+    fireEvent.change(input, { target: { value: 'eventId: "missing"' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+
+    expect(await findByTestId('workflowTriggerEventsEmptyState')).toBeInTheDocument();
+    expect(getByText('No events match your search')).toBeInTheDocument();
+    expect(
+      getByText(/Try widening the time range, adjusting the query in the search bar/)
+    ).toBeInTheDocument();
+  });
+
+  it('does not show the empty state while refetching with no rows', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: true,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByTestId, queryByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    expect(queryByTestId('workflowTriggerEventsEmptyState')).not.toBeInTheDocument();
+  });
+
   it('shows a privilege message when trigger event search returns 403', async () => {
     mockUseQueryTriggerEvents.mockReturnValue({
       data: undefined,

@@ -56,9 +56,9 @@ export const DATE_DIFF_TIME_UNITS = (() => {
   const dateDiffDefinition = scalarFunctionDefinitions.find(
     ({ name }) => name.toLowerCase() === 'date_diff'
   );
-  const suggestedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.suggestedValues ?? [];
+  const allowedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.hint?.allowedValues ?? [];
 
-  return suggestedValues.map((unit) => `"${unit}", `);
+  return allowedValues.map((unit) => `"${unit}", `);
 })();
 
 export const mockFieldsWithTypes = (
@@ -87,7 +87,7 @@ export const suggest = async (
   offset?: number
 ): Promise<ISuggestionItem[]> => {
   const cursorPosition = offset ?? query.length;
-  const { innerText, root, command } = findAutocompleteAstPosition(query, cursorPosition);
+  const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
   const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
   const targetCommand = headerConstruction ?? command;
 
@@ -105,7 +105,10 @@ export const suggest = async (
     cursorPosition
   );
 
-  return attachReplacementRanges(innerText, suggestions, { commandContext: contextWithRoot });
+  return attachReplacementRanges(innerText, suggestions, {
+    commandContext: contextWithRoot,
+    tokens,
+  });
 };
 
 export const expectSuggestions = async (

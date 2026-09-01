@@ -9,11 +9,12 @@ import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
 import * as userEventLib from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
-import { Provider } from 'react-redux';
-import type { Store } from 'redux';
+import { Provider } from 'react-redux-v7';
+import type { Store } from 'redux-v4';
 import type { RouteComponentProps } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Routes, Route } from '@kbn/shared-ux-router';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 export interface CcrRenderResult extends RenderResult {
   user: UserEvent;
@@ -92,11 +93,13 @@ export const renderWithRouter = <ExtraProps extends object = {}>(
   };
 
   const renderResult = render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <Routes>
-        <Route path={routePath} component={Wrapped} />
-      </Routes>
-    </MemoryRouter>
+    <MockAppHeaderProvider>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route path={routePath} component={Wrapped} />
+        </Routes>
+      </MemoryRouter>
+    </MockAppHeaderProvider>
   );
 
   return {

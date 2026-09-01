@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { AnyAction, Dispatch } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction, Dispatch } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import { v4 as uuidv4 } from 'uuid';
 import type { FeatureCollection } from 'geojson';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -32,12 +32,12 @@ import {
   unregisterCancelCallback,
   getEventHandlers,
   getInspectorAdapters,
+  fitMapToBounds,
 } from '../reducers/non_serializable_instances';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   LAYER_DATA_LOAD_STARTED,
-  SET_GOTO,
   SET_JOINS,
   SET_LAYER_STYLE_META,
   UPDATE_LAYER_PROP,
@@ -46,7 +46,7 @@ import {
 import type { InnerJoin } from '../classes/joins/inner_join';
 import type { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import type { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
+import type { DataRequestMeta, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { getLayersExtent } from './get_layers_extent';
@@ -75,7 +75,7 @@ export type DataRequestContext = {
 };
 
 export function clearDataRequests(layer: ILayer) {
-  return (dispatch: Dispatch) => {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     layer.getInFlightRequestTokens().forEach((requestToken: symbol) => {
       dispatch(cancelRequest(requestToken));
     });
@@ -248,7 +248,10 @@ function startDataLoad(
   ) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
+      const prevRequestToken = layer.getPrevRequestToken(dataId);
+      if (prevRequestToken) {
+        dispatch(cancelRequest(prevRequestToken));
+      }
     }
 
     const eventHandlers = getEventHandlers(getState());
@@ -363,7 +366,10 @@ export function updateSourceDataRequest(layerId: string, newData: object) {
 }
 
 export function fitToLayerExtent(layerId: string) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
@@ -372,7 +378,7 @@ export function fitToLayerExtent(layerId: string) {
           getDataRequestContext(dispatch, getState, boundsLayerId, false, false)
         );
         if (bounds) {
-          await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
+          await dispatch(fitMapToBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
         }
       } catch (error) {
         if (!(error instanceof DataRequestAbortError)) {
@@ -390,7 +396,10 @@ export function fitToLayerExtent(layerId: string) {
 }
 
 export function fitToDataBounds(onNoBounds?: () => void) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     const rootLayers = getLayerList(getState()).filter((layer) => {
       return layer.getParent() === undefined;
     });
@@ -406,7 +415,7 @@ export function fitToDataBounds(onNoBounds?: () => void) {
       return;
     }
 
-    dispatch(setGotoWithBounds(scaleBounds(extent, FIT_TO_BOUNDS_SCALE_FACTOR)));
+    dispatch(fitMapToBounds(scaleBounds(extent, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };
 }
 
@@ -433,13 +442,6 @@ export function autoFitToBounds() {
       }
       dispatch(fitToDataBounds(onNoBounds));
     }
-  };
-}
-
-function setGotoWithBounds(bounds: MapExtent) {
-  return {
-    type: SET_GOTO,
-    bounds,
   };
 }
 

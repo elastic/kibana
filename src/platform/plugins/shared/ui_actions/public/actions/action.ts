@@ -25,6 +25,10 @@ export interface ActionExecutionMeta {
    * The event that caused the action to execute (e.g., mouse click, keyboard event)
    */
   event?: React.MouseEvent;
+  /**
+   * Returns focus to the control that opened the action.
+   */
+  returnFocus?: () => void;
 }
 
 /**
@@ -124,12 +128,6 @@ export interface Action<Context extends object = object, ActionExtension extends
    */
   getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
-  /**
-   * Determines if notification should be shown in menu for that action
-   *
-   */
-  showNotification?: boolean;
-
   extension?: ActionExtension;
 }
 
@@ -184,12 +182,6 @@ export type ActionDefinition<
    * @returns an Observable that emits when this action's disabled state should be recalculated.
    */
   getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
-
-  /**
-   * Determines if notification should be shown in menu for that action
-   *
-   */
-  showNotification?: boolean;
 
   /**
    * @returns an Observable that emits when this action's compatibility should be recalculated.

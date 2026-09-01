@@ -7,6 +7,7 @@
 import { keyBy } from 'lodash';
 import { rangeQuery, kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { MobileErrorGroupPeriodsResponse } from '@kbn/apm-api-shared';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import type { Coordinate } from '../../../../typings/timeseries';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -115,11 +116,6 @@ export async function getMobileErrorGroupDetailedStatistics({
       }),
     };
   });
-}
-
-export interface MobileErrorGroupPeriodsResponse {
-  currentPeriod: Record<string, ErrorGroupDetailedStat>;
-  previousPeriod: Record<string, ErrorGroupDetailedStat>;
 }
 
 export async function getMobileErrorGroupPeriods({

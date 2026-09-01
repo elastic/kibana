@@ -290,6 +290,44 @@ describe('connector_add_flyout', () => {
       expect(screen.queryByTestId('action-type-2-card')).not.toBeInTheDocument();
     });
 
+    it('Filters connectors based on selected feature ids', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType1.id,
+          enabled: true,
+          name: 'Jira',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: actionType2.id,
+          enabled: true,
+          name: 'Webhook',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['cases'],
+        },
+      ]);
+
+      actionTypeRegistry.get.mockImplementation((id) =>
+        id === actionType1.id ? actionType1 : actionType2
+      );
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+          selectedFeatureIds={['cases']}
+        />
+      );
+
+      expect(await screen.findByTestId('action-type-2-card')).toBeInTheDocument();
+      expect(screen.queryByTestId('action-type-1-card')).not.toBeInTheDocument();
+    });
+
     it('Filters connectors based on selectMessage search', async () => {
       loadActionTypes.mockResolvedValue([
         {
@@ -414,6 +452,110 @@ describe('connector_add_flyout', () => {
 
       await new Promise((r) => setTimeout(r, 0));
       expect(screen.queryByTestId('my-workflows-connector-card')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('deprecated connectors', () => {
+    it('does not render a stack action type card when isDeprecated is true', async () => {
+      const onActionTypeChange = jest.fn();
+      const deprecatedActionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-deprecated-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      const activeActionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-active-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+
+      // mock get return for filter
+      actionTypeRegistry.get.mockReturnValueOnce(deprecatedActionType);
+      actionTypeRegistry.get.mockReturnValueOnce(activeActionType);
+      // mock get return for map
+      actionTypeRegistry.get.mockReturnValueOnce(deprecatedActionType);
+      actionTypeRegistry.get.mockReturnValueOnce(activeActionType);
+
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: deprecatedActionType.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: true,
+        },
+        {
+          id: activeActionType.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      expect(await screen.findByTestId('my-active-action-type-card')).toBeInTheDocument();
+      expect(screen.queryByTestId('my-deprecated-action-type-card')).not.toBeInTheDocument();
+    });
+
+    it('does not render a spec connector card when isDeprecated is true', async () => {
+      const onActionTypeChange = jest.fn();
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-deprecated-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Deprecated Spec Connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: true,
+        },
+        {
+          id: 'my-active-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Active Spec Connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      expect(await screen.findByTestId('my-active-spec-connector-card')).toBeInTheDocument();
+      expect(screen.queryByTestId('my-deprecated-spec-connector-card')).not.toBeInTheDocument();
     });
   });
 

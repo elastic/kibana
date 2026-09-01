@@ -9,7 +9,15 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiIcon, useEuiBreakpoint, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiIcon,
+  mathWithUnits,
+  useEuiBreakpoint,
+  useEuiFontSize,
+  useEuiMinBreakpoint,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac, useKeyboardShortcut } from '@kbn/shared-ux-utility';
 import { useGlobalSearch } from '../../shared/chrome_hooks';
@@ -20,9 +28,16 @@ import {
   useHeaderButtonStyleVars,
 } from './header_action_button';
 
-const PLACEHOLDER = i18n.translate('core.ui.chrome.globalHeader.searchButton.placeholder', {
+const COMPACT_PLACEHOLDER = i18n.translate('core.ui.chrome.globalHeader.searchButton.placeholder', {
   defaultMessage: 'Find content...',
 });
+
+const EXPANDED_PLACEHOLDER = i18n.translate(
+  'core.ui.chrome.globalHeader.searchButton.expandedPlaceholder',
+  {
+    defaultMessage: 'Find apps, content, and more.',
+  }
+);
 
 const ARIA_LABEL = i18n.translate('core.ui.chrome.globalHeader.searchButton.ariaLabel', {
   defaultMessage: 'Search',
@@ -32,15 +47,30 @@ const MODIFIER_KEY = isMac ? '⌘' : 'Ctrl';
 
 const SHORTCUT = { key: '/', meta: true };
 
-export const SearchButton = React.memo(() => {
+export interface SearchButtonProps {
+  layout?: 'compact' | 'expanded';
+}
+
+export const SearchButton = React.memo(({ layout = 'compact' }: SearchButtonProps) => {
   const config = useGlobalSearch();
   const { euiTheme } = useEuiTheme();
   const euiFontSizeS = useEuiFontSize('s').fontSize;
   const baseStyleVars = useHeaderButtonStyleVars();
   const compactQuery = useEuiBreakpoint(['xs', 's']);
+  const mMin = useEuiMinBreakpoint('m');
+  const xlMin = useEuiMinBreakpoint('xl');
+  const isExpanded = layout === 'expanded';
+
+  const leadingStyles = css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: euiTheme.size.s,
+    minWidth: 0,
+  });
 
   const shortcutBadgeStyles = css({
     color: euiTheme.colors.textSubdued,
+    flexShrink: 0,
   });
 
   const placeholderStyles = css({
@@ -68,6 +98,17 @@ export const SearchButton = React.memo(() => {
     padding: `0 ${euiTheme.size.s}`,
     gap: euiTheme.size.s,
     whiteSpace: 'nowrap',
+    ...(isExpanded
+      ? {
+          justifyContent: 'space-between',
+          [mMin]: {
+            width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+          },
+          [xlMin]: {
+            width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
+          },
+        }
+      : {}),
   });
 
   const shortcutLabel = `${MODIFIER_KEY} ${SHORTCUT.key}`;
@@ -90,8 +131,12 @@ export const SearchButton = React.memo(() => {
       style={baseStyleVars}
       onClick={config.onClick}
     >
-      <EuiIcon type="search" size="m" color={euiTheme.colors.textParagraph} aria-hidden />
-      <span css={[placeholderStyles, collapsibleStyles]}>{PLACEHOLDER}</span>
+      <span css={leadingStyles}>
+        <EuiIcon type="magnify" size="m" color={euiTheme.colors.textParagraph} aria-hidden />
+        <span css={[placeholderStyles, collapsibleStyles]}>
+          {isExpanded ? EXPANDED_PLACEHOLDER : COMPACT_PLACEHOLDER}
+        </span>
+      </span>
       <EuiBadge css={[shortcutBadgeStyles, collapsibleStyles]}>{shortcutLabel}</EuiBadge>
     </button>
   );
