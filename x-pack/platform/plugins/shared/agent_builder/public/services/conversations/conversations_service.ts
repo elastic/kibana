@@ -10,6 +10,7 @@ import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   GetConversationResponse,
   ListConversationsResponse,
+  SearchConversationsResponse,
   DeleteConversationResponse,
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
@@ -20,6 +21,7 @@ import type {
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
+  ConversationSearchOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
@@ -48,6 +50,25 @@ export class ConversationsService {
           per_page: perPage,
           sort_order: sortOrder,
           pinned,
+        },
+      }
+    );
+  }
+
+  async search({
+    query,
+    agentId,
+    page,
+    perPage,
+  }: ConversationSearchOptions): Promise<SearchConversationsResponse> {
+    return await this.http.get<SearchConversationsResponse>(
+      buildPath(`${internalApiPath}/conversations/_search`),
+      {
+        query: {
+          query,
+          agent_id: agentId,
+          page,
+          per_page: perPage,
         },
       }
     );

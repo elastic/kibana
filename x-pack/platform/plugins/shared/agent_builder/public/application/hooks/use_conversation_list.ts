@@ -7,28 +7,11 @@
 
 import { useMemo } from 'react';
 import { useInfiniteQuery } from '@kbn/react-query';
-import { MAX_RESULT_WINDOW } from '../../../common/constants';
-import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
 import { queryKeys } from '../query_keys';
+import { dedupeById, getNextConversationPageParam } from '../utils/conversation_pagination';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
 const DEFAULT_CONVERSATIONS_PAGE_SIZE = 50;
-
-/**
- * Deduplicates an array of conversations by id, keeping the first occurrence.
- * Offset pagination can return a duplicate if a document's sort position shifts
- * between two page fetches; keeping the lower-page copy is the safe tie-break.
- */
-const dedupeById = (
-  conversations: ListConversationsResponseItem[]
-): ListConversationsResponseItem[] => {
-  const seen = new Set<string>();
-  return conversations.filter((c) => {
-    if (seen.has(c.id)) return false;
-    seen.add(c.id);
-    return true;
-  });
-};
 
 export const useConversationList = ({
   agentId,
@@ -62,12 +45,7 @@ export const useConversationList = ({
         page: pageParam ?? 1,
         perPage: perPage ?? DEFAULT_CONVERSATIONS_PAGE_SIZE,
       }),
-    getNextPageParam: (lastPage) => {
-      const { page, per_page: pp, total } = lastPage.pagination;
-      const next = page + 1;
-      // No more pages if we've fetched all results, or the next offset would exceed the ES window.
-      return page * pp < total && next * pp <= MAX_RESULT_WINDOW ? next : undefined;
-    },
+    getNextPageParam: getNextConversationPageParam,
   });
 
   const conversations = useMemo(
