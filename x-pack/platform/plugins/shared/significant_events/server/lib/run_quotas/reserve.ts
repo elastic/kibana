@@ -85,6 +85,8 @@ export const reserveInvestigationRunQuota = async ({
     granted: false,
     reason: 'limit',
   };
+  let criticalOverride = false;
+  let shouldLogDecision = false;
   await mutateRunQuotaLedger({
     internalRepository,
     date: dayKey(resolveDailyWindow(new Date(taskRunAt))),
@@ -98,26 +100,25 @@ export const reserveInvestigationRunQuota = async ({
           throw new Error('Allowed investigation event identity does not match');
         }
         response = { granted: true };
+        shouldLogDecision = false;
         return undefined;
       }
 
       const withinLimit = ledger.count < limit.max;
-      const criticalOverride = !withinLimit && resolvedEvent.severity === '80-critical';
+      criticalOverride = !withinLimit && resolvedEvent.severity === '80-critical';
       const granted = withinLimit || criticalOverride;
 
       response = {
         granted,
         ...(granted ? {} : { reason: 'limit' as const }),
       };
+      shouldLogDecision = true;
       if (
         granted &&
         ledger.allowedInvestigationKeys.length >= RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS
       ) {
         throw new Error('Run quota ledger cannot record another accepted investigation');
       }
-      logger.info(
-        `Investigation run quota decision actor=[${actor}] eventId=[${eventId}] granted=[${granted}] criticalOverride=[${criticalOverride}]`
-      );
 
       if (!granted) {
         return undefined;
@@ -131,6 +132,12 @@ export const reserveInvestigationRunQuota = async ({
       };
     },
   });
+
+  if (shouldLogDecision) {
+    logger.info(
+      `Investigation run quota decision actor=[${actor}] eventId=[${eventId}] granted=[${response.granted}] criticalOverride=[${criticalOverride}]`
+    );
+  }
 
   return response;
 };

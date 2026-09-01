@@ -375,6 +375,7 @@ describe('investigation ledger integration', () => {
     expect(ledger?.count).toBe(10);
     expect(ledger?.criticalOverrideCount).toBe(0);
     expect(ledger?.allowedInvestigationKeys).toHaveLength(10);
+    expect(logger.info).toHaveBeenCalledTimes(50);
   });
 
   it('tracks critical exceptions and reconsiders denials after a limit increase', async () => {
