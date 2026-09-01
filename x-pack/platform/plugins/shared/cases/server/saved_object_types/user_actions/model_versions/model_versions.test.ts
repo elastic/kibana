@@ -30,5 +30,36 @@ describe('cases-user-actions model versions', () => {
         },
       ]);
     });
+
+    it('accepts an unknown source.type in forwardCompatibility', () => {
+      const schema = modelVersion2.schemas?.forwardCompatibility;
+      if (typeof schema === 'function') {
+        throw new Error('expected an object schema, got a function');
+      }
+
+      const attrs = {
+        action: 'create',
+        created_at: '2020-01-01T00:00:00.000Z',
+        created_by: { username: 'elastic' },
+        owner: 'cases',
+        type: 'comment',
+        source: { type: 'some_future_source', id: '1' },
+      };
+
+      expect(() => schema?.validate(attrs)).not.toThrow();
+    });
+
+    it('rejects an unknown source.type in create', () => {
+      const attrs = {
+        action: 'create',
+        created_at: '2020-01-01T00:00:00.000Z',
+        created_by: { username: 'elastic' },
+        owner: 'cases',
+        type: 'comment',
+        source: { type: 'some_future_source', id: '1' },
+      };
+
+      expect(() => modelVersion2.schemas.create?.validate(attrs)).toThrow();
+    });
   });
 });

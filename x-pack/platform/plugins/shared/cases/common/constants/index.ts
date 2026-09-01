@@ -316,6 +316,7 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
 export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
+export const MAX_ACTION_SOURCE_TYPE_LENGTH = 1024 as const;
 export const MAX_ACTION_SOURCE_ID_LENGTH = 512 as const;
 export const MAX_ACTION_SOURCE_NAME_LENGTH = 256 as const;
 export const MAX_ACTION_SOURCE_RUN_ID_LENGTH = 512 as const;

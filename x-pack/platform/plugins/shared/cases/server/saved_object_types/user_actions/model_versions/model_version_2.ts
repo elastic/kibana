@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { userActionCreateSchemaV2 } from '../schemas';
+import { userActionCreateSchemaV2, userActionForwardCompatibilitySchemaV2 } from '../schemas';
 
 /**
  * Adds `source` so agent, workflow, rule, and attack-discovery origins are
@@ -40,7 +40,11 @@ export const modelVersion2: SavedObjectsModelVersion = {
     },
   ],
   schemas: {
-    forwardCompatibility: userActionCreateSchemaV2.extends({}, { unknowns: 'ignore' }),
+    // `source.type` is a closed `oneOf` in `create`, so forward compatibility
+    // uses a lenient variant that accepts any string for `type`. Otherwise a
+    // node on this version would throw reading a doc from a future version
+    // that adds a new source type, instead of just stripping unknown fields.
+    forwardCompatibility: userActionForwardCompatibilitySchemaV2,
     create: userActionCreateSchemaV2,
   },
 };
