@@ -3855,8 +3855,15 @@ describe('generateOtelcolConfig', () => {
       // Malformed config_yaml reaches getDefaultPresetForEsOutput via getPresetConfig when no
       // explicit preset is stored; the safe parse wrapper falls back to `balanced` rather than
       // letting a YAMLParseError propagate out of policy generation.
+      // otel_disable_beatsauth skips the beatsauth config_yaml parse (which intentionally
+      // throws) so this test isolates the preset-detection path.
       expect(() =>
-        getExporter({ ...defaultOutput, preset: undefined, config_yaml: '{ unclosed' })
+        getExporter({
+          ...defaultOutput,
+          preset: undefined,
+          config_yaml: '{ unclosed',
+          otel_disable_beatsauth: true,
+        })
       ).not.toThrow();
     });
   });

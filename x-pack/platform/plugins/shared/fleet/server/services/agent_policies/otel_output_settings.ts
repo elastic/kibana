@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { parse } from 'yaml';
 
 import type { Output } from '../../types';
-import type { OutputPreset } from '../../../common/types/models/output';
+import type { OutputPreset, PresetCapableOutput } from '../../../common/types/models/output';
 import {
   getDefaultPresetForEsOutput,
   outputTypeSupportPresets,
@@ -235,7 +235,7 @@ const readHeadersSetting = (
 };
 
 const getPresetConfig = (output: Output): EsOutputPresetConfig | undefined => {
-  if (!outputTypeSupportPresets(output.type)) {
+  if (!outputTypeSupportPresets(output)) {
     return undefined;
   }
   // Mirrors transformOutputToFullPolicyOutput: an output with no explicit preset is sent to
@@ -270,7 +270,9 @@ const getPresetConfig = (output: Output): EsOutputPresetConfig | undefined => {
  * in the constant; it does not affect the translation here since `idleConnectionTimeout` is
  * intentionally out of scope (see the module comment above).
  */
-const resolveEffectiveEsOutputSettings = (output: Output): EffectiveEsOutputSettings => {
+const resolveEffectiveEsOutputSettings = (
+  output: Output & PresetCapableOutput
+): EffectiveEsOutputSettings => {
   const configYaml = parseYamlRecord(output.config_yaml);
   const preset = getPresetConfig(output);
 
@@ -350,7 +352,9 @@ const calcNamedPresetSizing = (
  * `index`/`logs_index` is deliberately not translated because a static index would disable
  * the dynamic `data_stream.*` routing that OTel integrations rely on.
  */
-export const buildOtelEsExporterConfig = (output: Output): Record<string, unknown> => {
+export const buildOtelEsExporterConfig = (
+  output: Output & PresetCapableOutput
+): Record<string, unknown> => {
   const settings = resolveEffectiveEsOutputSettings(output);
 
   // Beats opens one connection per host per worker, and the agent derives the OTel
