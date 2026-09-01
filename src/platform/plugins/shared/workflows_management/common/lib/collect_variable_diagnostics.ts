@@ -9,6 +9,7 @@
 
 import { LineCounter, parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { collectAllSteps } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import {
@@ -17,6 +18,35 @@ import {
   validateLiquidForLoopCollections,
   validateVariables,
 } from '@kbn/workflows-yaml';
+
+/**
+ * Step budget. Building a step's context schema walks that step's predecessors,
+ * so per-step cost grows with the step count. This path is synchronous, so the
+ * budget is what one request may hold the event loop for.
+ *
+ * Worst case at the two caps below — that many steps sharing that many
+ * references — measures ~60 ms and ~59 MiB, one event-loop tick. A workflow at
+ * the route's own 1 MiB body limit carries roughly 5,000 steps and is refused
+ * here; before the caps existed it exhausted the Node heap and took the process
+ * down.
+ */
+export const MAX_STEPS_FOR_VARIABLE_VALIDATION = 250;
+
+/**
+ * Reference budget, the other cost dimension, and the steeper one at scale:
+ * 20,000 references measures ~800 ms / ~440 MiB regardless of step count.
+ */
+export const MAX_VARIABLES_FOR_VARIABLE_VALIDATION = 1000;
+
+export interface VariableDiagnosticsResult {
+  diagnostics: WorkflowDiagnostic[];
+  /**
+   * Set when the workflow exceeded a budget and the rules did not run. The
+   * absence of diagnostics then means "not checked", not "nothing wrong", so
+   * callers must report it separately instead of implying a clean result.
+   */
+  notRunReason?: string;
+}
 
 /**
  * Runs the `variable-validation` rule group the editor runs, so
@@ -30,7 +60,15 @@ export function collectVariableDiagnostics(
   yaml: string,
   workflowDefinition: WorkflowYaml,
   workflowGraph: WorkflowGraph
-): WorkflowDiagnostic[] {
+): VariableDiagnosticsResult {
+  const stepCount = collectAllSteps(workflowDefinition.steps ?? []).length;
+  if (stepCount > MAX_STEPS_FOR_VARIABLE_VALIDATION) {
+    return {
+      diagnostics: [],
+      notRunReason: `Variable validation skipped: the workflow has ${stepCount} steps, above the limit of ${MAX_STEPS_FOR_VARIABLE_VALIDATION}.`,
+    };
+  }
+
   // The editor validates against a document parsed with `keepSourceTokens` and no
   // `mapAsMap`, unlike the one `parseWorkflowYamlToJSON` builds for schema
   // validation. Parsing again here keeps the two surfaces on identical input.
@@ -38,6 +76,12 @@ export function collectVariableDiagnostics(
   const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
 
   const variableItems = collectAllVariables(yaml, yamlDocument, lineCounter, workflowGraph);
+  if (variableItems.length > MAX_VARIABLES_FOR_VARIABLE_VALIDATION) {
+    return {
+      diagnostics: [],
+      notRunReason: `Variable validation skipped: the workflow has ${variableItems.length} variable references, above the limit of ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION}.`,
+    };
+  }
 
   // One resolver for both passes: each builds a context schema per step, and
   // building one walks that step's predecessors, so private caches would do the
@@ -56,6 +100,7 @@ export function collectVariableDiagnostics(
     ...validateLiquidForLoopCollections(
       yaml,
       yamlDocument,
+      lineCounter,
       workflowGraph,
       workflowDefinition,
       stepContextResolver
@@ -63,7 +108,7 @@ export function collectVariableDiagnostics(
   ];
 
   // Decorations carry no rule ID and describe a variable that resolved cleanly.
-  return results.flatMap<WorkflowDiagnostic>((result) =>
+  const diagnostics = results.flatMap<WorkflowDiagnostic>((result) =>
     result.ruleId && result.severity
       ? [
           {
@@ -75,4 +120,6 @@ export function collectVariableDiagnostics(
         ]
       : []
   );
+
+  return { diagnostics };
 }
