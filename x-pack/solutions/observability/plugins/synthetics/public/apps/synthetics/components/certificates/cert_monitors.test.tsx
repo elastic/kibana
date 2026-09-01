@@ -170,7 +170,7 @@ describe('CertMonitors', () => {
 
     it('threads ?spaceId= when the monitor lives in another space', () => {
       jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
-        space: { id: 'default', name: 'Default', disabledFeatures: [] },
+        space: { id: asSpaceId('default'), name: 'Default', disabledFeatures: [] },
         loading: false,
         error: undefined,
       });
@@ -186,7 +186,7 @@ describe('CertMonitors', () => {
 
     it('omits ?spaceId= when the monitor is in the active space', () => {
       jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
-        space: { id: 'default', name: 'Default', disabledFeatures: [] },
+        space: { id: asSpaceId('default'), name: 'Default', disabledFeatures: [] },
         loading: false,
         error: undefined,
       });
