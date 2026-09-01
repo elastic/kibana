@@ -216,7 +216,7 @@ When a field is required with a default, instead of failing the request for not 
 //
 // Use this pattern
 //
-// When route validation recieves "{}", validation passes "{ foo: '' }" to handler
+// When route validation receives "{}", validation passes "{ foo: '' }" to handler
 //
 const myEmbeddlabeStateSchema = schema: schema.object({
   foo: schema.string({
@@ -231,7 +231,7 @@ When a field is optional with a default, route validation does not supply the de
 //
 // Avoid this pattern
 //
-// When route validation recieves "{}", validation passes "{}" to route handler
+// When route validation receives "{}", validation passes "{}" to route handler
 //
 const myEmbeddlabeStateSchema = schema: schema.object({
   foo: schema.maybe(schema.string({
