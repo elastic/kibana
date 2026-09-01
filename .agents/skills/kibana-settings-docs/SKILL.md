@@ -132,6 +132,7 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
   - Do not copy the stack lifecycle onto deployments.
   - Do not write a version on those keys.
 - **`serverless`:** write `serverless: ga` when the setting exists on serverless. Write `serverless: unavailable` when it does not. Do not put a version on `serverless`.
+- **Gated notes:** To scope a `note`, `tip`, `warning`, or `important` to a version or deployment, put `:applies_to:` on the first line of that field. Do not wrap the field in `:::{note}`.
 
 Tag `stack` at the minor. Do not put version numbers in the description next to a badge.
 
@@ -177,6 +178,7 @@ Skip this when the reference entry is enough.
 - [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
 - [ ] `ech: ga` only if the Elastic Cloud Hosted user-settings allowlist includes the key
 - [ ] Cloud page include exists only if the entry has `ech: ga`
+- [ ] If a note is version- or deployment-scoped, `:applies_to:` is the first line of that field
 - [ ] No UI label, test ID, or component name used as the YAML `setting` key
 
 ## Additional resources

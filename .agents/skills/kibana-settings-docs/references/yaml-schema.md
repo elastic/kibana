@@ -54,7 +54,7 @@ groups:
 | `default` | Shown as **Default**. Match source. Quote strings that YAML would otherwise mistype. |
 | `options` | Enum values: `option` plus optional `description`. |
 | `applies_to` | Availability. Required for new entries. |
-| `note`, `tip`, `warning`, `important` | Admonitions on the setting. |
+| `note`, `tip`, `warning`, `important` | Admonitions on the setting. To gate one to a version or deployment, put `:applies_to:` on the first line of the field. |
 | `deprecation_details` | Extra deprecation prose. Pair with `applies_to` lifecycle `deprecated`. |
 | `example` | Markdown sample, usually `kibana.yml`. |
 | `settings` | Nested child settings. Children inherit `applies_to` unless they override it. Nested keys often look like `"[n].url"`. |
@@ -205,6 +205,38 @@ description: |
   * {applies_to}`stack: ga 9.5+` Defaults to `system`.
   * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
 ```
+
+### Gated notes
+
+The `note`, `tip`, `warning`, and `important` fields already render as admonitions. Do not wrap them in `:::{note}`.
+
+To show a badge on that admonition, put `:applies_to:` on the first line of the field. The next line is the note body.
+
+Version-scoped:
+
+```yaml
+        note: |
+          :applies_to: stack: ga 9.2-9.4
+          In these versions, this setting defaults to `true`.
+```
+
+Deployment-scoped:
+
+```yaml
+        note: |
+          :applies_to: serverless: ga
+          In Serverless, the list can include a maximum of 50 items.
+```
+
+More than one key:
+
+```yaml
+        note: |
+          :applies_to: {stack: ga 9.5+, serverless: ga}
+          Setting this value too high may cause timeouts.
+```
+
+If `:applies_to:` is not the first line, the badge does not attach to the note. Use a gated note for extra admonition prose. Use inline `{applies_to}` in the description for per-version defaults.
 
 ### Version syntax
 

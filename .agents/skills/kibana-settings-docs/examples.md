@@ -204,3 +204,19 @@ Keep the YAML entry. Do not delete it. Append `removed` and the version on `stac
           - option: disabled
           - option: system
 ```
+
+## Gated note
+
+Put `:applies_to:` on the first line of `note`, `tip`, `warning`, or `important`. Do not add a `:::{note}` wrapper.
+
+```yaml
+        note: |
+          :applies_to: stack: ga 9.2-9.4
+          In these versions, this setting defaults to `true`.
+```
+
+```yaml
+        note: |
+          :applies_to: serverless: ga
+          In Serverless, the list can include a maximum of 50 items.
+```
