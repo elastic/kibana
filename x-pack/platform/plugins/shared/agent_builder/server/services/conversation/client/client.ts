@@ -44,6 +44,7 @@ import type {
   ConversationWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
+import type { ConversationSearchOptions } from '../../../../common/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildPinnedFilter,
@@ -68,7 +69,11 @@ import type {
   UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
-import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../../common/constants';
+import {
+  MAX_CONVERSATIONS_PER_PAGE,
+  MAX_CONVERSATION_SEARCH_PER_PAGE,
+  MAX_RESULT_WINDOW,
+} from '../../../../common/constants';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
@@ -138,6 +143,7 @@ export interface ConversationClient {
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -282,6 +288,43 @@ class ConversationClientImpl implements ConversationClient {
       query: {
         bool: {
           filter: [...this.buildBaseFilters(agentIds), ...pinnedFilter],
+        },
+      },
+    });
+
+    return this.mapListResponse(response);
+  }
+
+  async search(options: ConversationSearchOptions): Promise<ConversationListResult> {
+    const { query, agentId, page = 1, perPage = MAX_CONVERSATION_SEARCH_PER_PAGE } = options;
+
+    const agentIds = await this.resolveAccessibleAgentIds(agentId);
+    if (agentIds.length === 0) {
+      return { results: [], total: 0 };
+    }
+
+    const trimmedQuery = query.trim();
+    const titleMatch = trimmedQuery
+      ? [{ match_bool_prefix: { title: { query: trimmedQuery, operator: 'and' as const } } }]
+      : [];
+
+    const response = await this.storage.getClient().search({
+      // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
+      track_total_hits: MAX_RESULT_WINDOW,
+      from: (page - 1) * perPage,
+      size: perPage,
+      // Relevance first; updated_at/created_at break the frequent _score ties so paging is stable.
+      sort: [
+        { _score: { order: 'desc' } },
+        { updated_at: { order: 'desc' } },
+        { created_at: { order: 'desc' } },
+      ],
+      seq_no_primary_term: true,
+      _source: CONVERSATION_LIST_SOURCE_FIELDS,
+      query: {
+        bool: {
+          filter: this.buildBaseFilters(agentIds),
+          must: titleMatch,
         },
       },
     });
