@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { BehaviorSubject } from 'rxjs';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
@@ -58,8 +58,15 @@ export const InlineSwimLane = ({
   screenContext,
 }: AttachmentRenderProps<MlChartAttachment<AnomalySwimLaneEmbeddableState>>) => {
   const { data } = attachment;
+  // Prefer the attachment's own time_range (set by the tool for historical jobs). Fall back to
+  // the screen context only when no explicit range was provided (realtime jobs).
   const timeRange = data.time_range ?? screenContext?.time_range;
+  // parentApi is created once so EmbeddableRenderer receives a stable reference.
+  // timeRange$ is kept in sync via the effect below.
   const parentApi = useMemo(() => buildParentApi(data, timeRange), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    parentApi.timeRange$.next(timeRange);
+  }, [parentApi, timeRange]);
 
   return (
     <div css={embeddableWrapperCss}>
@@ -79,6 +86,9 @@ export const InlineAnomalyCharts = ({
   const { data } = attachment;
   const timeRange = data.time_range ?? screenContext?.time_range;
   const parentApi = useMemo(() => buildParentApi(data, timeRange), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    parentApi.timeRange$.next(timeRange);
+  }, [parentApi, timeRange]);
 
   return (
     <div css={embeddableWrapperCss}>
@@ -98,6 +108,9 @@ export const InlineSingleMetricViewer = ({
   const { data } = attachment;
   const timeRange = data.time_range ?? screenContext?.time_range;
   const parentApi = useMemo(() => buildParentApi(data, timeRange), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    parentApi.timeRange$.next(timeRange);
+  }, [parentApi, timeRange]);
 
   return (
     <div css={embeddableWrapperCss}>

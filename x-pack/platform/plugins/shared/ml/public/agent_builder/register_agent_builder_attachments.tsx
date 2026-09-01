@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { EuiSkeletonText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
@@ -40,10 +42,16 @@ const getLabel = (attachment: UnknownAttachment, fallback: string): string => {
 
 export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPluginStart) {
   agentBuilder.attachments.addAttachmentType<SwimLaneAttachment>(ANOMALY_SWIMLANE_ATTACHMENT_TYPE, {
-    getLabel: (attachment) => getLabel(attachment, 'Anomaly Swim Lane'),
+    getLabel: (attachment) =>
+      getLabel(
+        attachment,
+        i18n.translate('xpack.ml.agentBuilder.attachments.anomalySwimLane.label', {
+          defaultMessage: 'Anomaly Swim Lane',
+        })
+      ),
     getIcon: () => 'machineLearningApp',
     renderInlineContent: (props) => (
-      <React.Suspense fallback={null}>
+      <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
         <LazyInlineSwimLane {...props} />
       </React.Suspense>
     ),
@@ -52,10 +60,16 @@ export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPlugin
   agentBuilder.attachments.addAttachmentType<AnomalyChartsAttachment>(
     ANOMALY_CHARTS_ATTACHMENT_TYPE,
     {
-      getLabel: (attachment) => getLabel(attachment, 'Anomaly Charts'),
+      getLabel: (attachment) =>
+        getLabel(
+          attachment,
+          i18n.translate('xpack.ml.agentBuilder.attachments.anomalyCharts.label', {
+            defaultMessage: 'Anomaly Charts',
+          })
+        ),
       getIcon: () => 'machineLearningApp',
       renderInlineContent: (props) => (
-        <React.Suspense fallback={null}>
+        <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyInlineAnomalyCharts {...props} />
         </React.Suspense>
       ),
@@ -65,10 +79,16 @@ export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPlugin
   agentBuilder.attachments.addAttachmentType<SingleMetricViewerAttachment>(
     SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
     {
-      getLabel: (attachment) => getLabel(attachment, 'Single Metric Viewer'),
+      getLabel: (attachment) =>
+        getLabel(
+          attachment,
+          i18n.translate('xpack.ml.agentBuilder.attachments.singleMetricViewer.label', {
+            defaultMessage: 'Single Metric Viewer',
+          })
+        ),
       getIcon: () => 'machineLearningApp',
       renderInlineContent: (props) => (
-        <React.Suspense fallback={null}>
+        <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyInlineSingleMetricViewer {...props} />
         </React.Suspense>
       ),

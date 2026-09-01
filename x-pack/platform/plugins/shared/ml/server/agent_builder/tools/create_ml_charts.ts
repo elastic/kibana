@@ -33,6 +33,7 @@ const schema = z.object({
   job_ids: z
     .array(z.string().min(1).max(1000))
     .min(1)
+    .max(10000)
     .describe(
       'IDs of the anomaly detection jobs or groups. Must be verified to exist via ml.ad_get_job_info before calling. For single_metric_viewer, exactly one job ID is required.'
     ),
