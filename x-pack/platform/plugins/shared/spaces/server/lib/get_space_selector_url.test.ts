@@ -17,4 +17,10 @@ describe('getSpaceSelectorUrl', () => {
       '/my/server/base/path/spaces/space_selector'
     );
   });
+
+  it('encodes next query parameter', () => {
+    expect(getSpaceSelectorUrl('', '/app/dashboards?foo=bar&baz=qux')).toEqual(
+      '/spaces/space_selector?next=%2Fapp%2Fdashboards%3Ffoo%3Dbar%26baz%3Dqux'
+    );
+  });
 });
