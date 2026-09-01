@@ -17,5 +17,6 @@
     "@kbn/scout",
     "@kbn/es",
     "@kbn/test-subj-selector",
+    "@kbn/core-http-common",
   ]
 }

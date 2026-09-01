@@ -3112,6 +3112,19 @@ ssl.test: 123
     expect(policyOutput.ssl?.certificate).toBe('my-cert');
     expect(policyOutput.ssl).not.toHaveProperty('key');
   });
+
+  it('should throw for OTLP outputs because compilation is not yet implemented', () => {
+    expect(() =>
+      transformOutputToFullPolicyOutput({
+        id: 'otlp-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test otlp output',
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+      } as any)
+    ).toThrow('OTLP output "otlp-id" cannot be compiled into an agent policy output');
+  });
 });
 
 describe('generateFleetConfig', () => {
