@@ -2222,7 +2222,7 @@ describe('Response actions history', () => {
 
       render();
 
-      expect(renderResult.getByTestId('ruleName')).toHaveAttribute(
+      expect(renderResult.getByTestId(`${testPrefix}-column-ruleName`)).toHaveAttribute(
         'href',
         expect.stringContaining('/id/rule-123')
       );
