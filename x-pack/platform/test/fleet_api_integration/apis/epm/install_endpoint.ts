@@ -81,6 +81,51 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('same-version reinstall keeps transform refs in installed_es', () => {
+      // Regression test for elastic/kibana#217503: force-reinstalling the same package version
+      // produced transform ids byte-identical to the previous refs. The legacy install path
+      // applied removals in a separate SO write after the add, wiping the freshly-written refs
+      // and leaving installed_es with zero transform entries while ES still had live transforms.
+      // On the next upgrade nothing was deleted and duplicate transforms accumulated.
+      it('transform refs must survive a same-version force reinstall', async function () {
+        await installPackage(pkgName, pkgVersion);
+
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const installedEs: Array<{ id: string; type: string }> =
+          res.body.item.installationInfo.installed_es;
+
+        const transformRefs = installedEs.filter((a) => a.type === 'transform');
+        expect(transformRefs.length).to.be.greaterThan(0);
+
+        const expectedIds = transforms.map((t) => `${t.id}-${pkgVersion}`);
+        for (const expectedId of expectedIds) {
+          expect(transformRefs.some((r) => r.id === expectedId)).to.be(true);
+        }
+      });
+
+      it('no duplicate transforms must exist in Elasticsearch after reinstall', async function () {
+        const res = (await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_transform/endpoint.metadata_*`,
+          },
+          { meta: true, ignore: [404] }
+        )) as { statusCode: number; body: { transforms: Array<{ id: string }> } };
+        expect(res.statusCode).equal(200);
+        const esTransforms = res.body.transforms ?? [];
+        const transformIds = esTransforms.map((t) => t.id);
+
+        // Each id must appear at most once — duplicates indicate the ref-wipe bug.
+        const unique = [...new Set(transformIds)];
+        expect(unique.length).to.equal(transformIds.length);
+        expect(unique.length).to.equal(transforms.length);
+      });
+    });
+
     const uninstallPackage = async (pkg: string, version: string) =>
       supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
