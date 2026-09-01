@@ -17,10 +17,12 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Throughline UI-facing autonomy level (1 Suggest only through 5 Acts · trusted)
+ * Release maturity shown as a badge next to a watch, worker, or skill
  */
-export const AutonomyLevel = lazySchema(() => z.number().int().min(1).max(5));
-export type AutonomyLevel = z.infer<typeof AutonomyLevel>;
+export const Lifecycle = lazySchema(() => z.enum(['ga', 'beta', 'pilot']));
+export type Lifecycle = z.infer<typeof Lifecycle>;
+export type LifecycleEnum = typeof Lifecycle.enum;
+export const LifecycleEnum = Lifecycle.enum;
 
 export const ScheduleMode = lazySchema(() => z.enum(['always', 'window', 'demand']));
 export type ScheduleMode = z.infer<typeof ScheduleMode>;
@@ -141,12 +143,6 @@ export type WatchRecentRun = z.infer<typeof WatchRecentRun>;
 
 export const WatchMetrics = lazySchema(() =>
   z.object({
-    runs7d: z.number().int().nullable(),
-    /**
-     * Acceptance rate as a percentage from 0 to 100
-     */
-    acceptedPct: z.number().nullable(),
-    timeSaved: z.string().nullable(),
     /**
      * ISO 8601 timestamp of most recent run
      */
@@ -175,10 +171,6 @@ export const Watch = lazySchema(() =>
      * Accent color for coverage strip and cards (hex or CSS var)
      */
     color: z.string(),
-    /**
-     * Icon key for UI (EUI icon name)
-     */
-    icon: z.string(),
     enabled: z.boolean(),
     draft: z.boolean(),
     /**
@@ -194,6 +186,10 @@ export const Watch = lazySchema(() =>
      */
     mandate: z.string(),
     description: z.string(),
+    /**
+     * Omitted for generally available watches; badge shown otherwise
+     */
+    lifecycle: Lifecycle.optional(),
     schedule: WatchSchedule,
     triggers: z.array(WatchTriggerProjection),
     /**
@@ -203,7 +199,6 @@ export const Watch = lazySchema(() =>
     scopeSummary: z.string(),
     scopes: z.array(WatchScope),
     callables: z.array(WatchCallableRef),
-    autonomyLevel: AutonomyLevel,
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
   })

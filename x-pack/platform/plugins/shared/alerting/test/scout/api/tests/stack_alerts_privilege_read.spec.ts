@@ -15,6 +15,7 @@ import {
   FAKE_ALERT_INSTANCE_ID,
   setupStackAlertsPrivilegeTests,
   teardownStackAlertsPrivilegeTests,
+  STACK_ALERTS_PRIVILEGE_SETUP_TIMEOUT_MS,
   type StackAlertsPrivilegeState,
 } from '../lib/stack_alerts_privilege_setup';
 
@@ -30,6 +31,7 @@ apiTest.describe(
     let withReadPrivilegeCookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
+      apiTest.setTimeout(STACK_ALERTS_PRIVILEGE_SETUP_TIMEOUT_MS);
       state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
 
       withReadPrivilegeCreds = await requestAuth.getApiKeyForCustomRole({

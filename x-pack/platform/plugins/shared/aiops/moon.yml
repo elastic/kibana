@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/cps'
   - '@kbn/zod'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

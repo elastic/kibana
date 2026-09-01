@@ -35,7 +35,7 @@ export const CREATE_ACTION_POLICY_REQUEST: CreateActionPolicyDataInput = {
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: 'host.name: "web-*"',
   tags: ['production'],
-  groupingMode: 'per_episode',
+  grouping_mode: 'per_episode',
   throttle: { strategy: 'on_status_change' },
 };
 
@@ -47,16 +47,16 @@ export const ACTION_POLICY_RESPONSE: ActionPolicyResponse = {
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: 'host.name: "web-*"',
-  groupBy: null,
+  group_by: null,
   tags: ['production'],
-  groupingMode: 'per_episode',
+  grouping_mode: 'per_episode',
   throttle: { strategy: 'on_status_change', interval: null },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: 'elastic',
-  createdAt: '2026-01-15T12:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-01-15T12:00:00.000Z',
+  snoozed_until: null,
+  auth: { owner: 'elastic', created_by_user: true },
+  created_by: 'elastic',
+  created_at: '2026-01-15T12:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-01-15T12:00:00.000Z',
 };
 
 export const actionPolicyResponseExample = (

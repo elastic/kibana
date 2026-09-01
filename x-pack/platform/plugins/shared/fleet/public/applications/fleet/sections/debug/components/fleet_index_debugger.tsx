@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -102,14 +102,18 @@ export const FleetIndexDebugger = () => {
       {indexResult?.error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            {(indexResult?.error as any)?.error?.reason ?? (
-              <FormattedMessage
-                id="xpack.fleet.debug.fleetIndexDebugger.fetchError"
-                defaultMessage="Error fetching index data"
-              />
-            )}
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            title="Error"
+            text={
+              (indexResult?.error as any)?.error?.reason ?? (
+                <FormattedMessage
+                  id="xpack.fleet.debug.fleetIndexDebugger.fetchError"
+                  defaultMessage="Error fetching index data"
+                />
+              )
+            }
+          />
         </>
       )}
 

@@ -14,6 +14,7 @@ import { basicCase, getUserAction } from '../../../../containers/mock';
 import { casesConfigurationsMock } from '../../../../containers/configure/mock';
 import { getCaseConnectorsMockResponse } from '../../../../common/mock/connectors';
 import { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
+import { allCasesPermissions } from '../../../../common/mock';
 import { UserActionTypes } from '../../../../../common/types/domain';
 
 jest.mock('../../../user_actions/builder');
@@ -30,6 +31,7 @@ const defaultArgs = {
   currentUserProfile: undefined,
   appId: 'securitySolution',
   unifiedAttachmentTypeRegistry: new UnifiedAttachmentTypeRegistry(),
+  permissions: allCasesPermissions(),
   manageMarkdownEditIds: [],
   selectedOutlineCommentId: '',
   loadingCommentIds: [],

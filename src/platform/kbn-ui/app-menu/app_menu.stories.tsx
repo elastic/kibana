@@ -12,7 +12,7 @@ import type { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiFlexGroup, EuiHeader, EuiPageTemplate } from '@elastic/eui';
-import { AppMenuComponent } from '.';
+import { AppMenuComponent, AppMenuLoading } from '.';
 import type { AppMenuConfig } from '.';
 
 type AppMenuWrapperProps = ComponentProps<typeof AppMenuComponent>;
@@ -639,5 +639,108 @@ export const SelectedItems: Story = {
   name: 'Selected items - inline and overflow',
   args: {
     config: selectedItemsConfig,
+  },
+};
+
+const itemDescriptionsConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'add',
+      order: 1,
+      label: 'add',
+      testId: 'addButton',
+      iconType: 'plus',
+      popoverWidth: 280,
+      items: [
+        {
+          run: () => action('visualization-clicked'),
+          id: 'visualization',
+          order: 1,
+          label: 'Visualization',
+          iconType: 'lensApp',
+          testId: 'visualizationButton',
+          description: 'Create a chart or metric',
+        },
+        {
+          run: () => action('from-library-clicked'),
+          id: 'fromLibrary',
+          order: 2,
+          label: 'From library',
+          iconType: 'folderOpen',
+          testId: 'fromLibraryButton',
+          description: 'Add an existing visualization, map, or saved search from the library.',
+        },
+        {
+          run: () => action('controls-clicked'),
+          id: 'controls',
+          order: 3,
+          label: 'Controls',
+          iconType: 'controls',
+          testId: 'controlsButton',
+          description: 'Requires edit privileges',
+          disableButton: true,
+        },
+      ],
+    },
+  ],
+  primaryActionItem: {
+    id: 'create',
+    label: 'Create',
+    testId: 'createPopoverButton',
+    iconType: 'plus',
+    popoverWidth: 280,
+    items: [
+      {
+        run: () => action('create-dashboard-clicked'),
+        id: 'createDashboard',
+        order: 1,
+        label: 'Dashboard',
+        iconType: 'productDashboard',
+        testId: 'createDashboardButton',
+        description: 'Start from a blank canvas',
+      },
+      {
+        run: () => action('create-visualization-clicked'),
+        id: 'createVisualization',
+        order: 2,
+        label: 'Visualization',
+        iconType: 'chartBarVertical',
+        testId: 'createVisualizationButton',
+        description: 'Create a chart or metric from your data',
+      },
+    ],
+  },
+};
+
+/**
+ * `description` renders subdued supporting text below the item label inside popover menus
+ * (sub-items, overflow/static items, and `primaryActionItem.items`). It is ignored for
+ * inline top-level buttons and for the primary action button itself. Descriptions truncate
+ * to a single line.
+ */
+export const ItemDescriptions: Story = {
+  name: 'Item descriptions',
+  args: {
+    config: itemDescriptionsConfig,
+  },
+};
+
+export const Loading: Story = {
+  name: 'Loading skeleton',
+  render: () => (
+    <EuiHeader>
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+        <AppMenuLoading />
+      </EuiFlexGroup>
+    </EuiHeader>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Default `AppMenuLoading`: one overflow-style placeholder plus a primary-action rectangle. ' +
+          'Resize the viewport to see the same collapsed / minimal / expanded layouts as the real menu.',
+      },
+    },
   },
 };

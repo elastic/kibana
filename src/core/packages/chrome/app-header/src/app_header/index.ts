@@ -9,6 +9,8 @@
 
 export { AppHeader, AppHeaderView } from './app_header';
 export type { AppHeaderProps, AppHeaderViewProps } from './app_header';
+export { AppHeaderLoading, AppHeaderLoadingView } from './app_header_loading';
+export type { AppHeaderLoadingProps, AppHeaderLoadingMenu } from './app_header_loading';
 export {
   ChromeAppHeaderRegistration,
   useChromeAppHeaderRegistration,

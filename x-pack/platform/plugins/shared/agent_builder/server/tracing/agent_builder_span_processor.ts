@@ -22,8 +22,9 @@ import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
+import { toHashedId } from '@kbn/agent-builder-server/telemetry';
 import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
-import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
+import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 const BUILTIN_AGENT_IDS: Set<string> = new Set([

@@ -15,4 +15,7 @@ export {
   EuiDataGridObject,
   EuiGlobalToastListObject,
   EuiSuperSelectObject,
+  EuiSelectableObject,
+  EuiBasicTableObject,
+  EuiDraggableObject,
 } from '@elastic/eui-test-helpers';

@@ -46,11 +46,12 @@ Each pattern includes: field (source field name), pattern (the significant token
 Use \`pattern\` tokens for keyword/AND queries; use \`sample\` as the basis for phrase queries since variable parts between tokens are omitted and the token string is not a verbatim phrase.
 This is useful for understanding the types of logs in the stream and identifying anomalies or trends.`,
 
-  generate: async ({ stream, start, end, esClient, logger }) => {
+  generate: async ({ stream, start, end, esClient, logger, signal }) => {
     const tracedClient = createTracedEsClient({
       client: esClient,
       logger,
       plugin: 'streams',
+      abortSignal: signal,
     });
 
     const patterns = await getSigEventsLogPatternsEsql({

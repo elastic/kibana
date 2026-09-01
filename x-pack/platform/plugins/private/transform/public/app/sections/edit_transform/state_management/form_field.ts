@@ -24,6 +24,7 @@ export type FormFields =
   | 'frequency'
   | 'maxPageSearchSize'
   | 'numFailureRetries'
+  | 'projectRouting'
   | 'retentionPolicyField'
   | 'retentionPolicyMaxAge';
 

@@ -23,15 +23,17 @@ import {
   persistableStateAttachmentAttributes,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
-import { createErrorSO, createSOFindResponse } from '../test_utils';
+import { createErrorSO, createSOFindResponse, mockPointInTimeFinder } from '../test_utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  LEGACY_ALERT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { ConfigType } from '../../config';
 
 const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =>
@@ -2100,6 +2102,132 @@ describe('AttachmentService', () => {
 
       const filterAsString = JSON.stringify(unifiedCallArgs.filter);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
+    });
+  });
+
+  describe('countAlertsAttachedToCase', () => {
+    const mockFinder = mockPointInTimeFinder(unsecuredSavedObjectsClient);
+
+    it('counts unique origin alert ids', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'a', index: 'origin-index' }), score: 0 },
+          { ...createAlertAttachment({ alertId: 'a', index: 'origin-index' }), score: 0 },
+          { ...createAlertAttachment({ alertId: 'b', index: 'origin-index' }), score: 0 },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(2);
+    });
+
+    it('excludes alerts from linked-project indices', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'origin', index: 'origin-index' }), score: 0 },
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(1);
+    });
+
+    it('returns 0 when every attached alert is a linked-project index', async () => {
+      mockFinder(
+        createSOFindResponse([
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(0);
+    });
+
+    it('counts linked-project alerts when originOnly is false', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'origin', index: 'origin-index' }), score: 0 },
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+        originOnly: false,
+      });
+
+      expect(res).toBe(2);
+    });
+
+    it('counts unified alert attachments with a missing metadata.index instead of throwing', async () => {
+      mockFinder(
+        createSOFindResponse([
+          {
+            id: '1',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: {
+              type: toUnifiedAttachmentType(LEGACY_ALERT_TYPE, SECURITY_SOLUTION_OWNER),
+              attachmentId: ['a', 'b'],
+              owner: SECURITY_SOLUTION_OWNER,
+              created_at: '2019-11-25T21:55:00.177Z',
+              created_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: '2019-11-25T21:55:00.177Z',
+              updated_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+            },
+            references: [],
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(2);
     });
   });
 });

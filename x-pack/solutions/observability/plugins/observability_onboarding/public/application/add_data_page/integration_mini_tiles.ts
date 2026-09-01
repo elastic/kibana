@@ -12,47 +12,58 @@ export interface IntegrationMiniTileData {
   id: string;
   title: string;
   logo: SupportedLogo;
+  /** EPR package whose integrations detail page the tile opens. */
+  eprPackage?: string;
+  /** Internal onboarding-app route the tile opens. */
+  route?: string;
+  /** Fleet integration group whose chooser this tile opens instead of navigating,
+   * falling back to its normal navigation when Fleet has no card for the group. */
+  collectionGroup?: string;
 }
 
 export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
   {
-    id: 'confluence',
+    id: 'prometheus',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.confluence.title',
-      { defaultMessage: 'Confluence' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.prometheus.title',
+      { defaultMessage: 'Prometheus' }
     ),
-    logo: 'confluence',
+    logo: 'prometheus',
+    eprPackage: 'prometheus',
+    collectionGroup: 'prometheus',
   },
   {
-    id: 'salesforce',
+    id: 'supabase',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.salesforce.title',
-      { defaultMessage: 'Salesforce' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.supabase.title',
+      { defaultMessage: 'Supabase' }
     ),
-    logo: 'salesforce',
+    logo: 'supabase',
+    eprPackage: 'supabase',
   },
   {
-    id: 'slack',
+    id: 'auto_import',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.slack.title',
-      { defaultMessage: 'Slack' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.autoImport.title',
+      { defaultMessage: 'Auto Import' }
     ),
-    logo: 'slack',
+    logo: 'auto_import',
   },
   {
-    id: 'splunk',
+    id: 'upload_file',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.splunk.title',
-      { defaultMessage: 'Splunk' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.uploadFile.title',
+      { defaultMessage: 'Upload a file' }
     ),
-    logo: 'splunk',
+    logo: 'upload_file',
   },
   {
-    id: 'jira',
+    id: 'custom_logs',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.jira.title',
-      { defaultMessage: 'Jira' }
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.customLogs.title',
+      { defaultMessage: 'Custom logs' }
     ),
-    logo: 'jira',
+    logo: 'custom_logs',
+    route: '/otel-logs',
   },
 ] as const;

@@ -10,6 +10,12 @@
 // Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
 require('whatwg-fetch');
 
+// Monaco's clipboard contribution calls this deprecated browser API during module evaluation.
+// JSDOM does not implement it; node environments may not define `document`.
+if (typeof document !== 'undefined' && typeof document.queryCommandSupported !== 'function') {
+  Object.defineProperty(document, 'queryCommandSupported', { value: () => true });
+}
+
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
 }

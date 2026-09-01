@@ -14,6 +14,35 @@ export const ruleTemplateMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    /**
+     * Alerting v2 templates nest the create-rule payload under `rule`. Only the
+     * fields the v2 read APIs search, filter, sort, and aggregate on are indexed;
+     * they mirror the `alerting_rule` mappings so both surfaces sort identically.
+     */
+    rule: {
+      properties: {
+        metadata: {
+          properties: {
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            description: {
+              type: 'text',
+            },
+            tags: {
+              type: 'keyword',
+              ignore_above: 128,
+            },
+          },
+        },
+      },
+    },
     name: {
       type: 'text',
       fields: {

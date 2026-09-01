@@ -154,5 +154,12 @@ export const securityLabsSearchTool = (
       }
     },
     tags: ['security', 'security-labs', 'knowledge-base', 'search'],
+    annotations: {
+      title: 'Search Security Labs',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

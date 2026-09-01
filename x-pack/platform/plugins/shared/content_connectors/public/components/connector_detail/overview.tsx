@@ -10,15 +10,12 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -26,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { SyncJobs } from '../search_index/sync_jobs/sync_jobs';
@@ -58,10 +56,8 @@ export const ConnectorDetailOverview: React.FC = () => {
     <>
       {isWaitingOnAgentlessDeployment && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            iconType="warning"
-            color="warning"
             title={
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
@@ -77,63 +73,49 @@ export const ConnectorDetailOverview: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.contentConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
-                {
-                  defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
-                }
-              )}
-            </EuiText>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.contentConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
+              {
+                defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
+              }
+            )}
+          />
           <EuiSpacer />
         </>
       )}
       {error && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            iconType="warning"
-            color="danger"
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorErrorCallOut.title',
               {
                 defaultMessage: 'Your connector has reported an error',
               }
             )}
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">{error}</EuiText>
-          </EuiCallOut>
+            text={error}
+          />
           <EuiSpacer />
         </>
       )}
       {!!connector && !connector.index_name && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            iconType="info"
-            color="warning"
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.title',
               {
                 defaultMessage: 'Connector has no attached index',
               }
             )}
+            text={i18n.translate(
+              'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
+              {
+                defaultMessage:
+                  "You won't be able to start syncing content until your connector is attached to an index.",
+              }
+            )}
           >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
-                {
-                  defaultMessage:
-                    "You won't be able to start syncing content until your connector is attached to an index.",
-                }
-              )}
-            </EuiText>
-            <EuiSpacer />
             <EuiButtonTo
               data-test-subj="contentConnectorsConnectorOverviewAttachIndexButton"
               color="warning"
@@ -150,24 +132,21 @@ export const ConnectorDetailOverview: React.FC = () => {
                 }
               )}
             </EuiButtonTo>
-          </EuiCallOut>
+          </KbnWarningCallout>
           <EuiSpacer />
         </>
       )}
       {!!connector?.index_name && !indexData && (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
-            iconType="info"
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
               {
                 defaultMessage: "Attached index doesn't exist",
               }
             )}
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
+            text={
               <FormattedMessage
                 id="xpack.contentConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
                 defaultMessage="The connector will create the index on its next sync, or you can manually create the index {indexName} with your desired settings and mappings."
@@ -175,18 +154,16 @@ export const ConnectorDetailOverview: React.FC = () => {
                   indexName: <EuiCode>{connector.index_name}</EuiCode>,
                 }}
               />
-            </EuiText>
-          </EuiCallOut>
+            }
+          />
           <EuiSpacer />
         </>
       )}
       {connector?.is_native && !isCloud && (
         <>
           {isModalVisible && <ConvertConnectorModal />}
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            iconType="warning"
-            color="warning"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
               {
@@ -194,44 +171,39 @@ export const ConnectorDetailOverview: React.FC = () => {
                   'Elastic managed connectors (formerly native connectors) are no longer supported outside Elastic Cloud',
               }
             )}
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
-                  defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
-                  values={{
-                    link: (
-                      <EuiLink
-                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
-                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
-                        href={docLinks.buildConnector}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
-                          { defaultMessage: 'self-managed connector' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiButton
-              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
-              color="warning"
-              fill
-              onClick={() => showModal()}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
-                { defaultMessage: 'Convert connector' }
-              )}
-            </EuiButton>
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
+                defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
+                values={{
+                  link: (
+                    <EuiLink
+                      data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                      data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                      href={docLinks.buildConnector}
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
+                        { defaultMessage: 'self-managed connector' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+            actionProps={{
+              primary: {
+                'data-test-subj':
+                  'entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton',
+                onClick: () => showModal(),
+                children: i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
+                  { defaultMessage: 'Convert connector' }
+                ),
+              },
+            }}
+          />
           <EuiSpacer />
         </>
       )}
