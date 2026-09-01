@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import * as rt from 'io-ts';
 
 export const ActionSourceTypes = {
@@ -43,24 +44,18 @@ export const ActionSourceRt = rt.intersection([
 
 export type ActionSource = rt.TypeOf<typeof ActionSourceRt>;
 
-export const isActionSourceType = (value: unknown): value is ActionSourceType =>
-  value === ActionSourceTypes.agent ||
-  value === ActionSourceTypes.workflow ||
-  value === ActionSourceTypes.rule ||
-  value === ActionSourceTypes.attack ||
-  value === ActionSourceTypes.api ||
-  value === ActionSourceTypes.user;
-
 export const isActionSource = (value: unknown): value is ActionSource => {
-  if (value == null || typeof value !== 'object') {
+  if (!isPlainObject(value)) {
     return false;
   }
 
-  const candidate = value as { type?: unknown; id?: unknown };
+  const candidate = value as { type?: unknown; id?: unknown; name?: unknown; run_id?: unknown };
   return (
     typeof candidate.id === 'string' &&
     candidate.id.length > 0 &&
-    isActionSourceType(candidate.type)
+    ActionSourceTypeRt.is(candidate.type) &&
+    (candidate.name === undefined || typeof candidate.name === 'string') &&
+    (candidate.run_id === undefined || typeof candidate.run_id === 'string')
   );
 };
 

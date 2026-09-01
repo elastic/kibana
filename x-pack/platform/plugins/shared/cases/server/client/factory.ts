@@ -57,6 +57,7 @@ import { createCasesClient } from '.';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { CasesServices, CasesClientSource } from './types';
 import type { ActionSource } from '../../common/types/domain';
+import { getDefaultActionSource } from '../common/get_default_action_source';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
@@ -194,7 +195,7 @@ export class CasesClientFactory {
       auditLogger,
       alertsClient,
       auth,
-      actionSource,
+      actionSource: actionSource ?? getDefaultActionSource(request),
     });
 
     const userInfo = await this.getUserInfo(request);

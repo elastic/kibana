@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
 import type {
@@ -14,6 +15,7 @@ import type {
 } from '../../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { AttachmentTypeRegistry } from '../../../../common/registry';
+import { TestProviders } from '../../../common/mock';
 import { getMockBuilderArgs } from '../mock';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
@@ -190,5 +192,24 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     render(userAction.children);
 
     expect(await screen.findByText('My component')).toBeInTheDocument();
+  });
+
+  it('appends the action source to the event', () => {
+    const [built] = createRegisteredAttachmentUserActionBuilder({
+      ...userActionBuilderArgs,
+      userAction: {
+        ...userActionBuilderArgs.userAction,
+        source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+      },
+    }).build();
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={[built]} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText(/My event/)).toBeInTheDocument();
+    expect(screen.getByTestId('user-action-via-source')).toHaveTextContent('via Elastic AI Agent');
   });
 });

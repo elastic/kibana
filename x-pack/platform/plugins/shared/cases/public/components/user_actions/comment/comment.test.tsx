@@ -632,6 +632,24 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('added a comment')).toBeInTheDocument();
     });
+
+    it('appends the action source to the create event', () => {
+      const userAction = getUserAction(UserActionTypes.comment, UserActionActions.create, {
+        source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [basicCommentUnified],
+        userAction,
+      });
+
+      renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+      expect(screen.getByText(/added a comment/)).toBeInTheDocument();
+      expect(screen.getByTestId('user-action-via-source')).toHaveTextContent(
+        'via Elastic AI Agent'
+      );
+    });
   });
 
   describe('Unified event attachments', () => {

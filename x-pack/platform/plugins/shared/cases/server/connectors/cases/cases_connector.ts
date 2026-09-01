@@ -123,9 +123,7 @@ export class CasesConnector extends SubActionConnector<
       const validatedParams = await this.getValidatedRunParams(params, uiSettingsClient);
       const actionSource = toActionSource({
         type:
-          validatedParams.internallyManagedAlerts === true
-            ? ActionSourceTypes.attack
-            : ActionSourceTypes.rule,
+          validatedParams.source === 'attack' ? ActionSourceTypes.attack : ActionSourceTypes.rule,
         id: validatedParams.rule.id,
         name: validatedParams.rule.name,
       });
@@ -186,7 +184,7 @@ export class CasesConnector extends SubActionConnector<
       await uiSettingsClient.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)
     );
 
-    if (params.internallyManagedAlerts) {
+    if (params.source === 'attack') {
       return {
         ...params,
         maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,

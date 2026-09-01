@@ -39,6 +39,22 @@ describe('ActionSource', () => {
     expect(isActionSource({ type: 'agent' })).toBe(false);
   });
 
+  it('isActionSource rejects an unknown type', () => {
+    expect(isActionSource({ type: 'admin', id: 'admin-1' })).toBe(false);
+  });
+
+  it('isActionSource rejects a non-string name', () => {
+    expect(isActionSource({ type: 'agent', id: 'agent-1', name: 123 })).toBe(false);
+  });
+
+  it('isActionSource rejects a non-string run_id', () => {
+    expect(isActionSource({ type: 'agent', id: 'agent-1', run_id: 123 })).toBe(false);
+  });
+
+  it('isActionSource rejects an array', () => {
+    expect(isActionSource(['agent', 'agent-1'])).toBe(false);
+  });
+
   it('toActionSource omits empty name and runId', () => {
     expect(toActionSource({ type: 'rule', id: 'rule-1', name: '', runId: null })).toEqual({
       type: 'rule',
