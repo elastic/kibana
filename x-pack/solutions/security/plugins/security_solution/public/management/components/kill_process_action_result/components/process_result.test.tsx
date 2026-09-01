@@ -126,4 +126,98 @@ describe('ProcessResult', () => {
 
     expect(renderResult.getByTestId(testPrefix)).not.toBeNull();
   });
+
+  describe('when `code` maps to a known response code message', () => {
+    it('should display the response code message instead of the default success message', () => {
+      processResult = { pid: 1234, code: 'ra_kill-process_success_partial-descendants' };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain(
+        'Action completed successfully, but some descendants were not killed'
+      );
+    });
+
+    it('should display the response code message for descendant success code', () => {
+      processResult = { pid: 1234, code: 'ra_kill-process_descendant_success_done' };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain('Killed');
+    });
+
+    it('should display the response code message instead of the default failure message when an error is present', () => {
+      processResult = {
+        pid: 1234,
+        error: 'process failed to exit',
+        code: 'ra_kill-process_descendant_error_failure',
+      };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain('Failed to kill process');
+      expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
+    });
+
+    it('should display the response code message for descendant not-permitted error', () => {
+      processResult = {
+        pid: 1234,
+        error: 'permission denied',
+        code: 'ra_kill-process_descendant_error_not-permitted',
+      };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain('Process cannot be killed');
+      expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
+    });
+  });
+
+  describe('when `code` indicates a "not-found" condition', () => {
+    it('should treat `ra_kill-process_error_not-found` as success even when an error is present', () => {
+      processResult = {
+        pid: 1234,
+        error: 'process not found',
+        code: 'ra_kill-process_error_not-found',
+      };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain('The provided process was not found');
+      expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
+    });
+
+    it('should treat `ra_kill-process_descendant_error_not-found` as success even when an error is present', () => {
+      processResult = {
+        pid: 1234,
+        error: 'descendant process not found',
+        code: 'ra_kill-process_descendant_error_not-found',
+      };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain(
+        'Process was not found (may have terminated prior to action being taken)'
+      );
+      expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
+    });
+  });
+
+  describe('when `code` is absent or unknown', () => {
+    it('should fall back to the default success message when there is no error and no code', () => {
+      processResult = { pid: 1234 };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain('Killed');
+    });
+
+    it('should fall back to the default failure message including error text when code is absent', () => {
+      processResult = { pid: 1234, error: 'something went wrong' };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain('Not killed - something went wrong');
+    });
+  });
 });
