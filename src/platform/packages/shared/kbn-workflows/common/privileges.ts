@@ -74,7 +74,6 @@ export enum WorkflowsManagementUiActions {
   'read' = 'readWorkflow',
   'readManaged' = 'readManagedWorkflow',
   'update' = 'updateWorkflow',
-  'updateManaged' = 'updateManagedWorkflow',
   'delete' = 'deleteWorkflow',
   'execute' = 'executeWorkflow',
   'readExecution' = 'readWorkflowExecution',

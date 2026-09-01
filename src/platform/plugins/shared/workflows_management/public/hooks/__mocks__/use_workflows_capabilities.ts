@@ -14,7 +14,6 @@ export const mockWorkflowsManagementCapabilities: WorkflowsManagementCapabilitie
   canReadWorkflow: true,
   canReadManagedWorkflow: true,
   canUpdateWorkflow: true,
-  canUpdateManagedWorkflow: true,
   canDeleteWorkflow: true,
   canExecuteWorkflow: true,
   canReadWorkflowExecution: true,
