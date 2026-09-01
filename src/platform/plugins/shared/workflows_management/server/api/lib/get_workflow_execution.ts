@@ -78,9 +78,9 @@ export const getWorkflowExecution = async ({
       logger.warn(
         `Workflow execution document ${workflowExecutionId} exceeded the maximum response size Kibana can process`
       );
-      throw error;
+    } else {
+      logger.error(`Failed to get workflow execution ${workflowExecutionId}: ${error}`);
     }
-    logger.error(`Failed to get workflow execution ${workflowExecutionId}: ${error}`);
     throw error;
   }
 };
