@@ -111,7 +111,7 @@ describe('TimelineWrapper', () => {
 
     await userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
 
-    expect(mockDispatch).toBeCalledWith(
+    expect(mockDispatch).toHaveBeenCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })
     );
   });
@@ -125,7 +125,7 @@ describe('TimelineWrapper', () => {
 
     await userEvent.keyboard('{Escape}');
 
-    expect(mockDispatch).toBeCalledWith(
+    expect(mockDispatch).toHaveBeenCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: false })
     );
   });
@@ -153,7 +153,7 @@ describe('TimelineWrapper', () => {
         await userEvent.keyboard('{Escape}');
 
         // The timeline modal still closes...
-        expect(mockDispatch).toBeCalledWith(
+        expect(mockDispatch).toHaveBeenCalledWith(
           timelineActions.showTimeline({ id: TimelineId.test, show: false })
         );
         // ...but the underlying flyout's window-level handler is never reached.
@@ -210,7 +210,7 @@ describe('TimelineWrapper', () => {
 
       expect(mockCloseAllFlyouts).toHaveBeenCalledTimes(1);
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -234,9 +234,9 @@ describe('TimelineWrapper', () => {
 
       await userEvent.keyboard('{Escape}');
 
-      expect(mockCloseFlyout).toBeCalledWith('flyout-b-child');
-      expect(mockCloseFlyout).not.toBeCalledWith('flyout-b');
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockCloseFlyout).toHaveBeenCalledWith('flyout-b-child');
+      expect(mockCloseFlyout).not.toHaveBeenCalledWith('flyout-b');
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -267,7 +267,7 @@ describe('TimelineWrapper', () => {
 
       expect(mockCloseAllFlyouts).toHaveBeenCalledTimes(1);
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -309,7 +309,7 @@ describe('TimelineWrapper', () => {
       expect(mockCloseAllFlyouts).toHaveBeenCalledTimes(1);
       expect(mockCloseFlyout).not.toHaveBeenCalledWith('document-flyout-a');
       expect(mockCloseFlyout).not.toHaveBeenCalledWith('analyzer-flyout-b');
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -333,7 +333,7 @@ describe('TimelineWrapper', () => {
       await userEvent.keyboard('{Escape}');
 
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -378,7 +378,7 @@ describe('TimelineWrapper', () => {
       await userEvent.keyboard('{Escape}');
 
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -397,7 +397,7 @@ describe('TimelineWrapper', () => {
       await userEvent.keyboard('{Escape}');
 
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
