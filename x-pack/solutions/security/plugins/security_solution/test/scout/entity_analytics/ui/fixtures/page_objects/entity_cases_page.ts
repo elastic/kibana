@@ -51,7 +51,7 @@ export class EntityCasesPage {
   constructor(private readonly page: ScoutPage) {
     this.takeActionButton = page.testSubj.locator('take-action-button');
     this.addToCaseItem = page.testSubj.locator(ADD_TO_CASE_TEST_ID);
-    this.createNewCaseFromModalButton = page.testSubj.locator('createNewCaseBtn');
+    this.createNewCaseFromModalButton = page.testSubj.locator('cases-table-add-case-filter-bar');
 
     this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
     this.attachmentsContainer = page.testSubj.locator('case-view-attachments');

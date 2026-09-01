@@ -17,6 +17,7 @@ import {
   withActionIcons,
   withStatusDotIcons,
 } from '../../../../../common/utils/action_menu_items';
+import { ALERT_STATUS_ACTION_IDS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { ALERT_TAG_ACTION_ID } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { OSQUERY_ACTION_ID } from '../../../osquery/osquery_action_item';
@@ -44,9 +45,9 @@ interface AlertRowActionMenuProps {
 }
 
 const ALERT_STATUS_ICON_COLORS = {
-  'acknowledged-alert-status': 'primary',
-  'alert-close-context-menu-item': 'subdued',
-  'open-alert-status': 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  'close-alert-with-reason': 'subdued',
 } as const;
 
 const ACTION_ICONS_BY_ID = {
@@ -86,7 +87,13 @@ export const AlertRowActionMenu = ({
       ...(hasAgent ? osqueryItems : []),
     ];
     const actionGroups = isAlert
-      ? [statusItems, alertManagementItems, exceptionItems, responseActionItems, addToChatItems]
+      ? [
+          withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS),
+          alertManagementItems,
+          exceptionItems,
+          responseActionItems,
+          addToChatItems,
+        ]
       : [
           addToCaseItems,
           canCreateEndpointEventFilters ? eventFilterItems : [],
@@ -101,10 +108,7 @@ export const AlertRowActionMenu = ({
         : []),
     ]);
 
-    return withStatusDotIcons(
-      withActionIcons(orderedItems, ACTION_ICONS_BY_ID),
-      ALERT_STATUS_ICON_COLORS
-    );
+    return withActionIcons(orderedItems, ACTION_ICONS_BY_ID);
   }, [
     addToCaseItems,
     addToChatItems,

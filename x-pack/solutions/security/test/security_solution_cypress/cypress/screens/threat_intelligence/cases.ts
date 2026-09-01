@@ -13,7 +13,9 @@ export const INDICATORS_TABLE_ADD_TO_CASE_ITEM = getDataTestSubjectSelector(
 export const FLYOUT_ADD_TO_CASE_ITEM = getDataTestSubjectSelector(
   'tiIndicatorFlyoutAddToCaseContextMenu'
 );
-export const CREATE_NEW_CASE_FROM_MODAL_BUTTON = getDataTestSubjectSelector('createNewCaseBtn');
+export const CREATE_NEW_CASE_FROM_MODAL_BUTTON = getDataTestSubjectSelector(
+  'cases-table-add-case-filter-bar'
+);
 export const SELECT_EXISTING_CASE = `.euiButton`;
 export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
 export const CASE_COMMENT_EXTERNAL_REFERENCE = getDataTestSubjectSelector(

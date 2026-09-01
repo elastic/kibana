@@ -17,6 +17,7 @@ import {
   withActionIcons,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
+import { ALERT_STATUS_ACTION_IDS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { ADD_TO_CASE_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { EVENT_FILTER_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
 import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
@@ -54,9 +55,9 @@ interface DocumentDetailsActionMenuProps {
 }
 
 const ALERT_STATUS_ICON_COLORS = {
-  'acknowledged-alert-status': 'primary',
-  'alert-close-context-menu-item': 'subdued',
-  'open-alert-status': 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  'close-alert-with-reason': 'subdued',
 } as const;
 
 const ACTION_ICONS_BY_ID = {
@@ -121,7 +122,7 @@ export const DocumentDetailsActionMenu = ({
       ...(osqueryAvailable ? osqueryItems : []),
     ];
     const actionGroups = [
-      showAlertActions ? statusItems : [],
+      showAlertActions ? withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS) : [],
       alertManagementItems,
       exceptionActionItems,
       responseActionItems,
@@ -135,10 +136,7 @@ export const DocumentDetailsActionMenu = ({
         : []),
     ]);
 
-    return withStatusDotIcons(
-      withActionIcons(orderedItems, ACTION_ICONS_BY_ID),
-      ALERT_STATUS_ICON_COLORS
-    );
+    return withActionIcons(orderedItems, ACTION_ICONS_BY_ID);
   }, [
     addToCaseItems,
     alertAssigneeItems,

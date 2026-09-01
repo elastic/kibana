@@ -16,7 +16,8 @@ export interface EntityCasePermissions {
 /**
  * Returns if a user can add an entity to a new or existing case.
  * `createComment` is required because attachments are added as case comment/user-action entries.
- * Existing case requires `update` + `createComment`; new case requires `create` + `createComment`.
+ * Either `create` or `update` is sufficient for attaching: `create` to attach to a new case,
+ * `update` to attach to an existing one.
  * Owner is scoped to `APP_ID` (`securitySolution`) so permissions match what the Cases API enforces.
  */
 export const useEntityCasePermissions = (): EntityCasePermissions => {
