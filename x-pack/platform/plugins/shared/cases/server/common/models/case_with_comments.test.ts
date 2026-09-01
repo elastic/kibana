@@ -643,7 +643,9 @@ describe('CaseCommentModel', () => {
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('preserves scalar metadata.index when a unified (v2) event attachment has array attachmentId', async () => {
+    it('broadcasts a scalar metadata.index to match array attachmentId of a unified (v2) event attachment', async () => {
+      // `attachmentId` is always normalized to an array (see `newIds` above); `metadata.index`
+      // must stay symmetric with it instead of leaking a lone scalar into the persisted shape.
       const unifiedEventWithScalarIndex = {
         type: SECURITY_EVENT_ATTACHMENT_TYPE,
         owner: SECURITY_SOLUTION_OWNER,
@@ -662,14 +664,18 @@ describe('CaseCommentModel', () => {
 
       expect(attachments.length).toBe(1);
       const unifiedCall = attachments[0] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string } };
+        attributes: { attachmentId: string[]; metadata: { index: string[] } };
       };
       expect(unifiedCall.attributes.attachmentId).toEqual([
         'event-id-1',
         'event-id-2',
         'event-id-3',
       ]);
-      expect(unifiedCall.attributes.metadata.index).toBe('test-events-index');
+      expect(unifiedCall.attributes.metadata.index).toEqual([
+        'test-events-index',
+        'test-events-index',
+        'test-events-index',
+      ]);
     });
 
     it('does not remove alerts not attached to the case', async () => {
@@ -1140,6 +1146,29 @@ describe('CaseCommentModel', () => {
 
       expect(args.updatedAttributes.total_alerts).toEqual(2);
       expect(args.updatedAttributes.total_comments).toEqual(1);
+    });
+
+    it('does not treat a legacy actions payload as a comment attachment', async () => {
+      // `actions` has its own `comment` field but is not Lens-reference-eligible
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            type: AttachmentType.actions,
+            comment: 'Isolating this for investigation',
+            actions: {
+              targets: [{ endpointId: '123', hostname: 'windows-host-1' }],
+              type: 'isolate',
+            },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.attachmentService.getter.get).not.toHaveBeenCalled();
     });
   });
 
