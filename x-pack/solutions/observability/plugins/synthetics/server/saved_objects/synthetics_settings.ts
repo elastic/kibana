@@ -29,7 +29,7 @@ export const syntheticsSettings: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    icon: 'uptimeApp',
+    icon: 'gear',
     getTitle: () =>
       i18n.translate('xpack.synthetics.settings.index', {
         defaultMessage: 'Synthetics settings',

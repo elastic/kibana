@@ -29,7 +29,7 @@ export const logViewSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'name',
     displayName: 'log view',
     getTitle: getLogViewTitle,
-    icon: 'logsApp',
+    icon: 'documents',
     importableAndExportable: true,
   },
   mappings: {
