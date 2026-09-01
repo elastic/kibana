@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
     "@kbn/spaces-plugin",
