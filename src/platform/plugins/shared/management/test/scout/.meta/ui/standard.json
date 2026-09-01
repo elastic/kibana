@@ -5,22 +5,8 @@
   ],
   "tests": [
     {
-      "id": "400bbfe0d93a22b-9967bb024eeac1e",
-      "title": "Stack Management - accessibility landing page has no a11y violations",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_a11y.spec.ts",
-        "line": 24,
-        "column": 89
-      }
-    },
-    {
-      "id": "ab5e730aba1cc4c-a040694ac1e8817",
-      "title": "Management plugin routing mounts a registered section and routes within it",
+      "id": "ab5e730aba1cc4c-68f1e2c9c26ae48",
+      "title": "Management plugin routing opens a registered section from the sidebar and returns home",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -28,7 +14,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
-        "line": 42,
+        "line": 55,
         "column": 46
       }
     },
@@ -42,7 +28,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
-        "line": 64,
+        "line": 83,
         "column": 7
       }
     }
