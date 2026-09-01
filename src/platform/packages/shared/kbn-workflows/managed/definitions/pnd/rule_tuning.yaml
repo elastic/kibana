@@ -39,36 +39,18 @@ consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
-  # Written onto every alert that reached a decision, and filtered out by the harvest,
-  # so a later sweep cannot rediagnose the same alerts into the same proposal.
-  reviewed_tag: detection-watch:tuning-reviewed
-  dismissed_tag: detection-watch:tuning-dismissed
-  applied_tag: detection-watch:tuning-applied
-  dismissed_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-dismissed
-  applied_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-applied
 steps:
-  # Scoped to one space because the tag API writes to the space's own alerts index, so
-  # a cross-space harvest would keep rediagnosing alerts it can never mark.
-  # `allow_partial_results: false` because a partial aggregation would undercount
-  # fp_count and return a short alert list, leaving alerts that drove a decision
-  # untagged. The reviewed_tag filter ensures already-processed alerts are excluded.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
-      allow_partial_results: false
       query: |-
-        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+        FROM .alerts-security.alerts-*
         | WHERE `kibana.alert.workflow_status` == "closed"
           AND `kibana.alert.workflow_reason` == "false_positive"
           AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
-          AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
-        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp), alert_ids = MV_SLICE(VALUES(_id), 0, 999) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
+        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count }}
-        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at
         | SORT fp_count DESC
         | LIMIT 25
     on-failure:
@@ -449,25 +431,6 @@ steps:
             The approved tuning change failed to apply automatically. Apply it in the
             Detection Rules UI.
 
-      # ES|QL rows arrive as positional arrays; item.5 is the sixth KEEP field: alert_ids.
-      # Both paths write the reviewed tag; the outcome tag differentiates approved vs dismissed.
-      - name: mark_alerts_applied
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == true }}"
-        on-failure:
-          continue: true
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.applied_tags }}"
-
-      - name: mark_alerts_dismissed
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == false }}"
-        on-failure:
-          continue: true
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.dismissed_tags }}"
 
   # Size is computed on its own because comparison operators cannot follow a filter chain.
   - name: count_examined_rules
