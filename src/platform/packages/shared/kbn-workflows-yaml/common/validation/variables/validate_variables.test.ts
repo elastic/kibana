@@ -216,7 +216,7 @@ describe('validateVariables', () => {
     expect(result).toEqual([expectedError]);
     expect(mockGetContextSchemaForStep).toHaveBeenCalledTimes(2);
     expect(mockValidateVariable).toHaveBeenCalledTimes(1);
-    expect(mockValidateVariable).toHaveBeenCalledWith(validatedVariable, mockStepSchema);
+    expect(mockValidateVariable).toHaveBeenCalledWith(validatedVariable, mockStepSchema, undefined);
   });
 
   it('propagates unexpected validator failures', () => {
@@ -358,7 +358,7 @@ describe('validateVariables', () => {
       mockWorkflowGraph,
       'step-a'
     );
-    expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
+    expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext, undefined);
   });
 
   it('should handle foreach variables', () => {
