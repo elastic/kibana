@@ -20,7 +20,7 @@
  */
 
 import type { AssignTag, CaptureTag, ForTag, Tag, Template } from 'liquidjs';
-import { parseTemplateString } from '@kbn/workflows-yaml';
+import { parseTemplateString } from '../../liquid/liquid_parse_cache';
 
 export interface AssignVariable {
   name: string;

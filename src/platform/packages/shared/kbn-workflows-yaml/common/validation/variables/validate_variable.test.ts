@@ -8,23 +8,18 @@
  */
 
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import { parseVariablePath, type VariableItem } from '@kbn/workflows-yaml';
+import { parseVariablePath } from '../parse_variable_path';
+import type { VariableItem } from '../types';
 import { z } from '@kbn/zod/v4';
 
 // Mock the imports
-jest.mock('@kbn/workflows-yaml', () => ({
-  ...jest.requireActual('@kbn/workflows-yaml'),
-  parseVariablePath: jest.fn(),
-}));
+jest.mock('../parse_variable_path');
 jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path');
-jest.mock('../../workflow_context/lib/get_foreach_state_schema');
+jest.mock('../context/get_foreach_state_schema');
 
 import { validateVariable } from './validate_variable';
-import {
-  InvalidForeachParameterError,
-  InvalidForeachParameterErrorCodes,
-} from '../../workflow_context/lib/errors';
-import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
+import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from '../context/errors';
+import { getForeachItemSchema } from '../context/get_foreach_state_schema';
 
 const mockParseVariablePath = parseVariablePath as jest.MockedFunction<typeof parseVariablePath>;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
