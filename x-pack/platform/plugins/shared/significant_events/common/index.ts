@@ -108,8 +108,6 @@ export type {
   RunQuotaReserveReason,
   RunQuotaReserveResponse,
   RunQuotaSettings,
-  RunQuotaSkippedEvent,
-  RunQuotaSkippedResponse,
   RunQuotaStatusResponse,
   RunQuotaWindow,
   RunQuotasResponse,

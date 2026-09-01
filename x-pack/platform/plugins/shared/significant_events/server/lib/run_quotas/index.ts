@@ -40,16 +40,13 @@ export {
   getRunQuotaSavedObjectTypes,
   RUN_QUOTA_LEDGER_SO_TYPE,
   RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS,
-  RUN_QUOTA_MAX_DECISIONS,
-  RUN_QUOTA_MAX_DENIED_GRANT_KEYS,
-  RUN_QUOTA_MAX_SKIPPED_ROWS,
+  RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
 } from './saved_objects';
 export type {
-  RunQuotaInvestigationDecision,
+  RunQuotaAllowedInvestigationKey,
   RunQuotaLedgerAttributes,
   RunQuotaSettingsAttributes,
-  RunQuotaSkippedRow,
 } from './saved_objects';
 export { dayKey, resolveDailyWindow } from './window';

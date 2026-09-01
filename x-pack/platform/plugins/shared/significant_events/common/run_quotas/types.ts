@@ -59,10 +59,7 @@ export interface RunBudgetGroupUsage {
   used: number;
   counted: number;
   remaining: number | null;
-  withinLimitGrantCount: number;
-  criticalPastLimitGrantCount: number;
-  totalSkipped: number;
-  decisionsEvicted: boolean;
+  criticalOverrideCount: number;
 }
 
 export interface RunQuotasResponse {
@@ -108,20 +105,5 @@ export type RunQuotaReserveReason = 'ineligible' | 'limit';
 
 export interface RunQuotaReserveResponse {
   granted: boolean;
-  pastLimit: boolean;
   reason?: RunQuotaReserveReason;
-}
-
-export interface RunQuotaSkippedEvent {
-  eventUuid: string;
-  eventId: string;
-  severity: string;
-  decidedAt: string;
-}
-
-export interface RunQuotaSkippedResponse {
-  rows: RunQuotaSkippedEvent[];
-  totalSkipped: number;
-  truncated: boolean;
-  decisionsEvicted: boolean;
 }

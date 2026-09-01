@@ -41,14 +41,9 @@ const ledgerAttributes = {
   date: '2026-08-31',
   group: 'future_group',
   count: 0,
-  withinLimitGrantCount: 0,
-  criticalPastLimitGrantCount: 0,
+  criticalOverrideCount: 0,
   allowedGrantKeys: [],
-  deniedGrantKeys: [],
-  decisions: [],
-  skipped: [],
-  totalSkipped: 0,
-  decisionsEvicted: false,
+  allowedInvestigationKeys: [],
   futureTopLevel: { retained: true },
 };
 

@@ -9,9 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { RunQuotaReserveResponse } from '../../../common/run_quotas';
 import type { InvestigatableEventResolution } from '../significant_events/events/event_client';
 import {
-  RUN_QUOTA_MAX_DECISIONS,
-  RUN_QUOTA_MAX_SKIPPED_ROWS,
-  type RunQuotaInvestigationDecision,
+  RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
+  type RunQuotaAllowedInvestigationKey,
 } from './saved_objects';
 import {
   mutateRunQuotaLedger,
@@ -41,7 +40,6 @@ export const reserveInvestigationRunQuota = async ({
   spaceId,
   actor,
   logger,
-  now = new Date(),
   waitForEvidence = waitForInvestigationEvidence,
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
@@ -54,10 +52,9 @@ export const reserveInvestigationRunQuota = async ({
   spaceId: string;
   actor: string;
   logger: Logger;
-  now?: Date;
   waitForEvidence?: typeof waitForInvestigationEvidence;
 }): Promise<RunQuotaReserveResponse> => {
-  await validateInvestigationProvenance({
+  const { taskRunAt } = await validateInvestigationProvenance({
     request,
     executionId,
     spaceId,
@@ -65,7 +62,7 @@ export const reserveInvestigationRunQuota = async ({
   });
   const settings = await readRunQuotaSettings(internalRepository);
   if (!settings.enforcementEnabled) {
-    return { granted: true, pastLimit: false };
+    return { granted: true };
   }
   await waitForEvidence({
     executionReader,
@@ -76,91 +73,61 @@ export const reserveInvestigationRunQuota = async ({
 
   const resolvedEvent = await eventResolver.resolveInvestigatableEvent(eventId, eventUuid);
   if (!resolvedEvent.eligible) {
-    return { granted: false, pastLimit: false, reason: 'ineligible' };
+    return { granted: false, reason: 'ineligible' };
   }
 
   const limit = settings.limits.investigation;
   if (!limit?.enabled) {
-    return { granted: true, pastLimit: false };
+    return { granted: true };
   }
 
-  const decidedAt = now.toISOString();
   let response: RunQuotaReserveResponse = {
     granted: false,
-    pastLimit: false,
     reason: 'limit',
   };
   await mutateRunQuotaLedger({
     internalRepository,
-    date: dayKey(resolveDailyWindow(now)),
+    date: dayKey(resolveDailyWindow(new Date(taskRunAt))),
     group: 'investigation',
     mutation: (ledger) => {
-      const existingDecision = ledger.decisions.find(
-        (decision) => decision.eventUuid === eventUuid
+      const existingKey = ledger.allowedInvestigationKeys.find(
+        (key) => key.eventUuid === eventUuid
       );
-      if (existingDecision) {
-        if (existingDecision.eventId !== eventId) {
-          throw new Error('Investigation decision event identity does not match');
+      if (existingKey) {
+        if (existingKey.eventId !== eventId) {
+          throw new Error('Allowed investigation event identity does not match');
         }
-        response = {
-          granted: existingDecision.granted,
-          pastLimit: existingDecision.pastLimit,
-          ...(existingDecision.granted ? {} : { reason: 'limit' as const }),
-        };
-        return {};
+        response = { granted: true };
+        return undefined;
       }
 
       const withinLimit = ledger.count < limit.max;
-      const criticalPastLimit = !withinLimit && resolvedEvent.severity === '80-critical';
-      const granted = withinLimit || criticalPastLimit;
-      const decision: RunQuotaInvestigationDecision = {
-        eventUuid,
-        eventId,
-        actor,
-        granted,
-        pastLimit: criticalPastLimit,
-        decidedAt,
-      };
-      const allDecisions = [...ledger.decisions, decision];
-      const decisionsEvicted = allDecisions.length > RUN_QUOTA_MAX_DECISIONS;
-      const decisions = decisionsEvicted
-        ? allDecisions.slice(-RUN_QUOTA_MAX_DECISIONS)
-        : allDecisions;
+      const criticalOverride = !withinLimit && resolvedEvent.severity === '80-critical';
+      const granted = withinLimit || criticalOverride;
 
       response = {
         granted,
-        pastLimit: criticalPastLimit,
         ...(granted ? {} : { reason: 'limit' as const }),
       };
+      if (
+        granted &&
+        ledger.allowedInvestigationKeys.length >= RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS
+      ) {
+        throw new Error('Run quota ledger cannot record another accepted investigation');
+      }
       logger.info(
-        `Investigation run quota decision actor=[${actor}] eventId=[${eventId}] granted=[${granted}] pastLimit=[${criticalPastLimit}]`
+        `Investigation run quota decision actor=[${actor}] eventId=[${eventId}] granted=[${granted}] criticalOverride=[${criticalOverride}]`
       );
 
-      if (granted) {
-        return {
-          count: ledger.count + 1,
-          withinLimitGrantCount: ledger.withinLimitGrantCount + (withinLimit ? 1 : 0),
-          criticalPastLimitGrantCount:
-            ledger.criticalPastLimitGrantCount + (criticalPastLimit ? 1 : 0),
-          decisions,
-          decisionsEvicted: ledger.decisionsEvicted || decisionsEvicted,
-        };
+      if (!granted) {
+        return undefined;
       }
 
+      const allowedKey: RunQuotaAllowedInvestigationKey = { eventUuid, eventId };
       return {
-        decisions,
-        skipped: [
-          ...ledger.skipped,
-          {
-            eventUuid,
-            eventId,
-            spaceId,
-            severity: resolvedEvent.severity,
-            decidedAt,
-          },
-        ].slice(-RUN_QUOTA_MAX_SKIPPED_ROWS),
-        totalSkipped: ledger.totalSkipped + 1,
-        decisionsEvicted: ledger.decisionsEvicted || decisionsEvicted,
+        count: ledger.count + 1,
+        criticalOverrideCount: ledger.criticalOverrideCount + (criticalOverride ? 1 : 0),
+        allowedInvestigationKeys: [...ledger.allowedInvestigationKeys, allowedKey],
       };
     },
   });

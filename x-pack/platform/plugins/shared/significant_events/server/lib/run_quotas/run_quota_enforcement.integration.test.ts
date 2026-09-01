@@ -22,8 +22,7 @@ import { getRunQuotaLedgerId, mutateRunQuotaSettings } from './repository';
 import { reserveInvestigationRunQuota } from './reserve';
 import {
   RUN_QUOTA_LEDGER_SO_TYPE,
-  RUN_QUOTA_MAX_DECISIONS,
-  RUN_QUOTA_MAX_DENIED_GRANT_KEYS,
+  RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
   type RunQuotaLedgerAttributes,
@@ -231,7 +230,7 @@ describe('worker ledger integration', () => {
     ).toBeUndefined();
   });
 
-  it('replays a denied worker decision after the limit is raised', async () => {
+  it('reconsiders a denied worker after the limit is raised', async () => {
     const repository = createInMemoryRunQuotaRepository();
     await enableLimit(repository.client, 'ki_extraction', 1);
     const executionReader = makeExecutionReader(
@@ -268,64 +267,14 @@ describe('worker ledger integration', () => {
         group: 'ki_extraction',
         spaceId: 'default',
       })
-    ).resolves.toEqual({ allowed: false });
+    ).resolves.toEqual({ allowed: true });
 
     const ledger = repository.getAttributes<RunQuotaLedgerAttributes>(
       RUN_QUOTA_LEDGER_SO_TYPE,
       getRunQuotaLedgerId('2026-08-31', 'ki_extraction')
     );
-    expect(ledger?.count).toBe(1);
-    expect(ledger?.deniedGrantKeys).toHaveLength(1);
-  });
-
-  it('evicts the oldest denied worker key at the storage boundary', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    await enableLimit(repository.client, 'ki_extraction', 1);
-    const executionReader = makeExecutionReader(
-      makeKiExecutions([{ id: 'new-child', streamName: 'logs.new' }])
-    );
-    const { grantKey } = await validateWorkerProvenance({
-      request: makeRequest('new-child'),
-      executionId: 'new-child',
-      group: 'ki_extraction',
-      spaceId: 'default',
-      executionReader,
-    });
-    repository.seed(RUN_QUOTA_LEDGER_SO_TYPE, getRunQuotaLedgerId('2026-08-31', 'ki_extraction'), {
-      date: '2026-08-31',
-      group: 'ki_extraction',
-      count: 1,
-      withinLimitGrantCount: 0,
-      criticalPastLimitGrantCount: 0,
-      allowedGrantKeys: ['existing-grant'],
-      deniedGrantKeys: Array.from(
-        { length: RUN_QUOTA_MAX_DENIED_GRANT_KEYS },
-        (_, index) => `denied-${index}`
-      ),
-      decisions: [],
-      skipped: [],
-      totalSkipped: 0,
-      decisionsEvicted: false,
-    });
-
-    await expect(
-      consumeRunQuota({
-        internalRepository: repository.client,
-        executionReader,
-        request: makeRequest('new-child'),
-        executionId: 'new-child',
-        group: 'ki_extraction',
-        spaceId: 'default',
-      })
-    ).resolves.toEqual({ allowed: false });
-
-    const deniedGrantKeys = repository.getAttributes<RunQuotaLedgerAttributes>(
-      RUN_QUOTA_LEDGER_SO_TYPE,
-      getRunQuotaLedgerId('2026-08-31', 'ki_extraction')
-    )?.deniedGrantKeys;
-    expect(deniedGrantKeys).toHaveLength(RUN_QUOTA_MAX_DENIED_GRANT_KEYS);
-    expect(deniedGrantKeys).not.toContain('denied-0');
-    expect(deniedGrantKeys?.at(-1)).toBe(grantKey);
+    expect(ledger?.count).toBe(2);
+    expect(ledger?.allowedGrantKeys).toHaveLength(2);
   });
 
   it('grants valid workers without ledger writes while enforcement is off or uncapped', async () => {
@@ -377,13 +326,11 @@ describe('investigation ledger integration', () => {
     eventId,
     eventUuid,
     severity = '60-high',
-    now = new Date('2026-08-31T12:00:00.000Z'),
   }: {
     repository: ReturnType<typeof createInMemoryRunQuotaRepository>;
     eventId: string;
     eventUuid: string;
     severity?: '60-high' | '80-critical';
-    now?: Date;
   }) =>
     reserveInvestigationRunQuota({
       internalRepository: repository.client,
@@ -398,7 +345,6 @@ describe('investigation ledger integration', () => {
       spaceId: 'space-a',
       actor: 'elastic',
       logger,
-      now,
       waitForEvidence,
     });
 
@@ -427,12 +373,11 @@ describe('investigation ledger integration', () => {
       getRunQuotaLedgerId('2026-08-31', 'investigation')
     );
     expect(ledger?.count).toBe(10);
-    expect(ledger?.withinLimitGrantCount).toBe(10);
-    expect(ledger?.criticalPastLimitGrantCount).toBe(0);
-    expect(ledger?.totalSkipped).toBe(40);
+    expect(ledger?.criticalOverrideCount).toBe(0);
+    expect(ledger?.allowedInvestigationKeys).toHaveLength(10);
   });
 
-  it('preserves admission-time grant arithmetic through limit changes', async () => {
+  it('tracks critical exceptions and reconsiders denials after a limit increase', async () => {
     const repository = createInMemoryRunQuotaRepository();
     await enableLimit(repository.client, 'investigation', 2);
 
@@ -452,9 +397,11 @@ describe('investigation ledger integration', () => {
     await enableLimit(repository.client, 'investigation', 1);
     await expect(
       reserve({ repository, eventId: 'high-denied', eventUuid: 'uuid-4' })
-    ).resolves.toEqual({ granted: false, pastLimit: false, reason: 'limit' });
+    ).resolves.toEqual({ granted: false, reason: 'limit' });
     await enableLimit(repository.client, 'investigation', 4);
-    await reserve({ repository, eventId: 'high-after-raise', eventUuid: 'uuid-5' });
+    await expect(
+      reserve({ repository, eventId: 'high-denied', eventUuid: 'uuid-4' })
+    ).resolves.toEqual({ granted: true });
 
     const ledger = repository.getAttributes<RunQuotaLedgerAttributes>(
       RUN_QUOTA_LEDGER_SO_TYPE,
@@ -463,17 +410,13 @@ describe('investigation ledger integration', () => {
     expect(ledger).toEqual(
       expect.objectContaining({
         count: 4,
-        withinLimitGrantCount: 3,
-        criticalPastLimitGrantCount: 1,
-        totalSkipped: 1,
+        criticalOverrideCount: 1,
       })
     );
-    expect(ledger?.count).toBe(
-      (ledger?.withinLimitGrantCount ?? 0) + (ledger?.criticalPastLimitGrantCount ?? 0)
-    );
+    expect(ledger?.allowedInvestigationKeys).toHaveLength(4);
   });
 
-  it('replays a reservation decision without incrementing twice', async () => {
+  it('does not charge an accepted investigation twice', async () => {
     const repository = createInMemoryRunQuotaRepository();
     await enableLimit(repository.client, 'investigation', 1);
 
@@ -488,7 +431,7 @@ describe('investigation ledger integration', () => {
       eventUuid: 'uuid-1',
     });
 
-    expect(first).toEqual({ granted: true, pastLimit: false });
+    expect(first).toEqual({ granted: true });
     expect(replay).toEqual(first);
     expect(
       repository.getAttributes<RunQuotaLedgerAttributes>(
@@ -498,26 +441,37 @@ describe('investigation ledger integration', () => {
     ).toBe(1);
   });
 
-  it('evicts only the oldest decisions at the 500-decision boundary and keeps counting', async () => {
+  it('does not evict accepted investigations at the storage boundary', async () => {
     const repository = createInMemoryRunQuotaRepository();
     await enableLimit(repository.client, 'investigation', 10_000);
-
-    for (let index = 0; index <= RUN_QUOTA_MAX_DECISIONS; index++) {
-      await reserve({
-        repository,
-        eventId: `event-${index}`,
-        eventUuid: `uuid-${index}`,
-      });
-    }
-
-    const ledger = repository.getAttributes<RunQuotaLedgerAttributes>(
-      RUN_QUOTA_LEDGER_SO_TYPE,
-      getRunQuotaLedgerId('2026-08-31', 'investigation')
+    const allowedInvestigationKeys = Array.from(
+      { length: RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS },
+      (_, index) => ({ eventUuid: `uuid-${index}`, eventId: `event-${index}` })
     );
-    expect(ledger?.count).toBe(501);
-    expect(ledger?.decisions).toHaveLength(RUN_QUOTA_MAX_DECISIONS);
-    expect(ledger?.decisions[0].eventUuid).toBe('uuid-1');
-    expect(ledger?.decisionsEvicted).toBe(true);
+    repository.seed(RUN_QUOTA_LEDGER_SO_TYPE, getRunQuotaLedgerId('2026-08-31', 'investigation'), {
+      date: '2026-08-31',
+      group: 'investigation',
+      count: RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
+      criticalOverrideCount: 0,
+      allowedGrantKeys: [],
+      allowedInvestigationKeys,
+    });
+
+    await expect(
+      reserve({
+        repository,
+        eventId: 'critical-event',
+        eventUuid: 'critical-uuid',
+        severity: '80-critical',
+      })
+    ).rejects.toThrow('cannot record another accepted investigation');
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(
+      repository.getAttributes<RunQuotaLedgerAttributes>(
+        RUN_QUOTA_LEDGER_SO_TYPE,
+        getRunQuotaLedgerId('2026-08-31', 'investigation')
+      )
+    ).toEqual(expect.objectContaining({ count: 10_000, allowedInvestigationKeys }));
   });
 
   it('returns ineligible without a ledger mutation', async () => {
@@ -537,11 +491,10 @@ describe('investigation ledger integration', () => {
       spaceId: 'space-a',
       actor: 'elastic',
       logger,
-      now: new Date('2026-08-31T12:00:00.000Z'),
       waitForEvidence,
     });
 
-    expect(result).toEqual({ granted: false, pastLimit: false, reason: 'ineligible' });
+    expect(result).toEqual({ granted: false, reason: 'ineligible' });
     expect(
       repository.getAttributes(
         RUN_QUOTA_LEDGER_SO_TYPE,
@@ -605,13 +558,11 @@ describe('switch and limit persistence', () => {
       executionReader,
     });
     expect(
-      repository
-        .getAttributes<RunQuotaLedgerAttributes>(
-          RUN_QUOTA_LEDGER_SO_TYPE,
-          getRunQuotaLedgerId('2026-08-31', 'ki_extraction')
-        )
-        ?.deniedGrantKeys.includes(grantKey)
-    ).toBe(true);
+      repository.getAttributes<RunQuotaLedgerAttributes>(
+        RUN_QUOTA_LEDGER_SO_TYPE,
+        getRunQuotaLedgerId('2026-08-31', 'ki_extraction')
+      )?.allowedGrantKeys
+    ).not.toContain(grantKey);
     expect(
       repository.getAttributes(RUN_QUOTA_SETTINGS_SO_TYPE, RUN_QUOTA_SETTINGS_SO_ID)
     ).toBeDefined();

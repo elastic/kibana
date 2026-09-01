@@ -11,7 +11,6 @@ import { mutateRunQuotaLedger, readRunQuotaSettings } from './repository';
 import type { RunQuotaExecutionReader } from './provenance';
 import { validateWorkerProvenance } from './provenance';
 import { dayKey, resolveDailyWindow } from './window';
-import { RUN_QUOTA_MAX_DENIED_GRANT_KEYS } from './saved_objects';
 import type { RunQuotaSavedObjectsRepository } from './repository';
 
 export const consumeRunQuota = async ({
@@ -50,19 +49,11 @@ export const consumeRunQuota = async ({
     mutation: (ledger) => {
       if (ledger.allowedGrantKeys.includes(grantKey)) {
         allowed = true;
-        return {};
-      }
-      if (ledger.deniedGrantKeys.includes(grantKey)) {
-        allowed = false;
-        return {};
+        return undefined;
       }
       if (ledger.count >= limit.max) {
         allowed = false;
-        return {
-          deniedGrantKeys: [...ledger.deniedGrantKeys, grantKey].slice(
-            -RUN_QUOTA_MAX_DENIED_GRANT_KEYS
-          ),
-        };
+        return undefined;
       }
       allowed = true;
       return {

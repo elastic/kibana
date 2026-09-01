@@ -86,14 +86,9 @@ describe('run quota OCC repository', () => {
       date: '2026-08-31',
       group: 'detection',
       count: 1,
-      withinLimitGrantCount: 0,
-      criticalPastLimitGrantCount: 0,
+      criticalOverrideCount: 0,
       allowedGrantKeys: ['grant-1'],
-      deniedGrantKeys: [],
-      decisions: [],
-      skipped: [],
-      totalSkipped: 0,
-      decisionsEvicted: false,
+      allowedInvestigationKeys: [],
       futureTopLevel: { retained: true },
     };
     repository.get.mockResolvedValue(
@@ -116,6 +111,32 @@ describe('run quota OCC repository', () => {
     expect(result.futureTopLevel).toEqual({ retained: true });
     expect(result.count).toBe(2);
     expect(result.allowedGrantKeys).toEqual(['grant-1', 'grant-2']);
+  });
+
+  it('does not rewrite a ledger for a no-op mutation', async () => {
+    const repository = makeRepository();
+    const current: RunQuotaLedgerAttributes = {
+      date: '2026-08-31',
+      group: 'detection',
+      count: 1,
+      criticalOverrideCount: 0,
+      allowedGrantKeys: ['grant-1'],
+      allowedInvestigationKeys: [],
+    };
+    repository.get.mockResolvedValue(
+      makeSavedObject('ledger', getRunQuotaLedgerId('2026-08-31', 'detection'), current)
+    );
+
+    await expect(
+      mutateRunQuotaLedger({
+        internalRepository: repository,
+        date: '2026-08-31',
+        group: 'detection',
+        mutation: () => undefined,
+      })
+    ).resolves.toEqual(current);
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('uses deterministic ledger ids', () => {

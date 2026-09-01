@@ -17,7 +17,7 @@ import {
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
   RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS,
-  RUN_QUOTA_MAX_DENIED_GRANT_KEYS,
+  RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
   type RunQuotaLedgerAttributes,
   type RunQuotaSettingsAttributes,
 } from './saved_objects';
@@ -153,32 +153,24 @@ export const createEmptyRunQuotaLedger = (
   date,
   group,
   count: 0,
-  withinLimitGrantCount: 0,
-  criticalPastLimitGrantCount: 0,
+  criticalOverrideCount: 0,
   allowedGrantKeys: [],
-  deniedGrantKeys: [],
-  decisions: [],
-  skipped: [],
-  totalSkipped: 0,
-  decisionsEvicted: false,
+  allowedInvestigationKeys: [],
 });
 
 export type RunQuotaLedgerMutation = (
   current: RunQuotaLedgerAttributes
-) => Partial<RunQuotaLedgerAttributes>;
+) => Partial<RunQuotaLedgerAttributes> | undefined;
 
 const assertLedgerInvariant = (ledger: RunQuotaLedgerAttributes): void => {
   if (ledger.allowedGrantKeys.length > RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS) {
     throw new Error('Run quota ledger has too many allowed worker grant keys');
   }
-  if (ledger.deniedGrantKeys.length > RUN_QUOTA_MAX_DENIED_GRANT_KEYS) {
-    throw new Error('Run quota ledger has too many denied worker grant keys');
+  if (ledger.allowedInvestigationKeys.length > RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS) {
+    throw new Error('Run quota ledger has too many allowed investigation keys');
   }
-  if (
-    ledger.group === 'investigation' &&
-    ledger.count !== ledger.withinLimitGrantCount + ledger.criticalPastLimitGrantCount
-  ) {
-    throw new Error('Investigation run quota ledger grant counters do not sum to count');
+  if (ledger.criticalOverrideCount > ledger.count) {
+    throw new Error('Investigation critical override count exceeds the total grant count');
   }
 };
 
@@ -212,9 +204,13 @@ export const mutateRunQuotaLedger = async ({
     const current = currentSavedObject
       ? (currentSavedObject.attributes as RunQuotaLedgerAttributes)
       : createEmptyRunQuotaLedger(date, group);
+    const patch = mutation(current);
+    if (!patch) {
+      return current;
+    }
     const next = {
       ...current,
-      ...mutation(current),
+      ...patch,
       date,
       group,
     };
