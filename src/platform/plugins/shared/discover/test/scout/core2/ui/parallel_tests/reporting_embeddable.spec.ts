@@ -28,6 +28,9 @@ const createDashboardWithSavedSession = async (
 };
 
 spaceTest.describe('Discover session panel CSV export', { tag: '@local-stateful-classic' }, () => {
+  // Each scenario generates two reports, which can exceed Scout's default timeout under CI load.
+  spaceTest.setTimeout(5 * 60_000);
+
   spaceTest.beforeAll(async ({ apiServices, discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     await apiServices.discover.create(
