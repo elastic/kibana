@@ -233,6 +233,15 @@ export const matrixConfigSchema = schema.object({
      * presented as ranked. Omit to keep the raw ordering.
      */
     runStdev: schema.maybe(schema.number({ min: 0, max: 10 })),
+    /**
+     * Drop evaluators that score every model almost identically from the
+     * Overall aggregate. Such an evaluator carries no ranking information but
+     * still takes an equal share of the mean, compressing the spread between
+     * models and hiding the evaluators that do separate them. Detection is
+     * mechanical (see `evaluator_saturation.ts`); saturated evaluators are
+     * still rendered in their own columns, just not folded into Overall.
+     */
+    excludeSaturatedEvaluators: schema.boolean({ defaultValue: false }),
   }),
   /**
    * Renders the legacy single "Overall" column (weighted/mean over every base

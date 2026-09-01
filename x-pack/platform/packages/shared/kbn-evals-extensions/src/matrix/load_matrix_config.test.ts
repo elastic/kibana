@@ -27,7 +27,11 @@ describe('parseMatrixConfig', () => {
     expect(config.notRecommendedBelow).toBe(0);
     expect(config.notRecommendedLabel).toBe('Not recommended');
     expect(config.notRecommendedCountsAsZeroInOverall).toBe(true);
-    expect(config.overall).toEqual({ label: 'Overall', mode: 'weighted' });
+    expect(config.overall).toEqual({
+      label: 'Overall',
+      mode: 'weighted',
+      excludeSaturatedEvaluators: false,
+    });
     expect(config.showOverall).toBe(true);
     expect(config.composites).toEqual([]);
     expect(config.layout).toBeUndefined();

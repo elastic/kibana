@@ -526,3 +526,153 @@ describe('buildMatrix token axis', () => {
     expect(matrix.tokenCost!.models).toEqual([]);
   });
 });
+
+describe('buildMatrix saturated-evaluator exclusion', () => {
+  // Two evaluators per model: `discriminating` separates the models, `ceiling`
+  // returns effectively the same high score for everyone. Folding `ceiling`
+  // into Overall drags every model toward it and compresses the spread.
+  const buildScores = (): AggregatedModelScores[] =>
+    [
+      { id: 'model-a', discriminating: 0.9 },
+      { id: 'model-b', discriminating: 0.8 },
+      { id: 'model-c', discriminating: 0.7 },
+      { id: 'model-d', discriminating: 0.6 },
+      { id: 'model-e', discriminating: 0.5 },
+      { id: 'model-f', discriminating: 0.45 },
+      { id: 'model-g', discriminating: 0.4 },
+      { id: 'model-h', discriminating: 0.3 },
+      { id: 'model-i', discriminating: 0.2 },
+      { id: 'model-j', discriminating: 0.1 },
+    ].map(({ id, discriminating }) => ({
+      modelId: id,
+      suites: [
+        {
+          suiteId: 'suite-a',
+          datasets: [
+            {
+              datasetName: 'suite-a',
+              evaluators: [
+                { evaluatorName: 'discriminating', mean: discriminating, count: 10 },
+                { evaluatorName: 'ceiling', mean: 0.97, count: 10 },
+              ],
+            },
+          ],
+        },
+      ],
+    })) as unknown as AggregatedModelScores[];
+
+  const configWith = (excludeSaturatedEvaluators: boolean): MatrixConfig =>
+    parseMatrixConfig({
+      minCoverage: 1,
+      overall: { excludeSaturatedEvaluators },
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+      models: [
+        { id: 'model-a', label: 'A' },
+        { id: 'model-b', label: 'B' },
+        { id: 'model-c', label: 'C' },
+        { id: 'model-d', label: 'D' },
+        { id: 'model-e', label: 'E' },
+        { id: 'model-f', label: 'F' },
+        { id: 'model-g', label: 'G' },
+        { id: 'model-h', label: 'H' },
+        { id: 'model-i', label: 'I' },
+        { id: 'model-j', label: 'J' },
+      ],
+    });
+
+  const overallOf = (matrix: ReturnType<typeof buildMatrix>) =>
+    matrix.proprietary.map((row) =>
+      row.overall.kind === 'score' ? Number(row.overall.value.toFixed(3)) : undefined
+    );
+
+  it('widens the spread between models when the saturated evaluator is dropped', () => {
+    const scores = buildScores();
+    const before = overallOf(buildMatrix(scores, configWith(false)));
+    const after = overallOf(buildMatrix(scores, configWith(true)));
+
+    const spread = (values: Array<number | undefined>) =>
+      Math.max(...(values as number[])) - Math.min(...(values as number[]));
+
+    // Averaging in a flat evaluator halves the real difference between models.
+    expect(spread(before)).toBeCloseTo(4, 3);
+    expect(spread(after)).toBeCloseTo(8, 3);
+    expect(spread(after)).toBeGreaterThan(spread(before));
+  });
+
+  it('reports which evaluators were judged saturated', () => {
+    const matrix = buildMatrix(buildScores(), configWith(true));
+    const saturated = matrix.evaluatorSaturation.filter((entry) => entry.saturated);
+
+    expect(saturated.map((entry) => entry.evaluatorName)).toEqual(['ceiling']);
+  });
+
+  it('keeps the saturated evaluator in Overall when the config does not opt in', () => {
+    const matrix = buildMatrix(buildScores(), configWith(false));
+
+    // Detection is opt-in: nothing is reported and nothing is dropped.
+    expect(matrix.evaluatorSaturation).toEqual([]);
+    expect(overallOf(matrix)[0]).toBeCloseTo(9.35, 2);
+    expect(overallOf(matrix).at(-1)).toBeCloseTo(5.35, 2);
+  });
+});
+
+describe('buildMatrix sparse-column warning', () => {
+  const sparseConfig: MatrixConfig = parseMatrixConfig({
+    minCoverage: 1,
+    columns: [
+      { id: 'dense', label: 'Dense', suites: ['suite-a'], weight: 1 },
+      { id: 'sparse', label: 'Attack Discovery', suites: ['suite-b'], weight: 1 },
+    ],
+    models: [
+      { id: 'model-a', label: 'A' },
+      { id: 'model-b', label: 'B' },
+      { id: 'model-c', label: 'C' },
+      { id: 'model-d', label: 'D' },
+    ],
+  });
+
+  // Every model runs `suite-a`; only one ever ran `suite-b`.
+  const sparseScores = ['model-a', 'model-b', 'model-c', 'model-d'].map((modelId) => ({
+    modelId,
+    suites: [
+      {
+        suiteId: 'suite-a',
+        datasets: [
+          {
+            datasetName: 'suite-a',
+            evaluators: [{ evaluatorName: 'correctness', mean: 0.8, count: 5 }],
+          },
+        ],
+      },
+      ...(modelId === 'model-a'
+        ? [
+            {
+              suiteId: 'suite-b',
+              datasets: [
+                {
+                  datasetName: 'suite-b',
+                  evaluators: [{ evaluatorName: 'correctness', mean: 0.9, count: 5 }],
+                },
+              ],
+            },
+          ]
+        : []),
+    ],
+  })) as unknown as AggregatedModelScores[];
+
+  it('warns that a column covering a minority of models cannot rank', () => {
+    const log = { warning: jest.fn() };
+    buildMatrix(sparseScores, sparseConfig, log);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('"Attack Discovery" has scores for only 1 of 4 models')
+    );
+  });
+
+  it('stays quiet about a column every model ran', () => {
+    const log = { warning: jest.fn() };
+    buildMatrix(sparseScores, sparseConfig, log);
+
+    expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('"Dense"'));
+  });
+});

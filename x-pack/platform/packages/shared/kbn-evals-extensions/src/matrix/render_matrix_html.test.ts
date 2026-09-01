@@ -22,7 +22,7 @@ const mockConfig: MatrixConfig = {
   notRecommendedLabel: 'Not recommended',
   notRecommendedCountsAsZeroInOverall: true,
   excludeEvaluators: [],
-  overall: { label: 'Overall', mode: 'weighted' },
+  overall: { label: 'Overall', mode: 'weighted', excludeSaturatedEvaluators: false },
   showOverall: true,
   columns: [
     {
@@ -56,6 +56,7 @@ const mockMatrix: Matrix = {
     { id: '__overall__', label: 'Overall', kind: 'overall' },
   ],
   overallLabel: 'Overall',
+  evaluatorSaturation: [],
   proprietary: [
     {
       modelId: 'test-model',
@@ -221,6 +222,7 @@ describe('renderMatrixHtml', () => {
       composites: [],
       displayColumns: [{ id: 'alert-analysis', label: 'Alert Analysis', kind: 'base' }],
       overallLabel: 'Overall',
+      evaluatorSaturation: [],
       proprietary: [
         {
           modelId: 'test-model',
@@ -519,5 +521,28 @@ describe('renderMatrixHtml', () => {
     expect(html).not.toContain('<li>note with <b>');
     // No block at all when notes are absent.
     expect(renderMatrixHtml(mockMatrix, mockConfig)).not.toContain('class="methodology"');
+  });
+});
+
+describe('renderMatrixHtml tie tiers', () => {
+  const tiered = (tier?: number): Matrix => ({
+    ...mockMatrix,
+    proprietary: [{ ...mockMatrix.proprietary[0], tier }],
+  });
+
+  it('labels the Overall score with its tie tier', () => {
+    // The tier is the honest unit of ranking: rows in one tier differ by less
+    // than the measured run-to-run noise, so publishing the bare number invites
+    // a precision the data does not have.
+    const html = renderMatrixHtml(tiered(2), mockConfig);
+
+    expect(html).toContain('T2');
+    expect(html).toContain('not distinguishable at the measured run-to-run noise level');
+  });
+
+  it('omits the tier marker when tiering is not configured', () => {
+    const html = renderMatrixHtml(tiered(undefined), mockConfig);
+
+    expect(html).not.toContain('Tie tier');
   });
 });

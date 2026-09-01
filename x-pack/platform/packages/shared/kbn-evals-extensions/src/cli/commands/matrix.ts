@@ -264,7 +264,7 @@ export const matrixCmd: Command<void> = {
 
     warnOnConfiguredNamesMissingFromData(config, aggregated, log);
 
-    const matrix = buildMatrix(aggregated, config);
+    const matrix = buildMatrix(aggregated, config, log);
     const generateHtml = flagsReader.boolean('html');
 
     // Query traces before rendering so they can be embedded in matrix.json —

@@ -32,6 +32,7 @@ const matrix: Matrix = {
     { id: OVERALL_COLUMN_ID, label: 'Overall', kind: 'overall' },
   ],
   overallLabel: 'Overall',
+  evaluatorSaturation: [],
   proprietary: [
     {
       modelId: 'claude',
@@ -128,6 +129,7 @@ describe('renderMatrix', () => {
         { id: 'overall_score', label: 'Overall Score', kind: 'composite' },
       ],
       overallLabel: 'Overall',
+      evaluatorSaturation: [],
       proprietary: [
         {
           modelId: 'm',
@@ -168,6 +170,7 @@ describe('renderMatrix', () => {
         { id: OVERALL_COLUMN_ID, label: 'Overall', kind: 'overall' },
       ],
       overallLabel: 'Overall',
+      evaluatorSaturation: [],
       proprietary: [
         {
           modelId: 'm',

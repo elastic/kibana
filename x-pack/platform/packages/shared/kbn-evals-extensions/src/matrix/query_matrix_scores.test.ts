@@ -242,6 +242,81 @@ describe('queryMatrixScores', () => {
     expect(model.suites[0].datasets.some((d) => d.datasetId.startsWith('prefix:'))).toBe(false);
   });
 
+  it('warns when a model ran fewer examples than its peers', async () => {
+    // A short run still produces a score, and that score renders identically to
+    // a complete one. 4.5-sonnet published 7.49 off 18 of 21 examples this way.
+    const score = (modelId: string, exampleIndex: number) =>
+      ({
+        task: { model: { id: modelId }, repetition_index: 0 },
+        evaluator: { model: { id: 'judge' }, name: 'Factuality', score: 1 },
+        example: { id: `ex-${exampleIndex}` },
+      } as unknown as EvaluationScoreDocument);
+
+    const { client } = createClient({
+      complete: [experiment({ experiment_id: 'exp-complete', modelId: 'complete' })],
+      short: [experiment({ experiment_id: 'exp-short', modelId: 'short' })],
+    });
+    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+      .fn()
+      .mockImplementation(async (experimentId: string) =>
+        experimentId === 'exp-complete'
+          ? [score('complete', 1), score('complete', 2), score('complete', 3)]
+          : [score('short', 1)]
+      );
+
+    const warn = jest.spyOn(log, 'warning');
+    await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['complete', 'short'],
+      branch: 'main',
+      prefixesBySuite: { 'suite-a': ['ex'] },
+    });
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('short scored on 1 of 3 examples in suite-a')
+    );
+  });
+
+  it('warns when one model was measured with more repetitions than the rest', async () => {
+    // Repetitions shrink judge variance, so a 3-rep row has a tighter error bar
+    // than a 1-rep row. Both render as one number, so the mismatch is invisible
+    // unless it is stated.
+    const score = (modelId: string, exampleIndex: number, repetitionIndex: number) =>
+      ({
+        task: { model: { id: modelId }, repetition_index: repetitionIndex },
+        evaluator: { model: { id: 'judge' }, name: 'Factuality', score: 1 },
+        example: { id: `ex-${exampleIndex}` },
+      } as unknown as EvaluationScoreDocument);
+
+    const { client } = createClient({
+      once: [experiment({ experiment_id: 'exp-once', modelId: 'once' })],
+      thrice: [experiment({ experiment_id: 'exp-thrice', modelId: 'thrice' })],
+    });
+    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+      .fn()
+      .mockImplementation(async (experimentId: string) =>
+        experimentId === 'exp-once'
+          ? [score('once', 1, 0), score('once', 2, 0)]
+          : [
+              score('thrice', 1, 0),
+              score('thrice', 1, 1),
+              score('thrice', 1, 2),
+              score('thrice', 2, 0),
+            ]
+      );
+
+    const warn = jest.spyOn(log, 'warning');
+    await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['once', 'thrice'],
+      branch: 'main',
+      prefixesBySuite: { 'suite-a': ['ex'] },
+    });
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('Repetition imbalance in suite-a'));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('thrice'));
+  });
+
   it('reads a suite from its branch override instead of the global branch', async () => {
     const { client, listExperiments } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],

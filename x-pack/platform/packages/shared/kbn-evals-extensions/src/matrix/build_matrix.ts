@@ -13,6 +13,8 @@ import type {
   MatrixTokenCostConfig,
 } from './load_matrix_config';
 import type { AggregatedEvaluatorScore, AggregatedModelScores } from './query_matrix_scores';
+import { detectSaturatedEvaluators, saturatedEvaluatorNames } from './evaluator_saturation';
+import type { EvaluatorSaturation } from './evaluator_saturation';
 
 /** A single matrix cell: either a numeric 0-10 score or "Not recommended". */
 export type MatrixCell =
@@ -100,6 +102,11 @@ export interface Matrix {
   /** Full ordered render list (base + composite + legacy overall). */
   displayColumns: MatrixDisplayColumn[];
   overallLabel: string;
+  /**
+   * Per-evaluator ranking power, computed across all models. Evaluators marked
+   * `saturated` were excluded from Overall when the config opts in.
+   */
+  evaluatorSaturation: EvaluatorSaturation[];
   proprietary: MatrixRow[];
   openSource: MatrixRow[];
   /** Present only when the config opts into the token axis. */
@@ -441,11 +448,28 @@ const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
   });
 };
 
-export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixConfig): Matrix => {
+export const buildMatrix = (
+  aggregated: AggregatedModelScores[],
+  config: MatrixConfig,
+  log?: { warning: (message: string) => void }
+): Matrix => {
   const byModelId = new Map(aggregated.map((entry) => [entry.modelId, entry]));
   const resolveScores = (modelConfig: MatrixModelConfig) =>
     byModelId.get(modelConfig.id) ??
     aggregated.find((entry) => matchesModel(modelConfig, entry.modelId));
+
+  // An evaluator that returns nearly the same high score for every model ranks
+  // nothing, but still takes an equal share of the Overall mean -- diluting the
+  // evaluators that DO separate models. Detect those mechanically and drop them
+  // from the aggregate so Overall reflects the metrics that actually move.
+  const saturation = config.overall.excludeSaturatedEvaluators
+    ? detectSaturatedEvaluators(aggregated)
+    : [];
+  const saturatedNames = saturatedEvaluatorNames(saturation);
+  const excludeEvaluators =
+    saturatedNames.size > 0
+      ? [...config.excludeEvaluators, ...saturatedNames]
+      : config.excludeEvaluators;
 
   const proprietary: MatrixRow[] = [];
   const openSource: MatrixRow[] = [];
@@ -459,7 +483,7 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
     const cells: Record<string, MatrixCell> = {};
     for (const column of config.columns) {
       cells[column.id] = buildCell(
-        computeColumnMean(modelScores, column, config.excludeEvaluators),
+        computeColumnMean(modelScores, column, excludeEvaluators),
         column,
         config
       );
@@ -525,6 +549,23 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
 
   const sortByPrimaryDesc = (a: MatrixRow, b: MatrixRow): number => sortValue(b) - sortValue(a);
 
+  const allRows = [...proprietary, ...openSource];
+  if (log && allRows.length > 0) {
+    // A column only a handful of models ever ran still contributes to their
+    // Overall, so those models are averaged over a different set of columns
+    // than everyone else -- and the column itself cannot rank anything.
+    // Measured 2026-09-01: attack-discovery 4/20, both migrations columns 1/20,
+    // all three pipeline gaps rather than model failures.
+    for (const column of config.columns) {
+      const scored = allRows.filter((row) => row.cells[column.id]?.kind === 'score').length;
+      if (scored > 0 && scored < allRows.length / 2) {
+        log.warning(
+          `Column "${column.label}" has scores for only ${scored} of ${allRows.length} models -- too sparse to rank, and the models that did run it are averaged over a different column set than the rest. Check whether the suite is scheduled in the weekly pipeline before reading these cells as model differences.`
+        );
+      }
+    }
+  }
+
   return {
     columns: config.columns.map((column) => ({
       id: column.id,
@@ -538,6 +579,7 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
     })),
     displayColumns: buildDisplayColumns(config),
     overallLabel: config.overall.label,
+    evaluatorSaturation: saturation,
     proprietary: assignTiers(proprietary.sort(sortByPrimaryDesc), config),
     openSource: assignTiers(openSource.sort(sortByPrimaryDesc), config),
     // Token magnitudes are meaningful only over base columns; composites are derived scores.

@@ -290,7 +290,13 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
     column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
   switch (cell.kind) {
     case 'score':
-      return `<span class="ok-dot">✓</span> ${cell.value}`;
+      // Publish the tie tier next to the Overall number. The tier is what the
+      // data supports; the two-decimal score is not -- adjacent rows inside a
+      // tier are separated by less than the measured run-to-run noise, so the
+      // ordering between them is an artifact of rounding, not a ranking.
+      return column.kind === 'overall' && row.tier !== undefined
+        ? `<span class="ok-dot">✓</span> ${cell.value} <span class="sub-num" title="Tie tier ${row.tier}: rows sharing a tier are not distinguishable at the measured run-to-run noise level, so their relative order is not meaningful">T${row.tier}</span>`
+        : `<span class="ok-dot">✓</span> ${cell.value}`;
     case 'not-recommended':
       return `<span class="status err">⛔ fail</span>`;
     // Distinct from 'missing' (—): scores existed but judge policy rejected all

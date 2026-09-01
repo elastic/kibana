@@ -13,6 +13,7 @@ const matrix: Matrix = {
   composites: [],
   displayColumns: [],
   overallLabel: 'Overall',
+  evaluatorSaturation: [],
   proprietary: [
     {
       modelId: 'measured',

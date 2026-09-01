@@ -340,7 +340,12 @@ export const queryMatrixScores = async (
    * all thrown away — the two are indistinguishable otherwise.
    */
   const excludedByModel = new Map<string, ExcludedScoreCounts>();
-  const exampleCoverage: Array<{ modelId: string; suiteId: string; examples: number }> = [];
+  const exampleCoverage: Array<{
+    modelId: string;
+    suiteId: string;
+    examples: number;
+    repetitions: number;
+  }> = [];
 
   for (const suiteId of suiteIds) {
     const suiteBranch = branchBySuite?.[suiteId] ?? branch;
@@ -444,7 +449,22 @@ export const queryMatrixScores = async (
               .filter((id): id is string => typeof id === 'string')
           );
           if (exampleIds.size > 0) {
-            exampleCoverage.push({ modelId, suiteId, examples: exampleIds.size });
+            // Repetitions average out judge variance, so a model measured once
+            // carries a materially wider error bar than one measured three
+            // times -- comparing them as equals overstates the precision of the
+            // single-shot row. Track the reps actually present in the docs
+            // rather than the configured intent, which can silently not apply.
+            const repetitions = new Set(
+              scores
+                .map((doc) => doc.task?.repetition_index)
+                .filter((index): index is number => typeof index === 'number')
+            );
+            exampleCoverage.push({
+              modelId,
+              suiteId,
+              examples: exampleIds.size,
+              repetitions: repetitions.size,
+            });
           }
         } catch (error) {
           log.warning(
@@ -493,6 +513,42 @@ export const queryMatrixScores = async (
           `${entry.modelId} scored on ${entry.examples} of ${full} examples in ${suiteId} -- its score rests on an incomplete run and is not comparable to models that ran all ${full}`
         );
       }
+    }
+
+    // Same modal-count logic for repetitions. A row measured once sits on a
+    // wider error bar than one measured three times, but both render as a
+    // single number, so the imbalance is invisible in the published artifact
+    // unless it is said out loud.
+    const repTally = new Map<number, number>();
+    for (const entry of exampleCoverage) {
+      if (entry.suiteId === suiteId && entry.repetitions > 0) {
+        repTally.set(entry.repetitions, (repTally.get(entry.repetitions) ?? 0) + 1);
+      }
+    }
+    let modalReps = 0;
+    let modalRepCount = 0;
+    for (const [reps, count] of repTally) {
+      // Tie-break toward the LOWER repetition count: with two models at 1 and 3
+      // reps the baseline is the cheaper, more common shape, and the 3-rep row
+      // is the outlier worth flagging. Preferring the higher count here would
+      // make the advantaged row the baseline and silence the warning entirely.
+      const unset = modalRepCount === 0;
+      if (unset || count > modalRepCount || (count === modalRepCount && reps < modalReps)) {
+        modalReps = reps;
+        modalRepCount = count;
+      }
+    }
+    const better = [...repTally.keys()].filter((reps) => reps > modalReps);
+    if (better.length > 0) {
+      const maxReps = Math.max(...better);
+      const advantaged = exampleCoverage
+        .filter((entry) => entry.suiteId === suiteId && entry.repetitions === maxReps)
+        .map((entry) => entry.modelId);
+      log.warning(
+        `Repetition imbalance in ${suiteId}: most models were measured with ${modalReps} repetition(s), but ${advantaged.join(
+          ', '
+        )} ran ${maxReps} -- the higher-repetition rows carry a narrower error bar, so ranking them against the rest compares estimates of unequal precision`
+      );
     }
   }
 
