@@ -10,7 +10,9 @@ import { CATALOG_SOURCE_URLS, resolveCatalogSourceUrl } from './catalog_source_u
 
 describe('CATALOG_SOURCE_URLS', () => {
   it('defines a URL for every approved catalog source id', () => {
-    expect(Object.keys(CATALOG_SOURCE_URLS).sort()).toEqual([...APPROVED_CATALOG_SOURCE_IDS].sort());
+    expect(Object.keys(CATALOG_SOURCE_URLS).sort()).toEqual(
+      [...APPROVED_CATALOG_SOURCE_IDS].sort()
+    );
   });
 
   it('returns undefined for ids outside the approved catalog', () => {

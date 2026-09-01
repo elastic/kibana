@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APPROVED_CATALOG_SOURCE_IDS } from './constants';
+import type { APPROVED_CATALOG_SOURCE_IDS } from './constants';
 
 /**
  * Public feed URLs for the fixed, code-authoritative source catalog.
@@ -28,8 +28,7 @@ export const CATALOG_SOURCE_URLS = {
   'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
   'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
   'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
-  'rss:fortiguard-threat-signal':
-    'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
+  'rss:fortiguard-threat-signal': 'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;
 
 /** Returns the catalog fetch URL for a source id, if it is part of the approved set. */
