@@ -569,7 +569,7 @@ export class CRUDClient {
 
     this.logger.debug(`createEntitiesFromSource: attempting to create ${euids.length} entities`);
     const resp = await this.esClient.bulk({
-      index: getLatestEntitiesIndexName(this.namespace),
+      index: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       operations,
       refresh: false,
     });
