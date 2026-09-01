@@ -31,7 +31,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
-import { useEvaluators, useModelConnectors } from '../../hooks/use_experiments_api';
+import { useEvaluators } from '../../hooks/use_experiments_api';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { buildOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
 import { ConnectorSelector, type ConnectorSelectorOption } from '../shared/connector_selector';
 import { EvaluatorSelector, type SelectedEvaluator } from '../shared/evaluator_selector';
@@ -46,7 +47,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
     error: evaluatorsError,
   } = useEvaluators();
   const {
-    data: connectorsData,
+    connectors,
     isLoading: isLoadingConnectors,
     error: connectorsError,
   } = useModelConnectors();
@@ -68,11 +69,11 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
 
   const connectorOptions = React.useMemo<ConnectorSelectorOption[]>(
     () =>
-      (connectorsData ?? []).map((connector) => ({
+      connectors.map((connector) => ({
         value: connector.id,
         label: connector.name,
       })),
-    [connectorsData]
+    [connectors]
   );
 
   const combinedErrorMessage =

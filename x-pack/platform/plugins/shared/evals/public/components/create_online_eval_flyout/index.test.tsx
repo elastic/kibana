@@ -9,11 +9,13 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CreateOnlineEvalFlyout } from '.';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
-import { useEvaluators, useModelConnectors } from '../../hooks/use_experiments_api';
+import { useEvaluators } from '../../hooks/use_experiments_api';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { parseOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
 
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_experiments_api');
+jest.mock('../../hooks/use_model_connectors');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
 
@@ -118,10 +120,10 @@ describe('CreateOnlineEvalFlyout', () => {
       error: null,
     } as unknown as ReturnType<typeof useEvaluators>);
     mockedUseModelConnectors.mockReturnValue({
-      data: [{ id: 'connector-allowed', name: 'Judge Connector' }],
+      connectors: [{ id: 'connector-allowed', name: 'Judge Connector' }],
       isLoading: false,
       error: null,
-    } as unknown as ReturnType<typeof useModelConnectors>);
+    });
   });
 
   const getByTestSubj = (testSubj: string) =>

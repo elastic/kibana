@@ -40,12 +40,12 @@ import { useDatasets } from '../../hooks/use_evals_api';
 import {
   useAgentBuilderAgents,
   useEvaluators,
-  useModelConnectors,
   useExperimentTemplates,
   useRunExperiment,
   useSaveExperimentWorkflow,
   usePreviewExperiment,
 } from '../../hooks/use_experiments_api';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { WorkflowYamlPreview } from '../workflow_yaml_preview';
 import { ConnectorSelector, type ConnectorSelectorOption } from '../shared/connector_selector';
@@ -71,7 +71,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const toasts = services.notifications?.toasts;
   const flyoutTitleId = useGeneratedHtmlId();
 
-  const { data: connectorsData, isLoading: connectorsLoading } = useModelConnectors();
+  const { connectors, isLoading: connectorsLoading } = useModelConnectors();
   const { data: datasetsData, isLoading: datasetsLoading } = useDatasets({ perPage: 1000 });
   const { data: evaluatorsData, isLoading: evaluatorsLoading } = useEvaluators();
   const { data: templatesData } = useExperimentTemplates();
@@ -117,8 +117,8 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   });
 
   const connectorOptions = useMemo<ConnectorSelectorOption[]>(
-    () => (connectorsData ?? []).map((c) => ({ label: c.name, value: c.id })),
-    [connectorsData]
+    () => connectors.map((c) => ({ label: c.name, value: c.id })),
+    [connectors]
   );
 
   const datasetOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(

@@ -20,7 +20,7 @@ import {
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
-import { useLlmConnectors } from '../../hooks/use_llm_connectors';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -29,7 +29,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
 jest.mock('../../hooks/use_evals_api');
-jest.mock('../../hooks/use_llm_connectors');
+jest.mock('../../hooks/use_model_connectors');
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
@@ -56,7 +56,7 @@ const mockedUseDeleteOnlineEvalWorkflow = jest.mocked(useDeleteOnlineEvalWorkflo
 const mockedUseUpdateOnlineEvalWorkflow = jest.mocked(useUpdateOnlineEvalWorkflow);
 const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
 const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
-const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
+const mockedUseModelConnectors = jest.mocked(useModelConnectors);
 
 const lensEmbeddableComponent = jest.fn((props: { attributes?: unknown }) => (
   <div data-test-subj="mockLensEmbeddable">{JSON.stringify(props.attributes)}</div>
@@ -124,7 +124,7 @@ describe('OnlineEvalDetailPage', () => {
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useUpdateOnlineEvalWorkflow>);
-    mockedUseLlmConnectors.mockReturnValue({
+    mockedUseModelConnectors.mockReturnValue({
       connectors: [{ id: 'connector-1', name: 'Default connector' }],
       isLoading: false,
       error: null,
@@ -291,5 +291,18 @@ describe('OnlineEvalDetailPage', () => {
     expect(await screen.findByTestId('onlineEvalDetailEverySelect')).toBeDisabled();
     expect(await screen.findByTestId('onlineEvalDetailWindowInput')).toBeDisabled();
     expect(await screen.findByTestId('onlineEvalDetailExtraWhereInput')).toBeDisabled();
+  });
+
+  it('keeps the configured connector selected when it is no longer selectable', async () => {
+    mockedUseModelConnectors.mockReturnValue({
+      connectors: [{ id: 'connector-2', name: 'Another connector' }],
+      isLoading: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const connectorCombo = await screen.findByTestId('onlineEvalDetailConnectorCombo');
+    expect(connectorCombo.querySelector('input')).toHaveValue('connector-1');
   });
 });

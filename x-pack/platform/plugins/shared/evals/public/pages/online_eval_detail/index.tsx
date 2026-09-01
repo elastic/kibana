@@ -62,7 +62,11 @@ import {
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import type { OnlineEvalWorkflowConfig } from '../../../common/online_evals/workflow_yaml';
-import { useLlmConnectors } from '../../hooks/use_llm_connectors';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
+import {
+  ConnectorSelector,
+  type ConnectorSelectorOption,
+} from '../../components/shared/connector_selector';
 
 const SCORES_PER_PAGE = 25;
 const ONLINE_SCORES_DATA_VIEW = '.evaluation-online-scores';
@@ -76,10 +80,6 @@ interface EvaluatorOption extends EuiComboBoxOptionOption<string> {
   value: string;
   kind: 'llm' | 'code';
   version: string;
-}
-
-interface ConnectorOption extends EuiComboBoxOptionOption<string> {
-  value: string;
 }
 
 const EVERY_OPTIONS = [
@@ -261,7 +261,11 @@ export const OnlineEvalDetailPage: React.FC = () => {
     error: workflowError,
   } = useOnlineEvalWorkflow(workflowId);
   const updateWorkflow = useUpdateOnlineEvalWorkflow();
-  const { connectors, isLoading: isLoadingConnectors, error: connectorsError } = useLlmConnectors();
+  const {
+    connectors,
+    isLoading: isLoadingConnectors,
+    error: connectorsError,
+  } = useModelConnectors();
   const [evaluatorOptions, setEvaluatorOptions] = React.useState<EvaluatorOption[]>([]);
   const [isLoadingEvaluators, setIsLoadingEvaluators] = React.useState(false);
   const [editErrorMessage, setEditErrorMessage] = React.useState<string | null>(null);
@@ -413,26 +417,28 @@ export const OnlineEvalDetailPage: React.FC = () => {
     },
   });
 
-  const connectorOptions = React.useMemo<ConnectorOption[]>(
-    () =>
-      connectors.map((connector) => ({
-        value: connector.id,
-        label: connector.name,
-      })),
-    [connectors]
-  );
+  const connectorOptions = React.useMemo<ConnectorSelectorOption[]>(() => {
+    const options = connectors.map((connector) => ({
+      value: connector.id,
+      label: connector.name,
+    }));
 
-  const selectedConnector = React.useMemo<ConnectorOption[]>(
-    () =>
-      draftState.draft?.connectorId
-        ? [
-            connectorOptions.find((option) => option.value === draftState.draft?.connectorId) ?? {
-              value: draftState.draft.connectorId,
-              label: draftState.draft.connectorId,
-            },
-          ]
-        : [],
-    [connectorOptions, draftState.draft?.connectorId]
+    // A configured connector that is no longer selectable (deleted, or not chat-capable) still
+    // needs an option, otherwise the combo box renders empty and hides what the workflow uses.
+    const configuredConnectorId = draftState.draft?.connectorId;
+    if (
+      configuredConnectorId &&
+      !options.some((option) => option.value === configuredConnectorId)
+    ) {
+      return [...options, { value: configuredConnectorId, label: configuredConnectorId }];
+    }
+
+    return options;
+  }, [connectors, draftState.draft?.connectorId]);
+
+  const selectedConnectorIds = React.useMemo<string[]>(
+    () => (draftState.draft?.connectorId ? [draftState.draft.connectorId] : []),
+    [draftState.draft?.connectorId]
   );
 
   const selectedEvaluators = React.useMemo<EvaluatorOption[]>(
@@ -1056,9 +1062,20 @@ export const OnlineEvalDetailPage: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
                     <EuiForm component="div">
-                      <EuiFormRow
-                        fullWidth
-                        aria-labelledby="onlineEvalDetailConnectorFieldTitle"
+                      <ConnectorSelector
+                        ariaLabelledBy="onlineEvalDetailConnectorFieldTitle"
+                        selectedConnectorIds={selectedConnectorIds}
+                        connectorOptions={connectorOptions}
+                        onChange={(connectorIds) => {
+                          setEditErrorMessage(null);
+                          draftState.setDraft((previous) =>
+                            previous
+                              ? { ...previous, connectorId: connectorIds[0] ?? '' }
+                              : previous
+                          );
+                        }}
+                        isLoading={isLoadingConnectors}
+                        isDisabled={!canEditSettings}
                         isInvalid={connectorMissing}
                         error={
                           connectorMissing
@@ -1070,30 +1087,9 @@ export const OnlineEvalDetailPage: React.FC = () => {
                               )
                             : undefined
                         }
-                      >
-                        <EuiComboBox
-                          fullWidth
-                          isLoading={isLoadingConnectors}
-                          options={connectorOptions}
-                          selectedOptions={selectedConnector}
-                          onChange={(options) => {
-                            setEditErrorMessage(null);
-                            draftState.setDraft((previous) =>
-                              previous
-                                ? {
-                                    ...previous,
-                                    connectorId:
-                                      (options[0] as ConnectorOption | undefined)?.value ?? '',
-                                  }
-                                : previous
-                            );
-                          }}
-                          singleSelection={{ asPlainText: true }}
-                          isDisabled={!canEditSettings}
-                          isInvalid={connectorMissing}
-                          data-test-subj="onlineEvalDetailConnectorCombo"
-                        />
-                      </EuiFormRow>
+                        dataTestSubj="onlineEvalDetailConnectorCombo"
+                        singleSelection
+                      />
                     </EuiForm>
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -17,11 +17,11 @@ import {
   useToggleOnlineEvalWorkflow,
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
-import { useLlmConnectors } from '../../hooks/use_llm_connectors';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
-jest.mock('../../hooks/use_llm_connectors');
+jest.mock('../../hooks/use_model_connectors');
 jest.mock('../../components/create_online_eval_flyout', () => ({
   CreateOnlineEvalFlyout: ({ onClose }: { onClose: () => void }) => (
     <div data-test-subj="createOnlineEvalFlyoutMock">
@@ -37,7 +37,7 @@ const mockedUseOnlineEvalWorkflows = jest.mocked(useOnlineEvalWorkflows);
 const mockedUseToggleOnlineEvalWorkflow = jest.mocked(useToggleOnlineEvalWorkflow);
 const mockedUseDeleteOnlineEvalWorkflow = jest.mocked(useDeleteOnlineEvalWorkflow);
 const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
-const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
+const mockedUseModelConnectors = jest.mocked(useModelConnectors);
 
 const renderPage = () => {
   const history = createMemoryHistory({ initialEntries: ['/online'] });
@@ -72,7 +72,7 @@ const buildWorkflow = (
 describe('OnlineEvalsListPage', () => {
   beforeEach(() => {
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
-    mockedUseLlmConnectors.mockReturnValue({
+    mockedUseModelConnectors.mockReturnValue({
       connectors: [{ id: 'connector-1', name: 'Judge connector' }],
       isLoading: false,
       error: null,
@@ -185,7 +185,7 @@ describe('OnlineEvalsListPage', () => {
   });
 
   it('shows warning callout and no empty-state CTA when no connectors exist', () => {
-    mockedUseLlmConnectors.mockReturnValue({
+    mockedUseModelConnectors.mockReturnValue({
       connectors: [],
       isLoading: false,
       error: null,

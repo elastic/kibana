@@ -14,14 +14,16 @@ export interface ConnectorSelectorOption {
 }
 
 interface Props {
-  label: string;
   selectedConnectorIds: string[];
   connectorOptions: ConnectorSelectorOption[];
   onChange: (connectorIds: string[]) => void;
   dataTestSubj: string;
+  label?: string;
+  ariaLabelledBy?: string;
   helpText?: string;
   isLoading?: boolean;
   isInvalid?: boolean;
+  isDisabled?: boolean;
   error?: string;
   fullWidth?: boolean;
   singleSelection?: boolean;
@@ -29,14 +31,16 @@ interface Props {
 }
 
 export const ConnectorSelector = ({
-  label,
   selectedConnectorIds,
   connectorOptions,
   onChange,
   dataTestSubj,
+  label,
+  ariaLabelledBy,
   helpText,
   isLoading = false,
   isInvalid = false,
+  isDisabled = false,
   error,
   fullWidth = true,
   singleSelection = false,
@@ -55,6 +59,7 @@ export const ConnectorSelector = ({
   return (
     <EuiFormRow
       label={label}
+      aria-labelledby={ariaLabelledBy}
       helpText={helpText}
       isInvalid={isInvalid}
       error={error}
@@ -64,6 +69,7 @@ export const ConnectorSelector = ({
         fullWidth={fullWidth}
         isLoading={isLoading}
         isInvalid={isInvalid}
+        isDisabled={isDisabled}
         options={options}
         selectedOptions={selectedOptions}
         onChange={(selected) => {

@@ -37,7 +37,7 @@ import {
   type OnlineEvalWorkflowListItem,
 } from '../../hooks/use_online_eval_workflows';
 import { CreateOnlineEvalFlyout } from '../../components/create_online_eval_flyout';
-import { useLlmConnectors } from '../../hooks/use_llm_connectors';
+import { useModelConnectors } from '../../hooks/use_model_connectors';
 
 const WORKFLOWS_DOCS_URL = 'https://www.elastic.co/docs/explore-analyze/workflows';
 const CONNECTORS_MANAGEMENT_URL =
@@ -57,7 +57,7 @@ export const OnlineEvalsListPage: React.FC = () => {
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = React.useState(false);
 
   const { data, isLoading, error, refetch } = useOnlineEvalWorkflows();
-  const { connectors, isLoading: isLoadingConnectors } = useLlmConnectors();
+  const { connectors, isLoading: isLoadingConnectors } = useModelConnectors();
   const toggleOnlineEvalWorkflow = useToggleOnlineEvalWorkflow();
   const deleteOnlineEvalWorkflow = useDeleteOnlineEvalWorkflow();
 
