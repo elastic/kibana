@@ -1,0 +1,39 @@
+{
+  "id": "sdlc-sync-health",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "SDLC sync pipeline health",
+    "tags": [
+      "SDLC Intelligence",
+      "pipeline",
+      "health",
+      "sync"
+    ],
+    "ruleTypeId": ".index-threshold",
+    "schedule": {
+      "interval": "1h"
+    },
+    "params": {
+      "index": [
+        ".workflows-executions"
+      ],
+      "timeField": "createdAt",
+      "aggType": "count",
+      "groupBy": "all",
+      "termSize": 0,
+      "thresholdComparator": ">",
+      "threshold": [
+        0
+      ],
+      "timeWindowSize": 4,
+      "timeWindowUnit": "h",
+      "filterKuery": "workflowId\\:*sdlc* and status\\:(\"failed\" or \"timed_out\")"
+    },
+    "alertDelay": {
+      "active": 1
+    },
+    "description": "Fires when any SDLC sync workflow execution ends in failed/timed_out state within the window. A silently-dead sync is the worst failure mode for a visibility platform: dashboards keep rendering stale data. Source: .workflows-executions (workflows plugin system index; rule template installs with the package, requires the stack's internal collections read privilege or a matching non-system index if the deployment blocks system-index alerting)."
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0"
+}

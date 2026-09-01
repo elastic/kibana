@@ -89,7 +89,7 @@ api_path() {
 
 get_workflow() {
   local id="$1"
-  kibana_curl -s "$(api_path "/api/workflows/workflow/${id}")"
+  kibana_curl -s "${KIBANA_URL}$(api_path "/api/workflows/workflow/${id}")"
 }
 
 run_workflow() {
@@ -104,7 +104,7 @@ wait_for_execution() {
   local deadline=$((SECONDS + POLL_SECS))
   while (( SECONDS < deadline )); do
     local body status
-    body="$(kibana_curl -s "$(api_path "/api/workflows/executions/${exec_id}?includeOutput=true")")"
+    body="$(kibana_curl -s "${KIBANA_URL}$(api_path "/api/workflows/executions/${exec_id}?includeOutput=true")")"
     status="$(node -e 'const j=JSON.parse(process.argv[1]); process.stdout.write(j.status||"");' "$body")"
     log "execution ${exec_id}: status=${status:-unknown}"
     case "$status" in

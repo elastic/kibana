@@ -13,6 +13,7 @@ tags:
   - graphql
   - pull-requests
 
+# BACKFILL: temporarily set pageSize/pagesPerRun/max-iterations high (e.g. 10/50/50) and initialWatermark to the desired horizon, run manually until caught up, then restore incremental values. At defaults (10x10) each run ingests ~100 items.
 consts:
   orgLogin: REPLACE_WITH_ORG_LOGIN
   githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
@@ -20,7 +21,7 @@ consts:
   pullRequestsIndex: github-intel-pull-requests
   syncSource: github-activity-pull-requests
   entityType: pull_request
-  pageSize: 100
+  pageSize: 10
   pagesPerRun: 10
   initialWatermark: '2024-01-01T00:00:00Z'
 
