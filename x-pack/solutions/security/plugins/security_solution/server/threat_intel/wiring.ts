@@ -20,6 +20,7 @@ import type {
 import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
+import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
 import {
   PROMOTE_THREAT_INDICATORS_TASK_ID,
   SCRUB_REPORT_CONTENT_TASK_ID,
@@ -29,6 +30,7 @@ import {
   scheduleScrubReportContentTask,
 } from './tasks';
 import { registerThreatIntelWorkflowSteps } from './workflows/step_types';
+import { installThreatIntelManagedWorkflowsAndMarkReady } from '../workflows/threat_intel_workflow/install';
 
 /**
  * Cross-lifecycle state the pipeline needs. Setup registers routes that only
@@ -191,6 +193,19 @@ export const startThreatIntel = ({
     // pipeline has no schema to work against, so the tasks stay unscheduled.
     void runtime.bootstrapReady
       .then(async () => {
+        if (plugins.workflowsExtensions) {
+          await installThreatIntelManagedWorkflowsAndMarkReady({
+            workflowsExtensions: plugins.workflowsExtensions,
+            logger: tiLogger,
+          });
+        }
+
+        await ensureIndicatorAliasForSpace({
+          esClient,
+          spaceId: 'default',
+          logger: tiLogger,
+        }).catch(() => {});
+
         await schedulePromoteThreatIndicatorsTask({
           taskManager,
           logger: logger.get('threatIntel', 'iocIndicatorSync'),

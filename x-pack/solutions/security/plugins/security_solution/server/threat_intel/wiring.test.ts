@@ -12,6 +12,8 @@ import type { ExperimentalFeatures } from '../../common';
 import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
+import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
+import { installThreatIntelManagedWorkflowsAndMarkReady } from '../workflows/threat_intel_workflow/install';
 import {
   registerPromoteThreatIndicatorsTask,
   registerScrubReportContentTask,
@@ -37,6 +39,12 @@ jest.mock('./tasks', () => ({
   scheduleScrubReportContentTask: jest.fn(),
 }));
 jest.mock('./workflows/step_types', () => ({ registerThreatIntelWorkflowSteps: jest.fn() }));
+jest.mock('../workflows/threat_intel_workflow/install', () => ({
+  installThreatIntelManagedWorkflowsAndMarkReady: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('./setup/indicator_alias', () => ({
+  ensureIndicatorAliasForSpace: jest.fn().mockResolvedValue(undefined),
+}));
 
 /**
  * Everything the pipeline registers. The flag-off case asserts every one of these is
@@ -51,6 +59,8 @@ const ALL_REGISTRATIONS = [
   ['promote task definition', registerPromoteThreatIndicatorsTask],
   ['scrub task definition', registerScrubReportContentTask],
   ['bootstrap', ensureThreatIntelBootstrap],
+  ['indicator alias', ensureIndicatorAliasForSpace],
+  ['managed workflows', installThreatIntelManagedWorkflowsAndMarkReady],
   ['promote task schedule', schedulePromoteThreatIndicatorsTask],
   ['scrub task schedule', scheduleScrubReportContentTask],
 ] as const;

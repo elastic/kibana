@@ -34,6 +34,8 @@ export const PROMOTE_THREAT_INDICATORS_TASK_ID = 'threat_intel:promote_threat_in
 const DEFAULT_INTERVAL = '15m';
 const LOOKBACK_ON_FIRST_RUN = 'now-30d';
 const PAGE_SIZE = 200;
+/** Indicator upserts per bulk request (two bulk lines per op). Keeps memory and request size bounded. */
+const BULK_OPS_CHUNK_SIZE = 250;
 const TASK_TIMEOUT = '2m';
 
 /**
@@ -469,7 +471,7 @@ export const SOURCES_UPSERT_SCRIPT_FOR_TEST = SOURCES_UPSERT_SCRIPT;
  * Statuses and error types worth waiting out. Everything else is treated as
  * permanent.
  */
-const RETRYABLE_BULK_STATUSES: ReadonlySet<number> = new Set([429, 502, 503, 504]);
+const RETRYABLE_BULK_STATUSES: ReadonlySet<number> = new Set([408, 429, 500, 502, 503, 504]);
 const RETRYABLE_BULK_ERROR_TYPES: ReadonlySet<string> = new Set([
   'es_rejected_execution_exception',
   'circuit_breaking_exception',
@@ -674,67 +676,82 @@ export const registerPromoteThreatIndicatorsTask = ({
 
               const ops = buildBulkOps(hits, now);
               if (ops.length > 0) {
-                const bulkBody: Array<BulkUpdateAction | BulkScriptedUpsert> = [];
-                for (const op of ops) {
-                  bulkBody.push({ update: { _index: op._index, _id: op._id } });
-                  bulkBody.push({
-                    script: {
-                      source: SOURCES_UPSERT_SCRIPT,
-                      lang: 'painless',
-                      params: op.scriptParams as Record<string, unknown>,
-                    },
-                    upsert: op.upsert,
-                  });
-                }
-                try {
-                  const bulkResponse = await esClient.bulk(
-                    { refresh: false, operations: bulkBody },
-                    { signal }
-                  );
-                  if (bulkResponse.errors) {
-                    const failedItems = bulkResponse.items
-                      .map((item) => item.update ?? item.index ?? item.create)
-                      .filter((action): action is estypes.BulkResponseItem => !!action?.error);
-                    const retryable = failedItems.filter(isRetryableBulkFailure);
-                    const permanent = failedItems.filter((item) => !isRetryableBulkFailure(item));
-
-                    if (retryable.length > 0) {
-                      hadRetryableWriteFailures = true;
-                      logger.error(
-                        `IOC indicator bulk hit ${retryable.length} transient rejection(s) of ` +
-                          `${ops.length} operations. Holding the sync checkpoint so the next run ` +
-                          `re-scans this range (first error: ${JSON.stringify(
-                            retryable[0].error ?? {}
-                          )})`
-                      );
-                    }
-
-                    if (permanent.length > 0) {
-                      indicatorsRejected += permanent.length;
-                      logger.error(
-                        `IOC indicator bulk permanently rejected ${permanent.length} of ` +
-                          `${ops.length} operations. These indicators are not searchable by ` +
-                          `Indicator Match rules and are being skipped so the sync checkpoint can ` +
-                          `advance: retrying them would fail the same way and stall promotion for ` +
-                          `every space. Ids: ${permanent
-                            .map((item) => item._id)
-                            .slice(0, 10)
-                            .join(', ')}${permanent.length > 10 ? ', …' : ''} ` +
-                          `(first error: ${JSON.stringify(permanent[0].error ?? {})})`
-                      );
-                    }
-
-                    indicatorsWritten += ops.length - failedItems.length;
-                  } else {
-                    indicatorsWritten += ops.length;
+                for (
+                  let chunkStart = 0;
+                  chunkStart < ops.length;
+                  chunkStart += BULK_OPS_CHUNK_SIZE
+                ) {
+                  const chunk = ops.slice(chunkStart, chunkStart + BULK_OPS_CHUNK_SIZE);
+                  const bulkBody: Array<BulkUpdateAction | BulkScriptedUpsert> = [];
+                  for (const op of chunk) {
+                    bulkBody.push({ update: { _index: op._index, _id: op._id } });
+                    bulkBody.push({
+                      script: {
+                        source: SOURCES_UPSERT_SCRIPT,
+                        lang: 'painless',
+                        params: op.scriptParams as Record<string, unknown>,
+                      },
+                      upsert: op.upsert,
+                    });
                   }
-                } catch (err) {
-                  const message = (err as Error).message ?? String(err);
-                  throwRetryableError(
-                    new Error(`Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`),
-                    new Date(Date.now() + 60_000)
-                  );
-                  return { state: previousState };
+                  try {
+                    const bulkResponse = await esClient.bulk(
+                      { refresh: false, operations: bulkBody },
+                      { signal }
+                    );
+                    if (bulkResponse.errors) {
+                      const failedItems = bulkResponse.items
+                        .map((item) => item.update ?? item.index ?? item.create)
+                        .filter((action): action is estypes.BulkResponseItem => !!action?.error);
+                      const retryable = failedItems.filter(isRetryableBulkFailure);
+                      const permanent = failedItems.filter((item) => !isRetryableBulkFailure(item));
+
+                      if (retryable.length > 0) {
+                        hadRetryableWriteFailures = true;
+                        logger.error(
+                          `IOC indicator bulk hit ${retryable.length} transient rejection(s) of ` +
+                            `${chunk.length} operations. Holding the sync checkpoint so the next run ` +
+                            `re-scans this range (first error: ${JSON.stringify(
+                              retryable[0].error ?? {}
+                            )})`
+                        );
+                      }
+
+                      if (permanent.length > 0) {
+                        indicatorsRejected += permanent.length;
+                        logger.error(
+                          `IOC indicator bulk permanently rejected ${permanent.length} of ` +
+                            `${chunk.length} operations. These indicators are not searchable by ` +
+                            `Indicator Match rules and are being skipped so the sync checkpoint can ` +
+                            `advance: retrying them would fail the same way and stall promotion for ` +
+                            `every space. Ids: ${permanent
+                              .map((item) => item._id)
+                              .slice(0, 10)
+                              .join(', ')}${permanent.length > 10 ? ', …' : ''} ` +
+                            `(first error: ${JSON.stringify(permanent[0].error ?? {})})`
+                        );
+                      }
+
+                      indicatorsWritten += chunk.length - failedItems.length;
+                    } else {
+                      indicatorsWritten += chunk.length;
+                    }
+                  } catch (err) {
+                    const message = (err as Error).message ?? String(err);
+                    const status = (err as { statusCode?: number }).statusCode;
+                    if (status === 503 || status === 429 || status === 500 || status === 408) {
+                      throwRetryableError(
+                        new Error(
+                          `Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`
+                        ),
+                        new Date(Date.now() + 60_000)
+                      );
+                    }
+                    throwUnrecoverableError(
+                      new Error(`Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`)
+                    );
+                    return { state: previousState };
+                  }
                 }
               }
 

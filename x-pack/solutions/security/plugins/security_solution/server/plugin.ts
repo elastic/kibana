@@ -336,14 +336,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   /**
    * Threat-intel supply pipeline setup. Gated on
-   * `threatIntelSupplyEnabled`. Does not install managed workflows (that
-   * lands in the follow-up PR that folds into the existing install-then-ready
-   * path).
+   * `threatIntelSupplyEnabled`. Managed workflow installation runs from
+   * `startThreatIntel` after bootstrap completes.
    */
   /**
    * Threat-intel supply pipeline start. Captures optional spaces /
-   * inference / actions / taskManager contracts, heals an empty catalog, and
-   * schedules the promote task. Does not install managed workflows.
+   * inference / actions / taskManager contracts, heals an empty catalog,
+   * installs managed workflows, and schedules the promote task.
    */
   public setup(
     core: SecuritySolutionPluginCoreSetupDependencies,
