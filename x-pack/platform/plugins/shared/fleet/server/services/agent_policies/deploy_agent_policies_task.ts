@@ -11,7 +11,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { chunk, sortBy } from 'lodash';
 
 import { agentPolicyService, appContextService } from '..';
@@ -19,6 +19,10 @@ import { DEPLOY_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
 import { runWithCache } from '../epm/packages/cache';
 
 const TASK_TYPE = 'fleet:deploy_agent_policies';
+
+interface DeployAgentPoliciesTaskParams {
+  agentPolicyIdsWithSpace: Array<{ id: string; spaceId: SpaceId }>;
+}
 
 export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSetupContract) {
   taskManagerSetup.registerTaskDefinitions({
@@ -38,9 +42,16 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
       createTaskRunner: ({ taskInstance, signal }) => {
         return {
           async run() {
-            const { agentPolicyIdsWithSpace } = taskInstance.params as {
+            const rawParams = taskInstance.params as {
               agentPolicyIdsWithSpace: Array<{ id: string; spaceId?: string }>;
             };
+            const params: DeployAgentPoliciesTaskParams = {
+              agentPolicyIdsWithSpace: rawParams.agentPolicyIdsWithSpace.map(({ id, spaceId }) => ({
+                id,
+                spaceId: brandSpaceId(spaceId ?? DEFAULT_SPACE_ID),
+              })),
+            };
+            const { agentPolicyIdsWithSpace } = params;
 
             if (!agentPolicyIdsWithSpace.length) {
               return;
@@ -49,7 +60,7 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
               .getLogger()
               .debug(`Deploying ${agentPolicyIdsWithSpace.length} policies`);
             const agentPoliciesIdsIndexedBySpace = agentPolicyIdsWithSpace.reduce(
-              (acc, { id, spaceId = DEFAULT_SPACE_ID }) => {
+              (acc, { id, spaceId }) => {
                 if (!acc[spaceId]) {
                   acc[spaceId] = [];
                 }

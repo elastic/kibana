@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 
@@ -59,7 +60,7 @@ describe('RuleExecutorTaskRunner', () => {
       expect(pipeline.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           ruleId: 'rule-1',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           scheduledAt: taskInstance.scheduledAt?.toISOString(),
           abortSignal: signal,
           executionUuid,
