@@ -384,6 +384,8 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
+        adHocDataViews: {},
+        internalReferences: [],
         datasourceStates: { formBased: mockFormBasedState, textBased: mockTextBasedState },
         visualization: {},
         filters: [],

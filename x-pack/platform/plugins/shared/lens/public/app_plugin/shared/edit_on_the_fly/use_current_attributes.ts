@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { createEmptyLensState } from '../../../react_embeddable/helper';
-import { useLensSelector } from '../../../state_management';
+import { selectAdHocDataViews, useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
@@ -21,6 +21,7 @@ export const useCurrentAttributes = ({
   const { datasourceStates, visualization, activeDatasourceId } = useLensSelector(
     (state) => state.lens
   );
+  const sessionAdHocDataViews = useLensSelector(selectAdHocDataViews);
 
   // use the latest activeId, but fallback to attributes
   const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
@@ -37,11 +38,16 @@ export const useCurrentAttributes = ({
       })
     );
     // ES|QL layers use adHoc dataviews whose ids are not saved objects, so their
-    // references must not be persisted. References from other datasources must be
-    // kept though: e.g. form-based reference line or query annotation layers next
-    // to ES|QL data layers resolve their data view exclusively via references.
-    const adHocDataViewIds = new Set(Object.keys(initialAttributes?.state.adHocDataViews ?? {}));
-    const references = visualization.state
+    // references must not be persisted as top-level references. They still need to
+    // be resolvable at load time though (e.g. a form-based reference line layer
+    // sharing the chart's ad hoc data view), so they move to internalReferences —
+    // mirroring mergeToNewDoc. All other references (saved data views used by
+    // form-based or query annotation layers) stay in references.
+    const adHocDataViewIds = new Set([
+      ...Object.keys(initialAttributes?.state.adHocDataViews ?? {}),
+      ...Object.keys(sessionAdHocDataViews),
+    ]);
+    const allReferences = visualization.state
       ? extractReferencesFromState({
           activeDatasourceId,
           activeDatasources: Object.keys(datasourceStates).reduce(
@@ -54,8 +60,12 @@ export const useCurrentAttributes = ({
           datasourceStates,
           visualizationState: visualization.state,
           activeVisualization,
-        }).filter((ref) => !(ref.type === 'index-pattern' && adHocDataViewIds.has(ref.id)))
+        })
       : [];
+    const isAdHocRef = (ref: { type: string; id: string }) =>
+      ref.type === 'index-pattern' && adHocDataViewIds.has(ref.id);
+    const references = allReferences.filter((ref) => !isAdHocRef(ref));
+    const internalReferences = allReferences.filter(isAdHocRef);
     const attributes = initialAttributes ?? createEmptyLensState().attributes;
     const attrs: TypedLensSerializedState['attributes'] = {
       ...attributes,
@@ -63,6 +73,13 @@ export const useCurrentAttributes = ({
         ...attributes.state,
         visualization: visualization.state,
         datasourceStates: dsStates,
+        // include ad hoc data views created during the editing session (e.g. for
+        // a new reference line layer) that are not persisted yet
+        adHocDataViews: {
+          ...attributes.state.adHocDataViews,
+          ...sessionAdHocDataViews,
+        },
+        internalReferences,
       },
       references,
       visualizationType: activeVisualization.id,
@@ -74,6 +91,7 @@ export const useCurrentAttributes = ({
     datasourceMap,
     datasourceStates,
     initialAttributes,
+    sessionAdHocDataViews,
     visualization.state,
   ]);
 
