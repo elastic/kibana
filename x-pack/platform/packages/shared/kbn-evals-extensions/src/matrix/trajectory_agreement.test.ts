@@ -16,6 +16,7 @@ import {
   rowAgreement,
   sequenceSimilarity,
   trailsEqual,
+  trailSetsEqual,
   trailsFromDocs,
   wilsonInterval,
 } from './trajectory_agreement';
@@ -170,6 +171,39 @@ describe('answersFromDocs / pathContractFromDocs', () => {
   it('reads the declared contract and returns undefined for pre-field corpora', () => {
     expect(pathContractFromDocs([doc(0, 'x', 'probe')])).toBe('probe');
     expect(pathContractFromDocs([doc(0, 'x')])).toBeUndefined();
+  });
+});
+
+describe('trailSetsEqual', () => {
+  it('treats a reordered trail as the same tool set', () => {
+    expect(trailSetsEqual(['a', 'b'], ['b', 'a'])).toBe(true);
+    // ...while exact-sequence equality does not — that gap is the order-only churn.
+    expect(trailsEqual(['a', 'b'], ['b', 'a'])).toBe(false);
+  });
+
+  it('ignores repetition of the same tool', () => {
+    expect(trailSetsEqual(['a', 'a', 'b'], ['b', 'a'])).toBe(true);
+  });
+
+  it('separates a genuinely different tool from a reordering', () => {
+    expect(trailSetsEqual(['a', 'b'], ['a', 'c'])).toBe(false);
+  });
+});
+
+describe('cellAgreement toolSetRate', () => {
+  it('scores order-only churn as full tool-set agreement but zero exact agreement', () => {
+    const agreement = cellAgreement([
+      ['search', 'load_skill'],
+      ['load_skill', 'search'],
+    ]);
+    expect(agreement.identicalRate).toBe(0);
+    expect(agreement.toolSetRate).toBe(1);
+  });
+
+  it('scores a different tool as disagreement on both metrics', () => {
+    const agreement = cellAgreement([['search'], ['execute_esql']]);
+    expect(agreement.identicalRate).toBe(0);
+    expect(agreement.toolSetRate).toBe(0);
   });
 });
 

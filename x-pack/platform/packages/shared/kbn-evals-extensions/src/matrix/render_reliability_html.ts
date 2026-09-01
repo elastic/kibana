@@ -90,11 +90,15 @@ const reliabilityHtml = (agreement: ReliabilityRow, tied: boolean): string => {
       }/${agreement.measuredCells} cells</small>`
     : '';
   const tiedNote = tied ? '<small class="tied">tied — intervals overlap</small>' : '';
+  const orderOnly =
+    agreement.toolSetRate !== undefined && agreement.identicalRate !== undefined
+      ? ` · ${pct(agreement.toolSetRate)} same tool set`
+      : '';
   return (
     `<strong>${pct(agreement.identicalRate ?? 0)}</strong>${range}` +
     `<small>${agreement.pairs ?? 0} pairs · ${agreement.measuredCells} repeated cells · ${pct(
       agreement.sequenceSimilarity ?? 0
-    )} path similarity${answer}</small>` +
+    )} path similarity${orderOnly}${answer}</small>` +
     hotspot +
     tiedNote
   );
