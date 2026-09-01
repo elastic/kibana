@@ -142,11 +142,13 @@ export const useConversationTitle = () => {
 
 export const useConversationReadOnly = () => {
   const conversationId = useConversationId();
-  const { conversation, isLoading } = useConversation();
+  const { conversation, isFetching } = useConversation();
 
   return {
     isReadOnly: conversation?.read_only ?? false,
-    isLoading: Boolean(conversationId) && isLoading,
+    // Not `isLoading`: v4 reports it for disabled queries too, and this query stays disabled
+    // for the whole stream that creates a conversation.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
   };
 };
 
