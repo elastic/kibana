@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   GLOBAL_SPACE_ID,
   THREAT_INTEL_SOURCES_INDEX,
+  APPROVED_SOURCE_IDS,
   type FetchAdapterType,
 } from '../../../common/threat_intel';
 
@@ -284,8 +285,12 @@ export const seedDefaultSources = async ({
   }
 
   if (operations.length === 0) {
+    const legacyDisabled = await disableLegacySources({ esClient, logger, now });
+    if (legacyDisabled > 0) {
+      result.updated += legacyDisabled;
+    }
     log.debug(
-      `Default source reconciliation finished: 0 created, 0 updated, ${result.skipped} unchanged, 0 failed`
+      `Default source reconciliation finished: 0 created, ${result.updated} updated, ${result.skipped} unchanged, 0 failed`
     );
     return result;
   }
@@ -326,6 +331,11 @@ export const seedDefaultSources = async ({
     await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
   }
 
+  const legacyDisabled = await disableLegacySources({ esClient, logger, now });
+  if (legacyDisabled > 0) {
+    result.updated += legacyDisabled;
+  }
+
   const summary = `Default source reconciliation finished: ${result.created} created, ${result.updated} updated, ${result.skipped} unchanged, ${result.failed} failed`;
   if (result.created > 0 || result.updated > 0 || result.failed > 0) {
     log.info(summary);
@@ -334,4 +344,51 @@ export const seedDefaultSources = async ({
   }
 
   return result;
+};
+
+const disableLegacySources = async ({
+  esClient,
+  logger,
+  now,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  now: string;
+}): Promise<number> => {
+  const log = logger.get('seed-default-sources');
+  let disabled = 0;
+
+  const response = await esClient.search<{ enabled?: boolean }>({
+    index: THREAT_INTEL_SOURCES_INDEX,
+    size: 1000,
+    _source: ['enabled'],
+    query: {
+      bool: {
+        filter: [{ term: { enabled: true } }],
+        must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
+      },
+    },
+  });
+
+  for (const hit of (response.hits.hits ?? []).filter((document) => document._id)) {
+    const sourceId = hit._id as string;
+    try {
+      await esClient.update({
+        index: THREAT_INTEL_SOURCES_INDEX,
+        id: sourceId,
+        doc: { enabled: false, updated_at: now },
+        refresh: false,
+      });
+      disabled += 1;
+      log.info(`Disabled legacy source outside the fixed catalog: ${sourceId}`);
+    } catch (err) {
+      log.warn(`Failed to disable legacy source ${sourceId}: ${(err as Error).message}`);
+    }
+  }
+
+  if (disabled > 0) {
+    await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
+  }
+
+  return disabled;
 };

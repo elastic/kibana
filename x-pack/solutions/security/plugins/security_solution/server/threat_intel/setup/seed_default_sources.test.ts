@@ -56,6 +56,8 @@ const run = async ({
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.mget.mockResolvedValue({ docs: documents } as never);
+  esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+  esClient.update.mockResolvedValue({} as never);
   esClient.bulk.mockImplementation((async ({
     operations,
   }: {
