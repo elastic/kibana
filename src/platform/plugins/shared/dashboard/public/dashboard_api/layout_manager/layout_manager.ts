@@ -84,7 +84,6 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
-import { CONSOLE_LANG_ID } from '@kbn/monaco';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -286,7 +285,6 @@ export function initializeLayoutManager(
           }
         );
         currentChildState[uuid] = serializedState;
-        console.log('UPDATE LAYOUT');
         layout$.next(updatedLayout);
       }
     }
@@ -617,7 +615,6 @@ export function initializeLayoutManager(
         layout$.next(layout);
       },
       registerChildApi: (api: DefaultEmbeddableApi) => {
-        console.log('ADD CHILD', api);
         children$.next({
           ...children$.value,
           [api.uuid]: api,

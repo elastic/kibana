@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatestWith, debounceTime, map, of, share, startWith } from 'rxjs';
+import { combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
 import type { HasParentApi } from '../../has_parent_api';
 import type { HasSerializableState } from '../../has_serializable_state';
@@ -37,8 +37,7 @@ export const initializeStateApi = <StateType extends object = object>({
     // anyStateChange$ does not emit on subscribe
     // use startWith to get latest state on subscribe
     startWith(undefined),
-    map(() => serializeState()),
-    share()
+    map(() => serializeState())
   );
 
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
