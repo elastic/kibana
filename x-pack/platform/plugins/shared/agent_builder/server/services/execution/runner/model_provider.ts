@@ -141,7 +141,10 @@ export const createModelProvider = ({
     };
   };
 
-  const getModelById = async (connectorId: string): Promise<ScopedModel> => {
+  const getModelById = async (
+    connectorId: string,
+    { temperature }: { temperature?: number } = {}
+  ): Promise<ScopedModel> => {
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
@@ -178,6 +181,7 @@ export const createModelProvider = ({
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
         ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+        ...(temperature !== undefined ? { temperature } : {}),
       },
     });
 
@@ -211,7 +215,8 @@ export const createModelProvider = ({
   });
 
   return {
-    selectModel: async (opts) => getModelById(await selectModelId(opts)),
+    selectModel: async (opts) =>
+      getModelById(await selectModelId(opts), { temperature: opts.temperature }),
     getDefaultModel: async () => getModelById(await getDefaultConnectorId()),
     getModelById: ({ connectorId }) => getModelById(connectorId),
     hasFastModel,

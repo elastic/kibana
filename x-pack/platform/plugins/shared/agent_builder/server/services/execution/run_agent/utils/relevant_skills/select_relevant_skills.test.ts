@@ -12,6 +12,7 @@ import {
   selectRelevantSkills,
   buildRecentContext,
   MAX_SELECTED_SKILLS,
+  RELEVANT_SKILLS_TEMPERATURE,
 } from './select_relevant_skills';
 
 const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefinition =>
@@ -99,7 +100,7 @@ describe('selectRelevantSkills', () => {
       logger,
     });
 
-    expect(selectModel).toHaveBeenCalledWith({ effortLevel: 'low' });
+    expect(selectModel).toHaveBeenCalledWith({ effortLevel: 'low', temperature: 0 });
     expect(result.skills.map((s) => s.id)).toEqual(['a.gamma', 'a.alpha']);
     expect(result.skills[0]).toMatchObject({ name: 'gamma', relevance_note: 'because gamma' });
     expect(result.skills[1].relevance_note).toBeUndefined();
@@ -170,7 +171,7 @@ describe('selectRelevantSkills', () => {
       logger,
     });
 
-    expect(result).toEqual({ skills: [] });
+    expect(result).toEqual({ skills: [], fallbackReason: 'error' });
   });
 
   it('falls back to an empty selection (never hangs) when the call exceeds the timeout', async () => {
@@ -186,12 +187,13 @@ describe('selectRelevantSkills', () => {
       timeoutMs: 20,
     });
 
-    expect(result).toEqual({ skills: [] });
+    expect(result).toEqual({ skills: [], fallbackReason: 'timeout' });
     // A debug line for the timeout aids observability of fast-model latency in production
     // (connectors that ignore the abort signal keep the request running silently).
     expect(testLogger.debug).toHaveBeenCalledWith(expect.stringContaining('timed out after 20ms'));
-    // The catch-branch warn message carries the timeout-specific reason too.
-    expect(testLogger.warn).toHaveBeenCalledWith(expect.stringContaining('timed out after 20ms'));
+    // A timeout on a best-effort fast path is expected under load, so it must not warn — the
+    // reason stays machine-readable on the returned selection instead.
+    expect(testLogger.warn).not.toHaveBeenCalled();
   });
 
   it('falls back to an empty selection when the external abort signal fires', async () => {
@@ -210,10 +212,44 @@ describe('selectRelevantSkills', () => {
     });
     controller.abort();
 
-    await expect(promise).resolves.toEqual({ skills: [] });
+    await expect(promise).resolves.toEqual({ skills: [], fallbackReason: 'aborted' });
     // Abort (not timeout): the warn carries the abort reason, and no timeout debug line is emitted.
     expect(testLogger.warn).toHaveBeenCalledWith(expect.stringContaining('aborted'));
     expect(testLogger.debug).not.toHaveBeenCalledWith(expect.stringContaining('timed out'));
+  });
+
+  it('pins temperature to 0 so repeated identical requests select the same skills', async () => {
+    const invoke = jest.fn().mockResolvedValue({ skills: [{ id: 'a.alpha' }] });
+    const { modelProvider, selectModel } = makeModelProvider(invoke);
+
+    await selectRelevantSkills({
+      skills: manySkills(),
+      context: { userMessage: 'x' },
+      modelProvider,
+      logger,
+    });
+
+    // Skill selection is a discrete classification, not a generative task: sampling entropy here
+    // shows up as agent-trajectory churn that is not attributable to the agent model.
+    expect(selectModel).toHaveBeenCalledWith(
+      expect.objectContaining({ temperature: RELEVANT_SKILLS_TEMPERATURE })
+    );
+    expect(RELEVANT_SKILLS_TEMPERATURE).toBe(0);
+  });
+
+  it('reports no fallbackReason on a successful selection', async () => {
+    const invoke = jest.fn().mockResolvedValue({ skills: [{ id: 'a.alpha' }] });
+    const { modelProvider } = makeModelProvider(invoke);
+
+    const result = await selectRelevantSkills({
+      skills: manySkills(),
+      context: { userMessage: 'x' },
+      modelProvider,
+      logger,
+    });
+
+    // An empty list with no reason means "nothing applies"; with a reason it means "selector broke".
+    expect(result.fallbackReason).toBeUndefined();
   });
 });
 

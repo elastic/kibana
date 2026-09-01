@@ -35,6 +35,12 @@ export interface ScopedModel {
 
 export interface ModelSelectionPreferences {
   effortLevel?: EffortLevel;
+  /**
+   * Sampling temperature for the returned model. Omit to use the connector default; set 0 for
+   * discrete classification-style calls (e.g. relevant-skill selection) where sampling entropy is
+   * noise rather than useful variation.
+   */
+  temperature?: number;
 }
 
 /**
