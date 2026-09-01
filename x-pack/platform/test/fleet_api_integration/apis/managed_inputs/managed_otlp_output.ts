@@ -39,8 +39,6 @@ export default function (providerContext: FtrProviderContext) {
     const es = getService('es');
     const kibanaServer = getService('kibanaServer');
 
-    const getSecretById = (id: string) => es.get({ index: '.fleet-secrets', id });
-
     skipIfNoDockerRegistry(providerContext);
 
     const getSecretById = (id: string) =>
