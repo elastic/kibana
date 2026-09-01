@@ -32,6 +32,7 @@ import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_u
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
 import { AttachmentErrorCallout } from './attachment_error_callout';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
+import { withActionSourceEvent } from '../action_source_event';
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
@@ -104,11 +105,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
               userProfiles={userProfiles}
             />
           ),
-          event: (
+          event: withActionSourceEvent(
             <>
               {`${DEFAULT_EVENT_ATTACHMENT_TITLE} `}
               <EuiCode>{attachmentTypeId}</EuiCode>
-            </>
+            </>,
+            userAction.source
           ),
           className: `comment-${attachment.type}-not-found`,
           'data-test-subj': `comment-${attachment.type}-not-found`,
@@ -148,7 +150,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
         ),
         className,
         css: creationActivity.css,
-        event: creationActivity.event,
+        event: withActionSourceEvent(creationActivity.event, userAction.source),
         eventColor: creationActivity.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,

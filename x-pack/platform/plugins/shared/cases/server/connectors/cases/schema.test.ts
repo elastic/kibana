@@ -18,6 +18,7 @@ describe('CasesConnectorRunParamsSchema', () => {
     groupingBy: ['host.name'],
     rule: { id: 'rule-id', name: 'Test rule', tags: [], ruleUrl: 'https://example.com' },
     owner: 'cases',
+    source: 'rule',
     ...overrides,
   });
 
@@ -35,7 +36,6 @@ describe('CasesConnectorRunParamsSchema', () => {
         "groupingBy": Array [
           "host.name",
         ],
-        "internallyManagedAlerts": null,
         "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
@@ -45,6 +45,7 @@ describe('CasesConnectorRunParamsSchema', () => {
           "ruleUrl": "https://example.com",
           "tags": Array [],
         },
+        "source": "rule",
         "templateId": null,
         "templateVersion": null,
         "timeWindow": "7d",
@@ -363,11 +364,28 @@ describe('CasesConnectorRunParamsSchema', () => {
     });
   });
 
-  describe('internallyManagedAlerts', () => {
-    it('defaults the internallyManagedAlerts to null', () => {
-      expect(CasesConnectorRunParamsSchema.validate(getParams()).internallyManagedAlerts).toBe(
-        null
+  describe('source', () => {
+    it('accepts `rule`', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ source: 'rule' })).source).toBe(
+        'rule'
       );
+    });
+
+    it('accepts `attack`', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ source: 'attack' })).source).toBe(
+        'attack'
+      );
+    });
+
+    it('throws if source is missing', () => {
+      const { source, ...rest } = getParams();
+      expect(() => CasesConnectorRunParamsSchema.validate(rest)).toThrow();
+    });
+
+    it('throws for an unsupported value', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ source: 'admin' }))
+      ).toThrow();
     });
   });
 });

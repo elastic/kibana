@@ -111,7 +111,8 @@ export const CasesConnectorRunParamsSchema = schema.object({
   templateVersion: schema.nullable(
     schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
   ),
-  internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
+  /** Who this run is attributed to. Required so callers can't silently fall back to `rule`. */
+  source: schema.oneOf([schema.literal('attack'), schema.literal('rule')]),
 });
 
 const ZAlertSchema = z.record(z.string(), z.any()).superRefine((value, ctx) => {
@@ -206,7 +207,8 @@ export const ZCasesConnectorRunParamsSchema = z
       .default(DEFAULT_MAX_OPEN_CASES),
     templateId: z.string().max(MAX_TEMPLATE_KEY_LENGTH).nullable().default(null),
     templateVersion: z.string().max(MAX_TEMPLATE_VERSION_STRING_LENGTH).nullable().default(null),
-    internallyManagedAlerts: z.boolean().default(false).nullable(),
+    /** Who this run is attributed to. Required so callers can't silently fall back to `rule`. */
+    source: z.enum(['attack', 'rule']),
   })
   .strict();
 

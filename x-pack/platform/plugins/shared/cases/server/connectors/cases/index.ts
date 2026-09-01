@@ -137,13 +137,13 @@ export const getCasesConnectorAdapter = ({
        * We handle attack discovery alerts differently than other alerts and group
        * their building block SIEM alerts that led to each attack separately.
        */
-      let internallyManagedAlerts = false;
+      let source: 'attack' | 'rule' = 'rule';
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
       let maximumCasesToOpen = params.subActionParams.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
-          internallyManagedAlerts = true;
+          source = 'attack';
           maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
         } catch (error) {
           logger.error(
@@ -170,7 +170,7 @@ export const getCasesConnectorAdapter = ({
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         templateVersion: params.subActionParams.templateVersion,
-        internallyManagedAlerts,
+        source,
       };
 
       return { subAction: 'run', subActionParams };

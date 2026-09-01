@@ -7,6 +7,7 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { StepContext } from '@kbn/workflows';
 import type { ActionSource } from '../../../common/types/domain';
 import { ActionSourceTypes, isActionSource, toActionSource } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
@@ -59,16 +60,13 @@ export const resolveActionSourceFromStepContext = (
   }
 
   try {
-    const wfCtx = context.contextManager.getContext() as {
-      workflow?: { id?: string; name?: string };
-      execution?: { id?: string };
-    };
-    if (typeof wfCtx.workflow?.id === 'string' && wfCtx.workflow.id.length > 0) {
+    const wfCtx: StepContext = context.contextManager.getContext();
+    if (wfCtx.workflow.id.length > 0) {
       return toActionSource({
         type: ActionSourceTypes.workflow,
         id: wfCtx.workflow.id,
         name: wfCtx.workflow.name,
-        runId: wfCtx.execution?.id,
+        runId: wfCtx.execution.id,
       });
     }
   } catch {

@@ -157,7 +157,8 @@ export const runAgent = async ({
   const agent = await agentRegistry.get(agentId, { access: 'use' });
   const agentEntry = getAgentFromRunContext(manager.context);
   if (agentEntry != null) {
-    agentEntry.agentName = agent.name;
+    const agentEntryIndex = manager.context.stack.indexOf(agentEntry);
+    manager.context.stack[agentEntryIndex] = { ...agentEntry, agentName: agent.name };
   }
 
   // Layer runtime overrides onto the agent's own config first, then merge with the type base.
