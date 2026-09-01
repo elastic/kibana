@@ -138,16 +138,6 @@ safe-outputs:
     draft: true
     max: 1
     labels: [flaky-test-fixer]
-    allowed-labels:
-      [
-        'release_note:skip',
-        'release_note:fix',
-        'backport:skip',
-        'backport:all-open',
-        'backport:version',
-        'v9.*',
-        'v8.*',
-      ]
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
     reviewers: ${{ github.actor }}
@@ -215,6 +205,7 @@ safe-outputs:
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
 strict: false
 timeout-minutes: 90
+max-ai-credits: 1200
 ---
 
 # Flaky Test Fixer
@@ -268,7 +259,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-7. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
+7. Open the PR (see "PR format" below) without release-note or backport labels. The Flaky Fix Verifier applies both after it validates the PR. If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 10. **Only if you opened a PR in step 7**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
@@ -358,13 +349,6 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   <bullet list of what you could not verify and why. E.g., behavior under CI parallel load, on a different stack version, against a real Elasticsearch instance, etc. Omit this section if there is nothing to mention.>
 
   </details>
-
-  <details>
-  <summary>Backporting guidance</summary>
-
-  <one or two sentences: which backport label(s) you applied — `backport:skip`, `backport:all-open`, or `backport:version` with the per-branch `vX.Y.Z` labels — or that you applied none because you weren't sure, and why. Say which open release branches (from `versions.json`) the patched file(s) exist on and whether this patch applies there unchanged. If you left it unlabeled, note which versions a reviewer should consider.>
-
-  </details>
   ```
 
 The first line links only the failed-test issue. When supported, the **Relevant history** section follows the Summary (and its runtime table, when present) and precedes Context; it links the one PR, or small set of PRs, needed to understand how the flake became possible or observable:
@@ -382,23 +366,11 @@ Add the following at the very end of the PR description (and outside of the deta
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
 
-## Release note label
+## Release-note and backport labels
 
-Pass exactly one release-note label in the `labels` field of the `create_pull_request` safe output: `release_note:skip` when the patch only touches test code, `release_note:fix` when it changes application code (the fix is user-facing).
+Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification, adds a user-focused `## Release note` section for `release_note:fix`, and leaves its label rationale in a short PR comment; label guidance does not belong in the PR body.
 
-## Backport label
-
-The guiding principle is to backport a fix to every older active version branch where it still applies — don't leave older branches flaky, so propagate the fix as widely as it safely fits.
-
-Only apply backport labels when you are **confident** about the decision. If you're unsure, apply **no** backport label at all and explain the uncertainty in the "Backporting guidance" section so a human can decide. Never guess.
-
-When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically) — or, for a version-branch fix, list them in the outcome comment's **Labels** line. First figure out which open `release` branches (listed in `versions.json` at the repository root) the fix belongs on by confirming the file(s) you patched exist at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
-
-- **`backport:skip`** — the fix is effectively main-only: the failing test (or the file you patched) doesn't exist on any open release branch, it was recently added, or the flakiness is specific to `main`.
-- **`backport:all-open`** — the patched file(s) exist on **every** open release branch and your patch applies there unchanged, so fixing it across all of them is safe.
-- **`backport:version` + one `vX.Y.Z` label per target branch** — only *some* open release branches need the fix. Pass `backport:version` **together with** the version label for each target branch, mapping the branch to its current version in `versions.json` (e.g. `9.4` → `v9.4.4`, `9.3` → `v9.3.8`). Include a branch's label only when you've confirmed the patched file(s) exist there.
-
-Always explain the choice — including a deliberate no-label decision — in the "Backporting guidance" section.
+The only exception is a failure that must be fixed directly on a version branch and therefore cannot produce a `main` PR for the verifier. In that no-PR hand-off, use `release_note:skip` for internal changes, documentation changes, fixes for unreleased features, or other non-user-facing changes; use `release_note:fix` for user-facing bug fixes to already released versions. For `release_note:fix`, include a `## Release note` section with one concise, user-focused description of what the change does for the user. Also include any confident version-branch labels described below.
 
 ## Fix already on `main`
 
@@ -407,7 +379,7 @@ Sometimes the failure is on a **version branch** (e.g. `9.3`) while `main` alrea
 When it happens, do **not** open a normal `main` PR. Find the `main` PR that already fixed it (`git log` / `git blame`, or the PR the investigator implicated), then:
 
 - **Contained `main` PR** (small and single-purpose — essentially just the fix and its test, no unrelated refactors, so it backports cleanly): do **not** open a PR. Post the "Backport the existing fix" outcome comment naming that PR and the release branch(es) that still need it. When unsure whether it backports cleanly, prefer this — a recommendation beats an unverified PR.
-- **Not-contained `main` PR** (bundles unrelated changes, so a whole-PR backport isn't safe): prepare a **best-effort fix for the failing version branch** with just the extracted change, and hand it over in the outcome comment — see "Fixes that must target a version branch". If other release branches still need the fix too, list the matching `backport:version` + `vX.Y.Z` labels (per "Backport label", but leave out `main` and any branch already fixed) so whoever opens the PR applies them.
+- **Not-contained `main` PR** (bundles unrelated changes, so a whole-PR backport isn't safe): prepare a **best-effort fix for the failing version branch** with just the extracted change, and hand it over in the outcome comment — see "Fixes that must target a version branch". If other release branches still need the fix too, list `backport:version` plus the current `vX.Y.Z` label for each affected branch from `versions.json` (leave out `main` and any branch already fixed) so whoever opens the PR applies them.
 
 ## Fixes that must target a version branch
 
@@ -443,19 +415,20 @@ Follow this format:
   Open this PR against <version-branch> manually — this workflow can only target `main`. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
 
   - **Title:** `<PR title, per "PR format">`
-  - **Labels:** `flaky-test-fixer`, `<release_note:skip or release_note:fix, per "Release note label">`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
+  - **Labels:** `flaky-test-fixer`, `<release_note:skip or release_note:fix, per "Release-note and backport labels">`, `<backport:version plus the current vX.Y.Z label(s) for the affected branch(es) from versions.json — write "no backport label" if you weren't sure>`
 
   <details>
   <summary>PR description</summary>
 
-  <the PR body per "PR format", without its "Verification" and "Backporting guidance" blocks>
+  <the PR body per "PR format", without its "Verification" block; for `release_note:fix`, insert `## Release note` with one concise, user-focused description immediately before the final NOTE>
 
   </details>
 
   <details>
   <summary>Backporting guidance</summary>
 
-  <the "Backporting guidance" content per "PR format", explaining the labels listed above>
+  - `<vX.Y.Z>` → <one very short sentence justifying this version's backport decision>.
+  <repeat once for every active version checked>
 
   </details>
 
@@ -497,4 +470,4 @@ Follow this format:
 
   #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<requester-github-handle-here-if-not-a-bot>
   ```
-  Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix).
+  Fill `<vX.Y.Z>` from the branch → version mapping in `versions.json` (only the branches that still need the fix).
