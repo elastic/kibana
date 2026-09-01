@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
-import { stepSchemas } from '../../../../common/step_schemas';
+import { resetWorkflowContextRegistry, setWorkflowContextRegistry } from './registry';
+import type { RegisteredStepOutput } from './registry';
 
 describe('getOutputSchemaForStepType', () => {
-  let originalGetAllConnectorsMapCache: typeof stepSchemas.getAllConnectorsMapCache;
   let mockConnectorsMap: Map<string, { type: string; outputSchema?: z.ZodSchema }>;
+  let mockStepOutput: RegisteredStepOutput | undefined;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Save original and mock getAllConnectorsMapCache
-    originalGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache;
     mockConnectorsMap = new Map();
-    stepSchemas.getAllConnectorsMapCache = jest.fn().mockImplementation(() => mockConnectorsMap);
+    mockStepOutput = undefined;
+    setWorkflowContextRegistry({
+      getStepOutput: () => mockStepOutput,
+      getConnector: (stepTypeId) =>
+        mockConnectorsMap.get(stepTypeId) as ConnectorContractUnion | undefined,
+      getTriggerDefinition: () => undefined,
+    });
   });
 
   afterEach(() => {
-    stepSchemas.getAllConnectorsMapCache = originalGetAllConnectorsMapCache;
+    resetWorkflowContextRegistry();
   });
 
   describe('elasticsearch and kibana connectors', () => {
@@ -235,8 +240,8 @@ describe('getOutputSchemaForStepType', () => {
       expect(result.safeParse({})).toEqual({ success: true, data: {} });
     });
 
-    it('should return z.unknown() when connectors map cache is null', () => {
-      stepSchemas.getAllConnectorsMapCache = jest.fn().mockReturnValue(null);
+    it('should return z.unknown() when nothing is registered for the step type', () => {
+      mockConnectorsMap.clear();
 
       const mockNode = {
         id: 'test-id',
@@ -307,25 +312,9 @@ describe('getOutputSchemaForStepType', () => {
   });
 
   describe('custom steps output schemas', () => {
-    let originalGetStepDefinition: typeof stepSchemas.getStepDefinition;
-    let originalIsPublicStepDefinition: typeof stepSchemas.isPublicStepDefinition;
-
-    let mockStepDefinition: Partial<PublicStepDefinition>;
-
     beforeEach(() => {
-      originalGetStepDefinition = stepSchemas.getStepDefinition;
-      originalIsPublicStepDefinition = stepSchemas.isPublicStepDefinition;
-      stepSchemas.getStepDefinition = jest.fn().mockImplementation(() => mockStepDefinition);
-      (stepSchemas.isPublicStepDefinition as unknown as jest.Mock) = jest
-        .fn()
-        .mockReturnValue(true);
       // Reset connector map for custom steps tests (empty map)
       mockConnectorsMap.clear();
-    });
-
-    afterEach(() => {
-      stepSchemas.getStepDefinition = originalGetStepDefinition;
-      stepSchemas.isPublicStepDefinition = originalIsPublicStepDefinition;
     });
 
     it('should use getOutputSchema when available and return its result', () => {
@@ -334,14 +323,9 @@ describe('getOutputSchemaForStepType', () => {
         safeParse: (val: any) => ({ success: true, data: String(val) }),
       } as any;
 
-      mockStepDefinition = {
-        id: 'dynamic-step',
+      mockStepOutput = {
         outputSchema: { def: { type: 'unknown' } } as any,
-        editorHandlers: {
-          dynamicSchema: {
-            getOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
-          },
-        },
+        getDynamicOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
       };
 
       const mockNode = {
@@ -359,9 +343,7 @@ describe('getOutputSchemaForStepType', () => {
       const result = getOutputSchemaForStepType(mockNode);
 
       // Should call getOutputSchema with configuration.with
-      expect(
-        mockStepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema
-      ).toHaveBeenCalledWith({
+      expect(mockStepOutput?.getDynamicOutputSchema).toHaveBeenCalledWith({
         input: {
           customParam: 'dynamicValue',
         },
@@ -379,16 +361,11 @@ describe('getOutputSchemaForStepType', () => {
         safeParse: (val: any) => ({ success: true, data: val }),
       } as any;
 
-      mockStepDefinition = {
-        id: 'error-step',
+      mockStepOutput = {
         outputSchema: mockStaticSchema,
-        editorHandlers: {
-          dynamicSchema: {
-            getOutputSchema: jest.fn().mockImplementation(() => {
-              throw new Error('Dynamic schema generation failed');
-            }),
-          },
-        },
+        getDynamicOutputSchema: jest.fn().mockImplementation(() => {
+          throw new Error('Dynamic schema generation failed');
+        }),
       };
 
       const mockNode = {
@@ -404,9 +381,7 @@ describe('getOutputSchemaForStepType', () => {
       const result = getOutputSchemaForStepType(mockNode);
 
       // Should call getOutputSchema first
-      expect(
-        mockStepDefinition.editorHandlers?.dynamicSchema?.getOutputSchema
-      ).toHaveBeenCalledWith({
+      expect(mockStepOutput?.getDynamicOutputSchema).toHaveBeenCalledWith({
         input: {
           param: 'value',
         },
@@ -424,10 +399,9 @@ describe('getOutputSchemaForStepType', () => {
         safeParse: (val: any) => ({ success: true, data: val }),
       } as any;
 
-      mockStepDefinition = {
-        id: 'static-step',
+      mockStepOutput = {
         outputSchema: mockStaticSchema,
-        // no getOutputSchema property
+        // no getDynamicOutputSchema property
       };
 
       const mockNode = {
