@@ -156,6 +156,39 @@ describe('FieldInput', () => {
     expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
+  it('should expose the Lens-committed field display name on the combobox for functional tests', () => {
+    const { unmount } = renderFieldInput({
+      selectedColumn: getStringBasedOperationColumn(),
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'source'
+    );
+    unmount();
+
+    renderFieldInput({ incompleteField: 'dest' });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'dest'
+    );
+  });
+
+  it('should expose displayName on data-selected-field when it differs from the source field id', () => {
+    renderFieldInput({
+      selectedColumn: {
+        label: 'timestamp',
+        dataType: 'date',
+        isBucketed: false,
+        operationType: 'min',
+        sourceField: 'timestamp',
+      },
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'timestampLabel'
+    );
+  });
+
   it('should render an error message when incomplete operation is on', () => {
     const { container } = renderFieldInput({
       incompleteOperation: 'terms',
@@ -260,7 +293,7 @@ describe('FieldInput', () => {
     expect(instance.find(EuiComboBox).first().prop('selectedOptions')).toEqual([
       {
         label: 'dest',
-        value: { type: 'field', field: 'dest' },
+        value: { type: 'field', field: 'dest', operationType: 'terms' },
       },
     ]);
   });
