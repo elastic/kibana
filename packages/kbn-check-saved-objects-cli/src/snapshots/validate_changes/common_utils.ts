@@ -145,26 +145,9 @@ export function toSchemaPathFormat(mappingPath: string): string {
  * kbn-config-schema. If Joi internals change, both places will need updating.
  */
 function extractMappingCompatibleSchemaFields(joiSchema: any, path: string[] = []): string[] {
-  if (joiSchema == null) {
-    return path.length > 0 ? [path.join('.')] : [];
-  }
-
-  const matches: Array<{ schema?: any; switch?: Array<{ then: any }> }> =
-    joiSchema.$_terms?.matches;
+  const matches: Array<{ schema: any }> = joiSchema.$_terms?.matches;
   if (matches?.length > 0) {
-    return matches.flatMap((match) => {
-      if (match.schema != null) {
-        return extractMappingCompatibleSchemaFields(match.schema, path);
-      }
-      // Handle discriminated union: alternatives.conditional() with a switch produces
-      // entries with a `switch` array (each containing `{ is, then }`) instead of `schema`.
-      if (match.switch?.length) {
-        return match.switch.flatMap(({ then: s }) =>
-          extractMappingCompatibleSchemaFields(s, path)
-        );
-      }
-      return path.length > 0 ? [path.join('.')] : [];
-    });
+    return matches.flatMap(({ schema: alt }) => extractMappingCompatibleSchemaFields(alt, path));
   }
 
   const namedKeys: Map<string, { schema: any }> = joiSchema._ids?._byKey;
