@@ -74,6 +74,11 @@ import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from '
 
 const coreId = Symbol('core');
 
+// [DO NOT MERGE] Positive control for the warm-start memory CI check
+// (elastic/kibana#288147): retain ~12 MiB on the JS heap at server startup,
+// which must trip the 5 MiB post-GC regression threshold and post a PR comment.
+export const warmStartBenchPositiveControl = new Array(1.5 * 1024 * 1024).fill(0.5);
+
 /** @internal */
 
 export class Server {
