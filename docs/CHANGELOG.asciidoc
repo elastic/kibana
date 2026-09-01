@@ -133,6 +133,12 @@ include::upgrade-notes.asciidoc[]
 
 The 8.19.21 release includes the following breaking changes and fixes.
 
+[IMPORTANT]
+====
+The 8.19.21 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
+
 [float]
 [[breaking-changes-v8.19.21]]
 === Breaking changes
