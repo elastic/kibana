@@ -182,7 +182,9 @@ const CasesTableFiltersComponent = ({
             background-color: transparent;
           `}
         >
-          {activeFilters.map((filter) => filter.render({ filterOptions }))}
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
+          ))}
           {isSelectorView || (
             <MoreFiltersSelectable
               options={selectableOptions}

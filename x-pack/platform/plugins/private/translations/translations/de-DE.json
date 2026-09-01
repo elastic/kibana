@@ -42624,7 +42624,6 @@
     "xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.textareaPlaceholderText": "Daten hier eingeben",
     "xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions": "Geben Sie den Namen des auszuführenden Prozesses ein",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported": "„{type}“ Speicherabbildungstyp wird derzeit für diesen Host-OS-Typ nicht unterstützt ({osType})",
-    "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel": "„pid“ und „entityId“ Argumente werden für „Kernel“-Speicherabbildungen nicht unterstützt",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess": "Für Speicherabbildungen des Prozesses ist das Argument „pid“ oder „entityId“ erforderlich",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg": "Eingangsparameter für das ausgewählte Skript",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg": "Das auszuführende Skript (ausgewählt aus der Popup-Liste)",

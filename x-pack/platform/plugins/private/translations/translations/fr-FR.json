@@ -42466,7 +42466,6 @@
     "xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.textareaPlaceholderText": "Saisir les données ici",
     "xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions": "Saisissez un nom de processus à exécuter",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported": "Le type de vidage de mémoire « {type} » n'est actuellement pas pris en charge pour ce type de système d'exploitation hôte ({osType})",
-    "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel": "Les arguments « pid » et « entityId » ne sont pas pris en charge pour les vidages de mémoire « kernel » (noyau)",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess": "L'argument « pid » ou « entityId » est obligatoire pour les vidages de mémoire « process » (processus)",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg": "Arguments d’entrée pour le script sélectionné",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg": "Le script à exécuter (sélectionné dans la liste contextuelle)",
