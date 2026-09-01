@@ -121,10 +121,16 @@ describe('editor_request', () => {
       expect(result).toEqual(4);
     });
 
-    it('detects the next request when empty lines follow a closed string value', () => {
-      // Pins the per-line offset accumulation: empty lines contribute only their newline,
-      // so a drifted offset for POST /b would fall back inside the closed "abc" string.
-      const content = ['GET /a', '{', '  "s": "abc"', '', '', 'POST /b'];
+    it('skips request-like lines inside a closed multi-line triple-quoted value and stops at the next request', () => {
+      const content = [
+        'POST _query',
+        '{',
+        '  "script": """',
+        '  GET _all',
+        '  """',
+        '}',
+        'GET _search',
+      ];
       const model = {
         ...getMockModel(content),
         getPositionAt: () => ({ lineNumber: 1 }),
@@ -134,6 +140,40 @@ describe('editor_request', () => {
         parsedRequest,
         model,
         startLineNumber: 1,
+      });
+
+      expect(result).toEqual(6);
+    });
+
+    it('detects the next request when empty lines precede a closed string value', () => {
+      // Pins the per-line offset accumulation: empty lines contribute only their newline,
+      // so a drifted offset for POST /b would fall back inside the closed "abc" string.
+      const content = ['GET /a', '{', '', '', '  "s": "abc"', 'POST /b'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(5);
+    });
+
+    it('ignores a stray quote on the request line when the request starts after a block comment', () => {
+      const content = ['/* c', ' */ GET x"', '{"a": ', 'GET y'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 2 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 2,
       });
 
       expect(result).toEqual(3);

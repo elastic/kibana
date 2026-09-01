@@ -56,17 +56,20 @@ export const getRequestEndLineNumber = ({
     } else {
       // if there is no next request, find the end of the text or the line that starts with a method
       const lineCount = model.getLineCount();
-      const tailLines: string[] = [];
-      for (let lineNumber = requestStartLineNumber; lineNumber <= lineCount; lineNumber++) {
-        tailLines.push(model.getLineContent(lineNumber));
+      // The parser reads the request line as method + url and never opens a string on it, so the
+      // string scan starts at the body: a stray quote or comment marker on the request line must
+      // not phase-shift the string state of the lines below.
+      const bodyLines: string[] = [];
+      for (let lineNumber = requestStartLineNumber + 1; lineNumber <= lineCount; lineNumber++) {
+        bodyLines.push(model.getLineContent(lineNumber));
       }
-      // Scan the request tail once and query each candidate line by offset; rescanning the
-      // whole prefix for every method-like line is quadratic on large unfinished bodies.
-      const isInsideUnfinishedString = createInsideConsoleStringChecker(tailLines.join('\n'));
+      // Scan the body once and query each candidate line by offset; rescanning the whole prefix
+      // for every method-like line is quadratic on large unfinished bodies.
+      const isInsideUnfinishedString = createInsideConsoleStringChecker(bodyLines.join('\n'));
       let nextLineNumber = requestStartLineNumber + 1;
-      let nextLineStartOffset = tailLines[0].length + 1;
+      let nextLineStartOffset = 0;
       while (nextLineNumber <= lineCount) {
-        const nextLineContent = tailLines[nextLineNumber - requestStartLineNumber];
+        const nextLineContent = bodyLines[nextLineNumber - requestStartLineNumber - 1];
         if (
           nextLineContent.trim().match(startsWithMethodRegex) &&
           !isInsideUnfinishedString(nextLineStartOffset)

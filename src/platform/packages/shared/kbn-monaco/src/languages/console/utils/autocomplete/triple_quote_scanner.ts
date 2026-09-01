@@ -75,7 +75,7 @@ interface ScanState {
   esqlQueryStartIndex: number;
   tripleQuoteIsJsonValue: boolean;
   commentRanges?: CommentRange[];
-  // Offset where the currently open string started; only tracked when collecting string ranges.
+  // Offset where the currently open string started; only read when collecting string ranges.
   stringOpenIndex: number;
   stringRanges?: StringRange[];
   json?: JsonScanState;
@@ -312,7 +312,7 @@ const enterString = (text: string, state: ScanState, quoteLen: 1 | 3): void => {
 };
 
 const leaveString = (state: ScanState, closingQuoteOffset = 0): void => {
-  state.stringRanges?.push([state.stringOpenIndex, state.index]);
+  state.stringRanges?.push([state.stringOpenIndex, state.index + closingQuoteOffset]);
   if (state.json) {
     state.json.lastSignificantChar = '"';
     state.json.lastSignificantCharIndex = state.index + closingQuoteOffset;
@@ -541,9 +541,10 @@ export const isInsideConsoleString = (text: string): boolean => scanConsoleEnd(t
 
 /**
  * Scans `text` once and returns a checker that reports whether an offset falls inside a standard
- * or triple-quoted Console string. The offset of an opening quote is outside its string; an
- * unterminated string extends to the end of the text. Unlike `isInsideConsoleString`, which
- * rescans its whole argument on every call, the returned checker answers in O(log n).
+ * or triple-quoted Console string. The offset of an opening quote is outside its string, offsets
+ * within the closing delimiter are inside, and an unterminated string extends to the end of the
+ * text. Unlike `isInsideConsoleString`, which rescans its whole argument on every call, the
+ * returned checker answers in O(log n).
  */
 export const createInsideConsoleStringChecker = (text: string): ((offset: number) => boolean) => {
   const { stringRanges = [] } = scanConsoleText(text, { collectStringRanges: true });

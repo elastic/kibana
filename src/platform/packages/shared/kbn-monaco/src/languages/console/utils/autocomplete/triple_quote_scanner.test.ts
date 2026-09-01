@@ -537,5 +537,15 @@ describe('triple_quote_scanner', () => {
       expect(isInsideString(openingQuoteOffset)).toBe(false);
       expect(isInsideString(openingQuoteOffset + 1)).toBe(true);
     });
+
+    it('treats the closing delimiter offsets as inside the string', () => {
+      const text = 'GET _search\n{"a": """v"""}';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const closingQuoteOffset = text.lastIndexOf('"""');
+
+      expect(isInsideString(closingQuoteOffset)).toBe(true);
+      expect(isInsideString(closingQuoteOffset + 2)).toBe(true);
+      expect(isInsideString(closingQuoteOffset + 3)).toBe(false);
+    });
   });
 });

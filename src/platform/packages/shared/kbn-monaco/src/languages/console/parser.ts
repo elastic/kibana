@@ -477,6 +477,10 @@ export const createParser = (): ConsoleParser => {
         // closing delimiter already scanned to the end of the input).
         // https://github.com/elastic/kibana/issues/284396
         if (syntaxError.unterminated) {
+          // Consume the swallowed content so `parse()` does not also flag it as a leftover
+          // 'Syntax error' on top of the unterminated-delimiter error.
+          at = text.length;
+          ch = '';
           return;
         }
         // snap
