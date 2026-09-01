@@ -68,13 +68,11 @@ const BLOCKS_FIXTURE: IndicatorBlock[] = [
   {
     block_index: 0,
     reference: 'https://twitter.com/malware_traffic/status/12345',
-    reference_class: 'social',
     iocs: [makeIoc('1.2.3.4'), makeIoc('5.6.7.8')],
   },
   {
     block_index: 1,
     reference: 'https://blog.malwareanalysis.io/cobaltstrike-2024',
-    reference_class: 'candidate',
     iocs: [makeIoc('9.10.11.12'), makeIoc('1.2.3.4')],
   },
 ];
@@ -83,7 +81,6 @@ const BLOCKS_FIXTURE: IndicatorBlock[] = [
 const makeIocBlock = (blockIndex: number, count: number, reference?: string): IndicatorBlock => ({
   block_index: blockIndex,
   reference,
-  reference_class: reference ? 'candidate' : undefined,
   iocs: Array.from({ length: count }, (_, i) => makeIoc(`10.0.${blockIndex}.${i}`)),
 });
 
@@ -165,6 +162,32 @@ describe('textIndicatorListAdapter', () => {
     expect(ioc9?.reference).toContain('malwareanalysis');
   });
 
+  it('sanitizes IOC references before reports are written', async () => {
+    parseIndicatorListMock.mockReturnValue([
+      {
+        block_index: 0,
+        reference: 'https://user:secret@example.com/report',
+        iocs: [makeIoc('1.2.3.4')],
+      },
+      {
+        block_index: 1,
+        reference: 'file:///etc/passwd',
+        iocs: [makeIoc('5.6.7.8')],
+      },
+    ]);
+
+    const reports = await textIndicatorListAdapter.run(
+      makeSource(TRAIL_URL),
+      makeContext(jest.fn().mockResolvedValue(okResponse()))
+    );
+    const iocs = reports.flatMap((report) => report.extracted?.iocs ?? []);
+
+    expect(iocs.find(({ value }) => value === '1.2.3.4')?.reference).toBe(
+      'https://example.com/report'
+    );
+    expect(iocs.find(({ value }) => value === '5.6.7.8')?.reference).toBeUndefined();
+  });
+
   it('deduplicates IOCs by (type, value) — first block attribution wins', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
@@ -196,7 +219,6 @@ describe('textIndicatorListAdapter', () => {
       {
         block_index: 0,
         reference: 'https://example.com',
-        reference_class: 'candidate',
         iocs: [],
       },
     ];
@@ -317,7 +339,6 @@ describe('textIndicatorListAdapter', () => {
       {
         block_index: 0,
         reference: ref,
-        reference_class: 'candidate',
         iocs: Array.from({ length: bigCount }, (_, i) =>
           makeIoc(`192.168.${Math.floor(i / 256)}.${i % 256}`)
         ),
@@ -379,13 +400,11 @@ describe('textIndicatorListAdapter', () => {
       {
         block_index: 0,
         reference: 'https://ref0.example.com/',
-        reference_class: 'candidate',
         iocs: block0Iocs,
       },
       {
         block_index: 1,
         reference: 'https://ref1.example.com/',
-        reference_class: 'candidate',
         iocs: block1Iocs,
       },
     ]);
@@ -409,7 +428,6 @@ describe('textIndicatorListAdapter', () => {
         {
           block_index: 0,
           reference: 'https://example.com/ref',
-          reference_class: 'candidate',
           iocs: iocValues.map((v) => makeIoc(v)),
         },
       ]);

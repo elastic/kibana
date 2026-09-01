@@ -129,12 +129,13 @@ export const textIndicatorListAdapter: FetchAdapter = {
     // present in block 0 and block 5 doesn't appear in two separate chunks.
     const dedupedIocs = new Map<string, IocEntry>();
     for (const block of blocks) {
+      const reference = normalizeProvenanceUrl(block.reference);
       for (const ioc of block.iocs) {
         const key = `${ioc.type}:${ioc.value}`;
         if (!dedupedIocs.has(key)) {
           dedupedIocs.set(key, {
             ...ioc,
-            ...(block.reference !== undefined ? { reference: block.reference } : {}),
+            ...(reference ? { reference } : {}),
             block_index: block.block_index,
           });
         }

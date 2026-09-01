@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseIndicatorList, classifyReference } from './parse_indicator_list';
+import { parseIndicatorList } from './parse_indicator_list';
 import { extractIocs } from '../../services/extract_iocs';
 import type { ExtractIocsResult, ExtractedIoc } from '../../services/extract_iocs';
 import type { IocType } from '../../../../common/threat_intel';
@@ -38,48 +38,6 @@ const makeResult = (...iocs: ExtractedIoc[]): ExtractIocsResult => ({
 beforeEach(() => {
   extractIocsMock.mockReset();
   extractIocsMock.mockReturnValue(empty());
-});
-
-describe('classifyReference', () => {
-  it('classifies twitter.com as social', () => {
-    expect(classifyReference('https://twitter.com/user/status/123')).toBe('social');
-  });
-
-  it('classifies x.com as social', () => {
-    expect(classifyReference('https://x.com/foo')).toBe('social');
-  });
-
-  it('classifies t.me as social', () => {
-    expect(classifyReference('https://t.me/channel')).toBe('social');
-  });
-
-  it('classifies pastebin.com as social', () => {
-    expect(classifyReference('https://pastebin.com/abc123')).toBe('social');
-  });
-
-  it('classifies t.co (twitter shortener) as social', () => {
-    expect(classifyReference('https://t.co/xyz')).toBe('social');
-  });
-
-  it('classifies subdomains of social hosts as social', () => {
-    expect(classifyReference('https://mobile.twitter.com/foo')).toBe('social');
-  });
-
-  it('classifies a vendor blog as candidate', () => {
-    expect(classifyReference('https://blog.somevendor.com/emotet-writeup')).toBe('candidate');
-  });
-
-  it('classifies an arbitrary unknown domain as candidate', () => {
-    expect(classifyReference('https://threatintel.example.org/report')).toBe('candidate');
-  });
-
-  it('classifies a malformed URL as candidate', () => {
-    expect(classifyReference('not-a-url')).toBe('candidate');
-  });
-
-  it('classifies an empty string as candidate', () => {
-    expect(classifyReference('')).toBe('candidate');
-  });
 });
 
 describe('parseIndicatorList', () => {
@@ -144,12 +102,6 @@ describe('parseIndicatorList', () => {
       const blocks = parseIndicatorList(body);
       expect(blocks[0].reference).toBe(TWITTER_REF);
       expect(blocks[1].reference).toBe(BLOG_REF);
-    });
-
-    it('propagates reference_class onto each block', () => {
-      const blocks = parseIndicatorList(body);
-      expect(blocks[0].reference_class).toBe('social');
-      expect(blocks[1].reference_class).toBe('candidate');
     });
 
     it('block 0 contains the two IOCs under the twitter reference', () => {
@@ -248,7 +200,6 @@ describe('parseIndicatorList', () => {
       expect(blocks).toHaveLength(2);
       expect(blocks[0].block_index).toBe(0);
       expect(blocks[0].reference).toBeUndefined();
-      expect(blocks[0].reference_class).toBeUndefined();
       expect(blocks[0].iocs[0].value).toBe('orphan.com');
     });
 

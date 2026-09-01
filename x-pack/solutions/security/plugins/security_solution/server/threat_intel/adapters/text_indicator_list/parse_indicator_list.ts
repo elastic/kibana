@@ -14,48 +14,11 @@ import { extractIocs } from '../../services/extract_iocs';
  */
 const NON_ELEVATABLE_TIERS: ReadonlySet<string> = new Set(['reference', 'denied']);
 
-// Hosts that are link-only and not worth ingesting as threat content.
-// The router may refine this list later; fail toward 'candidate' on unknowns.
-const SOCIAL_HOSTS = new Set([
-  'twitter.com',
-  'x.com',
-  't.me',
-  'pastebin.com',
-  'bit.ly',
-  'ghostbin.com',
-  't.co',
-  'tinyurl.com',
-  'facebook.com',
-  'reddit.com',
-  'youtube.com',
-]);
-
 export interface IndicatorBlock {
   reference?: string;
-  reference_class?: 'social' | 'candidate';
   block_index: number;
   iocs: ExtractedIoc[];
 }
-
-/**
- * Classifies a reference URL as 'social' (link-only, not worth ingesting) or
- * 'candidate' (potentially rich source content). Malformed URLs → 'candidate'.
- */
-export const classifyReference = (url: string): 'social' | 'candidate' => {
-  try {
-    const { hostname } = new URL(url);
-    const lower = hostname.toLowerCase();
-    // Check exact match or subdomain match
-    for (const host of SOCIAL_HOSTS) {
-      if (lower === host || lower.endsWith(`.${host}`)) {
-        return 'social';
-      }
-    }
-    return 'candidate';
-  } catch {
-    return 'candidate';
-  }
-};
 
 const REFERENCE_PREFIX = '# Reference:';
 
@@ -93,7 +56,6 @@ export const parseIndicatorList = (body: string): IndicatorBlock[] => {
 
       seenFirstReference = true;
       currentBlock.reference = url;
-      currentBlock.reference_class = classifyReference(url);
     } else if (line && !line.startsWith('#')) {
       const { iocs } = extractIocs({ text: line, defang: false });
       for (const ioc of iocs) {
