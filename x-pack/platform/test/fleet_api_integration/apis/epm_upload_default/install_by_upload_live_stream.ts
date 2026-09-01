@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import JSZip from 'jszip';
+import AdmZip from 'adm-zip';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -199,68 +199,73 @@ async function buildUploadPackageZip({
 }): Promise<Buffer> {
   const root = `${name}-${PACKAGE_VERSION}`;
   const dataStreamDir = `${root}/data_stream/logs`;
-  const zip = new JSZip();
+  // adm-zip instead of jszip: 8.19 does not have jszip as a dependency.
+  const zip = new AdmZip();
 
-  zip.file(
+  zip.addFile(
     `${root}/manifest.yml`,
-    [
-      `name: ${name}`,
-      `version: ${PACKAGE_VERSION}`,
-      `title: ${name}`,
-      'description: Upload live-stream probe package',
-      'type: integration',
-      'owner:',
-      '  github: elastic/fleet',
-      'policy_templates:',
-      '  - name: logs',
-      '    title: Logs',
-      '    description: Collect log files',
-      '    inputs:',
-      '      - type: logfile',
-      '        title: Log file',
-      '        description: Collect log files',
-      '',
-    ].join('\n')
+    Buffer.from(
+      [
+        `name: ${name}`,
+        `version: ${PACKAGE_VERSION}`,
+        `title: ${name}`,
+        'description: Upload live-stream probe package',
+        'type: integration',
+        'owner:',
+        '  github: elastic/fleet',
+        'policy_templates:',
+        '  - name: logs',
+        '    title: Logs',
+        '    description: Collect log files',
+        '    inputs:',
+        '      - type: logfile',
+        '        title: Log file',
+        '        description: Collect log files',
+        '',
+      ].join('\n')
+    )
   );
-  zip.file(
+  zip.addFile(
     `${dataStreamDir}/manifest.yml`,
-    [
-      'title: Probe logs',
-      'type: logs',
-      `dataset: ${dataset}`,
-      'streams:',
-      '  - input: logfile',
-      '    title: Probe logs',
-      '    vars:',
-      includeDatasetVar
-        ? [
-            '      - name: data_stream.dataset',
-            '        type: text',
-            '        title: Dataset name',
-            '        required: false',
-            '        show_user: true',
-            '      - name: paths',
-            '        type: text',
-            '        title: Paths',
-            '        required: false',
-            '        multi: true',
-            '        show_user: true',
-          ].join('\n')
-        : [
-            '      - name: paths',
-            '        type: text',
-            '        title: Paths',
-            '        required: false',
-            '        multi: true',
-            '        show_user: true',
-          ].join('\n'),
-      '',
-    ].join('\n')
+    Buffer.from(
+      [
+        'title: Probe logs',
+        'type: logs',
+        `dataset: ${dataset}`,
+        'streams:',
+        '  - input: logfile',
+        '    title: Probe logs',
+        '    vars:',
+        includeDatasetVar
+          ? [
+              '      - name: data_stream.dataset',
+              '        type: text',
+              '        title: Dataset name',
+              '        required: false',
+              '        show_user: true',
+              '      - name: paths',
+              '        type: text',
+              '        title: Paths',
+              '        required: false',
+              '        multi: true',
+              '        show_user: true',
+            ].join('\n')
+          : [
+              '      - name: paths',
+              '        type: text',
+              '        title: Paths',
+              '        required: false',
+              '        multi: true',
+              '        show_user: true',
+            ].join('\n'),
+        '',
+      ].join('\n')
+    )
   );
-  zip.file(
+  zip.addFile(
     `${dataStreamDir}/agent/stream/stream.yml.hbs`,
-    'paths:\n{{#each paths}}\n  - {{this}}\n{{/each}}\n'
+    Buffer.from('paths:\n{{#each paths}}\n  - {{this}}\n{{/each}}\n')
   );
 
-  return Buffer.from(await zip.generateAsync({ type: 'nodebuffer' }));
+  return zip.toBuffer();
 }
