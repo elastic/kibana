@@ -286,6 +286,79 @@ describe('AttacksGroupTakeActionItems', () => {
       expect(await findByText('Explore in Attacks')).toBeInTheDocument();
       expect(queryByText('Investigate in Timeline')).not.toBeInTheDocument();
     });
+
+    describe('showNavigationAction', () => {
+      const renderWithNavigationAction = (showNavigationAction?: boolean) =>
+        render(
+          <TestProviders>
+            <AttacksGroupTakeActionItems
+              attack={mockAttack}
+              showNavigationAction={showNavigationAction}
+              telemetrySource="attacks_page_group_take_action"
+              isRemoteDocument={false}
+            />
+          </TestProviders>
+        );
+
+      it('renders the navigation item by default', async () => {
+        mockUseIsInSecurityApp.mockReturnValue(true);
+        const { findByText } = renderWithNavigationAction();
+
+        expect(await findByText('Investigate in Timeline')).toBeInTheDocument();
+      });
+
+      it('renders the other action items when the navigation item is shown', async () => {
+        mockUseIsInSecurityApp.mockReturnValue(true);
+        const { findByText } = renderWithNavigationAction(true);
+
+        expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
+        expect(await findByText('Assign alert')).toBeInTheDocument();
+        expect(await findByText('Apply alert tags')).toBeInTheDocument();
+        expect(await findByText('Run workflow')).toBeInTheDocument();
+        expect(await findByText('View in AI Assistant')).toBeInTheDocument();
+      });
+
+      it('omits `Investigate in Timeline` when false and inside the Security Solution app', () => {
+        mockUseIsInSecurityApp.mockReturnValue(true);
+        const { queryByText } = renderWithNavigationAction(false);
+
+        expect(queryByText('Investigate in Timeline')).not.toBeInTheDocument();
+      });
+
+      it('omits `Explore in Attacks` when false and outside the Security Solution app', () => {
+        mockUseIsInSecurityApp.mockReturnValue(false);
+        const { queryByText } = renderWithNavigationAction(false);
+
+        expect(queryByText('Explore in Attacks')).not.toBeInTheDocument();
+      });
+
+      it('keeps the other action items when the navigation item is omitted', async () => {
+        mockUseIsInSecurityApp.mockReturnValue(true);
+        const { findByText } = renderWithNavigationAction(false);
+
+        expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
+        expect(await findByText('Assign alert')).toBeInTheDocument();
+        expect(await findByText('Apply alert tags')).toBeInTheDocument();
+        expect(await findByText('Run workflow')).toBeInTheDocument();
+        expect(await findByText('View in AI Assistant')).toBeInTheDocument();
+      });
+
+      it('keeps the navigation item for a remote document', async () => {
+        mockUseIsInSecurityApp.mockReturnValue(true);
+        const { findByText } = render(
+          <TestProviders>
+            <AttacksGroupTakeActionItems
+              attack={mockAttack}
+              showNavigationAction={false}
+              telemetrySource="attacks_page_group_take_action"
+              isRemoteDocument={true}
+            />
+          </TestProviders>
+        );
+
+        expect(await findByText('Investigate in Timeline')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('run workflow', () => {
