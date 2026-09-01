@@ -35,4 +35,9 @@ describe('decodeDataUrl', () => {
   it('throws when the data: URL has no comma', () => {
     expect(() => decodeDataUrl('data:text/plain')).toThrow(/missing comma/);
   });
+
+  it('rejects decoded fixture payloads above the network response cap', () => {
+    const oversized = `data:application/rss+xml,${'a'.repeat(10 * 1024 * 1024 + 1)}`;
+    expect(() => decodeDataUrl(oversized)).toThrow(/feed cap/);
+  });
 });

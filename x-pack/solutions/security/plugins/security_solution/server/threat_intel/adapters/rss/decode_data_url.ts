@@ -14,11 +14,17 @@
  *
  * Supports both percent-encoded and `;base64` payloads.
  */
+const MAX_DECODED_BYTES = 10 * 1024 * 1024;
+const MAX_DATA_URL_CHARS = MAX_DECODED_BYTES * 3 + 1024;
+
 export const isDataUrl = (url: string): boolean => url.startsWith('data:');
 
 export const decodeDataUrl = (dataUrl: string): string => {
   if (!isDataUrl(dataUrl)) {
     throw new Error(`Expected a data: URL, got "${dataUrl.slice(0, 32)}"`);
+  }
+  if (dataUrl.length > MAX_DATA_URL_CHARS) {
+    throw new Error(`Data URL exceeds the ${MAX_DECODED_BYTES}-byte feed cap`);
   }
 
   const commaIdx = dataUrl.indexOf(',');
@@ -30,9 +36,12 @@ export const decodeDataUrl = (dataUrl: string): string => {
   const payload = dataUrl.slice(commaIdx + 1);
   const isBase64 = /(?:^|;)base64(?:;|$)/i.test(meta);
 
-  if (isBase64) {
-    return Buffer.from(payload, 'base64').toString('utf8');
-  }
+  const decoded = isBase64
+    ? Buffer.from(payload, 'base64').toString('utf8')
+    : decodeURIComponent(payload);
 
-  return decodeURIComponent(payload);
+  if (Buffer.byteLength(decoded, 'utf8') > MAX_DECODED_BYTES) {
+    throw new Error(`Decoded data URL exceeds the ${MAX_DECODED_BYTES}-byte feed cap`);
+  }
+  return decoded;
 };
