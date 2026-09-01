@@ -373,11 +373,15 @@ describe('buildThresholdEsql', () => {
       );
     });
 
-    it('drives the WHERE off the lowest-severity threshold in multi mode', () => {
+    it('builds the WHERE from the alert condition, not the severity levels', () => {
+      // The lowest severity level is kept in sync with the condition threshold in the
+      // form (ADR option 1), so build_esql never rewrites the WHERE from severity. Using
+      // an intentionally out-of-sync level here documents that the WHERE follows the
+      // condition threshold, not the level threshold.
       const result = buildThresholdEsql(
         makeValues({
           stats: [cpuStat],
-          alertConditions: [{ ...cpuCondition, threshold: [0.95] }],
+          alertConditions: [{ ...cpuCondition, threshold: [0.7] }],
           severity: {
             mode: 'multi',
             singleLevelSeverity: 'high',
@@ -388,7 +392,7 @@ describe('buildThresholdEsql', () => {
           },
         })
       );
-      expect(result).toContain('| WHERE cpu_avg > 0.8');
+      expect(result).toContain('| WHERE cpu_avg > 0.7');
     });
 
     it('supports descending thresholds with a < comparator', () => {

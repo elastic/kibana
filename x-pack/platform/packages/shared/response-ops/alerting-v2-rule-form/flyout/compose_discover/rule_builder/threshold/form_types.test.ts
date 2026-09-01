@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertCondition } from './form_types';
+import type { AlertCondition, SeverityConfig } from './form_types';
 import {
   Aggregation,
   areAllStatsValid,
@@ -18,6 +18,8 @@ import {
   reconcileAlertConditionMetrics,
   reconcileSeverity,
   shouldSyncConditionMetricOnLabelChange,
+  syncConditionToSeverityThreshold,
+  syncSeverityToConditionThreshold,
 } from './form_types';
 
 describe('nextStatLabel', () => {
@@ -147,6 +149,73 @@ describe('severity helpers', () => {
 
     it('passes through undefined', () => {
       expect(reconcileSeverity(undefined, [condition(Comparator.GT)])).toBeUndefined();
+    });
+  });
+
+  describe('threshold coupling', () => {
+    const multi = (levels: SeverityConfig['levels']): SeverityConfig => ({
+      mode: 'multi',
+      singleLevelSeverity: 'high',
+      levels,
+    });
+
+    describe('syncSeverityToConditionThreshold', () => {
+      it('mirrors the condition threshold onto the lowest multi level', () => {
+        const result = syncSeverityToConditionThreshold(
+          multi([
+            { id: 'l1', severity: 'low', threshold: 0.8 },
+            { id: 'l2', severity: 'high', threshold: 0.95 },
+          ]),
+          0.6
+        );
+        expect(result?.levels[0].threshold).toBe(0.6);
+        expect(result?.levels[1].threshold).toBe(0.95);
+      });
+
+      it('leaves single mode untouched', () => {
+        const single: SeverityConfig = { mode: 'single', singleLevelSeverity: 'high', levels: [] };
+        expect(syncSeverityToConditionThreshold(single, 0.6)).toBe(single);
+      });
+
+      it('is a no-op for undefined severity or threshold', () => {
+        expect(syncSeverityToConditionThreshold(undefined, 0.6)).toBeUndefined();
+        const config = multi([{ id: 'l1', severity: 'low', threshold: 0.8 }]);
+        expect(syncSeverityToConditionThreshold(config, undefined)).toBe(config);
+      });
+    });
+
+    describe('syncConditionToSeverityThreshold', () => {
+      it('mirrors the lowest multi level onto the single condition', () => {
+        const result = syncConditionToSeverityThreshold(
+          [condition(Comparator.GT)],
+          multi([
+            { id: 'l1', severity: 'low', threshold: 0.6 },
+            { id: 'l2', severity: 'high', threshold: 0.95 },
+          ])
+        );
+        expect(result[0].threshold).toEqual([0.6]);
+      });
+
+      it('preserves an upper bound if present', () => {
+        const result = syncConditionToSeverityThreshold(
+          [{ id: '1', metric: 'm', comparator: Comparator.GT, threshold: [100, 200] }],
+          multi([{ id: 'l1', severity: 'low', threshold: 50 }])
+        );
+        expect(result[0].threshold).toEqual([50, 200]);
+      });
+
+      it('is a no-op for multiple conditions or single-mode severity', () => {
+        const conditions = [condition(Comparator.GT), condition(Comparator.LT)];
+        expect(syncConditionToSeverityThreshold(conditions, multi([]))).toBe(conditions);
+        const single = [condition(Comparator.GT)];
+        expect(
+          syncConditionToSeverityThreshold(single, {
+            mode: 'single',
+            singleLevelSeverity: 'high',
+            levels: [],
+          })
+        ).toBe(single);
+      });
     });
   });
 });

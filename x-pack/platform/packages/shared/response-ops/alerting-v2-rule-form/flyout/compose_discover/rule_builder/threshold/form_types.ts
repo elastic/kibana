@@ -271,12 +271,47 @@ export const reconcileSeverity = (
   severity: SeverityConfig | undefined,
   alertConditions: AlertCondition[]
 ): SeverityConfig | undefined => {
-  if (!severity || !isSeveritySupported(alertConditions)) return undefined;  
+  if (!severity || !isSeveritySupported(alertConditions)) return undefined;
   const [condition] = alertConditions;
   if (severity.mode === 'multi' && !isMultiSeveritySupported(condition.comparator)) {
     return { ...severity, mode: 'single' };
   }
   return severity;
+};
+
+const hasMultiLevels = (severity: SeverityConfig | undefined): severity is SeverityConfig =>
+  severity?.mode === 'multi' && severity.levels.length > 0;
+
+/**
+ * Mirror the alert condition threshold onto the lowest multi-severity level, 
+ * so editing the condition keeps the lowest level — which defines the breach 
+ * threshold — in sync.
+ */
+export const syncSeverityToConditionThreshold = (
+  severity: SeverityConfig | undefined,
+  conditionThreshold: number | undefined
+): SeverityConfig | undefined => {
+  if (!hasMultiLevels(severity) || conditionThreshold === undefined) return severity;
+  return {
+    ...severity,
+    levels: severity.levels.map((lvl, i) =>
+      i === 0 ? { ...lvl, threshold: conditionThreshold } : lvl
+    ),
+  };
+};
+
+/**
+ * Mirror the lowest multi-severity level threshold onto the single alert condition, 
+ * so editing that level keeps the generated breach WHERE in sync with the UI.
+ */
+export const syncConditionToSeverityThreshold = (
+  alertConditions: AlertCondition[],
+  severity: SeverityConfig | undefined
+): AlertCondition[] => {
+  if (alertConditions.length !== 1 || !hasMultiLevels(severity)) return alertConditions;
+  const [condition] = alertConditions;
+  const lowestThreshold = severity.levels[0].threshold;
+  return [{ ...condition, threshold: [lowestThreshold, ...condition.threshold.slice(1)] }];
 };
 
 const FLIPPED_COMPARATOR: Record<Comparator, Comparator> = {

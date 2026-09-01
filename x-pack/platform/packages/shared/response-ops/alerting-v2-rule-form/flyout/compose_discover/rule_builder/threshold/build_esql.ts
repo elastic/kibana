@@ -115,27 +115,21 @@ const buildConditionExpr = (condition: AlertCondition): ESQLSingleAstItem => {
   ]);
 };
 
-interface SeverityEsql {
-  /** Right-hand side for `EVAL severity = <evalRhs>`. */
-  evalRhs: string;
-  /** Lowest-severity threshold that should drive the alert-condition WHERE (multi mode only). */
-  whereThreshold?: number;
-}
-
 /**
- * Translate the severity config into ES|QL fragments. Single mode emits a
+ * Build the right-hand side of `EVAL severity = <rhs>`. Single mode emits a
  * constant `"<level>"`; multi mode emits a `CASE(...)` evaluated from most to
- * least severe (the least-severe level being the fallback) and reports the
- * lowest-severity threshold so the WHERE clause admits every severity level.
- * Returns `null` when multi mode cannot be represented (range comparator or no
- * levels).
+ * least severe (the least-severe level being the fallback). The WHERE clause is
+ * driven by the alert condition itself — the lowest severity level threshold is
+ * kept in sync with the condition threshold in the form (see ADR), so no query
+ * rewrite is needed here. Returns `null` when multi mode cannot be represented
+ * (range comparator or no levels).
  */
-const buildSeverityEsql = (
+const buildSeverityEvalRhs = (
   severity: SeverityConfig,
   condition: AlertCondition
-): SeverityEsql | null => {
+): string | null => {
   if (severity.mode === 'single') {
-    return { evalRhs: `"${severity.singleLevelSeverity}"` };
+    return `"${severity.singleLevelSeverity}"`;
   }
 
   const operator = COMPARATOR_OP[condition.comparator];
@@ -147,10 +141,10 @@ const buildSeverityEsql = (
     .slice()
     .reverse()
     .map((level) => `${column} ${operator} ${level.threshold}, "${level.severity}"`);
-  const evalRhs =
-    branches.length > 0 ? `CASE(${branches.join(', ')}, "${lowest.severity}")` : `"${lowest.severity}"`;
 
-  return { evalRhs, whereThreshold: lowest.threshold };
+  return branches.length > 0
+    ? `CASE(${branches.join(', ')}, "${lowest.severity}")`
+    : `"${lowest.severity}"`;
 };
 
 const isStatValid = (stat: StatDefinition): boolean => {
@@ -213,27 +207,18 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
     }
   }
 
-  // WHERE (alert conditions). Severity only applies to a single condition.
+  // WHERE (alert conditions). Severity only applies to a single condition; the
+  // lowest severity level threshold is synced to the condition in the form, so
+  // the WHERE is always built straight from the alert conditions.
   const validConditions = values.alertConditions.filter((c) => c.metric && c.threshold.length > 0);
   const singleCondition = validConditions.length === 1 ? validConditions[0] : undefined;
-  const severityEsql =
+  const severityEvalRhs =
     values.severity && singleCondition
-      ? buildSeverityEsql(values.severity, singleCondition)
+      ? buildSeverityEvalRhs(values.severity, singleCondition)
       : null;
 
   if (validConditions.length > 0) {
-    // In multi-severity mode the WHERE uses the lowest-severity threshold so that
-    // every configured severity level is admitted by the breach condition.
-    const whereConditions =
-      severityEsql?.whereThreshold !== undefined && singleCondition
-        ? [
-            {
-              ...singleCondition,
-              threshold: [severityEsql.whereThreshold, ...singleCondition.threshold.slice(1)],
-            },
-          ]
-        : validConditions;
-    const conditionExprs = whereConditions.map(buildConditionExpr);
+    const conditionExprs = validConditions.map(buildConditionExpr);
     const joiner = values.conditionOperator === 'OR' ? 'or' : 'and';
     const combined = conditionExprs.reduce((left, right) =>
       Builder.expression.func.binary(joiner, [left, right])
@@ -242,8 +227,8 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
   }
 
   // EVAL severity (after the breach WHERE, so it enriches breached rows).
-  if (severityEsql) {
-    const exprAst = parseFragment(severityEsql.evalRhs);
+  if (severityEvalRhs) {
+    const exprAst = parseFragment(severityEvalRhs);
     if (exprAst) {
       commands.push(
         Builder.command({
