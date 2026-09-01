@@ -62,8 +62,9 @@ const threatReportsTemplate = {
       properties: {
         '@timestamp': { type: 'date' as const },
         content_fingerprint: { type: 'keyword' as const },
-        // Logical per-space isolation tag. `'*'` = visible from every
-        // space. Routes filter by current space + `'*'`.
+        // Application-layer space filter tag (`'*'` = all spaces). Kibana routes
+        // scope reads to the current space plus `'*'`. This is not an Elasticsearch
+        // authorization boundary on the hidden reports index while supply is disabled.
         space_id: { type: 'keyword' as const },
         source: {
           properties: {
