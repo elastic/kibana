@@ -505,10 +505,7 @@ describe('overviewStatusReducer', () => {
 
     it('keeps appended pages when a page-1 refresh completes after the append', () => {
       const pageState = { page: 1, perPage: 2 } as any;
-      let state = overviewStatusReducer(
-        undefined,
-        fetchOverviewStatusAction.get({ pageState })
-      );
+      let state = overviewStatusReducer(undefined, fetchOverviewStatusAction.get({ pageState }));
       state = overviewStatusReducer(
         state,
         fetchOverviewStatusAction.success(
