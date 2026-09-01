@@ -67,6 +67,7 @@ jest.mock('./provider_registry', () => ({
 }));
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   resolveKibanaStepTypeAlias: (type: string) =>
     type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
 }));

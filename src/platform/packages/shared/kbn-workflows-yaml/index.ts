@@ -158,6 +158,60 @@ export type {
   YamlValidationResult,
 } from './common/validation/types';
 
+// Workflow context schema (variable/step/foreach context used by validation and autocomplete)
+export {
+  getWorkflowContextRegistry,
+  resetWorkflowContextRegistry,
+  setWorkflowContextRegistry,
+  type RegisteredStepOutput,
+  type WorkflowContextRegistry,
+} from './common/validation/context/registry';
+export {
+  InvalidForeachParameterError,
+  InvalidForeachParameterErrorCodes,
+} from './common/validation/context/errors';
+export {
+  extendContextWithTemplateLocals,
+  getContextSchemaWithTemplateLocals,
+  mapBlockScalarSourceToValueOffset,
+} from './common/validation/context/extend_context_with_template_locals';
+export {
+  getAllForLoopScopes,
+  getTemplateLocalContext,
+  isLiquidRangeLiteral,
+  isLiquidStringLiteral,
+  parseAssignRhs,
+  resolveAssignChain,
+  stripAssignRhsFilters,
+  type AssignVariable,
+  type ForLoopScope,
+  type TemplateLocalContext,
+} from './common/validation/context/extract_template_local_context';
+export {
+  extendWithPathSpecificContext,
+  getContextSchemaForPath,
+  getContextSchemaForStep,
+} from './common/validation/context/get_context_for_path';
+export {
+  FOREACH_ITEM_SCHEMA_DESC,
+  getForeachCollectionDiagnostic,
+  getForeachItemSchema,
+  getForeachStateSchema,
+} from './common/validation/context/get_foreach_state_schema';
+export { getNearestStepPath } from './common/validation/context/get_nearest_step_path';
+export { getOutputSchemaForStepType } from './common/validation/context/get_output_schema_for_step_type';
+export { getStepsCollectionSchema } from './common/validation/context/get_steps_collection_schema';
+export { getValueAtYamlPath } from './common/validation/context/get_value_at_yaml_path';
+export { getVariablesSchema } from './common/validation/context/get_variables_schema';
+export { getWorkflowContextSchema } from './common/validation/context/get_workflow_context_schema';
+
+// Variable validation rules (the `variable-validation` rule group)
+export { collectAllVariables } from './common/validation/variables/collect_all_variables';
+export { validateVariable } from './common/validation/variables/validate_variable';
+export { validateVariables } from './common/validation/variables/validate_variables';
+export { validateLiquidYamlScalars } from './common/validation/variables/validate_liquid_yaml_scalars';
+export { validateLiquidForLoopCollections } from './common/validation/variables/validate_liquid_for_loop_collections';
+
 // Yaml editing utilities
 export {
   insertStep,
