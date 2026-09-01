@@ -80,7 +80,6 @@ export interface ReportKiVerificationEventParams {
   verifiers_run?: number;
   failed_verifier_ids?: string[];
   error_type?: string;
-  errored_verifier_id?: string;
 }
 
 const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
@@ -125,13 +124,6 @@ const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
     },
     _meta: {
       description: 'Failing verifier ids. Present only when a completed run failed verification.',
-      optional: true,
-    },
-  },
-  errored_verifier_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'Verifier id that threw an execution error.',
       optional: true,
     },
   },

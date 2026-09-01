@@ -47,16 +47,15 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 | Field | Description |
 |---|---|
 | `outcome` | The run outcome: `success` (verification completed, pass or fail), `failure` (the run errored), or `aborted` when the run was cancelled. |
-| `passed` | Whether every applicable verifier passed. Present only when the run completed. |
+| `passed` | Whether every applicable verifier passed. A throwing verifier counts as a failure. Present when the run completed. |
 | `verifiers_run` | Number of verifiers that ran; `0` means the KI had nothing to verify, so those passes can be filtered out. Present when the run completed. |
 | `failed_verifier_ids` | Failing verifier ids, verbatim. Present only when a completed run failed verification. |
 | `error_type` | As in KI write events. Present only on `failure`. |
-| `errored_verifier_id` | The verifier that threw an execution error. Present when a verifier prevents the run from completing. |
 
 ## Logs
 
 - KI writes and write failures log at `debug` from the `plugins.contextEngine.context_steps` logger. Log lines carry the KI document id and the AI index id.
 
-- Every verification run logs from the same logger: a pass logs the verifier count, a failed verification logs the failing verifier ids, an unattributed error or aborted run logs its outcome at `debug`, and a verifier execution error logs its verifier id and safe error type at `warn`. Reasons appear only in the step output.
+- Every verification run logs at `debug` from the same logger: a pass logs the verifier count, a failed verification logs the failing verifier ids, an errored or aborted run logs its outcome. Reasons appear only in the step output.
 
 - Telemetry reporting failures log at `debug` from the `plugins.contextEngine.telemetry` logger.

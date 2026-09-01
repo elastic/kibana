@@ -129,21 +129,13 @@ describe('ContextEngineAnalyticsService', () => {
     });
 
     it('reports failure and abort outcomes without run fields', () => {
-      service.reportKiVerification({
-        outcome: 'failure',
-        errorType: 'ConnectionError',
-        erroredVerifierId: 'esql-valid-runtime',
-      });
+      service.reportKiVerification({ outcome: 'failure', errorType: 'TypeError' });
       service.reportKiVerification({ outcome: 'aborted' });
 
       expect(analytics.reportEvent).toHaveBeenNthCalledWith(
         1,
         CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
-        {
-          outcome: 'failure',
-          error_type: 'ConnectionError',
-          errored_verifier_id: 'esql-valid-runtime',
-        }
+        { outcome: 'failure', error_type: 'TypeError' }
       );
       expect(analytics.reportEvent).toHaveBeenNthCalledWith(
         2,

@@ -11,5 +11,3 @@ export class KiVerificationInputError extends Error {
     this.name = 'KiVerificationInputError';
   }
 }
-
-export { KiVerifierExecutionError } from './execution_error';
