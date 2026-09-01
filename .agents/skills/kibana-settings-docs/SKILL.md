@@ -1,6 +1,6 @@
 ---
 name: kibana-settings-docs
-description: Document Kibana kibana.yml settings and Advanced Settings (uiSettings) in docs-builder {settings} YAML. Use when adding, changing, deprecating, or removing a kibana.yml key, uiSettings.register, uiSettings.registerGlobal, advanced-settings-space.yml, advanced-settings-global.yml, or a docs/reference/configuration-reference YAML file.
+description: Document Kibana kibana.yml settings and Advanced Settings (uiSettings) in docs-builder {settings} YAML for public user documentation. Use when adding, changing, deprecating, or removing a kibana.yml key, uiSettings.register, uiSettings.registerGlobal, advanced-settings-space.yml, advanced-settings-global.yml, or a docs/reference/configuration-reference YAML file.
 ---
 
 # Kibana settings docs
