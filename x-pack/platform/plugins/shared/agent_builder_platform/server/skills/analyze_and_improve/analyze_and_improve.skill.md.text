@@ -29,6 +29,11 @@ made, classified after the fact. Signals are the raw evidence. A **finding** is 
 pipeline that specific signals support. Your job is to get from the former to the latter, and only
 then to a proposed change.
 
+**The lever is the automation.** Every change you propose is a change to a workflow, or to the
+sources feeding one — never to an individual knowledge indicator, which is an artifact of the
+automation that produced it and will be regenerated with the same defect. When the evidence points
+at a KI, answer *which automation produced it, and what about that automation changes*.
+
 ## Where the evidence lives
 
 Signals live in `context-engine-signals-*` — one index per Kibana space.
@@ -45,15 +50,16 @@ Signals live in `context-engine-signals-*` — one index per Kibana space.
 | `data.status` / `data.error` | Whether the call errored, and the message if it did. |
 | `data.agent` | Which agent ran it (`id`, `name`). |
 | `data.conversation_id` | The conversation the call belonged to. |
-| `data.fell_back_to_raw` | The round tried a KI retrieval **and** hit raw data — a genuine fallback. |
+| `data.fell_back_to_raw` | The round contained both a KI retrieval and a raw query. Not proof of a fallback: a KI can direct the agent to live data. |
 | `data.looped` | The round ran three or more ES\|QL queries: the agent kept trying. |
 | `data.round_signals` | Per-round counts: `esql_count`, `ki_retrieval_count`, `raw_query_count`. |
 
 ### The tags
 
 - **`query_error`** — the query failed. `data.error` carries the message.
-- **`empty_retrieval`** — the query ran fine and returned zero rows. This is usually the most
-  informative tag: the agent asked a well-formed question and the index had no answer for it.
+- **`empty_retrieval`** — the query ran and returned zero rows. Usually the most informative tag,
+  but it establishes only that nothing matched: the content may be absent, or present under
+  vocabulary the query did not use.
 - **`coverage_gap`** — the agent queried ordinary user data rather than a KI index. Orthogonal to
   the other two: it describes *how* the agent got its context, not whether it worked.
 
@@ -69,19 +75,22 @@ sub-fields with `field_extract(data, "<path>")`, which returns a `keyword`:
 
 ```esql
 FROM context-engine-signals-*
-| WHERE @timestamp >= NOW() - 7 days AND tags == "empty_retrieval"
+| WHERE @timestamp >= NOW() - 7 days AND MV_CONTAINS(tags, "empty_retrieval")
 | EVAL target = field_extract(data, "target_index")
 | STATS signals = COUNT(*), conversations = COUNT_DISTINCT(field_extract(data, "conversation_id")) BY target
 | SORT signals DESC
 ```
 
-`tags` is a keyword array, so `tags == "empty_retrieval"` matches any signal carrying that tag.
+Always match tags with `MV_CONTAINS(tags, "<tag>")`. Never compare `tags` to a value directly: it
+is multi-valued, so a comparison operator evaluates to `null` and matches only signals carrying
+that one tag **and no other**. You get a short result set with nothing to indicate it is
+incomplete.
 
 To read the queries behind a group, keep the whole object and read it yourself:
 
 ```esql
 FROM context-engine-signals-*
-| WHERE @timestamp >= NOW() - 7 days AND tags == "empty_retrieval"
+| WHERE @timestamp >= NOW() - 7 days AND MV_CONTAINS(tags, "empty_retrieval")
 | WHERE field_extract(data, "target_index") == "<target>"
 | SORT @timestamp DESC
 | LIMIT 20
@@ -94,9 +103,19 @@ history that has already been acted on.
 ### Following a signal back to its conversation
 
 `trace_ids` joins into `traces-agent_builder.otel-<space>` — the same space as the signals index the
-signal came from. Go there when the signal alone does not tell you *why* the agent asked what it
-asked: the user's question, the reasoning around the tool call, and what the agent did with the
-empty result all live on the trace, not on the signal.
+signal came from. A wildcard query spans spaces, so carry the signal's own index through or you
+will not know which trace index to join into. `_index` is a metadata field: request it on `FROM`
+before you can `KEEP` it, otherwise the query fails with `Unknown column [_index]`.
+
+```esql
+FROM context-engine-signals-* METADATA _index
+| WHERE @timestamp >= NOW() - 7 days AND MV_CONTAINS(tags, "empty_retrieval")
+| KEEP _index, @timestamp, trace_ids, data
+```
+
+Go there when the signal alone does not tell you *why* the agent asked what it asked: the user's
+question, the reasoning around the tool call, and what the agent did with the empty result all live
+on the trace, not on the signal.
 
 This is worth doing for the handful of signals a finding rests on, not for every signal in a group.
 
@@ -104,16 +123,24 @@ This is worth doing for the handful of signals a finding rests on, not for every
 
 Before proposing a change to something, read it.
 
-- **Automations.** The briefing lists the AI index's linked workflow ids. `platform.workflows.get_workflow`
-  returns a workflow's definition. Read it before proposing to edit or retire it — a workflow that
-  looks redundant from the outside often is not, and a proposal that misquotes what a workflow does
-  will be rejected on sight.
+- **Automations, first and in detail.** The briefing lists the AI index's linked workflow ids;
+  `platform.workflows.get_workflow` returns a workflow's definition. Your proposal has to name a
+  step, so read for one: what it samples and how much, what it asks the model for, how many
+  indicators it can emit, and what it writes into which fields. A pipeline's *shape* often bounds
+  what it could ever produce, however well its prompts are worded. A proposal that misquotes what a
+  workflow does will be rejected on sight.
 - **The KIs themselves.** `platform.core.list_indices` finds the `ai-index-*` indices;
   `platform.core.execute_esql` samples them. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
-  content" or "content that exists under a name the agent did not guess".
+  content" or "content that exists under a name the agent did not guess". What is missing or
+  malformed in them is the output the workflow actually produced. With several linked workflows,
+  attribute a KI to one by reading the definitions and seeing which writes to that destination and
+  id pattern. If that does not settle it, say attribution was not established rather than guessing.
 - **Sources.** The briefing lists them. A coverage gap on data that is not in any source is a
-  source problem before it is a KI problem.
+  source problem, and the fix is to the source rather than to any automation. Confirm it before
+  proposing: an `esql` source is a query you can run, so run it and see whether the data is
+  genuinely absent or merely filtered out. A `connector` source you cannot inspect — say so and
+  describe what you would need to check, rather than proposing a change to contents you never saw.
 
 ## Prefer the signals you were given
 
@@ -122,14 +149,14 @@ already been scoped to the AI index, the time window, and the tags the run cares
 what the run's output will be reconciled against. Reading `context-engine-signals-*` directly in
 that case risks basing a finding on evidence that has nothing to do with this index.
 
-Go read the indices yourself only when no signals came with the run.
+Query `context-engine-signals-*` yourself only when no signals came with the run. Inspect the AI
+index and its linked workflows either way.
 
 ## What makes a finding worth proposing
 
-This is the part that decides whether the loop is useful or noise. A finding is worth proposing
-when all of the following hold.
+A finding is worth proposing when all of the following hold.
 
-1. **It recurs.** A single failed query is an accident. A pattern across several signals — ideally
+1. **It recurs.** Do not propose a change from a single signal. A pattern across several signals — ideally
    several distinct conversations, not one conversation where the agent retried five times — is
    evidence. `data.conversation_id` and `trace_ids` are how you tell those apart, and
    `data.looped` warns you when you are looking at the latter.
@@ -138,10 +165,19 @@ when all of the following hold.
    guess. Cite the concrete values: the `target_index`, representative `data.query` strings, the
    `data.error` text, how many signals and how many distinct conversations.
 
-3. **You can name the change.** "Improve coverage of billing data" is not a proposal. "Add a KI
-   describing the `invoices-*` schema and the questions it answers, because six retrievals against
-   the index asked about invoice status and returned nothing" is. A proposal a reviewer cannot act
-   on without doing the analysis again has not saved anyone anything.
+   Count the denominator too: how many retrievals hit that same target over the same window,
+   tagged or not. Ten failures out of twelve and ten out of ten thousand are different findings,
+   and only the rate distinguishes a broken index from a heavily used healthy one. Report both.
+   A supplied signal set is usually scoped to particular tags and so will not contain the clean
+   retrievals; query the signals indices for that count alone, keeping the supplied set as the
+   corpus every finding is drawn from.
+
+3. **You can name the change, and it names a workflow or a source.** "Improve coverage of billing
+   data" is not a proposal. "`billing-ki-generation` filters its source query to
+   `status == "open"`, so nothing is ever generated about settled invoices — widen it, because six
+   retrievals asked about invoice status and returned nothing" is. For a workflow, name the step.
+   For a source, name what data or configuration changes. A proposal a reviewer cannot act on
+   without doing the analysis again has not saved anyone anything.
 
 4. **The change is plausibly the fix.** Argue from the evidence to the change. If the argument only
    works when you assume something you have not checked, go check it or lower your confidence and
@@ -149,43 +185,62 @@ when all of the following hold.
 
 ### Shapes you will see, and what they usually mean
 
-- **Many `empty_retrieval` on one `target_index`, semantically similar queries.** The index
-  genuinely lacks that content. Check the KIs first: if related content exists but under different
-  vocabulary, the fix is a description or tagging change, not a new KI.
+- **Many `empty_retrieval` on one `target_index`, semantically similar queries.** Content the
+  agents need is not reaching the index. Read the KIs before concluding it is absent: if related
+  content exists but under vocabulary the queries never use, the automation is generating the right
+  material and describing it badly, which is a different change from generating more of it.
 - **`empty_retrieval` where the queries filter on a `type` or `tags` value the index does not
-  have.** A retrieval problem, not a coverage problem. The content may be there; the agent guessed
-  a vocabulary that does not exist.
-- **`query_error` clustering on one field or one shape of query.** Usually a mapping or generation
-  bug in whichever automation produces those documents. Read the workflow before proposing.
-- **`query_error` from malformed ES|QL that varies each time.** An agent-side problem. No change to
-  this AI index will fix it — say so rather than proposing something.
-- **Repeated `coverage_gap` on the same raw index, especially with `fell_back_to_raw`.** The agents
-  keep needing data the index has no KI about. Strong evidence for an addition — and the raw
-  queries themselves tell you what the KI should cover.
+  have.** The retrieval skill requires the agent to aggregate the available values before filtering.
+  Inspect the trace: if the agent skipped or ignored that discovery step, this is an agent-side
+  retrieval failure and needs no automation change. Propose an automation change only when
+  independent evidence shows that the workflow failed to emit an intended taxonomy value.
+- **`query_error` from malformed ES|QL.** Query the trace by `trace_id` and inspect the ordered tool
+  calls when trace details are available. Determine whether the agent composed the query or followed
+  an ES|QL access pattern from a previously retrieved KI. If the KI contains the malformed query,
+  inspect its producing workflow and propose correcting the generation step. If trace details are
+  unavailable, check whether the same query appears in a KI; otherwise do not attribute the error
+  to an automation.
+- **Repeated `coverage_gap` on the same raw index, especially with `fell_back_to_raw`.** Agents
+  keep reaching for data no indicator covers, and the raw queries tell you what an automation
+  should be producing. Confirm the gap first: a KI whose access pattern hands the agent a query to
+  run against live data is working as designed, and the agent running it is recorded as raw access
+  in the same round as the KI retrieval — the same signature as an agent that found nothing and
+  went to the data itself. If an indicator already covers the topic, there is nothing to fix.
 - **`coverage_gap` with no fallback and no errors.** The agent went straight to raw data and it
-  worked. Weaker evidence: it may simply be a question KIs were never meant to answer.
+  worked. Weaker evidence: it may simply be a question indicators were never meant to answer.
+- **The index holds indicators, but the fields retrieval matches on are empty or malformed.**
+  Looks identical to missing coverage; entirely different fix. The automation is writing documents
+  but a step is not populating what it should. Check how the writing step maps its inputs before
+  proposing anything about coverage or granularity.
 
 ### When to propose nothing
 
-Saying "the evidence does not support a change yet" is a valid, and often correct, outcome. Reach
-for it when:
+Propose no change when the evidence does not meet the criteria above. Reach for that when:
 
-- The window holds only a handful of signals.
-- Everything traces back to one conversation or one user.
+- The window holds only a handful of signals, or they are a small fraction of the retrievals
+  against that target.
+- Everything traces back to one conversation.
 - The failures are agent-side and no index change would prevent them.
+- The evidence is real but neither an automation nor a source change addresses it — the
+  automations are doing the right thing and the questions are ones indicators were never meant to
+  answer.
 - The evidence points at something you cannot see — a source you have no visibility into, or an
   index you cannot read.
 
 Say plainly what you found, why it is not enough, and what *would* settle it — a longer window,
-signals from a different space, a look at a specific workflow. A speculative proposal costs a
-reviewer's attention and teaches the loop nothing; an honest gap tells them where to look next.
+signals from a different space, a look at a specific workflow.
 
 ### Do not re-propose what was already rejected
 
-When the run gives you the improvement history for this index, read it before proposing anything. A
-rejected proposal is a human's judgement that the change was wrong — restating it wastes their time
-and erodes trust in the loop. If new evidence genuinely changes the picture, say explicitly what
-changed and why it now points the other way.
+When the run gives you the improvement history for this index, read it before proposing anything.
+Do not repeat a rejected proposal unless new evidence addresses the reason it was rejected, and say
+what changed. Read that reason rather than assuming the change was wrong: a proposal can be turned
+down as a duplicate, as poorly evidenced, or as badly timed, and each of those points somewhere
+different.
+
+History reaches you from the run or not at all. There is no store to search and no tool that
+returns it, so do not go looking for one. When no history came with the run, say that you had none
+rather than reporting that none exists.
 
 ## Reporting a finding
 
@@ -194,8 +249,9 @@ For each finding, make these legible:
 - **What is wrong** — stated as something observable, not as a conclusion.
 - **The evidence** — which signals, how many, across how many conversations, over what window, with
   representative queries or error messages quoted.
-- **The proposed change** — specific enough to act on: which KI, which workflow, which source, and
-  what about it changes.
+- **The proposed change** — specific enough to act on. For a workflow: which workflow, which step,
+  and what about that step changes. For a source: which source, and what data or configuration is
+  added or altered.
 - **Why it should help** — the link from the evidence to the change.
 - **How confident you are, and what would raise it.**
 

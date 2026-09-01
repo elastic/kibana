@@ -38,6 +38,15 @@ describe('analyzeAndImproveSkill', () => {
     expect(analyzeAndImproveSkill.referencedContent).toHaveLength(0);
   });
 
+  it('matches tags with MV_CONTAINS, never with a comparison operator', () => {
+    // `tags` is multi-valued. A comparison operator applied to a multi-valued field evaluates to
+    // null, so `tags == "<tag>"` matches only signals carrying that tag and no other — silently
+    // dropping every multi-tag signal. Elasticsearch reports this as a warning, and execute_esql
+    // does not surface warnings, so a regression here is invisible at runtime.
+    expect(analyzeAndImproveSkill.content).not.toMatch(/\btags\s*(==|!=)/);
+    expect(analyzeAndImproveSkill.content).toContain('MV_CONTAINS(tags,');
+  });
+
   it('binds only read-only registry tools', async () => {
     const toolIds = (await analyzeAndImproveSkill.getRegistryTools?.()) ?? [];
 
