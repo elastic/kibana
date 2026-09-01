@@ -17,7 +17,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 
-const TEMPLATE_VERSION = 26;
+const TEMPLATE_VERSION = 27;
 
 const TEMPLATE_META = { managed_by: 'threat_intel', version: TEMPLATE_VERSION };
 
@@ -335,7 +335,6 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             adapter_type: { type: 'keyword' },
             name: { type: 'keyword' },
             enabled: { type: 'boolean' },
-            config: { type: 'object', enabled: false },
             tags: { type: 'keyword' },
             space_id: { type: 'keyword' },
             created_at: { type: 'date' },

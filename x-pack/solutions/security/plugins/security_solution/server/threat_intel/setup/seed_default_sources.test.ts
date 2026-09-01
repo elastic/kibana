@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { GLOBAL_SPACE_ID } from '../../../common/threat_intel';
+import { GLOBAL_SPACE_ID, CATALOG_SOURCE_URLS } from '../../../common/threat_intel';
 import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
 
 const TOTAL = DEFAULT_SOURCES.length;
@@ -27,7 +27,6 @@ const storedDocument = (
     adapter_type: source.adapter_type,
     name: source.name,
     enabled: source.enabled,
-    config: source.config,
     tags: source.tags,
     space_id: GLOBAL_SPACE_ID,
     created_at: '2026-08-01T00:00:00.000Z',
@@ -91,7 +90,7 @@ describe('DEFAULT_SOURCES approved catalog', () => {
   };
 
   it('contains only the twelve approved source IDs and URLs', () => {
-    expect(Object.fromEntries(DEFAULT_SOURCES.map(({ id, config }) => [id, config.url]))).toEqual({
+    expect(CATALOG_SOURCE_URLS).toEqual({
       ...ENABLED_ENDPOINTS,
       ...DISABLED_ENDPOINTS,
     });
@@ -168,11 +167,29 @@ describe('seedDefaultSources', () => {
         adapter_type: 'rss',
         name: 'Elastic Security Labs',
         enabled: false,
-        config: { url: 'https://www.elastic.co/security-labs/rss/feed.xml' },
         tags: ['vendor', 'elastic', 'research', 'research-tools'],
         created_at: '2025-01-02T03:04:05.000Z',
       }),
     });
+    expect(operations[1]).not.toHaveProperty('config');
+  });
+
+  it('strips legacy config from otherwise current catalog rows', async () => {
+    const elastic = DEFAULT_SOURCES.find(({ id }) => id === 'vendor_api:elastic-security-labs');
+    if (!elastic) throw new Error('Elastic Security Labs source is missing');
+    const documents = currentDocuments().map((document) =>
+      document._id === elastic.id
+        ? storedDocument(elastic, {
+            config: { url: 'https://old.example.test/feed.xml' },
+          })
+        : document
+    );
+
+    const { esClient, result } = await run({ documents });
+    const written = esClient.bulk.mock.calls[0][0].operations?.[1] as Record<string, unknown>;
+
+    expect(result.updated).toBe(1);
+    expect(written).not.toHaveProperty('config');
   });
 
   it('repairs missing operator-owned fields from catalog defaults', async () => {

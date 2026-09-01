@@ -16,16 +16,15 @@ import {
 /**
  * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
  *
- * This is a fixed, approved catalog. Eight sources ship enabled; the optional
- * AWS and FortiGuard packs ship disabled for an operator to turn on per design
- * partner. Operators can only list and enable / disable entries — the catalog
- * is not operator-extensible, so there is no create / update / delete path.
+ * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
+ * sources index. This is a fixed, approved catalog. Eight sources ship enabled;
+ * the optional AWS and FortiGuard packs ship disabled for an operator to turn
+ * on per design partner. Operators can only list and enable / disable entries.
  */
 interface DefaultSource {
   id: string;
   adapter_type: FetchAdapterType;
   name: string;
-  config: { url: string };
   tags: string[];
   /**
    * Declared default state. Eight approved sources ship `true`; the optional
@@ -40,9 +39,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'kev:cisa-known-exploited-vulnerabilities',
     adapter_type: 'kev',
     name: 'CISA Known Exploited Vulnerabilities',
-    config: {
-      url: 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
-    },
     tags: ['vulnerability', 'cisa', 'kev', 'government'],
     enabled: true,
   },
@@ -50,7 +46,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'vendor_api:elastic-security-labs',
     adapter_type: 'rss',
     name: 'Elastic Security Labs',
-    config: { url: 'https://www.elastic.co/security-labs/rss/feed.xml' },
     tags: ['vendor', 'elastic', 'research', 'research-tools'],
     enabled: true,
   },
@@ -58,7 +53,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:mandiant-research',
     adapter_type: 'rss',
     name: 'Mandiant / Google Cloud Threat Intelligence',
-    config: { url: 'https://cloud.google.com/security/blog/threat-intelligence/rss' },
     tags: ['vendor', 'research', 'apt'],
     enabled: true,
   },
@@ -66,7 +60,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:unit42',
     adapter_type: 'rss',
     name: 'Palo Alto Networks Unit 42',
-    config: { url: 'https://unit42.paloaltonetworks.com/feed/' },
     tags: ['vendor', 'research', 'malware', 'apt'],
     enabled: true,
   },
@@ -74,7 +67,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:talos',
     adapter_type: 'rss',
     name: 'Cisco Talos Intelligence',
-    config: { url: 'https://blog.talosintelligence.com/rss/' },
     tags: ['vendor', 'research', 'malware'],
     enabled: true,
   },
@@ -82,7 +74,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:crowdstrike',
     adapter_type: 'rss',
     name: 'CrowdStrike Blog',
-    config: { url: 'https://www.crowdstrike.com/blog/feed/' },
     tags: ['vendor', 'research', 'apt'],
     enabled: true,
   },
@@ -90,7 +81,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:cisa-alerts',
     adapter_type: 'rss',
     name: 'CISA Alerts and Advisories',
-    config: { url: 'https://www.cisa.gov/cybersecurity-advisories/all.xml' },
     tags: ['government', 'advisories', 'vulnerability', 'government-policy'],
     enabled: true,
   },
@@ -98,9 +88,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'text_indicator_list:maltrail-cobaltstrike',
     adapter_type: 'text_indicator_list',
     name: 'Maltrail — CobaltStrike C2 indicators',
-    config: {
-      url: 'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
-    },
     tags: ['malware', 'research-tools', 'feed'],
     enabled: true,
   },
@@ -110,7 +97,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:aws-security',
     adapter_type: 'rss',
     name: 'AWS Security Blog',
-    config: { url: 'https://aws.amazon.com/blogs/security/feed/' },
     tags: ['vendor', 'aws', 'cloud', 'iam', 'pack:aws-iam'],
     enabled: false,
   },
@@ -118,7 +104,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:aws-security-bulletins',
     adapter_type: 'rss',
     name: 'AWS Security Bulletins',
-    config: { url: 'https://aws.amazon.com/security/security-bulletins/rss/feed/' },
     tags: ['vendor', 'aws', 'cloud', 'iam', 'advisories', 'pack:aws-iam'],
     enabled: false,
   },
@@ -126,7 +111,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:fortiguard-advisories',
     adapter_type: 'rss',
     name: 'FortiGuard Advisories',
-    config: { url: 'https://filestore.fortinet.com/fortiguard/rss/ir.xml' },
     tags: ['vendor', 'fortinet', 'fortigate', 'advisories', 'pack:fortigate'],
     enabled: false,
   },
@@ -134,7 +118,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:fortiguard-threat-signal',
     adapter_type: 'rss',
     name: 'FortiGuard Threat Signal',
-    config: { url: 'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml' },
     tags: ['vendor', 'fortinet', 'fortigate', 'pack:fortigate'],
     enabled: false,
   },
@@ -167,7 +150,6 @@ const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
   adapter_type: src.adapter_type,
   name: src.name,
   enabled: src.enabled,
-  config: src.config,
   tags: src.tags,
   space_id: GLOBAL_SPACE_ID,
   created_at: now,
@@ -178,9 +160,10 @@ const arraysEqual = (left: readonly string[] | undefined, right: readonly string
   left?.length === right.length && left.every((value, index) => value === right[index]);
 
 const isCatalogCurrent = (stored: StoredSource | undefined, source: DefaultSource): boolean =>
-  stored?.adapter_type === source.adapter_type &&
+  stored != null &&
+  !('config' in stored) &&
+  stored.adapter_type === source.adapter_type &&
   stored.name === source.name &&
-  stored.config?.url === source.config.url &&
   arraysEqual(stored.tags, source.tags) &&
   stored.space_id === GLOBAL_SPACE_ID &&
   typeof stored.enabled === 'boolean' &&
@@ -194,7 +177,6 @@ const buildReconciledSourceDocument = (
   adapter_type: source.adapter_type,
   name: source.name,
   enabled: typeof stored?.enabled === 'boolean' ? stored.enabled : source.enabled,
-  config: source.config,
   tags: source.tags,
   space_id: GLOBAL_SPACE_ID,
   created_at: typeof stored?.created_at === 'string' ? stored.created_at : now,

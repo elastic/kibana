@@ -43,3 +43,4 @@ export {
   THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
   THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
 } from './constants';
+export { CATALOG_SOURCE_URLS, resolveCatalogSourceUrl } from './catalog_source_urls';

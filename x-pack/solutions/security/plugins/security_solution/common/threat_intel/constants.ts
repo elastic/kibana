@@ -22,8 +22,8 @@ export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as cons
  * hyphen, so it covers the per-space filtered aliases and never this bare index, which
  * carries every space's candidates at every confidence level.
  *
- * Reports and sources stay under `.kibana-`: only the internal user touches them. Source
- * URLs come from the fixed public catalog and are never operator-supplied credentials.
+ * Reports and sources stay under `.kibana-`: only the internal user touches them. Feed
+ * URLs are resolved from the code catalog and are not stored in the sources index.
  */
 export const THREAT_INTEL_INDICATORS_INDEX = '.threat-intel-indicators' as const;
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
