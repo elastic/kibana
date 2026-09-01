@@ -9,7 +9,7 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { spaceSettings } = getPageObjects(['common', 'spaceSettings']);
   const esArchiver = getService('esArchiver');
 
@@ -30,7 +30,5 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         solution: 'classic',
       });
     });
-
-    loadTestFile(require.resolve('./logs/_get_doc_viewer'));
   });
 }

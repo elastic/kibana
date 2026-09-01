@@ -149,6 +149,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
+    severity: '80-critical',
     recommendations: [
       {
         title: 'Revert the pool-size config change',
@@ -162,7 +163,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
         description: 'Would have confirmed whether a leak compounded the exhaustion.',
       },
     ],
-    significant_event_updates: [severityUpdate],
+    trigger_feedback: [severityUpdate],
   };
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
@@ -170,10 +171,10 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(validPayload).success).toBe(true);
   });
 
-  it('accepts all three event_update field types (severity, status, summary) under both schemas', () => {
+  it('accepts all three trigger feedback field types (severity, status, summary) under both schemas', () => {
     const allFields = {
       ...validPayload,
-      significant_event_updates: [severityUpdate, statusUpdate, summaryUpdate],
+      trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate],
     };
 
     expect(validate(allFields)).toBe(true);
@@ -404,6 +405,13 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
   });
 
+  it('rejects an investigation severity outside the canonical tiers under both schemas', () => {
+    const invalidSeverity = { ...validPayload, severity: 'critical' };
+
+    expect(validate(invalidSeverity)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
+  });
+
   it('accepts a minimal recommendation (title only) under both schemas', () => {
     const minimalRecommendation = {
       ...validPayload,
@@ -459,10 +467,10 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
   });
 
-  it('rejects an event_update with an unknown field under both schemas', () => {
+  it('rejects trigger feedback with an unknown field under both schemas', () => {
     const unknownField = {
       ...validPayload,
-      significant_event_updates: [
+      trigger_feedback: [
         {
           field: 'confidence',
           from: '0.5',
@@ -477,58 +485,58 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(unknownField).success).toBe(false);
   });
 
-  it('rejects a severity event_update with an invalid enum value under both schemas', () => {
+  it('rejects severity trigger feedback with an invalid enum value under both schemas', () => {
     const invalidSeverity = {
       ...validPayload,
-      significant_event_updates: [{ ...severityUpdate, to: '90-mega' }],
+      trigger_feedback: [{ ...severityUpdate, to: '90-mega' }],
     };
 
     expect(validate(invalidSeverity)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
   });
 
-  it('rejects a status event_update with an invalid enum value under both schemas', () => {
+  it('rejects status trigger feedback with an invalid enum value under both schemas', () => {
     const invalidStatus = {
       ...validPayload,
-      significant_event_updates: [{ ...statusUpdate, to: 'unknown' }],
+      trigger_feedback: [{ ...statusUpdate, to: 'unknown' }],
     };
 
     expect(validate(invalidStatus)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
   });
 
-  it('rejects an event_update missing a required field (reason) under both schemas', () => {
+  it('rejects trigger feedback missing a required field (reason) under both schemas', () => {
     const { reason, ...withoutReason } = severityUpdate;
-    const missingReason = { ...validPayload, significant_event_updates: [withoutReason] };
+    const missingReason = { ...validPayload, trigger_feedback: [withoutReason] };
 
     expect(validate(missingReason)).toBe(false);
     expect(investigationStateSchema.safeParse(missingReason).success).toBe(false);
   });
 
-  it('rejects an event_update with empty evidence under both schemas', () => {
+  it('rejects trigger feedback with empty evidence under both schemas', () => {
     const emptyEvidence = {
       ...validPayload,
-      significant_event_updates: [{ ...severityUpdate, evidence: [] }],
+      trigger_feedback: [{ ...severityUpdate, evidence: [] }],
     };
 
     expect(validate(emptyEvidence)).toBe(false);
     expect(investigationStateSchema.safeParse(emptyEvidence).success).toBe(false);
   });
 
-  it('rejects a summary event_update with an empty `to` under both schemas', () => {
+  it('rejects summary trigger feedback with an empty `to` under both schemas', () => {
     const emptySummary = {
       ...validPayload,
-      significant_event_updates: [{ ...summaryUpdate, to: '' }],
+      trigger_feedback: [{ ...summaryUpdate, to: '' }],
     };
 
     expect(validate(emptySummary)).toBe(false);
     expect(investigationStateSchema.safeParse(emptySummary).success).toBe(false);
   });
 
-  it('rejects a significant_event_updates array exceeding MAX_SIGNIFICANT_EVENT_UPDATES under both schemas', () => {
+  it('rejects a trigger_feedback array exceeding MAX_TRIGGER_FEEDBACK under both schemas', () => {
     const tooMany = {
       ...validPayload,
-      significant_event_updates: [severityUpdate, statusUpdate, summaryUpdate, severityUpdate],
+      trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate, severityUpdate],
     };
 
     expect(validate(tooMany)).toBe(false);
