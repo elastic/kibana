@@ -35,6 +35,7 @@ export interface InvestigationRecord extends InvestigationAttributes {
 
 export interface InvestigationPatch extends InvestigationStructuredOutput {
   status?: InvestigationStatus;
+  started_at?: string;
   completed_at?: string;
   executed_by?: string;
   error?: string;

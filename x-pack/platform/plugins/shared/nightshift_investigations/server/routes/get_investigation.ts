@@ -18,6 +18,11 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
     description: 'Retrieves the current state of an investigation by ID.',
   },
   security: {
+    // agentBuilder:read is used as a proxy for "this user has AI feature access." Investigation
+    // results are fetched by workflow execution ID (not through the AB conversation list), so
+    // this is not a strict AB permission requirement. It is consistent with the write requirement
+    // on the start route: read ensures baseline AI feature visibility for polling. See
+    // start_investigation.ts for fuller reasoning.
     authz: {
       requiredPrivileges: ['agentBuilder:read'],
     },

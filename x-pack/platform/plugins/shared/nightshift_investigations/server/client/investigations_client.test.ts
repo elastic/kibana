@@ -78,7 +78,6 @@ const makeClient = (
   });
 
 const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): InvestigationAttributes => ({
-  investigation_id: 'inv-1',
   status: 'completed',
   subject_type: 'alert',
   subject_id: 'alert-42',
@@ -102,7 +101,7 @@ const makeRecord = (
 ): InvestigationRecord => ({
   id,
   version,
-  ...makeAttrs({ investigation_id: id, ...overrides }),
+  ...makeAttrs(overrides),
 });
 
 const findResult = (records: InvestigationRecord[]): FindInvestigationsResult => ({
@@ -1031,18 +1030,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
   };
 
   beforeEach(() => {
-    mockManagement.getWorkflowExecution.mockImplementation(async (id: string) => {
-      const lastCall = mockManagement.runWorkflow.mock.calls.at(-1);
-      const inputs = lastCall?.[2];
-      return {
-        id,
-        workflowId: WORKFLOW_ID,
-        status: ExecutionStatus.RUNNING,
-        startedAt: '2024-01-01T00:00:00Z',
-        executedBy: 'test-user',
-        context: { inputs },
-      };
-    });
+    repository.get.mockResolvedValue(undefined);
   });
 
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
@@ -1460,7 +1448,7 @@ describe('NightshiftInvestigationsClient.update()', () => {
   });
 });
 
-describe('NightshiftInvestigationsClient.ensure()', () => {
+describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
   const EXECUTION_ID = 'exec-123';
 
   const makeEnsureExecution = (overrides: Record<string, unknown> = {}) => ({
@@ -1483,11 +1471,31 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
     ...overrides,
   });
 
-  it('is a no-op when the record already exists', async () => {
-    repository.get.mockResolvedValue(makeRecord({}, { id: EXECUTION_ID }));
+  it('is a no-op when the record is already running', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
 
-    await makeClient().ensure(EXECUTION_ID);
+    await makeClient().ensureOrCreate(EXECUTION_ID);
 
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('transitions a pending record to running', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'pending', completed_at: undefined },
+        { id: EXECUTION_ID, version: 'v1' }
+      )
+    );
+
+    await makeClient().ensureOrCreate(EXECUTION_ID);
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      patch: expect.objectContaining({ status: 'running', started_at: expect.any(String) }),
+      version: 'v1',
+    });
     expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -1495,12 +1503,11 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
   it('creates the record from the execution document', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
 
-    await makeClient().ensure(EXECUTION_ID);
+    await makeClient().ensureOrCreate(EXECUTION_ID);
 
     expect(repository.create).toHaveBeenCalledWith({
       id: EXECUTION_ID,
       attributes: expect.objectContaining({
-        investigation_id: EXECUTION_ID,
         status: 'running',
         subject_type: 'alert',
         subject_id: 'alert-42',
@@ -1520,7 +1527,7 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
     );
     repository.find.mockResolvedValue(findResult([superseded]));
 
-    await makeClient().ensure(EXECUTION_ID);
+    await makeClient().ensureOrCreate(EXECUTION_ID);
 
     expect(repository.find).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1551,7 +1558,7 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
     );
     repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-old'));
 
-    await expect(makeClient().ensure(EXECUTION_ID)).resolves.toBeUndefined();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
 
     expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-old'));
@@ -1560,7 +1567,9 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
   it('throws InvestigationNotFoundError when the execution does not exist', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(null);
 
-    await expect(makeClient().ensure(EXECUTION_ID)).rejects.toThrow(InvestigationNotFoundError);
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
     expect(repository.create).not.toHaveBeenCalled();
   });
 
@@ -1569,7 +1578,9 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
       makeEnsureExecution({ workflowId: 'some-other-workflow', originManagedWorkflowId: undefined })
     );
 
-    await expect(makeClient().ensure(EXECUTION_ID)).rejects.toThrow(InvestigationNotFoundError);
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
     expect(repository.create).not.toHaveBeenCalled();
   });
 
@@ -1578,7 +1589,7 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
       makeEnsureExecution({ context: { inputs: { message: 'bare run' } } })
     );
 
-    await expect(makeClient().ensure(EXECUTION_ID)).rejects.toThrow(
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
       InvestigationSubjectMissingError
     );
     expect(repository.create).not.toHaveBeenCalled();
@@ -1588,6 +1599,6 @@ describe('NightshiftInvestigationsClient.ensure()', () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
     repository.create.mockRejectedValue(new InvestigationAlreadyExistsError(EXECUTION_ID));
 
-    await expect(makeClient().ensure(EXECUTION_ID)).resolves.toBeUndefined();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
   });
 });

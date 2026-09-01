@@ -440,7 +440,12 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
-    await this.ensure(executionId).catch((error) => {
+    await this.create({
+      investigationId: executionId,
+      subject,
+      triggerType: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      concurrencyKey: concurrency_key,
+    }).catch((error) => {
       this.logger.warn(
         `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
       );
@@ -450,14 +455,62 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * Creates the investigation record for a workflow execution if it does not exist yet.
-   * Called from start() so the id is readable immediately, and by the workflow's
-   * persist_investigation_started step so runs that skipped start() are still tracked. Idempotent so
-   * replays and concurrent calls are safe.
+   * Creates a new investigation record as `pending`. Called from start() so the id is readable
+   * immediately. The workflow's persist_investigation_started step later transitions the record
+   * to `running` via ensureOrCreate().
    */
-  async ensure(investigationId: string): Promise<void> {
+  async create({
+    investigationId,
+    subject,
+    triggerType,
+    concurrencyKey,
+  }: {
+    investigationId: string;
+    subject: InvestigationSubject;
+    triggerType: InvestigationTriggerType;
+    concurrencyKey?: string;
+  }): Promise<void> {
+    if (concurrencyKey) {
+      await this.cancelSupersededInvestigation({ concurrencyKey });
+    }
+
+    try {
+      await this.investigationRepository.create({
+        id: investigationId,
+        attributes: {
+          status: 'pending',
+          subject_type: subject.type,
+          subject_id: subject.id,
+          ...(subject.summary ? { subject_summary: subject.summary } : {}),
+          trigger_type: triggerType,
+          concurrency_key: concurrencyKey,
+          created_at: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      if (error instanceof InvestigationAlreadyExistsError) {
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Ensures the investigation record exists and is running. Called by the workflow's
+   * persist_investigation_started step. If a pending record exists (created by start()), transitions
+   * it to running. If no record exists (workflow triggered without start()), creates one as running
+   * from the execution document. Already-running or terminal records are left untouched.
+   */
+  async ensureOrCreate(investigationId: string): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
     if (existing) {
+      if (existing.status === 'pending') {
+        await this.investigationRepository.update({
+          id: investigationId,
+          patch: { status: 'running', started_at: new Date().toISOString() },
+          version: existing.version,
+        });
+      }
       return;
     }
 
@@ -495,7 +548,6 @@ export class NightshiftInvestigationsClient {
       await this.investigationRepository.create({
         id: investigationId,
         attributes: {
-          investigation_id: investigationId,
           status: 'running',
           subject_type: subject.type,
           subject_id: subject.id,

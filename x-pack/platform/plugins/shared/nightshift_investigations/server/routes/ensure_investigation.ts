@@ -34,7 +34,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.ensure(params.path.id);
+      await client.ensureOrCreate(params.path.id);
     } catch (error) {
       rethrowInvestigationClientError(error);
     }
