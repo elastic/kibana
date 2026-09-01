@@ -8,36 +8,32 @@
  */
 
 import type { Document } from 'yaml';
-import { DynamicStepContextSchema } from '@kbn/workflows';
+import type { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { VariableItem, YamlValidationResult } from '../types';
+import type { VariableValidationOptions } from './validate_variable';
 import { validateVariable } from './validate_variable';
 import { getContextSchemaWithTemplateLocals } from '../context/extend_context_with_template_locals';
-import {
-  extendWithPathSpecificContext,
-  getContextSchemaForStep,
-} from '../context/get_context_for_path';
+import { extendWithPathSpecificContext } from '../context/get_context_for_path';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
+import { createStepContextResolver } from '../context/step_context_resolver';
 import { getValueAtYamlPath } from '../context/get_value_at_yaml_path';
-import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
-
-const ROOT_CACHE_KEY: unique symbol = Symbol('root');
 
 export function validateVariables(
   variableItems: VariableItem[],
   workflowGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
   yamlDocument?: Document | null,
-  yamlString?: string
+  yamlString?: string,
+  options?: VariableValidationOptions
 ): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
 
-  const baseSchema = DynamicStepContextSchema.merge(
-    getWorkflowContextSchema(workflowDefinition, yamlDocument)
-  ) as typeof DynamicStepContextSchema;
+  const stepContext =
+    options?.stepContextResolver ??
+    createStepContextResolver(workflowDefinition, workflowGraph, yamlDocument);
 
-  const stepSchemaCache = new Map<string | symbol, typeof DynamicStepContextSchema>();
   const pathContextCache = new Map<string, typeof DynamicStepContextSchema>();
   const fullContextCache = new Map<string, typeof DynamicStepContextSchema>();
 
@@ -48,23 +44,16 @@ export function validateVariables(
     const nearestStep = nearestStepPath
       ? getValueAtYamlPath<{ name?: string }>(workflowDefinition, nearestStepPath)
       : undefined;
-    const cacheKey = nearestStep?.name ?? ROOT_CACHE_KEY;
 
     let context: typeof DynamicStepContextSchema | null = null;
 
     try {
-      let stepSchema = stepSchemaCache.get(cacheKey);
-      if (!stepSchema) {
-        if (nearestStep?.name) {
-          stepSchema = getContextSchemaForStep(baseSchema, workflowGraph, nearestStep.name);
-        } else {
-          stepSchema = baseSchema;
-        }
-        stepSchemaCache.set(cacheKey, stepSchema);
-      }
+      const stepSchema = stepContext.forStep(nearestStep?.name);
 
       const pathSuffix = nearestStepPath ? path.slice(nearestStepPath.length) : [];
-      const pathContextKey = `${String(cacheKey)}:${pathSuffix.join('.')}`;
+      // NUL separates the parts so a step name containing the separator cannot
+      // collide with a different (step, path suffix) pair.
+      const pathContextKey = `${nearestStep?.name ?? ''}\0${pathSuffix.join('\0')}`;
 
       let pathSchema = pathContextCache.get(pathContextKey);
       if (!pathSchema) {
