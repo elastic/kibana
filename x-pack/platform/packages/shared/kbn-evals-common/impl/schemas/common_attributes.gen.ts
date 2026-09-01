@@ -116,6 +116,10 @@ export const EvaluatorInfo = lazySchema(() =>
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
+    /**
+     * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
+     */
+    direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
     model: Model.optional(),
     /**
      * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.
