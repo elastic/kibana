@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { GLOBAL_SPACE_ID, THREAT_INTEL_SOURCES_INDEX } from '../../../common/threat_intel';
+import {
+  GLOBAL_SPACE_ID,
+  THREAT_INTEL_SOURCES_INDEX,
+  type FetchAdapterType,
+} from '../../../common/threat_intel';
 
 /**
  * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
@@ -18,14 +22,14 @@ import { GLOBAL_SPACE_ID, THREAT_INTEL_SOURCES_INDEX } from '../../../common/thr
  */
 interface DefaultSource {
   id: string;
-  adapter_type: 'rss' | 'vendor_api' | 'text_indicator_list' | 'kev';
+  adapter_type: FetchAdapterType;
   name: string;
   config: { url: string };
   tags: string[];
   /**
    * Declared default state. Eight approved sources ship `true`; the optional
    * AWS and FortiGuard packs ship `false` so an operator opts in per design
-   * partner. Create-only seeding means an operator's later choice survives boots.
+   * partner. Reconciliation preserves an operator's later choice across boots.
    */
   enabled: boolean;
 }
@@ -43,7 +47,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
   },
   {
     id: 'vendor_api:elastic-security-labs',
-    adapter_type: 'vendor_api',
+    adapter_type: 'rss',
     name: 'Elastic Security Labs',
     config: { url: 'https://www.elastic.co/security-labs/rss/feed.xml' },
     tags: ['vendor', 'elastic', 'research', 'research-tools'],
@@ -138,11 +142,25 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
 export interface SeedDefaultSourcesResult {
   total: number;
   created: number;
+  updated: number;
   skipped: number;
   failed: number;
 }
 
-const BULK_CREATE_CHUNK_SIZE = 50;
+interface StoredSource {
+  adapter_type?: string;
+  name?: string;
+  enabled?: boolean;
+  config?: { url?: string };
+  tags?: string[];
+  space_id?: string;
+  created_at?: string;
+}
+
+interface CatalogAction {
+  id: string;
+  kind: 'create' | 'index';
+}
 
 const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
   adapter_type: src.adapter_type,
@@ -155,13 +173,38 @@ const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
   updated_at: now,
 });
 
+const arraysEqual = (left: readonly string[] | undefined, right: readonly string[]): boolean =>
+  left?.length === right.length && left.every((value, index) => value === right[index]);
+
+const isCatalogCurrent = (stored: StoredSource | undefined, source: DefaultSource): boolean =>
+  stored?.adapter_type === source.adapter_type &&
+  stored.name === source.name &&
+  stored.config?.url === source.config.url &&
+  arraysEqual(stored.tags, source.tags) &&
+  stored.space_id === GLOBAL_SPACE_ID &&
+  typeof stored.enabled === 'boolean' &&
+  typeof stored.created_at === 'string';
+
+const buildReconciledSourceDocument = (
+  source: DefaultSource,
+  stored: StoredSource | undefined,
+  now: string
+) => ({
+  adapter_type: source.adapter_type,
+  name: source.name,
+  enabled: typeof stored?.enabled === 'boolean' ? stored.enabled : source.enabled,
+  config: source.config,
+  tags: source.tags,
+  space_id: GLOBAL_SPACE_ID,
+  created_at: typeof stored?.created_at === 'string' ? stored.created_at : now,
+  updated_at: now,
+});
+
 const isCreateConflict = (error: { type?: string; status?: number } | undefined): boolean =>
   error?.type === 'version_conflict_engine_exception' || error?.status === 409;
 
 /**
- * Idempotent seeding — bulk `create` by stable id so re-runs do not duplicate.
- * Operator edits to enabled, tags, or config survive subsequent seeds because
- * we only insert missing ids (conflicts are treated as already present).
+ * Reconciles the fixed source catalog while preserving operator-owned enablement.
  */
 export const seedDefaultSources = async ({
   esClient,
@@ -176,6 +219,7 @@ export const seedDefaultSources = async ({
   const result: SeedDefaultSourcesResult = {
     total: DEFAULT_SOURCES.length,
     created: 0,
+    updated: 0,
     skipped: 0,
     failed: 0,
   };
@@ -183,61 +227,90 @@ export const seedDefaultSources = async ({
   // Debug, not info: this runs on every boot so a partial seed can finish, and on a
   // healthy deployment every entry is already present. The caller logs the outcome at
   // info when something actually changed.
-  log.debug(`Seeding ${result.total} default threat-intel sources`);
+  log.debug(`Reconciling ${result.total} default threat-intel sources`);
 
-  for (let offset = 0; offset < DEFAULT_SOURCES.length; offset += BULK_CREATE_CHUNK_SIZE) {
-    const chunk = DEFAULT_SOURCES.slice(offset, offset + BULK_CREATE_CHUNK_SIZE);
-    const operations = chunk.flatMap((src) => [
-      { create: { _index: THREAT_INTEL_SOURCES_INDEX, _id: src.id } },
-      buildDefaultSourceDocument(src, now),
-    ]);
+  const existing = await esClient.mget<StoredSource>({
+    index: THREAT_INTEL_SOURCES_INDEX,
+    ids: DEFAULT_SOURCES.map(({ id }) => id),
+  });
+  const existingById = new Map(existing.docs.map((document) => [document._id, document]));
+  const actions: CatalogAction[] = [];
+  const operations: Array<Record<string, unknown>> = [];
 
-    try {
-      const bulkResponse = await esClient.bulk({
-        operations,
-        refresh: false,
-      });
-
-      for (const item of bulkResponse.items) {
-        const createItem = item.create;
-        if (!createItem) {
-          result.failed += 1;
-        } else if (createItem.error) {
-          if (isCreateConflict(createItem.error)) {
-            result.skipped += 1;
-          } else {
-            result.failed += 1;
-            log.warn(
-              `Failed to seed default source ${createItem._id}: ${
-                createItem.error.type ?? 'error'
-              } ${createItem.error.reason ?? ''}`
-            );
-          }
-        } else if (createItem.result === 'created') {
-          result.created += 1;
-          log.debug(`Seeded default source ${createItem._id}`);
-        }
-      }
-    } catch (err) {
-      const message = (err as Error).message;
-      result.failed += chunk.length;
-      log.warn(
-        `Bulk seed failed for sources ${chunk[0]?.id ?? '?'}..${
-          chunk[chunk.length - 1]?.id ?? '?'
-        }: ${message}`
+  for (const source of DEFAULT_SOURCES) {
+    const existingDocument = existingById.get(source.id);
+    if (!existingDocument?.found) {
+      actions.push({ id: source.id, kind: 'create' });
+      operations.push(
+        { create: { _index: THREAT_INTEL_SOURCES_INDEX, _id: source.id } },
+        buildDefaultSourceDocument(source, now)
       );
+    } else {
+      const stored = existingDocument._source;
+      if (isCatalogCurrent(stored, source)) {
+        result.skipped += 1;
+      } else {
+        actions.push({ id: source.id, kind: 'index' });
+        operations.push(
+          {
+            index: {
+              _index: THREAT_INTEL_SOURCES_INDEX,
+              _id: source.id,
+              if_seq_no: existingDocument._seq_no,
+              if_primary_term: existingDocument._primary_term,
+            },
+          },
+          buildReconciledSourceDocument(source, stored, now)
+        );
+      }
     }
   }
 
-  if (result.created > 0) {
+  if (operations.length === 0) {
+    log.debug(
+      `Default source reconciliation finished: 0 created, 0 updated, ${result.skipped} unchanged, 0 failed`
+    );
+    return result;
+  }
+
+  try {
+    const bulkResponse = await esClient.bulk({ operations, refresh: false });
+    for (let index = 0; index < actions.length; index += 1) {
+      const action = actions[index];
+      const responseItem = bulkResponse.items[index];
+      const item = action.kind === 'create' ? responseItem?.create : responseItem?.index;
+      if (!item) {
+        result.failed += 1;
+      } else if (item.error) {
+        if (action.kind === 'create' && isCreateConflict(item.error)) {
+          result.skipped += 1;
+        } else {
+          result.failed += 1;
+          log.warn(
+            `Failed to reconcile default source ${action.id}: ${item.error.type ?? 'error'} ${
+              item.error.reason ?? ''
+            }`
+          );
+        }
+      } else if (action.kind === 'create' && item.result === 'created') {
+        result.created += 1;
+      } else if (action.kind === 'index' && item.result === 'updated') {
+        result.updated += 1;
+      } else {
+        result.failed += 1;
+      }
+    }
+  } catch (err) {
+    result.failed += actions.length;
+    log.warn(`Bulk source reconciliation failed: ${(err as Error).message}`);
+  }
+
+  if (result.created > 0 || result.updated > 0) {
     await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
   }
 
-  // A healthy catalog re-seeds on every boot and every source 409s, so an
-  // unconditional info log would report `0 created, 8 skipped` forever. Only
-  // an actual change or failure is worth an operator's attention.
-  const summary = `Default source seeding finished: ${result.created} created, ${result.skipped} skipped, ${result.failed} failed`;
-  if (result.created > 0 || result.failed > 0) {
+  const summary = `Default source reconciliation finished: ${result.created} created, ${result.updated} updated, ${result.skipped} unchanged, ${result.failed} failed`;
+  if (result.created > 0 || result.updated > 0 || result.failed > 0) {
     log.info(summary);
   } else {
     log.debug(summary);

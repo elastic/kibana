@@ -22,8 +22,8 @@ export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as cons
  * hyphen, so it covers the per-space filtered aliases and never this bare index, which
  * carries every space's candidates at every confidence level.
  *
- * Reports and sources stay under `.kibana-`: only the internal user touches them, and the
- * sources index holds feed credentials.
+ * Reports and sources stay under `.kibana-`: only the internal user touches them. Source
+ * URLs come from the fixed public catalog and are never operator-supplied credentials.
  */
 export const THREAT_INTEL_INDICATORS_INDEX = '.threat-intel-indicators' as const;
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
@@ -67,18 +67,18 @@ export const GLOBAL_SPACE_ID = '*' as const;
  */
 export const MAX_URL_LENGTH = 2048;
 
-export const SOURCE_TYPES = [
+export const FETCH_ADAPTER_TYPES = ['rss', 'text_indicator_list', 'kev'] as const;
+export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
+
+export const REPORT_SOURCE_TYPES = [
   'rss',
-  'stix',
-  'taxii',
-  'vendor_api',
   'text_indicator_list',
   'kev',
   'email',
   'manual',
   'telemetry',
 ] as const;
-export type SourceType = (typeof SOURCE_TYPES)[number];
+export type SourceType = (typeof REPORT_SOURCE_TYPES)[number];
 
 export const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
 export type SeverityLevel = (typeof SEVERITY_LEVELS)[number];

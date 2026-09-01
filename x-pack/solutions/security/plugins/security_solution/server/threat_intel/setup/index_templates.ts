@@ -93,30 +93,7 @@ const threatReportsTemplate = {
               copy_to: ['content.body_text_bm25'],
             },
             body_text_bm25: { type: 'text' as const },
-            // Set when body_text is the report title rather than a real body, which
-            // happens for title-only feed entries. Enrichment can use it to skip or
-            // cheapen a stage instead of running inference over the title twice.
-            body_is_title_fallback: { type: 'boolean' as const },
             language: { type: 'keyword' as const },
-            // Structured citations from STIX SDOs (external_references array). Nested so
-            // per-entry field associations survive multi-field queries (e.g. source_name +
-            // url). description is stored but not searched (prose reference note).
-            external_references: {
-              type: 'nested' as const,
-              properties: {
-                source_name: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                url: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                canonical_url: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                external_id: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                description: { type: 'text' as const, index: false as const },
-                // Per-reference m-of-n fragmentation fields (v19 chunking). Written by the
-                // text_indicator_list adapter when a single # Reference: block must be split
-                // across multiple report docs to stay under the nested-object limit.
-                // Always present on text_indicator_list reports (unsplit = 1/1).
-                ref_part: { type: 'integer' as const },
-                ref_part_count: { type: 'integer' as const },
-              },
-            },
           },
         },
         severity: {
@@ -807,144 +784,6 @@ const migrateExistingGateMappings = async (
   }
 };
 
-const migrateExistingExternalReferencesMapping = async (
-  esClient: ElasticsearchClient,
-  reportIndices: readonly string[],
-  logger: Logger
-): Promise<void> => {
-  const log = logger.get('external-references-mapping-migration');
-
-  for (const indexName of reportIndices) {
-    try {
-      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
-        index: indexName,
-      });
-      const contentProps = (
-        indexMappings?.mappings?.properties as
-          | Record<string, { properties?: Record<string, unknown> }>
-          | undefined
-      )?.content?.properties;
-
-      const extRefProps = (
-        contentProps?.external_references as { properties?: Record<string, unknown> } | undefined
-      )?.properties;
-
-      if (!contentProps?.external_references) {
-        // State 2: index predates v18 — no external_references block at all.
-        // Install the *complete* current property set, not just the v18 fields.
-        // These branches are exclusive, so a partial install here would leave
-        // ref_part/ref_part_count missing until a second Kibana boot, and until
-        // then dynamic: strict rejects every chunked text-indicator-list doc.
-        await esClient.indices.putMapping({
-          index: indexName,
-          properties: {
-            content: {
-              properties: {
-                external_references: {
-                  type: 'nested',
-                  properties: {
-                    source_name: { type: 'keyword' },
-                    url: { type: 'keyword' },
-                    canonical_url: { type: 'keyword' },
-                    external_id: { type: 'keyword' },
-                    description: { type: 'text', index: false },
-                    ref_part: { type: 'integer' },
-                    ref_part_count: { type: 'integer' },
-                  },
-                },
-              },
-            },
-          },
-        });
-        log.info(`Migrated external_references mapping on ${indexName} (v18 backfill)`);
-      } else if (!extRefProps?.canonical_url) {
-        // State 3: index has external_references (v18/v19) but canonical_url subfield is absent.
-        // putMapping onto an existing nested field is additive and idempotent. `description`
-        // is included in every repair branch so a single pass converges: the v26 bounds
-        // migration recreates the parent with only the keyword fields, so an index can reach
-        // this state with `description` missing, and it is the only child State 2 alone adds.
-        await esClient.indices.putMapping({
-          index: indexName,
-          properties: {
-            content: {
-              properties: {
-                external_references: {
-                  type: 'nested',
-                  properties: {
-                    canonical_url: { type: 'keyword' },
-                    ref_part: { type: 'integer' },
-                    ref_part_count: { type: 'integer' },
-                    description: { type: 'text', index: false },
-                  },
-                },
-              },
-            },
-          },
-        });
-        log.info(
-          `Migrated canonical_url + ref_part/ref_part_count + description subfields on ${indexName} (v19 backfill)`
-        );
-      } else if (!extRefProps?.ref_part || !extRefProps?.ref_part_count) {
-        // State 4: index has external_references + canonical_url but lacks ref_part/ref_part_count
-        // (v19 indices created before chunking was added). Additive and idempotent.
-        await esClient.indices.putMapping({
-          index: indexName,
-          properties: {
-            content: {
-              properties: {
-                external_references: {
-                  type: 'nested',
-                  properties: {
-                    ref_part: { type: 'integer' },
-                    ref_part_count: { type: 'integer' },
-                    description: { type: 'text', index: false },
-                  },
-                },
-              },
-            },
-          },
-        });
-        log.info(
-          `Migrated ref_part/ref_part_count + description subfields on ${indexName} (v19 chunking backfill)`
-        );
-      } else if (!extRefProps?.description) {
-        // State 5: every keyword child and the chunking fields are present, but the
-        // `text`/`index:false` `description` is not. Reachable when a failed State 2 is
-        // followed by the v26 bounds migration recreating the parent (keyword fields only),
-        // then a later boot backfilling ref_part/ref_part_count. Without this branch,
-        // `description` would never be re-added once the parent exists and the readiness
-        // verifier (which now requires it) would fail every retry.
-        await esClient.indices.putMapping({
-          index: indexName,
-          properties: {
-            content: {
-              properties: {
-                external_references: {
-                  type: 'nested',
-                  properties: {
-                    description: { type: 'text', index: false },
-                  },
-                },
-              },
-            },
-          },
-        });
-        log.info(
-          `Migrated external_references.description subfield on ${indexName} (v18 backfill)`
-        );
-      }
-    } catch (err) {
-      log.error(
-        `Failed to migrate external_references mapping on ${indexName}: ${
-          (err as Error).message
-        }. ` +
-          `The content.external_references field will be rejected by dynamic: strict until the ` +
-          `mapping is updated manually.`
-      );
-    }
-  }
-};
-
 const migrateExistingIndicatorSourcesMapping = async (
   esClient: ElasticsearchClient,
   logger: Logger
@@ -1228,19 +1067,12 @@ const migrateOneReportKeywordBounds = async (
         ?.properties?.iocs as { properties?: Record<string, unknown> }
     )?.properties ?? {}) as Record<string, { ignore_above?: number }>;
 
-    // Must be at least as strict as `checkRequiredMapping`, which compares
-    // `ignore_above` by exact value and also requires the other fields this migration
-    // writes. A weaker predicate here deadlocks bootstrap permanently: the migration
-    // decides it has nothing to do, the verifier disagrees, and every retry repeats
-    // that, so the one-time readiness promise never resolves. `putMapping` is
-    // idempotent, so erring toward running it again costs nothing.
-    if (iocProps.value?.ignore_above === FEED_TEXT_IGNORE_ABOVE) {
-      const contentProps = (
-        indexMappings?.mappings?.properties?.content as
-          | { properties?: Record<string, unknown> }
-          | undefined
-      )?.properties;
-      if (contentProps?.body_is_title_fallback) return;
+    if (
+      iocProps.value?.ignore_above === FEED_TEXT_IGNORE_ABOVE &&
+      iocProps.defanged?.ignore_above === FEED_TEXT_IGNORE_ABOVE &&
+      iocProps.reference?.ignore_above === FEED_TEXT_IGNORE_ABOVE
+    ) {
+      return;
     }
 
     await esClient.indices.putMapping({
@@ -1254,20 +1086,6 @@ const migrateOneReportKeywordBounds = async (
                 value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
                 defanged: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
                 reference: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
-              },
-            },
-          },
-        },
-        content: {
-          properties: {
-            body_is_title_fallback: { type: 'boolean' },
-            external_references: {
-              type: 'nested',
-              properties: {
-                source_name: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                canonical_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                external_id: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
               },
             },
           },
@@ -1513,26 +1331,6 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
   { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
-  // Child fields, not just the parent. The v19 migration adds these to an
-  // already-existing `external_references`, and it catches its own errors, so
-  // checking only the parent could not tell a pre-migration mapping from a migrated
-  // one and a failed child putMapping passed verification.
-  { path: 'content.external_references.ref_part' },
-  { path: 'content.external_references.ref_part_count' },
-  { path: 'content.external_references.source_name', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
-  { path: 'content.external_references.url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
-  { path: 'content.external_references.canonical_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
-  { path: 'content.external_references.external_id', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
-  // Only State 2 of the external-references migration (whole block absent) writes this
-  // `text`/`index:false` child; States 3/4 and the v26 bounds migration recreate the
-  // parent with only the keyword fields. So a failed State 2 followed by a v26 recreate
-  // leaves `description` unmapped while every other child is present, and `dynamic:
-  // strict` then rejects any STIX report carrying an external-reference description.
-  { path: 'content.external_references.description' },
-  // v26. `body_is_title_fallback` is a new field, so a failed v26 putMapping makes
-  // `dynamic: strict` reject every title-only report; the bounded keywords are
-  // existing paths whose parameter changed, which is why they are checked by value.
-  { path: 'content.body_is_title_fallback' },
   { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.reference', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
@@ -1734,7 +1532,6 @@ export const installIndexTemplates = async ({
   await migrateExistingIocTierMappings(esClient, reportIndices, log);
   await migrateExistingGateMappings(esClient, reportIndices, log);
   await migrateExistingIocPortMapping(esClient, reportIndices, log);
-  await migrateExistingExternalReferencesMapping(esClient, reportIndices, log);
   await migrateExistingIocReferenceMappings(esClient, reportIndices, log);
   await migrateExistingIndicatorSourcesMapping(esClient, log);
   await migrateExistingIndicatorTypeMappings(esClient, log);

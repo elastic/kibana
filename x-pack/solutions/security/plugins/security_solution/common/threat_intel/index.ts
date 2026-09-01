@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export type { SourceType, SeverityLevel, IocType, ThreatCategory, ThreatRegion } from './constants';
+export type {
+  FetchAdapterType,
+  SourceType,
+  SeverityLevel,
+  IocType,
+  ThreatCategory,
+  ThreatRegion,
+} from './constants';
 export {
   GLOBAL_SPACE_ID,
   MAX_URL_LENGTH,
@@ -14,7 +21,8 @@ export {
   THREAT_INTEL_SOURCES_INDEX,
   THREAT_INTEL_INDICATORS_INDEX,
   INDICATOR_REFERENCE_PREFIX,
-  SOURCE_TYPES,
+  FETCH_ADAPTER_TYPES,
+  REPORT_SOURCE_TYPES,
   SEVERITY_LEVELS,
   IOC_TYPES,
   THREAT_CATEGORIES,

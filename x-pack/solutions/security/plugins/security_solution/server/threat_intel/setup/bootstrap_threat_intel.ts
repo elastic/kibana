@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  THREAT_REPORTS_INDEX,
   THREAT_INTEL_SOURCES_INDEX,
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
 } from '../../../common/threat_intel';
@@ -56,6 +57,40 @@ const withElasticsearchRetry = async <T>(
   throw lastError ?? new Error(`${label} failed`);
 };
 
+const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
+
+/** Verifies the effective endpoints used by required report-content fields. */
+const checkReportSemanticTextEndpoints = async (
+  esClient: ElasticsearchClient,
+  log: Logger
+): Promise<void> => {
+  const mappings = await esClient.indices.getMapping({
+    index: THREAT_REPORTS_INDEX,
+    include_defaults: true,
+  });
+  const contentProperties = (
+    mappings[THREAT_REPORTS_INDEX]?.mappings.properties?.content as
+      | { properties?: Record<string, { type?: string; inference_id?: string }> }
+      | undefined
+  )?.properties;
+  const endpointIds = new Set<string>();
+
+  for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
+    const mapping = contentProperties?.[field];
+    if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
+      throw new Error(
+        `Required report field content.${field} did not resolve to a semantic_text inference endpoint`
+      );
+    }
+    endpointIds.add(mapping.inference_id);
+  }
+
+  for (const endpointId of endpointIds) {
+    await esClient.inference.get({ inference_id: endpointId });
+    log.debug(`Report semantic_text endpoint ${endpointId} verified present`);
+  }
+};
+
 /**
  * Checks that the text-embedding endpoint backing the `semantic_text` Diamond
  * summary fields is present. Non-fatal: Elasticsearch validates `inference_id`
@@ -97,10 +132,8 @@ const checkDiamondSummaryEmbeddingEndpoint = async (
 /**
  * Seeds the default feed catalog into `.kibana-threat-intel-sources`.
  *
- * Runs on every boot, not only when the catalog is empty: `seedDefaultSources`
- * creates by stable id and treats a 409 as already-present, so re-seeding is
- * idempotent and preserves operator enable/disable edits. Separated from
- * template installation so a partial seed can retry independently.
+ * Runs on every boot so missing sources are created and code-owned fields on
+ * existing entries are reconciled without overwriting operator enablement.
  */
 const seedThreatIntelCatalog = async ({
   esClient,
@@ -121,23 +154,21 @@ const seedThreatIntelCatalog = async ({
       // already-created entries come back as `skipped` (conflicts are idempotent).
       if (result.failed > 0) {
         throw new Error(
-          `${result.failed} of ${result.total} default sources failed to seed ` +
-            `(${result.created} created, ${result.skipped} already present)`
+          `${result.failed} of ${result.total} default sources failed to reconcile ` +
+            `(${result.created} created, ${result.updated} updated, ${result.skipped} unchanged)`
         );
       }
       return result;
     },
     log,
-    'Threat intelligence default source seeding'
+    'Threat intelligence default source reconciliation'
   );
 
-  // Seeding runs on every boot so a partial seed can finish, which means the steady
-  // state is "created 0, all skipped". Only say something at info when the catalog
-  // actually changed, otherwise this is one noise line per restart forever.
   const summary =
-    `Threat intelligence source seeding finished: ${seed.created} sources created, ` +
-    `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`;
-  if (seed.created > 0 || seed.failed > 0) {
+    `Threat intelligence source reconciliation finished: ${seed.created} created, ` +
+    `${seed.updated} updated, ${seed.skipped} unchanged, ${seed.failed} failed ` +
+    `(${seed.total} catalog entries)`;
+  if (seed.created > 0 || seed.updated > 0 || seed.failed > 0) {
     log.info(summary);
   } else {
     log.debug(summary);
@@ -155,7 +186,7 @@ const seedThreatIntelCatalog = async ({
     );
     if (catalogCount.count === 0 && seed.created === 0) {
       log.error(
-        'Threat intelligence source seeding completed but `.kibana-threat-intel-sources` is still empty'
+        'Threat intelligence source reconciliation completed but `.kibana-threat-intel-sources` is still empty'
       );
     }
   } catch (err) {
@@ -175,10 +206,9 @@ const seedThreatIntelCatalog = async ({
  * that caused ALL schema migrations (v14–v19) to silently miss any cluster
  * that had already been seeded.
  *
- * Source catalog seeding also runs on every boot, but is create-only: it
- * recreates missing defaults by stable id while leaving operator enable/disable
- * edits (and any operator-added sources) intact. See the call site below for the
- * trade-off that deleting a seeded default does not stick.
+ * Source catalog reconciliation also runs on every boot. It recreates missing
+ * defaults and updates catalog-owned fields while preserving each operator-owned
+ * `enabled` value and original `created_at`.
  */
 export const ensureThreatIntelBootstrap = async ({
   esClient,
@@ -198,20 +228,17 @@ export const ensureThreatIntelBootstrap = async ({
     'Threat intelligence index template installation'
   );
 
+  await withElasticsearchRetry(
+    () => checkReportSemanticTextEndpoints(esClient, log),
+    log,
+    'Threat intelligence report semantic_text endpoint validation'
+  );
+
   // Non-blocking check — see `checkDiamondSummaryEmbeddingEndpoint` doc comment.
   await checkDiamondSummaryEmbeddingEndpoint(esClient, log);
 
-  // Seed on every boot rather than only when the catalog is empty.
-  //
-  // `seedDefaultSources` bulk-creates by stable id and treats a 409 as
-  // already-present, so this is idempotent and cheap. Gating on
-  // `count > 0` made a partial seed permanent: if one bulk attempt created some
-  // defaults and Kibana exited before the rest landed, the next boot saw a
-  // non-empty catalog and never retried the missing entries. A single
-  // operator-created source had the same effect, suppressing seeding entirely.
-  //
-  // The trade-off is that deleting a seeded default does not stick, since the next
-  // boot recreates it. Turning a default feed off is what `enabled: false` is for,
-  // and the update route sets it; delete is for sources an operator added.
+  // Reconcile on every boot so partial writes retry and catalog corrections reach
+  // existing installations. Deleting a fixed source does not stick; disabling it is
+  // the supported operator control.
   return seedThreatIntelCatalog({ esClient, logger });
 };

@@ -54,20 +54,7 @@ const REPORT_INDEX = '.kibana-threat-reports';
 const fullyMigratedReportMappings = () => ({
   properties: {
     content: {
-      properties: {
-        body_is_title_fallback: {},
-        external_references: {
-          properties: {
-            source_name: { ignore_above: 2048 },
-            url: { ignore_above: 2048 },
-            canonical_url: { ignore_above: 2048 },
-            external_id: { ignore_above: 2048 },
-            description: {},
-            ref_part: {},
-            ref_part_count: {},
-          },
-        },
-      },
+      properties: {},
     },
     lineage: { properties: { content_scrubbed_at: {} } },
     extracted: {
@@ -265,18 +252,23 @@ describe('index_templates — migrations', () => {
       return mappings;
     };
 
-    it('bounds the IOC value and the feed-supplied citation URLs', async () => {
+    it('bounds every IOC keyword that can contain feed-supplied text', async () => {
       const { patchedPaths } = await runMigrations({ reportMappings: preV26() });
 
-      for (const boundedField of [
-        'extracted.iocs.value',
-        'extracted.iocs.defanged',
-        'extracted.iocs.reference',
-        'content.external_references.url',
-        'content.external_references.canonical_url',
-      ]) {
+      for (const boundedField of ['extracted.iocs.value', 'extracted.iocs.defanged']) {
         expect(patchedPaths).toContain(boundedField);
       }
+    });
+
+    it('repairs a missing reference bound even when value is already bounded', async () => {
+      const mappings = fullyMigratedReportMappings();
+      (
+        mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>
+      ).reference = {};
+
+      const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+      expect(patchedPaths).toContain('extracted.iocs.reference');
     });
 
     it('is a no-op once the IOC value is already bounded', async () => {
@@ -331,87 +323,6 @@ describe('index_templates — migrations', () => {
     it('does not touch settings once already migrated', async () => {
       const { esClient } = await runMigrations();
       expect(esClient.indices.putSettings).not.toHaveBeenCalled();
-    });
-  });
-
-  // The four external_references states the reviewer called out. State 2 must
-  // install the complete current property set: because the branches are
-  // exclusive, a partial install would leave ref_part missing until a second
-  // boot, and strict mapping rejects chunked docs in the meantime.
-  describe('content.external_references', () => {
-    const withExternalRefs = (props: Record<string, unknown> | undefined) => {
-      const mappings = fullyMigratedReportMappings();
-      if (props === undefined) {
-        delete (mappings.properties.content.properties as Record<string, unknown>)
-          .external_references;
-      } else {
-        mappings.properties.content.properties.external_references = {
-          properties: props,
-        } as never;
-      }
-      return mappings;
-    };
-
-    it('installs the full property set on a pre-v18 index (no external_references)', async () => {
-      const { patchedPaths } = await runMigrations({ reportMappings: withExternalRefs(undefined) });
-
-      for (const field of [
-        'source_name',
-        'url',
-        'canonical_url',
-        'external_id',
-        'description',
-        'ref_part',
-        'ref_part_count',
-      ]) {
-        expect(patchedPaths).toContain(`content.external_references.${field}`);
-      }
-    });
-
-    it('adds canonical_url, ref_parts and description on a v18 index', async () => {
-      const { patchedPaths } = await runMigrations({
-        reportMappings: withExternalRefs({ source_name: {}, url: {} }),
-      });
-
-      expect(patchedPaths).toContain('content.external_references.canonical_url');
-      expect(patchedPaths).toContain('content.external_references.ref_part');
-      expect(patchedPaths).toContain('content.external_references.ref_part_count');
-      // Repaired in the same pass so a single retry converges (no second-boot gap).
-      expect(patchedPaths).toContain('content.external_references.description');
-    });
-
-    it('adds ref_parts and description on a v19 index that has canonical_url', async () => {
-      const { patchedPaths } = await runMigrations({
-        reportMappings: withExternalRefs({ source_name: {}, url: {}, canonical_url: {} }),
-      });
-
-      expect(patchedPaths).toContain('content.external_references.ref_part');
-      expect(patchedPaths).toContain('content.external_references.description');
-      expect(patchedPaths).not.toContain('content.external_references.canonical_url');
-    });
-
-    // The v26 bounds migration recreates external_references with only the keyword
-    // children, so an index can have every field except the text `description`. State 2
-    // (whole block absent) never fires here, so without a dedicated branch this leaf
-    // would stay unmapped forever and the readiness verifier would fail every retry.
-    it('adds description when only that text child is missing', async () => {
-      const { patchedPaths } = await runMigrations({
-        reportMappings: withExternalRefs({
-          source_name: {},
-          url: {},
-          canonical_url: {},
-          external_id: {},
-          ref_part: {},
-          ref_part_count: {},
-        }),
-      });
-
-      expect(patchedPaths).toContain('content.external_references.description');
-    });
-
-    it('is a no-op when fully migrated', async () => {
-      const { patchedPaths } = await runMigrations();
-      expect(patchedPaths).toEqual([]);
     });
   });
 });
@@ -547,31 +458,6 @@ describe('index_templates — mapping coverage guard', () => {
     expect(reportsTemplate).not.toContain('data_stream:');
   });
 
-  it('content.external_references is declared as nested with the expected property shape', () => {
-    expect(src).toContain('external_references: {');
-    expect(src).toContain("type: 'nested' as const,");
-    // No closing brace on the feed-controlled fields: they also carry an
-    // `ignore_above`, and this guard is about the field existing as a keyword, not
-    // about its exact parameter list.
-    expect(src).toContain("source_name: { type: 'keyword' as const");
-    expect(src).toContain("url: { type: 'keyword' as const");
-    expect(src).toContain("canonical_url: { type: 'keyword' as const");
-    expect(src).toContain("external_id: { type: 'keyword' as const");
-    expect(src).toContain("description: { type: 'text' as const, index: false as const }");
-    expect(src).toContain("ref_part: { type: 'integer' as const }");
-    expect(src).toContain("ref_part_count: { type: 'integer' as const }");
-  });
-
-  it('migrateExistingExternalReferencesMapping is wired into installIndexTemplates', () => {
-    expect(src).toContain('const migrateExistingExternalReferencesMapping');
-
-    const installIdx = src.indexOf('export const installIndexTemplates');
-    expect(installIdx).toBeGreaterThan(-1);
-
-    const callIdx = src.indexOf('await migrateExistingExternalReferencesMapping', installIdx);
-    expect(callIdx).toBeGreaterThan(installIdx);
-  });
-
   it('extracted.iocs includes reference and block_index fields (v19 maltrail adapter fields)', () => {
     // `reference` also carries an `ignore_above`, so match the declaration prefix.
     expect(src).toContain("reference: { type: 'keyword' as const");
@@ -653,29 +539,6 @@ describe('index_templates — post-migration schema check', () => {
     expect(verificationError?.message).toMatch(/Bootstrap is not ready/);
   });
 
-  // The v19 migration adds child fields to an already-existing parent and catches its
-  // own errors, so checking only the parent could not tell a pre-migration mapping
-  // from a migrated one: a failed child putMapping passed verification and writes
-  // carrying those fields were then rejected by dynamic: strict.
-  it.each(['canonical_url', 'ref_part', 'ref_part_count', 'description'])(
-    'fails when the external_references child %s is still missing',
-    async (child) => {
-      const mappings = fullyMigratedReportMappings();
-      delete (
-        mappings.properties.content.properties.external_references.properties as Record<
-          string,
-          unknown
-        >
-      )[child];
-
-      const { verificationError } = await runMigrations({ reportMappings: mappings });
-
-      expect(verificationError?.message).toMatch(
-        new RegExp(`content\\.external_references\\.${child}`)
-      );
-    }
-  );
-
   // The v26 migration changes a parameter on paths that already exist on a pre-v26
   // index, so an existence-only check could not tell a migrated index from an
   // unmigrated one and a failed v26 putMapping passed verification.
@@ -732,16 +595,6 @@ describe('index_templates — post-migration schema check', () => {
 
     expect(verificationError?.message).toMatch(/extracted\.iocs\.value/);
     expect(verificationError?.message).toMatch(/ignore_above/);
-  });
-
-  it('fails when the v26 boolean field is missing entirely', async () => {
-    const mappings = fullyMigratedReportMappings();
-    delete (mappings.properties.content.properties as Record<string, unknown>)
-      .body_is_title_fallback;
-
-    const { verificationError } = await runMigrations({ reportMappings: mappings });
-
-    expect(verificationError?.message).toMatch(/content\.body_is_title_fallback/);
   });
 
   // v19 writes `reference` and `block_index` in one putMapping, but a failed v19 then a
