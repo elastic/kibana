@@ -430,10 +430,10 @@ set-function-length@1.2.2
 setimmediate@1.0.5
 sha.js@2.4.12
 shallowequal@1.1.0
-side-channel-list@1.0.0
+side-channel-list@1.0.1
 side-channel-map@1.0.1
 side-channel-weakmap@1.0.2
-side-channel@1.1.0
+side-channel@1.1.1
 source-map-support@0.5.21
 source-map@0.5.7
 source-map@0.6.1
