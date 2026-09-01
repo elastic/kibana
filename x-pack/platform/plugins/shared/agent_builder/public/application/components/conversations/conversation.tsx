@@ -11,6 +11,7 @@ import {
   useEuiOverflowScroll,
   useEuiScrollBar,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -88,7 +89,9 @@ export const Conversation: React.FC<{}> = () => {
       scrollContainer,
     });
 
-  const scrollContainerHeight = scrollContainer?.clientHeight ?? 0;
+  // Observed, not read during render: a stale height makes the current round taller than the
+  // viewport, scrolling its input out of view.
+  const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
 
   const stagedAttachmentIds = useMemo(() => {
     const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
