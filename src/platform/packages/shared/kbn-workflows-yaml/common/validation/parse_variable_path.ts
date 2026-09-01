@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALLOWED_KEY_REGEX, PROPERTY_PATH_REGEX } from '@kbn/workflows-yaml';
+import { ALLOWED_KEY_REGEX, PROPERTY_PATH_REGEX } from '../regex';
 
 export function validateVariablePath(path: string) {
   return ALLOWED_KEY_REGEX.test(path);

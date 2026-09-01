@@ -96,6 +96,7 @@ export {
   isVariableLineParseResult,
 } from './common/yaml/parse_line_for_completion';
 export { getStepNodesWithType, isStepLikeMap } from './common/yaml/get_step_nodes_with_type';
+export { getScalarValueAtOffset } from './common/yaml/get_scalar_value_at_offset';
 export { getTriggerNodesWithType } from './common/yaml/get_trigger_nodes_with_type';
 export type {
   LineParseResult,
@@ -125,6 +126,16 @@ export type {
   EnrichmentResult,
   ConnectorParamsSchemaResolver,
 } from './common/zod/enrich_error_message';
+
+// Type guards
+export { isRecord } from './common/type_guards';
+
+// Variable path parsing
+export {
+  parseVariablePath,
+  validateVariablePath,
+  type ParsedVariablePath,
+} from './common/validation/parse_variable_path';
 
 // Validation result types shared by the editor and the server validator
 export {

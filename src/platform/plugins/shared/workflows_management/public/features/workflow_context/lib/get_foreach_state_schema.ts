@@ -19,10 +19,10 @@ import {
   getZodTypeName,
   inferZodType,
   matchVariable,
+  parseVariablePath,
 } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
-import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
