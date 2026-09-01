@@ -2106,6 +2106,9 @@ describe('AttachmentService', () => {
       expect(unifiedCallArgs.type).toBe('cases-attachments');
 
       const filterAsString = JSON.stringify(unifiedCallArgs.filter);
+      expect(filterAsString).toMatch(/"value":\s*"security.endpoint"/);
+      expect(filterAsString).toMatch(/"value":\s*"osquery"/);
+      expect(filterAsString).toMatch(/"value":\s*"security.indicator"/);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
     });
   });

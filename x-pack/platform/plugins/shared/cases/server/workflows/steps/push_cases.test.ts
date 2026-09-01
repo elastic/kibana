@@ -105,10 +105,21 @@ describe('pushCasesStepDefinition', () => {
     const output = result as { output: { cases: Array<{ comments: unknown[] }> } };
     expect(output.output.cases[0].comments).toEqual([
       {
-        ...unifiedComment,
+        id: 'comment-1',
+        version: 'WzQ3LDFc',
         type: 'user',
         comment: 'Investigating now',
-        data: undefined,
+        owner: 'securitySolution',
+        created_at: '2020-02-19T23:06:33.798Z',
+        created_by: {
+          full_name: 'Leslie Knope',
+          username: 'lknope',
+          email: 'leslie.knope@elastic.co',
+        },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
       },
     ]);
   });
