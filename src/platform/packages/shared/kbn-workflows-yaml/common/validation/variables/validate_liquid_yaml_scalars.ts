@@ -10,7 +10,7 @@
 import _ from 'lodash';
 import type { Document, LineCounter, Node, Pair, Scalar } from 'yaml';
 import { visit } from 'yaml';
-import { DynamicStepContextSchema } from '@kbn/workflows';
+import type { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
@@ -28,13 +28,14 @@ import {
   isLiquidStringLiteral,
   resolveAssignChain,
 } from '../context/extract_template_local_context';
-import { getContextSchemaForStep } from '../context/get_context_for_path';
+
 import {
   getForeachCollectionDiagnostic,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
-import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
+import type { StepContextResolver } from '../context/step_context_resolver';
+import { createStepContextResolver } from '../context/step_context_resolver';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
@@ -52,8 +53,7 @@ interface ForLoopValidationContext {
   readonly workflowGraph: WorkflowGraph;
   readonly workflowDefinition: WorkflowYaml;
   readonly yamlDocument: Document;
-  readonly baseSchema: typeof DynamicStepContextSchema;
-  readonly stepSchemaCache: Map<string, typeof DynamicStepContextSchema>;
+  readonly stepContext: StepContextResolver;
 }
 
 /**
@@ -65,7 +65,8 @@ export function validateLiquidYamlScalars(
   yamlDocument: Document,
   lineCounter: LineCounter,
   workflowGraph?: WorkflowGraph,
-  workflowDefinition?: WorkflowYaml
+  workflowDefinition?: WorkflowYaml,
+  stepContextResolver?: StepContextResolver
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
   const forLoopContext: ForLoopValidationContext | null =
@@ -76,10 +77,9 @@ export function validateLiquidYamlScalars(
           workflowGraph,
           workflowDefinition,
           yamlDocument,
-          baseSchema: DynamicStepContextSchema.merge(
-            getWorkflowContextSchema(workflowDefinition, yamlDocument)
-          ) as typeof DynamicStepContextSchema,
-          stepSchemaCache: new Map(),
+          stepContext:
+            stepContextResolver ??
+            createStepContextResolver(workflowDefinition, workflowGraph, yamlDocument),
         }
       : null;
 
@@ -194,11 +194,7 @@ function collectForLoopCollectionResults(
     return results;
   }
 
-  let stepSchema = ctx.stepSchemaCache.get(nearestStep.name);
-  if (!stepSchema) {
-    stepSchema = getContextSchemaForStep(ctx.baseSchema, ctx.workflowGraph, nearestStep.name);
-    ctx.stepSchemaCache.set(nearestStep.name, stepSchema);
-  }
+  const stepSchema = ctx.stepContext.forStep(nearestStep.name);
 
   const forLoopScopes = getAllForLoopScopes(templateString);
   for (const scope of forLoopScopes) {

@@ -207,6 +207,10 @@ export {
 export { getValueAtYamlPath } from './common/validation/context/get_value_at_yaml_path';
 export { getVariablesSchema } from './common/validation/context/get_variables_schema';
 export { getWorkflowContextSchema } from './common/validation/context/get_workflow_context_schema';
+export {
+  createStepContextResolver,
+  type StepContextResolver,
+} from './common/validation/context/step_context_resolver';
 
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';
