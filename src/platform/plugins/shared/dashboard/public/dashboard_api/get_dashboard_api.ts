@@ -202,6 +202,7 @@ export function getDashboardApi({
     onSave$: onSave$.asObservable(),
   });
 
+  const initialState$ = new Subject<DashboardState>();
   const historyManager = initializeHistoryManager({
     anyStateChange$,
     hasOverlays$: trackOverlayApi.hasOverlays$,
@@ -216,12 +217,13 @@ export function getDashboardApi({
         Boolean(childStateLoading || childrenLoading || dataLoading)
       )
     ),
-    onHistoryReady: () => {
-      // place incoming embeddables after first history emit
-      // so "undo" can remove incoming embeddables
-      layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
-    },
+    initialState$,
   });
+
+  if (incomingEmbeddables?.length) {
+    initialState$.next(getState());
+    layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+  }
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 

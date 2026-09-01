@@ -50,7 +50,7 @@ import {
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
-  STATE_CHANGE_DEBOUNCE,
+  UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -84,6 +84,7 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
+import { CONSOLE_LANG_ID } from '@kbn/monaco';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -133,6 +134,7 @@ export function initializeLayoutManager(
   const childrenChanges$ = childrenUnsavedChanges$(children$);
   const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
     for (const { uuid, latestState } of childrenState) {
+      console.log({ latestState });
       currentChildState[uuid] = latestState;
     }
   });
@@ -284,6 +286,7 @@ export function initializeLayoutManager(
           }
         );
         currentChildState[uuid] = serializedState;
+        console.log('UPDATE LAYOUT');
         layout$.next(updatedLayout);
       }
     }
@@ -528,7 +531,7 @@ export function initializeLayoutManager(
     internalApi: {
       anyStateChange$: merge(
         layout$.pipe(skip(1)),
-        latestChildrenState$.pipe(debounceTime(STATE_CHANGE_DEBOUNCE))
+        latestChildrenState$.pipe(debounceTime(UNSAVED_CHANGES_DEBOUNCE))
       ).pipe(
         debounceTime(0), // batch state + layout updates
         map(() => undefined)
@@ -614,6 +617,7 @@ export function initializeLayoutManager(
         layout$.next(layout);
       },
       registerChildApi: (api: DefaultEmbeddableApi) => {
+        console.log('ADD CHILD', api);
         children$.next({
           ...children$.value,
           [api.uuid]: api,

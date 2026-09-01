@@ -13,9 +13,10 @@ import {
   debounceTime,
   filter,
   map,
-  first,
+  merge,
   withLatestFrom,
   type Observable,
+  type Subject,
 } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
@@ -29,14 +30,14 @@ export function initializeHistoryManager({
   setState,
   getState,
   dataLoading$,
-  onHistoryReady,
+  initialState$,
 }: {
   anyStateChange$: Observable<void>;
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   getState: () => DashboardState;
   setState: (state: DashboardState) => Promise<void>;
   dataLoading$: Observable<boolean>;
-  onHistoryReady: () => void;
+  initialState$: Subject<DashboardState>;
 }) {
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
 
@@ -60,11 +61,9 @@ export function initializeHistoryManager({
     })
   );
 
-  onStateChange$.pipe(first()).subscribe(() => onHistoryReady());
-
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
-      onStateChange$,
+      onStateChange$: merge(initialState$, onStateChange$),
       setState,
       maxSize: 100,
     }

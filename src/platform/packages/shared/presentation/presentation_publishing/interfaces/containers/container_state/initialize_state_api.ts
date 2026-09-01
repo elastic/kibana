@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
-import type { HasSerializableState } from '../../has_serializable_state';
-import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
+import { combineLatestWith, debounceTime, map, of, share, startWith } from 'rxjs';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
+import type { HasParentApi } from '../../has_parent_api';
+import type { HasSerializableState } from '../../has_serializable_state';
+import type { HasUniqueId } from '../../has_uuid';
+import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { getTitle } from '../../titles/publishes_title';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
-import type { HasUniqueId } from '../../has_uuid';
-import type { HasParentApi } from '../../has_parent_api';
-export const STATE_CHANGE_DEBOUNCE = 100;
+export const UNSAVED_CHANGES_DEBOUNCE = 100;
 
 export const initializeStateApi = <StateType extends object = object>({
   uuid,
@@ -33,11 +33,12 @@ export const initializeStateApi = <StateType extends object = object>({
     defaultState?: Partial<StateType>;
   }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
   const latestState$ = anyStateChange$.pipe(
+    debounceTime(0), // combine all state changes
     // anyStateChange$ does not emit on subscribe
     // use startWith to get latest state on subscribe
     startWith(undefined),
-    debounceTime(STATE_CHANGE_DEBOUNCE),
-    map(() => serializeState())
+    map(() => serializeState()),
+    share()
   );
 
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
@@ -51,6 +52,7 @@ export const initializeStateApi = <StateType extends object = object>({
   }
 
   const hasUnsavedChanges$ = latestState$.pipe(
+    debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
     map(([currentState, lastSavedState]) => {
       // check state equality

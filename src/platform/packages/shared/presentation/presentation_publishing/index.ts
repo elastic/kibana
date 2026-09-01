@@ -240,7 +240,7 @@ export { childrenLatestState$ } from './interfaces/containers/container_state/ch
 
 export {
   initializeStateApi,
-  STATE_CHANGE_DEBOUNCE,
+  UNSAVED_CHANGES_DEBOUNCE,
 } from './interfaces/containers/container_state/initialize_state_api';
 
 export {
