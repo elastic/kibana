@@ -276,6 +276,124 @@ export const elasticsearchRoleSchema = schema.object(
         { maxSize: 100 }
       )
     ),
+
+    /**
+     * An optional object defining global privileges. A global privilege is a form of cluster privilege
+     * that is request-aware.
+     */
+    global: schema.maybe(
+      schema.oneOf([
+        schema.object(
+          {
+            /**
+             * A list of data source privilege entries, used to grant access to ES|QL data sources.
+             */
+            data_source: schema.maybe(
+              schema.arrayOf(
+                schema.object(
+                  {
+                    names: schema.arrayOf(
+                      schema.string({
+                        meta: {
+                          description:
+                            'A list of data source names or wildcard patterns to which the permissions in this entry apply.',
+                        },
+                      }),
+                      { minSize: 1, maxSize: 100 }
+                    ),
+                    privileges: schema.arrayOf(
+                      schema.oneOf([
+                        schema.literal('create'),
+                        schema.literal('read_metadata'),
+                        schema.literal('delete'),
+                        schema.literal('read'),
+                        schema.literal('manage'),
+                      ]),
+                      {
+                        minSize: 1,
+                        maxSize: 100,
+                        meta: {
+                          description:
+                            'The data source privileges that role members have for the specified data sources.',
+                        },
+                      }
+                    ),
+                  },
+                  {
+                    meta: {
+                      id: 'security_role_data_source_privileges',
+                      description: 'The data source privileges entry.',
+                    },
+                  }
+                ),
+                { maxSize: 1000 }
+              )
+            ),
+
+            /**
+             * Elasticsearch application global user privileges.
+             *
+             * Kept optional to support role descriptors that only use data source privileges.
+             */
+            application: schema.maybe(
+              schema.object({
+                manage: schema.object({
+                  applications: schema.arrayOf(
+                    schema.string({
+                      meta: {
+                        description:
+                          'A list of application names that the role can manage at the global privilege scope.',
+                      },
+                    }),
+                    { maxSize: 1000 }
+                  ),
+                }),
+              })
+            ),
+          },
+          {
+            meta: {
+              id: 'security_role_global_privileges',
+              description: 'Global privileges for the role.',
+            },
+            unknowns: 'allow',
+          }
+        ),
+        schema.arrayOf(
+          schema.object(
+            {
+              data_source: schema.maybe(
+                schema.arrayOf(
+                  schema.object({
+                    names: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+                    privileges: schema.arrayOf(
+                      schema.oneOf([
+                        schema.literal('create'),
+                        schema.literal('read_metadata'),
+                        schema.literal('delete'),
+                        schema.literal('read'),
+                        schema.literal('manage'),
+                      ]),
+                      { minSize: 1, maxSize: 100 }
+                    ),
+                  }),
+                  { maxSize: 1000 }
+                )
+              ),
+              application: schema.maybe(
+                schema.object({
+                  manage: schema.object({
+                    applications: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+                  }),
+                })
+              ),
+            },
+            { unknowns: 'allow' }
+          ),
+          { maxSize: 1000 }
+        ),
+      ])
+    ),
   },
   {
     meta: {

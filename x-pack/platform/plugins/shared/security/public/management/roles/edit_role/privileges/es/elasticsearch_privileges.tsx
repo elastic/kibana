@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiComboBox,
   EuiDescribedFormGroup,
@@ -24,6 +25,7 @@ import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ClusterPrivileges } from './cluster_privileges';
+import { DataSourcePrivileges } from './data_source_privileges';
 import { IndexPrivileges } from './index_privileges';
 import { RemoteClusterPrivileges } from './remote_cluster_privileges';
 import type { BuiltinESPrivileges, Role, SecurityLicense } from '../../../../../../common';
@@ -50,6 +52,23 @@ interface Props {
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
+  private static readonly dataSourceDocLink =
+    'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-security#privileges';
+
+  private ensureGlobalPrivilege = (): estypes.SecurityGlobalPrivilege => {
+    return (
+      (Array.isArray(this.props.role.elasticsearch.global)
+        ? this.props.role.elasticsearch.global[0]
+        : this.props.role.elasticsearch.global) ?? {
+        application: {
+          manage: {
+            applications: [],
+          },
+        },
+      }
+    );
+  };
+
   public render() {
     return (
       <CollapsiblePanel iconType={'logoElasticsearch'} title={'Elasticsearch'}>
@@ -139,7 +158,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             <EuiSpacer />
           </>
         )}
-
         {buildFlavor === 'traditional' && (
           <>
             <EuiDescribedFormGroup
@@ -187,7 +205,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             <EuiSpacer />
           </>
         )}
-
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
@@ -218,6 +235,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           editable={editable}
           isDarkMode={this.props.isDarkMode}
         />
+
         {buildFlavor === 'traditional' && canUseRemoteIndices && (
           <>
             <EuiSpacer />
@@ -255,6 +273,45 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </>
         )}
+
+        <EuiSpacer />
+        <EuiSpacer />
+
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesTitle"
+              defaultMessage="Data source privileges"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesDescription"
+              defaultMessage="Control access to ES|QL data sources. "
+            />
+            <EuiLink
+              className="editRole__learnMore"
+              href={ElasticsearchPrivileges.dataSourceDocLink}
+              target={'_blank'}
+            >
+              <FormattedMessage
+                id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesLearnMoreLinkText"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          </p>
+        </EuiText>
+        <DataSourcePrivileges
+          role={role}
+          indexPatterns={indexPatterns}
+          validator={validator}
+          onChange={onChange}
+          onAdd={this.addDataSourcePrivilege}
+          editable={editable}
+        />
       </Fragment>
     );
   };
@@ -267,6 +324,32 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       />
     </EuiLink>
   );
+
+  public addDataSourcePrivilege = () => {
+    const { role } = this.props;
+
+    const globalValue = role.elasticsearch.global;
+    const current =
+      (Array.isArray(globalValue) ? globalValue[0]?.data_source : globalValue?.data_source) ?? [];
+    const next = [
+      ...current,
+      {
+        names: [],
+        privileges: [],
+      },
+    ];
+
+    const global = this.ensureGlobalPrivilege();
+    this.props.onChange({
+      ...this.props.role,
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        global: Array.isArray(globalValue)
+          ? [{ ...global, data_source: next }]
+          : { ...global, data_source: next },
+      },
+    });
+  };
 
   public addIndexPrivilege = () => {
     const { role } = this.props;

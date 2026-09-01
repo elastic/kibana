@@ -33,6 +33,7 @@ export type ElasticsearchRole = Pick<
   indices: Role['elasticsearch']['indices'];
   remote_indices?: Role['elasticsearch']['remote_indices'];
   run_as: Role['elasticsearch']['run_as'];
+  global?: Role['elasticsearch']['global'];
 };
 
 const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
@@ -76,6 +77,7 @@ export function transformElasticsearchRoleToRole({
       indices: elasticsearchRole.indices,
       remote_indices: elasticsearchRole.remote_indices,
       run_as: elasticsearchRole.run_as,
+      ...(elasticsearchRole.global ? { global: elasticsearchRole.global } : {}),
     },
     kibana: kibanaTransformResult.success ? (kibanaTransformResult.value as Role['kibana']) : [],
     _transform_error: [

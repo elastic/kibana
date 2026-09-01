@@ -13,6 +13,7 @@ export type {
   RemoteClusterPrivilege,
   Role,
   RoleKibanaPrivilege,
+  RoleDataSourcePrivilege,
   RoleIndexPrivilege,
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,

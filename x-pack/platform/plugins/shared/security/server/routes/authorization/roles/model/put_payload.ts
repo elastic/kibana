@@ -24,6 +24,7 @@ export const transformPutPayloadToElasticsearchRole = (
       indices: undefined,
       remote_indices: undefined,
       run_as: undefined,
+      global: undefined,
     },
     kibana = [],
   } = rolePayload;
@@ -39,6 +40,7 @@ export const transformPutPayloadToElasticsearchRole = (
     indices: elasticsearch.indices || [],
     remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],
+    ...(elasticsearch.global ? { global: elasticsearch.global } : {}),
     applications: [
       ...transformPrivilegesToElasticsearchPrivileges(application, kibana),
       ...otherApplications,
