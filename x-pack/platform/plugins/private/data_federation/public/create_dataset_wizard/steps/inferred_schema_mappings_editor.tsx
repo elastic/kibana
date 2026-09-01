@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 import type { Control } from 'react-hook-form';
@@ -33,7 +34,10 @@ import {
   getDynamicInferredFields,
   mappingsToAutomaticFieldTypes,
 } from '../automatic_field_types_utils';
-import { isDatasetWizardFlow396, type DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
+import {
+  isDatasetWizardFlow396,
+  type DatasetWizardFlowVariant,
+} from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
@@ -119,6 +123,11 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   inferredFields,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const { euiTheme } = useEuiTheme();
+  /** Holds the row still while the button gives way to the inline add form. */
+  const mappedFieldsHeaderCss = css`
+    min-block-size: ${euiTheme.size.xl};
+  `;
   const containerRef = useRef<HTMLDivElement>(null);
   const addFieldButtonRef = useRef<HTMLElement | null>(null);
   const {
@@ -285,7 +294,12 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       `}
     >
       <div data-test-subj="datasetWizardMappedFields">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          gutterSize="s"
+          css={mappedFieldsHeaderCss}
+        >
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h4>{datasetWizardStrings.mappedFieldsTitle()}</h4>
