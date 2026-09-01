@@ -280,7 +280,7 @@ const createPinnedDispatcher = (pinned: ValidatedAddress): Agent =>
 export interface FetchUrlOptions {
   /** Step-level cancellation. Combined with the per-request timeout. */
   abortSignal: AbortSignal;
-  /** Optional headers. Adapter sets `Accept` for STIX/TAXII negotiation. */
+  /** Optional request headers, including adapter-specific `Accept` values. */
   headers?: Record<string, string>;
 }
 
@@ -420,9 +420,9 @@ const FOLLOWED_REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 
  *
  * `dns.lookup` does not take an AbortSignal, so on its own a stalled resolver
  * outlives both the per-request timeout and a step abort: the feed run stays
- * pending indefinitely. Since the hostname is operator-supplied, that is a
- * task-worker resource-exhaustion vector, so the guard cannot be the only thing
- * bounding it. The lookup itself keeps running in the background, but this
+ * pending indefinitely. Since the hostname comes from an untrusted source
+ * document, that is a task-worker resource-exhaustion vector. The guard cannot
+ * be the only thing bounding it. The lookup itself keeps running in the background, but this
  * function stops waiting on it.
  */
 const assertSafeUrlResolvedWithin = async (
