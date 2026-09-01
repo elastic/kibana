@@ -736,9 +736,9 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 ## 9.4.6 [kibana-9.4.6-release-notes]
 
-% ::::{NOTE}
-% ::::
-
+::::{important} 
+The 9.4.6 release contains fixes for potential security vulnerabilities. For details, go to [security announcements](https://discuss.elastic.co/c/announcements/security-announcements/31).
+::::
 
 ### Features and enhancements [kibana-9.4.6-features-enhancements]
 

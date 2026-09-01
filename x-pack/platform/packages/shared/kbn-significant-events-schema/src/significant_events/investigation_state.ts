@@ -226,6 +226,9 @@ export const triggerFeedbackSchema = z.discriminatedUnion('field', [
 ]);
 export type TriggerFeedback = z.infer<typeof triggerFeedbackSchema>;
 
+/** Max hypotheses an investigation can track. Keep in sync with the YAML maxItems. */
+export const MAX_HYPOTHESES = 50;
+
 /**
  * Full state of an investigation at a point in time. This is the ONE schema shared by:
  * - every `investigation_progress` `tool_ui` event emitted while the investigation runs (always
@@ -239,7 +242,7 @@ export type TriggerFeedback = z.infer<typeof triggerFeedbackSchema>;
 export const investigationStateSchema = z.object({
   /** Current ("what's happening now") or final narrative summary of the investigation. */
   summary: z.string().max(MAX_TEXT_LENGTH),
-  hypotheses: z.array(investigationHypothesisSchema).max(50),
+  hypotheses: z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES),
   /**
    * The final answer — the mechanism/root-cause narrative, as plain prose (no markdown headings
    * or bullet lists). Populated once a hypothesis is `confirmed`; absent while still

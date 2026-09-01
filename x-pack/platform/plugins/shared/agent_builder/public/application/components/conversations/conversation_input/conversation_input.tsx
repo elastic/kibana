@@ -18,6 +18,7 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
   useAgentId,
+  useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
@@ -105,6 +106,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
+  const { isReadOnly: isConversationReadOnly, isLoading: isConversationReadOnlyLoading } =
+    useConversationReadOnly();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
   const submitMessage = useSubmitMessage();
@@ -147,6 +150,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
+    if (isConversationReadOnly) return;
+
     if (initialMessage && !autoSendInitialMessage && isNewConversation && !isAwaitingPrompt) {
       messageEditorController.setContent(initialMessage);
       messageEditorController.focus();
@@ -157,13 +162,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     isNewConversation,
     isAwaitingPrompt,
+    isConversationReadOnly,
     messageEditorController,
     resetInitialMessage,
   ]);
 
   // Skip auto-focus while a HITL prompt is open, it should own focus instead
   useEffect(() => {
-    if (isAwaitingPrompt) return;
+    if (isAwaitingPrompt || isConversationReadOnly) return;
     const timeoutId = setTimeout(() => {
       messageEditorController.focus();
     }, 200);
@@ -171,7 +177,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [conversationId, messageEditorController, isAwaitingPrompt]);
+  }, [conversationId, messageEditorController, isAwaitingPrompt, isConversationReadOnly]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
@@ -199,6 +205,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     messageEditorController.clear();
     onSubmit?.();
   };
+
+  if (isConversationReadOnly || isConversationReadOnlyLoading) {
+    return null;
+  }
 
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>

@@ -38,9 +38,25 @@ const getInitialProjectRouting = (
   return hasSameProjectRouting ? firstProjectRouting : defaultProjectRouting;
 };
 
+interface UseProjectScopeActionArgs {
+  onUpdateSuccess?: (submittedItems: TransformListRow[]) => void;
+}
+
 export type ProjectScopeAction = ReturnType<typeof useProjectScopeAction>;
 
-export const useProjectScopeAction = () => {
+const haveSameTransformIds = (
+  firstItems: TransformListRow[],
+  secondItems: TransformListRow[]
+): boolean => {
+  if (firstItems.length !== secondItems.length) {
+    return false;
+  }
+
+  const secondItemIds = new Set(secondItems.map(({ id }) => id));
+  return firstItems.every(({ id }) => secondItemIds.has(id));
+};
+
+export const useProjectScopeAction = ({ onUpdateSuccess }: UseProjectScopeActionArgs = {}) => {
   const { cps } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const cpsManager = cps?.cpsManager;
@@ -156,13 +172,28 @@ export const useProjectScopeAction = () => {
       return;
     }
 
-    updateTransformsProjectScope({
-      projectRouting: targetProjectRouting,
-      transformsInfo: items.map(({ id }) => ({ id })),
-    });
+    const submittedItems = items;
+    updateTransformsProjectScope(
+      {
+        projectRouting: targetProjectRouting,
+        transformsInfo: submittedItems.map(({ id }) => ({ id })),
+      },
+      {
+        onSuccess: (results) => {
+          const didAllTransformsUpdate = Object.values(results).every((result) => result.success);
+
+          if (didAllTransformsUpdate) {
+            setItems((currentItems) =>
+              haveSameTransformIds(currentItems, submittedItems) ? [] : currentItems
+            );
+            onUpdateSuccess?.(submittedItems);
+          }
+        },
+      }
+    );
     setModalVisible(false);
     setFlyoutVisible(false);
-  }, [items, targetProjectRouting, updateTransformsProjectScope]);
+  }, [items, onUpdateSuccess, targetProjectRouting, updateTransformsProjectScope]);
 
   return {
     availableProjects,

@@ -27,14 +27,30 @@ jest.mock('./authenticate_and_deploy_step/managed_integrations_section', () => (
   ManagedIntegrationsSection: jest.fn(),
 }));
 
+jest.mock('./ecf_deployment_section', () => ({
+  useEcfDeployment: jest.fn(),
+  EcfDeploymentSection: jest.fn(),
+}));
+
+jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(() => ({ services: { cloud: undefined } })),
+}));
+
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
+import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseDeploy = useDeploy as jest.Mock;
 const MockManagedIntegrationsSection = ManagedIntegrationsSection as unknown as jest.Mock;
+const mockUseEcfDeployment = useEcfDeployment as jest.Mock;
+const MockEcfDeploymentSection = EcfDeploymentSection as unknown as jest.Mock;
+const mockUseSessionStorage = useSessionStorage as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -43,6 +59,14 @@ const miService = {
   name: 'AWS GuardDuty',
   deploymentMethods: [{ method: 'managed_integration', preferred: true }],
   identityFederationSupported: true,
+  showInUI: true,
+};
+
+const ecfService = {
+  id: 'cloudtrail',
+  name: 'AWS CloudTrail',
+  deploymentMethods: [{ method: 'ecf', preferred: true }],
+  identityFederationSupported: false,
   showInUI: true,
 };
 
@@ -67,6 +91,27 @@ function makeDeployReturn(
   };
 }
 
+function makeEcfReturn(
+  overrides: { hasAnyEcf?: boolean; isDone?: boolean } = {}
+): ReturnType<typeof useEcfDeployment> {
+  return {
+    hasAnyEcf: overrides.hasAnyEcf ?? false,
+    isDone: overrides.isDone ?? false,
+    ecfServiceIds: new Set(),
+    sectionProps: {
+      ecfUnifiedConfigs: [],
+      ecfOtelConfigs: [],
+      ecfCrowdstrikeServices: [],
+      unifiedLaunchUrl: undefined,
+      otelLaunchUrl: undefined,
+      crowdstrikeLaunchUrl: undefined,
+      globalRegion: 'us-east-1',
+      launchedFamilies: [],
+      onLaunch: jest.fn(),
+    },
+  };
+}
+
 function renderStep(onContinue = jest.fn(), onBack?: () => void) {
   return render(
     <I18nProvider>
@@ -83,8 +128,15 @@ describe('AuthenticateAndDeployStep', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['guardduty'] },
       awsServicesMap: awsServicesMapWithMI,
+      deploymentMethod: 'managed_integration',
+      setDeploymentMethod: jest.fn(),
     });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
+    mockUseEcfDeployment.mockReturnValue(makeEcfReturn());
+    mockUseSessionStorage.mockReturnValue([
+      { globalRegion: 'us-east-1', serviceVars: {}, instances: [] },
+      jest.fn(),
+    ]);
     MockManagedIntegrationsSection.mockImplementation(
       ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
         <div>
@@ -92,6 +144,15 @@ describe('AuthenticateAndDeployStep', () => {
             Deploy
           </button>
           {hasFailed && <span data-test-subj="mock-failed">Failed</span>}
+        </div>
+      )
+    );
+    MockEcfDeploymentSection.mockImplementation(
+      ({ onLaunch }: { onLaunch: (f: string) => void }) => (
+        <div>
+          <button data-test-subj="mock-ecf-launch-btn" onClick={() => onLaunch('unified')}>
+            Launch CloudFormation
+          </button>
         </div>
       )
     );
@@ -146,7 +207,7 @@ describe('AuthenticateAndDeployStep', () => {
     // storage, so the local state does not reset on remount.
 
     it('hasFailed=true when hook returns non-empty failedInstances on first render (no deploy attempted)', () => {
-      // Simulates the hook having been seeded from persisted deployAndDetectStep.failedInstances.
+      // Simulates the hook having been seeded from persisted detectAndReviewStep.failedInstances.
       mockUseDeploy.mockReturnValue(
         makeDeployReturn({ failedInstances: ['guardduty'], isDeploying: false })
       );
@@ -165,11 +226,14 @@ describe('AuthenticateAndDeployStep', () => {
   });
 
   describe('Next button gating — no MI services', () => {
-    it('Next is enabled without deploying', () => {
+    it('Next is enabled without deploying when no MI or ECF services', () => {
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: [] },
         awsServicesMap: awsServicesMapEmpty,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
       });
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
       renderStep();
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
     });
@@ -203,6 +267,66 @@ describe('AuthenticateAndDeployStep', () => {
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
       expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ECF section — Next button gating', () => {
+    beforeEach(() => {
+      // Switch to ECF-only service (no MI)
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+      });
+    });
+
+    it('Next is disabled when ECF is present and not yet launched', () => {
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: false }));
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('Next is enabled after ECF launch button clicked (isDone=true)', () => {
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: true }));
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+
+    it('renders EcfDeploymentSection when hasAnyEcf is true', () => {
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: false }));
+      renderStep();
+      expect(screen.getByTestId('mock-ecf-launch-btn')).toBeInTheDocument();
+    });
+
+    it('does not render EcfDeploymentSection when hasAnyEcf is false', () => {
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
+      renderStep();
+      expect(screen.queryByTestId('mock-ecf-launch-btn')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ECF + MI both present', () => {
+    beforeEach(() => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty', 'cloudtrail'] },
+        awsServicesMap: new Map([
+          ['guardduty', miService],
+          ['cloudtrail', ecfService],
+        ]),
+      });
+    });
+
+    it('Next remains disabled when MI deployed but ECF not launched', () => {
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: false }));
+      renderStep();
+      fireEvent.click(screen.getByTestId('mock-deploy-btn'));
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('Next enables when both MI deployed and ECF launched', () => {
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: true }));
+      renderStep();
+      fireEvent.click(screen.getByTestId('mock-deploy-btn'));
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
     });
   });
 });

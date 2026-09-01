@@ -8,7 +8,12 @@
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { agentIdCondition, UNASSIGNED_CONDITION } from './assign_by_condition';
 import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
-import { configIdOf, toConditionUpdates, toMonitorPlacements } from './rebalance_writes';
+import {
+  configIdOf,
+  toClearedConditionUpdates,
+  toConditionUpdates,
+  toMonitorPlacements,
+} from './rebalance_writes';
 
 const LOCATION = 'loc1';
 
@@ -176,5 +181,22 @@ describe('toConditionUpdates', () => {
 
     expect(bySpace.get('default')).toHaveLength(1);
     expect(bySpace.get('team-x')).toHaveLength(1);
+  });
+});
+
+describe('toClearedConditionUpdates', () => {
+  it('emits a null-condition update for every policy that currently has a pin', () => {
+    const bySpace = toClearedConditionUpdates([
+      policy({ id: `m1-${LOCATION}`, condition: agentIdCondition('agent-a') }),
+      policy({ id: `m2-${LOCATION}` }),
+    ]);
+
+    expect(bySpace.get('default')).toEqual([
+      expect.objectContaining({ id: `m1-${LOCATION}`, condition: null }),
+    ]);
+  });
+
+  it('writes nothing when no policy has a condition', () => {
+    expect(toClearedConditionUpdates([policy({ id: `m1-${LOCATION}` })]).size).toBe(0);
   });
 });

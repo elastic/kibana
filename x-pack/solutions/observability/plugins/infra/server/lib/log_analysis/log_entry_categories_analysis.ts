@@ -22,8 +22,8 @@ import {
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
 import { startTracingSpan } from '../../../common/performance_tracing';
-import type { MlAnomalyDetectors, MlSystem } from '../../types';
-import { fetchMlJob, getLogEntryDatasets } from './common';
+import type { MlAnomalyDetectors, MlSystem, ServerlessInfo } from '../../types';
+import { fetchMlJob, getLogEntryDatasets, resolveJobProjectRouting } from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import type { LogEntryCategoryHit } from './queries/log_entry_categories';
 import {
@@ -158,7 +158,7 @@ export async function getLogEntryCategoryExamples(
   categoryId: number,
   exampleCount: number,
   resolvedLogView: ResolvedLogView,
-  projectRouting?: string
+  serverless: ServerlessInfo
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -177,6 +177,7 @@ export async function getLogEntryCategoryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
+  const projectRouting = resolveJobProjectRouting(mlJob, serverless);
   const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {

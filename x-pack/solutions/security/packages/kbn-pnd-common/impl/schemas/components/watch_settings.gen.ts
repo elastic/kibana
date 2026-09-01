@@ -78,6 +78,10 @@ export const WatchSkill = lazySchema(() =>
      */
     id: z.string(),
     /**
+     * Display name resolved from the Agent Builder registry at projection time.
+     */
+    name: z.string().optional(),
+    /**
      * Watches whose workers may call this skill
      */
     watchIds: z.array(z.string()),
@@ -85,10 +89,7 @@ export const WatchSkill = lazySchema(() =>
      * ISO 8601 timestamp of last invocation, or null when never invoked
      */
     lastRun: z.string().nullable(),
-    /**
-     * Global flag. Effective enablement is this AND the per-watch attachment flag.
-     */
-    enabled: z.boolean(),
+    summary: z.string().optional(),
     /**
      * Omitted for generally available skills; badge shown otherwise
      */

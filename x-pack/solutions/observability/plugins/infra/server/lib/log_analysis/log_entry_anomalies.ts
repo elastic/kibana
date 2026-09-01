@@ -30,9 +30,10 @@ import type {
   InfraRequestHandlerContext,
   MlAnomalyDetectors,
   MlSystem,
+  ServerlessInfo,
 } from '../../types';
 import type { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { fetchMlJob, getLogEntryDatasets } from './common';
+import { fetchMlJob, getLogEntryDatasets, resolveJobProjectRouting } from './common';
 import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
@@ -358,6 +359,7 @@ export async function getLogEntryExamples(
   exampleCount: number,
   resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
+  serverless: ServerlessInfo,
   categoryId?: string
 ) {
   const finalizeLogEntryExamplesSpan = startTracingSpan('get log entry rate example log entries');
@@ -378,6 +380,7 @@ export async function getLogEntryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
+  const projectRouting = resolveJobProjectRouting(mlJob, serverless);
   const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
@@ -402,7 +405,8 @@ export async function getLogEntryExamples(
     dataset,
     exampleCount,
     callWithRequest,
-    categoryId
+    categoryId,
+    projectRouting
   );
 
   const logEntryExamplesSpan = finalizeLogEntryExamplesSpan();
@@ -430,7 +434,8 @@ export async function fetchLogEntryExamples(
   dataset: string,
   exampleCount: number,
   callWithRequest: KibanaFramework['callWithRequest'],
-  categoryId?: string
+  categoryId?: string,
+  projectRouting?: string
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch log rate examples from ES');
 
@@ -478,7 +483,8 @@ export async function fetchLogEntryExamples(
         endTime,
         dataset,
         exampleCount,
-        categoryQuery
+        categoryQuery,
+        projectRouting
       )
     )
   );

@@ -1,5 +1,5 @@
 {
-  "sha1": "d5303667aa5ba5a2922c5c3b7ad9b57eac93b9e5",
+  "sha1": "7fc7574c64c4200e6d623df3f874843b657f411a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -29,7 +29,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
         "line": 122,
-        "column": 79
+        "column": 61
       }
     },
     {

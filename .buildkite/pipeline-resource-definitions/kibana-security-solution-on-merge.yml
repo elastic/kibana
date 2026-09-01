@@ -19,7 +19,7 @@ spec:
       description: 'Runs the Security Solution Cypress test suites after changes merge'
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#security-serverless-test-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'

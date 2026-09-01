@@ -72,9 +72,6 @@ const styles = {
       padding-right: 0;
     }
   `,
-  projectScopeSelector: css`
-    min-inline-size: 180px;
-  `,
 };
 
 const localStorage = new Storage(window.localStorage);
@@ -283,18 +280,18 @@ export const Wizard: FC<WizardProps> = React.memo(
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
     const projectScopeSelector =
       shouldUseProjectScope && cpsManager ? (
-        <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
-          <ProjectScopeSelector
-            cpsManager={cpsManager}
-            onProjectRoutingChange={handleProjectRoutingChange}
-            projectRouting={projectRouting}
-          />
-        </EuiFlexItem>
+        <ProjectScopeSelector
+          cpsManager={cpsManager}
+          onProjectRoutingChange={handleProjectRoutingChange}
+          projectRouting={projectRouting}
+        />
       ) : null;
     const dataViewPickerComponent = (
       <DataViewPicker
         compressed={false}
         currentDataViewId={dataView?.id}
+        showDataViewLabel={false}
+        showDropdownIcon={false}
         savedDataViews={savedDataViews}
         isDisabled={isDataViewPickerDisabled}
         onChangeDataView={requestDataViewChange}
@@ -309,6 +306,8 @@ export const Wizard: FC<WizardProps> = React.memo(
             : undefined
         }
         trigger={{
+          iconSide: 'right',
+          iconType: 'chevronSingleDown',
           label:
             dataView?.getName() ??
             i18n.translate('xpack.transform.stepDefineForm.selectDataViewLabel', {
@@ -348,8 +347,10 @@ export const Wizard: FC<WizardProps> = React.memo(
       </EuiFormRow>
     );
     const dataViewPicker = (
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
-        {projectScopeSelector}
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+        {projectScopeSelector ? (
+          <EuiFlexItem grow={false}>{projectScopeSelector}</EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
       </EuiFlexGroup>
     );

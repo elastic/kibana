@@ -40,6 +40,16 @@ Before enabling live projection in shared or production environments:
 - Settings writes require `pnd_write`; managed install is requestless, so the PND route is the authorization boundary.
 - Autonomy is the common durable setting for every managed Watch. Trigger, scope-routing, worker, skill, and approval-gate mutations remain outside the live extension.
 
+### Skills projection
+
+Skills are only projected from real data. At startup, PND provisions the required Agent Builder agent in every space that has an installed watch before `ready()` runs reconciliation, so skills resolve correctly in non-default spaces on first request.
+
+`GET /internal/pnd/skills` returns a per-space `WatchSkill[]` projected from live workflow definitions:
+
+- Each `ai.agent` step in a workflow's YAML contributes the skills it can invoke. The projection walks all step branches (if/else, cases, parallel branches) so nested agent steps are found.
+- If the step has a `configuration_overrides.skill_ids` list those IDs are used, even when the step's agent-id cannot be resolved from Agent Builder. Otherwise the agent's own `configuration.skill_ids` are used, plus any `baseConfiguration.skill_ids` from its type.
+- Results are cached per space with a 5-minute TTL. The cache is invalidated immediately after any watch enable, disable, or settings write so the next read reflects the current list of projected skills.
+
 ## Chrome strategy (PR1)
 
 PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform Kibana chrome**:
@@ -85,6 +95,9 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 | GET | `/internal/pnd/watches` |
 | GET | `/internal/pnd/watches/{watchId}` |
 | PATCH | `/internal/pnd/watches/{watchId}` |
+| GET | `/internal/pnd/workers` |
+| PATCH | `/internal/pnd/workers/{workerId}` |
+| GET | `/internal/pnd/skills` |
 | GET | `/internal/pnd/investigations` |
 | GET | `/internal/pnd/investigations/{id}` |
 | GET | `/internal/pnd/investigations/{id}/proposals` |
@@ -157,6 +170,7 @@ Do not add runtime meaning for autonomy levels, execution identities, trigger/sc
 | Watch settings defaults, migrations, patches, and API projection | `plugins/pnd/server/managed_workflows/watches` |
 | Investigation / Proposal conversation projection | Agent Builder / Conversations (optional dep) |
 | Live Watch projection (non-mock) | Workflows Management via `workflowsExtensions` |
+| Skills projection | `server/services/utils/skills_projection_service.ts` + `server/services/watches/project_watch.ts` |
 | Brief / in-app pages | `plugins/pnd/public` |
 | Solution nav nodes | `security_solution_ess` / `security_solution_serverless` navigation trees |
 
@@ -172,7 +186,7 @@ Do not add runtime meaning for autonomy levels, execution identities, trigger/sc
 - Nesting routes under `/app/security` or importing Security page wrappers
 - Wiring remaining operate destinations (Alerts, Attacks, …) to real apps
 - Pixel-perfect Throughline CSS port
-- Implementing Workflows / Skills / Activity / Performance / Guardrails data
+- Implementing Workflows / Activity / Performance / Guardrails data
 - No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
 - No PND create or delete surface for custom watches
 

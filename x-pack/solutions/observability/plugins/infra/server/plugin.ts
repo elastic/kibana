@@ -50,6 +50,7 @@ import type {
   InfraPluginRequestHandlerContext,
   InfraPluginSetup,
   InfraPluginStart,
+  ServerlessInfo,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
@@ -77,10 +78,15 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
+  private serverless: ServerlessInfo;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.serverless = {
+      isServerless: context.env.packageInfo.buildFlavor === 'serverless',
+      cpsEnabled: false,
+    };
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
       LOGS_RULES_ALERT_CONTEXT,
@@ -99,6 +105,7 @@ export class InfraServerPlugin
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
+    this.serverless.cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     const framework = new KibanaFramework(core, this.config, plugins);
     const metricsClient = plugins.metricsDataAccess.client;
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
@@ -174,6 +181,7 @@ export class InfraServerPlugin
       logger: this.logger,
       basePath: core.http.basePath,
       plugins: libsPlugins,
+      serverless: this.serverless,
     };
 
     plugins.features.registerKibanaFeature(getMetricsFeature());

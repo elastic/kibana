@@ -196,6 +196,20 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(modalProps?.hideDashboardOptions).toBe(false);
     });
 
+    it('should show dashboard options after enabling Save As for an existing session', async () => {
+      const { modalProps } = await setup({});
+      expect(modalProps?.hideDashboardOptions).toBe(true);
+
+      await act(async () => {
+        modalProps?.onCopyOnSaveChange?.(true);
+      });
+
+      const updatedModalProps = MockModal.mock.lastCall?.[0] as
+        | DiscoverSessionSaveDashboardModalProps
+        | undefined;
+      expect(updatedModalProps?.hideDashboardOptions).toBe(false);
+    });
+
     it('should show dashboard options for a new session (non-embedded)', async () => {
       const { modalProps } = await setup({ persistedDiscoverSession: false });
       expect(modalProps?.hideDashboardOptions).toBe(false);

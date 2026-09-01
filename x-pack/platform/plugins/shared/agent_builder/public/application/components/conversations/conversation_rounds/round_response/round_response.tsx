@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -81,11 +81,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
           />
         ) : null}
       </EuiFlexItem>
-      {isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingElastic size="l" aria-label="Streaming response" />
-        </EuiFlexItem>
-      )}
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
           <RoundResponseActions

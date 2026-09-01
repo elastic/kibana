@@ -27,6 +27,7 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
+import { nightshiftInvestigationSavedObjectType } from './saved_objects';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -60,6 +61,8 @@ export class NightshiftInvestigationsPlugin
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+
+    core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
       createTriggerEmitter({

@@ -57,10 +57,10 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setDataFormat,
   } = useServicesStep({ onContinue });
 
-  const { deployAndDetectStep } = useOnboardingFlow();
+  const { detectAndReviewStep } = useOnboardingFlow();
   const isFormatDisabled =
-    Object.keys(deployAndDetectStep.policyIdsByInstance).length > 0 ||
-    Object.values(deployAndDetectStep.serviceStatuses).some(
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
+    Object.values(detectAndReviewStep.serviceStatuses).some(
       (s) => s !== 'error' && s !== 'timeout'
     );
 

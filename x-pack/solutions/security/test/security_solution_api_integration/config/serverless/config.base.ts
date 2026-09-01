@@ -26,6 +26,12 @@ export interface CreateTestConfigOptions {
   kbnTestServerWait?: RegExp;
   suiteTags?: { include?: string[]; exclude?: string[] };
   indexRefreshInterval?: string | false;
+  /**
+   * When false, skips installing the mock prebuilt rules package in the beforeAll hook.
+   * Set to false for test suites that do not exercise prebuilt-rule management endpoints.
+   * Defaults to true.
+   */
+  installMockPrebuiltRulesPackage?: boolean;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -78,15 +84,18 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/',
-        rootHooks: {
-          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
-          // Prebuilt rules package installation has been known to be flakiness reason since
-          // EPR might be unavailable or the network may have faults.
-          // Real prebuilt rules package installation is prevented by
-          // installing a lightweight mock package.
-          beforeAll: ({ getService }: FtrProviderContext) =>
-            installMockPrebuiltRulesPackage({ getService }),
-        },
+        rootHooks:
+          options.installMockPrebuiltRulesPackage !== false
+            ? {
+                // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
+                // Prebuilt rules package installation has been known to be flakiness reason since
+                // EPR might be unavailable or the network may have faults.
+                // Real prebuilt rules package installation is prevented by
+                // installing a lightweight mock package.
+                beforeAll: ({ getService }: FtrProviderContext) =>
+                  installMockPrebuiltRulesPackage({ getService }),
+              }
+            : {},
       },
       indexRefreshInterval: options.indexRefreshInterval,
     };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import type { MlAnomalyDetectors, MlSystem } from '../../types';
+import { getProjectRoutingFromJob } from '@kbn/ml-cps-common';
+import type { MlAnomalyDetectors, MlSystem, ServerlessInfo } from '../../types';
 import { NoLogAnalysisMlJobError } from './errors';
 
 import type { CompositeDatasetKey, LogEntryDatasetBucket } from './queries/log_entry_data_sets';
@@ -36,6 +38,21 @@ export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: 
     },
   };
 }
+
+/**
+ * Resolves the CPS project scope to query raw log data with on behalf of an ML job.
+ * If CPS is not enabled, undefined is returned
+ */
+export const resolveJobProjectRouting = (
+  mlJob: estypes.MlJob,
+  serverless: ServerlessInfo
+): string | undefined => {
+  if (!serverless.isServerless || !serverless.cpsEnabled) {
+    return undefined;
+  }
+
+  return getProjectRoutingFromJob(mlJob) ?? undefined;
+};
 
 export const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 

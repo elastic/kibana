@@ -1,5 +1,5 @@
 {
-  "sha1": "609d87674806fe1522edda90ae4a6532ee9cb1f0",
+  "sha1": "768247933eecdcff6ffaec7abfab98ec9de12036",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -445,6 +445,22 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
         "line": 43,
         "column": 7
+      }
+    },
+    {
+      "id": "6697d27925b9def-ea242490a272e1b",
+      "title": "Streams layout renders the destinations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 50,
+        "column": 13
       }
     },
     {

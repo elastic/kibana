@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
 
-const DOWNSTREAM = ['service-settings', 'authenticate-and-deploy', 'deploy-and-detect'];
+const DOWNSTREAM = ['service-settings', 'authenticate-and-deploy', 'detect-and-review'];
 
 function render(selectedServiceIds: string[], markStepsIncomplete = jest.fn()) {
   return renderHook(

@@ -227,22 +227,6 @@
         "line": 28,
         "column": 7
       }
-    },
-    {
-      "id": "41a5e8b53c1a295-ec9bfa8647930ac",
-      "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/step_details.spec.ts",
-        "line": 34,
-        "column": 28
-      }
     }
   ]
 }

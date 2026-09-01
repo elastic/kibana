@@ -86,12 +86,3 @@ export const setWorkerEnabled = (workerId: string, enabled: boolean): WatchWorke
 /* -------------------------------------------------------------------------- */
 
 export const listSkills = (): WatchSkill[] => getState().skills;
-
-export const setSkillEnabled = (skillId: string, enabled: boolean): WatchSkill | undefined => {
-  const skill = getState().skills.find((candidate) => candidate.id === skillId);
-  if (!skill) {
-    return undefined;
-  }
-  skill.enabled = enabled;
-  return skill;
-};

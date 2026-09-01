@@ -33,7 +33,7 @@ describe('watchRegistry', () => {
           name: catalog?.name,
           color: catalog?.color,
           enabled: false,
-          callables: [],
+          skills: [],
           coverage: [],
           recentRuns: [],
           metrics: { lastRun: null },
