@@ -21,7 +21,7 @@ import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
 import type { AxisSortOrderProps } from './sort_order';
 import { AxisSortOrder } from './sort_order';
-import { isTimeBasedAxis } from '../time_series';
+import { isTimeSeriesOperation } from '../time_series';
 
 export function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   return (
@@ -138,17 +138,11 @@ export function HeatmapHorizontalAxisSettings({
   frame,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
   const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
-  // use activeData to get the actual type of the x axis
-  const activeData = frame.activeData?.[state.layerId];
-  const xActiveColumn = activeData?.columns.find((col) => col.id === state.xAccessor);
-  const xActiveColumnMetaType = xActiveColumn?.meta.type;
-
   const xOperation =
     state?.layerId && state?.xAccessor
       ? frame.datasourceLayers[state.layerId]?.getOperationForColumnId(state.xAccessor)
       : undefined;
-
-  const isTimeBasedXAxis = isTimeBasedAxis(xOperation, xActiveColumnMetaType);
+  const isTimeBasedXAxis = isTimeSeriesOperation(xOperation);
 
   const onSortingChange = useCallback<AxisSortOrderProps['onSortingChange']>(
     (xSortPredicate) => {

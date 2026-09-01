@@ -100,49 +100,6 @@ describe('heatmap style settings', () => {
     expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).not.toBeDisabled();
   });
 
-  it('disables x-axis sort when the activeData column type is date even if persisted column type is string', async () => {
-    const setState = jest.fn();
-    const state: HeatmapVisualizationState = {
-      ...defaultProps.state,
-      gridConfig: {
-        ...defaultProps.state.gridConfig,
-        xSortPredicate: 'asc',
-      },
-    };
-
-    const datasource = createMockDatasource();
-    const persistedStringOperation: OperationDescriptor = {
-      label: '@timestamp',
-      dataType: 'string',
-      scale: 'ordinal',
-      isBucketed: true,
-      hasTimeShift: false,
-      hasReducedTimeRange: false,
-    };
-    datasource.publicAPIMock.getOperationForColumnId.mockReturnValue(persistedStringOperation);
-
-    renderComponent({
-      state,
-      setState,
-      frame: createMockFramePublicAPI({
-        datasourceLayers: {
-          [state.layerId]: datasource.publicAPIMock,
-        },
-        activeData: {
-          [state.layerId]: {
-            type: 'datatable',
-            columns: [{ id: 'x', name: '@timestamp', meta: { type: 'date' } }],
-            rows: [],
-          },
-        },
-      }),
-    });
-
-    expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).toBeDisabled();
-    expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).toHaveValue('none');
-    expect(setState).not.toHaveBeenCalled();
-  });
-
   it('should have called setState with the proper value of xAxisLabelRotation', async () => {
     renderComponent();
 
