@@ -27,8 +27,8 @@ describe('createApmRelatedAlertsAttachmentType', () => {
   });
 
   describe('validate', () => {
-    it('accepts valid data with all alert fields', () => {
-      const result = type.validate({
+    it('accepts valid data with all alert fields', async () => {
+      const result = await type.validate({
         serviceName: 'checkout',
         environment: 'production',
         title: 'Related Alerts — checkout',
@@ -41,13 +41,13 @@ describe('createApmRelatedAlertsAttachmentType', () => {
       }
     });
 
-    it('accepts minimal valid data (no alerts, no optional fields)', () => {
-      const result = type.validate({ serviceName: 'checkout', alerts: [] });
+    it('accepts minimal valid data (no alerts, no optional fields)', async () => {
+      const result = await type.validate({ serviceName: 'checkout', alerts: [] });
       expect(result.valid).toBe(true);
     });
 
-    it('accepts alerts with only required fields (no reason, duration, severity, serviceName)', () => {
-      const result = type.validate({
+    it('accepts alerts with only required fields (no reason, duration, severity, serviceName)', async () => {
+      const result = await type.validate({
         serviceName: 'checkout',
         alerts: [
           {
@@ -62,40 +62,40 @@ describe('createApmRelatedAlertsAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('rejects missing serviceName', () => {
-      const result = type.validate({ alerts: [] });
+    it('rejects missing serviceName', async () => {
+      const result = await type.validate({ alerts: [] });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects missing alerts array', () => {
-      const result = type.validate({ serviceName: 'checkout' });
+    it('rejects missing alerts array', async () => {
+      const result = await type.validate({ serviceName: 'checkout' });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects an alert with invalid status value', () => {
-      const result = type.validate({
+    it('rejects an alert with invalid status value', async () => {
+      const result = await type.validate({
         serviceName: 'checkout',
         alerts: [{ ...validAlert, status: 'unknown' }],
       });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects an alert missing required id field', () => {
+    it('rejects an alert missing required id field', async () => {
       const { id: _id, ...noId } = validAlert;
-      const result = type.validate({ serviceName: 'checkout', alerts: [noId] });
+      const result = await type.validate({ serviceName: 'checkout', alerts: [noId] });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects an alert with a non-number start', () => {
-      const result = type.validate({
+    it('rejects an alert with a non-number start', async () => {
+      const result = await type.validate({
         serviceName: 'checkout',
         alerts: [{ ...validAlert, start: 'not-a-number' }],
       });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects a serviceName that exceeds the max length', () => {
-      const result = type.validate({
+    it('rejects a serviceName that exceeds the max length', async () => {
+      const result = await type.validate({
         serviceName: 'x'.repeat(1025),
         alerts: [],
       });

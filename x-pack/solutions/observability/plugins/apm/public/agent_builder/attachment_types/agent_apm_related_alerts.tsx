@@ -171,7 +171,7 @@ export function AgentApmRelatedAlerts({ data }: AgentApmRelatedAlertsProps) {
       <EuiBasicTable<AlertItem>
         tableCaption={displayTitle}
         items={alerts}
-        rowKey="id"
+        itemId="id"
         columns={columns}
         compressed
       />

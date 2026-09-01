@@ -66,7 +66,7 @@ describe('get_apm_correlations handler', () => {
     expect(result.metric).toBe('latency');
     expect(result.totalTransactions).toBe(5);
     expect(result.correlations).toEqual([]);
-    expect(result.subset).toEqual({
+    expect((result as any).subset).toEqual({
       totalTransactions: 0,
       definition: { metric: 'latency', percentileThreshold: 95, durationThresholdUs: undefined },
     });

@@ -100,7 +100,8 @@ describe('AgentApmRelatedAlerts rendering', () => {
 
   it('renders the service name in the default title', () => {
     renderComponent({ serviceName: 'checkout', alerts: [] });
-    expect(screen.getByText(/checkout/i)).toBeInTheDocument();
+    // The empty-state prompt also mentions the service name, so target the heading.
+    expect(screen.getByRole('heading', { name: /checkout/i })).toBeInTheDocument();
   });
 
   it('renders a custom title when provided', () => {
@@ -115,7 +116,8 @@ describe('AgentApmRelatedAlerts rendering', () => {
 
   it('renders the rule name as a link with the correct href', () => {
     renderComponent({ serviceName: 'checkout', alerts: [activeAlert] });
-    const link = screen.getByRole('link', { name: 'High error rate' });
+    // `external` links carry EUI screen-reader suffix text, so match on a prefix.
+    const link = screen.getByRole('link', { name: /High error rate/ });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/base/app/observability/alerts/alert-1');
   });
