@@ -20,7 +20,7 @@ consts:
   issuesIndex: github-intel-issues
   syncSource: github-activity-issues
   entityType: issue
-  pageSize: 100
+  pageSize: 10
   pagesPerRun: 10
   # Used on first run when no checkpoint watermark exists.
   initialWatermark: '2024-01-01T00:00:00Z'
