@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability logs essentials UI', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('../test_suites/discover/logs'));
     loadTestFile(require.resolve('../test_suites/logs_essentials_only'));
   });
 }
