@@ -67,7 +67,7 @@ export const toMonitorPlacements = (
  */
 export const toConditionUpdate = (
   pkgPolicy: PackagePolicy,
-  condition: string
+  condition: string | null
 ): UpdatePackagePolicyWithId => ({
   id: pkgPolicy.id,
   version: pkgPolicy.version,
@@ -123,6 +123,26 @@ export const toConditionUpdates = (
     const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     const updates = bySpace.get(spaceId) ?? [];
     updates.push(toConditionUpdate(pkgPolicy, desiredCondition));
+    bySpace.set(spaceId, updates);
+  }
+  return bySpace;
+};
+
+/**
+ * Condition-only updates that drop every existing agent pin. Used when shard
+ * rebalancing is turned off so monitors go back to unfiltered (classic) scheduling.
+ */
+export const toClearedConditionUpdates = (
+  pkgPolicies: PackagePolicy[]
+): Map<string, UpdatePackagePolicyWithId[]> => {
+  const bySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+  for (const pkgPolicy of pkgPolicies) {
+    if (typeof pkgPolicy.condition !== 'string') {
+      continue;
+    }
+    const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
+    const updates = bySpace.get(spaceId) ?? [];
+    updates.push(toConditionUpdate(pkgPolicy, null));
     bySpace.set(spaceId, updates);
   }
   return bySpace;
