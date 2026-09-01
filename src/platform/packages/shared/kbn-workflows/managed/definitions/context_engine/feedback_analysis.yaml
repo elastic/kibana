@@ -39,18 +39,14 @@ triggers:
       every: '__INTERVAL_MINUTES__m'
   - type: manual
 steps:
-  # Selection, grouping and the briefing all happen behind this one endpoint rather than as ES|QL
-  # steps here: the association rules have real branches that belong in tested TypeScript, and
-  # keeping them in one place is what will let the interactive "Analyze & improve" hand-off select
-  # the same way.
+  # Selection, grouping and the briefing all happen inside this step rather than as ES|QL steps
+  # here: the association rules have real branches that belong in tested TypeScript, and keeping
+  # them in one place is what will let the interactive "Analyze & improve" hand-off select the
+  # same way.
   - name: fetch_context
-    type: kibana.request
+    type: context-engine.getFeedbackContext
     with:
-      method: GET
-      path: '/s/{{ workflow.spaceId }}/internal/context_engine/ai_index/__AI_INDEX_ID__/feedback_context'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-        elastic-api-version: '1'
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
 
   - name: analyze_and_record
     type: if
@@ -60,8 +56,8 @@ steps:
     steps:
       - name: run_analysis_agent
         type: ai.agent
-        # Resolved by the endpoint from `feedback_analysis.agent_id`, so changing the agent on an
-        # AI index takes effect on the next run rather than needing a reinstall.
+        # Resolved by the context step from `feedback_analysis.agent_id`, so changing the agent on
+        # an AI index takes effect on the next run rather than needing a reinstall.
         agent-id: '{{ steps.fetch_context.output.agent_id }}'
         plugin-id: 'context_engine_feedback_analysis'
         aggregate-by: 'context_engine'
@@ -78,23 +74,16 @@ steps:
           schema: '${{ steps.fetch_context.output.output_schema }}'
 
       - name: record_improvements
-        type: kibana.request
+        type: context-engine.recordImprovements
         with:
-          method: POST
-          path: '/s/{{ workflow.spaceId }}/internal/context_engine/improvements'
-          headers:
-            x-elastic-internal-origin: 'kibana'
-            elastic-api-version: '1'
-            kbn-xsrf: 'true'
-          body:
-            ai_index_id: '{{ consts.AI_INDEX_ID }}'
-            agent_run_id: '{{ execution.id }}'
-            # Echoed from the selection rather than recomputed: relative date math resolves
-            # differently on a second evaluation, and provenance should record the window the
-            # signals were actually read from.
-            signal_window: '${{ steps.fetch_context.output.run.signal_window }}'
-            signal_spaces: '${{ steps.fetch_context.output.run.signal_spaces }}'
-            improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
+          ai_index_id: '{{ consts.AI_INDEX_ID }}'
+          agent_run_id: '{{ execution.id }}'
+          # Echoed from the selection rather than recomputed: relative date math resolves
+          # differently on a second evaluation, and provenance should record the window the
+          # signals were actually read from.
+          signal_window: '${{ steps.fetch_context.output.signal_window }}'
+          signal_spaces: '${{ steps.fetch_context.output.signal_spaces }}'
+          improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
 
   - name: output_result
     type: workflow.output

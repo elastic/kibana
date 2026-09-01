@@ -12,7 +12,7 @@ import {
   MAX_ANALYSIS_SIGNALS,
   MAX_IMPROVEMENTS_HISTORY_SIZE,
 } from '../../common/constants';
-import type { GetFeedbackContextResponse } from '../../common/http_api/feedback_context';
+import type { FeedbackAnalysisContext } from '../../common/http_api/feedback_context';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import { buildImprovementsJsonSchema } from '../../common/http_api/improvements_output_schema';
@@ -42,7 +42,7 @@ export const buildFeedbackContext = async (
   aiIndexId: string,
   { esClient, aiIndexService, improvementsService }: BuildFeedbackContextDeps,
   { now }: { now?: Date } = {}
-): Promise<GetFeedbackContextResponse> => {
+): Promise<FeedbackAnalysisContext> => {
   const aiIndex = await aiIndexService.get(aiIndexId);
   const feedbackAnalysis = aiIndex.feedback_analysis;
 
@@ -74,14 +74,8 @@ export const buildFeedbackContext = async (
   };
 
   return {
-    ai_index: aiIndex,
     agent_id: agentId,
-    allowed_actions: allowedActions,
     run,
-    groups,
-    signals: selection.signals,
-    ki_summary: kiList.summary,
-    improvement_history: history,
     briefing: renderBriefing({
       aiIndex,
       run,

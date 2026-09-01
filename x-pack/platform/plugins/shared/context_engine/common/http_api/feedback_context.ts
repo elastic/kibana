@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type { AiIndexHttpItem } from './ai_indices';
-import type { ImprovementAction } from './improvement_actions';
-import type { Improvement } from './improvements';
-import type { ListKisResponse } from './knowledge_indicators';
-import type { Signal } from './signals';
-
 /**
  * One recurring shape in an AI index's signals: a classifier tag seen repeatedly against the same
  * target index through the same tool.
@@ -52,30 +46,20 @@ export interface FeedbackAnalysisRunContext {
 }
 
 /**
- * Everything one analysis run needs, assembled server-side.
+ * Everything one analysis run needs, assembled server-side and handed to the run by the
+ * `context-engine.getFeedbackContext` workflow step.
  *
- * Both the scheduled runner and the interactive "Analyze & improve" button read this endpoint, so
- * "the scheduled run sees the same input as the button" is an invariant of the code rather than a
- * convention two callers have to keep agreeing on.
+ * Deliberately narrow: the groups, KI summary and prior improvements a run reasons about are
+ * already rendered into {@link briefing}, so carrying them separately would push the same content
+ * through the workflow engine twice.
  */
-export interface GetFeedbackContextResponse {
-  ai_index: AiIndexHttpItem;
+export interface FeedbackAnalysisContext {
   /** `feedback_analysis.agent_id` when set, otherwise the default Elastic agent. */
   agent_id: string;
-  /** The actions this index permits. Empty means observe-only. */
-  allowed_actions: ImprovementAction[];
   run: FeedbackAnalysisRunContext;
-  /** Ranked highest-value first. */
-  groups: SignalPatternGroup[];
-  /** A sample of the selected signals, newest first. */
-  signals: Signal[];
-  /** What the AI index currently holds, so a proposal can tell a gap from a duplicate. */
-  ki_summary: ListKisResponse['summary'];
-  /** Prior proposals with their outcomes, so a run does not re-propose what was turned down. */
-  improvement_history: Improvement[];
   /** The rendered prompt, ready to hand to the agent as its message. */
   briefing: string;
-  /** JSON Schema for the agent's structured output, narrowed to {@link allowed_actions}. */
+  /** JSON Schema for the agent's structured output, narrowed to the index's allowed actions. */
   output_schema: Record<string, unknown>;
   /** False when the window held nothing to analyze, so a run can exit before spending an LLM call. */
   has_signals: boolean;

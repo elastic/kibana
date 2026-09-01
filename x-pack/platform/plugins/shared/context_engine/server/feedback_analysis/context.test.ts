@@ -82,17 +82,24 @@ describe('buildFeedbackContext', () => {
     const context = await build();
 
     expect(context).toMatchObject({
-      ai_index: { id: 'orders' },
       agent_id: agentBuilderDefaultAgentId,
-      allowed_actions: [...IMPROVEMENT_ACTIONS],
       run: { signal_window: WINDOW, signal_spaces: ['default'], signal_count: 1 },
-      ki_summary: { total: 3 },
-      improvement_history: [],
       has_signals: true,
     });
-    expect(context.groups).toHaveLength(1);
     expect(context.briefing).toContain('# Feedback analysis for AI index `orders`');
     expect(context.output_schema).toHaveProperty('properties.improvements');
+  });
+
+  it('carries the index, its KI summary and its signal patterns in the briefing rather than beside it', async () => {
+    const context = await build();
+
+    // The run reads the briefing, not a parallel copy of the same facts. Returning both would push
+    // the same content through the workflow engine twice.
+    expect(context).not.toHaveProperty('groups');
+    expect(context).not.toHaveProperty('signals');
+    expect(context).not.toHaveProperty('ki_summary');
+    expect(context.briefing).toContain('coverage_gap');
+    expect(context.briefing).toContain('knowledge indicators**: 3');
   });
 
   it('passes the index configuration into signal selection', async () => {
@@ -127,7 +134,11 @@ describe('buildFeedbackContext', () => {
     const context = await build();
 
     expect(context.agent_id).toBe(agentBuilderDefaultAgentId);
-    expect(context.allowed_actions).toEqual([...IMPROVEMENT_ACTIONS]);
+    expect(context.output_schema).toMatchObject({
+      properties: {
+        improvements: { items: { properties: { action: { enum: [...IMPROVEMENT_ACTIONS] } } } },
+      },
+    });
   });
 
   it('narrows the output schema to the actions the index permits', async () => {
@@ -135,7 +146,6 @@ describe('buildFeedbackContext', () => {
       buildAiIndex({ feedback_analysis: { enabled: true, allowed_actions: ['add_ki'] } })
     );
 
-    expect(context.allowed_actions).toEqual(['add_ki']);
     expect(context.output_schema).toMatchObject({
       properties: { improvements: { items: { properties: { action: { enum: ['add_ki'] } } } } },
     });
@@ -160,7 +170,6 @@ describe('buildFeedbackContext', () => {
     const context = await build();
 
     expect(context.run.signal_count).toBe(1);
-    expect(context.groups).toEqual([]);
     expect(context.has_signals).toBe(false);
   });
 
@@ -180,9 +189,6 @@ describe('buildFeedbackContext', () => {
       },
     ] as never);
 
-    const context = await build();
-
-    expect(context.improvement_history).toHaveLength(1);
-    expect(context.briefing).toContain('Add a KI for refunds');
+    expect((await build()).briefing).toContain('Add a KI for refunds');
   });
 });

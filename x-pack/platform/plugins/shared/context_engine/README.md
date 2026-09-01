@@ -15,7 +15,6 @@ stream. AI index records are stored in a hidden Kibana system index
 | `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
 | `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
-| `GET`    | `/internal/context_engine/ai_index/{id}/feedback_context`         | Get the context for an analysis run  |
 
 Notes:
 
@@ -143,9 +142,9 @@ the AI index API (they return 404 while it is off).
 An **improvement** is a proposed change to one AI index's KI pipeline, derived
 from that index's signals. They live in the single global
 `context-engine-improvements` index, exposed to the server as
-`ContextEnginePluginStart.getImprovementsService(esClient)` and written over
-HTTP by an analysis run (see [Feedback analysis runs](#feedback-analysis-runs)).
-The review UI that applies them comes later.
+`ContextEnginePluginStart.getImprovementsService(esClient)` and written by an
+analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The review
+UI that applies them comes later.
 
 Unlike signals, the store is **global rather than per-space**: an improvement
 targets an AI index's KI pipeline, and the AI index registry has no space
@@ -213,21 +212,33 @@ signals, work out what would make it serve agents better, and record the
 proposals in the improvements store. Runs are scheduled per AI index by
 `feedback_analysis` (see [Feedback analysis configuration](#feedback-analysis-configuration)).
 
-| Method | Path                                                       | Description                            |
-| ------ | ---------------------------------------------------------- | -------------------------------------- |
-| `GET`  | `/internal/context_engine/ai_index/{id}/feedback_context`   | Everything one run reads               |
-| `POST` | `/internal/context_engine/improvements`                     | Record what a run proposed             |
+| Step                                | Description              |
+| ----------------------------------- | ------------------------ |
+| `context-engine.getFeedbackContext` | Everything one run reads |
+| `context-engine.recordImprovements` | Record what a run proposed |
 
-Both routes require the `context_engine:feedbackLoop` advanced setting and run
-as the caller. A scheduled run is a managed workflow owned by a real user, so
-there is no path here that reads or writes as Kibana.
+**Workflow steps rather than HTTP routes.** The workflow is the only caller of
+either, and both need plugin services a request could not otherwise reach: the
+selection code the interactive hand-off will share, and the improvements
+service, whose write is a read-modify-write under optimistic concurrency
+control rather than a plain index operation. A step reaches those directly.
+
+Both steps require the `context_engine:feedbackLoop` advanced setting and act as
+the workflow owner. A scheduled run is a managed workflow owned by a real user,
+so there is no path here that reads or writes as Kibana.
 
 ### The runner
 
 The runner is the `system-context-engine-feedback-analysis` managed workflow,
 installed once per AI index with the index id and interval templated in. Its
 shape is three steps: fetch the context, run the index's agent against it with
-a forced output schema, post the result.
+a forced output schema, record the result.
+
+The briefing is handed over as the agent's `message`. The existing
+`platform.context_engine.ai_index` attachment is deliberately **not** used: it
+carries the `save_automation` tool and instructions to ask the user questions,
+both of which belong to the interactive setup conversation and neither of which
+an unattended, propose-only run should have.
 
 A **managed workflow rather than a Task Manager task** because the `ai.agent`
 step already runs under the workflow owner's identity. A scheduled analysis has

@@ -12,15 +12,8 @@ export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
 export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
-export const aiIndexFeedbackContextPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_context`;
 export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
 export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
-
-/** Where an analysis run records what it proposed. */
-export const improvementsPath = `${internalApiPath}/improvements`;
-
-/** Version of the internal Improvements API, shared between route registration and the runner. */
-export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;

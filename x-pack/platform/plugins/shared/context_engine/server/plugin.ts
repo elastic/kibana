@@ -28,7 +28,6 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
-import { registerFeedbackAnalysisRoutes } from './routes/feedback_analysis';
 import { registerSignalRoutes } from './routes/signals';
 import type { FeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
@@ -166,43 +165,48 @@ export class ContextEnginePlugin
       },
     });
 
-    // The two endpoints an analysis run talks to.
-    registerFeedbackAnalysisRoutes({
-      router,
-      getAiIndexService,
-      getImprovementsService,
-      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
-    });
+    const isContextEngineEnabled = async (request: KibanaRequest) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
+      return (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+    };
+
+    const checkWritePrivilege = async (request: KibanaRequest) => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      const { security, spaces } = startDeps;
+      if (!security) {
+        return true;
+      }
+      const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const { hasAllRequested } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .atSpace(spaceId, {
+          kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
+        });
+      return hasAllRequested;
+    };
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
       analyticsService,
       logger: this.logger.get('context_steps'),
-      getAiIndexService: () => {
-        if (!this.aiIndexService) {
-          throw new Error('AI index service not available — plugin has not started');
-        }
-        return this.aiIndexService;
-      },
-      isContextEngineEnabled: async (request) => {
-        const [coreStart] = await coreSetup.getStartServices();
-        const soClient = coreStart.savedObjects.getScopedClient(request);
-        const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-        return (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
-      },
-      checkWritePrivilege: async (request) => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        const { security, spaces } = startDeps;
-        if (!security) {
-          return true;
-        }
-        const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
-        const { hasAllRequested } = await security.authz
-          .checkPrivilegesWithRequest(request)
-          .atSpace(spaceId, {
-            kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
-          });
-        return hasAllRequested;
+      getAiIndexService,
+      isContextEngineEnabled,
+      checkWritePrivilege,
+      // The two steps an analysis run is built from. Steps rather than HTTP routes: the workflow
+      // is the only caller, and both need plugin services a request could not reach any other way.
+      feedbackAnalysis: {
+        getAiIndexService,
+        getImprovementsService,
+        getAuditLogger: async (request) => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return coreStart.security.audit.asScoped(request);
+        },
+        isContextEngineEnabled,
+        isFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+        checkWritePrivilege,
+        logger: this.logger.get('feedback_analysis'),
       },
     });
 
