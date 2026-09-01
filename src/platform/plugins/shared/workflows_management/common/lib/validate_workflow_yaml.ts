@@ -49,6 +49,7 @@ export function validateWorkflowYaml(
   options?: ValidateWorkflowYamlOptions
 ): ValidateWorkflowResponseDto {
   const diagnostics: WorkflowDiagnostic[] = [];
+  const validationNotRun: string[] = [];
   let parsedWorkflow: WorkflowYaml | undefined;
 
   const parseResult = parseWorkflowYamlToJSON(yaml, zodSchema, {
@@ -144,14 +145,16 @@ export function validateWorkflowYaml(
     // Variable validation resolves references against the step graph, so it only
     // runs once the graph builds. Same guard the editor applies.
     if (options?.variableValidationRegistry && workflowGraph) {
-      diagnostics.push(
-        ...collectVariableDiagnostics(
-          options.variableValidationRegistry,
-          yaml,
-          parsedWorkflow,
-          workflowGraph
-        )
+      const variableValidation = collectVariableDiagnostics(
+        options.variableValidationRegistry,
+        yaml,
+        parsedWorkflow,
+        workflowGraph
       );
+      diagnostics.push(...variableValidation.diagnostics);
+      if (variableValidation.notRunReason) {
+        validationNotRun.push(variableValidation.notRunReason);
+      }
     }
   }
 
@@ -169,5 +172,6 @@ export function validateWorkflowYaml(
     valid: diagnostics.filter((d) => d.severity === 'error').length === 0,
     diagnostics,
     parsedWorkflow,
+    ...(validationNotRun.length > 0 ? { validationNotRun } : {}),
   };
 }
