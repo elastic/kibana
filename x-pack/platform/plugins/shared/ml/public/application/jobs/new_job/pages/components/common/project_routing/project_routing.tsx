@@ -12,6 +12,7 @@ import { useGeneratedHtmlId } from '@elastic/eui';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useMlKibana } from '../../../../../../contexts/kibana';
+import { useNewJobCapsService } from '../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { JobCreatorContext } from '../../job_creator_context';
 import type {
   MultiMetricJobCreator,
@@ -23,6 +24,7 @@ import { Description } from './description';
 export const ProjectRoutingSelect: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
+  const newJobCapsService = useNewJobCapsService();
 
   const titleId = useGeneratedHtmlId({
     prefix: 'project-routing',
@@ -51,11 +53,20 @@ export const ProjectRoutingSelect: FC = () => {
 
   const onProjectRoutingChange = useCallback(
     (newProjectRouting: ProjectRouting) => {
-      jobCreator.projectRouting = newProjectRouting as string | null;
-      setProjectRouting(newProjectRouting as string | null);
+      const routing =
+        typeof newProjectRouting === 'string' && newProjectRouting !== ''
+          ? newProjectRouting
+          : undefined;
+      jobCreator.projectRouting = routing ?? null;
+      setProjectRouting(routing ?? null);
       jobCreatorUpdate();
+      void newJobCapsService
+        .initializeFromDataVIew(jobCreator.dataView, true, true, routing)
+        .then(() => {
+          jobCreatorUpdate();
+        });
     },
-    [jobCreator, jobCreatorUpdate]
+    [jobCreator, jobCreatorUpdate, newJobCapsService]
   );
 
   return (

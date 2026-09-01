@@ -295,6 +295,40 @@ describe('AlertConditionStep', () => {
     });
   });
 
+  describe('query-dependent field gating', () => {
+    it('disables time field and group fields when no query is committed', () => {
+      renderStep({ queryCommitted: false });
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    });
+
+    it('disables time field and group fields when the committed query is empty', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: '', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    });
+
+    it('enables time field and group fields once a usable query is committed', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeEnabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeEnabled();
+    });
+  });
+
   describe('group-by auto-population in tracking mode', () => {
     it('extracts BY columns from the base query (composed format)', async () => {
       renderStep(

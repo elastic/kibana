@@ -162,6 +162,10 @@ describe('updateRuleApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         uiamApiKey: 'dWlhbS0yMzQ6ZXNzdV9hYmM=',
+        // Written explicitly, not omitted: this is a partial saved-object update, so leaving it
+        // out would keep a previously stored `true` and the rule would then withhold the UIAM
+        // shared secret from this freshly granted internal key.
+        uiamApiKeyExternal: false,
         apiKeyOwner: 'elastic',
         apiKeyCreatedByUser: false,
         revision: 0,

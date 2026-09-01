@@ -17,18 +17,11 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import type {
-  ApplicationStart,
-  HttpStart,
-  IUiSettingsClient,
-  ThemeServiceStart,
-} from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { css } from '@emotion/react';
 import type { InspectorViewDescription } from '../types';
 import type { Adapters } from '../../common';
+import type { InspectorKibanaServices } from '../views/requests/components/types';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
@@ -47,14 +40,7 @@ interface InspectorPanelProps {
   title?: string;
   options?: unknown;
   views: InspectorViewDescription[];
-  dependencies: {
-    application: ApplicationStart;
-    http: HttpStart;
-    uiSettings: IUiSettingsClient;
-    share: SharePluginStart;
-    settings: SettingsStart;
-    theme: ThemeServiceStart;
-  };
+  dependencies: InspectorKibanaServices;
 }
 
 interface InspectorPanelState {

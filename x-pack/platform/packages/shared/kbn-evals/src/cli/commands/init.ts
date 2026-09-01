@@ -232,29 +232,16 @@ export const runConfigInit = async (
     set(example, field.jsonPath, value.trim() || '');
   }
 
-  const litellmVirtualKey = getNestedValue(example, 'litellm.virtualKey');
-  if (typeof litellmVirtualKey === 'string' && litellmVirtualKey.includes('REPLACE_ME')) {
+  const openrouterApiKey = getNestedValue(example, 'openrouter.apiKey');
+  if (typeof openrouterApiKey === 'string' && openrouterApiKey.includes('REPLACE_ME')) {
     const { value } = await inquirer.prompt<{ value: string }>({
       type: 'password',
       name: 'value',
-      message: 'LiteLLM virtual key (sk-...):',
+      message: 'OpenRouter API key:',
       mask: '*',
     });
     if (value.trim()) {
-      set(example, 'litellm.virtualKey', value.trim());
-    }
-  }
-
-  const litellmTeamId = getNestedValue(example, 'litellm.teamId');
-  if (typeof litellmTeamId === 'string' && litellmTeamId.includes('REPLACE_ME')) {
-    const { value } = await inquirer.prompt<{ value: string }>({
-      type: 'input',
-      name: 'value',
-      message: 'LiteLLM team ID (find yours at https://elastic.litellm-prod.ai/ui/?page=teams):',
-      default: '',
-    });
-    if (value.trim()) {
-      set(example, 'litellm.teamId', value.trim());
+      set(example, 'openrouter.apiKey', value.trim());
     }
   }
 
