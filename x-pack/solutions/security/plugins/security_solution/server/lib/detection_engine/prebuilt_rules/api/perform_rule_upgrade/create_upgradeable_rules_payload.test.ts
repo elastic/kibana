@@ -151,6 +151,64 @@ describe('createModifiedPrebuiltRuleAssets', () => {
     expect(result.modifiedPrebuiltRuleAssets[0].type).toEqual('query');
   });
 
+  it.each(['BASE', 'CURRENT'] as const)(
+    'produces a processing error for a non-customized type-changed rule under pick_version: %s',
+    (pickVersion) => {
+      const upgradeableRule = buildRuleTriad({
+        currentType: 'query',
+        targetType: 'saved_query',
+        isCustomized: false,
+      });
+
+      const requestBody: PerformRuleUpgradeRequestBody = {
+        mode: 'SPECIFIC_RULES',
+        pick_version: pickVersion,
+        rules: [{ rule_id: RULE_ID, revision: 1, version: 2 }],
+      };
+
+      const result = createModifiedPrebuiltRuleAssets({
+        upgradeableRules: [upgradeableRule],
+        requestBody,
+        defaultPickVersion: 'MERGED',
+      });
+
+      expect(result.processingErrors).toHaveLength(1);
+      expect(result.modifiedPrebuiltRuleAssets).toHaveLength(0);
+      expect(String(result.processingErrors[0].error)).toMatch(/'TARGET' or 'MERGED'/);
+    }
+  );
+
+  it('produces a processing error for a non-customized type-changed rule with a field-level pick_version of CURRENT', () => {
+    const upgradeableRule = buildRuleTriad({
+      currentType: 'query',
+      targetType: 'saved_query',
+      isCustomized: false,
+    });
+
+    const requestBody: PerformRuleUpgradeRequestBody = {
+      mode: 'SPECIFIC_RULES',
+      pick_version: 'MERGED',
+      rules: [
+        {
+          rule_id: RULE_ID,
+          revision: 1,
+          version: 2,
+          fields: { name: { pick_version: 'CURRENT' } },
+        },
+      ],
+    };
+
+    const result = createModifiedPrebuiltRuleAssets({
+      upgradeableRules: [upgradeableRule],
+      requestBody,
+      defaultPickVersion: 'MERGED',
+    });
+
+    expect(result.processingErrors).toHaveLength(1);
+    expect(result.modifiedPrebuiltRuleAssets).toHaveLength(0);
+    expect(String(result.processingErrors[0].error)).toMatch(/'TARGET' or 'MERGED'/);
+  });
+
   it('still upgrades a non-customized type-changed rule under pick_version: TARGET (the single-rule flyout shape)', () => {
     const upgradeableRule = buildRuleTriad({
       currentType: 'query',
