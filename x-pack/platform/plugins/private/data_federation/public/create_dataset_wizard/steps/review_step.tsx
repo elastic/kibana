@@ -30,6 +30,7 @@ import type { DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
+  isDatasetWizardFlow396,
 } from '../dataset_wizard_flow_variant';
 import {
   buildDatasetPayloadFromWizardValues,
@@ -51,22 +52,32 @@ export interface ReviewStepProps {
   flowVariant: DatasetWizardFlowVariant;
 }
 
-const SettingBadge = ({ badge }: { badge: ReviewSettingBadge }) => (
+/**
+ * Where settings arrive pre-filled, a value that differs from the default was
+ * modified, and the pink carries that edit. Where the fields start empty, the
+ * user only ever made a choice.
+ */
+interface ReviewBadgeStyle {
+  tone: 'accent' | 'primary';
+  chosenLabel: string;
+}
+
+const SettingBadge = ({ badge, style }: { badge: ReviewSettingBadge; style: ReviewBadgeStyle }) => (
   <EuiBadge
-    color={badge === 'default' ? 'hollow' : 'accent'}
+    color={badge === 'default' ? 'hollow' : style.tone}
     data-test-subj={`datasetWizardReviewBadge-${badge}`}
   >
-    {badge === 'default'
-      ? datasetWizardStrings.reviewDefaultBadge()
-      : datasetWizardStrings.reviewModifiedBadge()}
+    {badge === 'default' ? datasetWizardStrings.reviewDefaultBadge() : style.chosenLabel}
   </EuiBadge>
 );
 
 const SummaryDescriptionList = ({
   rows,
+  badgeStyle,
   testSubj,
 }: {
   rows: ReviewSummaryRow[];
+  badgeStyle: ReviewBadgeStyle;
   testSubj?: string;
 }) => (
   <EuiDescriptionList textStyle="reverse" compressed data-test-subj={testSubj}>
@@ -78,7 +89,7 @@ const SummaryDescriptionList = ({
           {row.badge ? (
             <>
               {' '}
-              <SettingBadge badge={row.badge} />
+              <SettingBadge badge={row.badge} style={badgeStyle} />
             </>
           ) : null}
         </EuiDescriptionListDescription>
@@ -95,7 +106,13 @@ const splitSummaryRows = (rows: ReviewSummaryRow[]): [ReviewSummaryRow[], Review
   return [rows.slice(0, midpoint), rows.slice(midpoint)];
 };
 
-const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
+const SettingsSummarySection = ({
+  rows,
+  badgeStyle,
+}: {
+  rows: ReviewSummaryRow[];
+  badgeStyle: ReviewBadgeStyle;
+}) => {
   if (rows.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="datasetWizardReviewSettingsEmpty">
@@ -105,7 +122,13 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
   }
 
   if (rows.length < REVIEW_SETTINGS_TWO_COLUMN_THRESHOLD) {
-    return <SummaryDescriptionList rows={rows} testSubj="datasetWizardReviewSettings" />;
+    return (
+      <SummaryDescriptionList
+        rows={rows}
+        badgeStyle={badgeStyle}
+        testSubj="datasetWizardReviewSettings"
+      />
+    );
   }
 
   const [settingsRowsLeft, settingsRowsRight] = splitSummaryRows(rows);
@@ -119,12 +142,14 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
       <EuiFlexItem grow={1}>
         <SummaryDescriptionList
           rows={settingsRowsLeft}
+          badgeStyle={badgeStyle}
           testSubj="datasetWizardReviewSettingsLeft"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <SummaryDescriptionList
           rows={settingsRowsRight}
+          badgeStyle={badgeStyle}
           testSubj="datasetWizardReviewSettingsRight"
         />
       </EuiFlexItem>
@@ -163,6 +188,14 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
     [euiTheme.size.xs, reviewTabScrollableMaxHeight]
   );
 
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
+
+  /** Room enough that each heading does not read as part of its column. */
+  const summarySectionTitleSpacerSize = isFlow396 ? 'm' : 's';
+  const badgeStyle: ReviewBadgeStyle = isFlow396
+    ? { tone: 'primary', chosenLabel: datasetWizardStrings.reviewCustomBadge() }
+    : { tone: 'accent', chosenLabel: datasetWizardStrings.reviewModifiedBadge() };
+
   const reviewScrollableTabPanelStyles = useMemo(
     () => css`
       display: flex;
@@ -194,14 +227,8 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
     [dataSources, flowVariant, values]
   );
   const settingsRows = useMemo(
-    () =>
-      getReviewSettingsRows(
-        values.settings,
-        values.resource,
-        values.settings_custom_json,
-        flowVariant
-      ),
-    [flowVariant, values.resource, values.settings, values.settings_custom_json]
+    () => getReviewSettingsRows(values.settings, values.resource, values.settings_custom_json),
+    [values.resource, values.settings, values.settings_custom_json]
   );
   const schemaMappingRows = useMemo(
     () => getReviewSchemaMappingRows(values, flowVariant),
@@ -223,23 +250,28 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
             <EuiTitle size="xs">
               <h4>{datasetWizardStrings.reviewLogisticsSectionTitle()}</h4>
             </EuiTitle>
-            <EuiSpacer size="s" />
-            <SummaryDescriptionList rows={logisticsRows} testSubj="datasetWizardReviewLogistics" />
+            <EuiSpacer size={summarySectionTitleSpacerSize} />
+            <SummaryDescriptionList
+              rows={logisticsRows}
+              badgeStyle={badgeStyle}
+              testSubj="datasetWizardReviewLogistics"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={useTwoColumnSettings ? 2 : 1}>
             <EuiTitle size="xs">
               <h4>{datasetWizardStrings.reviewSettingsSectionTitle()}</h4>
             </EuiTitle>
-            <EuiSpacer size="s" />
-            <SettingsSummarySection rows={settingsRows} />
+            <EuiSpacer size={summarySectionTitleSpacerSize} />
+            <SettingsSummarySection rows={settingsRows} badgeStyle={badgeStyle} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <EuiTitle size="xs">
               <h4>{datasetWizardStrings.reviewSchemaMappingsSectionTitle()}</h4>
             </EuiTitle>
-            <EuiSpacer size="s" />
+            <EuiSpacer size={summarySectionTitleSpacerSize} />
             <SummaryDescriptionList
               rows={schemaMappingRows}
+              badgeStyle={badgeStyle}
               testSubj="datasetWizardReviewSchemaMappings"
             />
           </EuiFlexItem>
@@ -309,12 +341,17 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
       content: <SummaryTab />,
       'data-test-subj': 'datasetWizardReviewSummaryTabButton',
     },
-    {
-      id: 'preview',
-      name: datasetWizardStrings.reviewPreviewTabTitle(),
-      content: <PreviewTab />,
-      'data-test-subj': 'datasetWizardReviewPreviewTabButton',
-    },
+    // The payload preview only restates the request, which has a tab of its own.
+    ...(isFlow396
+      ? []
+      : [
+          {
+            id: 'preview',
+            name: datasetWizardStrings.reviewPreviewTabTitle(),
+            content: <PreviewTab />,
+            'data-test-subj': 'datasetWizardReviewPreviewTabButton',
+          },
+        ]),
     ...(flowVariant === DATASET_WIZARD_FLOW_VARIANT_2
       ? [
           {

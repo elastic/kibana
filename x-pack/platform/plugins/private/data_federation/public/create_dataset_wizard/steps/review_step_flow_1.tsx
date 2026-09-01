@@ -112,10 +112,16 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
       data-test-subj="datasetWizardReviewSettingsTwoColumn"
     >
       <EuiFlexItem grow={1}>
-        <SummaryDescriptionList rows={settingsRowsLeft} testSubj="datasetWizardReviewSettingsLeft" />
+        <SummaryDescriptionList
+          rows={settingsRowsLeft}
+          testSubj="datasetWizardReviewSettingsLeft"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <SummaryDescriptionList rows={settingsRowsRight} testSubj="datasetWizardReviewSettingsRight" />
+        <SummaryDescriptionList
+          rows={settingsRowsRight}
+          testSubj="datasetWizardReviewSettingsRight"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -282,7 +288,11 @@ export const ReviewStepFlow1: FunctionComponent<ReviewStepProps> = ({ values, da
   return (
     <div data-test-subj="datasetWizardReviewStep">
       <EuiTitle size="s">
-        <h3>{datasetWizardStrings.reviewTitle(values.name.trim() || datasetWizardStrings.reviewUntitledDataset())}</h3>
+        <h3>
+          {datasetWizardStrings.reviewTitle(
+            values.name.trim() || datasetWizardStrings.reviewUntitledDataset()
+          )}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiTabbedContent tabs={tabs} data-test-subj="datasetWizardReviewTabs" />

@@ -17,7 +17,6 @@ import {
 } from '../create_dataset_flyout/settings_custom_json_utils';
 import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
 import { getDefaultSettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
-import { getSettingDefaultLabel } from '../create_dataset_flyout/dataset_settings_default_hints';
 import { FORMAT_SUPER_SELECT_OPTIONS } from '../create_dataset_flyout/dataset_settings_options';
 import {
   formatSettingsFieldDisplayValue,
@@ -35,7 +34,6 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
-  isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
@@ -181,8 +179,7 @@ export const getReviewLogisticsRows = (
 export const getReviewSettingsRows = (
   settings: DatasetWizardFormValues['settings'],
   resource: string,
-  customJson?: string,
-  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
+  customJson?: string
 ): ReviewSummaryRow[] => {
   const format = settings.format;
   if (!format) {
@@ -193,7 +190,6 @@ export const getReviewSettingsRows = (
     ? applyCustomJsonToFormSettings(settings, customJson)
     : settings;
   const defaults = getDefaultSettingsForFormat(format);
-  const showUnsetAsDefaults = isDatasetWizardFlow396(flowVariant);
   const inferredFormat = inferFormatFromResource(resource);
   const formatBadge =
     inferredFormat && inferredFormat === format ? undefined : ('modified' as const);
@@ -215,21 +211,9 @@ export const getReviewSettingsRows = (
     }
 
     const value = effectiveSettings[fieldId];
+    // A setting left unset is one Elasticsearch decides, so the review only
+    // covers what the user chose.
     if (!value || (typeof value === 'string' && value.trim() === '')) {
-      // Flows that leave defaults as placeholders still owe the reader the
-      // value Elasticsearch will apply.
-      const defaultLabel = showUnsetAsDefaults
-        ? getSettingDefaultLabel(fieldId, format)
-        : undefined;
-
-      if (defaultLabel) {
-        rows.push({
-          label: getDatasetSettingsFieldLabel(fieldId),
-          displayValue: defaultLabel,
-          badge: 'default',
-        });
-      }
-
       continue;
     }
 

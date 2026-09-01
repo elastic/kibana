@@ -12,7 +12,6 @@ import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/c
 import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
-  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
@@ -273,34 +272,7 @@ describe('review_step_utils', () => {
     );
   });
 
-  it('shows the values Elasticsearch will apply for settings left unset in flow 3 9.6', () => {
-    const settings = {
-      ...emptyCreateDatasetSettingsFormValues(),
-      format: 'csv' as const,
-      delimiter: ';',
-    };
-
-    const rows = getReviewSettingsRows(
-      settings,
-      's3://obs-logs-prod/**/*.csv',
-      undefined,
-      DATASET_WIZARD_FLOW_VARIANT_3_9_6
-    );
-
-    expect(rows).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ displayValue: 'Semicolon (;)', badge: 'modified' }),
-        expect.objectContaining({
-          label: 'Partition detection',
-          displayValue: 'Auto',
-          badge: 'default',
-        }),
-        expect.objectContaining({ label: 'Encoding', displayValue: 'UTF-8', badge: 'default' }),
-      ])
-    );
-  });
-
-  it('omits unset settings from summary rows in flows that pre-fill their defaults', () => {
+  it('covers only the settings the user chose, leaving the rest to Elasticsearch', () => {
     const settings = {
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'csv' as const,
@@ -309,7 +281,10 @@ describe('review_step_utils', () => {
 
     const rows = getReviewSettingsRows(settings, 's3://obs-logs-prod/**/*.csv');
 
-    expect(rows.find((row) => row.label === 'Encoding')).toBeUndefined();
+    expect(rows).toEqual([
+      expect.objectContaining({ label: 'Format', displayValue: 'CSV' }),
+      expect.objectContaining({ displayValue: 'Semicolon (;)', badge: 'modified' }),
+    ]);
   });
 
   it('returns automatic schema mapping rows when inferred field types were modified', () => {

@@ -17,6 +17,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from '../dataset_wizard_flow_variant';
 import { getReviewSettingsRows } from '../review_step_utils';
 import { ReviewStep } from './review_step';
@@ -263,5 +264,46 @@ describe('ReviewStep flow 3', () => {
     expect(screen.queryByText('Preview results')).not.toBeInTheDocument();
     expect(screen.getByText('Preview configuration')).toBeInTheDocument();
     expect(screen.getByText('Request')).toBeInTheDocument();
+  });
+
+  describe('flow 3 9.6', () => {
+    it('drops the payload preview tab, which only restates the request', () => {
+      render(
+        <EuiProvider>
+          <ReviewStep
+            values={defaultValues}
+            dataSources={[s3DataSource]}
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+          />
+        </EuiProvider>
+      );
+
+      expect(screen.queryByText('Preview configuration')).not.toBeInTheDocument();
+      expect(screen.getByText('Summary')).toBeInTheDocument();
+      expect(screen.getByText('Request')).toBeInTheDocument();
+    });
+
+    it('calls a chosen value custom rather than modified', () => {
+      render(
+        <EuiProvider>
+          <ReviewStep
+            values={{
+              ...defaultValues,
+              settings: { ...defaultValues.settings, error_mode: 'skip_row' },
+            }}
+            dataSources={[s3DataSource]}
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+          />
+        </EuiProvider>
+      );
+
+      const badges = screen.getAllByTestId('datasetWizardReviewBadge-modified');
+
+      expect(badges.length).toBeGreaterThan(0);
+      badges.forEach((badge) => {
+        expect(badge).toHaveTextContent('Custom');
+      });
+      expect(screen.queryByText('Modified')).not.toBeInTheDocument();
+    });
   });
 });

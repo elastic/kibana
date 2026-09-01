@@ -848,6 +848,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Modified',
     }),
 
+  reviewCustomBadge: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewCustomBadge', {
+      defaultMessage: 'Custom',
+    }),
+
   reviewManualMappingsLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewManualMappingsLabel', {
       defaultMessage: 'Mapped fields',
