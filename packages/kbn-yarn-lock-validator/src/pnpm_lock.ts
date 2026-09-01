@@ -105,7 +105,20 @@ export async function readPnpmLock(): Promise<PnpmLock> {
   }
 }
 
-export function toLockGraph(lock: PnpmLock): PnpmLockGraph {
+export interface ToLockGraphOptions {
+  /**
+   * Include resolved peer dependencies as graph edges. pnpm materializes each
+   * resolved peer as a `dependencies` edge (e.g. `@babel/core` under a babel
+   * plugin), which yarn.lock never did. Following them balloons the transitive
+   * closure, so it is opt-in for now.
+   */
+  includePeerDependencies?: boolean;
+}
+
+export function toLockGraph(
+  lock: PnpmLock,
+  { includePeerDependencies = false }: ToLockGraphOptions = {}
+): PnpmLockGraph {
   const rootVersions = new Map<string, string>();
   for (const [name, dep] of Object.entries({
     ...lock.rootDependencies,
@@ -119,9 +132,19 @@ export function toLockGraph(lock: PnpmLock): PnpmLockGraph {
     const { name, version } = snapshotKeyToNameVersion(snapshotKey);
     const selfKey = `${name}@${version}`;
 
+    // Peers resolved for this snapshot instance are encoded in the key's
+    // parenthesized suffix and also surface as `dependencies` edges; skip them
+    // unless explicitly requested.
+    const peerNames = includePeerDependencies
+      ? EMPTY_PEER_SET
+      : new Set(peerNamesFromKey(snapshotKey));
+
     const children: string[] = [];
     const childValues = { ...snapshot.dependencies, ...snapshot.optionalDependencies };
     for (const [childName, childValue] of Object.entries(childValues)) {
+      if (peerNames.has(childName)) {
+        continue;
+      }
       const childKey = toSnapshotKey(childName, childValue);
       const { name: cn, version: cv } = snapshotKeyToNameVersion(childKey);
       children.push(`${cn}@${cv}`);
@@ -132,6 +155,34 @@ export function toLockGraph(lock: PnpmLock): PnpmLockGraph {
   }
 
   return { rootVersions, edges };
+}
+
+const EMPTY_PEER_SET: ReadonlySet<string> = new Set();
+
+/**
+ * Extract the top-level resolved peer package names from a pnpm snapshot key,
+ * e.g. `foo@1(bar@2(baz@3))(qux@4)` -> `['bar', 'qux']` (nested peers ignored).
+ */
+export function peerNamesFromKey(key: string): string[] {
+  const names: string[] = [];
+  let depth = 0;
+  let groupStart = -1;
+  for (let i = key.indexOf('('); i >= 0 && i < key.length; i++) {
+    const ch = key[i];
+    if (ch === '(') {
+      if (depth === 0) {
+        groupStart = i + 1;
+      }
+      depth++;
+    } else if (ch === ')') {
+      depth--;
+      if (depth === 0 && groupStart !== -1) {
+        names.push(snapshotKeyToNameVersion(key.slice(groupStart, i)).name);
+        groupStart = -1;
+      }
+    }
+  }
+  return names;
 }
 
 /**

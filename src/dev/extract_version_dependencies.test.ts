@@ -134,4 +134,62 @@ snapshots:
       `"Unable to find missing in the root package.json dependency list"`
     );
   });
+
+  describe('peer dependencies', () => {
+    // `plugin` resolves its `core` peer, which pnpm records both as a key suffix
+    // and as a `dependencies` edge; `core` then pulls a large `core-helper` tree.
+    const peerPackageJsonContent = JSON.stringify({
+      dependencies: { plugin: '^1.0.0' },
+    });
+
+    const peerLockContent = `
+lockfileVersion: '9.0'
+
+importers:
+
+  .:
+    dependencies:
+      plugin:
+        specifier: ^1.0.0
+        version: 1.0.0(core@2.0.0)
+
+snapshots:
+
+  plugin@1.0.0(core@2.0.0):
+    dependencies:
+      core: 2.0.0
+      plugin-util: 1.0.0
+
+  core@2.0.0:
+    dependencies:
+      core-helper: 2.0.0
+
+  core-helper@2.0.0: {}
+
+  plugin-util@1.0.0: {}
+`;
+
+    it('excludes resolved peer dependencies by default', () => {
+      expect(
+        collectDependencyVersionLines({
+          dependencies: ['plugin'],
+          rootPackageJsonContent: peerPackageJsonContent,
+          transitive: true,
+          pnpmLockContent: peerLockContent,
+        })
+      ).toEqual(['plugin-util@1.0.0', 'plugin@1.0.0']);
+    });
+
+    it('includes peer dependencies and their subtree when opted in', () => {
+      expect(
+        collectDependencyVersionLines({
+          dependencies: ['plugin'],
+          rootPackageJsonContent: peerPackageJsonContent,
+          transitive: true,
+          includePeerDependencies: true,
+          pnpmLockContent: peerLockContent,
+        })
+      ).toEqual(['core-helper@2.0.0', 'core@2.0.0', 'plugin-util@1.0.0', 'plugin@1.0.0']);
+    });
+  });
 });

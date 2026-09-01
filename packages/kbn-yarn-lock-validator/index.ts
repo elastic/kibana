@@ -11,9 +11,10 @@ export {
   parseLockfile,
   readPnpmLock,
   toLockGraph,
+  peerNamesFromKey,
   snapshotKeyToNameVersion,
   stripPeerSuffix,
 } from './src/pnpm_lock';
-export type { PnpmLock, PnpmLockGraph, PnpmImporterDep } from './src/pnpm_lock';
+export type { PnpmLock, PnpmLockGraph, PnpmImporterDep, ToLockGraphOptions } from './src/pnpm_lock';
 export { validateDependencies } from './src/validate_lock';
 export { findProductionDependencies } from './src/find_production_dependencies';

@@ -22,11 +22,19 @@ const options: RunOptions = {
     'This can be useful to set up Moon task dependencies on package versions used in the repo.',
   flags: {
     string: ['collect'],
-    boolean: ['transitive'],
+    boolean: ['transitive', 'include-peer-dependencies'],
+    help: `
+      --collect <name>            Package to collect (repeatable, required).
+      --transitive                Include the full transitive closure.
+      --include-peer-dependencies With --transitive, also follow resolved peer
+                                  dependencies. Off by default: peer edges are
+                                  large and noisy for cache keys.
+    `,
   },
   usage:
     `node scripts/extract_version_dependencies <output_file_path> ` +
-    `--collect <package_name1> [--collect <package_name2> ...] [--transitive]`,
+    `--collect <package_name1> [--collect <package_name2> ...] [--transitive] ` +
+    `[--include-peer-dependencies]`,
 };
 
 export async function runCli() {
@@ -34,11 +42,15 @@ export async function runCli() {
     const outputFilePath = flagsReader.getPositionals()[0];
     const dependencies = flagsReader.arrayOfStrings('collect');
     const transitive = flagsReader.boolean('transitive');
+    const includePeerDependencies = flagsReader.boolean('include-peer-dependencies');
     if (typeof dependencies === 'undefined') {
       throw new Error('--collect flag is required and must specify at least one package name.');
     }
 
-    await collectDependenciesAndWriteFile(dependencies, outputFilePath, { transitive });
+    await collectDependenciesAndWriteFile(dependencies, outputFilePath, {
+      transitive,
+      includePeerDependencies,
+    });
 
     return;
   }, options);
@@ -47,7 +59,7 @@ export async function runCli() {
 async function collectDependenciesAndWriteFile(
   dependencies: string[],
   outputFilePath: string,
-  { transitive }: { transitive: boolean }
+  { transitive, includePeerDependencies }: { transitive: boolean; includePeerDependencies: boolean }
 ) {
   const rootPackageJson = path.join(REPO_ROOT, 'package.json');
   const pnpmLockPath = path.join(REPO_ROOT, 'pnpm-lock.yaml');
@@ -61,6 +73,7 @@ async function collectDependenciesAndWriteFile(
     dependencies,
     rootPackageJsonContent: packageJsonContent,
     transitive,
+    includePeerDependencies,
     pnpmLockContent,
   });
 
@@ -71,15 +84,17 @@ export const collectDependencyVersionLines = ({
   dependencies,
   rootPackageJsonContent,
   transitive,
+  includePeerDependencies = false,
   pnpmLockContent,
 }: {
   dependencies: string[];
   rootPackageJsonContent: string;
   transitive: boolean;
+  includePeerDependencies?: boolean;
   pnpmLockContent: string;
 }) => {
   const pkgJson = JSON.parse(rootPackageJsonContent);
-  const graph = toLockGraph(parseLockfile(pnpmLockContent));
+  const graph = toLockGraph(parseLockfile(pnpmLockContent), { includePeerDependencies });
 
   const allRequestedDependencies = {
     ...pkgJson.devDependencies,
