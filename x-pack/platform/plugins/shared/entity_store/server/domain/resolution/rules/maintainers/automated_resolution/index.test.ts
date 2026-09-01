@@ -253,6 +253,19 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual(aliasResolutionState);
   });
 
+  it('runs related_user in the same tick as a matcher backfill', async () => {
+    const esClient = createEsClient();
+    const enabled = DEFAULT_EFFECTIVE_RULES.map((rule) =>
+      rule.id === ALIAS_RESOLUTION_RULE ? { ...rule, enabled: true } : rule
+    );
+
+    await runConfig(esClient, { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: {} }, enabled);
+
+    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(1);
+    expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
+    expect(runRelatedUserAliasResolution).toHaveBeenCalledTimes(1);
+  });
+
   it('runs related_user when that rule is enabled', async () => {
     const esClient = createEsClient();
     await runConfig(

@@ -10,8 +10,8 @@ export const GROUP_SIZE_CEILING = 100;
 
 /**
  * Keyset page size for match-group rows. Must stay at or below ES|QL's
- * `result_truncation_max_size` (10_000); 5_000 was verified to recover every
- * group on a 14k-group fixture.
+ * `result_truncation_max_size` (10_000) or a short page is treated as the last
+ * page and remaining groups are skipped.
  */
 export const MATCHER_PAGE_SIZE = 5_000;
 

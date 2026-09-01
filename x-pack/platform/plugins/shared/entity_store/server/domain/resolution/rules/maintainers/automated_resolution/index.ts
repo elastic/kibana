@@ -60,11 +60,12 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
 
       const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
-      const isBackfill = ruleState.lastProcessedTimestamp == null;
-      if (isBackfill) {
+      const isMatcherBackfill =
+        Boolean(ruleConfig.match) && ruleState.lastProcessedTimestamp == null;
+      if (isMatcherBackfill) {
         if (backfillStarted) {
           logger.debug(
-            `Deferring full-scan of resolution rule '${ruleConfig.id}'; another rule is backfilling this tick`
+            `Deferring full-scan of resolution rule '${ruleConfig.id}'; another matcher is backfilling this tick`
           );
           continue;
         }

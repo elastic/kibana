@@ -134,9 +134,9 @@ export const buildMatchGroupsQuery = ({
     // retargeted. Do not rename this to exclude them.
     `| EVAL unresolved_id = CASE(is_unresolved == 1, ${ENTITY_ID_FIELD}, null)`,
     `| EVAL unresolved_namespace = CASE(is_unresolved == 1, ${ENTITY_NAMESPACE_FIELD}, null)`,
-    // TOP(..., 100) on existing_targets is lossless: groups with total_n > 100
-    // are declined in TypeScript anyway, so a dropped target could never have
-    // been used. VALUES() has no cap and can OOM the query during STATS.
+    // Cap existing_targets with TOP(..., 100), not VALUES(). run.ts skips any
+    // group with total_n > 100 before it uses this list, so a truncated target
+    // cannot change a link. VALUES() is uncapped and can OOM STATS.
     `| STATS ${MATCH_GROUP_COLUMNS.ids} = TOP(unresolved_id, ${GROUP_SIZE_CEILING}, "asc"),
         ${MATCH_GROUP_COLUMNS.unresolvedNs} = VALUES(unresolved_namespace),
         ${MATCH_GROUP_COLUMNS.existingTargets} = TOP(${RESOLVED_TO_FIELD}, ${GROUP_SIZE_CEILING}, "asc"),
