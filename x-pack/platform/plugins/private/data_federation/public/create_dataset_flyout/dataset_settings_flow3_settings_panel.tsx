@@ -8,7 +8,14 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 
@@ -17,7 +24,10 @@ import type {
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
 import { DatasetSettingsAdvancedViewToggle } from './dataset_settings_advanced_view_toggle';
-import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
+import {
+  DatasetSettingsFieldsLayout,
+  getIndentedDatasetSettingsFieldsWidthCss,
+} from './dataset_settings_fields_layout';
 import { getFlow3CommonFields } from './dataset_settings_flow3_layout';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 
@@ -35,6 +45,8 @@ export interface DatasetSettingsFlow3SettingsPanelProps {
   commonSettingsTitle: string;
   advancedSettingsTitle: string;
   testSubjPrefix?: string;
+  /** When false, the fields sit directly on the page instead of a filled panel. */
+  hasPanelBackground?: boolean;
 }
 
 export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
@@ -47,8 +59,31 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
   commonSettingsTitle,
   advancedSettingsTitle,
   testSubjPrefix = 'datasetWizard',
+  hasPanelBackground = true,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
+
+  /**
+   * Without a fill to separate them, the fields read as part of the section, so
+   * they line up with its title rather than with the arrow that indents it. The
+   * accordion button already provides the space above. The indent is a margin
+   * on the fields rather than panel padding, so that it eats into their width
+   * instead of shifting their right edge past the fields in the other sections.
+   */
+  const panelProps = hasPanelBackground
+    ? ({ color: 'subdued', paddingSize: 'm' } as const)
+    : ({
+        color: 'transparent',
+        paddingSize: 'none',
+        css: css`
+          padding-block-end: ${euiTheme.size.m};
+        `,
+      } as const);
+
+  const fieldsCss = hasPanelBackground
+    ? undefined
+    : getIndentedDatasetSettingsFieldsWidthCss([euiTheme.size.l, euiTheme.size.xs]);
 
   const commonFields = useMemo(() => getFlow3CommonFields(format, errorMode), [errorMode, format]);
 
@@ -77,18 +112,20 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         paddingSize="none"
       >
         <EuiPanel
-          color="subdued"
-          paddingSize="m"
+          {...panelProps}
           hasShadow={false}
           data-test-subj={`${testSubjPrefix}Flow3CommonSettingsPanel`}
         >
-          <DatasetSettingsFieldsLayout
-            control={control}
-            fields={commonFields}
-            testSubjPrefix={testSubjPrefix}
-            columns={1}
-            rowSpacerSize="m"
-          />
+          <div css={fieldsCss} data-test-subj={`${testSubjPrefix}Flow3CommonSettingsFields`}>
+            <DatasetSettingsFieldsLayout
+              control={control}
+              fields={commonFields}
+              testSubjPrefix={testSubjPrefix}
+              columns={1}
+              rowSpacerSize="m"
+              constrainWidth={hasPanelBackground}
+            />
+          </div>
         </EuiPanel>
       </EuiAccordion>
       <EuiAccordion
@@ -106,19 +143,21 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         paddingSize="none"
       >
         <EuiPanel
-          color="subdued"
-          paddingSize="m"
+          {...panelProps}
           hasShadow={false}
           data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsPanel`}
         >
-          <DatasetSettingsAdvancedViewToggle
-            control={control}
-            getValues={getValues}
-            setValue={setValue}
-            format={format}
-            errorMode={errorMode}
-            testSubjPrefix={testSubjPrefix}
-          />
+          <div css={fieldsCss} data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsFields`}>
+            <DatasetSettingsAdvancedViewToggle
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              format={format}
+              errorMode={errorMode}
+              testSubjPrefix={testSubjPrefix}
+              constrainWidth={hasPanelBackground}
+            />
+          </div>
         </EuiPanel>
       </EuiAccordion>
     </>

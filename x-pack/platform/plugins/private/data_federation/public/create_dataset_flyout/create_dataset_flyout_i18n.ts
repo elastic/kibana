@@ -9,21 +9,14 @@ import { i18n } from '@kbn/i18n';
 
 /** Localized strings for the create / edit dataset flyout. */
 export const createDatasetFlyoutStrings = {
-  settingsDefaultPlaceholder: (value: string) =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDefaultPlaceholder', {
-      defaultMessage: 'Default: {value}',
-      values: { value },
+  settingsDefaultEmptyStringHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDefaultEmptyStringHelp', {
+      defaultMessage: 'An empty string by default.',
     }),
 
   settingsDefaultOptionBadge: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDefaultOptionBadge', {
       defaultMessage: 'Default',
-    }),
-
-  settingsClearToDefault: (label: string) =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsClearToDefault', {
-      defaultMessage: 'Clear {label} to use the default',
-      values: { label },
     }),
 
   createTitle: () =>
@@ -163,6 +156,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Select error mode',
     }),
 
+  settingsErrorModeDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeDescription', {
+      defaultMessage: 'What happens when a row cannot be parsed.',
+    }),
+
   settingsErrorModeFailFast: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeFailFast', {
       defaultMessage: 'Fail fast',
@@ -183,6 +181,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Max errors',
     }),
 
+  settingsMaxErrorsPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxErrorsPlaceholder', {
+      defaultMessage: 'Enter a number of errors',
+    }),
+
   settingsMaxErrorsHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxErrorsHelp', {
       defaultMessage: 'Maximum number of row errors before failing.',
@@ -196,6 +199,11 @@ export const createDatasetFlyoutStrings = {
   settingsMaxErrorRatioLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxErrorRatioLabel', {
       defaultMessage: 'Max error ratio',
+    }),
+
+  settingsMaxErrorRatioPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxErrorRatioPlaceholder', {
+      defaultMessage: 'Enter a ratio between 0 and 1',
     }),
 
   settingsMaxErrorRatioHelp: () =>
@@ -218,6 +226,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Schema sample size',
     }),
 
+  settingsSchemaSampleSizePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizePlaceholder', {
+      defaultMessage: 'Enter a number of rows',
+    }),
+
   settingsSchemaSampleSizeHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizeHelp', {
       defaultMessage: 'Number of rows to sample when inferring schema.',
@@ -238,6 +251,14 @@ export const createDatasetFlyoutStrings = {
       'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionPlaceholder',
       {
         defaultMessage: 'Select partition detection',
+      }
+    ),
+
+  settingsPartitionDetectionDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionDescription',
+      {
+        defaultMessage: 'How partitions are discovered in the resource path.',
       }
     ),
 
@@ -383,6 +404,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Select quote mode',
     }),
 
+  settingsModeDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeDescription', {
+      defaultMessage: 'How quoting and escaping are handled while reading fields.',
+    }),
+
   settingsModeQuoted: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeQuoted', {
       defaultMessage: 'Quoted',
@@ -406,6 +432,11 @@ export const createDatasetFlyoutStrings = {
   settingsHeaderRowPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowPlaceholder', {
       defaultMessage: 'Select header row',
+    }),
+
+  settingsHeaderRowDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowDescription', {
+      defaultMessage: 'Whether the first row holds column names rather than data.',
     }),
 
   settingsHeaderRowTrue: () =>
@@ -455,6 +486,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Quote character',
     }),
 
+  settingsQuotePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsQuotePlaceholder', {
+      defaultMessage: 'Enter a quote character',
+    }),
+
   settingsQuoteHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsQuoteHelp', {
       defaultMessage: 'The character used to quote fields.',
@@ -463,6 +499,11 @@ export const createDatasetFlyoutStrings = {
   settingsEscapeLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapeLabel', {
       defaultMessage: 'Escape character',
+    }),
+
+  settingsEscapePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapePlaceholder', {
+      defaultMessage: 'Enter an escape character',
     }),
 
   settingsEscapeHelp: () =>
@@ -475,6 +516,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Comment prefix',
     }),
 
+  settingsCommentPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsCommentPlaceholder', {
+      defaultMessage: 'Enter a comment prefix',
+    }),
+
   settingsCommentHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsCommentHelp', {
       defaultMessage: 'Lines beginning with this prefix are skipped.',
@@ -483,6 +529,11 @@ export const createDatasetFlyoutStrings = {
   settingsColumnPrefixLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsColumnPrefixLabel', {
       defaultMessage: 'Column prefix',
+    }),
+
+  settingsColumnPrefixPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsColumnPrefixPlaceholder', {
+      defaultMessage: 'Enter a column prefix',
     }),
 
   settingsColumnPrefixHelp: () =>
@@ -511,6 +562,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Multi-value syntax',
     }),
 
+  settingsMultiValueSyntaxDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxDescription', {
+      defaultMessage: 'How several values inside a single field are written.',
+    }),
+
   settingsMultiValueSyntaxPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxPlaceholder', {
       defaultMessage: 'Select multi-value syntax',
@@ -531,9 +587,19 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Max field size',
     }),
 
+  settingsMaxFieldSizePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizePlaceholder', {
+      defaultMessage: 'Enter a size',
+    }),
+
   settingsMaxFieldSizeHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeHelp', {
       defaultMessage: 'Maximum size of a single field. Default is 10 MB. 0 means unlimited.',
+    }),
+
+  settingsMaxFieldSizeDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeDescription', {
+      defaultMessage: 'Maximum size of a single field. 0 means unlimited.',
     }),
 
   settingsMaxFieldSizeUnitAriaLabel: () =>
@@ -605,6 +671,11 @@ export const createDatasetFlyoutStrings = {
   settingsSegmentSizeLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeLabel', {
       defaultMessage: 'Segment size',
+    }),
+
+  settingsSegmentSizePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizePlaceholder', {
+      defaultMessage: 'Enter a size, for example 4mb',
     }),
 
   settingsSegmentSizeHelp: () =>

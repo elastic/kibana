@@ -15,8 +15,17 @@ import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state
 import { DatasetSettingsField } from './dataset_settings_field';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 
+/** The share of the form fields take up, wherever in the step they appear. */
+const DATASET_SETTINGS_FIELDS_WIDTH = '80%';
+
 export const datasetSettingsFieldsWidthCss = css`
-  width: 80%;
+  width: ${DATASET_SETTINGS_FIELDS_WIDTH};
+`;
+
+/** Indents fields while leaving their right edge on the shared boundary. */
+export const getIndentedDatasetSettingsFieldsWidthCss = (indent: readonly string[]) => css`
+  margin-inline-start: calc(${indent.join(' + ')});
+  width: calc(${DATASET_SETTINGS_FIELDS_WIDTH} - ${indent.join(' - ')});
 `;
 
 const chunkFields = <T,>(items: readonly T[], size: number): T[][] => {

@@ -16,7 +16,7 @@ import { ByteSizeUnitButton } from './byte_size_unit_button';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import { validateMaxFieldSize } from './create_dataset_flyout_form_state';
-import { useDatasetSettingDefaultHint } from './dataset_settings_default_hints';
+import { useSettingFieldText } from './dataset_settings_default_hints';
 import {
   bytesToDisplayValue,
   displayValueToBytes,
@@ -44,17 +44,12 @@ export const MaxFieldSizeField: FunctionComponent<MaxFieldSizeFieldProps> = ({
   const initialDisplayState = getMaxFieldSizeDisplayState(field.value);
   const [displayValue, setDisplayValue] = useState(initialDisplayState.displayValue);
   const [unit, setUnit] = useState<ByteSizeUnit>(initialDisplayState.unit);
-  const defaultHint = useDatasetSettingDefaultHint('settings.max_field_size');
-  // The default is stored in bytes, so it has to follow the unit on screen.
-  const defaultBytes = defaultHint?.value
-    ? parseStoredMaxFieldSizeBytes(defaultHint.value)
-    : undefined;
-  const defaultPlaceholder =
-    defaultBytes === undefined
-      ? undefined
-      : createDatasetFlyoutStrings.settingsDefaultPlaceholder(
-          formatMaxFieldSizeDisplayValue(bytesToDisplayValue(defaultBytes, unit))
-        );
+  const fieldText = useSettingFieldText('settings.max_field_size', {
+    label: createDatasetFlyoutStrings.settingsMaxFieldSizeLabel(),
+    description: createDatasetFlyoutStrings.settingsMaxFieldSizeDescription(),
+    helpText: createDatasetFlyoutStrings.settingsMaxFieldSizeHelp(),
+    placeholder: createDatasetFlyoutStrings.settingsMaxFieldSizePlaceholder(),
+  });
 
   useEffect(() => {
     const nextDisplayState = getMaxFieldSizeDisplayState(field.value);
@@ -91,8 +86,8 @@ export const MaxFieldSizeField: FunctionComponent<MaxFieldSizeFieldProps> = ({
 
   return (
     <EuiFormRow
-      label={createDatasetFlyoutStrings.settingsMaxFieldSizeLabel()}
-      helpText={createDatasetFlyoutStrings.settingsMaxFieldSizeHelp()}
+      label={fieldText.label}
+      helpText={fieldText.helpText}
       fullWidth
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
@@ -103,7 +98,7 @@ export const MaxFieldSizeField: FunctionComponent<MaxFieldSizeFieldProps> = ({
         compressed
         min={0}
         step="any"
-        placeholder={defaultPlaceholder}
+        placeholder={fieldText.placeholder}
         isInvalid={Boolean(fieldState.error)}
         value={displayValue}
         onChange={(event) => handleDisplayChange(event.target.value)}

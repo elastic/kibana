@@ -14,7 +14,10 @@ import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
-import { useDatasetSettingDefaultHint } from './dataset_settings_default_hints';
+import {
+  useDatasetSettingDefaultHint,
+  useSettingFieldText,
+} from './dataset_settings_default_hints';
 import { DefaultOptionBadge } from './dataset_settings_super_select_utils';
 
 export interface SettingsPresetComboBoxProps {
@@ -22,6 +25,8 @@ export interface SettingsPresetComboBoxProps {
   name: FieldPath<CreateDatasetFormValues>;
   label: string;
   helpText?: string;
+  /** Shorter phrasing of the help text, for flows that show it as a placeholder. */
+  description?: string;
   placeholder: string;
   presets: Array<{ value: string; label: string; description?: string }>;
   'data-test-subj': string;
@@ -47,6 +52,7 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
   name,
   label,
   helpText,
+  description,
   placeholder,
   presets,
   'data-test-subj': dataTestSubj,
@@ -54,6 +60,7 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
 }) => {
   const { field, fieldState } = useController({ name, control, rules });
   const defaultHint = useDatasetSettingDefaultHint(name);
+  const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
 
   const comboBoxOptions = useMemo(
     () =>
@@ -89,8 +96,8 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
 
   return (
     <EuiFormRow
-      label={label}
-      helpText={helpText}
+      label={fieldText.label}
+      helpText={fieldText.helpText}
       fullWidth
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
@@ -106,7 +113,7 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
         isClearable
         isInvalid={Boolean(fieldState.error)}
         aria-label={label}
-        placeholder={defaultHint?.placeholder ?? placeholder}
+        placeholder={fieldText.placeholder}
         singleSelection={{ asPlainText: true }}
         customOptionText={createDatasetFlyoutStrings.settingsPresetCustomOptionText()}
         inputRef={field.ref}

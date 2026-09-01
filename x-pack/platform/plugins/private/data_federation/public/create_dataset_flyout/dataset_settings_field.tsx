@@ -27,9 +27,9 @@ import {
   PARTITION_PATH_PRESETS,
   SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS,
 } from './dataset_settings_options';
-import { useDatasetSettingDefaultHint } from './dataset_settings_default_hints';
+import { useSettingFieldText } from './dataset_settings_default_hints';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
-import { SettingsEnumSuperSelect } from './settings_enum_super_select';
+import { SettingsEnumField } from './settings_enum_field';
 import { SettingsPresetComboBox } from './settings_preset_combo_box';
 import {
   validateMaxErrorRatio,
@@ -53,10 +53,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
   switch (fieldId) {
     case 'partition_detection':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.partition_detection"
           label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
+          description={createDatasetFlyoutStrings.settingsPartitionDetectionDescription()}
           placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
           options={PARTITION_DETECTION_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsPartitionDetection`}
@@ -82,7 +83,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       return <SchemaSampleSizeField control={control} testSubjPrefix={testSubjPrefix} />;
     case 'schema_resolution':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.schema_resolution"
           label={createDatasetFlyoutStrings.settingsSchemaResolutionLabel()}
@@ -106,10 +107,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'mode':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.mode"
           label={createDatasetFlyoutStrings.settingsModeLabel()}
+          description={createDatasetFlyoutStrings.settingsModeDescription()}
           placeholder={createDatasetFlyoutStrings.settingsModePlaceholder()}
           options={MODE_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsMode`}
@@ -122,6 +124,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.quote"
           label={createDatasetFlyoutStrings.settingsQuoteLabel()}
           helpText={createDatasetFlyoutStrings.settingsQuoteHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsQuotePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsQuote`}
         />
       );
@@ -132,6 +135,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.escape"
           label={createDatasetFlyoutStrings.settingsEscapeLabel()}
           helpText={createDatasetFlyoutStrings.settingsEscapeHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsEscapePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsEscape`}
         />
       );
@@ -142,6 +146,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.comment"
           label={createDatasetFlyoutStrings.settingsCommentLabel()}
           helpText={createDatasetFlyoutStrings.settingsCommentHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsCommentPlaceholder()}
           testSubj={`${testSubjPrefix}SettingsComment`}
         />
       );
@@ -159,10 +164,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'header_row':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.header_row"
           label={createDatasetFlyoutStrings.settingsHeaderRowLabel()}
+          description={createDatasetFlyoutStrings.settingsHeaderRowDescription()}
           placeholder={createDatasetFlyoutStrings.settingsHeaderRowPlaceholder()}
           options={HEADER_ROW_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsHeaderRow`}
@@ -175,6 +181,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.column_prefix"
           label={createDatasetFlyoutStrings.settingsColumnPrefixLabel()}
           helpText={createDatasetFlyoutStrings.settingsColumnPrefixHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsColumnPrefixPlaceholder()}
           testSubj={`${testSubjPrefix}SettingsColumnPrefix`}
         />
       );
@@ -204,10 +211,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'multi_value_syntax':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.multi_value_syntax"
           label={createDatasetFlyoutStrings.settingsMultiValueSyntaxLabel()}
+          description={createDatasetFlyoutStrings.settingsMultiValueSyntaxDescription()}
           placeholder={createDatasetFlyoutStrings.settingsMultiValueSyntaxPlaceholder()}
           options={MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsMultiValueSyntax`}
@@ -215,10 +223,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'error_mode':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.error_mode"
           label={createDatasetFlyoutStrings.settingsErrorModeLabel()}
+          description={createDatasetFlyoutStrings.settingsErrorModeDescription()}
           placeholder={createDatasetFlyoutStrings.settingsErrorModePlaceholder()}
           options={ERROR_MODE_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsErrorMode`}
@@ -231,6 +240,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.max_errors"
           label={createDatasetFlyoutStrings.settingsMaxErrorsLabel()}
           helpText={createDatasetFlyoutStrings.settingsMaxErrorsHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsMaxErrorsPlaceholder()}
           testSubj={`${testSubjPrefix}SettingsMaxErrors`}
           min={0}
           rules={{ validate: validateMaxErrors }}
@@ -243,6 +253,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.max_error_ratio"
           label={createDatasetFlyoutStrings.settingsMaxErrorRatioLabel()}
           helpText={createDatasetFlyoutStrings.settingsMaxErrorRatioHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsMaxErrorRatioPlaceholder()}
           testSubj={`${testSubjPrefix}SettingsMaxErrorRatio`}
           min={0}
           max={1}
@@ -259,12 +270,13 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.segment_size"
           label={createDatasetFlyoutStrings.settingsSegmentSizeLabel()}
           helpText={createDatasetFlyoutStrings.settingsSegmentSizeHelp()}
+          placeholder={createDatasetFlyoutStrings.settingsSegmentSizePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsSegmentSize`}
         />
       );
     case 'optimized_reader':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.optimized_reader"
           label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()}
@@ -276,7 +288,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'late_materialization':
       return (
-        <SettingsEnumSuperSelect
+        <SettingsEnumField
           control={control}
           name="settings.late_materialization"
           label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()}
@@ -300,12 +312,16 @@ const SchemaSampleSizeField: FunctionComponent<{
     control,
     rules: { validate: validateSchemaSampleSize },
   });
-  const defaultHint = useDatasetSettingDefaultHint('settings.schema_sample_size');
+  const fieldText = useSettingFieldText('settings.schema_sample_size', {
+    label: createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel(),
+    helpText: createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp(),
+    placeholder: createDatasetFlyoutStrings.settingsSchemaSampleSizePlaceholder(),
+  });
 
   return (
     <EuiFormRow
-      label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
-      helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
+      label={fieldText.label}
+      helpText={fieldText.helpText}
       fullWidth
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
@@ -316,7 +332,7 @@ const SchemaSampleSizeField: FunctionComponent<{
         compressed
         min={1}
         step={1}
-        placeholder={defaultHint?.placeholder}
+        placeholder={fieldText.placeholder}
         isInvalid={Boolean(fieldState.error)}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}
@@ -332,18 +348,20 @@ const TextSettingsField: FunctionComponent<{
   name: `settings.${string}`;
   label: string;
   helpText?: string;
+  description?: string;
+  placeholder?: string;
   testSubj: string;
-}> = ({ control, name, label, helpText, testSubj }) => {
+}> = ({ control, name, label, helpText, description, placeholder, testSubj }) => {
   const { field } = useController({ name, control });
-  const defaultHint = useDatasetSettingDefaultHint(name);
+  const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
 
   return (
-    <EuiFormRow label={label} helpText={helpText} fullWidth>
+    <EuiFormRow label={fieldText.label} helpText={fieldText.helpText} fullWidth>
       <EuiFieldText
         data-test-subj={testSubj}
         fullWidth
         compressed
-        placeholder={defaultHint?.placeholder}
+        placeholder={fieldText.placeholder}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}
         name={field.name}
@@ -358,19 +376,33 @@ const NumberSettingsField: FunctionComponent<{
   name: `settings.${string}`;
   label: string;
   helpText?: string;
+  description?: string;
+  placeholder?: string;
   testSubj: string;
   min?: number;
   max?: number;
   step?: number;
   rules?: { validate: (value: string) => true | string };
-}> = ({ control, name, label, helpText, testSubj, min, max, step, rules }) => {
+}> = ({
+  control,
+  name,
+  label,
+  helpText,
+  description,
+  placeholder,
+  testSubj,
+  min,
+  max,
+  step,
+  rules,
+}) => {
   const { field, fieldState } = useController({ name, control, rules });
-  const defaultHint = useDatasetSettingDefaultHint(name);
+  const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
 
   return (
     <EuiFormRow
-      label={label}
-      helpText={helpText}
+      label={fieldText.label}
+      helpText={fieldText.helpText}
       fullWidth
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
@@ -382,7 +414,7 @@ const NumberSettingsField: FunctionComponent<{
         min={min}
         max={max}
         step={step}
-        placeholder={defaultHint?.placeholder}
+        placeholder={fieldText.placeholder}
         isInvalid={Boolean(fieldState.error)}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}

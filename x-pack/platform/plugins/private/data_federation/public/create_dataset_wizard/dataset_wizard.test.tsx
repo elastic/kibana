@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor, act, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
@@ -84,16 +85,18 @@ describe('DatasetWizard step navigation', () => {
     const view = render(
       <Router history={history}>
         <EuiProvider>
-          <DatasetWizard
-            isEditMode={false}
-            existingDataSetNames={[]}
-            dataSources={dataSources}
-            defaultValues={defaultValues}
-            flowVariant={flowVariant}
-            reloadDataSources={jest.fn().mockResolvedValue(undefined)}
-            onCancel={jest.fn()}
-            onSave={jest.fn().mockResolvedValue(null)}
-          />
+          <I18nProvider>
+            <DatasetWizard
+              isEditMode={false}
+              existingDataSetNames={[]}
+              dataSources={dataSources}
+              defaultValues={defaultValues}
+              flowVariant={flowVariant}
+              reloadDataSources={jest.fn().mockResolvedValue(undefined)}
+              onCancel={jest.fn()}
+              onSave={jest.fn().mockResolvedValue(null)}
+            />
+          </I18nProvider>
         </EuiProvider>
       </Router>
     );

@@ -84,11 +84,20 @@ export interface DatasetSettingsAdvancedViewToggleProps {
   format: Exclude<DatasetFormatFormValue, ''>;
   errorMode: DatasetErrorModeFormValue;
   testSubjPrefix: string;
+  constrainWidth?: boolean;
 }
 
 export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   DatasetSettingsAdvancedViewToggleProps
-> = ({ control, getValues, setValue, format, errorMode, testSubjPrefix }) => {
+> = ({
+  control,
+  getValues,
+  setValue,
+  format,
+  errorMode,
+  testSubjPrefix,
+  constrainWidth = true,
+}) => {
   const prevSettingsDigestRef = useRef<string | null>(null);
 
   const advancedFields = useMemo(
@@ -191,6 +200,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
       testSubjPrefix={testSubjPrefix}
       columns={1}
       rowSpacerSize="m"
+      constrainWidth={constrainWidth}
     />
   );
 };

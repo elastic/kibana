@@ -101,7 +101,7 @@ const isCsvTsvSwitch = (
 
 export interface ApplySettingsForFormatOptions {
   /**
-   * Flows that surface defaults as placeholders leave the fields empty so the
+   * Flows that name defaults in the help text leave the fields empty so the
    * request can omit them.
    */
   applyDefaults?: boolean;

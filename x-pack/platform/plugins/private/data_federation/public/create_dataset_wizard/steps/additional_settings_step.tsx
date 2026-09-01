@@ -336,6 +336,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
                 commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
                 advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
                 testSubjPrefix="datasetWizard"
+                hasPanelBackground={!isDatasetWizardFlow396(flowVariant)}
               />
             ) : (
               <>

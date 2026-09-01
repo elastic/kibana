@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { FunctionComponent, PropsWithChildren } from 'react';
 import React, { useRef } from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { render, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -21,6 +23,10 @@ import {
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
+import {
+  DATASET_SETTING_DESCRIPTION_TEST_SUBJ,
+  DATASET_SETTING_DESCRIPTION_TIP_TEST_SUBJ,
+} from '../../create_dataset_flyout/dataset_settings_default_hints';
 import { AdditionalSettingsStep } from './additional_settings_step';
 
 jest.mock('@kbn/code-editor', () => ({
@@ -41,6 +47,13 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
+/** Mirrors the app, which renders inside Kibana's i18n and EUI contexts. */
+const TestProviders: FunctionComponent<PropsWithChildren> = ({ children }) => (
+  <EuiProvider>
+    <I18nProvider>{children}</I18nProvider>
+  </EuiProvider>
+);
+
 const TestHarness = ({
   resource,
   isEditMode = false,
@@ -58,7 +71,7 @@ const TestHarness = ({
   });
 
   return (
-    <EuiProvider>
+    <TestProviders>
       <AdditionalSettingsStep
         control={control}
         getValues={getValues}
@@ -69,8 +82,32 @@ const TestHarness = ({
         flowVariant={flowVariant}
         autoDetectedRegion={autoDetectedRegion}
       />
-    </EuiProvider>
+    </TestProviders>
   );
+};
+
+const getHelpTexts = (fieldElement: HTMLElement): HTMLElement[] => {
+  const helpTexts = fieldElement.closest('.euiFormRow')?.querySelectorAll('.euiFormHelpText');
+
+  if (!helpTexts?.length) {
+    throw new Error('Expected the field to have help text');
+  }
+
+  return Array.from(helpTexts) as HTMLElement[];
+};
+
+/** Where defaults are shown, the description is only there for screen readers. */
+const getVisibleHelpText = (fieldElement: HTMLElement): HTMLElement => {
+  const helpTexts = getHelpTexts(fieldElement).filter(
+    (helpText) =>
+      !helpText.querySelector(`[data-test-subj="${DATASET_SETTING_DESCRIPTION_TEST_SUBJ}"]`)
+  );
+
+  if (helpTexts.length !== 1) {
+    throw new Error(`Expected one visible help text, found ${helpTexts.length}`);
+  }
+
+  return helpTexts[0];
 };
 
 describe('AdditionalSettingsStep', () => {
@@ -177,7 +214,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = watch('settings');
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -188,7 +225,7 @@ describe('AdditionalSettingsStep', () => {
               flowVariant={flowVariant}
             />
             <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
-          </EuiProvider>
+          </TestProviders>
         );
       };
 
@@ -231,7 +268,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = watch('settings');
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -242,7 +279,7 @@ describe('AdditionalSettingsStep', () => {
               flowVariant={flowVariant}
             />
             <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
-          </EuiProvider>
+          </TestProviders>
         );
       };
 
@@ -342,7 +379,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = watch('settings');
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -353,7 +390,7 @@ describe('AdditionalSettingsStep', () => {
               flowVariant={flowVariant}
             />
             <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
-          </EuiProvider>
+          </TestProviders>
         );
       };
 
@@ -385,7 +422,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = watch('settings');
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -396,7 +433,7 @@ describe('AdditionalSettingsStep', () => {
               flowVariant={flowVariant}
             />
             <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
-          </EuiProvider>
+          </TestProviders>
         );
       };
 
@@ -457,7 +494,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = watch('settings');
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -468,7 +505,7 @@ describe('AdditionalSettingsStep', () => {
               flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
             />
             <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
-          </EuiProvider>
+          </TestProviders>
         );
       };
 
@@ -486,7 +523,64 @@ describe('AdditionalSettingsStep', () => {
       });
     });
 
-    it('offers the default as a placeholder instead', async () => {
+    it('names the default in the help text, as the literal Elasticsearch receives', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsDelimiter')).toBeInTheDocument();
+      });
+
+      const delimiterHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsDelimiter'));
+      expect(delimiterHelp.textContent).toBe(', by default.');
+      expect(delimiterHelp.querySelector('code')?.textContent).toBe(',');
+
+      // The stored value is a byte count, which is not what the help text quotes.
+      const maxFieldSizeHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsMaxFieldSize'));
+      expect(maxFieldSizeHelp.querySelector('code')?.textContent).toBe('10mb');
+
+      // An empty default has no literal worth quoting.
+      const nullValueHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsNullValue'));
+      expect(nullValueHelp.textContent).toBe('An empty string by default.');
+      expect(nullValueHelp.querySelector('code')).toBeNull();
+    });
+
+    it('moves the description into a tooltip on the label, and keeps it for screen readers', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsDelimiter')).toBeInTheDocument();
+      });
+
+      const delimiterRow = getByTestId('datasetWizardSettingsDelimiter').closest(
+        '.euiFormRow'
+      ) as HTMLElement;
+      const description =
+        'The character that separates fields. If your delimiter is not available, create a custom one.';
+
+      fireEvent.mouseOver(
+        within(delimiterRow).getByTestId(DATASET_SETTING_DESCRIPTION_TIP_TEST_SUBJ)
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole('tooltip')).toHaveTextContent(description);
+      });
+
+      expect(
+        within(delimiterRow).getByTestId(DATASET_SETTING_DESCRIPTION_TEST_SUBJ)
+      ).toHaveTextContent(description);
+    });
+
+    it('keeps the plain select placeholders', async () => {
       const { getByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.csv"
@@ -500,7 +594,135 @@ describe('AdditionalSettingsStep', () => {
 
       expect(
         within(getByTestId('datasetWizardSettingsDelimiter')).getByRole('combobox')
-      ).toHaveAttribute('placeholder', 'Default: Comma (,)');
+      ).toHaveAttribute('placeholder', 'Select delimiter');
+      expect(
+        within(getByTestId('datasetWizardSettingsMode')).getByRole('combobox')
+      ).toHaveAttribute('placeholder', 'Select quote mode');
+    });
+
+    it('lets a dropdown be cleared back to its default through the combo box', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsMode')).toBeInTheDocument();
+      });
+
+      const modeField = within(getByTestId('datasetWizardSettingsMode'));
+      fireEvent.click(modeField.getByRole('combobox'));
+
+      await waitFor(() => {
+        expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
+      });
+
+      const defaultOption = screen.getByRole('option', { name: /Quoted/ });
+      expect(
+        within(defaultOption).getByTestId('datasetSettingsDefaultOptionBadge')
+      ).toBeInTheDocument();
+
+      fireEvent.click(defaultOption);
+
+      await waitFor(() => {
+        expect(modeField.getByTestId('comboBoxClearButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(modeField.getByTestId('comboBoxClearButton'));
+
+      await waitFor(() => {
+        expect(modeField.queryByTestId('comboBoxClearButton')).toBeNull();
+      });
+
+      expect(modeField.getByRole('combobox')).toHaveAttribute('placeholder', 'Select quote mode');
+    });
+
+    it('keeps the super select in flow 3, which has no default to clear back to', async () => {
+      const { getByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsMode')).toBeInTheDocument();
+      });
+
+      const modeField = getByTestId('datasetWizardSettingsMode');
+      expect(modeField.tagName).toBe('BUTTON');
+      expect(
+        within(modeField.closest('.euiFormRow') as HTMLElement).queryByRole('combobox')
+      ).toBeNull();
+    });
+
+    it('says nothing about defaults in flow 3, where they are already filled in', async () => {
+      const { getByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsDelimiter')).toBeInTheDocument();
+      });
+
+      const delimiterHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsDelimiter'));
+      expect(delimiterHelp.textContent).toBe(
+        'The character that separates fields. If your delimiter is not available, create a custom one.'
+      );
+      expect(delimiterHelp.querySelector('code')).toBeNull();
+    });
+
+    it('drops the filled settings panels that flow 3 keeps', async () => {
+      const render96 = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(render96.getByTestId('datasetWizardFlow3CommonSettingsPanel')).toBeInTheDocument();
+      });
+
+      ['datasetWizardFlow3CommonSettingsPanel', 'datasetWizardFlow3AdvancedSettingsPanel'].forEach(
+        (testSubj) => {
+          expect(render96.getByTestId(testSubj)).not.toHaveClass('euiPanel--subdued');
+        }
+      );
+
+      render96.unmount();
+
+      const renderFlow3 = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      );
+
+      await waitFor(() => {
+        expect(renderFlow3.getByTestId('datasetWizardFlow3CommonSettingsPanel')).toHaveClass(
+          'euiPanel--subdued'
+        );
+      });
+    });
+
+    it('indents the settings fields without pushing them past the format field', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+      });
+
+      [
+        'datasetWizardFlow3CommonSettingsFields',
+        'datasetWizardFlow3AdvancedSettingsFields',
+      ].forEach((testSubj) => {
+        const { width, marginInlineStart } = getComputedStyle(getByTestId(testSubj));
+
+        expect(marginInlineStart).toBe('calc(24px + 4px)');
+        expect(width).toBe('calc(80% - 24px - 4px)');
+      });
     });
 
     it('keeps pre-filling defaults in flow 3', async () => {
@@ -512,7 +734,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = watch('settings');
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -523,7 +745,7 @@ describe('AdditionalSettingsStep', () => {
               flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
             />
             <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
-          </EuiProvider>
+          </TestProviders>
         );
       };
 
@@ -583,7 +805,7 @@ describe('AdditionalSettingsStep', () => {
         });
 
         return (
-          <EuiProvider>
+          <TestProviders>
             <AdditionalSettingsStep
               control={control}
               getValues={getValues}
@@ -593,7 +815,7 @@ describe('AdditionalSettingsStep', () => {
               isEditMode={true}
               flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
             />
-          </EuiProvider>
+          </TestProviders>
         );
       };
 

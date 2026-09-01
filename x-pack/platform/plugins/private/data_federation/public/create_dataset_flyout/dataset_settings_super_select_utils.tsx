@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
@@ -21,14 +21,12 @@ export const buildSuperSelectOption = <T extends string>({
   value,
   label,
   description,
-  isDefault = false,
 }: {
   value: T;
   label: string;
   description?: string;
-  isDefault?: boolean;
 }): EuiSuperSelectOption<T> => {
-  if (!description && !isDefault) {
+  if (!description) {
     return { value, inputDisplay: label, dropdownDisplay: label };
   }
 
@@ -37,21 +35,10 @@ export const buildSuperSelectOption = <T extends string>({
     inputDisplay: label,
     dropdownDisplay: (
       <>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <strong>{label}</strong>
-          </EuiFlexItem>
-          {isDefault ? (
-            <EuiFlexItem grow={false}>
-              <DefaultOptionBadge />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-        {description ? (
-          <EuiText size="s" color="subdued">
-            <p>{description}</p>
-          </EuiText>
-        ) : null}
+        <strong>{label}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{description}</p>
+        </EuiText>
       </>
     ),
   };
