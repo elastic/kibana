@@ -57,10 +57,7 @@ describe('ensureAuthorizedToRunWorkflow', () => {
       saved_objects: [caseA, caseB],
     });
 
-    const entities = await ensureAuthorizedToRunWorkflow(
-      { ids: [caseA.id, caseB.id] },
-      clientArgs
-    );
+    const entities = await ensureAuthorizedToRunWorkflow({ ids: [caseA.id, caseB.id] }, clientArgs);
 
     expect(clientArgs.services.caseService.getCases).toHaveBeenCalledTimes(1);
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
