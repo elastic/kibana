@@ -582,5 +582,26 @@ export const module = new KibanaContainerModule(({ onSetup }) => {
 });
 ```
 
+### Tips
+- Avoid resolving other services from `toDynamicValue` bindings if they can be resolved using `toResolvedValue`.
+  The latter resolves services in a single step in the same transcient scope.
+  ```ts
+  bind(Token).toDynamicValue(async ({ get }) => {
+    const config = get(Config);
+    const http = get(HttpClient);
+    const response = await http.get(config.url);
+
+    return response.data;
+  });
+  ```
+
+  ```ts
+  bind(Token).toResolvedValue(async (config, http) => {
+    const response = await http.get(config.url);
+
+    return response.data;
+  }, [Config, HttpClient]);
+  ```
+
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
