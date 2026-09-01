@@ -56,8 +56,11 @@ const run = async ({
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.mget.mockResolvedValue({ docs: documents } as never);
-  esClient.bulk.mockImplementation((async ({ operations }) =>
-    bulkImpl(operations as Array<Record<string, unknown>>)) as never);
+  esClient.bulk.mockImplementation((async ({
+    operations,
+  }: {
+    operations?: Array<Record<string, unknown>>;
+  }) => bulkImpl(operations ?? [])) as never);
   const logger = loggingSystemMock.createLogger();
   const result = await seedDefaultSources({ esClient, logger });
   return { esClient, logger, result };
@@ -238,6 +241,17 @@ describe('seedDefaultSources', () => {
     await expect(
       seedDefaultSources({ esClient, logger: loggingSystemMock.createLogger() })
     ).rejects.toThrow('read timeout');
+  });
+
+  it('propagates an item-level catalog read failure instead of treating it as missing', async () => {
+    const documents = missingDocuments();
+    documents[0] = {
+      _id: DEFAULT_SOURCES[0].id,
+      _index: 'sources',
+      error: { type: 'no_shard_available_action_exception' },
+    };
+
+    await expect(run({ documents })).rejects.toThrow(/Catalog read failed/);
   });
 
   it('logs a changed catalog at info', async () => {

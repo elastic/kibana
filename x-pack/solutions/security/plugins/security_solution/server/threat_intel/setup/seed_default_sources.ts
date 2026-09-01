@@ -239,7 +239,15 @@ export const seedDefaultSources = async ({
 
   for (const source of DEFAULT_SOURCES) {
     const existingDocument = existingById.get(source.id);
-    if (!existingDocument?.found) {
+    if (!existingDocument) {
+      throw new Error(`Catalog read did not return source ${source.id}`);
+    }
+    if ('error' in existingDocument) {
+      throw new Error(
+        `Catalog read failed for source ${source.id}: ${existingDocument.error.type ?? 'error'}`
+      );
+    }
+    if (!existingDocument.found) {
       actions.push({ id: source.id, kind: 'create' });
       operations.push(
         { create: { _index: THREAT_INTEL_SOURCES_INDEX, _id: source.id } },
@@ -247,9 +255,18 @@ export const seedDefaultSources = async ({
       );
     } else {
       const stored = existingDocument._source;
+      if (!stored) {
+        throw new Error(`Catalog source ${source.id} was found without _source`);
+      }
       if (isCatalogCurrent(stored, source)) {
         result.skipped += 1;
       } else {
+        if (
+          existingDocument._seq_no === undefined ||
+          existingDocument._primary_term === undefined
+        ) {
+          throw new Error(`Catalog source ${source.id} is missing concurrency metadata`);
+        }
         actions.push({ id: source.id, kind: 'index' });
         operations.push(
           {

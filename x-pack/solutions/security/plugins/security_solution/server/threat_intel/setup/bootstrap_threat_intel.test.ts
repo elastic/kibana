@@ -48,15 +48,19 @@ const makeEsClient = (sourceCount: number): jest.Mocked<ElasticsearchClient> => 
   return {
     count: jest.fn().mockResolvedValue({ count: sourceCount }),
     indices: {
-      getMapping: jest.fn().mockResolvedValue({
+      getFieldMapping: jest.fn().mockResolvedValue({
         [THREAT_REPORTS_INDEX]: {
           mappings: {
-            properties: {
-              content: {
-                properties: {
-                  title: { type: 'semantic_text', inference_id: '.default-embedding' },
-                  body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
-                },
+            'content.title': {
+              full_name: 'content.title',
+              mapping: {
+                title: { type: 'semantic_text', inference_id: '.default-embedding' },
+              },
+            },
+            'content.body_text': {
+              full_name: 'content.body_text',
+              mapping: {
+                body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
               },
             },
           },
@@ -196,15 +200,17 @@ describe('ensureThreatIntelBootstrap', () => {
 
     it('fails readiness when a required field has no effective endpoint', async () => {
       const esClient = makeEsClient(12);
-      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+      (esClient.indices.getFieldMapping as jest.Mock).mockResolvedValue({
         [THREAT_REPORTS_INDEX]: {
           mappings: {
-            properties: {
-              content: {
-                properties: {
-                  title: { type: 'semantic_text' },
-                  body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
-                },
+            'content.title': {
+              full_name: 'content.title',
+              mapping: { title: { type: 'semantic_text' } },
+            },
+            'content.body_text': {
+              full_name: 'content.body_text',
+              mapping: {
+                body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
               },
             },
           },

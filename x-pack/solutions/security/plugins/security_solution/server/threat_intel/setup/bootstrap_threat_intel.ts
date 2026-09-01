@@ -64,19 +64,18 @@ const checkReportSemanticTextEndpoints = async (
   esClient: ElasticsearchClient,
   log: Logger
 ): Promise<void> => {
-  const mappings = await esClient.indices.getMapping({
+  const mappings = await esClient.indices.getFieldMapping({
     index: THREAT_REPORTS_INDEX,
+    fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
     include_defaults: true,
   });
-  const contentProperties = (
-    mappings[THREAT_REPORTS_INDEX]?.mappings.properties?.content as
-      | { properties?: Record<string, { type?: string; inference_id?: string }> }
-      | undefined
-  )?.properties;
+  const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
   const endpointIds = new Set<string>();
 
   for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-    const mapping = contentProperties?.[field];
+    const fullName = `content.${field}`;
+    const fieldMapping = fieldMappings?.[fullName];
+    const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
     if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
       throw new Error(
         `Required report field content.${field} did not resolve to a semantic_text inference endpoint`
