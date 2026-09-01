@@ -42,6 +42,8 @@ export const CaseUserActionStatsSchema = z.object({
   total_hidden_comment_updates: z.number(),
   total_other_actions: z.number(),
   total_other_action_deletions: z.number(),
+  /** Visible History rows (document other-actions + extended_fields expansion extras). */
+  total_visible_other_actions: z.number(),
 });
 
 export const UserActionFindRequestSchema = paginationSchema({

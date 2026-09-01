@@ -50,6 +50,7 @@ import type {
 import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
 import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
 import { isCommentAttachmentType } from '../../../common/utils/attachments';
+import { getExtendedFieldsActivityRowCount } from './extended_fields_activity_rows';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -720,6 +721,7 @@ export class CaseUserActionService {
       total_hidden_comment_updates: 0,
       total_other_actions: 0,
       total_other_action_deletions: 0,
+      total_visible_other_actions: 0,
     };
 
     response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
@@ -763,6 +765,33 @@ export class CaseUserActionService {
 
     result.total_other_actions = result.total - result.total_comments;
     result.total_other_action_deletions = result.total_deletions - result.total_comment_deletions;
+
+    /**
+     * Extended-fields history intentionally renders one Activity row per field from a single
+     * stored user action. Document totals stay SO-based for pagination; visible totals add the
+     * extra rows so Type filter badges match the timeline.
+     *
+     * `payload.extended_fields` is unmapped (dynamic:false), so we page every extended_fields
+     * user action for the case via findAll (no limit) and count rows from each payload.
+     */
+    const extendedFieldsUserActions = await this.finder.findAll({
+      caseId,
+      types: [UserActionTypes.extended_fields],
+      decode: false,
+    });
+    let visibleExtendedFieldsRows = 0;
+    for (const userAction of extendedFieldsUserActions) {
+      const payload = userAction.attributes.payload as
+        | { extended_fields?: Record<string, unknown> | null }
+        | undefined;
+      visibleExtendedFieldsRows += getExtendedFieldsActivityRowCount(payload?.extended_fields);
+    }
+    const extendedFieldsExtras = Math.max(
+      0,
+      visibleExtendedFieldsRows - extendedFieldsUserActions.length
+    );
+
+    result.total_visible_other_actions = result.total_other_actions + extendedFieldsExtras;
 
     return result;
   }

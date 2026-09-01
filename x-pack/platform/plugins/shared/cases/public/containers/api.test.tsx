@@ -721,6 +721,7 @@ describe('Cases API', () => {
       total_hidden_comment_updates: 0,
       total_other_actions: 10,
       total_other_action_deletions: 0,
+      total_visible_other_actions: 10,
     };
 
     beforeEach(() => {

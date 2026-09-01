@@ -361,6 +361,7 @@ describe('User actions APIs', () => {
         total_hidden_comment_updates: 0,
         total_other_actions: 5,
         total_other_action_deletions: 0,
+        total_visible_other_actions: 5,
       };
 
       it('has expected attributes in request', () => {
@@ -392,6 +393,7 @@ describe('User actions APIs', () => {
         total_hidden_comment_updates: 0,
         total_other_actions: 40,
         total_other_action_deletions: 0,
+        total_visible_other_actions: 40,
       };
 
       it('has expected attributes in request', () => {
