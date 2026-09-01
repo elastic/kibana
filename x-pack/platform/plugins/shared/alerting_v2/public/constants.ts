@@ -46,6 +46,19 @@ export {
   CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
 } from '@kbn/alerting-v2-constants';
 
+/** Query param that filters the action policies list to policies matching a rule. */
+export const ACTION_POLICY_LIST_RULE_ID_PARAM = 'ruleId';
+
+export const readActionPolicyListRuleId = (search: string): string | undefined => {
+  const ruleId = new URLSearchParams(search).get(ACTION_POLICY_LIST_RULE_ID_PARAM)?.trim();
+  return ruleId || undefined;
+};
+
+export interface ActionPolicyListLinkOptions {
+  /** When set, the list shows only action policies that match this rule. */
+  ruleId?: string;
+}
+
 export interface AlertEpisodesListLinkOptions {
   /** Pre-applied filters carried via the rison-encoded `_a` query param. */
   filters?: {
@@ -77,6 +90,18 @@ export const paths = {
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   actionPolicyList: ALERTING_V2_ACTION_POLICIES_BASE_PATH,
+  /**
+   * Builds a deep-link URL to the action policies list, optionally pre-filtering
+   * to policies that match a rule via {@link ACTION_POLICY_LIST_RULE_ID_PARAM}.
+   */
+  actionPolicyListHref: (opts?: ActionPolicyListLinkOptions): string => {
+    if (!opts?.ruleId) {
+      return ALERTING_V2_ACTION_POLICIES_BASE_PATH;
+    }
+    const search = new URLSearchParams();
+    search.set(ACTION_POLICY_LIST_RULE_ID_PARAM, opts.ruleId);
+    return `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}?${search.toString()}`;
+  },
   /** Plain base path — safe for `<Route path={...}>` definitions. */
   alertEpisodesList: ALERTING_V2_EPISODES_BASE_PATH,
   /**

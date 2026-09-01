@@ -6,7 +6,13 @@
  */
 
 import { decode as decodeRison } from '@kbn/rison';
-import { ALERTING_V2_EPISODES_BASE_PATH, paths } from './constants';
+import {
+  ACTION_POLICY_LIST_RULE_ID_PARAM,
+  ALERTING_V2_ACTION_POLICIES_BASE_PATH,
+  ALERTING_V2_EPISODES_BASE_PATH,
+  paths,
+  readActionPolicyListRuleId,
+} from './constants';
 
 /** Parse the `_a` rison blob from the generated URL. */
 const decodeAppState = (url: string): unknown => {
@@ -14,6 +20,38 @@ const decodeAppState = (url: string): unknown => {
   if (!raw) return undefined;
   return (decodeRison(raw) as Record<string, unknown>)?.episodesList;
 };
+
+describe('paths.actionPolicyListHref', () => {
+  it('returns the base action policies path when called with no options', () => {
+    expect(paths.actionPolicyListHref()).toBe(ALERTING_V2_ACTION_POLICIES_BASE_PATH);
+  });
+
+  it('returns the base action policies path when ruleId is empty', () => {
+    expect(paths.actionPolicyListHref({ ruleId: undefined })).toBe(
+      ALERTING_V2_ACTION_POLICIES_BASE_PATH
+    );
+  });
+
+  it('encodes ruleId as a query param', () => {
+    const url = paths.actionPolicyListHref({ ruleId: 'rule-1' });
+    expect(new URL(url, 'http://localhost').pathname).toBe(ALERTING_V2_ACTION_POLICIES_BASE_PATH);
+    expect(
+      new URL(url, 'http://localhost').searchParams.get(ACTION_POLICY_LIST_RULE_ID_PARAM)
+    ).toBe('rule-1');
+  });
+});
+
+describe('readActionPolicyListRuleId', () => {
+  it('returns the ruleId query value', () => {
+    expect(readActionPolicyListRuleId('?ruleId=rule-1')).toBe('rule-1');
+  });
+
+  it('returns undefined when the param is missing or blank', () => {
+    expect(readActionPolicyListRuleId('')).toBeUndefined();
+    expect(readActionPolicyListRuleId('?ruleId=')).toBeUndefined();
+    expect(readActionPolicyListRuleId('?q=foo')).toBeUndefined();
+  });
+});
 
 describe('paths.alertEpisodesListHref', () => {
   it('returns the base episodes path when called with no options', () => {
