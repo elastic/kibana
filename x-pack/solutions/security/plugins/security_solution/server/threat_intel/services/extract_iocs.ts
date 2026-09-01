@@ -67,30 +67,29 @@ const URL_PATTERN = /\bhttps?:\/\/[^\s<>"']{4,}/gi;
 const TRAILING_PROSE_CHARS = '.,;:!?\'"';
 const CLOSER_TO_OPENER: Readonly<Record<string, string>> = { ')': '(', ']': '[', '}': '{' };
 
-/** True when a closing bracket has no opener earlier in the URL. */
-const isUnbalancedCloser = (text: string, closer: string): boolean => {
-  const opener = CLOSER_TO_OPENER[closer];
-  if (opener === undefined) return false;
-  const opens = text.split(opener).length - 1;
-  const closes = text.split(closer).length - 1;
-  return closes > opens;
-};
-
 const trimUrlPunctuation = (url: string): string => {
-  let out = url;
-  let trimming = true;
-  while (trimming) {
-    const last = out[out.length - 1];
-    if (
-      last !== undefined &&
-      (TRAILING_PROSE_CHARS.includes(last) || isUnbalancedCloser(out, last))
-    ) {
-      out = out.slice(0, -1);
-    } else {
-      trimming = false;
-    }
+  const counts: Record<string, number> = { '(': 0, ')': 0, '[': 0, ']': 0, '{': 0, '}': 0 };
+  for (const char of url) {
+    if (char in counts) counts[char] += 1;
   }
-  return out;
+
+  let end = url.length;
+  while (end > 0) {
+    const last = url[end - 1];
+    if (TRAILING_PROSE_CHARS.includes(last)) {
+      end -= 1;
+      continue;
+    }
+
+    const opener = CLOSER_TO_OPENER[last];
+    if (opener !== undefined && counts[last] > counts[opener]) {
+      counts[last] -= 1;
+      end -= 1;
+      continue;
+    }
+    break;
+  }
+  return url.slice(0, end);
 };
 
 /**
@@ -572,13 +571,20 @@ interface DomainCandidate {
  * (their presence is informational, not inferential).
  */
 const longestMatchDomainDedup = (candidates: DomainCandidate[]): DomainCandidate[] => {
-  // Materialised once: the set is static across the scan, so converting it per
-  // candidate would make this quadratic on the allocation path as well.
   const domains = Array.from(new Set(candidates.map((c) => c.domain)));
+  const subsumed = new Set<string>();
+  for (const domain of domains) {
+    let dot = domain.indexOf('.');
+    while (dot >= 0) {
+      subsumed.add(domain.slice(dot + 1));
+      dot = domain.indexOf('.', dot + 1);
+    }
+  }
+
   return candidates.filter((c) => {
     // Always keep reference/denied — they are observability entries, not anchors.
     if (c.tier === 'reference' || c.tier === 'denied') return true;
-    return !domains.some((other) => other !== c.domain && other.endsWith(`.${c.domain}`));
+    return !subsumed.has(c.domain);
   });
 };
 
@@ -631,9 +637,18 @@ const REDACTION_GLYPHS = new Set(['*', '＊', '█', '●']);
  */
 type Span = readonly [number, number];
 
-const isConsumed = (index: number, len: number, consumed: readonly Span[]): boolean => {
-  const end = index + len;
-  return consumed.some(([s, e]) => index >= s && end <= e);
+const mergeSpans = (spans: readonly Span[]): Span[] => {
+  const sorted = [...spans].sort(([left], [right]) => left - right);
+  const merged: Span[] = [];
+  for (const span of sorted) {
+    const previous = merged[merged.length - 1];
+    if (previous === undefined || span[0] > previous[1]) {
+      merged.push(span);
+    } else if (span[1] > previous[1]) {
+      merged[merged.length - 1] = [previous[0], span[1]];
+    }
+  }
+  return merged;
 };
 
 /** A match whose offset the regex engine actually resolved. */
@@ -662,8 +677,16 @@ function* unconsumedMatches(
   pattern: RegExp,
   consumed: readonly Span[]
 ): Generator<OffsetMatch> {
+  const spans = mergeSpans(consumed);
+  let spanIndex = 0;
   for (const match of matchesWithOffset(text, pattern)) {
-    if (!isConsumed(match.index, match[0].length, consumed)) {
+    while (spanIndex < spans.length && spans[spanIndex][1] <= match.index) {
+      spanIndex += 1;
+    }
+    const span = spans[spanIndex];
+    const isConsumed =
+      span !== undefined && match.index >= span[0] && match.index + match[0].length <= span[1];
+    if (!isConsumed) {
       yield match;
     }
   }

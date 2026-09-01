@@ -169,6 +169,13 @@ describe('extract_iocs — refang pre-pass and value normalization', () => {
       expect(urlValues(r)).toContain('https://evil.example/Foo_(bar)');
     });
 
+    test('trims a long run of unmatched closers without rescanning the URL', () => {
+      const r = extractIocs({
+        text: `ref https://evil.example/payload${')'.repeat(100_000)} done`,
+      });
+      expect(urlValues(r)).toContain('https://evil.example/payload');
+    });
+
     test('hash value is lowercased (unchanged from prior behavior)', () => {
       const r = extractIocs({ text: 'hash: D41D8CD98F00B204E9800998ECF8427E' });
       expect(valuesOf(r, 'hash')).toContain('d41d8cd98f00b204e9800998ecf8427e');
@@ -350,6 +357,14 @@ describe('extract_iocs — DROP side (precision filters)', () => {
     test('keeps standalone domain when no longer match exists', () => {
       const r = extractIocs({ text: 'beacon to malicious.evil.top' });
       expect(domainValues(r)).toContain('malicious.evil.top');
+    });
+
+    test('handles a large set of unrelated domains without pairwise suffix scans', () => {
+      const domains = Array.from({ length: 10_000 }, (_, index) => `node${index}.evil${index}.com`);
+      const r = extractIocs({ text: domains.join(' ') });
+
+      expect(r.count).toBe(domains.length);
+      expect(r.truncated).toBe(true);
     });
   });
 });
