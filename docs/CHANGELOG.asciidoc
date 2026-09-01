@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.21>>
 * <<release-notes-8.19.20>>
 * <<release-notes-8.19.19>>
 * <<release-notes-8.19.18>>
@@ -126,6 +127,55 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.21]]
+== {kib} 8.19.21
+
+The 8.19.21 release includes the following breaking changes and fixes.
+
+[IMPORTANT]
+====
+The 8.19.21 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
+
+[float]
+[[breaking-changes-v8.19.21]]
+=== Breaking changes
+The email connector now verifies TLS certificates on HTTPS proxies by default. Connections to hosts with self-signed, expired, or hostname-mismatched certificates that previously succeeded will now fail. 
+
+To keep the previous behavior on the proxy connection, set `xpack.actions.ssl.proxyVerificationMode` to `none`. 
+
+Per-host `xpack.actions.customHostSettings` (custom CA or relaxed hostname) does not apply to the proxy connection. Only self-managed deployments that route email through an HTTPS proxy are affected ({kibana-pull}283150[#283150]).
+
+[float]
+[[fixes-v8.19.21]]
+=== Fixes
+Alerting::
+* Limit alerts-as-data resource installation concurrency to reduce peak heap usage ({kibana-pull}287643[#287643]).
+* Fix alert suppression for alerts stored with nested `_source` fields to prevent creating duplicate alerts instead of updating existing ones ({kibana-pull}282192[#282192]).
+Data ingestion and Fleet::
+* Fix {fleet} to ignore cluster privileges other than `monitor` in package manifests when applying permissions to agent API keys ({kibana-pull}286084[#286084]).
+* Fix {fleet} Kafka output to accept custom multi-field format strings entered directly in the Dynamic Topic field instead of producing an invalid topic expression ({kibana-pull}285581[#285581]).
+Developer tools::
+* Fix duplicate Cut, Copy, and Paste actions in the Console context menu ({kibana-pull}286704[#286704]).
+* Fix Console body autocomplete to prioritize explicit field rules over same-name global rules ({kibana-pull}286703[#286703]).
+* Fix Console autocomplete inserting boolean and numeric values as quoted strings instead of JSON primitives ({kibana-pull}286699[#286699]).
+* Fix Console body autocomplete failing after closed triple-quoted string values ({kibana-pull}286695[#286695]).
+* Fix Console autocomplete not triggering at request body positions, and correct template expansion and text corruption bugs when accepting suggestions ({kibana-pull}284530[#284530]).
+* Fix Console incorrectly showing autocomplete suggestions inside non-query triple-quoted strings ({kibana-pull}282424[#282424]).
+Elastic Observability solution::
+* Add a warning in the Synthetics UI when a private-location agent is too old to support maintenance windows ({kibana-pull}285327[#285327]).
+* Fix custom threshold rate aggregation to correctly alert when a counter increases from 0 ({kibana-pull}283973[#283973]).
+Elastic Security solution::
+For the Elastic Security 8.19.21 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Fix query rule set and rule ID validation to reject invalid characters before sending requests to {es} ({kibana-pull}276710[#276710]).
+Kibana platform::
+* Fix PKI session invalidation when in-flight HTTP/2 requests are canceled ({kibana-pull}285153[#285153]).
+* Fix {kib} to detect a misconfigured audit log file path on startup and report a degraded state instead of crashing ({kibana-pull}282347[#282347]).
+Machine Learning::
+* Fix the trained model testing endpoint to require admin-level permissions and run inference as the requesting user ({kibana-pull}282002[#282002]).
 
 [[release-notes-8.19.20]]
 == {kib} 8.19.20

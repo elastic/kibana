@@ -592,6 +592,55 @@ describe('Alerting Plugin', () => {
 
           await startContract.getAlertingAuthorizationWithRequest(fakeRequest);
         });
+
+        test(`exposes registerSyncTask()`, async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+            generateAlertingConfig()
+          );
+          const plugin = new AlertingPlugin(context);
+
+          const encryptedSavedObjectsSetup = {
+            ...encryptedSavedObjectsMock.createSetup(),
+            canEncrypt: true,
+          };
+          plugin.setup(coreMock.createSetup(), {
+            licensing: licensingMock.createSetup(),
+            encryptedSavedObjects: encryptedSavedObjectsSetup,
+            taskManager: taskManagerMock.createSetup(),
+            eventLog: eventLogServiceMock.create(),
+            actions: actionsMock.createSetup(),
+            statusService: statusServiceMock.createSetupContract(),
+            monitoringCollection: monitoringCollectionMock.createSetup(),
+            data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+            features: featuresPluginMock.createSetup(),
+            unifiedSearch: autocompletePluginMock.createSetupContract(),
+            ...(useDataStreamForAlerts
+              ? { serverless: serverlessPluginMock.createSetupContract() }
+              : {}),
+          });
+
+          const startContract = plugin.start(coreMock.createStart(), {
+            actions: actionsMock.createStart(),
+            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+            features: mockFeatures(),
+            spaces: spacesMock.createStart(),
+            licensing: licensingMock.createStart(),
+            eventLog: eventLogMock.createStart(),
+            taskManager: taskManagerMock.createStart(),
+            data: dataPluginMock.createStartContract(),
+            share: {} as SharePluginStart,
+            dataViews: {
+              dataViewsServiceFactory: jest
+                .fn()
+                .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+              getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+            } as DataViewsServerPluginStart,
+          });
+
+          const unsubscribe = startContract.registerSyncTask('consumer-sync-task');
+          expect(typeof unsubscribe).toBe('function');
+          unsubscribe();
+        });
       });
     });
   }
