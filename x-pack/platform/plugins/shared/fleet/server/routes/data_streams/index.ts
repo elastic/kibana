@@ -99,7 +99,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       security: {
         authz: {
           // Read-only: the handler runs a search and mutates nothing. Index-level access is
-          // enforced by Elasticsearch since the query runs as the current user.
+          // additionally enforced by Elasticsearch, since the query runs as the current user —
+          // the handler converts an ES security_exception into a 403 rather than "no data".
           requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.READ],
         },
       },

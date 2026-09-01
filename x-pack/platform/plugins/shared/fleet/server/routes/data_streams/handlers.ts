@@ -373,6 +373,16 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
   }
 };
 
+/**
+ * True when an ES error is (or wraps) a `security_exception`. The type can sit at the top level or
+ * be nested under `root_cause` when the failure is wrapped by a search phase exception.
+ */
+function isSecurityException(error: any): boolean {
+  if (!error) return false;
+  if (error.type === 'security_exception') return true;
+  return (error.root_cause ?? []).some((c: { type?: string }) => c.type === 'security_exception');
+}
+
 export const getHasDataHandler: RequestHandler = async (context, request, response) => {
   const { dataStreams: dataStreamsParam, start } = request.query as {
     dataStreams: string;
@@ -403,18 +413,42 @@ export const getHasDataHandler: RequestHandler = async (context, request, respon
   try {
     const msearchResponse = await esClient.msearch({ searches });
     const results: Record<string, boolean> = {};
+
     patterns.forEach((pattern: string, i: number) => {
       const hit = msearchResponse.responses[i];
       if ('error' in hit) {
+        // msearch reports a per-index failure on the response item rather than throwing, so an
+        // access denial arrives here. Surface it as 403 instead of reporting "no data" — a
+        // silent `false` would leave callers polling forever with no sign of the real problem.
+        if (isSecurityException(hit.error)) {
+          throw new FleetUnauthorizedError(
+            `Not enough permissions to query data stream "${pattern}"`
+          );
+        }
         results[pattern] = false;
       } else {
         results[pattern] = ((hit.hits.total as SearchTotalHits)?.value ?? 0) > 0;
       }
     });
+
     return response.ok({ body: { results } });
   } catch (err) {
+    if (err instanceof FleetUnauthorizedError) {
+      throw err;
+    }
+
+    const isResponseError = err instanceof errors.ResponseError;
+
+    if (isResponseError && isSecurityException(err?.body?.error)) {
+      throw new FleetUnauthorizedError(
+        `Not enough permissions to query data streams: ${err.message}`
+      );
+    }
+
+    // "No shards available" and "no data yet" are the same answer for the caller — a data stream
+    // that exists but has not been written to yet can report this.
     const isNoShards =
-      err instanceof errors.ResponseError &&
+      isResponseError &&
       err?.body?.error?.type === 'search_phase_execution_exception' &&
       (err?.body?.error?.root_cause ?? []).some(
         (c: { type?: string }) => c.type === 'no_shard_available_action_exception'
@@ -426,6 +460,7 @@ export const getHasDataHandler: RequestHandler = async (context, request, respon
       });
       return response.ok({ body: { results } });
     }
+
     throw err;
   }
 };

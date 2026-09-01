@@ -22,6 +22,8 @@ import { dataStreamService } from '../../services/data_streams';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { appContextService } from '../../services';
 
+import { FleetUnauthorizedError } from '../../errors';
+
 import { getDeprecatedILMCheckHandler, getListHandler, getHasDataHandler } from './handlers';
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 
@@ -573,6 +575,108 @@ describe('getHasDataHandler', () => {
     });
 
     await expect(getHasDataHandler(context, request, response)).rejects.toThrow('boom');
+  });
+
+  describe('permission errors', () => {
+    const makeSecurityError = (body: any) =>
+      new errors.ResponseError({
+        statusCode: 403,
+        body,
+        headers: {},
+        meta: {} as any,
+        warnings: null,
+      } as any);
+
+    it('throws FleetUnauthorizedError for a per-response security_exception', async () => {
+      // msearch reports per-index failures on the response item rather than throwing.
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [{ error: { type: 'security_exception', reason: 'denied' } }],
+      } as any);
+
+      const request = makeRequest({
+        dataStreams: 'logs-aws.vpcflow-*',
+        start: '2025-01-01T00:00:00Z',
+      });
+
+      await expect(getHasDataHandler(context, request, response)).rejects.toThrow(
+        FleetUnauthorizedError
+      );
+      // Must not be reported as "no data".
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('throws FleetUnauthorizedError when a security_exception is nested in root_cause', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [
+          {
+            error: {
+              type: 'search_phase_execution_exception',
+              root_cause: [{ type: 'security_exception', reason: 'denied' }],
+            },
+          },
+        ],
+      } as any);
+
+      const request = makeRequest({
+        dataStreams: 'logs-aws.vpcflow-*',
+        start: '2025-01-01T00:00:00Z',
+      });
+
+      await expect(getHasDataHandler(context, request, response)).rejects.toThrow(
+        FleetUnauthorizedError
+      );
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('throws FleetUnauthorizedError for a top-level security_exception', async () => {
+      mockEsClient.msearch.mockRejectedValue(
+        makeSecurityError({ error: { type: 'security_exception', reason: 'denied' } })
+      );
+
+      const request = makeRequest({
+        dataStreams: 'logs-aws.vpcflow-*',
+        start: '2025-01-01T00:00:00Z',
+      });
+
+      await expect(getHasDataHandler(context, request, response)).rejects.toThrow(
+        FleetUnauthorizedError
+      );
+    });
+
+    it('still reports false for non-permission per-response errors', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [{ error: { type: 'index_not_found_exception' } }],
+      } as any);
+
+      const request = makeRequest({
+        dataStreams: 'logs-aws.vpcflow-*',
+        start: '2025-01-01T00:00:00Z',
+      });
+
+      await getHasDataHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { results: { 'logs-aws.vpcflow-*': false } },
+      });
+    });
+
+    it('fails the whole request when one pattern of several is denied', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [
+          { hits: { total: { value: 1 } } },
+          { error: { type: 'security_exception', reason: 'denied' } },
+        ],
+      } as any);
+
+      const request = makeRequest({
+        dataStreams: 'logs-aws.vpcflow-*,metrics-aws.ec2-*',
+        start: '2025-01-01T00:00:00Z',
+      });
+
+      await expect(getHasDataHandler(context, request, response)).rejects.toThrow(
+        FleetUnauthorizedError
+      );
+    });
   });
 
   it('builds the correct msearch body — one header+body pair per pattern', async () => {
