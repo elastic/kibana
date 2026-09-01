@@ -35,7 +35,7 @@ If the key already existed in the product and you are only adding the YAML, omit
 
 ## New kibana.yml setting available on Elastic Cloud Hosted
 
-Set `ech: ga` if Cloud supports the key. Confirm Cloud actually allowlists it. Then include the YAML from `elastic-cloud-kibana-settings.md` with `:deployment: ech` if that include is not already present for this file.
+Set `ech: ga` if the Elastic Cloud Hosted user-settings allowlist includes the key. Then include the YAML from `elastic-cloud-kibana-settings.md` with `:deployment: ech` if that include is not already present for this file.
 
 ```yaml
       - setting: xpack.example.mode

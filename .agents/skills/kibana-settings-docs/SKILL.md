@@ -47,7 +47,7 @@ Task progress:
 - [ ] 5. Update host Markdown, toc.yml, or Cloud include only if needed
 - [ ] 6. Tag applies_to (stack history + deployments + serverless as required)
 - [ ] 7. Preview and check the Supported on line
-- [ ] 8. Check related work (release notes, docker env vars, Cloud support)
+- [ ] 8. If users need instructions, find the how-to page and open a docs-content issue or PR
 ```
 
 ### 1. Classify
@@ -107,7 +107,7 @@ Create or update a host file only when you add a new YAML collection:
 - Add the page under `docs/reference/toc.yml` → `configuration-reference.md`.
 - If Elastic Cloud Hosted should list the setting, include the YAML from `docs/reference/cloud/elastic-cloud-kibana-settings.md` with `:deployment: ech`.
 
-That Cloud filter shows a setting only when `applies_to` includes `ech: ga`. Omit `ech` when Elastic Cloud Hosted does not support the setting. Do not write `ech: unavailable`. A missing `applies_to` block shows the setting on the Cloud page. Always set `applies_to`.
+That filter shows a setting only when the entry has `ech: ga`. Decide `ech: ga` from the allowlist in step 6. A missing `applies_to` block shows the setting on the Cloud page. Always set `applies_to`.
 
 Reporting settings already split across several YAML files included from `reporting-settings.md`. Add to the matching include, not a new page.
 
@@ -124,6 +124,10 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
 - **Do not delete a removed setting.** Keep the YAML entry so users on earlier versions can still find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`.
 - **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported:
   - Write `key: ga` if that deployment supports it, even when `stack` is `preview` or `removed`.
+  - For `ech`, check the Elastic Cloud Hosted user-settings allowlist first. That list lives in the `cloud` repository.
+  - `packages/kbn-check-kibana-settings-cli` compares Kibana keys against it.
+  - Write `ech: ga` if the key is on the list. Omit `ech` if it is not.
+  - Do not infer support from the published Cloud settings page. That page is generated from this YAML.
   - Omit the key if that deployment does not support it.
   - Do not copy the stack lifecycle onto deployments.
   - Do not write `unavailable` or a version on those keys.
@@ -149,25 +153,16 @@ YAML that parses is not proof that badges render. Inspect the live DOM for the s
 - A rendered line is `dd > p.settings-supported-on` with `<applies-to-popover>` children.
 - If `stack` names an unreleased version, the docs can show Planned until that minor ships. Do not strip that version.
 
-### 8. Related work
+### 8. How-to follow-up
 
-This skill only edits the settings YAML. A settings change can still need other edits in the same Kibana PR. Skip any item that does not apply.
+The YAML in this repo is the setting reference. Users may also need instructions.
 
-**Release notes**
+If the change needs new or updated how-to content:
 
-If the setting is user-facing and new, changed, deprecated, or removed, add an entry under `docs/release-notes/`. Skip this when you are only documenting a setting that already shipped.
+1. Search published docs with the `elastic-docs` MCP (`search_docs` or `find_related_docs`).
+2. Open an `elastic/docs-content` issue, or an accompanying PR on the page that already covers that workflow.
 
-**Docker environment variables**
-
-This applies only to new `kibana.yml` keys, not Advanced Settings. If operators set the key with an environment variable in Docker, add it to `src/dev/build/tasks/os_packages/docker_generator/resources/base/bin/kibana-docker`. The Kibana PR template has this checklist item.
-
-**Elastic Cloud Hosted**
-
-`ech: ga` in the YAML documents that Cloud already supports the setting. It does not enable the setting on Cloud. If Cloud does not support the key yet, omit `ech`. Do not set `ech: ga` as a request to Cloud.
-
-**How-to pages**
-
-How to edit settings lives in `elastic/docs-content`. The setting reference lives in this repo. Do not copy the YAML entry into a docs-content page.
+Skip this when the reference entry is enough.
 
 ## Verification checklist
 
@@ -181,6 +176,7 @@ How to edit settings lives in `elastic/docs-content`. The setting reference live
 - [ ] Lifecycle changes append on `stack` (for example `preview 9.0-9.2, ga 9.3+`). They do not replace the previous value
 - [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
 - [ ] Unsupported deployments are omitted, not tagged `unavailable`
+- [ ] `ech: ga` only if the Elastic Cloud Hosted user-settings allowlist includes the key
 - [ ] Cloud page include exists only if the entry has `ech: ga`
 - [ ] No UI label, test ID, or component name used as the YAML `setting` key
 

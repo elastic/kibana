@@ -87,7 +87,7 @@ This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-t
 | `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | `ga` if supported. Omit the key if not. Never a version. Never `preview`, `experimental`, `deprecated`, `removed`, or `unavailable` |
 | `serverless` | Supported on serverless, or not | `ga` if supported. Omit the key if not. Never a version |
 
-`ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and Elastic Cloud Hosted supports the setting, write `ech: ga`.
+`ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and the Elastic Cloud Hosted user-settings allowlist includes the key, write `ech: ga`.
 
 Preferred map form (all versions):
 
@@ -116,7 +116,7 @@ Some existing files use a list of strings. Match the file's map-versus-list shap
 
 `docs/reference/cloud/elastic-cloud-kibana-settings.md` includes YAML with `:deployment: ech`.
 
-docs-builder shows a setting on that page when the entry has `ech: ga`. Omit `ech` when Cloud does not support the setting. A missing `applies_to` block on the entry shows the setting on the Cloud page. Always set `applies_to`.
+docs-builder shows a setting on that page when the entry has `ech: ga`. Write `ech: ga` only if the Elastic Cloud Hosted Kibana user-settings allowlist includes the key. That list lives in the `cloud` repository. Omit `ech` when the key is not allowlisted. A missing `applies_to` block on the entry shows the setting on the Cloud page. Always set `applies_to`.
 
 ### Do not copy stack lifecycle onto deployments
 
