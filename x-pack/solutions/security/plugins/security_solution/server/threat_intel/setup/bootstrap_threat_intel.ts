@@ -17,6 +17,14 @@ export interface BootstrapThreatIntelResult {
   seed: SeedDefaultSourcesResult;
 }
 
+// Bootstrap runs on the plugin boot path that the one-time readiness promise
+// (and the routes gated on it) waits for, so these bound how long we retry
+// transient Elasticsearch errors before giving up. 8 attempts is 7 × 2s ≈ 14s of
+// backoff per operation, and template install and seeding each get their own
+// budget, so cumulative boot delay can exceed that. The window is sized to ride
+// out ES still starting or preconfigured endpoints/templates propagating on a
+// fresh cluster, while staying bounded so a persistent failure surfaces (rejects
+// readiness) instead of blocking boot indefinitely.
 const BOOTSTRAP_RETRY_ATTEMPTS = 8;
 const BOOTSTRAP_RETRY_DELAY_MS = 2_000;
 
