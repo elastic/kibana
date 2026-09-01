@@ -121,7 +121,7 @@ describe('ProjectPicker', () => {
     await userEvent.click(screen.getByTestId('cps-project-picker-button'));
 
     expect(screen.getByLabelText('Cross-project search (CPS) scope')).toBeInTheDocument();
-    expect(screen.getByText('Cross-project search')).toBeInTheDocument();
+    expect(screen.getByText('Change project scope')).toBeInTheDocument();
     expect(screen.getByTestId('projectPickerList')).toBeInTheDocument();
     expect(screen.getAllByTestId('projectPickerListItem')).toHaveLength(3);
     expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();

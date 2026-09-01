@@ -66,7 +66,6 @@ describe('buildLensConfig', () => {
       error: null,
       currentAttempt: 1,
       esqlQuery: PROVIDED_ESQL,
-      timeRange: null,
     });
     mockedCreateGraph.mockReturnValue({ invoke } as unknown as ReturnType<
       typeof createVisualizationGraph
@@ -147,7 +146,6 @@ describe('buildLensConfig', () => {
       error: null,
       currentAttempt: 1,
       esqlQuery: PROVIDED_ESQL,
-      timeRange: null,
     });
 
     await expect(run(PROVIDED_ESQL)).resolves.toEqual({

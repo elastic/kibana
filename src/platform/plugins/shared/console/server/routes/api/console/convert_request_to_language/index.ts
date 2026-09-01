@@ -25,7 +25,7 @@ const routeValidationConfig = {
       schema.object({
         method: acceptedHttpVerb,
         url: nonEmptyString,
-        data: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 1000 }),
+        data: schema.arrayOf(schema.string({ maxLength: 100000 }), { maxSize: 1000 }),
       }),
       { maxSize: 100 }
     )

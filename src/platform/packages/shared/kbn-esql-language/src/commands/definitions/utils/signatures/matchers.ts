@@ -130,7 +130,7 @@ export function pairKeywordAndTextTypes(types: FunctionParameterType[]): Functio
 }
 
 /** Lets matching treat `text` and `keyword` as the same string family. */
-function areCompatibleStringTypes(type1: string, type2: string): boolean {
+export function areCompatibleStringTypes(type1: string, type2: string): boolean {
   return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
 }
 

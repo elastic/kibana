@@ -9,4 +9,9 @@
 
 export { spaceTest } from '../../../common/ui/fixtures';
 export { LOGS, LOGS_EXPERIENCE_TAGS } from './constants';
-export { setupLogsExperience, teardownLogsExperience } from './setup';
+export {
+  createNonLogsDiscoverSession,
+  deleteLogsExperienceData,
+  setupLogsExperience,
+  teardownLogsExperience,
+} from './setup';
