@@ -509,7 +509,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.search).toHaveBeenCalledTimes(1);
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
-            size: maxAlerts,
+            size: maxAlerts * 2,
             ignore_unavailable: true,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
