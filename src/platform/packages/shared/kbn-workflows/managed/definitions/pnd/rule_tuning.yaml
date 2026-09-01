@@ -39,25 +39,44 @@ consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
+  # Written onto every alert that reached a decision, and filtered out by the harvest,
+  # so a later sweep cannot rediagnose the same alerts into the same proposal.
+  reviewed_tag: detection-watch:tuning-reviewed
+  dismissed_tag: detection-watch:tuning-dismissed
+  applied_tag: detection-watch:tuning-applied
+  dismissed_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-dismissed
+  applied_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-applied
 steps:
+  # Scoped to one space because the tag API writes to the space's own alerts index, so
+  # a cross-space harvest would keep rediagnosing alerts it can never mark.
+  # `allow_partial_results: false` because a partial aggregation would both undercount
+  # fp_count and return a short alert_ids list, leaving alerts that drove a decision
+  # untagged. The 1000-id slice keeps the bulk tag request inside Kibana's payload
+  # limit; a rule noisier than that surfaces again on the next sweep.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
+      allow_partial_results: false
       query: |-
-        FROM .alerts-security.alerts-*
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
         | WHERE `kibana.alert.workflow_status` == "closed"
           AND `kibana.alert.workflow_reason` == "false_positive"
           AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
-        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
+          AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp), alert_ids = MV_SLICE(VALUES(_id), 0, 999) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count }}
-        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at
+        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
         | SORT fp_count DESC
-        | LIMIT 25
+        | LIMIT 10
     on-failure:
       continue: true
 
   # No iteration-timeout: an enclosing step-timeout zone would cut short the 72h
-  # approval gate below. Runaway work is bounded by the diagnose step's own timeout.
+  # approval gate below. Runaway work is bounded by the agent step's own timeout.
   - name: tune_each_rule
     type: foreach
     foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
@@ -250,7 +269,7 @@ steps:
           rejectLabel: Dismiss
           message: |-
             Rule tuning proposal for {{ foreach.item.1 }}
-            {{ foreach.item.2 }} alerts were closed in the last {{ inputs.lookback_hours }} hours.
+            {{ foreach.item.2 }} alerts were closed as false positives.
 
             {{ steps.diagnose_rule.output.structured_output.summary }}
 
@@ -271,7 +290,12 @@ steps:
             Backtest:
             current {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }}{% else %}inconclusive{% endif %},
             proposed {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }}{% else %}inconclusive{% endif %}.
-
+            {% if steps.preview_current_query.output.error_text != '' %}
+            Current query preview errors: {{ steps.preview_current_query.output.error_text }}
+            {% endif %}
+            {% if steps.preview_proposed_query.output.error_text != '' %}
+            Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
+            {% endif %}
             Approving replaces the rule query. It can be edited back in the Detection Rules UI.
             {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "suppression" %}
@@ -297,8 +321,11 @@ steps:
             apply the recommended change manually in the Detection Rules UI.
             {% endif %}
 
-      # Decided once so the apply and hand-off branches stay exact complements. Grouping
-      # an `or` chain with parentheses is a tokenization error in these expressions.
+            {% if steps.diagnose_rule.output.conversation_id %}
+            Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
+            {% endif %}
+
+      # Decided once so the apply and hand-off branches stay exact complements.
       - name: classify_proposal
         type: data.set
         with:
@@ -431,6 +458,25 @@ steps:
             The approved tuning change failed to apply automatically. Apply it in the
             Detection Rules UI.
 
+      # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
+      # harvest's KEEP projects: the alert_ids multivalue.
+      - name: mark_alerts_dismissed
+        type: security.setAlertTags
+        if: "${{ steps.review_tuning.output.response.approved == false }}"
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add: "${{ consts.dismissed_tags }}"
+        on-failure:
+          continue: true
+
+      - name: mark_alerts_applied
+        type: security.setAlertTags
+        if: "${{ steps.review_tuning.output.response.approved == true }}"
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add: "${{ consts.applied_tags }}"
+        on-failure:
+          continue: true
 
   # Size is computed on its own because comparison operators cannot follow a filter chain.
   - name: count_examined_rules
