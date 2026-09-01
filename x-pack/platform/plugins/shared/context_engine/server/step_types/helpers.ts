@@ -14,6 +14,7 @@ import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { KiVerificationSummary } from '../ki_verification';
+import { KiVerifierExecutionError } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
 import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
@@ -120,12 +121,26 @@ export const withKiVerificationTelemetry = async ({
     }
     return summary;
   } catch (error) {
-    const aborted = isAbortError(error);
-    const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+    const verifierError = error instanceof KiVerifierExecutionError ? error : undefined;
+    const cause = verifierError?.cause ?? error;
+    const aborted = isAbortError(cause);
+    const errorType = aborted ? undefined : errorTypeForTelemetry(cause);
     analyticsService.reportKiVerification({
       outcome: aborted ? 'aborted' : 'failure',
       errorType,
+      erroredVerifierId: verifierError?.verifierId,
     });
+    if (verifierError) {
+      logger.warn(`KI verifier '${verifierError.verifierId}' threw: ${errorType}`);
+      throw new ExecutionError({
+        type: 'VerificationExecutionError',
+        message: `KI verifier '${verifierError.verifierId}' could not complete`,
+        details: {
+          verifierId: verifierError.verifierId,
+          errorType,
+        },
+      });
+    }
     logger.debug(aborted ? 'KI verification aborted' : `KI verification errored: ${errorType}`);
     throw error;
   }

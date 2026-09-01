@@ -71,12 +71,14 @@ export class ContextEngineAnalyticsService {
     verifiersRun,
     failedVerifierIds,
     errorType,
+    erroredVerifierId,
   }: {
     outcome: ContextEngineOutcome;
     passed?: boolean;
     verifiersRun?: number;
     failedVerifierIds?: string[];
     errorType?: string;
+    erroredVerifierId?: string;
   }): void {
     try {
       this.analytics.reportEvent<ReportKiVerificationEventParams>(
@@ -88,6 +90,7 @@ export class ContextEngineAnalyticsService {
           ...(failedVerifierIds !== undefined &&
             failedVerifierIds.length > 0 && { failed_verifier_ids: failedVerifierIds }),
           ...(errorType !== undefined && { error_type: errorType }),
+          ...(erroredVerifierId !== undefined && { errored_verifier_id: erroredVerifierId }),
         }
       );
     } catch (error) {

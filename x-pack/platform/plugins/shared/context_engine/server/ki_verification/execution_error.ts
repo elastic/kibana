@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export class KiVerificationInputError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'KiVerificationInputError';
+export class KiVerifierExecutionError extends Error {
+  constructor(public readonly verifierId: string, public readonly cause: unknown) {
+    super(`KI verifier '${verifierId}' failed to execute`);
+    this.name = 'KiVerifierExecutionError';
   }
 }
-
-export { KiVerifierExecutionError } from './execution_error';

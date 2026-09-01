@@ -6,14 +6,14 @@
  */
 
 import type { KiVerifierRegistry } from './registry';
-import { errorTypeForTelemetry, isAbortError } from '../telemetry';
+import { isAbortError } from '../telemetry';
 import type {
   KiVerificationContext,
   KiVerificationSummary,
   KiVerifierResult,
   KnowledgeIndicator,
 } from './types';
-import { KiVerificationInputError } from './errors';
+import { KiVerificationInputError, KiVerifierExecutionError } from './errors';
 
 export class KiVerificationService {
   constructor(private readonly registry: KiVerifierRegistry) {}
@@ -56,10 +56,10 @@ export class KiVerificationService {
         const outcome = await verifier.verify(ki, verifierContext);
         results.push({ ...outcome, verifier: id });
       } catch (error) {
-        if (!isAbortError(error)) {
-          verifierContext.logger.warn(`KI verifier '${id}' threw: ${errorTypeForTelemetry(error)}`);
+        if (isAbortError(error)) {
+          throw error;
         }
-        throw error;
+        throw new KiVerifierExecutionError(id, error);
       }
     }
 

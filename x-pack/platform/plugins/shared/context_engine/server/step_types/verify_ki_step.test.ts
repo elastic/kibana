@@ -17,10 +17,10 @@ type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'
 type VerifyKiHandlerContext = Parameters<VerifyKiHandler>[0];
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
-const esResponseError = (type: string, reason: string) =>
+const esResponseError = (type: string, reason: string, statusCode = 400) =>
   new errors.ResponseError(
     elasticsearchClientMock.createApiResponse({
-      statusCode: 400,
+      statusCode,
       body: { error: { type, reason } },
     })
   );
@@ -200,6 +200,37 @@ describe('verify_ki workflow step', () => {
         reason: expect.stringContaining('Unknown column [made_up_field]'),
       },
     ]);
+  });
+
+  it('attributes runtime execution errors without exposing their details', async () => {
+    setContextEngineEnabled(true);
+    esClient.esql.query.mockRejectedValue(
+      esResponseError('security_exception', 'sensitive authorization details', 403)
+    );
+
+    const thrown = await runHandler(
+      { attributes: { esql: 'FROM logs-* | LIMIT 10' } },
+      { verifiers: [ESQL_VALID_RUNTIME_VERIFIER_ID] }
+    ).catch((error) => error);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('VerificationExecutionError');
+    expect(thrown.message).toBe(
+      `KI verifier '${ESQL_VALID_RUNTIME_VERIFIER_ID}' could not complete`
+    );
+    expect(thrown.message).not.toContain('sensitive authorization details');
+    expect(thrown.details).toEqual({
+      verifierId: ESQL_VALID_RUNTIME_VERIFIER_ID,
+      errorType: 'ResponseError',
+    });
+    expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+      outcome: 'failure',
+      errorType: 'ResponseError',
+      erroredVerifierId: ESQL_VALID_RUNTIME_VERIFIER_ID,
+    });
+    expect(telemetry.logger.warn).toHaveBeenCalledWith(
+      `KI verifier '${ESQL_VALID_RUNTIME_VERIFIER_ID}' threw: ResponseError`
+    );
   });
 
   it('skips KIs with no applicable verifiers', async () => {

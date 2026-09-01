@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { KiVerifierRegistry } from './registry';
-import { KiVerificationInputError } from './errors';
+import { KiVerificationInputError, KiVerifierExecutionError } from './errors';
 import { KiVerificationService } from './service';
 import type { KiVerificationContext, KiVerifier, KiVerifierOutcome } from './types';
 
@@ -108,17 +108,23 @@ describe('KiVerificationService', () => {
   });
 
   it('propagates a verifier execution failure', async () => {
+    const cause = new Error('boom');
     const thrower: KiVerifier = {
       id: 'thrower',
       applies: () => true,
       verify: jest.fn(async () => {
-        throw new Error('boom');
+        throw cause;
       }),
     };
     registry.register(thrower);
 
-    await expect(run('thrower')).rejects.toThrow('boom');
-    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'thrower' threw: Error");
+    await expect(run('thrower')).rejects.toEqual(
+      expect.objectContaining({
+        name: KiVerifierExecutionError.name,
+        verifierId: 'thrower',
+        cause,
+      })
+    );
   });
 
   it('rethrows abort errors', async () => {
@@ -138,19 +144,25 @@ describe('KiVerificationService', () => {
   });
 
   it('propagates a failure from applies()', async () => {
+    const cause = new Error('applies boom');
     const thrower: KiVerifier = {
       id: 'applies-thrower',
       applies: () => {
-        throw new Error('applies boom');
+        throw cause;
       },
       verify: jest.fn(async () => ({ passed: true as const })),
     };
     registry.register(thrower);
 
-    await expect(run('applies-thrower')).rejects.toThrow('applies boom');
+    await expect(run('applies-thrower')).rejects.toEqual(
+      expect.objectContaining({
+        name: KiVerifierExecutionError.name,
+        verifierId: 'applies-thrower',
+        cause,
+      })
+    );
 
     expect(thrower.verify).not.toHaveBeenCalled();
-    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'applies-thrower' threw: Error");
   });
 
   it('stamps the result with the verifier id from the registry', async () => {
