@@ -231,7 +231,7 @@ describe('severity helpers', () => {
   });
 
   describe('nextSeverityLevel', () => {
-    it('returns the next level above the most severe one used', () => {
+    it('returns the next unused level above the most severe one used', () => {
       expect(nextSeverityLevel([{ id: 'a', severity: 'low', threshold: 1 }])).toBe('medium');
       expect(
         nextSeverityLevel([
@@ -241,8 +241,26 @@ describe('severity helpers', () => {
       ).toBe('high');
     });
 
-    it('clamps at the top of the hierarchy', () => {
-      expect(nextSeverityLevel([{ id: 'a', severity: 'critical', threshold: 1 }])).toBe('critical');
+    it('fills a lower gap when nothing above the max is free', () => {
+      expect(nextSeverityLevel([{ id: 'a', severity: 'critical', threshold: 1 }])).toBe('info');
+      expect(
+        nextSeverityLevel([
+          { id: 'a', severity: 'medium', threshold: 1 },
+          { id: 'b', severity: 'high', threshold: 2 },
+          { id: 'c', severity: 'critical', threshold: 3 },
+        ])
+      ).toBe('info');
+    });
+
+    it('never repeats an already-used level', () => {
+      const levels = [
+        { id: 'a', severity: 'info' as const, threshold: 1 },
+        { id: 'b', severity: 'low' as const, threshold: 2 },
+        { id: 'c', severity: 'high' as const, threshold: 3 },
+        { id: 'd', severity: 'critical' as const, threshold: 4 },
+      ];
+      // Only `medium` is free.
+      expect(nextSeverityLevel(levels)).toBe('medium');
     });
 
     it('falls back to the lowest level when there are none', () => {

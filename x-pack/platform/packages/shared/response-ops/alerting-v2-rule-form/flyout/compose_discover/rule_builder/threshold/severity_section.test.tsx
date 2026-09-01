@@ -134,6 +134,24 @@ describe('SeveritySection', () => {
     expect(next.levels[1].severity).toBe('medium');
   });
 
+  it('disables adding levels once every severity is in use', () => {
+    renderSection({
+      alertConditions: [condition()],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'info', threshold: 0.5 },
+          { id: 'l2', severity: 'low', threshold: 0.6 },
+          { id: 'l3', severity: 'medium', threshold: 0.7 },
+          { id: 'l4', severity: 'high', threshold: 0.8 },
+          { id: 'l5', severity: 'critical', threshold: 0.9 },
+        ],
+      },
+    });
+    expect(screen.getByTestId('ruleBuilderAddSeverityLevel')).toBeDisabled();
+  });
+
   it('removes a severity level in multi mode', () => {
     const { onChange } = renderSection({
       alertConditions: [condition()],

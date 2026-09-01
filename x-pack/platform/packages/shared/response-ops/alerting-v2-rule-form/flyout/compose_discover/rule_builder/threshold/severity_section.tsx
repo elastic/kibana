@@ -43,6 +43,7 @@ import {
   isMultiSeveritySupported,
   isSeveritySupported,
   nextSeverityLevel,
+  MAX_SEVERITY_LEVELS,
 } from './form_types';
 import {
   SEVERITY_LEVEL_OPTIONS,
@@ -326,6 +327,7 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                     size="s"
                     iconType="plusCircle"
                     onClick={addLevel}
+                    isDisabled={severity.levels.length >= MAX_SEVERITY_LEVELS}
                     data-test-subj="ruleBuilderAddSeverityLevel"
                   >
                     <FormattedMessage

@@ -263,14 +263,23 @@ export const createDefaultSeverityLevels = (condition: AlertCondition): Severity
   ];
 };
 
+/** Since duplicate severity levels are invalid, at most one level per severity can exist. */
+export const MAX_SEVERITY_LEVELS = SEVERITY_LEVELS.length;
+
 /**
- * Suggest the severity for a newly added multi-severity level: the next level
- * above the most severe one already used, clamped to the top of the hierarchy.
+ * Suggest the severity for a newly added multi-severity level: the first unused
+ * level above the most severe one already used, falling back to the lowest unused
+ * level (filling gaps). Never returns a severity already in use unless all are
+ * taken, which the {@link MAX_SEVERITY_LEVELS} cap prevents.
  */
 export const nextSeverityLevel = (levels: SeverityLevel[]): AlertEventSeverity => {
-  if (levels.length === 0) return SEVERITY_LEVELS[0];
-  const maxIndex = Math.max(...levels.map((lvl) => SEVERITY_LEVELS.indexOf(lvl.severity)));
-  return SEVERITY_LEVELS[Math.min(maxIndex + 1, SEVERITY_LEVELS.length - 1)];
+  const used = new Set(levels.map((lvl) => lvl.severity));
+  const maxIndex = levels.length
+    ? Math.max(...levels.map((lvl) => SEVERITY_LEVELS.indexOf(lvl.severity)))
+    : -1;
+  const above = SEVERITY_LEVELS.slice(maxIndex + 1).find((severity) => !used.has(severity));
+  if (above) return above;
+  return SEVERITY_LEVELS.find((severity) => !used.has(severity)) ?? SEVERITY_LEVELS[0];
 };
 
 /**
