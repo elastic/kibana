@@ -54,8 +54,8 @@ interface OxlintRun {
 
 async function runOxlint(args: string[]): Promise<OxlintRun> {
   const { stdout, stderr, exitCode } = await execa(
-    oxlintBinPath,
-    ['--config', OXLINT_CONFIG_PATH, '--format', 'json', ...args],
+    process.execPath,
+    [oxlintBinPath, '--config', OXLINT_CONFIG_PATH, '--format', 'json', ...args],
     { cwd: REPO_ROOT, reject: false, maxBuffer: 256 * 1024 * 1024 }
   );
 
