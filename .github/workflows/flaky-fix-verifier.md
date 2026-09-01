@@ -452,10 +452,13 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
 
    ```markdown
    ### 🏷️ Release and backport labels
-   Applied `<release-note label>` and `<backport labels>` because <one concise reason grounded in the changed code and checked release branches>.
+   Applied `<release-note label>` because <one very short reason>.
+
+   - `<version>` → <one very short sentence justifying its backport decision>.
+   - `<version>` → <one very short sentence justifying its backport decision>.
    ```
 
-   If no backport label was safe, say which active versions may need consideration and why the verifier could not decide. Do not add this guidance to the PR body.
+   Include exactly one bullet for every active version checked, using its current `vX.Y.Z` label from `versions.json`. Each bullet must start with the version, followed by `→` and one very short sentence explaining why that version is included, excluded, or uncertain. Do not add introductory prose, nested bullets, or details to the backport list. If no backport label was safe, the bullets must state the uncertainty per version. Do not add this guidance to the PR body.
 
 This work runs after the fix exists and has been validated, so a backport-analysis failure must never change a green verdict or hold the PR in draft: still apply the release-note label, leave the PR without a backport label, explain the uncertainty in the short rationale, and continue opening it for review.
 
@@ -468,7 +471,7 @@ This work runs after the fix exists and has been validated, so a backport-analys
 An update comment is the kickoff rationale, a terminal verdict, or the required release/backport-label rationale. Post one **only when it is strictly necessary and adds real value** a reader can't already get from the `/flaky` command, the runner's result comment, the pushed commit, or the labels; otherwise post nothing. Shape:
 
 1. A `### <emoji> <heading>` first line: the status heading from the table below.
-2. One to three sentences: what happened and, for a verdict, the single most useful next step. Don't write a full analysis. For any non-green verdict (`failed` or `inconclusive`), state **why** the run wasn't green — and when the red comes from unrelated tests that merely share the config (lane pollution not caused by this PR), say so explicitly, naming the failing test(s), so a reviewer doesn't misread it as the fix failing.
+2. One to three prose sentences: what happened and, for a verdict, the single most useful next step. A green label rationale additionally includes the required per-version backport bullets from [Release-note and backport labels](#release-note-and-backport-labels). Don't write a full analysis. For any non-green verdict (`failed` or `inconclusive`), state **why** the run wasn't green — and when the red comes from unrelated tests that merely share the config (lane pollution not caused by this PR), say so explicitly, naming the failing test(s), so a reviewer doesn't misread it as the fix failing.
 3. Add a short `<details><summary>See details</summary>` block only when a reader genuinely needs a specific you can't fit above (e.g. a concrete recommended fix, or which unrelated test failed). Keep it terse; omit it otherwise.
 
 A green terminal verdict always needs the short release/backport-label rationale described above. Fold it into the skipped or passed-after-iteration verdict comment when one is already required; for a first-run `passed` verdict, post only the label-rationale comment. These are the allowed comment shapes:
@@ -482,7 +485,7 @@ A green terminal verdict always needs the short release/backport-label rationale
 | Passed after >1 flaky run (an earlier fix didn't hold and you pushed a revision) | `### ✅ Flaky-fix verified` |
 | Release/backport labels (routine first-run pass) | `### 🏷️ Release and backport labels` |
 
-**Passed after more than one iteration.** When the verdict is `passed` **and** `triggeredByBot` (from `flaky-run-count.json`) is greater than 1 — i.e. an earlier fix didn't hold and you pushed a revised fix that then held — post one short comment describing, in one sentence, what the final revision changed to make the test stable, then add the release/backport-label rationale as the final sentence. A first-run pass instead gets only the label-rationale comment.
+**Passed after more than one iteration.** When the verdict is `passed` **and** `triggeredByBot` (from `flaky-run-count.json`) is greater than 1 — i.e. an earlier fix didn't hold and you pushed a revised fix that then held — post one short comment describing, in one sentence, what the final revision changed to make the test stable, then add the release-note rationale and per-version backport bullets. A first-run pass instead gets only the label-rationale comment.
 
 ## Flaky test invocation comment
 
@@ -582,7 +585,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 ## Workflow guardrails
 
 - Never exceed 6 total `/flaky` triggers of your own for this PR; use the precomputed `triggeredByBot` in `flaky-run-count.json` (kibanamachine-authored only) rather than re-tallying, so developer-triggered `/flaky` comments don't count toward this.
-- Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the summary to 1–3 sentences (any extra depth goes in a terse `<details>` block, per [Update comment](#update-comment)), and prefer none during verification. A green terminal verdict gets exactly one label-rationale note, folded into an existing skipped or passed-after-iteration comment when possible.
+- Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the prose summary to 1–3 sentences plus the required per-version backport bullets (any extra depth goes in a terse `<details>` block, per [Update comment](#update-comment)), and prefer none during verification. A green terminal verdict gets exactly one label-rationale note, folded into an existing skipped or passed-after-iteration comment when possible.
 - The `/flaky` command must be its own comment and start with `/flaky ` (it is consumed by `.github/workflows/trigger-flaky.yml`).
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not post a `/flaky` comment in response to a results comment you have already acted on (check for a later `/flaky` comment or a terminal label).
