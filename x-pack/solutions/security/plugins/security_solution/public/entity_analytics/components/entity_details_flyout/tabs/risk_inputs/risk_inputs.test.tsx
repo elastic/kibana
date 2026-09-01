@@ -485,13 +485,12 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+2.22');
   });
 
-  // Covers https://github.com/elastic/kibana/issues/280414.
+  // Client half of the fix for https://github.com/elastic/kibana/issues/280414.
   //
   // The Contexts row used to show the level stored on the risk score, which is only set when the
-  // score is written. Changing criticality asks the risk engine to score the entity again, but it
-  // writes nothing when the entity has no alert in the engine's lookback (see
-  // `score_base_entities.ts`), so the row kept showing the old level. It now reads the level from
-  // the entity store record.
+  // score is written, so it could be out of date. It now reads the entity store record. The server
+  // half writes a fresh score, so in the normal case both agree and the contribution still shows.
+  // A `-` means the score has not caught up yet, or the recalculation did not land.
   describe('asset criticality read from the entity store record', () => {
     const scoreWithCriticality = (criticalityLevel: string, contribution: number) => ({
       '@timestamp': '2021-08-19T16:00:00.000Z',

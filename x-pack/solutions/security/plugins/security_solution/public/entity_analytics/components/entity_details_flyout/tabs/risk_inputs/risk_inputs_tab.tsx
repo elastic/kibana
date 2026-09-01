@@ -150,11 +150,11 @@ export const RiskInputsTab = <T extends EntityType>({
   const { data: watchlists } = useGetWatchlists();
   const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
-  // A risk score stores the criticality that was set when the score was written. Changing
-  // criticality asks the risk engine to score the entity again, but it writes nothing when the
-  // entity has no alert in the engine's lookback, so that stored value can be old. Read the
-  // current level from the entity store record instead, like EntitySummaryGrid does. Saving
-  // criticality patches this query's cache, so the row updates right away.
+  // A risk score stores the criticality that was set when the score was written, so it can be
+  // out of date. Read the current level from the entity store record instead, like
+  // EntitySummaryGrid does. Saving criticality patches this query's cache, so the row is right
+  // straight away rather than after the recalculation round trip, and stays right if that
+  // recalculation fails.
   const { entityRecord } = useEntityFromStore({ entityId, entityType, skip: !entityId });
 
   // The record has loaded. No `asset.criticality` on it means the level was removed, not that
@@ -813,8 +813,9 @@ const ContextsSection = <T extends EntityType>({
         ? null
         : liveCriticality
       : persistedLevel;
-    // The stored contribution was calculated from the stored level. Once the two levels differ it
-    // no longer matches the level we show, so drop it.
+    // The stored contribution was calculated from the stored level, so it does not match the level
+    // we show once the two differ. That gap should be brief, lasting until the recalculation
+    // writes a new score, and longer only if that recalculation failed.
     const contributionDescribesLevel = !useLiveLevel || liveCriticality === persistedLevel;
 
     return {
