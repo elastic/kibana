@@ -390,6 +390,7 @@ export function initializeLayoutManager(
   };
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
+    childrenStateLoading$.next(true);
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
     const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
     if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
@@ -401,10 +402,12 @@ export function initializeLayoutManager(
         { displaySuccessMessage: false },
         existingGridData
       );
+      childrenStateLoading$.next(false);
       return newPanel.uuid;
     } else {
       const prevLayoutState = pick(existingPinnedPanelData, 'grow', 'width', 'order');
       const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
+      childrenStateLoading$.next(false);
       return newPanel.uuid;
     }
   };
