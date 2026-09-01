@@ -763,7 +763,7 @@ describe('KibanaEvalsClient', () => {
       description: 'desc',
       examples: [
         { id: 'ex-a', input: { q: 'a' }, output: { ok: true } },
-        { id: 'ex-b', input: { q: 'b' }, output: { ok: true } },
+        { input: { q: 'b' }, output: { ok: true } },
       ],
     };
 
@@ -787,8 +787,8 @@ describe('KibanaEvalsClient', () => {
 
     // Without this an evaluator can only re-derive identity by hashing `input`,
     // which breaks whenever a dataset edits an input string (#288243).
-    expect(seen.map((entry) => entry.exampleId).sort()).toEqual(['ex-a', 'ex-b']);
-    expect(seen.every((entry) => typeof entry.exampleIndex === 'number')).toBe(true);
-    expect(seen.every((entry) => typeof entry.repetition === 'number')).toBe(true);
+    expect(seen.map((entry) => entry.exampleId)).toEqual(['ex-a', undefined]);
+    expect(seen.map((entry) => entry.exampleIndex)).toEqual([0, 1]);
+    expect(seen.map((entry) => entry.repetition)).toEqual([0, 0]);
   });
 });
