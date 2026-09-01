@@ -231,9 +231,11 @@ export interface UiamServicePublic {
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
    * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
    * @param accessToken The OAuth access token.
+   * @param requestPath Optional request path hint used to derive the correct audience when the
+   *   token is opaque (non-JWT) and the audience cannot be extracted directly.
    * @returns The ephemeral token.
    */
-  exchangeOAuthToken(accessToken: string): Promise<string>;
+  exchangeOAuthToken(accessToken: string, requestPath?: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID.
@@ -496,12 +498,58 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * Extracts the `aud` claim from an unverified JWT payload. Returns `undefined` on any parse
+   * error — the caller must fall back to the configured resource URL in that case.
+   */
+  static #extractTokenAudience(accessToken: string): string | undefined {
+    try {
+      const payloadB64 = accessToken.split('.')[1];
+      if (!payloadB64) return undefined;
+      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+      const aud = payload.aud;
+      return typeof aud === 'string' ? aud : Array.isArray(aud) ? aud[0] : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Determines the expected OAuth audience for a token exchange request.
+   *
+   * Priority order:
+   * 1. The `aud` claim embedded in the token (JWT only), provided its origin matches the
+   *    configured resource URL — avoids accepting tokens for unrelated services.
+   * 2. An audience derived from the request path when the token is opaque (non-JWT).
+   *    A path containing `/a2a` maps to the A2A resource; all other paths use the default.
+   * 3. The configured Kibana server resource URL (default / MCP).
+   */
+  #resolveOAuthAudience(accessToken: string, requestPath?: string): string {
+    const tokenAudience = UiamService.#extractTokenAudience(accessToken);
+    if (tokenAudience) {
+      try {
+        if (new URL(tokenAudience).origin === new URL(this.#kibanaServerResourceURL).origin) {
+          return tokenAudience;
+        }
+      } catch {
+        // malformed URL in aud claim — fall through
+      }
+    }
+
+    if (requestPath?.includes('/a2a')) {
+      return this.#kibanaServerResourceURL.replace(/\/mcp$/, '/a2a');
+    }
+
+    return this.#kibanaServerResourceURL;
+  }
+
+  /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(accessToken: string): Promise<string> {
+  async exchangeOAuthToken(accessToken: string, requestPath?: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    const expectedAudience = this.#kibanaServerResourceURL;
+    const expectedAudience = this.#resolveOAuthAudience(accessToken, requestPath);
+
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);

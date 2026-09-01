@@ -149,6 +149,7 @@ describe('toCreateOAuthClientPayload', () => {
       uris: [{ value: 'http://127.0.0.1:3000/callback' }],
     },
     isConfidential: false,
+    isA2A: false,
   };
 
   it('builds a payload for a public client with no logo and a single redirect URI', () => {

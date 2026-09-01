@@ -17,6 +17,7 @@ export interface CreateOAuthClientPayload {
   client_metadata?: Record<string, string>;
   client_logo?: OAuthClientLogo;
   redirect_uris?: string[];
+  is_a2a?: boolean;
 }
 
 export interface CreateOAuthClientResponse extends OAuthClient {

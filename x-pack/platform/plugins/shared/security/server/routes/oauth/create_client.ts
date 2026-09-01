@@ -60,8 +60,8 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const resource = config.mcp?.oauth2?.metadata?.resource;
-        if (!resource) {
+        const mcpResource = config.mcp?.oauth2?.metadata?.resource;
+        if (!mcpResource) {
           return response.notFound({
             body: {
               message:
@@ -69,6 +69,8 @@ export function defineCreateOAuthClientRoute({
             },
           });
         }
+        const { is_a2a: isA2A, ...clientBody } = request.body;
+        const resource = isA2A ? mcpResource.replace(/\/mcp$/, '/a2a') : mcpResource;
 
         if (!serverlessProjectId) {
           return response.notFound({
@@ -98,7 +100,7 @@ export function defineCreateOAuthClientRoute({
         }
 
         const result = await oauth.createClient(request, {
-          ...request.body,
+          ...clientBody,
           resource,
           project_id: serverlessProjectId,
           project_type: projectType,

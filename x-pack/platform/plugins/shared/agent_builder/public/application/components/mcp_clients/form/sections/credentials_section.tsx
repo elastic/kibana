@@ -44,6 +44,27 @@ export const CredentialsSection = () => {
           />
         )}
       />
+      <EuiSpacer size="m" />
+      <Controller
+        control={control}
+        name="isA2A"
+        render={({ field }) => (
+          <EuiCheckbox
+            id="mcpClientIsA2A"
+            label={
+              <>
+                <strong>A2A</strong>
+                <EuiText size="s" color="subdued">
+                  Register this client for the A2A endpoint instead of MCP.
+                </EuiText>
+              </>
+            }
+            checked={field.value}
+            onChange={(e) => field.onChange(e.target.checked)}
+            data-test-subj="mcpClientIsA2ACheckbox"
+          />
+        )}
+      />
     </EuiPanel>
   );
 };

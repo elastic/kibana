@@ -169,6 +169,7 @@ export class AgentBuilderPlugin
     const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({
       router,
+      config: this.config,
       coreSetup,
       logger: this.logger,
       pluginsSetup: setupDeps,
