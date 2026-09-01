@@ -384,7 +384,7 @@ export const datasetWizardStrings = {
 
   additionalSettingsDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsDescription', {
-      defaultMessage: 'You can further customize your setup of your dataset',
+      defaultMessage: 'Settings you leave unchanged use the default for your file format.',
     }),
 
   dataSourceSetupWarningTitle: () =>
