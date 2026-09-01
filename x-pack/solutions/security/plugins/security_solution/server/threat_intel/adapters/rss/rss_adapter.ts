@@ -10,9 +10,10 @@ import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
 import { buildReportContent, collapseWhitespace, truncate } from '../../services/report_content';
+import { normalizeProvenanceUrl } from '../../services/provenance_url';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { decodeDataUrl, isDataUrl } from './decode_data_url';
-import { htmlFragmentToText } from './html_fragment_to_text';
+import { htmlFragmentToStructuredText } from './html_fragment_to_structured_text';
 import { parseRssFeed } from './parse_rss';
 
 const TITLE_MAX_LENGTH = 280;
@@ -82,7 +83,7 @@ export const rssAdapter: FetchAdapter = {
       // genuinely not HTML, so it is used as-is.
       const fullBodyText =
         entry.body?.kind === 'markup'
-          ? htmlFragmentToText(entry.body.html)
+          ? htmlFragmentToStructuredText(entry.body.html)
           : entry.body?.text ?? '';
       // Untruncated, so a revision differing only past the stored-body cap is still
       // detected as a change.
@@ -96,6 +97,7 @@ export const rssAdapter: FetchAdapter = {
         entry.publishedAt,
         fullBodyText,
       ]);
+      const sourceUrl = normalizeProvenanceUrl(entry.link) ?? normalizeProvenanceUrl(feedUrl);
       reports.push({
         '@timestamp': ingestedAt,
         content_fingerprint: fingerprint,
@@ -104,7 +106,7 @@ export const rssAdapter: FetchAdapter = {
           type: 'rss',
           // Provenance only. The adapter fetches the configured feed URL and nothing else;
           // an entry link is recorded so an analyst can open the original item, never fetched.
-          url: entry.link ?? feedUrl,
+          ...(sourceUrl ? { url: sourceUrl } : {}),
           name: source._source.name,
           adapter_id: adapterId,
         },

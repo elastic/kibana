@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { extractIocs } from '../../services/extract_iocs';
 import { rssAdapter } from './rss_adapter';
 import type { AdapterRunContext, SourceHit } from '../types';
 
@@ -44,7 +45,6 @@ const NOW = new Date('2026-05-16T12:00:00.000Z');
 const buildContext = (
   fetchImpl: jest.Mock<Promise<Response>, [string | URL | Request, RequestInit?]>
 ): AdapterRunContext => ({
-  esClient: elasticsearchServiceMock.createElasticsearchClient(),
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,
   now: () => NOW,
@@ -104,6 +104,38 @@ describe('rssAdapter', () => {
     }
   });
 
+  it('preserves RSS headings through IOC section tiering', async () => {
+    const structuredFeed = FEED_BODY.replace(
+      '<p>Body one</p>',
+      [
+        '<h2>Indicators of Compromise</h2><p>callnrwise.com</p>',
+        '<h2>References</h2><p>https://citation.example.org/report</p>',
+      ].join('')
+    );
+    const reports = await rssAdapter.run(
+      buildSource(),
+      buildContext(jest.fn().mockResolvedValue(okResponse(structuredFeed)))
+    );
+
+    const extracted = extractIocs({ text: reports[0].content.body_text });
+    expect(extracted.iocs).toContainEqual(
+      expect.objectContaining({
+        type: 'domain',
+        value: 'callnrwise.com',
+        tier: 'discriminating',
+        tier_basis: 'ioc_section',
+      })
+    );
+    expect(extracted.iocs).toContainEqual(
+      expect.objectContaining({
+        type: 'url',
+        value: 'https://citation.example.org/report',
+        tier: 'reference',
+        tier_basis: 'references_section',
+      })
+    );
+  });
+
   // Load-bearing invariant: an entry link is provenance metadata only. The adapter fetches
   // the configured feed URL and nothing else — it must never fetch each item's link.
   it('never fetches an entry link, only the configured feed URL', async () => {
@@ -116,6 +148,32 @@ describe('rssAdapter', () => {
     expect(requested).not.toContain('https://acme.example/1');
     expect(requested).not.toContain('https://acme.example/2');
   });
+
+  it('removes credentials from entry provenance', async () => {
+    const feed = FEED_BODY.replace(
+      'https://acme.example/1',
+      'https://feed-user:feed-secret@acme.example/1'
+    );
+    const reports = await rssAdapter.run(
+      buildSource(),
+      buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+    );
+
+    expect(reports[0].source.url).toBe('https://acme.example/1');
+  });
+
+  it.each(['file:///etc/passwd', 'data:text/plain,secret', 'not a url'])(
+    'falls back to the normalized feed URL for invalid entry link %s',
+    async (entryLink) => {
+      const feed = FEED_BODY.replace('https://acme.example/1', entryLink);
+      const reports = await rssAdapter.run(
+        buildSource(),
+        buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+      );
+
+      expect(reports[0].source.url).toBe(FEED_URL);
+    }
+  );
 
   // The fingerprint used to be feed URL + guid + title only, so an advisory
   // that kept its guid and title while revising the text deduped away forever.
