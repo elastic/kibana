@@ -13,5 +13,5 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 export const useIsChromeNextProjectHeader = (): boolean => {
   const { chrome } = useDiscoverServices();
 
-  return useMemo(() => chrome.next.isEnabled && chrome.getChromeStyle() === 'project', [chrome]);
+  return useMemo(() => chrome.getChromeStyle() === 'project', [chrome]);
 };

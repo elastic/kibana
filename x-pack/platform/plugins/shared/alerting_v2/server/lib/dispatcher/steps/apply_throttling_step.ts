@@ -12,11 +12,11 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getLastNotifiedTimestampsQueries } from '../queries';
+import { DispatchPlan, EpisodeTriage, PolicyCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicy,
-  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -36,10 +36,19 @@ export class ApplyThrottlingStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
+    const {
+      groups = [],
+      policies = PolicyCatalog.empty(),
+      triage = EpisodeTriage.empty(),
+      input,
+    } = state;
+    const { dispatchable } = triage;
 
     if (groups.length === 0) {
-      return { type: 'continue', data: { dispatch: [], throttled: [] } };
+      return {
+        type: 'continue',
+        data: { plan: DispatchPlan.of({ toDispatch: [], throttled: [], dispatchable }) },
+      };
     }
 
     const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(groups.map((g) => g.id));
@@ -54,7 +63,10 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
     logger.debug({ message: 'Applied throttling' });
 
-    return { type: 'continue', data: { dispatch, throttled } };
+    return {
+      type: 'continue',
+      data: { plan: DispatchPlan.of({ toDispatch: dispatch, throttled, dispatchable }) },
+    };
   }
 
   private async fetchLastNotifiedTimestamps(
@@ -82,7 +94,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
 export function applyThrottling(
   groups: readonly ActionGroup[],
-  policies: ReadonlyMap<string, ActionPolicy>,
+  policies: PolicyCatalog,
   lastNotifiedMap: ReadonlyMap<ActionGroupId, LastNotifiedInfo>,
   now: Date,
   logger?: LoggerServiceContract
@@ -141,7 +153,7 @@ function shouldDispatch(
 ): boolean {
   if (!lastRecord) return true;
 
-  const groupingMode = policy.groupingMode ?? 'per_episode';
+  const { groupingMode } = policy;
   const strategy =
     policy.throttle?.strategy ??
     (groupingMode === 'per_episode' ? 'on_status_change' : 'time_interval');
