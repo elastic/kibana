@@ -21,7 +21,7 @@ describe('buildSecurityApi', () => {
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();
-    api = buildSecurityApi({ authc, config: {} });
+    api = buildSecurityApi({ authc });
   });
 
   describe('authc.getCurrentUser', () => {
@@ -39,30 +39,6 @@ describe('buildSecurityApi', () => {
       const currentUser = await api.authc.getCurrentUser();
 
       expect(currentUser).toBe(delegateReturn);
-    });
-  });
-
-  describe('serviceAccounts.isEnabled', () => {
-    it('returns true when service accounts are enabled', () => {
-      const enabledApi = buildSecurityApi({
-        authc,
-        config: { serviceAccounts: { enabled: true } },
-      });
-
-      expect(enabledApi.serviceAccounts.isEnabled()).toBe(true);
-    });
-
-    it('returns false when service accounts are disabled', () => {
-      const disabledApi = buildSecurityApi({
-        authc,
-        config: { serviceAccounts: { enabled: false } },
-      });
-
-      expect(disabledApi.serviceAccounts.isEnabled()).toBe(false);
-    });
-
-    it('returns false when the setting is not available, as is the case outside of serverless', () => {
-      expect(api.serviceAccounts.isEnabled()).toBe(false);
     });
   });
 });

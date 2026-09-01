@@ -20,14 +20,12 @@ export async function describeDataset({
   end,
   index,
   kql,
-  signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
   kql?: string;
-  signal?: AbortSignal;
 }) {
   const [columns, sampleDocs, total] = await Promise.all([
     getEsqlColumnSchema({
@@ -35,7 +33,7 @@ export async function describeDataset({
       index,
       start,
       end,
-      signal,
+      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
     }),
     getSampleDocumentsEsql({
       esClient,
@@ -43,7 +41,7 @@ export async function describeDataset({
       start,
       end,
       kql,
-      abortSignal: signal,
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     }),
     runEsqlPopulationCount({
       esClient,
@@ -51,7 +49,7 @@ export async function describeDataset({
       start,
       end,
       kql,
-      signal,
+      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
     }),
   ]);
 

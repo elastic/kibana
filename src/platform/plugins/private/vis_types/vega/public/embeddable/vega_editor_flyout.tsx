@@ -89,11 +89,7 @@ export const VegaEditorFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="vegaEditorFlyoutCancelButton"
-              flush="left"
-              onClick={closeFlyout}
-            >
+            <EuiButtonEmpty flush="left" onClick={closeFlyout}>
               {i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
@@ -103,14 +99,12 @@ export const VegaEditorFlyout = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  color="success"
                   data-test-subj="vegaEditorFlyoutPreviewButton"
                   disabled={!canPreview}
-                  iconType="play"
                   onClick={previewChanges}
                 >
                   {i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
-                    defaultMessage: 'Run Preview',
+                    defaultMessage: 'Preview',
                   })}
                 </EuiButton>
               </EuiFlexItem>

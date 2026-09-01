@@ -58,7 +58,6 @@ export const evaluatorResultSchema = z.object({
     name: z.string(),
     version: z.string().optional(),
     kind: z.enum(['llm', 'code']).optional(),
-    model: modelSchema.optional(),
   }),
   scores: z.array(
     z.object({

@@ -81,7 +81,7 @@ export const collectSampleDocuments = async ({
           end: Date.now(),
           dslFilter: [...baseDslFilter, filter],
           size: 1,
-          abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+          requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
         });
         return { hits, criterion: details, filter };
       });
@@ -138,7 +138,7 @@ export const collectSampleDocuments = async ({
       dslFilter: baseDslFilter,
       whereCondition: unseenCondition,
       size: remaining,
-      abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     const beforeFill = docs.length;

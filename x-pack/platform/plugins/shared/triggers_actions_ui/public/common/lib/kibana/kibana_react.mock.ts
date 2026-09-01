@@ -77,7 +77,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-    security: { ...core.security, ...securityMock.createStart() },
+    security: securityMock.createStart(),
   } as TriggersAndActionsUiServices;
 };
 

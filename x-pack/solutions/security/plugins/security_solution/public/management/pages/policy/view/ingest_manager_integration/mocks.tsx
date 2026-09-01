@@ -177,8 +177,6 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         security_ai_prompt: [],
         osquery_pack_asset: [],
         osquery_saved_query: [],
-        agent: [],
-        workflow: [],
       },
       elasticsearch: {
         ingest_pipeline: [],
@@ -190,7 +188,6 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         ml_model: [],
         knowledge_base: [],
         esql_view: [],
-        index_alias: [],
       },
     },
     status: 'not_installed',

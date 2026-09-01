@@ -190,7 +190,7 @@ describe('Subtitle', () => {
     );
   });
 
-  it('should render avatar initials if profile is not yet loaded for manually generated attacks with userId', () => {
+  it('should render avatar placeholder if profile is not yet loaded for manually generated attacks with userId', () => {
     (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
       data: undefined,
     });
@@ -203,21 +203,6 @@ describe('Subtitle', () => {
     const { getByTestId } = render(<Subtitle attack={manualAttack} />);
 
     expect(getByTestId('attack-run-by-avatar')).toBeInTheDocument();
-    expect(getByTestId('attack-run-by-avatar')).toHaveTextContent('t');
-  });
-
-  it('should render avatar placeholder if profile and userName are unavailable', () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
-      data: undefined,
-    });
-    const manualAttack = {
-      ...mockAttack,
-      alertRuleUuid: ATTACK_DISCOVERY_AD_HOC_RULE_ID,
-      userId: 'test-user-id',
-      userName: undefined,
-    };
-    const { getByTestId } = render(<Subtitle attack={manualAttack} />);
-
     expect(getByTestId('attack-run-by-avatar')).toHaveTextContent('?');
   });
 

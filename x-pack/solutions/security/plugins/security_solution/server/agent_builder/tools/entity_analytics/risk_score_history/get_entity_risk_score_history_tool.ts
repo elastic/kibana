@@ -176,13 +176,6 @@ IMPORTANT — entries are aggregated, not every scoring run: the series is a dat
 Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaults to the entity's \`base\` score series; pass \`scoreType: "resolution"\` for resolution-group trends. Pass \`includeContributions: true\` only when explaining *why* a score changed. For fleet-level "who increased the most", use security.search_entities with riskScoreChangeInterval first, then drill in with this tool.`,
     schema,
     tags: ['security', 'entity-analytics', 'risk-score', 'history'],
-    annotations: {
-      title: 'Get Entity Risk Score History',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {

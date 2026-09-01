@@ -227,7 +227,6 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
-  CoreServiceAccountsService,
   CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';
 

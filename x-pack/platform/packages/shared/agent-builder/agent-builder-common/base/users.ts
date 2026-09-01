@@ -17,9 +17,7 @@ export interface UserIdAndName {
  *
  * Distinguished from {@link UserIdAndName} (which is a generic user reference, e.g. an
  * agent's stored `created_by` snapshot) so call sites can document intent: a parameter
- * typed `CurrentUser` carries the request's identity and authorization context, not an arbitrary
- * persisted reference.
+ * typed `CurrentUser` carries the request's identity, not an arbitrary persisted reference.
  */
-export interface CurrentUser extends UserIdAndName {
-  isAdmin: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CurrentUser extends UserIdAndName {}

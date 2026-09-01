@@ -15,7 +15,7 @@ import type { BuiltinToolDefinition } from '../tools/builtin';
 
 export type BuiltinAttachmentBoundedTool<RunInput extends ZodObject<any> = ZodObject<any>> = Omit<
   BuiltinToolDefinition<RunInput>,
-  'tags' | 'availability' | 'annotations'
+  'tags' | 'availability'
 >;
 
 type AttBoundToolMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'tags'>;

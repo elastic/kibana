@@ -177,7 +177,6 @@ export function createPluginStartContext<
     theme: deps.theme,
     security: {
       authc: deps.security.authc,
-      serviceAccounts: deps.security.serviceAccounts,
     },
     userProfile: deps.userProfile,
     userStorage: deps.userStorage,

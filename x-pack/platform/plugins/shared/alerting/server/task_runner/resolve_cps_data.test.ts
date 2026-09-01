@@ -50,24 +50,6 @@ describe('resolveCpsData', () => {
     });
   });
 
-  it('falls back to PROJECT_ROUTING_ALL on 400', async () => {
-    internalUserEsClient.transport.request.mockRejectedValueOnce({ statusCode: 400 });
-    currentUserEsClient.transport.request.mockResolvedValueOnce({ linked_projects: {} });
-
-    const result = await resolveCpsData(
-      internalUserEsClient,
-      currentUserEsClient,
-      'default',
-      logger
-    );
-
-    expect(result).toEqual({
-      resolvedExpression: PROJECT_ROUTING_ALL,
-      linkedProjects: [],
-    });
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
   it('falls back to PROJECT_ROUTING_ALL on 404', async () => {
     internalUserEsClient.transport.request.mockRejectedValueOnce({ statusCode: 404 });
     currentUserEsClient.transport.request.mockResolvedValueOnce({ linked_projects: {} });

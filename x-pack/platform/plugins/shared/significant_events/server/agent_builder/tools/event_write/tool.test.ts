@@ -59,12 +59,12 @@ describe('events_write tool', () => {
     expect(emptyItems.success).toBe(false);
     if (!missingItems.success) {
       expect(missingItems.error.issues[0].message).toBe(
-        'Pass items as a non-empty array of event objects.'
+        'Invalid input: expected array, received undefined'
       );
     }
     if (!emptyItems.success) {
       expect(emptyItems.error.issues[0].message).toBe(
-        'Pass items as a non-empty array of event objects.'
+        'Too small: expected array to have >=1 items'
       );
     }
     expect(

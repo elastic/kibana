@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
+  EuiCallOut,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -30,7 +31,6 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { PairedTTestResult } from '@kbn/evals-common';
@@ -40,7 +40,6 @@ import {
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
-import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -146,7 +145,7 @@ const ExperimentHeader: React.FC<{
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
-  const evaluatorModels = experimentData?.evaluator_models ?? [];
+  const evaluatorModel = experimentData?.evaluator_model?.id;
   const displayName = experimentData?.experiment_name || experimentId;
   const detailLocation = {
     pathname: `/experiments/${encodeURIComponent(experimentId)}`,
@@ -238,17 +237,18 @@ const ExperimentHeader: React.FC<{
               </EuiFlexItem>
             </>
           )}
-          {/* Always shown, unlike the task model above: an experiment scored only by code
-              evaluators has no judge, and the badge says so rather than leaving the reader to
-              guess whether the field is missing or empty. */}
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EvaluatorModelsBadge models={evaluatorModels} />
-          </EuiFlexItem>
+          {evaluatorModel && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent">{evaluatorModel}</EuiBadge>
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGroup>
       )}
     </EuiPanel>
@@ -868,12 +868,15 @@ export const CompareExperimentsPage: React.FC = () => {
         <>
           {(data.pairing.truncatedA || data.pairing.truncatedB) && (
             <>
-              <KbnWarningCallout
+              <EuiCallOut
                 announceOnMount
                 title={i18n.TRUNCATION_WARNING_TITLE}
-                text={i18n.TRUNCATION_WARNING_BODY}
+                color="warning"
+                iconType="warning"
                 size="s"
-              />
+              >
+                <p>{i18n.TRUNCATION_WARNING_BODY}</p>
+              </EuiCallOut>
               <EuiSpacer size="m" />
             </>
           )}

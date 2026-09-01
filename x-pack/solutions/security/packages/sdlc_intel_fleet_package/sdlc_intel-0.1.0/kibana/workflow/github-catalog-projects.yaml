@@ -94,7 +94,7 @@ steps:
                 "project": {
                   "id": "{{ node.id }}",
                   "number": "{{ node.number }}",
-                  "title": "{{ node.title }}",
+                  "title": {{ node.title | json }},
                   "url": "{{ node.url }}"
                 },
                 "payload": {{ node | json }}

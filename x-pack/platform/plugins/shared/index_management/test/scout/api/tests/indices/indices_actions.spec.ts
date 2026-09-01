@@ -20,12 +20,6 @@ const indexStatus = async (esClient: EsClient) => {
   return index.status;
 };
 
-// `total` sums primaries and replicas, so one action bumps it once per assigned replica.
-const primaryMetricTotal = async (esClient: EsClient, metric: 'flush' | 'refresh') => {
-  const { indices } = await esClient.indices.stats({ index: INDEX_NAME, metric });
-  return indices?.[INDEX_NAME].primaries?.[metric]?.total ?? 0;
-};
-
 // Closing, opening, flushing, refreshing, force merging and clearing the cache are not exposed in Serverless.
 apiTest.describe('Indices actions API', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
@@ -68,19 +62,27 @@ apiTest.describe('Indices actions API', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest('flushes an index', async ({ apiClient, esClient }) => {
-    expect(await primaryMetricTotal(esClient, 'flush')).toBe(0);
+    const flushCount = async () => {
+      const { indices } = await esClient.indices.stats({ index: INDEX_NAME, metric: 'flush' });
+      return indices?.[INDEX_NAME].total?.flush?.total;
+    };
+    expect(await flushCount()).toBe(0);
 
     expect(await executeAction(apiClient, 'flush')).toHaveStatusCode(200);
 
-    expect(await primaryMetricTotal(esClient, 'flush')).toBe(1);
+    expect(await flushCount()).toBe(1);
   });
 
   apiTest('refreshes an index', async ({ apiClient, esClient }) => {
-    const before = await primaryMetricTotal(esClient, 'refresh');
+    const refreshCount = async () => {
+      const { indices } = await esClient.indices.stats({ index: INDEX_NAME, metric: 'refresh' });
+      return indices?.[INDEX_NAME].total?.refresh?.total ?? 0;
+    };
+    const before = await refreshCount();
 
     expect(await executeAction(apiClient, 'refresh')).toHaveStatusCode(200);
 
-    expect(await primaryMetricTotal(esClient, 'refresh')).toBe(before + 1);
+    expect(await refreshCount()).toBe(before + 1);
   });
 
   apiTest('force merges an index', async ({ apiClient }) => {

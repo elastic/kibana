@@ -361,15 +361,6 @@ export const ExperimentDetailPage: React.FC = () => {
     );
   }, [experimentDetail?.stats]);
 
-  // Evaluators can each judge with their own model, so the experiment-level card reports the
-  // distinct set rather than one value, and stays empty for experiments only code evaluators
-  // scored. Sorted so the tooltip reads the same here as everywhere else the set is listed;
-  // the response orders them by how many evaluators used each.
-  const evaluatorModelIds = useMemo(
-    () => (experimentDetail?.evaluator_models ?? []).map(({ id }) => id).sort(),
-    [experimentDetail?.evaluator_models]
-  );
-
   // Live progress derived from the scores already aggregated in Elasticsearch —
   // the same source the results table streams from. The workflow step's own
   // counters advance only per batch (and read 0 during a single in-flight batch),
@@ -405,20 +396,6 @@ export const ExperimentDetailPage: React.FC = () => {
             <strong>{name}</strong>
           </EuiText>
         ),
-      },
-      {
-        field: 'evaluator_model',
-        name: i18n.COLUMN_EVALUATOR_MODEL,
-        render: (model: EvaluatorStats['evaluator_model']) =>
-          model ? (
-            <EuiBadge color="hollow">{model.id}</EuiBadge>
-          ) : (
-            <EuiToolTip content={i18n.EVALUATOR_MODEL_NOT_APPLICABLE_TOOLTIP}>
-              <EuiText size="s" color="subdued" tabIndex={0}>
-                {i18n.EVALUATOR_MODEL_NOT_APPLICABLE}
-              </EuiText>
-            </EuiToolTip>
-          ),
       },
       {
         field: 'stats.mean',
@@ -519,17 +496,7 @@ export const ExperimentDetailPage: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
-                    title={
-                      evaluatorModelIds.length > 1 ? (
-                        <EuiToolTip content={evaluatorModelIds.join(', ')}>
-                          <span tabIndex={0}>
-                            {i18n.getEvaluatorModelsDifferLabel(evaluatorModelIds.length)}
-                          </span>
-                        </EuiToolTip>
-                      ) : (
-                        evaluatorModelIds[0] ?? '-'
-                      )
-                    }
+                    title={experimentDetail.evaluator_model?.id ?? '-'}
                     description={i18n.STAT_EVALUATOR_MODEL}
                     titleSize="xs"
                   />

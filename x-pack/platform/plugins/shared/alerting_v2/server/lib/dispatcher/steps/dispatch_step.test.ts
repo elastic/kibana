@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { BulkScheduleWorkflowResult, WorkflowDetailDto } from '@kbn/workflows';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { DISPATCH_CHUNK_SIZE } from '../constants';
 import {
   createActionGroup,
   createActionPolicy,
@@ -21,20 +20,13 @@ import type { DispatchFailure } from '../types';
 import { DISPATCH_FAILURE_REASONS } from './constants';
 import { DispatchStep } from './dispatch_step';
 
-const API_KEY = 'dGVzdC1pZDp0ZXN0LWtleQ==';
-
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
   result.type === 'continue' ? result.data?.dispatchFailures ?? [] : [];
 
-const getExecutions = (
-  result: Awaited<ReturnType<DispatchStep['execute']>>
-): Map<string, string[]> | undefined =>
-  result.type === 'continue' ? result.data?.dispatchedExecutions : undefined;
-
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+    getWorkflow: jest.fn(),
+    scheduleWorkflow: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 const createWorkflowDetailDto = (
@@ -54,16 +46,6 @@ const createWorkflowDetailDto = (
   ...overrides,
 });
 
-const scheduled = (workflowExecutionId: string): BulkScheduleWorkflowResult[number] => ({
-  status: 'scheduled',
-  workflowExecutionId,
-});
-
-const scheduleError = (message: string): BulkScheduleWorkflowResult[number] => ({
-  status: 'error',
-  error: { message },
-});
-
 describe('DispatchStep', () => {
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -79,8 +61,8 @@ describe('DispatchStep', () => {
   it('dispatches each group to its workflow destinations', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const group = createActionGroup({
       id: 'g1',
@@ -89,7 +71,7 @@ describe('DispatchStep', () => {
     });
     const policy = createActionPolicy({
       id: 'p1',
-      apiKey: API_KEY,
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const state = createDispatcherPipelineState({
@@ -100,31 +82,27 @@ describe('DispatchStep', () => {
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-1']]]));
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'default');
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
-      [
-        expect.objectContaining({
-          workflow: expect.objectContaining({ id: 'workflow-1', name: 'Test Workflow' }),
-          spaceId: 'default',
-          inputs: expect.objectContaining({
-            payload: expect.objectContaining({
-              id: 'g1',
-              policyId: 'p1',
-              groupKey: group.groupKey,
-              episodes: group.episodes,
-            }),
-          }),
-          triggeredBy: 'action_policy',
+    expect(result.type === 'continue' && result.data?.dispatchedExecutions).toEqual(
+      new Map([['g1', ['exec-1']]])
+    );
+    expect(mockWfm.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default');
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'workflow-1', name: 'Test Workflow' }),
+      'default',
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          id: 'g1',
+          policyId: 'p1',
+          groupKey: group.groupKey,
+          episodes: group.episodes,
         }),
-      ],
+      }),
       expect.objectContaining({
         headers: expect.objectContaining({
-          authorization: `ApiKey ${API_KEY}`,
+          authorization: 'ApiKey dGVzdC1pZDp0ZXN0LWtleQ==',
         }),
-      })
+      }),
+      'action_policy'
     );
   });
 
@@ -143,14 +121,14 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
-    expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+    expect(mockWfm.getWorkflow).not.toHaveBeenCalled();
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('skips dispatch when workflow is not found', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([]);
+    mockWfm.getWorkflow.mockResolvedValue(null);
 
     const group = createActionGroup({
       id: 'g1',
@@ -159,7 +137,7 @@ describe('DispatchStep', () => {
     });
     const policy = createActionPolicy({
       id: 'p1',
-      apiKey: API_KEY,
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const state = createDispatcherPipelineState({
@@ -171,17 +149,14 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-    expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('dispatches to multiple workflow destinations', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([
-      createWorkflowDetailDto({ id: 'workflow-1' }),
-      createWorkflowDetailDto({ id: 'workflow-2' }),
-    ]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1'), scheduled('exec-2')]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const group = createActionGroup({
       id: 'g1',
@@ -193,7 +168,7 @@ describe('DispatchStep', () => {
     });
     const policy = createActionPolicy({
       id: 'p1',
-      apiKey: API_KEY,
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const state = createDispatcherPipelineState({
@@ -201,13 +176,10 @@ describe('DispatchStep', () => {
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state, loggerService);
+    await step.execute(state, loggerService);
 
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1', 'workflow-2'], 'default');
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(2);
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-1', 'exec-2']]]));
+    expect(mockWfm.getWorkflow).toHaveBeenCalledTimes(2);
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
   });
 
   it('continues with no-op when dispatch is empty', async () => {
@@ -218,7 +190,6 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.debug).not.toHaveBeenCalled();
-    expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
   });
 
   it('continues when dispatch is undefined', async () => {
@@ -229,22 +200,20 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.debug).not.toHaveBeenCalled();
-    expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
   });
 
   it('continues dispatching remaining groups when one group fails', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([
-      scheduled('exec-1'),
-      scheduleError('network timeout'),
-      scheduled('exec-3'),
-    ]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow
+      .mockResolvedValueOnce('exec-1')
+      .mockRejectedValueOnce(new Error('network timeout'))
+      .mockResolvedValueOnce('exec-3');
 
     const policy = createActionPolicy({
       id: 'p1',
-      apiKey: API_KEY,
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const groups = Array.from({ length: 3 }, (_, i) =>
@@ -263,14 +232,8 @@ describe('DispatchStep', () => {
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(getExecutions(result)).toEqual(
-      new Map([
-        ['g0', ['exec-1']],
-        ['g2', ['exec-3']],
-      ])
-    );
+    expect(mockWfm.getWorkflow).toHaveBeenCalledTimes(3);
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(3);
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).toHaveBeenCalledWith('network timeout', expect.anything());
   });
@@ -278,8 +241,8 @@ describe('DispatchStep', () => {
   it('logs error when scheduleWorkflow throws', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
 
     const group = createActionGroup({
       id: 'g1',
@@ -288,7 +251,7 @@ describe('DispatchStep', () => {
     });
     const policy = createActionPolicy({
       id: 'p1',
-      apiKey: API_KEY,
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const state = createDispatcherPipelineState({
@@ -315,14 +278,10 @@ describe('DispatchStep', () => {
   it('continues dispatching remaining destinations when one destination fails', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([
-      createWorkflowDetailDto({ id: 'workflow-1' }),
-      createWorkflowDetailDto({ id: 'workflow-2' }),
-    ]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([
-      scheduleError('workflow-1 failed'),
-      scheduled('exec-2'),
-    ]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow
+      .mockRejectedValueOnce(new Error('workflow-1 failed'))
+      .mockResolvedValueOnce('exec-2');
 
     const group = createActionGroup({
       id: 'g1',
@@ -334,7 +293,7 @@ describe('DispatchStep', () => {
     });
     const policy = createActionPolicy({
       id: 'p1',
-      apiKey: API_KEY,
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const state = createDispatcherPipelineState({
@@ -345,16 +304,15 @@ describe('DispatchStep', () => {
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-2']]]));
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
   });
 
   it('includes rule metadata in the workflow payload', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const episode = createAlertEpisode({ rule_id: 'rule-1' });
     const group = createActionGroup({
@@ -364,7 +322,7 @@ describe('DispatchStep', () => {
       episodes: [episode],
       rules: { 'rule-1': { name: 'CPU spike monitor' } },
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const state = createDispatcherPipelineState({
       dispatch: [group],
@@ -373,16 +331,15 @@ describe('DispatchStep', () => {
 
     await step.execute(state, loggerService);
 
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
-      [
-        expect.objectContaining({
-          inputs: expect.objectContaining({
-            payload: expect.objectContaining({
-              rules: { 'rule-1': { name: 'CPU spike monitor' } },
-            }),
-          }),
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          rules: { 'rule-1': { name: 'CPU spike monitor' } },
         }),
-      ],
+      }),
+      expect.anything(),
       expect.anything()
     );
   });
@@ -390,8 +347,8 @@ describe('DispatchStep', () => {
   it('omits rules missing from state.rules in the payload', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const episode = createAlertEpisode({ rule_id: 'rule-unknown' });
     const group = createActionGroup({
@@ -401,38 +358,88 @@ describe('DispatchStep', () => {
       episodes: [episode],
       rules: {},
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
-      rules: new Map(),
+      rules: new Map(), // rule-unknown not present
     });
 
     await step.execute(state, loggerService);
 
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
-      [
-        expect.objectContaining({
-          inputs: expect.objectContaining({ payload: expect.objectContaining({ rules: {} }) }),
-        }),
-      ],
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ payload: expect.objectContaining({ rules: {} }) }),
+      expect.anything(),
       expect.anything()
     );
+  });
+
+  it('dispatches multiple groups concurrently with a max concurrency of 3', async () => {
+    jest.useFakeTimers();
+    const step = new DispatchStep(mockWfm);
+
+    let inFlight = 0;
+    let maxInFlight = 0;
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          inFlight++;
+          maxInFlight = Math.max(maxInFlight, inFlight);
+          setTimeout(() => {
+            inFlight--;
+            resolve('exec-id');
+          }, 10);
+        })
+    );
+
+    const policy = createActionPolicy({
+      id: 'p1',
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
+    });
+
+    const groups = Array.from({ length: 5 }, (_, i) =>
+      createActionGroup({
+        id: `g${i}`,
+        policyId: 'p1',
+        destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      })
+    );
+
+    const state = createDispatcherPipelineState({
+      dispatch: groups,
+      policies: new Map([['p1', policy]]),
+    });
+
+    const executePromise = step.execute(state, loggerService);
+
+    await jest.advanceTimersByTimeAsync(100);
+
+    const result = await executePromise;
+
+    expect(result.type).toBe('continue');
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(5);
+    expect(maxInFlight).toBeLessThanOrEqual(3);
+
+    jest.useRealTimers();
   });
 
   it('records no dispatch failures on a fully successful run', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
       createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
@@ -484,21 +491,19 @@ describe('DispatchStep', () => {
         message: expect.stringContaining('No API key found for policy p1'),
       },
     ]);
-    expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
-    expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('records a workflow_not_found failure when the destination workflow is missing', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([]);
+    mockWfm.getWorkflow.mockResolvedValue(null);
 
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'missing-workflow' }],
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
       createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
@@ -512,20 +517,19 @@ describe('DispatchStep', () => {
       workflowId: 'missing-workflow',
       reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
     });
-    expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('records a workflow_disabled failure when the destination workflow is disabled', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto({ enabled: false })]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto({ enabled: false }));
 
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
       createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
@@ -539,21 +543,21 @@ describe('DispatchStep', () => {
       workflowId: 'workflow-1',
       reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
     });
-    expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('records a schedule_error failure with the thrown message when scheduling fails', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
 
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
       createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
@@ -573,14 +577,10 @@ describe('DispatchStep', () => {
   it('records only the failed destination when a group partially succeeds', async () => {
     const step = new DispatchStep(mockWfm);
 
-    mockWfm.getWorkflowsByIds.mockResolvedValue([
-      createWorkflowDetailDto({ id: 'workflow-1' }),
-      createWorkflowDetailDto({ id: 'workflow-2' }),
-    ]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([
-      scheduled('exec-1'),
-      scheduleError('workflow-2 failed'),
-    ]);
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow
+      .mockResolvedValueOnce('exec-1')
+      .mockRejectedValueOnce(new Error('workflow-2 failed'));
 
     const group = createActionGroup({
       id: 'g1',
@@ -590,14 +590,16 @@ describe('DispatchStep', () => {
         { type: 'workflow', id: 'workflow-2' },
       ],
     });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
       createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
       loggerService
     );
 
-    expect(getExecutions(result)).toEqual(new Map([['g1', ['exec-1']]]));
+    expect(result.type === 'continue' && result.data?.dispatchedExecutions).toEqual(
+      new Map([['g1', ['exec-1']]])
+    );
     const failures = getFailures(result);
     expect(failures).toHaveLength(1);
     expect(failures[0]).toMatchObject({
@@ -611,7 +613,7 @@ describe('DispatchStep', () => {
     const controller = new AbortController();
     controller.abort();
 
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const group1 = createActionGroup({ id: 'g1', policyId: 'p1' });
     const group2 = createActionGroup({ id: 'g2', policyId: 'p1' });
@@ -628,240 +630,12 @@ describe('DispatchStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
 
+    // no executions dispatched
     const executionIds = result.data?.dispatchedExecutions;
     expect(executionIds?.get('g1')).toBeUndefined();
     expect(executionIds?.get('g2')).toBeUndefined();
+    // no failures — groups were silently skipped
     expect(result.data?.dispatchFailures).toHaveLength(0);
-    expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
-    expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
-  });
-
-  it('prefetches workflows once per space', async () => {
-    const step = new DispatchStep(mockWfm);
-
-    mockWfm.getWorkflowsByIds.mockImplementation(async (ids: string[]) =>
-      ids.map((id) => createWorkflowDetailDto({ id }))
-    );
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-a'), scheduled('exec-b')]);
-
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
-    const groups = [
-      createActionGroup({
-        id: 'g1',
-        policyId: 'p1',
-        spaceId: 'space-a',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      }),
-      createActionGroup({
-        id: 'g2',
-        policyId: 'p1',
-        spaceId: 'space-b',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      }),
-    ];
-
-    await step.execute(
-      createDispatcherPipelineState({
-        dispatch: groups,
-        policies: new Map([['p1', policy]]),
-      }),
-      loggerService
-    );
-
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(2);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'space-a');
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'space-b');
-  });
-
-  it('issues one bulkScheduleWorkflow call per API key and never mixes keys', async () => {
-    const step = new DispatchStep(mockWfm);
-
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
-
-    const policyA = createActionPolicy({ id: 'p1', apiKey: 'key-a' });
-    const policyB = createActionPolicy({ id: 'p2', apiKey: 'key-b' });
-    const groups = [
-      createActionGroup({
-        id: 'g1',
-        policyId: 'p1',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      }),
-      createActionGroup({
-        id: 'g2',
-        policyId: 'p2',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      }),
-    ];
-
-    await step.execute(
-      createDispatcherPipelineState({
-        dispatch: groups,
-        policies: new Map([
-          ['p1', policyA],
-          ['p2', policyB],
-        ]),
-      }),
-      loggerService
-    );
-
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(2);
-    const authorizations = mockWfm.bulkScheduleWorkflow.mock.calls.map(
-      ([, request]) => request.headers.authorization
-    );
-    expect(authorizations).toEqual(['ApiKey key-a', 'ApiKey key-b']);
-    expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(1);
-    expect(mockWfm.bulkScheduleWorkflow.mock.calls[1][0]).toHaveLength(1);
-  });
-
-  it('records schedule_error for every destination in a space when prefetch throws', async () => {
-    const step = new DispatchStep(mockWfm);
-
-    mockWfm.getWorkflowsByIds.mockImplementation(async (_ids: string[], spaceId: string) => {
-      if (spaceId === 'space-a') {
-        throw new Error('es down');
-      }
-      return [createWorkflowDetailDto()];
-    });
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-b')]);
-
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
-    const groups = [
-      createActionGroup({
-        id: 'g1',
-        policyId: 'p1',
-        spaceId: 'space-a',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      }),
-      createActionGroup({
-        id: 'g2',
-        policyId: 'p1',
-        spaceId: 'space-b',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      }),
-    ];
-
-    const result = await step.execute(
-      createDispatcherPipelineState({
-        dispatch: groups,
-        policies: new Map([['p1', policy]]),
-      }),
-      loggerService
-    );
-
-    const failures = getFailures(result);
-    expect(failures).toHaveLength(1);
-    expect(failures[0]).toMatchObject({
-      actionGroupId: 'g1',
-      workflowId: 'workflow-1',
-      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
-      message: 'es down',
-    });
-    expect(getExecutions(result)).toEqual(new Map([['g2', ['exec-b']]]));
-  });
-
-  it('records schedule_error when scheduling returns no execution id', async () => {
-    const step = new DispatchStep(mockWfm);
-
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('')]);
-
-    const group = createActionGroup({
-      id: 'g1',
-      policyId: 'p1',
-      destinations: [{ type: 'workflow', id: 'workflow-1' }],
-    });
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
-
-    const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
-      loggerService
-    );
-
-    const failures = getFailures(result);
-    expect(failures).toHaveLength(1);
-    expect(failures[0]).toMatchObject({
-      actionGroupId: 'g1',
-      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
-    });
-    expect(getExecutions(result)?.get('g1')).toBeUndefined();
-  });
-
-  it('does not start a second chunk once the signal is aborted', async () => {
-    const step = new DispatchStep(mockWfm);
-    const controller = new AbortController();
-
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockImplementation(async (items) => {
-      controller.abort();
-      return items.map((_, i) => scheduled(`exec-${i}`));
-    });
-
-    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
-    const groups = Array.from({ length: DISPATCH_CHUNK_SIZE + 1 }, (_, i) =>
-      createActionGroup({
-        id: `g${i}`,
-        policyId: 'p1',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      })
-    );
-
-    const result = await step.execute(
-      createDispatcherPipelineState({
-        dispatch: groups,
-        policies: new Map([['p1', policy]]),
-        input: createDispatcherPipelineInput({ signal: controller.signal }),
-      }),
-      loggerService
-    );
-
-    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(DISPATCH_CHUNK_SIZE);
-    expect(getExecutions(result)?.size).toBe(DISPATCH_CHUNK_SIZE);
-    expect(getExecutions(result)?.has('g0')).toBe(true);
-    expect(getExecutions(result)?.has(`g${DISPATCH_CHUNK_SIZE}`)).toBe(false);
-    expect(getFailures(result)).toHaveLength(0);
-  });
-
-  it('continues other API keys when one chunk throws', async () => {
-    const step = new DispatchStep(mockWfm);
-
-    mockWfm.getWorkflowsByIds.mockResolvedValue([createWorkflowDetailDto()]);
-    mockWfm.bulkScheduleWorkflow.mockImplementation(async (_items, request) => {
-      if (request.headers.authorization === 'ApiKey key-a') {
-        throw new Error('key-a failed');
-      }
-      return [scheduled('exec-b')];
-    });
-
-    const result = await step.execute(
-      createDispatcherPipelineState({
-        dispatch: [
-          createActionGroup({
-            id: 'g1',
-            policyId: 'p1',
-            destinations: [{ type: 'workflow', id: 'workflow-1' }],
-          }),
-          createActionGroup({
-            id: 'g2',
-            policyId: 'p2',
-            destinations: [{ type: 'workflow', id: 'workflow-1' }],
-          }),
-        ],
-        policies: new Map([
-          ['p1', createActionPolicy({ id: 'p1', apiKey: 'key-a' })],
-          ['p2', createActionPolicy({ id: 'p2', apiKey: 'key-b' })],
-        ]),
-      }),
-      loggerService
-    );
-
-    expect(getFailures(result)).toHaveLength(1);
-    expect(getFailures(result)[0]).toMatchObject({
-      actionGroupId: 'g1',
-      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
-      message: 'key-a failed',
-    });
-    expect(getExecutions(result)).toEqual(new Map([['g2', ['exec-b']]]));
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 });

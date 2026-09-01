@@ -131,7 +131,6 @@ export type {
   SecurityServiceStart,
   CoreAuthenticationService,
   CoreAuditService,
-  CoreServiceAccountsService,
   AuditEvent,
   AuditHttp,
   AuditKibana,

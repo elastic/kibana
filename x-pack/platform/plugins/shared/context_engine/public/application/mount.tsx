@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AgentBuilderIntegration, ChatOpener, ContextEngineStartDependencies } from '../types';
+import type { ChatOpener, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
 
@@ -21,20 +21,18 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000 } },
 });
 
-export const mountApp = async ({
+export const mountApp = ({
   core,
   plugins,
   element,
   history,
   getChatOpener,
-  getAgentBuilderIntegration,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
   getChatOpener?: () => ChatOpener | undefined;
-  getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }) => {
   const services: ContextEngineServices = {
     ...core,
@@ -44,7 +42,6 @@ export const mountApp = async ({
     console: plugins.console,
     spaces: plugins.spaces,
     getChatOpener,
-    getAgentBuilderIntegration,
   };
 
   ReactDOM.render(

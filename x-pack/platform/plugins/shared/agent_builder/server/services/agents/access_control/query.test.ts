@@ -8,8 +8,8 @@
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { buildReadAccessFilter } from './query';
 
-const ownerUser = { id: 'user-1', username: 'owner', isAdmin: false };
-const ownerByUsernameOnly = { username: 'owner', isAdmin: false };
+const ownerUser = { id: 'user-1', username: 'owner' };
+const ownerByUsernameOnly = { username: 'owner' };
 
 describe('buildReadAccessFilter', () => {
   it('includes owner id clause, legacy username ownership, the not-private access-control mode clause, and a nested user-ACL clause', () => {

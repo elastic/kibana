@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -49,7 +49,7 @@ export const createExecuteApiTool = ({
   selfClient,
 }: {
   selfClient: HttpSelfService;
-}): InternalBuiltinToolDefinition<typeof executeSchema> => {
+}): BuiltinToolDefinition<typeof executeSchema> => {
   return {
     id: internalTools.executeApi,
     type: ToolType.builtin,

@@ -146,22 +146,28 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       });
     }
 
-    const services = {
-      ...core,
-      ...plugins,
-      security: { ...core.security, ...plugins.security },
-    };
-
     return {
-      OsqueryAction: getLazyOsqueryAction({ services }),
-      LiveQueryField: getLazyLiveQueryField({ services }),
+      OsqueryAction: getLazyOsqueryAction({
+        services: {
+          ...core,
+          ...plugins,
+        },
+      }),
+      LiveQueryField: getLazyLiveQueryField({
+        services: {
+          ...core,
+          ...plugins,
+        },
+      }),
       OsqueryResult: getLazyOsqueryResult({
-        ...services,
+        ...core,
+        ...plugins,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
       OsqueryResults: getLazyOsqueryResults({
-        ...services,
+        ...core,
+        ...plugins,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),

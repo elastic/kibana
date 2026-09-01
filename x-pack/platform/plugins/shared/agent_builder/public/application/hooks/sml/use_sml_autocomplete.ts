@@ -34,8 +34,11 @@ export interface UseSmlAutocompleteOptions {
 }
 
 /**
- * Typeahead hook for the @ menu, backed by POST `/sml/_autocomplete`. Debounces
- * keystrokes and keeps the previous results while the next request is in flight.
+ * Typeahead hook for the @ menu. Hits POST `/sml/_autocomplete`, which returns
+ * per-row `matched_discovery_labels` (with `kind` for UI badging, and
+ * `highlighted` when ES is able to produce a snippet).
+ *
+ * For full retrieval (LLM tool, content search), see `useSmlSearch`.
  */
 export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOptions) => {
   const { services } = useKibana();

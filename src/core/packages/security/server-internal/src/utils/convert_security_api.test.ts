@@ -42,20 +42,16 @@ describe('convertSecurityApi', () => {
         asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),
         withoutRequest: createAuditLoggerMock.create(),
       },
-      serviceAccounts: {
-        isEnabled: jest.fn(),
-      },
       fakeRequestEnricher: jest.fn(),
     };
   });
 
-  it('passes through delegate apiKeys, audit, serviceAccounts, and getRedactedSessionId', () => {
+  it('passes through delegate apiKeys, audit, and getRedactedSessionId', () => {
     const output = convertSecurityApi(source);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
     expect(output.authc.getRedactedSessionId).toBe(source.authc.getRedactedSessionId);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
     expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);
-    expect(output.serviceAccounts).toBe(source.serviceAccounts);
   });
 
   describe('getCurrentUser', () => {

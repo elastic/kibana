@@ -35,7 +35,6 @@ export const kiAutomationGenerationSkill = defineSkillType({
     platformCoreTools.getIndexMapping,
     platformCoreTools.getWorkflowExecutionStatus,
     `${internalNamespaces.workflows}.validate_workflow`,
-    `${internalNamespaces.workflows}.get_workflow`,
     `${internalNamespaces.workflows}.get_step_definitions`,
     `${internalNamespaces.workflows}.get_examples`,
     `${internalNamespaces.workflows}.get_connectors`,

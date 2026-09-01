@@ -371,7 +371,6 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     delete: jest.fn().mockReturnValue(Promise.resolve()),
     getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     getByIds: jest.fn().mockReturnValue(Promise.resolve()),
-    bumpRevision: jest.fn().mockReturnValue(Promise.resolve()),
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),

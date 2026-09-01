@@ -33,13 +33,6 @@ export class LensDimensions {
   private readonly timeShiftClearButton;
   /** Workspace error one-click fix (e.g. terms → filters for time shift). */
   readonly errorFixAction;
-  /** Terms dimension "Advanced" accordion (Other / missing bucket). */
-  readonly termsAdvancedAccordion;
-  /** Terms "Group remaining values as Other" switch. */
-  readonly termsOtherBucketSwitch;
-  /** Language switcher inside the open dimension Filter by input. */
-  readonly dimensionFilterLanguageButton;
-  readonly luceneLanguageMenuItem;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
@@ -50,12 +43,6 @@ export class LensDimensions {
     );
     this.timeShiftClearButton = this.timeShift.locator('[data-test-subj="comboBoxClearButton"]');
     this.errorFixAction = this.page.testSubj.locator('errorFixAction');
-    this.termsAdvancedAccordion = this.page.testSubj.locator('indexPattern-terms-advanced');
-    this.termsOtherBucketSwitch = this.page.testSubj.locator('indexPattern-terms-other-bucket');
-    this.dimensionFilterLanguageButton = this.page.testSubj.locator(
-      'indexPattern-filter-by-input > switchQueryLanguageButton'
-    );
-    this.luceneLanguageMenuItem = this.page.testSubj.locator('luceneLanguageMenuItem');
   }
 
   /**
@@ -239,33 +226,6 @@ export class LensDimensions {
     await this.page.testSubj.locator('lns-indexPattern-static_value-input').waitFor({
       state: 'visible',
     });
-  }
-
-  /**
-   * Enables terms "Group remaining values as Other" on the open dimension editor.
-   * Caller must have a terms dimension editor open with Other currently off
-   * (saved `lnsXYvis` omits `otherBucket`; the switch is unchecked until clicked).
-   */
-  async enableTermsOtherBucket() {
-    await this.termsAdvancedAccordion.click();
-    await this.termsOtherBucketSwitch.waitFor({ state: 'visible' });
-    await this.termsOtherBucketSwitch.click();
-    await this.termsOtherBucketSwitch
-      .and(this.page.locator('[aria-checked="true"]'))
-      .waitFor({ state: 'visible' });
-  }
-
-  /**
-   * Switches the open dimension Filter-by input from KQL to Lucene and closes the language menu.
-   * Caller must already have the filter popover open (`workspace.enableFilter`).
-   */
-  async setDimensionFilterLanguageToLucene() {
-    await this.dimensionFilterLanguageButton.click();
-    await this.luceneLanguageMenuItem.waitFor({ state: 'visible' });
-    await this.luceneLanguageMenuItem.click();
-    // FTR clicks the switcher again to dismiss the language menu after selecting Lucene.
-    await this.dimensionFilterLanguageButton.click();
-    await this.luceneLanguageMenuItem.waitFor({ state: 'hidden' });
   }
 
   async switchToQuickFunctions() {

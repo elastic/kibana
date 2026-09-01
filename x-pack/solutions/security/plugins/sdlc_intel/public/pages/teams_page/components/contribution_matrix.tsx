@@ -16,7 +16,6 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SdlcTeamCard, SdlcTeamsResponse } from '../../../../common/api/types';
 import { getRoadmapAccentColor } from '../lib/team_accents';
@@ -182,14 +181,7 @@ export const ContributionMatrix = ({
           />
         </EuiText>
       </div>
-      <EuiBasicTable<MatrixRow>
-        items={rows}
-        columns={columns}
-        tableLayout="fixed"
-        tableCaption={i18n.translate('xpack.sdlcIntel.teams.matrix.tableCaption', {
-          defaultMessage: 'Roadmap by team contribution matrix',
-        })}
-      />
+      <EuiBasicTable<MatrixRow> items={rows} columns={columns} tableLayout="fixed" />
     </EuiPanel>
   );
 };

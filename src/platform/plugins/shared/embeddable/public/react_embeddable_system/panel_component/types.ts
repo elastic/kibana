@@ -44,6 +44,7 @@ export interface PresentationPanelProps<
    */
   hideLoader?: boolean;
   hideHeader?: boolean;
+  hideInspector?: boolean;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;

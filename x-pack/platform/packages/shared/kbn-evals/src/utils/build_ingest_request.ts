@@ -10,7 +10,7 @@ import type { IngestScoresRequestBodyInput } from '@kbn/evals-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { BuildkiteCiMetadata } from './ci_metadata';
 import type { GitMetadata } from './git_metadata';
-import type { EvaluationCompleteEvent, DatasetRunResult, EvaluatorKind } from '../types';
+import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
 
 // TODO: Keep this in sync with `buildScoreDocuments` in `@kbn/evals-runner`, the
 // workflow/plugin implementation of the same score-ingestion contract. The two are
@@ -45,10 +45,7 @@ interface BuildableScore {
   score: IngestScore;
 }
 
-/** Narrows an inference model to the `{ id, family?, provider? }` shape scores are stamped with. */
-export function toScoreModel(
-  model: InferenceModel
-): IngestScoresRequestBodyInput['task_model'] | undefined {
+function toModel(model: InferenceModel): IngestScoresRequestBodyInput['task_model'] | undefined {
   if (!model.id) {
     return undefined;
   }
@@ -61,10 +58,6 @@ export function toScoreModel(
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
-
-/** The SDK names evaluator kinds `LLM`/`CODE`; the ingest API uses lowercase. */
-const toIngestKind = (kind: EvaluatorKind): IngestScore['evaluator']['kind'] =>
-  kind === 'LLM' ? 'llm' : 'code';
 
 function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
   const { taskRun, evaluationRun } = event;
@@ -94,8 +87,6 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
       ...(result?.explanation !== undefined && { explanation: result.explanation }),
       ...(isPlainObject(result?.metadata) && { metadata: result.metadata }),
       ...(evaluationRun.traceId !== undefined && { trace_id: evaluationRun.traceId }),
-      ...(evaluationRun.kind !== undefined && { kind: toIngestKind(evaluationRun.kind) }),
-      ...(evaluationRun.model !== undefined && { model: evaluationRun.model }),
     },
   };
 }
@@ -159,8 +150,8 @@ export function buildIngestRequest({
   log,
   source,
 }: BuildIngestRequestArgs): IngestScoresRequestBodyInput[] {
-  const taskModelPayload = toScoreModel(taskModel);
-  const evaluatorModelPayload = toScoreModel(evaluatorModel);
+  const taskModelPayload = toModel(taskModel);
+  const evaluatorModelPayload = toModel(evaluatorModel);
   const scores = buildScores(source);
 
   if (!taskModelPayload || !evaluatorModelPayload) {
