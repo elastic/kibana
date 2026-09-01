@@ -14,6 +14,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
+import type { ConditionUpdate } from './rebalance_writes';
 
 interface GetByIdsOptions {
   spaceId: string;
@@ -323,12 +324,19 @@ export class PackagePolicyService {
    * classic/immediate split to make. Without this, a rebalance cycle's bump
    * races the same agent policy as concurrent monitor CRUD with no retry,
    * so a single version conflict fails the whole cycle's moves outright.
+   *
+   * Writes through Fleet's `bulkUpdatePartial` rather than `bulkUpdate`: only
+   * `condition` (plus the revision metadata) changes, so the package lookup,
+   * validation, secret handling, input compilation and callbacks that
+   * `bulkUpdate` runs have nothing to act on here. `bulkUpdatePartial` also
+   * skips agent-policy deployment, which this path already owns via
+   * {@link AgentPolicyRevisionBatcher}.
    */
   async bulkUpdateInSpace({
     policiesToUpdate,
     spaceId,
   }: {
-    policiesToUpdate: UpdatePackagePolicyWithId[];
+    policiesToUpdate: ConditionUpdate[];
     spaceId: string;
   }) {
     if (policiesToUpdate.length === 0) {
@@ -337,19 +345,21 @@ export class PackagePolicyService {
 
     const soClient = this.getSpaceSoClient(spaceId === ALL_SPACES_ID ? DEFAULT_SPACE_ID : spaceId);
     const { updatedPolicies, failedPolicies } =
-      await this.server.fleet.packagePolicyService.bulkUpdate(
+      await this.server.fleet.packagePolicyService.bulkUpdatePartial(
         soClient,
-        this.getInternalEsClient(),
-        policiesToUpdate,
-        {
-          force: true,
-          asyncDeploy: true,
-          bumpRevision: false,
-        }
+        policiesToUpdate.map(({ update }) => update)
       );
 
+    // `bulkUpdatePartial` echoes back only the attributes that were sent, so
+    // `policy_ids` is absent from its result and the bump targets have to come
+    // from the source policies captured alongside each update. Keyed by
+    // package-policy id so only writes that actually landed get bumped.
+    const agentPolicyIdsByPackagePolicyId = new Map(
+      policiesToUpdate.map(({ update, agentPolicyIds }) => [update.id, agentPolicyIds])
+    );
+
     await this.revisionBatcher.schedule(
-      updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? []
+      updatedPolicies.flatMap(({ id }) => agentPolicyIdsByPackagePolicyId.get(id) ?? [])
     );
 
     return failedPolicies;

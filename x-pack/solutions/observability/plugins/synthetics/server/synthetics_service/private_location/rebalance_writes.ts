@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyPartialUpdate } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
 import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
@@ -51,43 +52,60 @@ export const toMonitorPlacements = (
 };
 
 /**
- * Minimal update payload that only re-targets a package policy to a different
- * agent by rewriting its `${agent.id}` condition. Carries the existing content
- * (inputs/vars/package) and single-policy binding over unchanged and drops
- * saved-object metadata Fleet recomputes on update, so the compiled config stays
- * identical and only the runtime agent condition changes.
+ * A condition-only package-policy write, paired with the agent policies that
+ * must be revision-bumped once it lands.
  *
- * Carries `version` (the optimistic-concurrency token from the snapshot read) so
- * Fleet rejects the write with a conflict if the package policy changed since —
- * a concurrent monitor edit, or the `Sync-Private-Location-Monitors` task writing
- * the same policy on its own schedule. Without it, this full-object rewrite built
- * from a stale snapshot would silently revert that change. On conflict the mover
- * lands in `bulkUpdate`'s failed set and is retried from a fresh read next cycle
- * (the rebalance is idempotent).
+ * The bump targets cannot be read back off the write: `bulkUpdatePartial`
+ * echoes only the attributes that were sent, so `policy_ids` is absent from its
+ * result. They are captured here from the source policy instead.
+ */
+export interface ConditionUpdate {
+  update: PackagePolicyPartialUpdate;
+  agentPolicyIds: string[];
+}
+
+/**
+ * A package policy read back from Fleet always carries its saved-object
+ * `version`, but the type models it as optional. Narrowing here keeps the
+ * optimistic-concurrency token mandatory on the write path rather than
+ * degrading to a blind overwrite when it is somehow absent.
+ */
+const hasVersion = (pkgPolicy: PackagePolicy): pkgPolicy is PackagePolicy & { version: string } =>
+  typeof pkgPolicy.version === 'string';
+
+/**
+ * Minimal write that only re-targets a package policy to a different agent by
+ * rewriting its `${agent.id}` condition. Sends just the changed attribute plus
+ * the revision metadata Fleet's full `bulkUpdate` would have stamped, so the
+ * rest of the stored document (inputs/vars/package/bindings) is left untouched
+ * by the saved-objects merge rather than rewritten from a snapshot.
+ *
+ * `revision` is bumped because it is compiled into the agent's policy document
+ * (`package_policies_to_agent_inputs`), so holding it back would change what
+ * agents receive.
+ *
+ * Carries `version` (the optimistic-concurrency token from the snapshot read)
+ * so Fleet rejects the write with a conflict if the package policy changed
+ * since — a concurrent monitor edit, or the `Sync-Private-Location-Monitors`
+ * task writing the same policy on its own schedule. On conflict the mover lands
+ * in the failed set and is retried from a fresh read next cycle (the rebalance
+ * is idempotent).
  */
 export const toConditionUpdate = (
-  pkgPolicy: PackagePolicy,
+  pkgPolicy: PackagePolicy & { version: string },
   condition: string | null
-): UpdatePackagePolicyWithId => ({
-  id: pkgPolicy.id,
-  version: pkgPolicy.version,
-  name: pkgPolicy.name,
-  description: pkgPolicy.description,
-  namespace: pkgPolicy.namespace,
-  enabled: pkgPolicy.enabled,
-  is_managed: pkgPolicy.is_managed,
-  package: pkgPolicy.package,
-  inputs: pkgPolicy.inputs,
-  vars: pkgPolicy.vars,
-  output_id: pkgPolicy.output_id,
-  supports_agentless: pkgPolicy.supports_agentless,
-  global_data_tags: pkgPolicy.global_data_tags,
-  elasticsearch: pkgPolicy.elasticsearch,
-  overrides: pkgPolicy.overrides,
-  additional_datastreams_permissions: pkgPolicy.additional_datastreams_permissions,
-  policy_id: pkgPolicy.policy_id,
-  policy_ids: pkgPolicy.policy_ids,
-  condition,
+): ConditionUpdate => ({
+  update: {
+    id: pkgPolicy.id,
+    version: pkgPolicy.version,
+    attributes: {
+      condition,
+      revision: pkgPolicy.revision + 1,
+      updated_at: new Date().toISOString(),
+      updated_by: 'system',
+    },
+  },
+  agentPolicyIds: pkgPolicy.policy_ids ?? [],
 });
 
 /**
@@ -105,8 +123,8 @@ export const toConditionUpdates = (
   pkgPolicies: PackagePolicy[],
   assignment: ReadonlyMap<string, string>,
   locationId: string
-): Map<string, UpdatePackagePolicyWithId[]> => {
-  const bySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+): Map<string, ConditionUpdate[]> => {
+  const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {
     const configId = configIdOf(pkgPolicy.id, locationId);
     if (!configId) {
@@ -119,6 +137,9 @@ export const toConditionUpdates = (
     const desiredCondition = agentIdCondition(desiredAgentId);
     if (pkgPolicy.condition === desiredCondition) {
       continue; // already pinned to the right agent → no write
+    }
+    if (!hasVersion(pkgPolicy)) {
+      continue; // no concurrency token → skip rather than blind-overwrite
     }
     const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     const updates = bySpace.get(spaceId) ?? [];
@@ -134,11 +155,14 @@ export const toConditionUpdates = (
  */
 export const toClearedConditionUpdates = (
   pkgPolicies: PackagePolicy[]
-): Map<string, UpdatePackagePolicyWithId[]> => {
-  const bySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+): Map<string, ConditionUpdate[]> => {
+  const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {
     if (typeof pkgPolicy.condition !== 'string') {
       continue;
+    }
+    if (!hasVersion(pkgPolicy)) {
+      continue; // no concurrency token → skip rather than blind-overwrite
     }
     const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     const updates = bySpace.get(spaceId) ?? [];
