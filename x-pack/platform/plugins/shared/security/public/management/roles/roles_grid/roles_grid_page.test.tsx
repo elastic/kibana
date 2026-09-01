@@ -199,6 +199,41 @@ describe('<RolesGridPage />', () => {
     expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
   });
 
+  it('hides the create action until the first load settles', async () => {
+    let resolveRoles: (value: Awaited<ReturnType<typeof apiClientMock.queryRoles>>) => void;
+    apiClientMock.queryRoles.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRoles = resolve;
+      })
+    );
+
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+      />
+    );
+
+    expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
+
+    resolveRoles!({
+      total: 0,
+      count: 0,
+      roles: [],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
+    });
+  });
+
   it('shows the create action after a non-403 load error', async () => {
     apiClientMock.queryRoles.mockRejectedValue({
       body: { statusCode: 500, message: 'boom' },

@@ -68,13 +68,6 @@ jest.mock('./privileges/kibana/transform_error_section', () => ({
   TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
 }));
 
-jest.mock('./reserved_role_badge', () => ({
-  ReservedRoleBadge: ({ role }: any) =>
-    role?.metadata?._reserved ? (
-      <span data-test-subj="reservedRoleBadgeTooltip">Reserved</span>
-    ) : null,
-}));
-
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
 const spacesApiUi = getUiApi({ spacesManager, getStartServices });
@@ -293,6 +286,33 @@ describe('<EditRolePage />', () => {
   });
 
   describe('with spaces enabled', () => {
+    it('keeps the header and shows a loading body while the page loads', async () => {
+      const props = getProps({
+        action: 'edit',
+        role: {
+          name: 'my custom role',
+          metadata: {},
+          elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+          kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+        },
+      });
+      props.rolesAPIClient.getRole.mockReturnValue(new Promise(() => {}));
+
+      render(
+        <TestProviders>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Edit role');
+        expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('roleFormNameInput')).not.toBeInTheDocument();
+    });
+
     it('can render readonly view when not enough privileges', async () => {
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -346,7 +366,10 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
+      expect(screen.getByTestId('reservedRoleBadge')).toHaveTextContent('Reserved');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Reserved roles are built-in and cannot be removed or modified.'
+      );
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -376,7 +399,6 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -485,7 +507,7 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('userCannotManageSpacesCallout')).toBeInTheDocument();
 
@@ -577,7 +599,10 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
+      expect(screen.getByTestId('reservedRoleBadge')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Reserved roles are built-in and cannot be removed or modified.'
+      );
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -608,7 +633,7 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -884,7 +909,7 @@ describe('<EditRolePage />', () => {
 
     await waitForRender();
 
-    expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
     expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
     expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
     expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -1036,7 +1061,7 @@ describe('<EditRolePage />', () => {
       expect(
         within(formRow).queryByText('A role with this name already exists.')
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expect(MockedElasticsearchPrivileges).toHaveBeenCalledWith(

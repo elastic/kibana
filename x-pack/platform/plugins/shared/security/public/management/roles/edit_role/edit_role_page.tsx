@@ -15,9 +15,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EuiPageSection,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
@@ -39,6 +39,7 @@ import type {
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -56,7 +57,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DeleteRoleButton } from './delete_role_button';
 import { hasRoleChanged } from './has_role_changed';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
-import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';
 import type { StartServices } from '../../..';
@@ -109,6 +109,17 @@ const editRoleDescription = i18n.translate(
       'Set privileges on your Elasticsearch data and control access to your Project spaces.',
   }
 );
+
+const reservedRoleDescription = i18n.translate(
+  'xpack.security.management.editRole.modifyingReversedRolesDescription',
+  {
+    defaultMessage: 'Reserved roles are built-in and cannot be removed or modified.',
+  }
+);
+
+const reservedRoleBadgeLabel = i18n.translate('xpack.security.management.reservedBadge', {
+  defaultMessage: 'Reserved',
+});
 
 export interface Props extends StartServices {
   action: 'edit' | 'clone';
@@ -487,7 +498,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
     <>
       <AppHeader
         title={getPageTitle()}
-        description={editRoleDescription}
+        description={isRoleReserved ? reservedRoleDescription : editRoleDescription}
+        badges={
+          isRoleReserved
+            ? [
+                {
+                  label: reservedRoleBadgeLabel,
+                  'data-test-subj': 'reservedRoleBadge',
+                },
+              ]
+            : undefined
+        }
         back={{
           href: history.createHref({ pathname: '/' }),
           label: listTitle,
@@ -499,7 +520,19 @@ export const EditRolePage: FunctionComponent<Props> = ({
   );
 
   if (isPageLoading) {
-    return <div className="editRolePage">{header}</div>;
+    return (
+      <div className="editRolePage">
+        {header}
+        <EuiPageSection alignment="center" color="subdued">
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.security.management.editRole.loadingRoleDescription"
+              defaultMessage="Loading…"
+            />
+          </SectionLoading>
+        </EuiPageSection>
+      </div>
+    );
   }
 
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
@@ -855,21 +888,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
       {header}
       <EuiForm {...formError} fullWidth>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            {isRoleReserved && (
-              <Fragment>
-                <ReservedRoleBadge role={role} />
-                <EuiText size="s" color="subdued">
-                  <p id="reservedRoleDescription" tabIndex={0}>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.modifyingReversedRolesDescription"
-                      defaultMessage="Reserved roles are built-in and cannot be removed or modified."
-                    />
-                  </p>
-                </EuiText>
-              </Fragment>
-            )}
-          </EuiFlexItem>
           <EuiFlexItem>
             {isDeprecatedRole && (
               <Fragment>
