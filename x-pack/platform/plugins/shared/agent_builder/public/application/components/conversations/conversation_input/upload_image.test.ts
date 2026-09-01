@@ -6,6 +6,7 @@
  */
 
 import { getUniqueName, processImageFile } from './upload_image';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { AttachmentType, MAX_IMAGE_BYTES } from '@kbn/agent-builder-common/attachments';
 
 (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap = jest
@@ -46,6 +47,7 @@ const makeFilesClient = (overrides?: Record<string, unknown>) => ({
 });
 
 const makeAddErrorToast = () => jest.fn();
+const makeReportEvent = () => jest.fn();
 
 describe('processImageFile', () => {
   afterEach(() => {
@@ -59,6 +61,7 @@ describe('processImageFile', () => {
     const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
+    const reportEvent = makeReportEvent();
 
     const result = await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
@@ -66,6 +69,7 @@ describe('processImageFile', () => {
       filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
+      reportEvent,
     });
 
     expect(filesClient.create).toHaveBeenCalledWith(
@@ -79,6 +83,7 @@ describe('processImageFile', () => {
       },
     ]);
     expect(addErrorToast).not.toHaveBeenCalled();
+    expect(reportEvent).not.toHaveBeenCalled();
     expect(result).toBe(true);
   });
 
@@ -89,6 +94,7 @@ describe('processImageFile', () => {
     const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
+    const reportEvent = makeReportEvent();
 
     const result = await processImageFile({
       file: makeFile('video.jpg', 'image/jpeg', 100),
@@ -96,11 +102,16 @@ describe('processImageFile', () => {
       filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
+      reportEvent,
     });
 
     expect(filesClient.create).not.toHaveBeenCalled();
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'invalid_type',
+      mime_type: 'image/jpeg',
+    });
     expect(result).toBe(false);
   });
 
@@ -108,6 +119,7 @@ describe('processImageFile', () => {
     const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
+    const reportEvent = makeReportEvent();
 
     const result = await processImageFile({
       file: makeFile('image.gif', 'image/gif', 100),
@@ -115,11 +127,16 @@ describe('processImageFile', () => {
       filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
+      reportEvent,
     });
 
     expect(filesClient.create).not.toHaveBeenCalled();
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'invalid_type',
+      mime_type: 'image/gif',
+    });
     expect(result).toBe(false);
   });
 
@@ -127,6 +144,7 @@ describe('processImageFile', () => {
     const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
+    const reportEvent = makeReportEvent();
 
     const result = await processImageFile({
       file: makeFile('big.png', 'image/png', MAX_IMAGE_BYTES + 1),
@@ -134,11 +152,17 @@ describe('processImageFile', () => {
       filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
+      reportEvent,
     });
 
     expect(filesClient.create).not.toHaveBeenCalled();
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'too_large',
+      mime_type: 'image/png',
+      file_size: MAX_IMAGE_BYTES + 1,
+    });
     expect(result).toBe(false);
     expect(mockCreateImageBitmap).not.toHaveBeenCalled();
   });
@@ -156,6 +180,7 @@ describe('processImageFile', () => {
     });
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
+    const reportEvent = makeReportEvent();
 
     const result = await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
@@ -163,11 +188,13 @@ describe('processImageFile', () => {
       filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
+      reportEvent,
       abortSignal: controller.signal,
     });
 
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).not.toHaveBeenCalled();
+    expect(reportEvent).not.toHaveBeenCalled();
     expect(result).toBe(true);
   });
 
@@ -178,6 +205,7 @@ describe('processImageFile', () => {
     });
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
+    const reportEvent = makeReportEvent();
 
     const result = await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
@@ -185,10 +213,12 @@ describe('processImageFile', () => {
       filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
+      reportEvent,
     });
 
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(reportEvent).not.toHaveBeenCalled();
     expect(result).toBe(false);
   });
 });

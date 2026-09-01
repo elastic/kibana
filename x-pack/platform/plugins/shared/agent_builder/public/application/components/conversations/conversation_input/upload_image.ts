@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import type { ToastInput } from '@kbn/core/public';
+import type { AnalyticsServiceStart, ToastInput } from '@kbn/core/public';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
   MAX_IMAGE_BYTES,
@@ -53,6 +54,7 @@ export const processImageFile = async ({
   filesClient,
   upsertAttachments,
   addErrorToast,
+  reportEvent,
   abortSignal,
 }: {
   file: File;
@@ -60,15 +62,25 @@ export const processImageFile = async ({
   filesClient: ScopedFilesClient;
   upsertAttachments: (attachments: ConversationAttachment[]) => void;
   addErrorToast: (input: ToastInput) => void;
+  reportEvent: AnalyticsServiceStart['reportEvent'];
   abortSignal?: AbortSignal;
 }): Promise<boolean> => {
   if (!(SUPPORTED_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
     addErrorToast({ title: labels.invalidType });
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'invalid_type',
+      mime_type: file.type,
+    });
     return false;
   }
 
   if (file.size > MAX_IMAGE_BYTES) {
     addErrorToast({ title: labels.tooLarge });
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'too_large',
+      mime_type: file.type,
+      file_size: file.size,
+    });
     return false;
   }
 
@@ -81,6 +93,10 @@ export const processImageFile = async ({
   );
   if (!isRealImage) {
     addErrorToast({ title: labels.invalidType });
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'invalid_type',
+      mime_type: file.type,
+    });
     return false;
   }
 

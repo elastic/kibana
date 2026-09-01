@@ -13,6 +13,7 @@ import type { MessageEditorController } from './message_editor/use_message_edito
 import { processImageFile, getUniqueName } from './upload_image';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface UseImageUploadParams {
@@ -35,6 +36,7 @@ export const useImageUpload = ({
   messageEditorController,
 }: UseImageUploadParams): UseImageUploadResult => {
   const { filesClient } = useAgentBuilderServices();
+  const { services } = useKibana();
   const { attachments, conversationId, upsertAttachments, removeAttachment } =
     useConversationContext();
   const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
@@ -80,6 +82,7 @@ export const useImageUpload = ({
         filesClient,
         upsertAttachments,
         addErrorToast,
+        reportEvent: services.analytics.reportEvent,
         abortSignal: controller.signal,
       })
         .then((success) => {
@@ -99,7 +102,14 @@ export const useImageUpload = ({
         });
       return name;
     },
-    [upsertAttachments, filesClient, addErrorToast, uploadingNames, messageEditorController]
+    [
+      upsertAttachments,
+      filesClient,
+      addErrorToast,
+      services.analytics,
+      uploadingNames,
+      messageEditorController,
+    ]
   );
 
   const handleAfterInput = useCallback(() => {
