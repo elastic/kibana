@@ -13,7 +13,7 @@ import { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
 const INDEX = '.entities.v2.latest.default';
 
 const requireMatch = (id: (typeof RESOLUTION_RULE_IDS)[keyof typeof RESOLUTION_RULE_IDS]) => {
-  const spec = getResolutionRuleConfig(id)?.match;
+  const spec = getResolutionRuleConfig(id)?.matcher;
   if (!spec) {
     throw new Error(`Expected matcher spec for ${id}`);
   }

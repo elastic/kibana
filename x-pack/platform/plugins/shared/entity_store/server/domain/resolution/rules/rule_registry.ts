@@ -62,7 +62,7 @@ export interface ResolutionRuleConfig {
    * Parameterized ES|QL matcher. Absent for rules that use a different query
    * shape (`related_user_alias_resolution` stays on Query DSL).
    */
-  match?: EsqlMatchSpec;
+  matcher?: EsqlMatchSpec;
 }
 
 export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
@@ -72,7 +72,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     description:
       'Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.',
     defaultEnabled: true,
-    match: {
+    matcher: {
       field: 'user.email',
       namespaces: [],
       lowercase: true,
@@ -84,7 +84,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     description:
       'Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
     defaultEnabled: true,
-    match: {
+    matcher: {
       field: 'user.id',
       namespaces: ['system', 'windows', 'active_directory'],
       lowercase: false,
@@ -97,7 +97,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     description:
       'Links Microsoft Defender (`m365_defender`) identities to Entra ID by GUID-shaped `user.id`. Needs Defender identity events and Entra entity analytics. Disable if Defender SID IAM events leak through the GUID gate.',
     defaultEnabled: true,
-    match: {
+    matcher: {
       field: 'user.id',
       namespaces: ['m365_defender', 'entra_id'],
       lowercase: false,
@@ -110,7 +110,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     description:
       'Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.',
     defaultEnabled: true,
-    match: {
+    matcher: {
       field: 'user.id',
       namespaces: ['crowdstrike', 'active_directory'],
       lowercase: false,
@@ -123,7 +123,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     description:
       'Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.',
     defaultEnabled: true,
-    match: {
+    matcher: {
       fieldByNamespace: {
         microsoft_365: 'user.id',
         entra_id: 'user.name',

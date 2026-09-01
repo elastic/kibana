@@ -20,7 +20,7 @@ jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
   resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
 }));
 
-const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.match!;
+const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 
 const createInitialState = (overrides: Partial<PerRuleState> = {}): PerRuleState => ({
   lastProcessedTimestamp: null,

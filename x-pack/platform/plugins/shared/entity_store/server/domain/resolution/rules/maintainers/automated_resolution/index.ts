@@ -61,7 +61,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
 
       const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
       const isMatcherBackfill =
-        Boolean(ruleConfig.match) && ruleState.lastProcessedTimestamp == null;
+        Boolean(ruleConfig.matcher) && ruleState.lastProcessedTimestamp == null;
       if (isMatcherBackfill) {
         if (backfillStarted) {
           logger.debug(
@@ -73,7 +73,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
 
       try {
-        if (ruleConfig.match) {
+        if (ruleConfig.matcher) {
           rules[ruleConfig.id] = await runEsqlMatcherRule({
             state: ruleState,
             namespace,
@@ -82,7 +82,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             resolutionClient,
             signal,
             telemetry,
-            spec: ruleConfig.match,
+            spec: ruleConfig.matcher,
             ruleId: ruleConfig.id,
             mutatedIds,
           });

@@ -126,7 +126,7 @@ describe('automatedResolutionMaintainerConfig', () => {
 
   it('pins the matcher rule ids so adding a rule fails this test on purpose', () => {
     expect(
-      RESOLUTION_RULE_CONFIGS.filter((config) => config.match).map((config) => config.id)
+      RESOLUTION_RULE_CONFIGS.filter((config) => config.matcher).map((config) => config.id)
     ).toEqual([...MATCHER_RULE_IDS]);
   });
 
@@ -197,7 +197,7 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(emailCall[0].state.lastProcessedTimestamp).toBeNull();
   });
 
-  it.each(RESOLUTION_RULE_CONFIGS.filter((config) => config.match).map((config) => config.id))(
+  it.each(RESOLUTION_RULE_CONFIGS.filter((config) => config.matcher).map((config) => config.id))(
     'skips disabled matcher rule %s and preserves its existing state',
     async (ruleId) => {
       const esClient = createEsClient();
