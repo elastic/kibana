@@ -14,6 +14,7 @@ import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { registerFatalExitLogging } from './register_fatal_exit_logging';
 
 interface BootstrapArgs {
   configs: string[];
@@ -49,17 +50,24 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService, env, onRootShutdown);
+  const root = new Root(rawConfigService, env, handleRootShutdown);
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
 
+  const fatalExitLogging = registerFatalExitLogging({ logger: rootLogger });
+
+  // Every shutdown reported by `Root.shutdown()` ends up here, so the fatal exit guard
+  // only has to speak up for terminations that never reach this path.
+  function handleRootShutdown(error?: any) {
+    fatalExitLogging.markShutdownReasonReported();
+    onRootShutdown(error);
+  }
+
   rootLogger.info('Kibana is starting');
 
-  // We will invert this message once we switch from opt-in to opt-out for code generation from strings.
-  // See https://github.com/elastic/kibana/issues/272315
-  if (isCodeGenerationFromStringsDisallowed()) {
-    rootLogger.info(
-      'Code generation from strings has been disallowed on this Kibana instance (--disallow-code-generation-from-strings)'
+  if (!isCodeGenerationFromStringsDisallowed()) {
+    rootLogger.warn(
+      'Code generation from strings is allowed on this Kibana instance. This hardening measure was disabled (KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false / --disallow-code-generation-from-strings not set).'
     );
   }
 

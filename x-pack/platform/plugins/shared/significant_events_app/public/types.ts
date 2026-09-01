@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -15,9 +16,6 @@ import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type React from 'react';
-
-export type KnowledgeIndicatorsPanelComponent = React.ComponentType<{ streamName: string }>;
 
 export interface SignificantEventsAppSetupDependencies {
   share: SharePluginSetup;
@@ -27,6 +25,7 @@ export interface SignificantEventsAppStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;
+  cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;
@@ -39,11 +38,5 @@ export interface SignificantEventsAppStartDependencies {
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface SignificantEventsAppPublicSetup {}
 
-export interface SignificantEventsAppPublicStart {
-  /**
-   * Factory for the embeddable Knowledge Indicators panel used in streams_app's
-   * stream overview. Call once per render tree; the returned component carries
-   * its own QueryClient and KibanaContext so no extra wrapping is needed.
-   */
-  getKnowledgeIndicatorsPanel: () => KnowledgeIndicatorsPanelComponent;
-}
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
+export interface SignificantEventsAppPublicStart {}

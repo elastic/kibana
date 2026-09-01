@@ -297,6 +297,47 @@ export const registerEntityGraphAttachment = ({
 };
 
 /**
+ * Registers the `security.entity_risk_score_history` attachment renderer
+ * (compact risk timeline chart + "Open full risk history" deep link into the entity
+ * flyout). Dynamically imports the chart chunk so `@elastic/charts` /
+ * RiskScoreTimeline stay off the main page-load bundle.
+ */
+export const registerEntityRiskScoreHistoryAttachment = ({
+  attachments,
+  application,
+  agentBuilder,
+  chrome,
+  experimentalFeatures,
+  searchSession,
+  uiSettings,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
+  searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_risk_score_history_attachment" */
+    './entity_risk_score_history'
+  ).then(({ createEntityRiskScoreHistoryAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityRiskScoreHistory,
+      createEntityRiskScoreHistoryAttachmentDefinition({
+        application,
+        agentBuilder,
+        chrome,
+        experimentalFeatures,
+        searchSession,
+        uiSettings,
+      })
+    );
+  });
+};
+
+/**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
  * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)

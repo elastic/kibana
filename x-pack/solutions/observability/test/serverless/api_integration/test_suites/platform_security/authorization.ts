@@ -1972,6 +1972,7 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:manage",
@@ -2186,6 +2187,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -2264,6 +2266,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:manage",
@@ -2438,6 +2441,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
+                "ai_index:visualization/read",
                 "api:generateReport",
                 "app:visualize",
                 "app:lens",
@@ -2495,6 +2499,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:read",
@@ -2619,6 +2624,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps/show",
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -2639,6 +2645,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:read",
@@ -2771,6 +2778,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps/show",
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -2823,6 +2831,7 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard_v2": Object {
               "all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:store_search_session",
@@ -3017,6 +3026,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -3080,6 +3090,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "app:dashboards",
@@ -3234,6 +3245,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "api:generateReport",
                 "app:visualize",
                 "app:lens",
@@ -3282,6 +3294,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "app:dashboards",
@@ -3398,6 +3411,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -3415,6 +3429,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "app:dashboards",
@@ -3539,6 +3554,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",

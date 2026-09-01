@@ -16,6 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-chrome-app-menu-components"
+    "@kbn/app-menu"
   ]
 }

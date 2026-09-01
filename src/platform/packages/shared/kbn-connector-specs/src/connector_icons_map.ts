@@ -113,6 +113,12 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.google_docs',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDocs" */ './specs/google_docs/icon')
+    ),
+  ],
+  [
     '.google_drive',
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
@@ -367,4 +373,8 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   ['.unifi', lazy(() => import(/* webpackChunkName: "connectorIconUnifi" */ './specs/unifi/icon'))],
+  [
+    '.urlscan_io',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
+  ],
 ]);

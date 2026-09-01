@@ -1,8 +1,7 @@
 {
-  "sha1": "59d02d42d2783494cd619cf77e891c8b86cd7337",
+  "sha1": "4755bebd22415b81ecc3e47a3a1f81485f50a780",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -585,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 60
       }
     },
@@ -599,7 +598,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 136,
+        "line": 134,
         "column": 90
       }
     },
@@ -613,7 +612,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 171,
+        "line": 165,
         "column": 20
       }
     },
@@ -627,22 +626,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 209,
+        "line": 206,
         "column": 9
       }
     },
     {
       "id": "a4060127e236200-80232182fc1d771",
       "title": "MigrateLegacyPolicies should migrate legacy policies to new format when cleanup runs",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 247,
-        "column": 6
+        "line": 235,
+        "column": 18
       }
     },
     {
@@ -655,8 +654,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 214,
-        "column": 27
+        "line": 266,
+        "column": 18
       }
     },
     {
@@ -669,7 +668,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 275,
+        "line": 291,
         "column": 20
       }
     },
@@ -814,6 +813,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
         "line": 310,
         "column": 9
+      }
+    },
+    {
+      "id": "78b337e953ebd4b-cdd38b3892a5251",
+      "title": "ScalablePrivateLocationMonitorCrud creates, updates, and deletes a monitor against a scalable private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
+        "line": 59,
+        "column": 28
       }
     }
   ]

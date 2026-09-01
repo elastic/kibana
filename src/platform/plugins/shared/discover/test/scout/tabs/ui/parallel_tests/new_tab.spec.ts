@@ -56,7 +56,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       await discover.waitUntilTabIsLoaded();
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getEsqlQueryValue()).toBe('FROM logsta*');
+      expect(await discover.getEsqlQueryValue()).toBe('FROM logsta* | SORT @timestamp DESC');
     });
 
     await spaceTest.step(
@@ -90,7 +90,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
   spaceTest('should create a new tab in ES|QL mode', async ({ pageObjects }) => {
     const { discover, unifiedTabs } = pageObjects;
-    const defaultQuery = 'FROM logst*';
+    const defaultQuery = 'FROM logst* | SORT @timestamp DESC';
     const updatedQuery = 'FROM logst* | LIMIT 1050';
 
     // tab 0 - created automatically with the default data view

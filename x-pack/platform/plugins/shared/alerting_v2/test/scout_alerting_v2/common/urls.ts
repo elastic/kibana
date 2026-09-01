@@ -16,35 +16,28 @@ import {
   RULE_API_PATH,
   EXECUTION_HISTORY_API_PATH,
   RULE_EXECUTIONS_API_PATH,
+  RULE_TEMPLATE_API_PATH,
 } from './constants';
 
-/**
- * Pre-parse input shape for {@link listRuleExecutionsUrl}. Kept local because
- * it only matters for tests that build query strings: fields with a Zod
- * `.default(...)` are optional here, and array-like fields accept either a
- * single value or an array (the schema normalizes them at parse time).
- */
+const toQueryString = (query: Record<string, string | number | string[] | undefined>): string => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      value.forEach((item) => params.append(key, String(item)));
+    } else {
+      params.set(key, String(value));
+    }
+  }
+  return params.toString();
+};
+
 type ListRuleExecutionsQueryInput = z.input<typeof listRuleExecutionsRequestSchema>;
 
-/**
- * URL for a single rule resource: `${RULE_API_PATH}/${encodedId}`.
- *
- * Always pass through `encodeURIComponent` so callers cannot accidentally
- * leak unencoded characters into path segments — important for the validation
- * tests that craft pathological ids.
- */
 export const getRuleUrl = (id: string) => `${RULE_API_PATH}/${encodeURIComponent(id)}`;
 export const getEnableRuleUrl = (id: string) => `${getRuleUrl(id)}/_enable`;
 export const getDisableRuleUrl = (id: string) => `${getRuleUrl(id)}/_disable`;
 
-/**
- * URL for a single action policy resource:
- * `${ACTION_POLICY_API_PATH}/${encodedId}`.
- *
- * Always passes through `encodeURIComponent` so callers cannot accidentally
- * leak unencoded characters into path segments — important for the validation
- * tests that craft pathological ids.
- */
 export const getActionPolicyUrl = (id: string) =>
   `${ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`;
 
@@ -76,11 +69,6 @@ export const getBulkRulesUrl = () => `${RULE_API_PATH}/_bulk_get`;
 
 export const getRunRuleUrl = (id: string) => `${getRuleUrl(id)}/_run`;
 
-/**
- * URL for the list action policies endpoint, optionally with a query string.
- * Arrays are encoded as repeated `key=value` pairs (e.g. `?tags=a&tags=b`) to
- * match the route's query parser.
- */
 export const getListActionPoliciesUrl = (
   query?: Record<string, string | number | string[]>
 ): string => {
@@ -95,6 +83,17 @@ export const getListActionPoliciesUrl = (
   }
   return `${ACTION_POLICY_API_PATH}?${params.toString()}`;
 };
+
+export const getRuleTemplateUrl = (id: string) =>
+  `${RULE_TEMPLATE_API_PATH}/${encodeURIComponent(id)}`;
+
+export const getFindRuleTemplatesUrl = (
+  query?: Record<string, string | number | string[] | undefined>
+): string => {
+  const qs = query ? toQueryString(query) : '';
+  return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
+};
+
 const getAlertActionUrl = (groupHash: string, suffix: string) =>
   `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
 
@@ -113,13 +112,6 @@ export const getDeactivateAlertActionUrl = (groupHash: string) =>
   getAlertActionUrl(groupHash, '_deactivate');
 
 export const BULK_ALERT_ACTION_URL = `${ALERT_API_PATH}/_bulk_action`;
-
-/** POST /api/alerting/v2/alerts — source in body */
-export const CREATE_ALERT_EVENT_URL = ALERT_API_PATH;
-
-/** POST /api/alerting/v2/alerts/:source — source in path */
-export const getCreateAlertEventBySourceUrl = (source: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(source)}`;
 
 export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;

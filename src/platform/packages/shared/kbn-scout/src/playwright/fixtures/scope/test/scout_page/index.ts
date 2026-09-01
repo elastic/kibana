@@ -10,8 +10,11 @@
 import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
 import type {
+  EuiBasicTableObject,
   EuiDataGridObject,
+  EuiDraggableObject,
   EuiGlobalToastListObject,
+  EuiSelectableObject,
   EuiSuperSelectObject,
 } from '../../../../eui_components';
 import type { RunA11yScanOptions } from '../../../../utils';
@@ -155,6 +158,9 @@ export type ScoutPage = Page & {
     comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
     dataGrid: (testSubj: string, scope?: ObjectScope) => EuiDataGridObject;
     superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
+    selectable: (testSubj: string, scope?: ObjectScope) => EuiSelectableObject;
+    basicTable: (testSubj: string, scope?: ObjectScope) => EuiBasicTableObject;
+    draggable: (testSubj: string, scope?: ObjectScope) => EuiDraggableObject;
     /**
      * Drives the global toast list (`EuiGlobalToastListObject`); `testSubj`
      * defaults to `globalToastList`, the subj Kibana core sets on the list.
