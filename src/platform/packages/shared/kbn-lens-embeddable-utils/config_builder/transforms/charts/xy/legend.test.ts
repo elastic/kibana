@@ -46,7 +46,7 @@ describe('XY Legend Transforms', () => {
         floatingColumns: 2,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'inside',
         columns: 2,
         position: 'bottom_left',
@@ -63,7 +63,7 @@ describe('XY Legend Transforms', () => {
         maxLines: 2,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'right',
         layout: { type: 'grid', truncate: { max_lines: 2 } },
@@ -78,7 +78,7 @@ describe('XY Legend Transforms', () => {
         shouldTruncate: true,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'left',
         layout: { type: 'grid', truncate: { max_lines: 1 } },
@@ -96,7 +96,7 @@ describe('XY Legend Transforms', () => {
         title: undefined,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'bottom',
         layout: { type: 'grid', truncate: { max_lines: 2 } },
@@ -115,7 +115,7 @@ describe('XY Legend Transforms', () => {
         title: 'My series',
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'bottom',
         layout: { type: 'grid', truncate: { max_lines: 2 } },
@@ -133,7 +133,7 @@ describe('XY Legend Transforms', () => {
         isTitleVisible: false,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'bottom',
         layout: { type: 'grid', truncate: { max_lines: 2 } },
@@ -151,7 +151,7 @@ describe('XY Legend Transforms', () => {
         maxLines: 1,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'right',
         size: 'l',
@@ -167,7 +167,7 @@ describe('XY Legend Transforms', () => {
         shouldTruncate: false,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'left',
         size: 's',
@@ -184,7 +184,7 @@ describe('XY Legend Transforms', () => {
         maxLines: 2,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'top',
         layout: { type: 'grid', truncate: { max_lines: 2 } },
@@ -200,7 +200,7 @@ describe('XY Legend Transforms', () => {
         shouldTruncate: true,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'bottom',
         layout: { type: 'grid', truncate: { max_lines: 1 } },
@@ -216,7 +216,7 @@ describe('XY Legend Transforms', () => {
         shouldTruncate: true,
       },
       api: {
-        visibility: 'visible',
+        visibility: 'auto',
         placement: 'outside',
         position: 'right',
         size: 'auto',
@@ -287,6 +287,58 @@ describe('XY Legend Transforms', () => {
         shouldTruncate: true,
       });
       expect(apiLegend).not.toHaveProperty('size');
+    });
+  });
+
+  describe('legend visibility', () => {
+    const outsideLegend = {
+      placement: 'outside' as const,
+      position: 'bottom' as const,
+    };
+
+    it('maps auto to Lens Auto (visible only when there is more than one series)', () => {
+      const { legend } = convertLegendToStateFormat({
+        ...outsideLegend,
+        visibility: 'auto',
+      });
+      expect(legend.isVisible).toBe(true);
+      expect(legend.showSingleSeries).toBeUndefined();
+    });
+
+    it('maps visible to Lens Show (always display, including a single series)', () => {
+      const { legend } = convertLegendToStateFormat({
+        ...outsideLegend,
+        visibility: 'visible',
+      });
+      expect(legend.isVisible).toBe(true);
+      expect(legend.showSingleSeries).toBe(true);
+    });
+
+    it('maps hidden to Lens Hide', () => {
+      const { legend } = convertLegendToStateFormat({
+        ...outsideLegend,
+        visibility: 'hidden',
+      });
+      expect(legend.isVisible).toBe(false);
+      expect(legend.showSingleSeries).toBeUndefined();
+    });
+
+    it('round-trips Lens Auto as visibility auto', () => {
+      const { apiLegend } = roundTripLegend({
+        isVisible: true,
+        position: 'right',
+      });
+      expect(apiLegend.visibility).toBe('auto');
+    });
+
+    it('round-trips Lens Show as visibility visible', () => {
+      const { apiLegend, stateLegend } = roundTripLegend({
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+      });
+      expect(apiLegend.visibility).toBe('visible');
+      expect(stateLegend.showSingleSeries).toBe(true);
     });
   });
 });

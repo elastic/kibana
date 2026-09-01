@@ -306,8 +306,7 @@ export type BeatsOutputSOAttributes =
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
 
-// TODO: add `| OutputSoOtlpAttributes` when service-layer OTLP CRUD is activated in the follow-up PR
-export type OutputSOAttributes = BeatsOutputSOAttributes;
+export type OutputSOAttributes = BeatsOutputSOAttributes | OutputSoOtlpAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled?: boolean;
