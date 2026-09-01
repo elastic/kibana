@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiIcon,
-  EuiLoadingElastic,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -67,66 +59,6 @@ function buildListTabHref(
   });
   const queryString = searchParams.toString();
   return queryString ? `${baseHref}?${queryString}` : baseHref;
-}
-
-/**
- * Compact primary banner shown in the chrome's header-banner slot (above the
- * whole Kibana body). It's sized to fill the fixed banner height rather than
- * using an `EuiCallOut`, which is too tall for that slot.
- */
-function PrototypeBanner({ onDismiss }: { onDismiss: () => void }) {
-  const { euiTheme } = useEuiTheme();
-  const message = i18n.translate('xpack.streams.streamsListView.prototypeCalloutTitle', {
-    defaultMessage:
-      'This is a UX prototype using hardcoded dummy data. Scope and capabilities are limited.',
-  });
-  const dismissLabel = i18n.translate(
-    'xpack.streams.streamsListView.prototypeCalloutDismissLabel',
-    {
-      defaultMessage: 'Dismiss',
-    }
-  );
-
-  return (
-    <div
-      data-test-subj="streamsPrototypeBanner"
-      className={css`
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: ${euiTheme.size.s};
-        height: 100%;
-        width: 100%;
-        padding-inline: ${euiTheme.size.xl};
-        background-color: ${euiTheme.colors.backgroundBaseInteractiveHoverAssistance};
-        color: ${euiTheme.colors.textAssistance};
-      `}
-    >
-      <EuiIcon type="info" size="s" color={euiTheme.colors.textAssistance} />
-      <EuiText size="s" color={euiTheme.colors.textAssistance}>
-        {message}
-      </EuiText>
-      <EuiButtonIcon
-        iconType="cross"
-        color="text"
-        size="xs"
-        aria-label={dismissLabel}
-        onClick={onDismiss}
-        data-test-subj="streamsPrototypeBannerDismiss"
-        className={css`
-          position: absolute;
-          inset-inline-end: ${euiTheme.size.s};
-          top: 50%;
-          transform: translateY(-50%);
-          color: ${euiTheme.colors.textAssistance};
-          svg {
-            fill: ${euiTheme.colors.textAssistance};
-          }
-        `}
-      />
-    </div>
-  );
 }
 
 export function StreamListView() {
@@ -243,21 +175,6 @@ export function StreamListView() {
     }
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
-  const [isPrototypeCalloutVisible, setIsPrototypeCalloutVisible] = React.useState(true);
-
-  // Render the prototype notice in the chrome header-banner slot, which sits above the entire
-  // Kibana body and pushes the app content down (rather than overlaying it like a fixed banner).
-  useEffect(() => {
-    if (isPrototypeCalloutVisible) {
-      core.chrome.setHeaderBanner({
-        content: <PrototypeBanner onDismiss={() => setIsPrototypeCalloutVisible(false)} />,
-      });
-    } else {
-      core.chrome.setHeaderBanner(undefined);
-    }
-    return () => core.chrome.setHeaderBanner(undefined);
-  }, [isPrototypeCalloutVisible, core.chrome]);
-
   // Prototype behavior: show the "marketing" toast on every (hard) refresh of the
   // Streams landing page, rather than persisting a "seen" flag.
   const [isMarketingToastVisible, setIsMarketingToastVisible] = React.useState(
@@ -294,6 +211,9 @@ export function StreamListView() {
 
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
+  // Classic stream creation is no longer relevant for the prototype; hide its menu entries.
+  // Flip this to `true` to restore the "Create classic stream" action.
+  const showClassicStreamCreation: boolean = false;
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
@@ -316,14 +236,18 @@ export function StreamListView() {
           iconType: 'plus',
           testId: 'streamsAppCreateStreamButton',
           items: [
-            {
-              id: 'createClassicStream',
-              order: 1,
-              label: classicStreamMenuItemLabel,
-              run: () => setIsClassicStreamCreationFlyoutOpen(true),
-              disableButton: !canCreateClassicStream,
-              testId: 'streamsAppCreateClassicStreamButton',
-            },
+            ...(showClassicStreamCreation
+              ? [
+                  {
+                    id: 'createClassicStream',
+                    order: 1,
+                    label: classicStreamMenuItemLabel,
+                    run: () => setIsClassicStreamCreationFlyoutOpen(true),
+                    disableButton: !canCreateClassicStream,
+                    testId: 'streamsAppCreateClassicStreamButton',
+                  },
+                ]
+              : []),
             {
               id: 'createQueryStream',
               order: 2,
@@ -338,14 +262,18 @@ export function StreamListView() {
     }
 
     return {
-      primaryActionItem: {
-        id: 'createClassicStream',
-        label: createClassicStreamLabel,
-        iconType: 'plus',
-        run: () => setIsClassicStreamCreationFlyoutOpen(true),
-        disableButton: !canCreateClassicStream,
-        testId: 'streamsAppCreateClassicStreamButton',
-      },
+      ...(showClassicStreamCreation
+        ? {
+            primaryActionItem: {
+              id: 'createClassicStream',
+              label: createClassicStreamLabel,
+              iconType: 'plus',
+              run: () => setIsClassicStreamCreationFlyoutOpen(true),
+              disableButton: !canCreateClassicStream,
+              testId: 'streamsAppCreateClassicStreamButton',
+            },
+          }
+        : {}),
       items,
     };
   }, [
@@ -356,6 +284,7 @@ export function StreamListView() {
     queryStreamMenuItemLabel,
     settingsLabel,
     showQueryStreams,
+    showClassicStreamCreation,
   ]);
 
   // Canvas / Sources / Pipelines / Destinations — the prototype's own tabs,

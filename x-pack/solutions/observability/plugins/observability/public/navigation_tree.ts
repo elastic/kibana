@@ -98,9 +98,11 @@ function createNavTree({
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
+        sideNavStatus: 'hidden',
       },
       {
         link: 'observability-overview:cases',
+        sideNavStatus: 'hidden',
         children: [
           {
             link: 'observability-overview:cases_configure',
@@ -114,6 +116,7 @@ function createNavTree({
       {
         link: 'slo',
         icon: 'chartGauge',
+        sideNavStatus: 'hidden',
       },
       ...(streamsAvailable
         ? [
@@ -129,6 +132,7 @@ function createNavTree({
           defaultMessage: 'Applications',
         }),
         renderAs: 'panelOpener',
+        sideNavStatus: 'hidden',
         icon: 'spaces',
         children: [
           {
@@ -227,6 +231,7 @@ function createNavTree({
           defaultMessage: 'Infrastructure',
         }),
         renderAs: 'panelOpener',
+        sideNavStatus: 'hidden',
         icon: 'productCloudInfra',
         children: [
           {
@@ -298,6 +303,7 @@ function createNavTree({
           defaultMessage: 'Other tools',
         }),
         renderAs: 'panelOpener',
+        sideNavStatus: 'hidden',
         icon: 'wrench',
         children: [
           {

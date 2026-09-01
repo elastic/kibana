@@ -12,6 +12,7 @@ import { ChromeNextGlobalHeaderLogo } from './global_header_logo';
 import { SearchButton } from './search_button';
 import { AiButtonSlot } from './ai_button_slot';
 import { HelpButton } from './help_button';
+import { MilestoneBadge } from './milestone_badge';
 import { ChromeNextGlobalHeaderShell } from './global_header_shell';
 import {
   useContextSwitcher,
@@ -29,6 +30,7 @@ export const ChromeNextGlobalHeader = React.memo(() => {
       <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
       <ChromeNextGlobalHeaderShell
         logo={<ChromeNextGlobalHeaderLogo />}
+        milestone={<MilestoneBadge />}
         search={<SearchButton />}
         actions={<AiButtonSlot />}
         help={<HelpButton />}

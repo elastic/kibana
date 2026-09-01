@@ -29,6 +29,7 @@ export interface ChromeNextGlobalHeaderShellProps {
   logo?: ReactNode;
   switcher?: ReactNode;
   projectPicker?: ReactNode;
+  milestone?: ReactNode;
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
@@ -87,6 +88,14 @@ const useGlobalHeaderStyles = () => {
       flex-shrink: 0;
     `;
 
+    const milestoneSlot = css`
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      flex-shrink: 1;
+      margin-inline-end: ${euiTheme.size.s};
+    `;
+
     const actionsSlot = css`
       display: flex;
       align-items: center;
@@ -118,6 +127,7 @@ const useGlobalHeaderStyles = () => {
       spacer,
       rightGroup,
       searchSlot,
+      milestoneSlot,
       actionsSlot,
       helpSlot,
       userMenuSlot,
@@ -127,7 +137,7 @@ const useGlobalHeaderStyles = () => {
 };
 
 export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShellProps>(
-  ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
+  ({ logo, switcher, projectPicker, milestone, search, help, actions, userMenu }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useGlobalHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -155,6 +165,11 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
         )}
         <div css={styles.spacer} />
         <div css={styles.rightGroup}>
+          {milestone && (
+            <div css={styles.milestoneSlot} data-test-subj="chromeNextGlobalHeaderMilestone">
+              {milestone}
+            </div>
+          )}
           {search && (
             <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
               {search}
