@@ -300,6 +300,16 @@ describe('AttacksGroupTakeActionItems', () => {
           </TestProviders>
         );
 
+      beforeEach(() => {
+        mockUseAttackCaseContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Add to existing case', key: 'addToExistingCase' },
+            { name: 'Add to new case', key: 'addToNewCase' },
+          ],
+          panels: [],
+        });
+      });
+
       it('renders the navigation item by default', async () => {
         mockUseIsInSecurityApp.mockReturnValue(true);
         const { findByText } = renderWithNavigationAction();
@@ -311,6 +321,8 @@ describe('AttacksGroupTakeActionItems', () => {
         mockUseIsInSecurityApp.mockReturnValue(true);
         const { findByText } = renderWithNavigationAction(true);
 
+        expect(await findByText('Add to existing case')).toBeInTheDocument();
+        expect(await findByText('Add to new case')).toBeInTheDocument();
         expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
         expect(await findByText('Assign alert')).toBeInTheDocument();
         expect(await findByText('Apply alert tags')).toBeInTheDocument();
@@ -336,6 +348,8 @@ describe('AttacksGroupTakeActionItems', () => {
         mockUseIsInSecurityApp.mockReturnValue(true);
         const { findByText } = renderWithNavigationAction(false);
 
+        expect(await findByText('Add to existing case')).toBeInTheDocument();
+        expect(await findByText('Add to new case')).toBeInTheDocument();
         expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
         expect(await findByText('Assign alert')).toBeInTheDocument();
         expect(await findByText('Apply alert tags')).toBeInTheDocument();
