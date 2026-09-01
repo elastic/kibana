@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, map, Subject } from 'rxjs';
 import { initializeHistoryManager } from './history_manager';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
@@ -27,9 +27,10 @@ const makeSetup = async () => {
     stateRef.current = state;
   });
 
-  const anyStateChange$ = new BehaviorSubject<undefined>(undefined);
+  const anyStateChange$ = new Subject<void>();
   const hasOverlays$ = new BehaviorSubject<boolean>(false);
   const dataLoading$ = new BehaviorSubject<boolean>(false);
+  const initialState$ = new Subject<DashboardState>();
 
   const { internalApi, cleanup } = initializeHistoryManager({
     anyStateChange$,
@@ -37,7 +38,7 @@ const makeSetup = async () => {
     setState,
     getState,
     dataLoading$,
-    onHistoryReady: jest.fn(),
+    initialState$,
   });
 
   // Build a combined disabledActions$ from the three separate observables exposed by internalApi.
@@ -54,9 +55,7 @@ const makeSetup = async () => {
 
   const api = { ...internalApi, disabledActions$ };
 
-  anyStateChange$.next(undefined); // initial state update
-  await waitFor(() => expect(getState).toBeCalled());
-  getState.mockClear();
+  initialState$.next({ ...initialState }); // seed history with the initial state
 
   return {
     api,
@@ -81,7 +80,7 @@ const pushStateChange = async (
   title = 'Updated Title'
 ) => {
   setup.stateRef.current = { ...setup.initialState, title };
-  setup.anyStateChange$.next(undefined);
+  setup.anyStateChange$.next();
   await waitFor(() => expect(setup.getState).toBeCalled());
 };
 
@@ -97,7 +96,7 @@ describe('initializeHistoryManager', () => {
     it('skips getState when hasOverlays$ is true', async () => {
       const setup = await makeSetup();
       setup.hasOverlays$.next(true);
-      setup.anyStateChange$.next(undefined);
+      setup.anyStateChange$.next();
       // wait for debounceTime(0) to fire and be filtered
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(setup.getState).not.toHaveBeenCalled();
@@ -107,7 +106,7 @@ describe('initializeHistoryManager', () => {
     it('skips getState when dataLoading$ is true', async () => {
       const setup = await makeSetup();
       setup.dataLoading$.next(true);
-      setup.anyStateChange$.next(undefined);
+      setup.anyStateChange$.next();
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(setup.getState).not.toHaveBeenCalled();
       setup.cleanup();
@@ -116,7 +115,7 @@ describe('initializeHistoryManager', () => {
     it('resumes after overlays are dismissed', async () => {
       const setup = await makeSetup();
       setup.hasOverlays$.next(true);
-      setup.anyStateChange$.next(undefined);
+      setup.anyStateChange$.next();
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(setup.getState).not.toHaveBeenCalled();
 
@@ -219,7 +218,7 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       setup.cleanup();
       // Subscription gone — no debounce timer starts, getState is never called.
-      setup.anyStateChange$.next(undefined);
+      setup.anyStateChange$.next();
       expect(setup.getState).not.toHaveBeenCalled();
     });
   });
