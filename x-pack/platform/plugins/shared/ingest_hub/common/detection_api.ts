@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
-export { ServicesStep } from './services_step';
-export { DetectAndReviewStep } from './detect_and_review_step';
-export { ServiceSettingsStep } from './service_settings_step';
+export interface HasDataResponse {
+  results: Record<string, boolean>;
+}
