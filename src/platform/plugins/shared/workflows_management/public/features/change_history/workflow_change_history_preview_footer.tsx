@@ -12,8 +12,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowYamlValidationAccordion } from '../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 /** Collapsed footer row height — matches the YAML editor validation accordion. */
 export const WORKFLOW_CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT = '48px';

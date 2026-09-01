@@ -15,6 +15,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { extractLiquidErrorPosition, parseTemplateString } from '@kbn/workflows-yaml';
+import type { YamlValidationErrorSeverity, YamlValidationResult } from '@kbn/workflows-yaml';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
 import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
@@ -33,7 +34,6 @@ import {
 } from '../../workflow_context/lib/get_foreach_state_schema';
 import { getNearestStepPath } from '../../workflow_context/lib/get_nearest_step_path';
 import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
-import type { YamlValidationErrorSeverity, YamlValidationResult } from '../model/types';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';

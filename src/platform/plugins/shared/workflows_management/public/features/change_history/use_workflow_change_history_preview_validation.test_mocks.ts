@@ -8,7 +8,7 @@
  */
 
 import type { monaco } from '@kbn/code-editor';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 
 jest.mock('../../../common/schema', () => {
   const mockWorkflowZodSchema = {};

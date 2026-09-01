@@ -126,6 +126,27 @@ export type {
   ConnectorParamsSchemaResolver,
 } from './common/zod/enrich_error_message';
 
+// Validation result types shared by the editor and the server validator
+export {
+  CUSTOM_YAML_VALIDATION_MARKER_OWNERS,
+  BATCHED_CUSTOM_MARKER_OWNER,
+  isYamlValidationMarkerOwner,
+  validationResultFingerprint,
+  validationResultsFingerprint,
+  filterHighlightableValidationResults,
+} from './common/validation/types';
+export type {
+  ConnectorIdItem,
+  VariableItem,
+  StepPropertyItem,
+  StepNameInfo,
+  YamlValidationErrorSeverity,
+  StepPropertyValidationResult,
+  YamlValidationDiagnostic,
+  YamlValidationDecoration,
+  YamlValidationResult,
+} from './common/validation/types';
+
 // Yaml editing utilities
 export {
   insertStep,

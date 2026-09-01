@@ -11,6 +11,7 @@ import type { Document } from 'yaml';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { VariableItem, YamlValidationResult } from '@kbn/workflows-yaml';
 import { validateVariable } from './validate_variable';
 import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
 import {
@@ -20,7 +21,6 @@ import {
 import { getNearestStepPath } from '../../workflow_context/lib/get_nearest_step_path';
 import { getValueAtYamlPath } from '../../workflow_context/lib/get_value_at_yaml_path';
 import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
-import type { VariableItem, YamlValidationResult } from '../model/types';
 
 const ROOT_CACHE_KEY: unique symbol = Symbol('root');
 

@@ -10,6 +10,7 @@
 import type YAML from 'yaml';
 import { parseDocument } from 'yaml';
 import { monaco } from '@kbn/code-editor';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   getSeverityString,
@@ -18,7 +19,6 @@ import {
 import { filterMonacoYamlMarkers } from '../validate_workflow_yaml/lib/filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from '../validate_workflow_yaml/lib/format_monaco_yaml_marker';
 import { getYamlMarkerRuleId } from '../validate_workflow_yaml/lib/get_yaml_marker_rule_id';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 export const collectYamlSchemaValidationResults = (
   model: monaco.editor.ITextModel,

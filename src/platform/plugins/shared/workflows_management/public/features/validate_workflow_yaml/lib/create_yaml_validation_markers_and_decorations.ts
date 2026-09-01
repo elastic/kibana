@@ -8,8 +8,8 @@
  */
 
 import { monaco } from '@kbn/code-editor';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import type { YamlValidationResult } from '../model/types';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,

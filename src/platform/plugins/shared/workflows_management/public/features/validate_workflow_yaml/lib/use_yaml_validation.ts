@@ -10,6 +10,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/code-editor';
+import {
+  BATCHED_CUSTOM_MARKER_OWNER,
+  validationResultsFingerprint,
+  type YamlValidationResult,
+} from '@kbn/workflows-yaml';
 import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import { createMarkersAndDecorations } from './create_yaml_validation_markers_and_decorations';
 import {
@@ -24,11 +29,6 @@ import {
   selectWorkflowDefinition,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import {
-  BATCHED_CUSTOM_MARKER_OWNER,
-  validationResultsFingerprint,
-  type YamlValidationResult,
-} from '../model/types';
 
 export interface UseYamlValidationResult {
   error: Error | null;
