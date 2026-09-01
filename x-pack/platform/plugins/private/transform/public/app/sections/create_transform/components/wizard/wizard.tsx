@@ -72,9 +72,6 @@ const styles = {
       padding-right: 0;
     }
   `,
-  projectScopeSelector: css`
-    min-inline-size: 180px;
-  `,
 };
 
 const localStorage = new Storage(window.localStorage);
@@ -283,13 +280,11 @@ export const Wizard: FC<WizardProps> = React.memo(
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
     const projectScopeSelector =
       shouldUseProjectScope && cpsManager ? (
-        <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
-          <ProjectScopeSelector
-            cpsManager={cpsManager}
-            onProjectRoutingChange={handleProjectRoutingChange}
-            projectRouting={projectRouting}
-          />
-        </EuiFlexItem>
+        <ProjectScopeSelector
+          cpsManager={cpsManager}
+          onProjectRoutingChange={handleProjectRoutingChange}
+          projectRouting={projectRouting}
+        />
       ) : null;
     const dataViewPickerComponent = (
       <DataViewPicker

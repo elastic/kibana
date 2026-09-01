@@ -159,6 +159,7 @@ export const ProjectScopeSelector = ({
 
   return (
     <EuiFormRow
+      css={{ inlineSize: 'fit-content' }}
       error={error ? unavailableLabel : undefined}
       isInvalid={Boolean(error)}
       label={projectScopeLabel}
@@ -169,7 +170,6 @@ export const ProjectScopeSelector = ({
           <EuiButton
             color="text"
             data-test-subj="transformProjectScopePicker"
-            fullWidth
             iconType="crossProjectSearch"
             isDisabled={isLoading || Boolean(error)}
             isLoading={isLoading}
@@ -180,8 +180,6 @@ export const ProjectScopeSelector = ({
           </EuiButton>
         }
         closePopover={() => setIsPopoverOpen(false)}
-        css={{ inlineSize: '100%' }}
-        display="block"
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         panelProps={{ css: { width: 560 } }}

@@ -114,6 +114,7 @@ const ProjectScopePopoverContent = ({
       fetchProjectsByRouting={fetchProjects}
       controlsState="hidden"
       customHeaderText={popoverTitle}
+      showProjectTags={false}
     />
   );
 };
