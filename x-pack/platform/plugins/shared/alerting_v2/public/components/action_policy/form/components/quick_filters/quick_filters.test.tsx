@@ -156,9 +156,7 @@ describe('TagsFilter', () => {
 
   it('sets tags to null when deselecting all', async () => {
     const onChange = jest.fn();
-    renderWithI18n(
-      <TagsFilter matcher={{ tags: ['production'] }} onChange={onChange} />
-    );
+    renderWithI18n(<TagsFilter matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
     await clickOption(user, 'quickFilterTagsList', 'production');

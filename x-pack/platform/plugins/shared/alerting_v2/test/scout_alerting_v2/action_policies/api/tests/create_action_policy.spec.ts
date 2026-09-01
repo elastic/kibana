@@ -321,7 +321,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   apiTest('validation: rejects matcher over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ matcher: { expression: 'a'.repeat(MAX_KQL_LENGTH + 1) } }),
+      body: buildCreateActionPolicyData({
+        matcher: { expression: 'a'.repeat(MAX_KQL_LENGTH + 1) },
+      }),
     });
 
     expect(response).toHaveStatusCode(400);

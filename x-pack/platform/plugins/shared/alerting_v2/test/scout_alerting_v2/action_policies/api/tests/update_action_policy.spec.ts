@@ -70,7 +70,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.destinations).toStrictEqual([
       { type: 'workflow', id: 'updated-workflow-id' },
     ]);
-    expect(response.body.matcher).toMatchObject({ expression: "env == 'production' && region == 'us-west-2'" });
+    expect(response.body.matcher).toMatchObject({
+      expression: "env == 'production' && region == 'us-west-2'",
+    });
     expect(response.body.group_by).toStrictEqual(['service.name', 'environment']);
     expect(response.body.throttle).toStrictEqual({ interval: '5m' });
     expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
@@ -103,7 +105,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
-      expect(response.body.matcher).toMatchObject({ expression: "env == 'production' && region == 'us-east-1'" });
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'production' && region == 'us-east-1'",
+      });
       expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '1m' });
     }
@@ -170,7 +174,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
-      expect(response.body.matcher).toMatchObject({ expression: "env == 'staging' && region == 'eu-central-1'" });
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'staging' && region == 'eu-central-1'",
+      });
       expect(response.body.group_by).toStrictEqual(['service.name', 'host.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '15m' });
     }

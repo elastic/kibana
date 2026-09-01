@@ -108,7 +108,10 @@ describe('EvaluateMatchersStep', () => {
   it('does not match when KQL matcher evaluates to false', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p1', matcher: { expression: 'episode_status: active' } });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'episode_status: active' },
+    });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -118,7 +121,10 @@ describe('EvaluateMatchersStep', () => {
   it('matches when KQL matcher evaluates to true', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p1', matcher: { expression: 'episode_status: active' } });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'episode_status: active' },
+    });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -242,7 +248,10 @@ describe('EvaluateMatchersStep', () => {
   it('continues evaluating sibling policies when one matcher throws', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
     const rule = createRule({ id: 'r1' });
-    const badPolicy = createActionPolicy({ id: 'p-bad', matcher: { expression: 'invalid kql (((' } });
+    const badPolicy = createActionPolicy({
+      id: 'p-bad',
+      matcher: { expression: 'invalid kql (((' },
+    });
     const goodPolicy = createActionPolicy({
       id: 'p-good',
       matcher: { expression: 'episode_status: active' },
@@ -266,7 +275,10 @@ describe('EvaluateMatchersStep', () => {
     const e1 = createAlertEpisode({ episode_id: 'e1', rule_id: 'r1' });
     const e2 = createAlertEpisode({ episode_id: 'e2', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const badPolicy = createActionPolicy({ id: 'p-bad', matcher: { expression: 'invalid kql (((' } });
+    const badPolicy = createActionPolicy({
+      id: 'p-bad',
+      matcher: { expression: 'invalid kql (((' },
+    });
     const catchAllPolicy = createActionPolicy({ id: 'p-catchall' });
 
     const matched = await runStep(
@@ -287,7 +299,10 @@ describe('EvaluateMatchersStep', () => {
   it('warn message keeps policy and episode ids in labels and omits the matcher', async () => {
     const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p-broken', matcher: { expression: 'invalid kql (((' } });
+    const policy = createActionPolicy({
+      id: 'p-broken',
+      matcher: { expression: 'invalid kql (((' },
+    });
 
     await runStep([episode], new Map([['r1', rule]]), new Map([['p-broken', policy]]));
 

@@ -319,7 +319,6 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-2');
       expect(mockGetWorkflow).toHaveBeenCalledTimes(2);
     });
-
   });
 
   describe('mounted guard', () => {

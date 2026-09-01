@@ -63,7 +63,9 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'policy-workflow-id' },
       ]);
-      expect(response.body.matcher).toMatchObject({ expression: "env == 'production' && region == 'us-east-1'" });
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'production' && region == 'us-east-1'",
+      });
       expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '10m' });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
