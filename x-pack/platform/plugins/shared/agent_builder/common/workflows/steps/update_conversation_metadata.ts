@@ -71,7 +71,10 @@ export const updateConversationMetadataStepCommonDefinition: CommonStepDefinitio
     details: i18n.translate(
       'xpack.agentBuilder.workflowSteps.updateConversationMetadata.documentation.details',
       {
-        defaultMessage: `Merges the provided key/value pairs into the conversation metadata. The conversation must have a template applied; only fields defined by the template are accepted. A successful write publishes a "${ConversationMetadataUpdatedTriggerId}" trigger event when at least one field value changes.`,
+        defaultMessage: `Merges the provided key/value pairs into the conversation metadata. The conversation must have a template applied; only fields defined by the template are accepted. A successful write publishes a "{triggerId}" trigger event when at least one field value changes.`,
+        values: {
+          triggerId: ConversationMetadataUpdatedTriggerId,
+        },
       }
     ),
     examples: [
