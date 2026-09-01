@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { compareWatchesForDisplay, type Watch, type WatchSkill } from '@kbn/pnd-common';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { fetchWatchWorkflows } from '../watches/fetch_watch_workflows';
@@ -18,7 +19,9 @@ import { projectWorkflowToWatch } from '../watches/project_watch';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CachedState {
-  skills: WatchSkill[];
+  // Space-scoped workflow data only — no user-registry-resolved names.
+  // Name/description resolution happens per-request in getCached.
+  workflows: WorkflowListItemDto[];
   fetchedAt: number;
 }
 
@@ -39,7 +42,7 @@ export class SkillsProjectionService {
     this.agentTypeMap = new Map(agentTypes.map((t) => [t.id, t]));
   }
 
-  private buildSkillsFromWatches(watches: Watch[], previousSkills: WatchSkill[]): WatchSkill[] {
+  private buildSkillsFromWatches(watches: Watch[]): WatchSkill[] {
     const skillMap = new Map<string, { watchIds: Set<string>; name?: string; summary?: string }>();
     for (const watch of watches) {
       for (const skill of watch.skills) {
@@ -50,10 +53,13 @@ export class SkillsProjectionService {
         skillMap.set(skill.id, entry);
       }
     }
-    return [...skillMap.entries()].map(([id, { watchIds, name, summary }]) => {
-      const prev = previousSkills.find((s) => s.id === id);
-      return { id, watchIds: [...watchIds], lastRun: prev?.lastRun ?? null, name, summary };
-    });
+    return [...skillMap.entries()].map(([id, { watchIds, name, summary }]) => ({
+      id,
+      watchIds: [...watchIds],
+      lastRun: null,
+      name,
+      summary,
+    }));
   }
 
   private isStale(spaceId: string): boolean {
@@ -61,11 +67,7 @@ export class SkillsProjectionService {
     return cached === undefined || Date.now() - cached.fetchedAt > CACHE_TTL_MS;
   }
 
-  private async refresh(request: KibanaRequest, spaceId: string): Promise<void> {
-    const agentLookup = this.agentBuilder
-      ? await buildAgentLookup(this.agentBuilder, this.agentTypeMap, request, this.logger)
-      : undefined;
-
+  private async refresh(spaceId: string): Promise<void> {
     const managedWorkflows = await this.managedWorkflows;
     const { items } = await fetchWatchWorkflows(
       this.management,
@@ -73,23 +75,27 @@ export class SkillsProjectionService {
       spaceId,
       this.logger
     );
-
-    const watches = items
-      .map((item) => projectWorkflowToWatch(item, agentLookup))
-      .sort(compareWatchesForDisplay);
-
-    const previousSkills = this.cacheBySpace.get(spaceId)?.skills ?? [];
-    this.cacheBySpace.set(spaceId, {
-      skills: this.buildSkillsFromWatches(watches, previousSkills),
-      fetchedAt: Date.now(),
-    });
+    this.cacheBySpace.set(spaceId, { workflows: items, fetchedAt: Date.now() });
   }
 
   private async getCached(request: KibanaRequest, spaceId: string): Promise<WatchSkill[]> {
     if (this.isStale(spaceId)) {
-      await this.refresh(request, spaceId);
+      await this.refresh(spaceId);
     }
-    return this.cacheBySpace.get(spaceId)?.skills ?? [];
+    const cached = this.cacheBySpace.get(spaceId);
+    if (!cached) return [];
+
+    // Resolve names from the current user's registry on every request so that
+    // no user receives metadata from another user's private agent or skill.
+    const agentLookup = this.agentBuilder
+      ? await buildAgentLookup(this.agentBuilder, this.agentTypeMap, request, this.logger)
+      : undefined;
+
+    const watches = cached.workflows
+      .map((item) => projectWorkflowToWatch(item, agentLookup))
+      .sort(compareWatchesForDisplay);
+
+    return this.buildSkillsFromWatches(watches);
   }
 
   invalidate(spaceId: string): void {

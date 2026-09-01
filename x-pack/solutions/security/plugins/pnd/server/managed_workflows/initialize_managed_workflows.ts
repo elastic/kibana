@@ -119,7 +119,20 @@ export const initializeManagedWorkflows = async ({
   }
 
   if (ensureAgentForSpace && watchSpaces.size > 0) {
-    await Promise.allSettled([...watchSpaces].map((spaceId) => ensureAgentForSpace(spaceId)));
+    const spaces = [...watchSpaces];
+    const agentResults = await Promise.allSettled(
+      spaces.map((spaceId) => ensureAgentForSpace(spaceId))
+    );
+    for (const [index, result] of agentResults.entries()) {
+      if (result.status === 'rejected') {
+        canReconcile = false;
+        logger.warn(
+          `Failed to ensure agent for space "${spaces[index]}": ${
+            result.reason instanceof Error ? result.reason.message : String(result.reason)
+          }`
+        );
+      }
+    }
   }
 
   if (canReconcile) {

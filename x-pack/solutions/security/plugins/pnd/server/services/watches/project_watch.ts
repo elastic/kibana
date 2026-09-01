@@ -135,7 +135,7 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
 export const projectSkillsFromDefinition = (
   definition: WorkflowYaml | null | undefined,
   policy: WatchPolicyAttrs | undefined,
-  agentLookupCalback?: AgentLookup
+  agentLookupCallback?: AgentLookup
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
 
@@ -154,11 +154,11 @@ export const projectSkillsFromDefinition = (
         ? overridesBlock.skill_ids.filter((s): s is string => typeof s === 'string')
         : null;
 
-      if (agentId && agentLookupCalback) {
-        const agentDef = agentLookupCalback.getAgent(agentId);
+      if (agentId && agentLookupCallback) {
+        const agentDef = agentLookupCallback.getAgent(agentId);
         if (agentDef) {
           const agentTypeDef = agentDef.type
-            ? agentLookupCalback.getAgentType(agentDef.type)
+            ? agentLookupCallback.getAgentType(agentDef.type)
             : undefined;
           const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
           // When the step has no overrides, fall back to the agent's own skill list.
@@ -203,7 +203,7 @@ export const projectSkillsFromDefinition = (
   for (const id of skillIds) {
     const override = overrides.get(id);
     // Default to skill definition only if UI overrides are not defined
-    const skillDef = override ? undefined : agentLookupCalback?.getSkill(id);
+    const skillDef = override ? undefined : agentLookupCallback?.getSkill(id);
     skills.push({
       id,
       name: override?.name ?? skillDef?.name ?? humanizeId(id),

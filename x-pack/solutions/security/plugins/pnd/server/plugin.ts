@@ -34,7 +34,7 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
-import { agentType, ensureAgentSafe, registerAgentType } from './agent';
+import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -123,8 +123,7 @@ export class PndPlugin
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
       ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) =>
-            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+        ? (spaceId) => ensureAgent({ agentBuilder: plugins.agentBuilder!, spaceId })
         : undefined,
     }).catch((error) => {
       this.logger.error(

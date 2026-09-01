@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Watch } from '@kbn/pnd-common';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { SkillsProjectionService } from './skills_projection_service';
@@ -18,8 +19,10 @@ jest.mock('./build_agent_lookup', () => ({
 }));
 
 import { projectWorkflowToWatch } from '../watches/project_watch';
+import { buildAgentLookup } from './build_agent_lookup';
 
 const mockProjectWatch = projectWorkflowToWatch as jest.Mock;
+const mockBuildAgentLookup = buildAgentLookup as jest.Mock;
 
 const mockRequest = {} as KibanaRequest;
 const mockLogger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
@@ -225,25 +228,67 @@ describe('SkillsProjectionService', () => {
       expect(management.getWorkflows).toHaveBeenCalledTimes(2);
     });
 
-    it('preserves lastRun across refreshes', async () => {
-      jest.useFakeTimers();
-      const lastRun = '2024-01-01T00:00:00.000Z';
-
+    it('returns null for lastRun (skill-level run tracking is not supported)', async () => {
       management.getWorkflows.mockResolvedValue(makeWorkflowListDto([{ id: 'watch-a' }]));
       mockProjectWatch.mockReturnValue(makeWatch('watch-a', ['skill-1']));
 
-      const firstSkills = await service.list(mockRequest, spaceId);
-      expect(firstSkills[0].lastRun).toBeNull();
+      const [skill] = await service.list(mockRequest, spaceId);
 
-      // Simulate a prior run record being written to the cache
-      (service as any).cacheBySpace.get(spaceId).skills[0].lastRun = lastRun;
+      expect(skill.lastRun).toBeNull();
+    });
 
-      jest.advanceTimersByTime(5 * 60 * 1000 + 1);
-      mockProjectWatch.mockReturnValue(makeWatch('watch-a', ['skill-1']));
-      const [second] = await service.list(mockRequest, spaceId);
+    it('uses cached workflow items but resolves names per request from each user registry', async () => {
+      const userARequest = { id: 'user-a' } as unknown as KibanaRequest;
+      const userBRequest = { id: 'user-b' } as unknown as KibanaRequest;
+      const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
 
-      expect(second.lastRun).toBe(lastRun);
-      jest.useRealTimers();
+      const serviceWithBuilder = new SkillsProjectionService(
+        management as unknown as WatchWorkflowsManagementClient,
+        undefined,
+        mockLogger,
+        mockAgentBuilder
+      );
+
+      management.getWorkflows.mockResolvedValue(makeWorkflowListDto([{ id: 'watch-1' }]));
+
+      const userALookup = { getSkill: jest.fn(), getAgent: jest.fn(), getAgentType: jest.fn() };
+      const userBLookup = { getSkill: jest.fn(), getAgent: jest.fn(), getAgentType: jest.fn() };
+
+      mockBuildAgentLookup.mockResolvedValueOnce(userALookup).mockResolvedValueOnce(userBLookup);
+
+      // Return different skill IDs depending on which user's lookup is in scope
+      mockProjectWatch.mockImplementation((_item: unknown, lookup: unknown) =>
+        lookup === userALookup
+          ? makeWatch('watch-1', ['skill-user-a'])
+          : makeWatch('watch-1', ['skill-user-b'])
+      );
+
+      const userASkills = await serviceWithBuilder.list(userARequest, spaceId);
+      const userBSkills = await serviceWithBuilder.list(userBRequest, spaceId);
+
+      // Workflow I/O is cached — only one fetch regardless of how many callers
+      expect(management.getWorkflows).toHaveBeenCalledTimes(1);
+
+      // Registry is resolved once per request, not once per cache-miss
+      expect(mockBuildAgentLookup).toHaveBeenCalledTimes(2);
+      expect(mockBuildAgentLookup).toHaveBeenNthCalledWith(
+        1,
+        mockAgentBuilder,
+        expect.anything(),
+        userARequest,
+        mockLogger
+      );
+      expect(mockBuildAgentLookup).toHaveBeenNthCalledWith(
+        2,
+        mockAgentBuilder,
+        expect.anything(),
+        userBRequest,
+        mockLogger
+      );
+
+      // Each user sees names resolved through their own registry — not the first caller's
+      expect(userASkills.map((s) => s.id)).toEqual(['skill-user-a']);
+      expect(userBSkills.map((s) => s.id)).toEqual(['skill-user-b']);
     });
   });
 
