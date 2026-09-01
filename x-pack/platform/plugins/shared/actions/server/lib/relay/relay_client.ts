@@ -165,7 +165,14 @@ export class RelayClient implements RelayClientContract {
     });
 
     const body = response.data as RelayTriggerResponseBody | undefined;
-    return { ref: body?.ref ?? '', tenantKey: body?.tenant_key ?? tenantKey };
+    if (typeof body?.ref !== 'string' || body.ref.length === 0) {
+      throw new RelayRequestError(
+        '/v1/trigger',
+        response.status,
+        'Relay invalid response format missing expected `ref`'
+      );
+    }
+    return { ref: body.ref, tenantKey: body?.tenant_key ?? tenantKey };
   }
 
   isRelayOrigin(url: string): boolean {

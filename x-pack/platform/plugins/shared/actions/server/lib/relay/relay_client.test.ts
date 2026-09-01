@@ -300,6 +300,41 @@ describe('RelayClient', () => {
         expect(error).toMatchObject({ statusCode: status, relayMessage: 'nope' });
       }
     );
+
+    it.each([
+      { label: 'empty body', data: undefined },
+      { label: 'empty object', data: {} },
+      { label: 'empty ref', data: { ref: '', tenant_key: 'team-A' } },
+      { label: 'missing ref', data: { tenant_key: 'team-A' } },
+    ])('throws RelayRequestError when response body has $label', async ({ data }) => {
+      requestMock.mockResolvedValue({ status: 202, data } as never);
+
+      const error = await createClient()
+        .trigger({ surface: 'slack', tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+        .then(() => undefined)
+        .catch((cause) => cause);
+
+      expect(error).toBeInstanceOf(RelayRequestError);
+      expect(error).toMatchObject({
+        relayMessage: 'Relay invalid response format missing expected `ref`',
+      });
+    });
+
+    it('falls back to the caller tenantKey when tenant_key is absent from the response', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000400' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          surface: 'slack',
+          tenantKey: 'team-A',
+          channel: 'C123',
+          message: 'hello',
+        })
+      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A' });
+    });
   });
 
   it('preserves Relay errors', async () => {
