@@ -34,7 +34,7 @@ export class ObservabilityNavigation {
 
   /** `goto*` does not call `waitForLoad()` — sidenav may be absent (e.g. classic chrome); call `waitForLoad()` when interacting with nav. */
   async goto() {
-    await this.page.gotoApp('observability');
+    await this.page.gotoApp('observability/overview');
   }
 
   async gotoLanding() {
@@ -103,6 +103,14 @@ export class ObservabilityNavigation {
 
   navItemInSidenavByDeepLinkId(deepLinkId: string): Locator {
     return this.sidenav.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
+  }
+
+  /**
+   * In-app Observability solution sidenav item (classic chrome only).
+   * Hidden when chrome style is `project` — use the chrome nav helpers there.
+   */
+  classicSidebarNavItem(appId: string, navId: string): Locator {
+    return this.page.testSubj.locator(`observability-nav-${appId}-${navId}`);
   }
 
   navItemInSidenavById(id: string): Locator {

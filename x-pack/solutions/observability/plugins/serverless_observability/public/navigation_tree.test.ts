@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Location } from 'history';
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
@@ -164,6 +165,13 @@ describe('Navigation Tree', () => {
         getIsActive: expect.any(Function),
       })
     );
+    expect(
+      flatAlerts?.getIsActive?.({
+        pathNameSerialized: '/app/observability/alerts/abc-123',
+        location: { pathname: '', search: '', hash: '', state: undefined } as Location,
+        prepend: (path) => path,
+      })
+    ).toBe(true);
   });
 
   it('opens Alerts as a flyout with notifications and operations when alerting v2 is enabled', () => {

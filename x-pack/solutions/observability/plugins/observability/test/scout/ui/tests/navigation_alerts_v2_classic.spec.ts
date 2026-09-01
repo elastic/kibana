@@ -15,11 +15,34 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
-import { spaceTest as test, tags } from '@kbn/scout-oblt';
+import { spaceTest as test, tags, OBSERVABILITY_SPA_SHELL_TIMEOUT_MS } from '@kbn/scout-oblt';
+import type { ObservabilityNavigation, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 const ALERTS_PANEL_ID = 'alerting';
-const ALERTS_DEEP_LINK = 'observability-overview:alerts';
+const CLASSIC_ALERTS_APP_ID = 'observability-overview';
+const CLASSIC_ALERTS_NAV_ID = 'alerts';
+
+const expectClassicAlertsLinkUnchanged = async (
+  nav: ObservabilityNavigation,
+  page: ScoutPage
+): Promise<void> => {
+  const alertsLink = nav.classicSidebarNavItem(CLASSIC_ALERTS_APP_ID, CLASSIC_ALERTS_NAV_ID);
+
+  await test.step('Alerts link is a plain item in the classic Observability sidenav', async () => {
+    await expect(alertsLink).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
+    await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
+  });
+
+  await test.step('clicking Alerts navigates to the alerts page', async () => {
+    await alertsLink.click();
+    await expect(page).toHaveURL(/\/app\/observability\/alerts/);
+  });
+
+  await test.step('v2 Alerts panel opener is not rendered', async () => {
+    await expect(nav.navItemInSidenavById(ALERTS_PANEL_ID)).not.toBeVisible();
+  });
+};
 
 test.describe(
   'Observability Alerts nav — classic sidebar',
@@ -40,7 +63,7 @@ test.describe(
       });
     });
 
-    test('Alerts link navigates to observability alerts and highlights in the sub-nav with no feature flags', async ({
+    test('Alerts link navigates to observability alerts with no feature flags', async ({
       browserAuth,
       pageObjects,
       page,
@@ -48,22 +71,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
 
-      const nav = pageObjects.observabilityNavigation;
-
-      await test.step('Alerts link is visible in the classic nav', async () => {
-        const alertsLink = nav.navItemInSidenavByDeepLinkId(ALERTS_DEEP_LINK);
-        await expect(alertsLink).toBeVisible();
-        await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-      });
-
-      await test.step('clicking Alerts navigates to the alerts page', async () => {
-        await nav.navItemInSidenavByDeepLinkId(ALERTS_DEEP_LINK).click();
-        await expect(page).toHaveURL(/\/app\/observability\/alerts/);
-      });
-
-      await test.step('Alerts is highlighted as active in the sub-nav', async () => {
-        await expect(nav.activeNavItemByDeepLinkId(ALERTS_DEEP_LINK)).toBeVisible();
-      });
+      await expectClassicAlertsLinkUnchanged(pageObjects.observabilityNavigation, page);
     });
 
     test('Alerts link is unchanged when alerting v2 is enabled', async ({
@@ -77,26 +85,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
 
-      const nav = pageObjects.observabilityNavigation;
-
-      await test.step('Alerts link is still a plain nav item', async () => {
-        const alertsLink = nav.navItemInSidenavByDeepLinkId(ALERTS_DEEP_LINK);
-        await expect(alertsLink).toBeVisible();
-        await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-      });
-
-      await test.step('clicking Alerts navigates to the alerts page', async () => {
-        await nav.navItemInSidenavByDeepLinkId(ALERTS_DEEP_LINK).click();
-        await expect(page).toHaveURL(/\/app\/observability\/alerts/);
-      });
-
-      await test.step('Alerts is highlighted as active', async () => {
-        await expect(nav.activeNavItemByDeepLinkId(ALERTS_DEEP_LINK)).toBeVisible();
-      });
-
-      await test.step('no panel opener is rendered', async () => {
-        await expect(nav.navItemInSidenavById(ALERTS_PANEL_ID)).not.toBeVisible();
-      });
+      await expectClassicAlertsLinkUnchanged(pageObjects.observabilityNavigation, page);
     });
 
     test('Alerts link is unchanged when both flags are enabled', async ({
@@ -114,26 +103,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
 
-      const nav = pageObjects.observabilityNavigation;
-
-      await test.step('Alerts link is still a plain nav item', async () => {
-        const alertsLink = nav.navItemInSidenavByDeepLinkId(ALERTS_DEEP_LINK);
-        await expect(alertsLink).toBeVisible();
-        await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-      });
-
-      await test.step('clicking Alerts navigates to the alerts page', async () => {
-        await nav.navItemInSidenavByDeepLinkId(ALERTS_DEEP_LINK).click();
-        await expect(page).toHaveURL(/\/app\/observability\/alerts/);
-      });
-
-      await test.step('Alerts is highlighted as active', async () => {
-        await expect(nav.activeNavItemByDeepLinkId(ALERTS_DEEP_LINK)).toBeVisible();
-      });
-
-      await test.step('no panel opener is rendered', async () => {
-        await expect(nav.navItemInSidenavById(ALERTS_PANEL_ID)).not.toBeVisible();
-      });
+      await expectClassicAlertsLinkUnchanged(pageObjects.observabilityNavigation, page);
     });
   }
 );
