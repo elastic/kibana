@@ -141,6 +141,7 @@ describe('SearchInterceptor', () => {
     };
 
     mockCoreSetup.http.post = jest.fn();
+    mockCoreSetup.http.delete = jest.fn().mockResolvedValue({});
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
       switch (name) {
         case UI_SETTINGS.SEARCH_TIMEOUT:

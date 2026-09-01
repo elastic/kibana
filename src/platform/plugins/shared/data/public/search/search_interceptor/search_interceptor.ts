@@ -173,6 +173,9 @@ export class SearchInterceptor {
       })
     );
 
+    this.boundBeforeUnloadHandler = this.cancelAllActiveSearches.bind(this);
+    window.addEventListener('beforeunload', this.boundBeforeUnloadHandler);
+
     // Set up PerformanceObserver to capture search requests as they happen
     try {
       this.performanceObserver = new PerformanceObserver((list) => {
@@ -203,29 +206,10 @@ export class SearchInterceptor {
     }
   }
 
-  private updateBeforeUnloadHandler(): void {
-    const hasActiveSearches = this.activeAsyncSearches.size > 0;
-    const handlerRegistered = this.boundBeforeUnloadHandler !== null;
-
-    if (hasActiveSearches && !handlerRegistered) {
-      this.boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this);
-      window.addEventListener('beforeunload', this.boundBeforeUnloadHandler);
-    } else if (!hasActiveSearches && handlerRegistered) {
-      window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler!);
-      this.boundBeforeUnloadHandler = null;
-    }
-  }
-
-  private handleBeforeUnload(): void {
-    this.cancelAllActiveSearches();
-  }
-
-  private sendCancelRequest(searchId: string, strategy: string): Promise<unknown> {
-    return Promise.resolve(
-      this.deps.http.delete(
-        buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
-        { version: '1', keepalive: true }
-      )
+  private sendCancelRequest(searchId: string, strategy: string) {
+    return this.deps.http.delete(
+      buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
+      { version: '1', keepalive: true }
     );
   }
 
@@ -443,7 +427,6 @@ export class SearchInterceptor {
           isSavedToBackground = true;
           if (id) {
             this.activeAsyncSearches.delete(id);
-            this.updateBeforeUnloadHandler();
           }
         });
 
@@ -499,14 +482,12 @@ export class SearchInterceptor {
 
         if (response.id && isRunningResponse(response) && !isSavedToBackground) {
           this.activeAsyncSearches.set(response.id, strategyToString(strategy));
-          this.updateBeforeUnloadHandler();
         }
 
         if (!isRunningResponse(response)) {
           searchTracker?.complete(response);
           if (response.id) {
             this.activeAsyncSearches.delete(response.id);
-            this.updateBeforeUnloadHandler();
           }
         }
       }),
@@ -567,7 +548,6 @@ export class SearchInterceptor {
         }
         if (id) {
           this.activeAsyncSearches.delete(id);
-          this.updateBeforeUnloadHandler();
         }
       }),
       // This observable is cached in the responseCache.
