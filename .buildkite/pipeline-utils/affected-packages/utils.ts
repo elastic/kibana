@@ -31,6 +31,15 @@ export function filterIgnoredFiles(files: string[], patterns: string[]): string[
 }
 
 /**
+ * Returns a predicate telling whether a file matches any of the given glob
+ * patterns, compiling the patterns once.
+ */
+export function createScopeMatcher(patterns: readonly string[]): (file: string) => boolean {
+  const matchers = compileMatchers(patterns);
+  return (file: string) => matchesAny(file, matchers);
+}
+
+/**
  * Returns true when any pattern matches any file in the list
  */
 export function touchedCriticalFiles(files: string[], criticalFiles: string[]): boolean {

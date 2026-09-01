@@ -117,6 +117,11 @@ describe('geminiAdapter', () => {
                     type: 'string',
                     description: 'foo',
                   },
+                  bar: {
+                    type: 'string',
+                    description: 'bar',
+                    enum: ['a', 'b'],
+                  },
                 },
                 required: ['foo'],
               },
@@ -146,7 +151,11 @@ describe('geminiAdapter', () => {
                 properties: {
                   foo: {
                     description: 'foo',
-                    enum: [],
+                    type: 'string',
+                  },
+                  bar: {
+                    description: 'bar',
+                    enum: ['a', 'b'],
                     format: 'enum',
                     type: 'string',
                   },

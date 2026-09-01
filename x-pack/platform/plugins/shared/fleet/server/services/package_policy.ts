@@ -1545,8 +1545,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    context?: RequestHandlerContext,
-    request?: KibanaRequest
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1578,8 +1577,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicyUpdateWithId,
         soClient,
         esClient,
-        context,
-        request
+        context
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
@@ -1636,6 +1634,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // eslint-disable-next-line prefer-const
     let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+
+    // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
+    // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
+    // `_compilePackagePolicyInputs` would see an empty/absent set and could zero out
+    // `secret_references` for secrets that are still in use.
+    if (restOfPackagePolicy.vars === undefined) {
+      restOfPackagePolicy.vars = oldPackagePolicy.vars;
+    }
 
     if (!packagePolicy.package?.name) {
       throw new FleetError(
@@ -1778,7 +1784,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ...(elasticsearchPrivileges && {
             elasticsearch: { privileges: elasticsearchPrivileges },
           }),
-          ...(secretReferences?.length && { secret_references: secretReferences }),
+          // Write the array when non-empty, or when the old policy had refs (to clear stale entries).
+          // Skip when both old and new are empty to avoid spurious changes on policies that never
+          // had secrets. `undefined` means secret storage is disabled — omit the key.
+          ...(secretReferences !== undefined &&
+            (secretReferences.length > 0 ||
+              (oldPackagePolicy.secret_references?.length ?? 0) > 0) && {
+              secret_references: secretReferences,
+            }),
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
@@ -1860,9 +1873,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgName: newPolicy.package!.name,
       currentVersion: newPolicy.package!.version,
     });
-    const deleteSecretsPromise = secretsToDelete?.length
-      ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
-      : Promise.resolve();
+    // Cloud-connector secrets are shared across package policies and are not tracked in
+    // `ingest-package-policies`, so `deleteSecretsIfNotReferenced` cannot see all consumers.
+    // Mirrors the existing guard at the delete path.
+    const deleteSecretsPromise =
+      secretsToDelete?.length && !oldPackagePolicy.cloud_connector_id
+        ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
+        : Promise.resolve();
 
     await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
@@ -2066,6 +2083,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // eslint-disable-next-line prefer-const
         let { version: _version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
+        if (restOfPackagePolicy.vars === undefined) {
+          restOfPackagePolicy.vars = oldPackagePolicy.vars;
+        }
+
         if (packagePolicyUpdate.is_managed && !options?.force) {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
         }
@@ -2107,7 +2128,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           restOfPackagePolicy = secretsRes.packagePolicyUpdate;
           secretReferences = secretsRes.secretReferences;
-          allSecretsToDelete.push(...secretsRes.secretsToDelete);
+          // Cloud-connector secrets are shared and not tracked in `ingest-package-policies`,
+          // so the reference-count guard cannot see all consumers. Skip deletion.
+          if (!oldPackagePolicy.cloud_connector_id) {
+            allSecretsToDelete.push(...secretsRes.secretsToDelete);
+          }
           inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
         }
         inputs = _compilePackagePolicyInputs(
@@ -2173,7 +2198,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ...(elasticsearchPrivileges && {
               elasticsearch: { privileges: elasticsearchPrivileges },
             }),
-            ...(secretReferences?.length && { secret_references: secretReferences }),
+            // Write the array when non-empty, or when the old policy had refs (to clear stale entries).
+            // Skip when both old and new are empty to avoid spurious changes on policies that never
+            // had secrets. `undefined` means secret storage is disabled — omit the key.
+            ...(secretReferences !== undefined &&
+              (secretReferences.length > 0 ||
+                (oldPackagePolicy.secret_references?.length ?? 0) > 0) && {
+                secret_references: secretReferences,
+              }),
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
@@ -2585,7 +2617,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
+      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR, {
+        ignoreMissing: true,
+      });
 
       await this.bumpAgentPoliciesRevision(
         { soClient, esClient },
@@ -3015,7 +3049,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         .getInternalUserSOClientWithoutSpaceExtension()
         .find<PackagePolicySOAttributes>({
           type: savedObjectType,
-          fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
+          fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id', 'vars', 'package'],
           searchFields: ['output_id'],
           search: escapeSearchQueryPhrase(outputId),
           perPage: SO_SEARCH_LIMIT,
@@ -3029,6 +3063,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enabled: packagePolicy.enabled,
         policy_ids: packagePolicy.policy_ids,
         inputs: packagePolicy.inputs,
+        vars: packagePolicy.vars,
         output_id: packagePolicy.output_id === outputId ? null : packagePolicy.output_id,
         package: packagePolicy.package,
       });
@@ -3543,8 +3578,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           skipUniqueNameVerification?: boolean | undefined;
         }
       | undefined,
-    context?: RequestHandlerContext,
-    request?: KibanaRequest
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -3552,7 +3586,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context, request);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
   }
 
   async create(

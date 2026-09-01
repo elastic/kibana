@@ -484,8 +484,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       request.params.packagePolicyId,
       newData,
       { user, force },
-      context,
-      request
+      context
     );
     return response.ok({
       body: {
