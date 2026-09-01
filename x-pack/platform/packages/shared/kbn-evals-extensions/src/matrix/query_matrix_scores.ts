@@ -68,6 +68,15 @@ function resolveVerdictScore(
 
   const [blockKey, verdictKey] = path;
   const metadata = doc.evaluator?.metadata as Record<string, unknown> | undefined;
+  // The scores route strips `evaluator.metadata` server-side (it is in
+  // UNBOUNDED_SCORE_FIELDS, added upstream in #286691). When the block is
+  // absent there is no verdict to ladder, but the numeric grade is still
+  // trustworthy — fall back to it rather than rejecting a valid score.
+  // Treating this as "unmapped" silently blanked per-prefix columns and
+  // reported every successful grade as excluded.
+  if (metadata === undefined) {
+    return doc.evaluator?.score;
+  }
   const block = metadata?.[blockKey] as Record<string, unknown> | undefined;
   // Groundedness puts its verdict at the top of the block; the correctness
   // evaluators nest theirs one level deeper under `summary`.
