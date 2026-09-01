@@ -75,7 +75,6 @@ export function getDashboardApi({
   const onSave$ = new Subject<DashboardSaveEvent>();
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
   const userActivity$ = new Subject<UserActivity>();
-  const historyUpdated$ = new Subject<void>();
 
   const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
 
@@ -104,11 +103,9 @@ export function getDashboardApi({
 
   const layoutManager = initializeLayoutManager(
     viewModeManager,
-    incomingEmbeddables,
     initialState.panels,
     initialState.pinned_panels,
-    trackPanel.api,
-    historyUpdated$
+    trackPanel.api
   );
   childrenSubject$.next(layoutManager.api.children$);
 
@@ -210,7 +207,6 @@ export function getDashboardApi({
     hasOverlays$: trackOverlayApi.hasOverlays$,
     setState,
     getState,
-    historyUpdated$,
     dataLoading$: combineLatest([
       layoutManager.internalApi.childrenStateLoading$,
       layoutManager.internalApi.childrenLoading$,
@@ -220,6 +216,11 @@ export function getDashboardApi({
         Boolean(childStateLoading || childrenLoading || dataLoading)
       )
     ),
+    onHistoryReady: () => {
+      // place incoming embeddables after first history emit
+      // so "undo" can remove incoming embeddables
+      layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+    },
   });
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
