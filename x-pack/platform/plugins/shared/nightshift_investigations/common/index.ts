@@ -6,6 +6,13 @@
  */
 
 import type { InvestigationState, Severity } from '@kbn/significant-events-schema';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
+  TriggerFeedback,
+} from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
 /**
@@ -79,6 +86,9 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
+/** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
+export const MAX_KEYWORD_LENGTH = 500;
+
 export const INVESTIGATION_STATUSES = [
   'pending',
   'running',
@@ -87,6 +97,17 @@ export const INVESTIGATION_STATUSES = [
   'cancelled',
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
+
+export interface InvestigationStructuredOutput {
+  summary?: string;
+  conclusion?: string;
+  severity?: Severity;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blind_spots?: InvestigationBlindSpot[];
+  trigger_feedback?: TriggerFeedback[];
+  impact?: InvestigationImpact;
+}
 
 export interface GetInvestigationResponse {
   investigation_id: string;
