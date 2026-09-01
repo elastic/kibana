@@ -1000,11 +1000,13 @@ export class DashboardApp {
     await this.editInDiscoverLink.click();
   }
 
+  /** Generates and downloads a CSV report for a Discover session panel. */
   async exportPanelAsCsv(title?: string): Promise<Download> {
     await this.toasts.dismissAll();
     await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
 
     const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
+    // Report generation runs asynchronously and can be slow on shared CI workers.
     await downloadButton.waitFor({ state: 'visible', timeout: 120_000 });
 
     const downloadPromise = this.page.waitForEvent('download');
