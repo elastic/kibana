@@ -37,7 +37,13 @@ const clientFingerprint = (yaml: string): string[] => {
   const variableItems = collectAllVariables(yaml, yamlDocument, yamlLineCounter, workflowGraph);
   const results = [
     ...validateVariables(variableItems, workflowGraph, workflowDefinition, yamlDocument, yaml),
-    ...validateLiquidForLoopCollections(yaml, yamlDocument, workflowGraph, workflowDefinition),
+    ...validateLiquidForLoopCollections(
+      yaml,
+      yamlDocument,
+      yamlLineCounter,
+      workflowGraph,
+      workflowDefinition
+    ),
   ];
   return fingerprint(
     results.flatMap((result) =>
