@@ -8,6 +8,7 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
@@ -50,7 +51,7 @@ export const createDiscoverSessionAttachmentType = (): AttachmentTypeDefinition 
     },
     getTools: () => [],
     getAgentDescription: () => {
-      return `This attachment is a Kibana Discover session: title, query, time range, and table columns. It does not include result rows. Render it with <render_attachment> so the user sees the document table. Do not dump tab JSON, vis_context, or sample documents into the conversation.`;
+      return `This attachment is a Kibana Discover session: title, query, time range, and table columns. It does not include result rows. To refine this table, call ${platformCoreTools.createDiscoverSession} with this attachment's id. Do not create a second Discover session unless the user asked for another table. Render it with <render_attachment>. Do not dump tab JSON, vis_context, or sample documents into the conversation.`;
     },
   };
 };

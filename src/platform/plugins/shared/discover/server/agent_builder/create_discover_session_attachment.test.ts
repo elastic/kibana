@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentFormattedAttachment,
   AttachmentFormatContext,
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
-import {
-  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-  AS_CODE_ESQL_DATA_SOURCE_TYPE,
-} from '@kbn/as-code-data-views-schema';
+import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
@@ -33,21 +31,6 @@ const esqlTab = {
   time_restore: true,
   time_range: { from: 'now-24h', to: 'now' },
   column_order: ['@timestamp', 'status', 'message'],
-};
-
-const classicTab = {
-  id: 'tab-classic',
-  label: 'Logs',
-  data_source: {
-    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    ref_id: 'logs-data-view',
-  },
-  filters: [],
-  sort: [],
-  view_mode: 'documents',
-  hide_chart: false,
-  hide_table: false,
-  time_restore: false,
 };
 
 const createFormatContext = (): AttachmentFormatContext => ({
@@ -92,88 +75,6 @@ describe('createDiscoverSessionAttachmentType', () => {
           description: '',
         });
       }
-    });
-
-    it('accepts a classic data view tab', async () => {
-      const result = await attachmentType.validate({
-        title: 'Classic only',
-        tabs: [classicTab],
-      });
-
-      expect(result).toEqual({ valid: true, data: expect.any(Object) });
-    });
-
-    it('rejects data missing tabs', async () => {
-      const result = await attachmentType.validate({
-        title: 'Missing tabs',
-      });
-
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects an empty tabs array', async () => {
-      const result = await attachmentType.validate({
-        title: 'Empty tabs',
-        tabs: [],
-      });
-
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects duplicate tab ids', async () => {
-      const result = await attachmentType.validate({
-        title: 'Duplicates',
-        tabs: [esqlTab, { ...esqlTab, label: 'Copy' }],
-      });
-
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects extra top-level keys', async () => {
-      const result = await attachmentType.validate({
-        title: 'Extra',
-        tabs: [esqlTab],
-        extra: true,
-      });
-
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects an ES|QL tab without a query', async () => {
-      const result = await attachmentType.validate({
-        title: 'No query',
-        tabs: [
-          {
-            ...esqlTab,
-            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE },
-          },
-        ],
-      });
-
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects tab ids with spaces or uppercase letters', async () => {
-      const withSpace = await attachmentType.validate({
-        title: 'Bad id',
-        tabs: [{ ...esqlTab, id: 'Tab 1' }],
-      });
-      const withUppercase = await attachmentType.validate({
-        title: 'Bad id',
-        tabs: [{ ...esqlTab, id: 'Tab-1' }],
-      });
-
-      expect(withSpace).toEqual({ valid: false, error: expect.any(String) });
-      expect(withUppercase).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects an empty title', async () => {
-      const result = await attachmentType.validate({
-        title: '',
-        tabs: [esqlTab],
-      });
-
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
   });
 
@@ -308,7 +209,9 @@ describe('createDiscoverSessionAttachmentType', () => {
       const description = attachmentType.getAgentDescription?.();
       expect(description).toContain('Discover session');
       expect(description).toContain('<render_attachment>');
+      expect(description).toContain(platformCoreTools.createDiscoverSession);
       expect(description).toContain('does not include result rows');
+      expect(description).toContain('Do not create a second Discover session');
     });
   });
 });

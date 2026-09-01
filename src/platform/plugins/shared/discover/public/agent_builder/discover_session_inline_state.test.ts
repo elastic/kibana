@@ -73,6 +73,7 @@ describe('discover session inline state', () => {
         enableDocumentViewer: true,
         enableFilters: false,
         documentViewerFlyoutType: 'overlay',
+        autoApplyDiscoverColumnDefaults: true,
       });
       expect(result).not.toHaveProperty('attributes');
     });

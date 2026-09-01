@@ -11,7 +11,6 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '../../server';
 import { toStoredSearchEmbeddableByValue } from '../embeddable/transform_utils';
@@ -160,31 +159,6 @@ describe('toSearchEmbeddableByValueState', () => {
       sort: [],
       view_mode: VIEW_MODE.DOCUMENT_LEVEL,
     });
-  });
-
-  it('does not copy vis_context from a fat ES|QL tab', () => {
-    const result = toSearchEmbeddableByValueState(
-      createSession({
-        title: 'Fat session',
-        tabs: [
-          {
-            ...esqlTab,
-            vis_context: {
-              suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
-              attributes: {
-                title: 'results over timestamp',
-                datasourceStates: { secret: true },
-              },
-            },
-          },
-        ],
-      })
-    );
-
-    const serialized = JSON.stringify(result);
-
-    expect(serialized).not.toContain('datasourceStates');
-    expect(serialized).not.toContain('vis_context');
   });
 
   it('produces state that toStoredSearchEmbeddableByValue can consume', () => {

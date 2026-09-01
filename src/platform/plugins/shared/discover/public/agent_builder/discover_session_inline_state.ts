@@ -45,6 +45,7 @@ export const buildDiscoverSessionEmbeddableInput = (
     enableDocumentViewer: true,
     enableFilters: false,
     documentViewerFlyoutType: 'overlay',
+    autoApplyDiscoverColumnDefaults: true,
   },
 });
 

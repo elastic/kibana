@@ -52,7 +52,7 @@ export const useDiscoverSessionUnifiedSearch = ({
 
   const searchBarProps = useMemo(
     (): StatefulSearchBarProps<Query> => ({
-      appName: 'discover',
+      appName: 'agentBuilder',
       useDefaultBehaviors: false,
       disableSubscribingToGlobalDataServices: true,
       enableDateRangePicker: true,

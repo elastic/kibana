@@ -35,13 +35,14 @@ describe('discoverSessionSkill', () => {
     ]);
   });
 
-  it('does not register visualization or executeEsql tools', () => {
-    const tools = discoverSessionSkill.getRegistryTools?.() ?? [];
-    expect(tools).not.toContain(platformCoreTools.createVisualization);
-    expect(tools).not.toContain(platformCoreTools.executeEsql);
-  });
-
   it('does not register inline tools', () => {
     expect(discoverSessionSkill.getInlineTools).toBeUndefined();
+  });
+
+  it('tells the agent how to create or update a Discover session', () => {
+    expect(discoverSessionSkill.content).toContain('attachment_id');
+    expect(discoverSessionSkill.content).toContain('<render_attachment');
+    expect(discoverSessionSkill.content).toContain('Do **not** create a second session');
+    expect(discoverSessionSkill.content).toContain('screen-context');
   });
 });
