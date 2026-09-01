@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (upload.schema.yaml) and the zod schema generated from it (upload.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const UploadActionRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-
-    parameters: schema.object({
-      overwrite: schema.maybe(schema.boolean({ defaultValue: false })),
-    }),
-
-    file: schema.stream(),
-  }),
-};
-
-/** Type used by the server's API for `upload` action */
-export type UploadActionApiRequestBody = TypeOf<typeof UploadActionRequestSchema.body>;
-
-/**
- * Type used on the UI side. The `file` definition is different on the UI side, thus the
- * need for a separate type.
- */
-export type UploadActionUIRequestBody = Omit<UploadActionApiRequestBody, 'file'> & {
-  file: File;
-};
+export {
+  UploadActionRequestSchema,
+  type UploadActionApiRequestBody,
+  type UploadActionUIRequestBody,
+} from '@kbn/security-solution-endpoint-common';

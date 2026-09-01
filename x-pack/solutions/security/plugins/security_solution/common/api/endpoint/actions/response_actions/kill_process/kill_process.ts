@@ -5,58 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (kill_process.schema.yaml) and the zod schema generated from it (kill_process.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-// --------------------------------------------------
-// Tests for this module are at:
-// x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/actions.test.ts:604
-// --------------------------------------------------
-
-export const KillProcessRouteRequestSchema = {
-  body: schema.object(
-    {
-      ...BaseActionRequestSchema,
-      parameters: schema.oneOf([
-        schema.object({
-          pid: schema.number({ min: 1 }),
-          // `kill_descendants` applies only to the Elastic Defend Endpoint (validated below)
-          kill_descendants: schema.maybe(schema.boolean()),
-        }),
-        schema.object({
-          entity_id: schema.string({ minLength: 1, maxLength: 256 }),
-          // `kill_descendants` applies only to the Elastic Defend Endpoint (validated below)
-          kill_descendants: schema.maybe(schema.boolean()),
-        }),
-
-        // Process Name currently applies only to SentinelOne (validated below)
-        schema.object({ process_name: schema.string({ minLength: 1, maxLength: 1024 }) }),
-      ]),
-    },
-    {
-      validate(bodyContent) {
-        if ('process_name' in bodyContent.parameters && bodyContent.agent_type !== 'sentinel_one') {
-          return `[parameters.process_name]: is not valid with agent type of ${bodyContent.agent_type}`;
-        }
-
-        if (
-          bodyContent.agent_type === 'sentinel_one' &&
-          !('process_name' in bodyContent.parameters)
-        ) {
-          return `[parameters.process_name]: missing parameter for agent type of ${bodyContent.agent_type}`;
-        }
-
-        if (
-          'kill_descendants' in bodyContent.parameters &&
-          bodyContent.agent_type &&
-          bodyContent.agent_type !== 'endpoint'
-        ) {
-          return `[parameters.kill_descendants]: is not valid with agent type of ${bodyContent.agent_type}`;
-        }
-      },
-    }
-  ),
-};
-
-export type KillProcessRequestBody = TypeOf<typeof KillProcessRouteRequestSchema.body>;
+export {
+  KillProcessRouteRequestSchema,
+  type KillProcessRequestBody,
+} from '@kbn/security-solution-endpoint-common';

@@ -5,57 +5,16 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
-import type { DeepMutable } from '../../../../../endpoint/types';
-import { BaseActionRequestSchema } from '../../..';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (memory_dump.schema.yaml) and the zod schema generated from it (memory_dump.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const MemoryDumpActionRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.object(
-      {
-        type: schema.oneOf([
-          schema.literal('process'),
-          schema.literal('kernel'),
-          schema.literal('raw'),
-        ]),
-        pid: schema.maybe(schema.number({ min: 1 })),
-        entity_id: schema.maybe(
-          schema.string({
-            minLength: 1,
-            maxLength: 256,
-            validate: (value) => {
-              if (!value.trim().length) {
-                return `entity_id cannot be an empty string`;
-              }
-            },
-          })
-        ),
-      },
-      {
-        validate: (parameters) => {
-          if (
-            (parameters.type === 'kernel' || parameters.type === 'raw') &&
-            (parameters.pid || parameters.entity_id)
-          ) {
-            return '"pid" and "entity_id" parameters only supported for type of "process"';
-          }
-
-          if (parameters.type === 'process') {
-            if (!parameters.pid && !parameters.entity_id) {
-              return 'Type of "process" requires either "pid" or "entity_id"';
-            }
-
-            if (parameters.pid !== undefined && parameters.entity_id !== undefined) {
-              return 'Type of "process" cannot have both "pid" and "entity_id"';
-            }
-          }
-        },
-      }
-    ),
-  }),
-};
-
-export type MemoryDumpActionRequestBody = DeepMutable<
-  TypeOf<typeof MemoryDumpActionRequestSchema.body>
->;
+export {
+  MemoryDumpActionRequestSchema,
+  type MemoryDumpActionRequestBody,
+} from '@kbn/security-solution-endpoint-common';

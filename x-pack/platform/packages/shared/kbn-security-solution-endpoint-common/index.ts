@@ -13,8 +13,10 @@
 // enumerated in this file, and adding a symbol to a source module does not
 // silently widen it.
 //
-// Still to be lifted by the commits that follow:
-//   - the 12 per-action request schemas (@kbn/config-schema and generated zod)
+// The OpenAPI specs (*.schema.yaml) and the zod schemas generated from them (*.gen.ts)
+// deliberately stay in security_solution: the specs are the source of truth for the public
+// API documentation, so they belong beside the API they document, and the generated zod
+// sits next to its source.
 
 export type { EndpointAuthz, EndpointAuthzKeyList, EndpointPrivileges } from './src/types/authz';
 
@@ -87,3 +89,51 @@ export {
   NoParametersRequestSchema,
   type BaseActionRequestBody,
 } from './src/api/common/base';
+
+export { CancelActionRequestSchema, type CancelActionRequestBody } from './src/api/actions/cancel';
+export {
+  ExecuteActionRequestSchema,
+  type ExecuteActionRequestBody,
+} from './src/api/actions/execute';
+export {
+  EndpointActionGetFileSchema,
+  type ResponseActionGetFileRequestBody,
+} from './src/api/actions/get_file';
+export {
+  IsolateRouteRequestSchema,
+  type IsolationRouteRequestBody,
+} from './src/api/actions/isolate';
+export {
+  KillProcessRouteRequestSchema,
+  type KillProcessRequestBody,
+} from './src/api/actions/kill_process';
+export {
+  MemoryDumpActionRequestSchema,
+  type MemoryDumpActionRequestBody,
+} from './src/api/actions/memory_dump';
+export {
+  MSDefenderEndpointRunScriptActionRequestParamsSchema,
+  RunScriptActionRequestSchema,
+  type EndpointRunScriptActionRequestParams,
+  type MSDefenderRunScriptActionRequestParams,
+  type RunScriptActionRequestBody,
+  type SentinelOneRunScriptActionRequestParams,
+} from './src/api/actions/run_script';
+export {
+  GetProcessesRouteRequestSchema,
+  type GetProcessesRequestBody,
+} from './src/api/actions/running_procs';
+export { ScanActionRequestSchema, type ScanActionRequestBody } from './src/api/actions/scan';
+export {
+  SuspendProcessRouteRequestSchema,
+  type SuspendProcessRequestBody,
+} from './src/api/actions/suspend_process';
+export {
+  UnisolateRouteRequestSchema,
+  type UnisolationRouteRequestBody,
+} from './src/api/actions/unisolate';
+export {
+  UploadActionRequestSchema,
+  type UploadActionApiRequestBody,
+  type UploadActionUIRequestBody,
+} from './src/api/actions/upload';
