@@ -24,6 +24,7 @@ import type { QueryMatrixScoresOptions } from '../../matrix/query_matrix_scores'
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 import { renderMatrixHtml } from '../../matrix/render_matrix_html';
+import { renderReliabilityHtml } from '../../matrix/render_reliability_html';
 import { queryMatrixTraces } from '../../matrix/query_matrix_traces';
 import type { MatrixTraceData } from '../../matrix/trace_types';
 import { readLocalGitState } from '../../matrix/local_git_state';
@@ -366,7 +367,13 @@ export const matrixCmd: Command<void> = {
         traces
       );
       Fs.writeFileSync(Path.join(outDir, 'matrix.html'), htmlContent);
-      log.info(`Wrote matrix.html to ${outDir}`);
+      const reliabilityHtml = renderReliabilityHtml(matrix, traces, {
+        branch,
+        lookbackDays,
+        commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
+      });
+      Fs.writeFileSync(Path.join(outDir, 'matrix.reliability.html'), reliabilityHtml);
+      log.info(`Wrote matrix.html and matrix.reliability.html to ${outDir}`);
     }
 
     log.info(

@@ -16,6 +16,7 @@ import {
   createPersonaMatrixFinalAnswerPresentEvaluator,
   createPersonaMatrixMinExpectedStepsEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
+  isRankablePathContract,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
 import type { PersonaMatrixChatClient } from './chat_client';
@@ -46,6 +47,29 @@ const buildLog = (): ToolingLog =>
     error: jest.fn(),
     debug: jest.fn(),
   } as unknown as ToolingLog);
+
+describe('path contract classification', () => {
+  it('keeps probes diagnostic and leaves candidate/rankable paths measurable', () => {
+    expect(isRankablePathContract({ pathContract: 'probe' })).toBe(false);
+    expect(isRankablePathContract({ pathContract: 'candidate' })).toBe(true);
+    expect(isRankablePathContract({ pathContract: 'rankable' })).toBe(true);
+    expect(isRankablePathContract(undefined)).toBe(true);
+  });
+
+  it('marks every measured 0/5 hunt example as a probe', () => {
+    const probePrefixes = [
+      'alert-analysis-',
+      'entity-analytics-',
+      'multi-step-',
+      'threat-hunting-',
+    ];
+    const probes = PERSONA_MATRIX_EXAMPLES.filter((example) =>
+      probePrefixes.some((prefix) => example.id.startsWith(prefix))
+    );
+    expect(probes).toHaveLength(12);
+    expect(probes.every((example) => example.metadata.pathContract === 'probe')).toBe(true);
+  });
+});
 
 describe('toDatasetExample', () => {
   it('resolves the golden path from metadata.expectedTools into output.tool_sequence', () => {
@@ -166,9 +190,14 @@ describe('createPersonaMatrixTrajectoryEvaluator', () => {
           }))
         )
       );
-      expect(result.score).not.toBeNull();
-      const metadata = result.metadata as { expected: string[] } | undefined;
-      expect(metadata?.expected).toEqual(wrapped.output.tool_sequence);
+      if (example.metadata.pathContract === 'probe') {
+        expect(result.score).toBeNull();
+        expect(result.metadata).toMatchObject({ pathContract: 'probe' });
+      } else {
+        expect(result.score).not.toBeNull();
+        const metadata = result.metadata as { expected: string[] } | undefined;
+        expect(metadata?.expected).toEqual(wrapped.output.tool_sequence);
+      }
     }
   });
 });

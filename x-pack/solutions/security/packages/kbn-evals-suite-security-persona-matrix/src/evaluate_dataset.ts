@@ -209,6 +209,10 @@ export const createPersonaMatrixMinExpectedStepsEvaluator = (): Evaluator => ({
  */
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
 
+export const isRankablePathContract = (
+  metadata: { pathContract?: 'rankable' | 'candidate' | 'probe' } | undefined
+): boolean => metadata?.pathContract !== 'probe';
+
 export const createPersonaMatrixTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
     extractToolCalls: (output) =>
@@ -226,6 +230,17 @@ export const createPersonaMatrixTrajectoryEvaluator = (): Evaluator => {
     name: 'Trajectory',
     evaluate: async (args) => {
       const exp = args.expected as PersonaMatrixDatasetExpected | undefined;
+      const meta = args.metadata as
+        | { pathContract?: 'rankable' | 'candidate' | 'probe' }
+        | undefined;
+      if (!isRankablePathContract(meta)) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'Open-ended capability probe — trajectory is diagnostic, not rankable.',
+          metadata: { pathContract: 'probe' },
+        };
+      }
       if (!exp?.tool_sequence || exp.tool_sequence.length === 0) {
         return {
           score: null,
@@ -433,6 +448,8 @@ export function createEvaluatePersonaMatrixDataset({
             steps: response.steps,
             errors: response.errors,
             traceId: response.traceId ?? null,
+            sampling: response.sampling,
+            trajectoryFingerprint: response.trajectoryFingerprint,
           };
 
           // Precompute the qualitative analyses inside the task once, so the

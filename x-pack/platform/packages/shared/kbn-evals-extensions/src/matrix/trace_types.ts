@@ -48,6 +48,11 @@ export interface MatrixTraceEntry {
    * measured once and its stability is unknown, not that it is stable.
    */
   spread?: Record<string, number>;
+  /**
+   * Ordered tool identifiers observed in each repetition. Invocation ids are
+   * excluded because providers generate a new id for every call.
+   */
+  repTrails?: string[][];
 }
 
 /**

@@ -7,6 +7,9 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+// Evals run in Node; SHA-256 is needed for stable trajectory provenance.
+// eslint-disable-next-line import/no-nodejs-modules
+import { createHash } from 'crypto';
 // Eval-harness capture side-channel: writes the verbatim model answer to a
 // local gitignored JSONL for offline report rendering.
 // eslint-disable-next-line @kbn/eslint/require_kbn_fs, import/no-nodejs-modules
@@ -36,6 +39,15 @@ export interface ConverseResponse {
   errors: Array<{ error: { message: string; stack?: string }; type: 'error' }>;
   conversationId?: string;
   traceId?: string | null;
+  /** Reproducibility metadata persisted in task.output on every score doc. */
+  sampling: {
+    connectorId: string;
+    temperature: number | null;
+    topP: number | null;
+    seed: number | null;
+  };
+  /** sha256 of the ordered tool_id + params sequence (provider ids excluded). */
+  trajectoryFingerprint: string;
 }
 
 interface ConverseApiResponse {
@@ -75,13 +87,32 @@ export class PersonaMatrixChatClient {
       });
 
       const message = resp.response?.message ?? '';
+      const steps = resp.steps ?? [];
+      const trajectoryFingerprint = createHash('sha256')
+        .update(
+          JSON.stringify(
+            steps
+              .filter((step) => step.type === 'tool_call' && step.tool_id)
+              .map((step) => ({ tool_id: step.tool_id, params: step.params ?? null }))
+          )
+        )
+        .digest('hex');
 
       const result: ConverseResponse = {
         messages: [{ message }],
-        steps: resp.steps ?? [],
+        steps,
         errors: [],
         conversationId: resp.conversation_id,
         traceId: resp.trace_id ?? null,
+        sampling: {
+          connectorId: this.connectorId,
+          // The converse API exposes no sampling controls. Persist null rather
+          // than inventing provider defaults; absence is itself evidence.
+          temperature: null,
+          topP: null,
+          seed: null,
+        },
+        trajectoryFingerprint,
       };
 
       // Capture the verbatim answer when PERSONA_MATRIX_CAPTURE is set.

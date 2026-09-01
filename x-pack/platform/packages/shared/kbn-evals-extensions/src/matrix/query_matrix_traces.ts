@@ -11,6 +11,7 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { AggregatedModelScores } from './query_matrix_scores';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
 import { traceKey } from './trace_types';
+import { trailsFromDocs } from './trajectory_agreement';
 
 /**
  * Runs `fn` over `items` with at most `limit` in flight, preserving input
@@ -63,10 +64,13 @@ const extractTraceFromScore = (score: EvaluationScoreDocument): MatrixTraceEntry
       if (toolId) {
         toolTrail.push(toolId);
       }
+      // Live score docs store arguments under `params`. `args` is the name this
+      // extractor originally guessed; 0/363 tool_call steps on golden carried it.
+      const rawParams = step.params ?? step.args;
       steps.push({
         type: 'tool',
         toolId,
-        toolParams: step.args ? JSON.stringify(step.args).slice(0, 300) : undefined,
+        toolParams: rawParams ? JSON.stringify(rawParams).slice(0, 300) : undefined,
       });
     } else if (stepType === 'reasoning') {
       steps.push({
@@ -226,9 +230,14 @@ const processExampleBatch = (
 
   const complete = isCompleteScore(relevant[0]);
 
-  // Key by model:exampleId for per-prompt detail
+  // Key by model:exampleId for per-prompt detail. This key — and only this key
+  // — carries the per-repetition tool_id trails: the prefix and suite keys
+  // below alias the SAME entry object, so writing trails on `entry` would make
+  // one example's repetitions count once per alias in the reliability roll-up.
   if (exampleId) {
-    traces[traceKey(modelId, exampleId)] = entry;
+    const trails = trailsFromDocs(relevant);
+    traces[traceKey(modelId, exampleId)] =
+      trails.length > 0 ? { ...entry, repTrails: trails } : entry;
   }
   // Category columns slice the dataset by example.id prefix (examplePrefixes),
   // synthesizing `prefix:<name>` dataset ids. Emit one trace per matching
@@ -271,7 +280,11 @@ const processExampleBatch = (
       const fallbackEntry = extractTraceFromScore(firstComplete);
       fallbackEntry.scores = exampleScoresByEvaluator(relevant.filter(isCompleteScore));
       const fid = firstComplete.example?.id;
-      if (fid) traces[traceKey(modelId, fid)] = fallbackEntry;
+      if (fid) {
+        const trails = trailsFromDocs(relevant.filter(isCompleteScore));
+        traces[traceKey(modelId, fid)] =
+          trails.length > 0 ? { ...fallbackEntry, repTrails: trails } : fallbackEntry;
+      }
       if (traces[suiteTraceKey] === undefined) {
         traces[suiteTraceKey] = fallbackEntry;
       }

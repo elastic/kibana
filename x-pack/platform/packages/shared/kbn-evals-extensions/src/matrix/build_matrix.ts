@@ -51,6 +51,10 @@ export interface MatrixRow {
   /** Column/composite id -> cell. */
   cells: Record<string, MatrixCell>;
   overall: MatrixCell;
+  /** Deterministic code/contract evaluator mean on the same 0–10 scale. */
+  capability?: MatrixCell;
+  /** Judged evaluator mean on the same 0–10 scale. */
+  judgedQuality?: MatrixCell;
   /**
    * Base columns with a non-missing cell out of all base columns. Partial
    * coverage means `overall` and composites average fewer examples and are
@@ -154,7 +158,8 @@ function* columnEvaluators(
 const computeColumnMean = (
   modelScores: AggregatedModelScores,
   column: MatrixColumnConfig,
-  excludeEvaluators: readonly string[]
+  excludeEvaluators: readonly string[],
+  includeEvaluator?: (evaluator: AggregatedEvaluatorScore) => boolean
 ): number | undefined => {
   const evaluatorSet = column.evaluators ? new Set(column.evaluators) : undefined;
 
@@ -162,6 +167,9 @@ const computeColumnMean = (
   let totalCount = 0;
 
   for (const evaluator of columnEvaluators(modelScores, column)) {
+    if (includeEvaluator && !includeEvaluator(evaluator)) {
+      continue;
+    }
     // A column may opt into an explicit evaluator allowlist; otherwise the global
     // exclusion list drops raw-magnitude evaluators that would blow out the 0-10 scale.
     const skip = evaluatorSet
@@ -190,6 +198,29 @@ const buildCell = (
 
   const scale = column.scale ?? config.defaultScale;
   return toCell(roundTo(mean * scale, config.decimals), config);
+};
+
+const CONTRACT_EVALUATORS = new Set([
+  'ExpectedToolCalled',
+  'FinalAnswerPresent',
+  'MinExpectedSteps',
+  'SkillInvoked',
+]);
+
+const axisCell = (
+  modelScores: AggregatedModelScores,
+  config: MatrixConfig,
+  includeEvaluator: (evaluator: AggregatedEvaluatorScore) => boolean
+): MatrixCell => {
+  const cells = config.columns.map((column) => ({
+    cell: buildCell(
+      computeColumnMean(modelScores, column, config.excludeEvaluators, includeEvaluator),
+      column,
+      config
+    ),
+    weight: config.overall.mode === 'weighted' ? column.weight : 1,
+  }));
+  return aggregateCells(cells, config);
 };
 
 /**
@@ -458,6 +489,19 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
         config.minCoverage > 0 && scoredColumns < config.minCoverage
           ? { kind: 'insufficient-coverage', covered: scoredColumns, required: config.minCoverage }
           : overall,
+      capability: axisCell(modelScores, config, (evaluator) =>
+        CONTRACT_EVALUATORS.has(
+          evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
+        )
+      ),
+      judgedQuality: axisCell(
+        modelScores,
+        config,
+        (evaluator) =>
+          !CONTRACT_EVALUATORS.has(
+            evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
+          )
+      ),
       coverage: {
         covered: scoredColumns,
         total: config.columns.length,
