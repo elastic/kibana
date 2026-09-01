@@ -6,19 +6,25 @@
  */
 import { schema } from '@kbn/config-schema';
 
+import {
+  FLEET_SCHEMA_ID_MAX_LENGTH,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+  FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+} from '../../constants';
+
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetUninstallTokensMetadataRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(
       schema.string({
-        maxLength: 50,
+        maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
         meta: { description: 'Partial match filtering for policy IDs' },
       })
     ),
     search: schema.maybe(
       schema.string({
-        maxLength: 50,
+        maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
         meta: { description: 'Partial match filtering for uninstall token values' },
       })
     ),
@@ -36,12 +42,12 @@ export const GetUninstallTokensMetadataRequestSchema = {
 };
 
 const UninstallTokenMetadataSchema = schema.object({
-  id: schema.string({ maxLength: 50 }),
-  policy_id: schema.string({ maxLength: 50 }),
+  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+  policy_id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
   policy_name: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string({ maxLength: 255 })])
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })])
   ),
-  created_at: schema.string({ maxLength: 50 }),
+  created_at: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
   namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });
 
@@ -52,7 +58,7 @@ export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
     uninstallTokenId: schema.string({
-      maxLength: 50,
+      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
       meta: { description: 'The ID of the uninstall token' },
     }),
   }),
@@ -60,14 +66,14 @@ export const GetUninstallTokenRequestSchema = {
 
 export const GetUninstallTokenResponseSchema = schema.object({
   item: UninstallTokenMetadataSchema.extends({
-    token: schema.string({ maxLength: 10000 }),
+    token: schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
   }),
 });
 
 export const RotateUninstallTokenRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string({
-      maxLength: 255,
+      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
       meta: { description: 'The ID of the agent policy whose uninstall token should be rotated' },
     }),
   }),

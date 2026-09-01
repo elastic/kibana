@@ -15,9 +15,6 @@ export const FLEET_SCHEMA_ID_MAX_LENGTH = 50;
 /** Human-readable names: policy names, package names, integration names. */
 export const FLEET_SCHEMA_NAME_MAX_LENGTH = 255;
 
-/** Version strings: semver, Kibana version conditions. */
-export const FLEET_SCHEMA_VERSION_MAX_LENGTH = 50;
-
 /** URLs: host URLs, proxy URLs, source URIs. */
 export const FLEET_SCHEMA_URL_MAX_LENGTH = 2048;
 
