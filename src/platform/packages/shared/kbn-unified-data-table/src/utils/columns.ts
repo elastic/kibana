@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SourceDisplayMode } from '../types';
+import type { DocumentsDisplayMode } from '../types';
 
 export const SOURCE_COLUMN = '_source';
 
@@ -30,11 +30,11 @@ export const isSummaryOnlyColumn = (columns: string[]): boolean =>
 export function getDisplayedColumns(
   stateColumns: string[] = [],
   dataView: DataView,
-  sourceDisplayMode: SourceDisplayMode = 'summary'
+  documentsDisplayMode: DocumentsDisplayMode = 'table'
 ) {
   // JSON mode is a single JSON cell; selected fields filter that cell instead of becoming their own
   // columns, so always show just the source column.
-  if (sourceDisplayMode === 'json') {
+  if (documentsDisplayMode === 'json') {
     return SOURCE_ONLY;
   }
   return stateColumns &&

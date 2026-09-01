@@ -21,7 +21,10 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
+import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
 import type {
@@ -42,6 +45,7 @@ export class NightshiftInvestigationsPlugin
 {
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
+  private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
 
@@ -55,6 +59,14 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
+    registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+
+    const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
+      createTriggerEmitter({
+        workflowsExtensions: this.workflowsExtensionsStart,
+        request,
+        logger: this.logger,
+      });
 
     const getInvestigationsClient = (request: KibanaRequest, spaceId?: string) =>
       new NightshiftInvestigationsClient({
@@ -84,11 +96,15 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           triggerInvestigationStepDefinition(getInvestigationsClient)
         );
+        // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
+        plugins.workflowsExtensions.registerStepDefinition(
+          ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
+        );
       }
 
       registerRoutes({
         repository: nightshiftInvestigationsRouteRepository,
-        dependencies: { getInvestigationsClient },
+        dependencies: { getInvestigationsClient, getTriggerEmitter },
         core,
         logger: this.logger,
         runDevModeChecks: false,
@@ -105,8 +121,12 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsStartDeps
   ): NightshiftInvestigationsServerStart {
     this.spaces = plugins.spaces;
+    this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
 
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install exists so the agent is
+    // visible and editable in the Agent Builder UI before the first investigation ever runs.
     if (plugins.agentBuilder) {
       void installInvestigationAgent({
         agentBuilder: plugins.agentBuilder,

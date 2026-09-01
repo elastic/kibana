@@ -31,8 +31,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       });
     });
 
-    loadTestFile(require.resolve('./logs/_get_pagination_config'));
     loadTestFile(require.resolve('./logs/_get_doc_viewer'));
-    loadTestFile(require.resolve('./logs/_summary_column'));
   });
 }
