@@ -175,9 +175,12 @@ export class EntityFlyoutAnomaliesPage {
   /**
    * Click a row-actions menu item. noWaitAfter: add-to-timeline updates the URL
    * while opening the modal, which otherwise hangs the click after scroll.
+   * force: the in-flight URL change from openRowActionsMenu causes a re-render
+   * that repositions the popover; the computed center-point is briefly covered,
+   * so Playwright's obstruction check times out without force.
    */
   async clickRowAction(actionKey: string) {
-    await this.getRowAction(actionKey).click({ noWaitAfter: true });
+    await this.getRowAction(actionKey).click({ noWaitAfter: true, force: true });
   }
 
   async selectMitreTactic(tactic: string) {
