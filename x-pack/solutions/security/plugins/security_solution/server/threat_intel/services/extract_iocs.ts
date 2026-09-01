@@ -120,8 +120,7 @@ const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
  *
  * Reachable from one 5,000,000-character analyst paste or a dense feed item:
  * `text_indicator_list` chunks its output across documents, but every other path writes
- * a single one. 5,000 matches the per-document budget that adapter already uses and
- * leaves room for the `external_references` entries sharing the same limit.
+ * a single one. 5,000 matches the per-document budget that adapter already uses.
  */
 const MAX_IOCS_PER_REPORT = 5_000;
 
