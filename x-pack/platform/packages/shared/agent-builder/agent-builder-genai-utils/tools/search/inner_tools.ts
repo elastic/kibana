@@ -198,6 +198,13 @@ export const noMatchingResourceToolName = 'no_matching_resource';
 
 export const NO_MATCHING_RESOURCE_ERROR = 'Could not figure out which data source to use';
 
+/**
+ * Emitted when the search dispatcher replies without selecting a tool. Tool
+ * choice is deliberately 'auto' (forcing it hangs some providers), so a
+ * tool-less reply is possible and must be handled instead of crashing.
+ */
+export const NO_TOOL_SELECTED_ERROR = 'Could not determine how to search for this query';
+
 export const createNoMatchingResourceTool = () => {
   return toTool(
     async () => {
