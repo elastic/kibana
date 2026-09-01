@@ -205,6 +205,5 @@ describe('esql-valid-syntax verifier', () => {
       expect(context.esClient.esql.query).not.toHaveBeenCalled();
       expect(context.esClient.transport.request).not.toHaveBeenCalled();
     });
-
   });
 });
