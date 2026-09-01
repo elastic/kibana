@@ -17,7 +17,13 @@
 // contract — Index Management covers it in
 // x-pack/.../index_management/test/scout/ui/tests/home_page.spec.ts.
 //
-// FTR source: src/platform/test/plugin_functional/test_suites/management/management_plugin.ts
+// The landing page a11y scan lives here as a test.step rather than in its own spec,
+// per Scout's preference for folding a11y checks into existing functional tests.
+//
+// FTR sources:
+//   src/platform/test/plugin_functional/test_suites/management/management_plugin.ts
+//   src/platform/test/accessibility/apps/management.ts -> it('main view')
+//   x-pack/platform/test/accessibility/apps/group1/management.ts -> it('main view')
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -51,6 +57,13 @@ test.describe('Management plugin routing', { tag: tags.stateful.classic }, () =>
     pageObjects,
   }) => {
     await pageObjects.management.goto();
+
+    await test.step('landing page has no a11y violations', async () => {
+      // The landing page only renders in-app content here (no modal/flyout/menu),
+      // so the app wrapper is the whole surface to scan.
+      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      expect(violations).toStrictEqual([]);
+    });
 
     await test.step('open a registered section from the management sidebar', async () => {
       await page.testSubj.locator('index_management').click();
