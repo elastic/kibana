@@ -147,14 +147,14 @@ export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
             {help}
           </div>
         )}
-        {actions && (
-          <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
-            {actions}
-          </div>
-        )}
         {userMenu && (
           <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
             {userMenu}
+          </div>
+        )}
+        {actions && (
+          <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
+            {actions}
           </div>
         )}
       </div>
