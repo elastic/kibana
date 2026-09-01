@@ -92,11 +92,13 @@ describe('esql-valid-runtime verifier', () => {
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
     });
 
-    it('appends a row limit at the end of the query', async () => {
-      await verifier.verify(makeKi(VALID_QUERY), context);
+    it('appends a row limit on a new line so trailing // comments do not swallow it', async () => {
+      const commentQuery = 'FROM logs-* | WHERE event.outcome == "failure" // trailing comment';
+
+      await verifier.verify(makeKi(commentQuery), context);
 
       const [sent] = sentQueries();
-      expect(sent).toMatch(/LIMIT 1\s*$/);
+      expect(sent).toMatch(/\n\| LIMIT 1$/);
     });
 
     it('executes a time-series data stream query using the TS source command', async () => {

@@ -18,19 +18,17 @@ const makeHandlerContext = (
   ki: VerifyKiHandlerContext['input']['ki'],
   esClient: EsClientMock,
   {
-    esqlAttributes,
     verifiers,
     getScopedEsClient,
   }: {
-    esqlAttributes?: string[];
     verifiers?: string[];
     getScopedEsClient?: () => unknown;
   } = {}
 ): VerifyKiHandlerContext =>
   ({
-    input: { ki, esql_attributes: esqlAttributes, verifiers },
+    input: { ki, verifiers },
     config: {},
-    rawInput: { ki, esql_attributes: esqlAttributes, verifiers },
+    rawInput: { ki, verifiers },
     contextManager: {
       getFakeRequest: jest.fn(),
       getScopedEsClient: getScopedEsClient ?? jest.fn().mockReturnValue(esClient),
@@ -69,7 +67,7 @@ describe('verify_ki workflow step', () => {
 
   const runHandler = async (
     ki: VerifyKiHandlerContext['input']['ki'],
-    opts: { esqlAttributes?: string[]; verifiers?: string[] } = {}
+    opts: { verifiers?: string[] } = {}
   ) => {
     const { output } = await makeDefinition().handler(makeHandlerContext(ki, esClient, opts));
     if (!output) {
@@ -134,35 +132,6 @@ describe('verify_ki workflow step', () => {
       },
       { verifier: ESQL_VALID_RUNTIME_VERIFIER_ID, passed: true },
     ]);
-  });
-
-  it('verifies the attributes named in esql_attributes instead of the default', async () => {
-    setContextEngineEnabled(true);
-
-    const output = await runHandler(
-      {
-        attributes: {
-          esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)',
-          aggregation_query: 'FROM logs-* | STATS c = COUNT(*)',
-        },
-      },
-      { esqlAttributes: ['aggregation_query'], verifiers: ALL_ESQL_VERIFIERS }
-    );
-
-    expect(output.passed).toBe(true);
-    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
-  });
-
-  it('passes a KI carrying none of the named attributes, without running any verifier', async () => {
-    setContextEngineEnabled(true);
-
-    const output = await runHandler(
-      { attributes: { esql: 'FROM logs-* | LIMIT 1' } },
-      { esqlAttributes: ['aggregation_query'], verifiers: ALL_ESQL_VERIFIERS }
-    );
-
-    expect(output).toEqual({ passed: true, results: [] });
-    expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 
   it('skips KIs with no applicable verifiers', async () => {

@@ -24,7 +24,7 @@ export const ESQL_EXECUTION_ROW_LIMIT = 1;
 const MAX_QUERY_ATTEMPTS = 3;
 
 const boundQuery = (query: string): string =>
-  `${query.trimEnd()} | LIMIT ${ESQL_EXECUTION_ROW_LIMIT}`;
+  `${query.trimEnd()}\n| LIMIT ${ESQL_EXECUTION_ROW_LIMIT}`;
 
 const formatEsError = (error: errors.ResponseError): string => {
   const details = error.body as ElasticsearchErrorDetails | undefined;

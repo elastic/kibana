@@ -53,7 +53,6 @@ export const createVerifyKiStepDefinition = (
             esClient: context.contextManager.getScopedEsClient(),
             logger,
             abortSignal: context.abortSignal,
-            esqlAttributes: context.input.esql_attributes,
             verifiers,
           }),
       });

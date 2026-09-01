@@ -9,24 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { kiPartialFieldsSchema, MAX_KI_ATTRIBUTE_KEY_LENGTH } from './ki';
+import { kiPartialFieldsSchema } from './ki';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
-export const DEFAULT_ESQL_ATTRIBUTE = 'esql';
-
-export const MAX_ESQL_ATTRIBUTES = 20;
 export const MAX_VERIFIER_IDS = 20;
 
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
-  esql_attributes: z
-    .array(z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH))
-    .max(MAX_ESQL_ATTRIBUTES)
-    .optional()
-    .describe(
-      `Names of the KI attributes carrying ES|QL to verify, defaulting to '${DEFAULT_ESQL_ATTRIBUTE}'. A listed attribute the KI does not carry is skipped, not failed.`
-    ),
   verifiers: z
     .array(z.string().min(1).max(100))
     .min(1)
@@ -67,8 +57,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'Runs the verifiers listed in `verifiers` and returns a pass/fail result per verifier. At least one id is required; an unknown id fails the step. ES|QL verifiers: `esql-valid-syntax` validates each query locally (no cluster call); `esql-valid-runtime` executes each query against live data, bounded to one row. Both read from the attribute names in `esql_attributes` (default: `{defaultAttribute}`). Missing attributes are skipped rather than failed. Requires the Context Engine advanced setting.',
-      values: { defaultAttribute: DEFAULT_ESQL_ATTRIBUTE },
+        'Runs the verifiers listed in `verifiers` and returns a pass/fail result per verifier. At least one id is required; an unknown id fails the step. ES|QL verifiers: `esql-valid-syntax` validates each query locally (no cluster call); `esql-valid-runtime` executes each query against live data, bounded to one row. Both read from the `esql` attribute. Requires the Context Engine advanced setting.',
     }),
     examples: [
       `## Verify a knowledge indicator's ES|QL
@@ -84,19 +73,6 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
       title: Failed login burst
       attributes:
         esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
-\`\`\``,
-      `## Verify ES|QL held in custom attributes
-\`\`\`yaml
-- name: verify_ki
-  type: ${VERIFY_KI_STEP_TYPE_ID}
-  with:
-    verifiers:
-      - esql-valid-syntax
-      - esql-valid-runtime
-    esql_attributes:
-      - aggregation_query
-      - sampling_query
-    ki: "{{ steps.construct_ki.output }}"
 \`\`\``,
     ],
   },
