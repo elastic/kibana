@@ -74,4 +74,16 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./delete_note_step/delete_note_step').then((m) => m.deleteNoteStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_notes_step/get_notes_step').then((m) => m.getNotesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./update_note_step/update_note_step').then((m) => m.updateNoteStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_rule_step/create_rule_step').then((m) => m.createRuleStepDefinition)
+  );
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -127,6 +128,30 @@ describe('Title', () => {
       );
 
       expect(screen.getByTestId('attackDiscoveryCheckbox')).toBeInTheDocument();
+    });
+
+    it('labels the checkbox with the title, with the original values replaced', () => {
+      jest.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
+
+      render(
+        <TestWrapper>
+          <Title {...defaultProps} showAnonymized={false} />
+        </TestWrapper>
+      );
+
+      expect(screen.getByRole('checkbox', { name: 'Original title' })).toBeInTheDocument();
+    });
+
+    it('labels the checkbox with the anonymized title when showAnonymized is true', () => {
+      jest.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
+
+      render(
+        <TestWrapper>
+          <Title {...defaultProps} showAnonymized={true} />
+        </TestWrapper>
+      );
+
+      expect(screen.getByRole('checkbox', { name: mockRawResponse.title })).toBeInTheDocument();
     });
 
     it('renders the accordion', () => {

@@ -450,7 +450,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
 
       const assertDiscoverNavigation = async () => {
         const discoverPagePromise = context.waitForEvent('page');
-        await dashboard.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+        await dashboard.clickPanelAction(testData.DATA_TEST_SUBJECTS.OPEN_IN_DISCOVER_ACTION);
         const discoverPage = await discoverPagePromise;
 
         try {

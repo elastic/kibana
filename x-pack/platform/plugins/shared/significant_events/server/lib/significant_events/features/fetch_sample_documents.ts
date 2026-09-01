@@ -129,7 +129,7 @@ export async function fetchSampleDocuments({
               start,
               end,
               sampleSize: size,
-              requestTimeout: samplingTimeoutMs,
+              abortSignal: samplingSignal,
             })
         ),
         samplingTimeoutMs
@@ -183,7 +183,7 @@ export async function fetchSampleDocuments({
             sampleSize: entityFilteredSize,
             whereCondition,
             unmappedFields: 'LOAD',
-            requestTimeout: samplingTimeoutMs,
+            abortSignal: samplingSignal,
           })
       ).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
@@ -227,7 +227,7 @@ export async function fetchSampleDocuments({
               start,
               end,
               sampleSize: size,
-              requestTimeout: samplingTimeoutMs,
+              abortSignal: samplingSignal,
             })
         ),
         samplingTimeoutMs

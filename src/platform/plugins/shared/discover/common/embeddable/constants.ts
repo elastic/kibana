@@ -31,5 +31,7 @@ export const EDITABLE_SAVED_SEARCH_KEYS = [
   'rowsPerPage',
   'headerRowHeight',
   'density',
+  'documentsDisplayMode',
+  'jsonModeSettings',
   'grid',
 ] as const satisfies ReadonlyArray<keyof SavedSearchAttributes>;

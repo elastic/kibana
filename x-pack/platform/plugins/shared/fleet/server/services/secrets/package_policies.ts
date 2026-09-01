@@ -300,15 +300,19 @@ export function diffSecretPaths(
     }
 
     const newPath = newPathsByPath[oldPath.path.join('.')];
-    if (newPath && newPath.value.value) {
-      const newValue = newPath.value?.value;
-      if (!newValue?.isSecretRef) {
-        toCreate.push(newPath);
-        toDelete.push(oldPath);
-      } else {
-        noChange.push(newPath);
-      }
+    if (newPath) {
       delete newPathsByPath[oldPath.path.join('.')];
+      if (newPath.value.value) {
+        if (!newPath.value.value.isSecretRef) {
+          toCreate.push(newPath);
+          toDelete.push(oldPath);
+        } else {
+          noChange.push(newPath);
+        }
+      } else {
+        // value explicitly cleared (null/undefined) — old secret must be deleted
+        toDelete.push(oldPath);
+      }
     }
   }
 

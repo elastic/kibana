@@ -57,6 +57,7 @@ describe('validateDeprecatedStepTypes', () => {
     expect(results).toEqual([
       expect.objectContaining({
         owner: 'deprecated-step-validation',
+        ruleId: 'deprecatedStepType',
         severity: 'warning',
         hoverMessage: null,
         message: 'Step type "kibana.createCase" is deprecated. Use "cases.createCase" instead.',
@@ -80,6 +81,7 @@ describe('validateDeprecatedStepTypes', () => {
     expect(results).toEqual([
       expect.objectContaining({
         owner: 'deprecated-step-validation',
+        ruleId: 'deprecatedStepType',
         severity: 'warning',
         message: 'Step type "inference.completion" is deprecated. Use "ai.prompt" instead.',
       }),

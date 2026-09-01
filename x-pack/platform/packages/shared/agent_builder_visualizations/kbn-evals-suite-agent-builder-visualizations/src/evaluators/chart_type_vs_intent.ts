@@ -50,6 +50,7 @@ export function createChartTypeVsIntentEvaluator<
   return {
     name,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
       const expectedChartTypes = normalizeExpected(expectedChartTypeExtractor(expected));
       if (expectedChartTypes.length === 0) {

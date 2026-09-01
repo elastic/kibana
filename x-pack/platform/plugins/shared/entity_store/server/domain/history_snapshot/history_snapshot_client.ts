@@ -13,7 +13,11 @@ import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
-import { getHistorySnapshotIndexName } from '../asset_manager/history_snapshot_index';
+import {
+  getHistorySnapshotIndexName,
+  getLegacySecurityHistorySnapshotIndexName,
+} from '../asset_manager/history_snapshot_index';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 export type RunHistorySnapshotResult =
@@ -69,8 +73,11 @@ export class HistorySnapshotClient {
 
     const timestampNow = moment.utc().toISOString();
     const snapshotDate = moment.utc().toDate();
-    const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const historySnapshotIndex = getHistorySnapshotIndexName(this.namespace, snapshotDate);
+    const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    const historySnapshotIndex =
+      latestIndex === getLatestEntitiesIndexName(this.namespace)
+        ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
+        : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
 
     try {
       await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });

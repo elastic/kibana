@@ -13,6 +13,7 @@ import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
 import type { ToolCallOfToolOptions } from './tools_of';
 import type { AnonymizationResponseMetadata } from './anonymization';
+import type { ChatCompletionReasoning } from './reasoning';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -105,6 +106,14 @@ export type ChatCompleteOptions = {
    * Defaults to 0;
    */
   temperature?: number;
+  /**
+   * Optional reasoning configuration for the Elasticsearch unified chat completion API.
+   *
+   * When native function tools are present and this is omitted, the Inference adapter
+   * defaults to `{ effort: 'none' }` so OpenAI Chat Completions accepts tool-calling
+   * requests on newer reasoning models.
+   */
+  reasoning?: ChatCompletionReasoning;
   /**
    * The model name identifier to use. Can be defined to use another model than the
    * default one, when using connectors / providers exposing multiple models.

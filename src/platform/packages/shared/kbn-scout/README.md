@@ -107,7 +107,7 @@ export default createPlaywrightConfig({
 
 Scout relies on configuration to determine the test files and opt-in [parallel test execution](https://playwright.dev/docs/test-parallel) against the single Elastic cluster.
 
-When `runGlobalSetup: true` is set, Scout also auto-discovers an optional `global.teardown.ts` next to `global.setup.ts`. Use `globalTeardownHook(...)` in that file to reset shared cluster/Kibana state once after all workers finish (even on failure) — for example, dropping legacy/hand-indexed data ingested by `global.setup.ts` or reverting feature-flag overrides. The teardown surface intentionally excludes `esArchiver`; use `esClient`/`kbnClient`/`apiServices` instead. See [`docs/extend/scout/global-setup-hook.md`](../../../../docs/extend/scout/global-setup-hook.md#global-teardown-hook) for the contract and examples.
+When `runGlobalSetup: true` is set, Scout also auto-discovers an optional `global.teardown.ts` next to `global.setup.ts`. Use `globalTeardownHook(...)` in that file to reset shared cluster/Kibana state once after all workers finish (even on failure) — for example, dropping legacy/hand-indexed data ingested by `global.setup.ts` or reverting feature-flag overrides. The teardown surface intentionally excludes `esArchiver`; use `esClient`/`kbnClient`/`apiServices` instead. See [`docs/extend/testing/global-setup-hook.md`](../../../../../docs/extend/testing/global-setup-hook.md#global-teardown-hook) for the contract and examples.
 
 The Playwright configuration should only be created this way to ensure compatibility with Scout functionality. For configuration verification, we use a marker `VALID_CONFIG_MARKER`, and Scout will throw an error if the configuration is invalid.
 
@@ -156,7 +156,7 @@ export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & Synthtrace
 });
 ```
 
-Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), and `tags` / `expect` from `@kbn/scout` or `@kbn/scout/ui` as usual.
+Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), `tags` from `@kbn/scout`, and `expect` from `@kbn/scout/ui`.
 
 3. **Parallel / `spaceTest`** — same pattern with `spaceTest` from `@kbn/scout`:
 
@@ -370,11 +370,13 @@ UI tests are designed for browser-based integration testing and provide access t
 **Test Imports for UI Testing:**
 
 ```ts
+import { expect } from '@kbn/scout/ui';
+
 // For sequential UI tests
-import { test, expect } from '@kbn/scout';
+import { test } from '@kbn/scout';
 
 // For parallel UI tests that can be space-isolated
-import { spaceTest as test, expect } from '@kbn/scout';
+import { spaceTest as test } from '@kbn/scout';
 ```
 
 **When to use each:**
@@ -387,7 +389,8 @@ If you need **synthtrace** worker fixtures (`apmSynthtraceEsClient`, `logsSyntht
 **Example UI Test:**
 
 ```ts
-import { spaceTest as test, expect } from '@kbn/scout';
+import { spaceTest as test } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 test('should display dashboard', async ({ pageObjects, page }) => {
   await pageObjects.dashboard.goto();
@@ -403,13 +406,15 @@ API tests are designed for server-side testing and provide fixtures focused on A
 
 ```ts
 // For API integration tests (server-side only, no browser fixtures)
-import { apiTest as test, expect } from '@kbn/scout';
+import { apiTest as test } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 ```
 
 **Example API Test:**
 
 ```ts
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 apiTest('POST api/painless_lab/execute is disabled', async ({ apiClient, log }) => {
   const response = await apiClient.post('api/painless_lab/execute', {
@@ -531,6 +536,7 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 - **`--arch`**: `stateful` or `serverless`.
 - **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
 - **`--preserveEsData`**: Reuse existing serverless ES object store data on startup instead of cleaning it (useful when restarting after crashes).
+- **Rspack HMR**: Disabled by default. Set `KBN_HMR=true` before starting the servers to enable it.
 
 This command is useful for manual testing or running tests via an IDE.
 

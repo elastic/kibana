@@ -17,10 +17,6 @@ export const PAGE_TITLE = i18n.translate('xpack.pnd.watches.pageTitle', {
   defaultMessage: 'Watches',
 });
 
-export const PAGE_SUBTITLE = i18n.translate('xpack.pnd.watches.pageSubtitle', {
-  defaultMessage: 'Coverage, autonomy & schedule',
-});
-
 /* -------------------------------------------------------------------------- */
 /* Loading and error states                                                   */
 /* -------------------------------------------------------------------------- */
@@ -78,16 +74,6 @@ export const SUBNAV_EXPAND = i18n.translate('xpack.pnd.watches.subnav.expand', {
  * `components/app_chrome/translations.ts`: `deep_links.ts` needs them and is page-load critical, so
  * importing them from here would pull every message in this module into the entry bundle.
  */
-
-export const HEADER_MENU_DOCUMENTATION = i18n.translate(
-  'xpack.pnd.watches.headerMenu.documentation',
-  { defaultMessage: 'Documentation' }
-);
-
-export const HEADER_MENU_GIVE_FEEDBACK = i18n.translate(
-  'xpack.pnd.watches.headerMenu.giveFeedback',
-  { defaultMessage: 'Give feedback' }
-);
 
 export const viewWatchAriaLabel = (name: string) =>
   i18n.translate('xpack.pnd.watches.viewWatchAriaLabel', {

@@ -9,7 +9,6 @@ import { chunk } from 'lodash';
 import pRetry from 'p-retry';
 import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, TYPED_ENTITY_PREFIXES } from './constants';
 
@@ -88,8 +87,8 @@ const buildSourceFields = (
  * entity store, bypassing any CPS routing that might redirect asCurrentUser queries to
  * remote indices. The parent route is already authz-gated, so this is safe.
  *
- * `entityStoreIndexExists` is the result of a single upstream existence check
- * (see fetchGraph). Returns an empty map when the index is absent or no IDs were given.
+ * `entityStoreIndexName` is the result of a single upstream index resolution
+ * (see fetchGraph). Returns an empty map when no live index exists or no IDs were given.
  *
  * Atomic: chunks run in parallel and each is wrapped in `p-retry` for the standard
  * Kibana transient-ES retry behavior (matches the pattern used by event_log / fleet /
@@ -104,20 +103,18 @@ export const fetchEntityEnrichment = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: string[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
 }): Promise<Map<string, EntityEnrichmentFields>> => {
-  if (entityIds.length === 0 || !entityStoreIndexExists) {
+  if (entityIds.length === 0 || entityStoreIndexName == null) {
     return new Map();
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
   const result = new Map<string, EntityEnrichmentFields>();
 
   await Promise.all(

@@ -20,6 +20,16 @@ jest.mock('../../api/registry', () => ({
   getRegistries: jest.fn(),
 }));
 
+jest.mock('@elastic/schemas/es/json/_types.json', () => ({
+  $defs: {
+    Oversized: {
+      type: 'object',
+      description: 'x'.repeat(2_000),
+      properties: { bool: { type: 'object' }, term: { type: 'object' } },
+    },
+  },
+}));
+
 const mockGetRegistries = jest.mocked(getRegistries);
 
 const createLoadedApi = (definition: ApiRegistryDefinition): LoadedApi => ({
@@ -86,6 +96,35 @@ describe('createDescribeApiTool', () => {
     expect(data.destructive).toBe(false);
     expect(data.unsupported_reason).toBeUndefined();
     expect(data.params_schema_yaml).toContain('description: Name of the index.');
+    expect(data.expandable_types).toEqual([]);
+  });
+
+  it('lists the types the schema was too large to output', async () => {
+    loadApi.mockResolvedValue(
+      createLoadedApi({
+        name: 'search',
+        namespace: null,
+        description: 'Run a search',
+        method: 'POST',
+        path: '/_search',
+        input: {
+          type: 'object',
+          properties: { query: { $ref: './_types.json#/$defs/Oversized' } },
+        },
+        destructive: false,
+      })
+    );
+
+    const tool = createDescribeApiTool();
+    const result = (await tool.handler(
+      { target: 'elasticsearch', api: 'search' },
+      agentBuilderMocks.tools.createHandlerContext()
+    )) as ToolHandlerStandardReturn;
+
+    const data = result.results[0].data as ApiDescribeResultData;
+    expect(data.expandable_types).toEqual(['Oversized']);
+    expect(data.params_schema_yaml).toContain('x-expandable: Oversized');
+    expect(data.params_schema_yaml).toContain('x-properties');
   });
 
   it('presents one flat parameter set rather than where each value is routed', async () => {

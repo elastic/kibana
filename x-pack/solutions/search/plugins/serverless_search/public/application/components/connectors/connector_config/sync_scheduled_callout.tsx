@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const SyncScheduledCallOut: React.FC = () => {
   return (
-    <EuiCallOut
-      color="primary"
-      iconType="info"
+    <KbnInfoCallout
       title={i18n.translate('xpack.serverlessSearch.connectors.syncScheduledTitle', {
         defaultMessage: 'A sync has been scheduled',
       })}
-    >
-      <EuiText>
-        {i18n.translate('xpack.serverlessSearch.connectors.syncSheduledDescription', {
-          defaultMessage:
-            'It may take a minute for this sync to be visible and for the connector to pick it up',
-        })}
-      </EuiText>
-    </EuiCallOut>
+      text={i18n.translate('xpack.serverlessSearch.connectors.syncSheduledDescription', {
+        defaultMessage:
+          'It may take a minute for this sync to be visible and for the connector to pick it up',
+      })}
+    />
   );
 };

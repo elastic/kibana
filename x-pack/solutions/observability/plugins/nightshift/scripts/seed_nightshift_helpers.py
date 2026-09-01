@@ -154,18 +154,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-001": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "dependency",
+            "subtype": "database",
             "feature_id": "web-frontend-auth-db",
             "source": "web-frontend",
             "target": "auth-database",
@@ -174,18 +177,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "notification-service",
             "name": "notification-service",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "search-api",
             "name": "search-api",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
@@ -194,6 +200,7 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-002": [
         {
             "type": "dependency",
+            "subtype": "grpc",
             "feature_id": "payment-to-ledger",
             "source": "payment-service",
             "target": "ledger-service",
@@ -202,6 +209,7 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "infrastructure",
+            "subtype": "infrastructure",
             "feature_id": "payment-service-pods",
             "title": "payment-service pods",
             "workloads": ["payment-gateway", "payment-settlement-worker"],
@@ -209,24 +217,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "billing-api",
             "name": "billing-api",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "dependency",
+            "subtype": "database",
             "feature_id": "payment-auth-db",
             "source": "payment-service",
             "target": "auth-database",
@@ -237,18 +249,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-003": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "infrastructure",
+            "subtype": "infrastructure",
             "feature_id": "es-data-tier",
             "title": "Elasticsearch data tier",
             "workloads": ["es-data-1", "es-data-2", "es-data-4"],
@@ -256,18 +271,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
@@ -276,18 +294,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-004": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "dependency",
+            "subtype": "udp",
             "feature_id": "api-gateway-coredns",
             "source": "api-gateway",
             "target": "coredns",
@@ -296,12 +317,14 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
@@ -310,24 +333,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-005": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "dependency",
+            "subtype": "tls",
             "feature_id": "ingress-api-gateway",
             "source": "ingress-controller",
             "target": "api-gateway",
@@ -338,12 +365,14 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-006": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "dependency",
+            "subtype": "http",
             "feature_id": "order-processors-schema",
             "source": "order-processors",
             "target": "schema-registry",
@@ -352,24 +381,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "fulfillment-api",
             "name": "fulfillment-api",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "inventory-service",
             "name": "inventory-service",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
@@ -378,18 +411,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-007": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "search-api",
             "name": "search-api",
             "stream_name": "logs.web-frontend",
@@ -398,30 +434,35 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-008": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "dependency",
+            "subtype": "http",
             "feature_id": "search-catalog",
             "source": "search-api",
             "target": "catalog-service",
@@ -430,6 +471,7 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "notification-service",
             "name": "notification-service",
             "stream_name": "logs.api-gateway",
@@ -438,18 +480,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-009": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "dependency",
+            "subtype": "database",
             "feature_id": "gateway-auth-db",
             "source": "api-gateway",
             "target": "auth-database",
@@ -458,24 +503,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "billing-api",
             "name": "billing-api",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-gateway",
             "name": "payment-gateway",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "ledger-service",
             "name": "ledger-service",
             "stream_name": "logs.payment-service",

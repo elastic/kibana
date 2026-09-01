@@ -31,7 +31,7 @@ import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
 import { GeneratedOnLabel } from './generated_on_label';
 import * as i18n from './translations';
-import { renderTextWithEntities } from './shared_lead_components';
+import { renderTextWithEntity } from './shared_lead_components';
 import { MAX_RECENT_LEADS, THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
 
 interface ThreatHuntingLeadsFlyoutProps {
@@ -72,7 +72,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
       (lead) =>
         lead.title.toLowerCase().includes(query) ||
         lead.byline.toLowerCase().includes(query) ||
-        lead.entities.some((e) => e.name.toLowerCase().includes(query))
+        lead.entity.name.toLowerCase().includes(query)
     );
   }, [leads, searchQuery]);
 
@@ -169,8 +169,8 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
   const fontSizeM = useEuiFontSize('m');
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const renderedByline = useMemo(
-    () => renderTextWithEntities(lead.byline, lead.entities, THREAT_HUNTING_LEADS_SCOPE_ID),
-    [lead.byline, lead.entities]
+    () => renderTextWithEntity(lead.byline, lead.entity, THREAT_HUNTING_LEADS_SCOPE_ID),
+    [lead.byline, lead.entity]
   );
   return (
     <EuiPanel

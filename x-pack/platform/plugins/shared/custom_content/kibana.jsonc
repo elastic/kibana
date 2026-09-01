@@ -11,9 +11,9 @@
     "server": true,
     "requiredPlugins": [
       "embeddable",
-      "inference",
       "data",
-      "esql"
+      "esql",
+      "uiActions"
     ],
     "optionalPlugins": [
       "agentBuilder"

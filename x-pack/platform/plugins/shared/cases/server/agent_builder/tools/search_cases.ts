@@ -156,7 +156,7 @@ export const searchCasesTool = (
   return {
     id: platformCoreTools.cases,
     type: ToolType.builtin,
-    description: `Read-only retrieval of Elastic cases (Security / Observability / Stack Management). For writes use \`platform.core.cases.manage\` (CRUD), \`platform.core.cases.attachments\` (comments, alerts, events, get_all), or \`platform.core.cases.observables\` (IOCs).
+    description: `Read-only retrieval of Elastic cases (Security / Observability / Stack Management). For writes use \`platform.core.cases.manage\` (CRUD), \`platform.core.cases.manage_attachments\` (comments, alerts, events), or \`platform.core.cases.observables\` (IOCs). To retrieve all attachments use \`platform.core.cases.get_attachments\`.
 
 ${CASES_SOLUTION_CONTEXT_INSTRUCTION}
 
@@ -166,8 +166,15 @@ Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`. See \`mode\
 
 \`search\` mode returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
-Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.attachments\` mode \`get_all\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
+Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
     schema: casesSchema,
+    annotations: {
+      title: 'Search Cases',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async (
       {
         mode,

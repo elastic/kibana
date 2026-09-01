@@ -65,6 +65,10 @@ const TitleComponent: React.FC<Props> = ({
     prefix: 'attackDiscoveryCheckbox',
   });
 
+  const titleId = useGeneratedHtmlId({
+    prefix: 'attackDiscoveryTitle',
+  });
+
   const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
 
   const onCheckboxChange = useCallback(() => {
@@ -111,9 +115,10 @@ const TitleComponent: React.FC<Props> = ({
         replacements={replacements}
         showAnonymized={showAnonymized}
         title={attackDiscovery.title}
+        titleId={titleId}
       />
     );
-  }, [attackDiscovery, replacements, showAnonymized]);
+  }, [attackDiscovery, replacements, showAnonymized, titleId]);
 
   return (
     <>
@@ -129,6 +134,7 @@ const TitleComponent: React.FC<Props> = ({
       >
         <EuiFlexItem grow={false}>
           <EuiCheckbox
+            aria-labelledby={titleId}
             checked={isSelected}
             css={css`
               display: inline;
