@@ -272,10 +272,10 @@ export const EditSpace: FC<PageProps> = ({
         />
       </div>
       <EuiSpacer size="l" />
-      {space && !isPageReady ? (
+      {!isPageReady ? (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xxl" />
+            <EuiLoadingSpinner size="xxl" data-test-subj="editSpacePageLoading" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
