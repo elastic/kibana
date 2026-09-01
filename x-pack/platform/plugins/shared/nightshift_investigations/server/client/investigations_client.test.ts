@@ -1515,6 +1515,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         concurrency_key: 'key-1',
         executed_by: 'workflow-user',
         created_at: '2024-01-01T00:00:00Z',
+        started_at: '2024-01-01T00:00:00Z',
       }),
     });
   });

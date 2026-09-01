@@ -17,7 +17,6 @@ import type { InvestigationAttributes } from './types';
 const TYPE = NIGHTSHIFT_INVESTIGATION_SO_TYPE;
 
 const attributes: InvestigationAttributes = {
-  investigation_id: 'inv-1',
   status: 'running',
   subject_type: 'alert',
   subject_id: 'alert-1',

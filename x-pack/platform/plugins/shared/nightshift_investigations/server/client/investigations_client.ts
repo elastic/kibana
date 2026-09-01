@@ -545,6 +545,7 @@ export class NightshiftInvestigationsClient {
     }
 
     try {
+      const startedAt = execution.startedAt ?? new Date().toISOString();
       await this.investigationRepository.create({
         id: investigationId,
         attributes: {
@@ -555,7 +556,8 @@ export class NightshiftInvestigationsClient {
           trigger_type: triggerType,
           concurrency_key: concurrencyKey,
           executed_by: execution.executedBy,
-          created_at: execution.startedAt ?? new Date().toISOString(),
+          created_at: startedAt,
+          started_at: startedAt,
         },
       });
     } catch (error) {
