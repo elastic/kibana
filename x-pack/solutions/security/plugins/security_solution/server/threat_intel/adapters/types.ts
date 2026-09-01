@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { NormalizedReport } from '../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
-import type { SourceType } from '../../../common/threat_intel';
+import type { FetchAdapterType } from '../../../common/threat_intel';
 import type { DnsLookupFn } from './http_client';
 
 /**
@@ -23,7 +23,7 @@ export interface SourceHit {
   _id: string;
   _index?: string;
   _source: {
-    adapter_type: SourceType;
+    adapter_type: FetchAdapterType;
     name: string;
     enabled?: boolean;
     config: Record<string, unknown>;
@@ -61,7 +61,7 @@ export interface AdapterRunContext {
  */
 export interface FetchAdapter {
   /** Discriminator on the source's `adapter_type`. */
-  readonly adapterType: SourceType;
+  readonly adapterType: FetchAdapterType;
   /**
    * Fetch the source and return zero or more normalized reports.
    *
