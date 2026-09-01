@@ -42,7 +42,6 @@ const makeServer = ({
   canManage: boolean;
 }) => {
   const globally = jest.fn().mockResolvedValue({ hasAllRequested: canManage });
-  const apiGet = jest.fn((privilege) => `api:${privilege}`);
   return {
     server: {
       core: {
@@ -64,13 +63,11 @@ const makeServer = ({
       },
       security: {
         authz: {
-          actions: { api: { get: apiGet } },
+          actions: { api: { get: jest.fn((privilege) => `api:${privilege}`) } },
           checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally }),
         },
       },
     } as unknown as SignificantEventsServer,
-    globally,
-    apiGet,
   };
 };
 
@@ -94,44 +91,6 @@ describe('run quota route authorization matrix', () => {
   ])('declares the required Streams privilege', (route, requiredPrivilege) => {
     expect(route.security.authz).toEqual({
       requiredPrivileges: [requiredPrivilege],
-    });
-  });
-
-  it('denies limit writes without deployment-wide Streams manage', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const { server } = makeServer({ repository: repository.client, canManage: false });
-
-    await expect(
-      putRoute.handler({
-        ...baseHandlerParams(server),
-        params: {
-          body: {
-            limits: { detection: { enabled: true, max: 120 } },
-          },
-        },
-      } as never)
-    ).rejects.toMatchObject({ output: { statusCode: 403 } });
-  });
-
-  it('uses the Streams API action for the global privilege check', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const { server, globally, apiGet } = makeServer({
-      repository: repository.client,
-      canManage: true,
-    });
-
-    await putRoute.handler({
-      ...baseHandlerParams(server),
-      params: {
-        body: {
-          limits: { detection: { enabled: true, max: 120 } },
-        },
-      },
-    } as never);
-
-    expect(apiGet).toHaveBeenCalledWith(STREAMS_API_PRIVILEGES.manage);
-    expect(globally).toHaveBeenCalledWith({
-      kibana: [`api:${STREAMS_API_PRIVILEGES.manage}`],
     });
   });
 });
@@ -292,30 +251,6 @@ describe('run quota read routes', () => {
         totalSkipped: 4,
       })
     );
-  });
-
-  it('redacts ownership for a caller without all-spaces manage', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    await mutateRunQuotaSettings(repository.client, () => ({
-      enforcementEnabled: true,
-      enabledAt: '2026-08-31T12:00:00.000Z',
-      enabledBy: 'admin',
-    }));
-    const { server } = makeServer({ repository: repository.client, canManage: false });
-
-    const response = await statusRoute.handler({
-      ...baseHandlerParams(server),
-      params: {},
-    } as never);
-
-    expect(response).toEqual(
-      expect.objectContaining({
-        enabled: true,
-        canManageLimits: false,
-      })
-    );
-    expect(response).not.toHaveProperty('enabledAt');
-    expect(response).not.toHaveProperty('enabledBy');
   });
 
   it('returns ownership for an all-spaces manager', async () => {

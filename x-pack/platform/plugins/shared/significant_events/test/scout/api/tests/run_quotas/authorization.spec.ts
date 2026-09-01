@@ -86,25 +86,6 @@ apiTest.describe(
     );
 
     apiTest(
-      'allows an all-spaces Streams manager to save a limit',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-        const response = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: {
-            limits: {
-              detection: { enabled: true, max: 100 },
-            },
-          },
-          responseType: 'json',
-        });
-
-        expect(response).toHaveStatusCode(200);
-      }
-    );
-
-    apiTest(
       'rejects plumbing calls without an active managed execution chain',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();

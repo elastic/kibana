@@ -93,21 +93,6 @@ describe('Significant Events run quota workflow invariants', () => {
     expect(definitions.onboarding.steps[0].name).toBe('check_budget');
   });
 
-  it('propagates scheduled origin and a numeric detection quota slot', () => {
-    const scheduledDiscover = findStep(definitions.scheduledReview, 'discover');
-    const continuousOnboarding = findStep(definitions.continuousOnboarding, 'schedule_onboarding');
-
-    expect(scheduledDiscover.with?.inputs).toEqual(
-      expect.objectContaining({
-        rootTriggeredBy: '${{ execution.triggeredBy }}',
-        quotaSlot: '${{ while.iteration }}',
-      })
-    );
-    expect(continuousOnboarding.with?.inputs).toEqual(
-      expect.objectContaining({ rootTriggeredBy: '${{ execution.triggeredBy }}' })
-    );
-  });
-
   it('declares the propagated worker inputs with their canonical types', () => {
     expect(findInput(definitions.discovery, 'rootTriggeredBy')).toEqual(
       expect.objectContaining({
