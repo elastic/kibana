@@ -58,8 +58,8 @@ export class PolicyArtifactsPage {
     this.viewFullDetailsAction = this.page.testSubj.locator('view-full-details-action');
     this.removeFromPolicyAction = this.page.testSubj.locator('remove-from-policy-action');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    // Test subjects are generated in different formats; they all end with -perPolicy.
-    this.perPolicyRadio = this.page.locator('[data-test-subj$="-perPolicy"]');
+    // Forms prefix this id (`*-form-effectedPolicies-perPolicy`).
+    this.perPolicyRadio = this.page.getByTestId(/-perPolicy$/);
   }
 
   criteria(selector: string): Locator {
