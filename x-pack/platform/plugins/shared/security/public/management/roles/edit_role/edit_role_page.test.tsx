@@ -980,7 +980,7 @@ describe('<EditRolePage />', () => {
       expect(
         within(formRow).getByText('A role with this name already exists.')
       ).toBeInTheDocument();
-      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expect(props.notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
       expectSaveFormButtons();
       expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
     });
@@ -1073,7 +1073,7 @@ describe('<EditRolePage />', () => {
       expect(
         within(formRow).queryByText('A role with this name already exists.')
       ).not.toBeInTheDocument();
-      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expect(props.notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
       expectSaveFormButtons();
     });
   });

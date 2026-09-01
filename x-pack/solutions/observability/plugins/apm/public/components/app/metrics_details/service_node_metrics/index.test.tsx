@@ -44,6 +44,6 @@ describe('ServiceNodeMetrics', () => {
 
     expect(() =>
       renderWithContext(<ServiceNodeMetrics serviceNodeName="test-node" />)
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 });
