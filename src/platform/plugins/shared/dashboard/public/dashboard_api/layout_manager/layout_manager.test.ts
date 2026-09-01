@@ -317,28 +317,18 @@ describe('layout manager', () => {
 
   describe('canRemovePanels', () => {
     test('allows removing panels when there is no expanded panel', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [],
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        }
-      );
+      const layoutManager = initializeLayoutManager(viewModeManagerMock, [panel1], [], {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+      });
       expect(layoutManager.api.canRemovePanels()).toBe(true);
     });
 
     test('does not allow removing panels when there is an expanded panel', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [],
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
-        }
-      );
+      const layoutManager = initializeLayoutManager(viewModeManagerMock, [panel1], [], {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
+      });
       expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
   });
@@ -447,15 +437,10 @@ describe('layout manager', () => {
     });
 
     test('can unpin panel', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        pinnedControls,
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        }
-      );
+      const layoutManager = initializeLayoutManager(viewModeManagerMock, [panel1], pinnedControls, {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+      });
       expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control1']: {
           ...pick(pinnedControls[0], ['grow', 'width', 'type']),
