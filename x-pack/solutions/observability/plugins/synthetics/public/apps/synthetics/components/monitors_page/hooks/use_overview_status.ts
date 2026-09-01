@@ -8,7 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
-import { selectOverviewPageState } from '../../../state';
+import { selectOverviewPageState, selectOverviewView } from '../../../state';
 import { setOverviewPageStateAction } from '../../../state/overview';
 import {
   fetchOverviewStatusAction,
@@ -24,7 +24,8 @@ import { useGetUrlParams } from '../../../hooks';
  * The fetch is triggered once by `useOverviewStatus` in the page-level component.
  */
 export function useOverviewStatusState() {
-  const { status, error, loaded, loading, allConfigs, total } = useSelector(selectOverviewStatus);
+  const { status, error, loaded, loading, allConfigs, total, lastRequest } =
+    useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   return {
     status,
@@ -34,6 +35,7 @@ export function useOverviewStatusState() {
     settled,
     allConfigs: allConfigs ?? [],
     total,
+    lastRequest,
   };
 }
 
@@ -55,9 +57,26 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   const statusFilter = statusFilterParam || undefined;
 
   const dispatch = useDispatch();
+  const view = useSelector(selectOverviewView);
 
-  const paramsRef = useRef({ pageState, scopeStatusByLocation, loaded, statusFilter });
-  paramsRef.current = { pageState, scopeStatusByLocation, loaded, statusFilter };
+  const paramsRef = useRef({
+    pageState,
+    scopeStatusByLocation,
+    loaded,
+    loading,
+    statusFilter,
+    view,
+    loadedCount: allConfigs?.length ?? 0,
+  });
+  paramsRef.current = {
+    pageState,
+    scopeStatusByLocation,
+    loaded,
+    loading,
+    statusFilter,
+    view,
+    loadedCount: allConfigs?.length ?? 0,
+  };
 
   // Tracks the last status filter the fetch effect reconciled, so it can detect
   // a filter change and reset pagination in the same pass (avoiding a cross-effect race).
@@ -71,12 +90,29 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   // filter/pageState changes — which would otherwise fetch with a stale page.
   useEffect(() => {
     if (!isInitialMount.current) {
-      const { pageState: ps, scopeStatusByLocation: scope, statusFilter: sf } = paramsRef.current;
+      const {
+        pageState: ps,
+        scopeStatusByLocation: scope,
+        statusFilter: sf,
+        view: currentView,
+        loadedCount,
+        loading: isLoading,
+      } = paramsRef.current;
+      // Don't start a replace-refresh while an append (or other fetch) is in
+      // flight — a page-1 refresh completing after the append would wipe it.
+      if (isLoading) {
+        return;
+      }
+      // The card view accumulates pages via infinite scroll. Refresh the entire
+      // loaded window in one request (page 1, perPage = loaded) so a periodic
+      // refresh keeps every accumulated card without collapsing back to page 1.
+      const refreshWholeWindow = currentView === 'cardView' && loadedCount > (ps.perPage ?? 0);
       dispatch(
         quietFetchOverviewStatusAction.get({
-          pageState: ps,
+          pageState: refreshWholeWindow ? { ...ps, page: 1, perPage: loadedCount } : ps,
           scopeStatusByLocation: scope,
           statusFilter: sf,
+          silent: true,
         })
       );
     }

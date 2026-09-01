@@ -7,6 +7,7 @@
 
 import { createReducer } from 'redux-toolkit-v1';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
+import { OVERVIEW_PAGINATION_DEFAULTS } from '../../../../../common/constants/monitor_management';
 import type { MonitorOverviewState } from './models';
 import { overviewViews } from './models';
 import { isPageStateSlotEqual } from '../utils/page_state_equality';
@@ -25,13 +26,14 @@ import {
 } from './actions';
 
 export const DEFAULT_OVERVIEW_VIEW = overviewViews[0];
+export const DEFAULT_OVERVIEW_PER_PAGE = OVERVIEW_PAGINATION_DEFAULTS.perPage;
 
 const initialState: MonitorOverviewState = {
   pageState: {
-    page: 1,
-    perPage: 20,
-    sortOrder: 'asc',
-    sortField: 'status',
+    page: OVERVIEW_PAGINATION_DEFAULTS.page,
+    perPage: DEFAULT_OVERVIEW_PER_PAGE,
+    sortOrder: OVERVIEW_PAGINATION_DEFAULTS.sortOrder,
+    sortField: OVERVIEW_PAGINATION_DEFAULTS.sortField,
     showFromAllSpaces: getInitialShowFromAllSpaces(),
     includeHeartbeatMonitors: getInitialIncludeHeartbeatMonitors(),
     // Seed the date-range window so the very first overview fetch is already
@@ -131,6 +133,14 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       }
     })
     .addCase(setOverviewViewAction, (state, action) => {
+      // The card view grows `perPage` as the user scrolls (infinite scroll)
+      // while the compact table paginates with a fixed page size. Reset
+      // pagination on a real view switch so neither view inherits the other's
+      // window.
+      if (state.view !== action.payload) {
+        state.pageState.page = 1;
+        state.pageState.perPage = DEFAULT_OVERVIEW_PER_PAGE;
+      }
       state.view = action.payload;
     })
     .addCase(setOverviewShowLastRunAction, (state, action) => {

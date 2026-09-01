@@ -43,6 +43,7 @@ import {
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import {
+  appendOverviewStatusEffect,
   augmentStaleStatusEffect,
   fetchOverviewStatusEffect,
   fetchStaleStatusEffect,
@@ -63,6 +64,7 @@ export const rootEffect = function* root(): Generator {
     fork(fetchSyntheticsMonitorEffect),
     fork(browserJourneyEffects),
     fork(fetchOverviewStatusEffect),
+    fork(appendOverviewStatusEffect),
     fork(fetchStaleStatusEffect),
     fork(augmentStaleStatusEffect),
     fork(fetchNetworkEventsEffect),

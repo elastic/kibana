@@ -12,6 +12,7 @@ import type { OverviewStatus } from '../../../../../common/runtime_types';
 import { selectOverviewPageState } from '../overview/selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
+  appendOverviewStatusAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
   quietFetchOverviewStatusAction,
@@ -25,6 +26,22 @@ export function* fetchOverviewStatusEffect() {
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,
       fetchOverviewStatusAction.fail
+    ) as ReturnType<typeof fetchEffectFactory>
+  );
+}
+
+/**
+ * Runs on its own effect (not the shared `takeLatest` above) so an append page
+ * request and a full replace/refresh never cancel each other — both land and
+ * are reconciled by the reducer (append merges, replace overwrites).
+ */
+export function* appendOverviewStatusEffect() {
+  yield takeLatest(
+    appendOverviewStatusAction.get,
+    fetchEffectFactory(
+      fetchOverviewStatus,
+      appendOverviewStatusAction.success,
+      appendOverviewStatusAction.fail
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }

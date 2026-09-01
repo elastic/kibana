@@ -25,7 +25,11 @@ export const CardsViewFooter = ({
   const { perPage } = useSelector(selectOverviewPageState);
   const { field: groupField } = useSelector(selectOverviewGroupBy);
   const isUnGrouped = groupField === 'none';
-  const { allConfigs, loaded } = useOverviewStatusState();
+  const { allConfigs, total, loaded } = useOverviewStatusState();
+
+  // Every server page has been pulled in — pagination is by monitor, so compare
+  // loaded monitors against the server total rather than the expanded card list.
+  const allLoaded = typeof total !== 'number' || allConfigs.length >= total;
 
   if (
     isUnGrouped &&
@@ -40,27 +44,26 @@ export const CardsViewFooter = ({
     <>
       <EuiSpacer />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {monitorsSortedByStatus.length === allConfigs.length && (
+        {allLoaded && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
           </EuiFlexItem>
         )}
-        {monitorsSortedByStatus.length === allConfigs.length &&
-          monitorsSortedByStatus.length > perPage && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="syntheticsOverviewGridButton"
-                onClick={() => {
-                  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                }}
-                iconType="sortUp"
-                iconSide="right"
-                size="xs"
-              >
-                {SCROLL_TO_TOP_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+        {allLoaded && monitorsSortedByStatus.length > perPage && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="syntheticsOverviewGridButton"
+              onClick={() => {
+                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+              }}
+              iconType="sortUp"
+              iconSide="right"
+              size="xs"
+            >
+              {SCROLL_TO_TOP_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

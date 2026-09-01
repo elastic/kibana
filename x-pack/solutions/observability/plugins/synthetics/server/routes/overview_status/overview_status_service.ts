@@ -15,7 +15,11 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { OverviewStatusQuery, OverviewStatusStaleBody } from '../common';
 import { getMonitorFilters, MONITOR_STATUS_PING_SEARCH_FIELDS } from '../common';
-import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
+import {
+  ConfigKey,
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_PAGINATION_DEFAULTS,
+} from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import type { RouteContext } from '../types';
 import type {
@@ -326,47 +330,31 @@ export class OverviewStatusService {
   }) {
     const queryParams = this.routeContext.request.query || {};
     const {
-      page = 1,
-      perPage = 20,
-      sortField = 'status',
-      sortOrder = 'asc',
+      page = OVERVIEW_PAGINATION_DEFAULTS.page,
+      perPage = OVERVIEW_PAGINATION_DEFAULTS.perPage,
+      sortField = OVERVIEW_PAGINATION_DEFAULTS.sortField,
+      sortOrder = OVERVIEW_PAGINATION_DEFAULTS.sortOrder,
       statusFilter,
     } = queryParams;
 
-    let pageSource: OverviewStatusMetaData[];
+    const buckets = {
+      [MONITOR_STATUS_ENUM.UP]: upConfigs,
+      [MONITOR_STATUS_ENUM.DOWN]: downConfigs,
+      [MONITOR_STATUS_ENUM.PENDING]: pendingConfigs,
+      [MONITOR_STATUS_ENUM.STALE]: staleConfigs,
+      [MONITOR_STATUS_ENUM.DISABLED]: disabledConfigs,
+    };
 
-    if (statusFilter) {
-      switch (statusFilter) {
-        case 'down':
-          pageSource = Object.values(downConfigs);
-          break;
-        case 'up':
-          pageSource = Object.values(upConfigs);
-          break;
-        case 'disabled':
-          pageSource = Object.values(disabledConfigs);
-          break;
-        case 'pending':
-          pageSource = Object.values(pendingConfigs);
-          break;
-        case 'stale':
-          pageSource = Object.values(staleConfigs);
-          break;
-        default:
-          pageSource = [];
-      }
-    } else {
-      const upAndDown =
-        sortOrder === 'asc'
-          ? [...Object.values(downConfigs), ...Object.values(upConfigs)]
-          : [...Object.values(upConfigs), ...Object.values(downConfigs)];
-      pageSource = [
-        ...upAndDown,
-        ...Object.values(disabledConfigs),
-        ...Object.values(pendingConfigs),
-        ...Object.values(staleConfigs),
-      ];
-    }
+    // `sortField: 'status'` is expressed as this concatenation order — `sortConfigs` is a no-op for it.
+    const pageSource = statusFilter
+      ? Object.values(buckets[statusFilter] ?? {})
+      : [
+          ...Object.values(sortOrder === 'asc' ? downConfigs : upConfigs),
+          ...Object.values(sortOrder === 'asc' ? upConfigs : downConfigs),
+          ...Object.values(disabledConfigs),
+          ...Object.values(pendingConfigs),
+          ...Object.values(staleConfigs),
+        ];
 
     this.sortConfigs(pageSource, sortField, sortOrder);
 

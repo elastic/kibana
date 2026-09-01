@@ -10,12 +10,15 @@ import type {
   OverviewStalePriorRun,
   OverviewStatus,
   OverviewStatusMetaData,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import { overviewStatusReducer } from '.';
 import {
+  appendOverviewStatusAction,
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
+  quietFetchOverviewStatusAction,
 } from './actions';
 
 const makeMeta = (
@@ -54,6 +57,17 @@ const makeStatus = (overrides: Partial<OverviewStatus> = {}): OverviewStatus =>
     disabledConfigs: {},
     ...overrides,
   } as OverviewStatus);
+
+const makePaginated = (
+  configs: OverviewStatusMetaData[],
+  overrides: Partial<PaginatedOverviewStatus> = {}
+): PaginatedOverviewStatus =>
+  ({
+    ...makeStatus(),
+    configs,
+    total: configs.length,
+    ...overrides,
+  } as unknown as PaginatedOverviewStatus);
 
 // `isRunStale` uses a 15-minute floor, so a run hours old is reliably stale and
 // a run minutes old is reliably fresh — no need to freeze the clock.
@@ -249,6 +263,203 @@ describe('overviewStatusReducer', () => {
       expect(refreshed.status?.upConfigs.mon1?.overallStatus).toBe('up');
       expect(refreshed.status?.staleConfigs.mon1).toBeUndefined();
       expect(refreshed.status?.pendingConfigs.mon1).toBeUndefined();
+    });
+  });
+
+  describe('appendOverviewStatusAction (card view infinite scroll)', () => {
+    it('merges the appended page into allConfigs and keeps the server-global total', () => {
+      const initial = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            pendingConfigs: {
+              mon1: makeMeta({ configId: 'mon1' }),
+              mon2: makeMeta({ configId: 'mon2' }),
+            },
+            pending: 4,
+            total: 4,
+          })
+        )
+      );
+      expect(initial.allConfigs).toHaveLength(2);
+      expect(initial.total).toBe(4);
+
+      const merged = overviewStatusReducer(
+        initial,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon3' }), makeMeta({ configId: 'mon4' })], {
+            pendingConfigs: {
+              mon3: makeMeta({ configId: 'mon3' }),
+              mon4: makeMeta({ configId: 'mon4' }),
+            },
+            pending: 4,
+            total: 4,
+          })
+        )
+      );
+
+      // page order preserved, no collapse back to page 1
+      expect(merged.allConfigs?.map((config) => config.configId)).toEqual([
+        'mon1',
+        'mon2',
+        'mon3',
+        'mon4',
+      ]);
+      expect(merged.status?.configs).toHaveLength(4);
+      // buckets merged so per-config lookups keep resolving across pages
+      expect(Object.keys(merged.status?.pendingConfigs ?? {}).sort()).toEqual([
+        'mon1',
+        'mon2',
+        'mon3',
+        'mon4',
+      ]);
+      // total is the server-global count, not the accumulated length
+      expect(merged.total).toBe(4);
+    });
+
+    it('dedupes by configId, updating the existing entry in place', () => {
+      const initial = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([
+            makeMeta({ configId: 'mon1' }),
+            makeMeta({ configId: 'mon2', name: 'old-name' }),
+          ])
+        )
+      );
+
+      const merged = overviewStatusReducer(
+        initial,
+        appendOverviewStatusAction.success(
+          makePaginated([
+            makeMeta({ configId: 'mon2', name: 'new-name' }),
+            makeMeta({ configId: 'mon3' }),
+          ])
+        )
+      );
+
+      expect(merged.allConfigs?.map((config) => config.configId)).toEqual(['mon1', 'mon2', 'mon3']);
+      expect(merged.allConfigs?.find((config) => config.configId === 'mon2')?.name).toBe(
+        'new-name'
+      );
+    });
+
+    it('replaces when there is no paginated base to merge into', () => {
+      const merged = overviewStatusReducer(
+        undefined,
+        appendOverviewStatusAction.success(makePaginated([makeMeta({ configId: 'mon1' })]))
+      );
+
+      expect(merged.allConfigs?.map((config) => config.configId)).toEqual(['mon1']);
+      expect(merged.loaded).toBe(true);
+    });
+
+    it('drops an appended page whose filter no longer matches lastRequest', () => {
+      const pageState = { page: 1, perPage: 20 } as any;
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.get({ pageState, statusFilter: 'up' })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'up1' })], { total: 4 })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.get({ pageState, statusFilter: 'up' })
+      );
+      // Filter change replaces the fetch context before the in-flight append lands.
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.get({ pageState, statusFilter: 'down' })
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'up2' })], { total: 4 })
+        )
+      );
+
+      expect(state.status).toBeNull();
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual(['up1']);
+    });
+  });
+
+  describe('quietFetchOverviewStatusAction', () => {
+    const pageState = { page: 1, perPage: 20 } as any;
+
+    it('does not set loading on a silent timer refresh', () => {
+      const loaded = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(makePaginated([makeMeta({ configId: 'mon1' })]))
+      );
+      expect(loaded.loading).toBe(false);
+
+      const refreshed = overviewStatusReducer(
+        loaded,
+        quietFetchOverviewStatusAction.get({ pageState, silent: true })
+      );
+
+      expect(refreshed.loading).toBe(false);
+    });
+
+    it('sets loading on a non-silent (navigation) quiet fetch', () => {
+      const loaded = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(makePaginated([makeMeta({ configId: 'mon1' })]))
+      );
+
+      const navigating = overviewStatusReducer(
+        loaded,
+        quietFetchOverviewStatusAction.get({ pageState })
+      );
+
+      expect(navigating.loading).toBe(true);
+    });
+  });
+
+  describe('fetchOverviewStatusAction.success (accumulated card-view window)', () => {
+    it('does not shrink allConfigs when a shorter refresh has the same total', () => {
+      const page1 = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            total: 4,
+          })
+        )
+      );
+      const accumulated = overviewStatusReducer(
+        page1,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon3' }), makeMeta({ configId: 'mon4' })], {
+            total: 4,
+          })
+        )
+      );
+      expect(accumulated.allConfigs).toHaveLength(4);
+
+      // Timer refresh of page 1 (2 items) while 4 are already loaded.
+      const refreshed = overviewStatusReducer(
+        accumulated,
+        fetchOverviewStatusAction.success(
+          makePaginated(
+            [makeMeta({ configId: 'mon1', name: 'updated' }), makeMeta({ configId: 'mon2' })],
+            { total: 4 }
+          )
+        )
+      );
+
+      expect(refreshed.allConfigs?.map((config) => config.configId)).toEqual([
+        'mon1',
+        'mon2',
+        'mon3',
+        'mon4',
+      ]);
+      expect(refreshed.allConfigs?.find((config) => config.configId === 'mon1')?.name).toBe(
+        'updated'
+      );
     });
   });
 

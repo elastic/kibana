@@ -19,9 +19,26 @@ export const fetchOverviewStatusAction = createAsyncAction<
 >('fetchOverviewStatusAction');
 
 export const quietFetchOverviewStatusAction = createAsyncAction<
-  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
+  {
+    pageState: MonitorOverviewPageState;
+    scopeStatusByLocation?: boolean;
+    statusFilter?: string;
+    // Timer refreshes skip the loading flag so the table/progress bar does not flicker.
+    silent?: boolean;
+  },
   PaginatedOverviewStatus
 >('quietFetchOverviewStatusAction');
+
+/**
+ * Fetch the next page of monitors and merge it into the current overview status
+ * instead of replacing it. Powers the card view's infinite scroll: the server
+ * still paginates by monitor, and each appended page is accumulated client-side
+ * (deduped by `configId`) so the already-rendered cards stay put.
+ */
+export const appendOverviewStatusAction = createAsyncAction<
+  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
+  PaginatedOverviewStatus
+>('appendOverviewStatusAction');
 
 /**
  * Supplementary lookup that promotes `pending` monitors which stopped reporting

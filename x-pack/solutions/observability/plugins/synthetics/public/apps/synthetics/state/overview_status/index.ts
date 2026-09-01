@@ -17,6 +17,7 @@ import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_man
 import { isRunStale } from '../../../../../common/lib';
 import type { IHttpSerializedFetchError } from '..';
 import {
+  appendOverviewStatusAction,
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
@@ -47,6 +48,12 @@ export interface OverviewStatusStateReducer {
   settled: boolean;
   isInitialLoad: boolean;
   total?: number;
+  // The scope/filter the current status was fetched with, so the card view's
+  // infinite scroll can request the next page with the exact same parameters.
+  lastRequest?: { scopeStatusByLocation?: boolean; statusFilter?: string };
+  // Filter context of an in-flight append. Compared on success so a page
+  // requested under the previous filters is not merged into a newer result.
+  pendingAppendRequest?: { scopeStatusByLocation?: boolean; statusFilter?: string };
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -151,21 +158,97 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
   }
 };
 
+const requestContextEquals = (
+  a?: { scopeStatusByLocation?: boolean; statusFilter?: string },
+  b?: { scopeStatusByLocation?: boolean; statusFilter?: string }
+) => a?.scopeStatusByLocation === b?.scopeStatusByLocation && a?.statusFilter === b?.statusFilter;
+
+const mergePaginatedStatus = (
+  existing: PaginatedOverviewStatus,
+  incoming: PaginatedOverviewStatus
+): PaginatedOverviewStatus => {
+  const byConfigId = new Map(existing.configs!.map((config) => [config.configId, config]));
+  for (const config of incoming.configs!) {
+    byConfigId.set(config.configId, config);
+  }
+  const mergedConfigs = Array.from(byConfigId.values());
+  return {
+    ...incoming,
+    upConfigs: { ...existing.upConfigs, ...incoming.upConfigs },
+    downConfigs: { ...existing.downConfigs, ...incoming.downConfigs },
+    pendingConfigs: { ...existing.pendingConfigs, ...incoming.pendingConfigs },
+    staleConfigs: { ...(existing.staleConfigs ?? {}), ...(incoming.staleConfigs ?? {}) },
+    disabledConfigs: { ...existing.disabledConfigs, ...incoming.disabledConfigs },
+    configs: mergedConfigs,
+  };
+};
+
+const applyMergedPaginated = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  const existing = state.status;
+  if (!existing?.configs || !incoming.configs) {
+    state.status = incoming;
+    state.allConfigs = incoming.configs ?? buildAllConfigs(incoming);
+    state.total = incoming.total ?? state.allConfigs.length;
+  } else {
+    const merged = mergePaginatedStatus(existing, incoming);
+    state.status = merged;
+    state.allConfigs = merged.configs;
+    state.total = incoming.total;
+  }
+  state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
+  state.loaded = true;
+  state.loading = false;
+  state.settled = true;
+  applyStaleBeforeWindow(state);
+};
+
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchOverviewStatusAction.get, (state, action) => {
       state.status = null;
       state.loading = true;
+      state.lastRequest = {
+        scopeStatusByLocation: action.payload.scopeStatusByLocation,
+        statusFilter: action.payload.statusFilter,
+      };
     })
-    .addCase(quietFetchOverviewStatusAction.get, (state) => {
-      state.loading = true;
+    .addCase(quietFetchOverviewStatusAction.get, (state, action) => {
+      // Timer refreshes pass `silent` so the compact table / progress bar
+      // does not flash on every auto-refresh interval.
+      if (!action.payload.silent) {
+        state.loading = true;
+      }
+      state.lastRequest = {
+        scopeStatusByLocation: action.payload.scopeStatusByLocation,
+        statusFilter: action.payload.statusFilter,
+      };
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = action.payload;
+      const incoming = action.payload;
+      const existing = state.status;
+      // A silent refresh of page 1 can complete after the card view has already
+      // appended later pages. Same `total` + a shorter `configs` means "this
+      // response is a prefix of the accumulated window" — merge so extra pages
+      // are not wiped. Filter changes go through `.get` which nulls `status`.
+      const preserveExtraPages =
+        Boolean(existing?.configs) &&
+        Boolean(incoming.configs) &&
+        existing!.configs!.length > incoming.configs!.length &&
+        incoming.total === existing!.total;
 
-      if (action.payload.configs) {
-        state.allConfigs = action.payload.configs;
-        state.total = action.payload.total;
+      if (preserveExtraPages) {
+        applyMergedPaginated(state, incoming);
+        return;
+      }
+
+      state.status = incoming;
+
+      if (incoming.configs) {
+        state.allConfigs = incoming.configs;
+        state.total = incoming.total;
       } else {
         state.allConfigs = buildAllConfigs(state.status);
         state.total = state.allConfigs.length;
@@ -180,6 +263,30 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       applyStaleBeforeWindow(state);
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+      state.settled = true;
+    })
+    .addCase(appendOverviewStatusAction.get, (state, action) => {
+      // Keep the current page visible while the next one loads.
+      state.loading = true;
+      state.pendingAppendRequest = {
+        scopeStatusByLocation: action.payload.scopeStatusByLocation,
+        statusFilter: action.payload.statusFilter,
+      };
+    })
+    .addCase(appendOverviewStatusAction.success, (state, action) => {
+      const pending = state.pendingAppendRequest;
+      state.pendingAppendRequest = undefined;
+      // Drop a page that was requested under a previous filter/scope so it
+      // cannot land on top of a newer replace (e.g. status-filter change).
+      if (pending && !requestContextEquals(pending, state.lastRequest)) {
+        return;
+      }
+      applyMergedPaginated(state, action.payload);
+    })
+    .addCase(appendOverviewStatusAction.fail, (state, action) => {
+      state.pendingAppendRequest = undefined;
       state.error = action.payload;
       state.loading = false;
       state.settled = true;

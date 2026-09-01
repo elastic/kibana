@@ -35,6 +35,37 @@ const SORT_FIELD_TO_COLUMN = Object.fromEntries(
   Object.entries(COLUMN_TO_SORT_FIELD).map(([column, sortField]) => [sortField, column])
 );
 
+/**
+ * Map an EUI table `onChange` to overview pageState. EUI always includes the
+ * current `page` on sort clicks, which would otherwise bypass the reducer's
+ * "reset to page 1 on non-pagination changes" guard.
+ */
+export function paginatedTableUpdatesFromCriteria(
+  criteria: Criteria<OverviewStatusMetaData>,
+  current: {
+    sortField: MonitorOverviewPageState['sortField'];
+    sortOrder: MonitorOverviewPageState['sortOrder'];
+  }
+): Partial<MonitorOverviewPageState> {
+  const updates: Partial<MonitorOverviewPageState> = {};
+  if (criteria.page) {
+    updates.page = criteria.page.index + 1;
+    updates.perPage = criteria.page.size;
+  }
+  const nextSort = criteria.sort;
+  if (nextSort) {
+    const mappedSortField = COLUMN_TO_SORT_FIELD[nextSort.field as string];
+    if (mappedSortField) {
+      updates.sortField = mappedSortField;
+      updates.sortOrder = nextSort.direction;
+      if (mappedSortField !== current.sortField || nextSort.direction !== current.sortOrder) {
+        updates.page = 1;
+      }
+    }
+  }
+  return updates;
+}
+
 // Module-level stable empty list so passing it to `useOverviewTrendsRequests`
 // while the flyout is open doesn't churn the effect's dependency identity.
 const EMPTY_ITEMS: OverviewStatusMetaData[] = [];
@@ -96,20 +127,11 @@ export const MonitorsTable = ({
   const onTableChange = useCallback(
     (criteria: Criteria<OverviewStatusMetaData>) => {
       if (isPaginated) {
-        const updates: Partial<MonitorOverviewPageState> = {};
-        if (criteria.page) {
-          updates.page = criteria.page.index + 1;
-          updates.perPage = criteria.page.size;
-        }
-        const nextSort = criteria.sort;
-        if (nextSort) {
-          const mappedSortField = COLUMN_TO_SORT_FIELD[nextSort.field as string];
-          if (mappedSortField) {
-            updates.sortField = mappedSortField;
-            updates.sortOrder = nextSort.direction;
-          }
-        }
-        dispatch(setOverviewPageStateAction(updates));
+        dispatch(
+          setOverviewPageStateAction(
+            paginatedTableUpdatesFromCriteria(criteria, { sortField, sortOrder })
+          )
+        );
       } else {
         onLocalPaginationChange(criteria);
         const nextSort = criteria.sort;
