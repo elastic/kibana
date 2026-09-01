@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, Logger, Plugin } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   VisTypeVegaPluginSetupDependencies,
@@ -39,6 +33,17 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     core: CoreSetup,
     { embeddable, usageCollection }: VisTypeVegaPluginSetupDependencies
   ) {
+    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
+    void core
+      .getStartServices()
+      .then(([coreStart]) =>
+        coreStart.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+      )
+      .then((enabled) => {
+        this.standaloneEmbeddableEnabled = enabled;
+      })
+      .catch(() => {});
+
     embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
       title: 'Vega',
       getSchema: (getDrilldownsSchema) =>
@@ -56,14 +61,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     return {};
   }
 
-  public start(core: CoreStart) {
-    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
-    void core.featureFlags
-      .getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      .then((enabled) => {
-        this.standaloneEmbeddableEnabled = enabled;
-      })
-      .catch(() => {});
+  public start() {
     return {};
   }
 }
