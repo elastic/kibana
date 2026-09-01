@@ -43,12 +43,16 @@ export const getDataCard = ({
       value: formatNumber(stats.documentsCount),
       isLoading,
     },
-    {
-      key: 'vectors',
-      label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorCount),
-      isLoading,
-    },
+    ...(stats.vectorCount !== undefined
+      ? [
+          {
+            key: 'vectors',
+            label: STAT_TILE_LABELS.vectors,
+            value: formatNumber(stats.vectorCount),
+            isLoading,
+          },
+        ]
+      : []),
     {
       key: 'totalSize',
       label: STAT_TILE_LABELS.totalSize,

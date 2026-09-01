@@ -27,7 +27,7 @@ interface StarredDashboardsCountResponse {
 
 interface DeploymentStatsResponse {
   indicesCount: number | null;
-  vectorCount: number | null;
+  vectorCount?: number | null;
   storeSizeBytes: number | null;
   dashboardsCount: number | null;
   documentsCount: number | null;
@@ -43,7 +43,6 @@ export interface DeploymentStats extends DeploymentStatsResponse {
 
 const initialStats: DeploymentStats = {
   indicesCount: null,
-  vectorCount: null,
   storeSizeBytes: null,
   workflowsCount: null,
   workflowsRunningCount: null,
@@ -105,7 +104,7 @@ export const useDeploymentStats = () => {
 
       return {
         indicesCount: esStats?.indicesCount ?? null,
-        vectorCount: esStats?.vectorCount ?? null,
+        vectorCount: esStats ? esStats.vectorCount : null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
         documentsCount: esStats?.documentsCount ?? null,
         apiKeysCount: esStats?.apiKeysCount ?? null,
