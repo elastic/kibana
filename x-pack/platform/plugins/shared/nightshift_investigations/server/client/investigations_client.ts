@@ -39,7 +39,11 @@ import {
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
-import type { InvestigationPatch, InvestigationRepository } from '../storage';
+import type {
+  InvestigationAttributes,
+  InvestigationPatch,
+  InvestigationRepository,
+} from '../storage';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
@@ -210,9 +214,6 @@ const SUPERSEDED_STATUSES = [
   'running',
 ] as const satisfies ReadonlyArray<InvestigationStatus>;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
   typeof value === 'string' && INVESTIGATION_SUBJECT_TYPES.some((type) => type === value);
 
@@ -244,10 +245,10 @@ const parseExecutionInvestigationMetadata = (
   executionContext: Record<string, unknown> | undefined
 ): ExecutionInvestigationMetadata => {
   const inputs =
-    isRecord(executionContext) && isRecord(executionContext.inputs)
+    isPlainObject(executionContext) && isPlainObject(executionContext.inputs)
       ? executionContext.inputs
       : undefined;
-  const inputContext = inputs && isRecord(inputs.context) ? inputs.context : undefined;
+  const inputContext = inputs && isPlainObject(inputs.context) ? inputs.context : undefined;
 
   const rawSource = inputContext?.source;
   let subject: InvestigationSubject | undefined;
@@ -275,6 +276,14 @@ const parseExecutionInvestigationMetadata = (
 
   return { subject, triggerType, concurrencyKey };
 };
+
+const toSubjectFields = (
+  subject: InvestigationSubject
+): Pick<InvestigationAttributes, 'subject_type' | 'subject_id' | 'subject_summary'> => ({
+  subject_type: subject.type,
+  subject_id: subject.id,
+  ...(subject.summary ? { subject_summary: subject.summary } : {}),
+});
 
 function recoverSubjectFromInput(
   input: Record<string, unknown> | undefined
@@ -474,25 +483,16 @@ export class NightshiftInvestigationsClient {
       await this.cancelSupersededInvestigation({ concurrencyKey });
     }
 
-    try {
-      await this.investigationRepository.create({
-        id: investigationId,
-        attributes: {
-          status: 'pending',
-          subject_type: subject.type,
-          subject_id: subject.id,
-          ...(subject.summary ? { subject_summary: subject.summary } : {}),
-          trigger_type: triggerType,
-          concurrency_key: concurrencyKey,
-          created_at: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      if (error instanceof InvestigationAlreadyExistsError) {
-        return;
-      }
-      throw error;
-    }
+    await this.createIgnoringConflict({
+      id: investigationId,
+      attributes: {
+        status: 'pending',
+        ...toSubjectFields(subject),
+        trigger_type: triggerType,
+        concurrency_key: concurrencyKey,
+        created_at: new Date().toISOString(),
+      },
+    });
   }
 
   /**
@@ -544,22 +544,30 @@ export class NightshiftInvestigationsClient {
       await this.cancelSupersededInvestigation({ concurrencyKey });
     }
 
+    const startedAt = execution.startedAt ?? new Date().toISOString();
+    await this.createIgnoringConflict({
+      id: investigationId,
+      attributes: {
+        status: 'running',
+        ...toSubjectFields(subject),
+        trigger_type: triggerType,
+        concurrency_key: concurrencyKey,
+        executed_by: execution.executedBy,
+        created_at: startedAt,
+        started_at: startedAt,
+      },
+    });
+  }
+
+  private async createIgnoringConflict({
+    id,
+    attributes,
+  }: {
+    id: string;
+    attributes: InvestigationAttributes;
+  }): Promise<void> {
     try {
-      const startedAt = execution.startedAt ?? new Date().toISOString();
-      await this.investigationRepository.create({
-        id: investigationId,
-        attributes: {
-          status: 'running',
-          subject_type: subject.type,
-          subject_id: subject.id,
-          ...(subject.summary ? { subject_summary: subject.summary } : {}),
-          trigger_type: triggerType,
-          concurrency_key: concurrencyKey,
-          executed_by: execution.executedBy,
-          created_at: startedAt,
-          started_at: startedAt,
-        },
-      });
+      await this.investigationRepository.create({ id, attributes });
     } catch (error) {
       if (error instanceof InvestigationAlreadyExistsError) {
         return;
@@ -681,6 +689,14 @@ export class NightshiftInvestigationsClient {
     const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
     const subjectSummary = asString(rawContext?.summary);
 
+    let error: string | undefined;
+    if (status === 'failed') {
+      if (execution.error?.message) {
+        this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
+      }
+      error = FALLBACK_INVESTIGATION_ERROR;
+    }
+
     return {
       investigation_id: investigationId,
       subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
@@ -695,13 +711,7 @@ export class NightshiftInvestigationsClient {
       severity:
         status === 'completed' ? asSeverity(structuredOutput?.severity, this.logger) : undefined,
       result: status === 'completed' ? this.toResult(investigationId, structuredOutput) : undefined,
-      error: (() => {
-        if (status !== 'failed') return undefined;
-        if (execution.error?.message) {
-          this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
-        }
-        return 'Investigation failed';
-      })(),
+      error,
     };
   }
 
