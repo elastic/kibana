@@ -10,8 +10,8 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
+  AlertAskAiAgentButtonProps,
   ErrorSampleAiInsightProps,
-  AlertAskAiAssistantButtonProps,
   ServiceInvestigateButtonProps,
 } from './components/insights';
 
@@ -19,7 +19,7 @@ import type {
 export interface ObservabilityAgentBuilderPluginPublicSetup {}
 
 export interface ObservabilityAgentBuilderPluginPublicStart {
-  getAlertAskAiAssistantButton: () => ComponentType<AlertAskAiAssistantButtonProps>;
+  getAlertAskAiAgentButton: () => ComponentType<AlertAskAiAgentButtonProps>;
   getErrorSampleAIInsight: () => ComponentType<ErrorSampleAiInsightProps>;
   getServiceInvestigateButton: () => ComponentType<ServiceInvestigateButtonProps>;
 }

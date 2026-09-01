@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,7 +102,8 @@ export function AlertDetails() {
     observabilityAgentBuilder,
   } = services;
 
-  const AlertAskAiAssistantButton = observabilityAgentBuilder?.getAlertAskAiAssistantButton();
+  const AlertAskAiAgentButtonRef = useRef(observabilityAgentBuilder?.getAlertAskAiAgentButton());
+  const AlertAskAiAgentButton = AlertAskAiAgentButtonRef.current;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -523,14 +524,15 @@ export function AlertDetails() {
             rule={rule}
             refetch={refetch}
           />,
-          AlertAskAiAssistantButton && alertDetail ? (
-            <AlertAskAiAssistantButton
-              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-              alertTitle={ruleTypeBreached}
-            />
-          ) : null,
-        ].filter(Boolean),
-        rightSideGroupProps: { gutterSize: 's' },
+          ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
+            ? [
+                <AlertAskAiAgentButton
+                  alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
+                  alertTitle={ruleTypeBreached}
+                />,
+              ]
+            : []),
+        ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}
