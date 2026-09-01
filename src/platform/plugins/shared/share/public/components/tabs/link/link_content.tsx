@@ -68,7 +68,7 @@ export const LinkContent = ({
   const isAbsoluteTimeByDefault = isTimeRangeAbsoluteTime(timeRange);
   const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
-  const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
+  const { delegatedShareUrlHandler, draftModeCallOut, helpText } = objectConfig;
   const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
@@ -149,6 +149,12 @@ export const LinkContent = ({
           onTimeTypeChange={handleTimeTypeChange}
           isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
         />
+        {helpText && (
+          <>
+            <EuiSpacer size="m" />
+            <div data-test-subj="shareLinkHelpText">{helpText}</div>
+          </>
+        )}
         {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />

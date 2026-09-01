@@ -43,6 +43,21 @@ export const LOAD_ERROR = i18n.translate('xpack.pnd.watches.workers.loadError', 
   defaultMessage: 'Unable to load workers.',
 });
 
+export const NOT_IMPLEMENTED_TITLE = i18n.translate(
+  'xpack.pnd.watches.workers.notImplemented.title',
+  {
+    defaultMessage: 'Workers are not implemented yet',
+  }
+);
+
+export const NOT_IMPLEMENTED_BODY = i18n.translate(
+  'xpack.pnd.watches.workers.notImplemented.body',
+  {
+    defaultMessage:
+      'The worker catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
+  }
+);
+
 export const enableWorkerAriaLabel = (name: string) =>
   i18n.translate('xpack.pnd.watches.workers.enableAriaLabel', {
     defaultMessage: 'Enable worker {name}',

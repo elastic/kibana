@@ -30,9 +30,7 @@ export class MapsPage {
 
   constructor(private readonly page: ScoutPage) {
     this.mapContainer = this.page.locator('#maps-plugin');
-    this.mapRenderComplete = this.mapContainer.locator(
-      'div[data-dom-id][data-render-complete="true"]'
-    );
+    this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
     this.addLayerButton = this.page.testSubj.locator('addLayerButton');

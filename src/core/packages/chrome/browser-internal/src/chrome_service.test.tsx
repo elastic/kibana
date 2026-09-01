@@ -28,7 +28,6 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 import {
   ChromeComponentsProvider,
@@ -85,7 +84,6 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications, // Keep for test assertions
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
   };
 
   if (availableApps) {
@@ -204,7 +202,7 @@ describe('start', () => {
   it('does not add legacy browser warning if browser supports CSP', async () => {
     const { startDeps } = await start();
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
@@ -213,7 +211,7 @@ describe('start', () => {
       cspConfigMock: { warnLegacyBrowsers: false },
     });
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('calls handleSystemColorModeChange() with the correct parameters', async () => {
@@ -635,7 +633,7 @@ describe('start', () => {
 
       service.stop();
 
-      expect(docTitleResetSpy).toBeCalledTimes(1);
+      expect(docTitleResetSpy).toHaveBeenCalledTimes(1);
       await expect(promises).resolves.toMatchInlineSnapshot(`
                       Array [
                         Array [

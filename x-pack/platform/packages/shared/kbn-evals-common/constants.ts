@@ -27,10 +27,12 @@ export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
+export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
 export const EVALS_RESOLVE_INSTRUMENTATION_URL =
   `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
+export const EVALS_EVALUATOR_URL = `${EVALS_EVALUATORS_URL}/{name}` as const;
 export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
 export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
@@ -47,8 +49,10 @@ const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
 export const EvaluationIndices = {
   SCORES: `${EVALUATION_INDEX_PREFIX}-scores`,
+  ONLINE_SCORES: `${EVALUATION_INDEX_PREFIX}-online-scores`,
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
+  EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
 } as const;
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
@@ -63,6 +67,7 @@ export const API_VERSIONS = {
 export const INTERNAL_API_ACCESS = 'internal' as const;
 
 export const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0' as const;
+export const EVALUATOR_UUID_NAMESPACE = 'c1d6a0f2-8b4e-4a17-9c3d-5f2e7a9b0c41' as const;
 
 export const MAX_EXAMPLES_PER_DATASET = 10_000 as const;
 export const MAX_SCORES_PER_QUERY = 10_000 as const;
@@ -72,5 +77,7 @@ export const MAX_TAG_LENGTH = 64 as const;
 
 export const MAX_DATASET_NAME_LENGTH = 256 as const;
 export const MAX_DATASET_DESCRIPTION_LENGTH = 2048 as const;
+
+export const MAX_EVALUATOR_NAME_LENGTH = 128 as const;
 
 export const MAX_DATASET_TAG_FACETS = 100 as const;

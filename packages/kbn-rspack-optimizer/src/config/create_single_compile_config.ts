@@ -9,11 +9,13 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Configuration } from '@rspack/core';
+import type { Configuration } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import { rspack, loadReactRefreshRspackPlugin, loadRsdoctorRspackPlugin } from '../rspack_runtime';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import {
   findTargetEntry,
@@ -27,8 +29,10 @@ import {
   getSharedResolveConfig,
   getSharedResolveFallback,
   getSharedModuleRules,
+  getSharedModuleParserConfig,
   getSharedIgnoreWarnings,
-  computeConfigHash,
+  getSharedCacheConfig,
+  SHARED_PERFORMANCE_CONFIG,
   getMinimizer,
 } from './shared_config';
 import type { ThemeTag } from '../types';
@@ -84,6 +88,8 @@ export interface SingleCompileConfigOptions {
   pluginPaths?: string[];
   /** Directories scanned for plugins */
   pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   themeTags?: ThemeTag[];
   /** ToolingLog instance for consistent logging with Kibana's dev mode */
   log?: ToolingLog;
@@ -123,6 +129,7 @@ export async function createSingleCompileConfig(
     testPlugins = false,
     pluginPaths,
     pluginScanDirs,
+    allowlistPluginGroups,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -147,6 +154,7 @@ export async function createSingleCompileConfig(
     testPlugins,
     paths: pluginPaths,
     parentDirs: pluginScanDirs,
+    allowlistPluginGroups,
   });
 
   // Create a SINGLE unified entry that imports ALL plugins
@@ -269,16 +277,10 @@ export async function createSingleCompileConfig(
           type: 'asset/resource',
         },
       ],
-      // In dev mode, cache ALL module resolution results (not just node_modules).
-      // Matches legacy webpack optimizer behavior (webpack.config.ts line 342).
-      // Default is /[\\/]node_modules[\\/]/ which re-validates all 50K+ source
-      // modules on each access. Dev-only: persistent cache handles cross-restart
-      // invalidation; within a single build, module resolution is deterministic.
-      ...(dist ? {} : { unsafeCache: true }),
+      parser: getSharedModuleParserConfig(),
     },
 
     optimization: {
-      removeAvailableModules: dist,
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
       // Skip sideEffects analysis in dev mode (matches legacy webpack optimizer).
@@ -328,45 +330,19 @@ export async function createSingleCompileConfig(
       minimizer: getMinimizer(dist),
     },
 
-    // Enable in-memory caching
-    cache,
-
-    // Experimental features
-    experiments: {
-      // Persistent cache for faster rebuilds between restarts
-      cache: cache
-        ? {
-            type: 'persistent',
-            // Treat node_modules/ as package-manager-managed. Rspack skips
-            // per-file stats during cache validation and relies on package.json
-            // changes (captured by buildDependencies below) instead.
-            snapshot: {
-              managedPaths: [Path.resolve(repoRoot, 'node_modules')],
-            },
-            buildDependencies: CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
-            // Version includes hash of this config file for reliable invalidation
-            // RSPack's buildDependencies may not trigger on TypeScript file changes
-            version: `v8-${dist ? 'prod' : 'dev'}-${computeConfigHash(
-              repoRoot,
-              CACHE_CONFIG_FILES
-            )}`,
-            // Use separate cache directories for dev vs dist to avoid stale cache issues
-            // Structure: .rspack-cache/dev or .rspack-cache/dist
-            // Clear all: rm -rf node_modules/.cache/.rspack-cache
-            storage: {
-              type: 'filesystem',
-              directory: Path.resolve(
-                repoRoot,
-                'node_modules/.cache/.rspack-cache',
-                dist ? 'dist' : 'dev'
-              ),
-            },
-          }
-        : false,
-    },
-
-    // Enable profiling in the RSPack config itself
-    profile,
+    // Persistent cache for faster rebuilds between restarts.
+    // (Rspack v2: moved from experiments.cache to the top-level cache option.)
+    // Group allowlist is in the version key because it changes which plugins are in the entry.
+    cache: getSharedCacheConfig({
+      enabled: cache,
+      dist,
+      repoRoot,
+      versionPrefix: `v9-${
+        allowlistPluginGroups ? [...allowlistPluginGroups].sort().join(',') : 'all'
+      }`,
+      configFiles: CACHE_CONFIG_FILES,
+      managedNodeModules: true,
+    }),
 
     plugins: [
       // Node.js browser polyfills (same as kbn-optimizer)
@@ -447,10 +423,9 @@ export async function createSingleCompileConfig(
       ...(hmr
         ? [
             new rspack.HotModuleReplacementPlugin(),
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            new (require('@rspack/plugin-react-refresh').ReactRefreshRspackPlugin)({
-              overlay: false,
-            }),
+            // v2 removed the `overlay` option (dev-server territory now); the
+            // optimizer's HMR client renders its own error overlay.
+            new (loadReactRefreshRspackPlugin())(),
           ]
         : []),
 
@@ -485,17 +460,12 @@ export async function createSingleCompileConfig(
       ...(profile && !profileStatsOnly
         ? (() => {
             try {
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              const { RsdoctorRspackPlugin } = require('@rsdoctor/rspack-plugin');
+              const RsdoctorRspackPlugin = loadRsdoctorRspackPlugin();
               log?.info('Enabling RsDoctor bundle analysis...');
               return [
                 new RsdoctorRspackPlugin({
                   // Don't auto-open browser - user can run CLI command manually
                   disableClientServer: true,
-                  supports: {
-                    // Enable bundle analysis
-                    bundleAnalyze: true,
-                  },
                 }),
               ];
             } catch (e: any) {
@@ -513,6 +483,8 @@ export async function createSingleCompileConfig(
       preset: 'errors-warnings',
       timings: true,
     },
+
+    performance: SHARED_PERFORMANCE_CONFIG,
 
     // Use shared ignore warnings (same as external plugins)
     ignoreWarnings: getSharedIgnoreWarnings(),

@@ -155,12 +155,9 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel | TODO: Remove later
-.ijwb
-/bazel
-/bazel-*
-.bazelrc.user
-.bazelrc.cache
+# PNPM
+.pnpm-store
+.pnpm
 
 elastic-agent-*
 fleet-server-*
@@ -215,3 +212,5 @@ src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.m
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md
+
+.ralph/

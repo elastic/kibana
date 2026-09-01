@@ -25,8 +25,6 @@ export const getSSEResponseHeaders = (): Record<string, string> => ({
   'Content-Type': 'text/event-stream',
   'Content-Encoding': 'identity',
   'Cache-Control': 'no-cache',
-  Connection: 'keep-alive',
-  'Transfer-Encoding': 'chunked',
   'X-Content-Type-Options': 'nosniff',
   'X-Accel-Buffering': 'no',
 });

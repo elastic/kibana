@@ -13,6 +13,7 @@ import React from 'react';
 import type { OverlayStart } from '@kbn/core/public';
 import { CoreScopedHistory, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { coreMock, notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,7 +32,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
 });
 
 const space: Space = {
-  id: 'my-space',
+  id: asSpaceId('my-space'),
   name: 'My Space',
   disabledFeatures: [],
 };
@@ -39,7 +40,7 @@ const space: Space = {
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
@@ -500,7 +501,10 @@ describe('ManageSpacePage', () => {
       <KibanaContextProvider
         services={{
           cps: {
-            cpsManager: { fetchProjects: mockFetchProjects },
+            cpsManager: {
+              fetchProjects: mockFetchProjects,
+              getConfigurationLinks: jest.fn(),
+            },
           },
           application: {
             capabilities: {
@@ -549,11 +553,9 @@ describe('ManageSpacePage', () => {
 
     await updateSolutionView('oblt');
 
-    // deselect linked project
+    // deselect origin project
     await userEvent.click(
-      screen.getByTestId(
-        `projectPickerListItemSwitch-${mockProjectRoutingFetchResult.linkedProjects[0]._id}`
-      )
+      screen.getByTestId(`projectPickerListItemSwitch-${mockProjectRoutingFetchResult.origin._id}`)
     );
 
     await userEvent.click(screen.getByTestId('save-space-button'));
@@ -568,7 +570,7 @@ describe('ManageSpacePage', () => {
       name: 'New Space Name',
       description: 'some description',
       solution: 'oblt',
-      projectRouting: '_id:* AND NOT _id:badce1234567890',
+      projectRouting: `_alias:* AND (_id:* AND NOT _id:${mockProjectRoutingFetchResult.origin._id})`,
     });
   }, 10000);
 

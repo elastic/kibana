@@ -32,7 +32,7 @@ import {
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
-import { getClusterQualifiedIndex } from '../../../shared/utils/get_cluster_qualified_index';
+import { getNonLocalQualifiedIndex } from '../../../shared/utils/non_local_index';
 import { LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
@@ -84,7 +84,7 @@ export const InvestigationSection = memo(
 
     const ancestorsIndexName = useMemo(
       () =>
-        getClusterQualifiedIndex(
+        getNonLocalQualifiedIndex(
           (getFieldValue(hit, LEGACY_ANCESTOR_INDEX) as string) ?? '',
           documentIndexName
         ),

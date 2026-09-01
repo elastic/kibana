@@ -10,79 +10,138 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../../constants';
 
-import { fetchIndex, fetchSavedObjectNames, fetchSavedObjects } from '.';
+import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+
+import { fetchIndex, fetchSavedObjectNames, fetchSavedObjects, isIndexAllowedForDebug } from '.';
+
+jest.mock('../spaces/query_namespaces_filtering');
+
+const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as jest.MockedFunction<
+  typeof addNamespaceFilteringToQuery
+>;
 
 describe('Fleet debug service', () => {
+  beforeEach(() => {
+    // By default, pass the query through unchanged (space awareness off / no filter added).
+    mockAddNamespaceFilteringToQuery.mockImplementation(async (query) => query);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('isIndexAllowedForDebug', () => {
+    it('allows the three Fleet UI indices', () => {
+      expect(isIndexAllowedForDebug('.fleet-agents')).toBe(true);
+      expect(isIndexAllowedForDebug('.fleet-actions')).toBe(true);
+      expect(isIndexAllowedForDebug('.fleet-enrollment-api-keys')).toBe(true);
+    });
+
+    it('rejects other .fleet- prefixed indices not in the allowlist', () => {
+      expect(isIndexAllowedForDebug('.fleet-policies')).toBe(false);
+      expect(isIndexAllowedForDebug('.fleet-fileds-fromhost-meta-*')).toBe(false);
+      expect(isIndexAllowedForDebug('.fleet-artifacts')).toBe(false);
+      expect(isIndexAllowedForDebug('.fleet-secrets')).toBe(false);
+    });
+
+    it('rejects non-Fleet indices', () => {
+      expect(isIndexAllowedForDebug('other-index')).toBe(false);
+      expect(isIndexAllowedForDebug('.internal-*')).toBe(false);
+      expect(isIndexAllowedForDebug('logs-elastic_agent-*')).toBe(false);
+    });
+
+    it('rejects comma-separated index lists', () => {
+      expect(isIndexAllowedForDebug('.fleet-agents,.fleet-actions')).toBe(false);
+      expect(isIndexAllowedForDebug('.fleet-agents,other-index')).toBe(false);
+    });
+
+    it('strips whitespace before checking', () => {
+      expect(isIndexAllowedForDebug('  .fleet-agents  ')).toBe(true);
+    });
+  });
+
   describe('fetchIndex', () => {
-    it('allows Fleet indices (prefix .fleet-)', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.search.mockResolvedValue({ hits: { hits: [] }, took: 0, _shards: {} } as any);
-
-      const res = await fetchIndex(esClient, '.fleet-agents');
-
-      expect(res.ok).toBe(true);
-      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents' });
-    });
-
-    it('allows Fleet index patterns', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.search.mockResolvedValue({ hits: { hits: [] }, took: 0, _shards: {} } as any);
-
-      const res = await fetchIndex(esClient, '.fleet-fileds-fromhost-meta-*');
-
-      expect(res.ok).toBe(true);
-      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-fileds-fromhost-meta-*' });
-    });
-
-    it('rejects non-Fleet indices with ok: false and message', async () => {
+    it('rejects disallowed indices with ok: false', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const res1 = await fetchIndex(esClient, 'other-index');
-      expect(res1.ok).toBe(false);
-      expect(res1.body).toEqual({ message: 'Index not allowed for debug.' });
-
-      const res2 = await fetchIndex(esClient, 'disallowed-index');
-      expect(res2.ok).toBe(false);
-
-      const res3 = await fetchIndex(esClient, '.internal-*');
-      expect(res3.ok).toBe(false);
-
-      const res4 = await fetchIndex(esClient, 'logs-elastic_agent-*');
-      expect(res4.ok).toBe(false);
-
-      expect(esClient.search).not.toHaveBeenCalled();
-    });
-
-    it('rejects index without .fleet- prefix', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      const res = await fetchIndex(esClient, 'fleet-agents');
+      const res = await fetchIndex(esClient, '.fleet-policies');
       expect(res.ok).toBe(false);
       expect(res.body).toEqual({ message: 'Index not allowed for debug.' });
       expect(esClient.search).not.toHaveBeenCalled();
     });
 
-    it('allows comma-separated list of Fleet indices', async () => {
+    it('calls esClient.search with the namespace-filtered query (space awareness off)', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.search.mockResolvedValue({ hits: { hits: [] }, took: 0, _shards: {} } as any);
 
-      const res = await fetchIndex(esClient, '.fleet-agents,.fleet-actions');
+      const passThrough = { bool: {} };
+      mockAddNamespaceFilteringToQuery.mockResolvedValue(passThrough);
+
+      const res = await fetchIndex(esClient, '.fleet-agents', 'default');
 
       expect(res.ok).toBe(true);
-      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents,.fleet-actions' });
+      expect(mockAddNamespaceFilteringToQuery).toHaveBeenCalledWith({ bool: {} }, 'default');
+      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents', query: passThrough });
     });
 
-    it('rejects comma-separated list when any segment is non-Fleet', async () => {
+    it('passes the custom-space namespace filter to esClient.search', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValue({ hits: { hits: [] }, took: 0, _shards: {} } as any);
 
-      const res1 = await fetchIndex(esClient, '.fleet-agents,other-index');
-      expect(res1.ok).toBe(false);
-      expect(res1.body).toEqual({ message: 'Index not allowed for debug.' });
+      const customSpaceFilter = {
+        bool: {
+          filter: [{ terms: { namespaces: ['my-space', '*'] } }],
+        },
+      };
+      mockAddNamespaceFilteringToQuery.mockResolvedValue(customSpaceFilter);
 
-      const res2 = await fetchIndex(esClient, '.fleet-agents,  other-index');
-      expect(res2.ok).toBe(false);
+      await fetchIndex(esClient, '.fleet-agents', 'my-space');
 
-      expect(esClient.search).not.toHaveBeenCalled();
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: '.fleet-agents',
+        query: customSpaceFilter,
+      });
+    });
+
+    it('passes the default-space namespace filter (should + must_not exists) to esClient.search', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValue({ hits: { hits: [] }, took: 0, _shards: {} } as any);
+
+      const defaultSpaceFilter = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { terms: { namespaces: ['default', '*'] } },
+                  { bool: { must_not: [{ exists: { field: 'namespaces' } }] } },
+                ],
+              },
+            },
+          ],
+        },
+      };
+      mockAddNamespaceFilteringToQuery.mockResolvedValue(defaultSpaceFilter);
+
+      await fetchIndex(esClient, '.fleet-enrollment-api-keys', 'default');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: '.fleet-enrollment-api-keys',
+        query: defaultSpaceFilter,
+      });
+    });
+
+    it('still calls esClient.search when no spaceId supplied (space awareness disabled path)', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValue({ hits: { hits: [] }, took: 0, _shards: {} } as any);
+
+      const unfiltered = { bool: {} };
+      mockAddNamespaceFilteringToQuery.mockResolvedValue(unfiltered);
+
+      await fetchIndex(esClient, '.fleet-actions', undefined);
+
+      expect(mockAddNamespaceFilteringToQuery).toHaveBeenCalledWith({ bool: {} }, undefined);
+      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-actions', query: unfiltered });
     });
   });
 

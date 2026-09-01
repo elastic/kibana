@@ -7,14 +7,8 @@
 
 import { injectable } from 'inversify';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import type {
-  AlertEpisode,
-  AlertEpisodeSuppression,
-  DispatcherPipelineState,
-  DispatcherStep,
-  DispatcherStepOutput,
-} from '../types';
-import { suppressionEpisodeKey, suppressionSeriesKey } from './utils/suppression_key';
+import { EpisodeScan, EpisodeTriage, SuppressionIndex } from '../state';
+import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
 
 @injectable()
 export class ApplySuppressionStep implements DispatcherStep {
@@ -24,51 +18,12 @@ export class ApplySuppressionStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { episodes = [], suppressions = [] } = state;
+    const { scan = EpisodeScan.empty(), suppressions = SuppressionIndex.empty() } = state;
 
-    const { suppressed, dispatchable } = applySuppression(episodes, suppressions);
+    const triage = EpisodeTriage.partition(scan.episodes, (episode) =>
+      suppressions.suppressionReasonFor(episode)
+    );
 
-    return { type: 'continue', data: { suppressed, dispatchable } };
+    return { type: 'continue', data: { triage } };
   }
-}
-
-export function applySuppression(
-  episodes: readonly AlertEpisode[],
-  suppressions: readonly AlertEpisodeSuppression[]
-): { suppressed: Array<AlertEpisode & { reason: string }>; dispatchable: AlertEpisode[] } {
-  const suppressionMap = new Map<string, AlertEpisodeSuppression>();
-
-  for (const s of suppressions) {
-    if (s.episode_id) {
-      suppressionMap.set(suppressionEpisodeKey({ ...s, episode_id: s.episode_id }), s);
-    } else {
-      suppressionMap.set(suppressionSeriesKey(s), s);
-    }
-  }
-
-  const suppressed: Array<AlertEpisode & { reason: string }> = [];
-  const dispatchable: AlertEpisode[] = [];
-
-  for (const ep of episodes) {
-    const episodeSuppression = suppressionMap.get(suppressionEpisodeKey(ep));
-    const seriesSuppression = suppressionMap.get(suppressionSeriesKey(ep));
-
-    if (episodeSuppression?.should_suppress || seriesSuppression?.should_suppress) {
-      const matchingSuppression = episodeSuppression?.should_suppress
-        ? episodeSuppression
-        : seriesSuppression!;
-      suppressed.push({ ...ep, reason: getSuppressionReason(matchingSuppression) });
-    } else {
-      dispatchable.push(ep);
-    }
-  }
-
-  return { suppressed, dispatchable };
-}
-
-function getSuppressionReason(suppression: AlertEpisodeSuppression): string {
-  if (suppression.last_snooze_action === 'snooze') return 'snooze';
-  if (suppression.last_ack_action === 'ack') return 'ack';
-  if (suppression.last_deactivate_action === 'deactivate') return 'deactivate';
-  return 'unknown suppression reason';
 }

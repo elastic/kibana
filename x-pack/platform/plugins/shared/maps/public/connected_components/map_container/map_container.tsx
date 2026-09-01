@@ -8,9 +8,8 @@
 import '../../_index.scss';
 import React, { Component } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiShadow, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import type { Observable, Subscription } from 'rxjs';
@@ -26,21 +25,17 @@ import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { getIsDarkMode, getTheme, isScreenshotMode } from '../../kibana_services';
 import type { RawValue } from '../../../common/constants';
-import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import type { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
 import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import type { ILayer } from '../../classes/layers/layer';
 
-const RENDER_COMPLETE_EVENT = 'renderComplete';
-
 export interface Props {
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
-  isMapLoading: boolean;
   cancelAllInFlightRequests: () => void;
   reload: () => void;
   exitFullScreen: () => void;
@@ -50,23 +45,13 @@ export interface Props {
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
   renderTooltipContent?: RenderToolTipContent;
-  title?: string;
-  description?: string;
   settings: MapSettings;
   layerList: ILayer[];
   waitUntilTimeLayersLoad$: Observable<void>;
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   * An example usage is tile_map and region_map visualizations. The visualizations use MapEmbeddable for rendering.
-   * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
-   */
-  isSharable: boolean;
   euiTheme?: any;
 }
 
 interface State {
-  isInitialLoadRenderTimeoutComplete: boolean;
-  domId: string;
   showFitToBoundsButton: boolean;
   showTimesliderButton: boolean;
 }
@@ -91,72 +76,80 @@ const zoomIconBackgroundImage = (path: string, color: string) =>
  * reads the color mode via `useEuiTheme`, allowing them to follow reload-less light/dark switches.
  */
 function MapControlsThemeStyles() {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const iconColor = euiTheme.colors.textParagraph;
   return (
     <Global
-      styles={css({
-        '.mapContainer': {
-          '.maplibregl-ctrl-group:not(:empty)': {
+      styles={[
+        // Match the MapLibre zoom control shadow to the medium shadow EUI panels
+        // use (via `euiShadow`) so it stays consistent with the toolbar controls
+        // and gets the correct light/dark output, including the dark-mode border.
+        css`
+          .mapContainer .maplibregl-ctrl-group:not(:empty) {
+            ${euiShadow(euiThemeContext, 'm')}
+          }
+        `,
+        css({
+          '.mapContainer': {
+            '.maplibregl-ctrl-group:not(:empty)': {
+              backgroundColor: euiTheme.colors.backgroundBasePlain,
+            },
+            '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
+              backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+            },
+            '.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon': {
+              backgroundImage: zoomIconBackgroundImage(ZOOM_OUT_ICON_PATH, iconColor),
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+            },
+          },
+          // The layer table-of-contents entries live in the right-side overlay
+          // (a sibling of `.mapContainer`), so their divider and state background
+          // colors are themed here to react to reload-less light/dark switches.
+          '.mapWidgetOverlay .mapTocEntry': {
+            borderBottomColor: euiTheme.border.color,
+          },
+          '.mapWidgetOverlay .mapTocEntry-isSelected': {
+            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          },
+          '.mapWidgetOverlay .mapTocEntry-isDraggingOver': {
             backgroundColor: euiTheme.colors.backgroundBasePlain,
           },
-          '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
-            backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
+          '.mapWidgetOverlay .mapTocEntry-isCombineLayer': {
+            backgroundColor: euiTheme.colors.backgroundBaseSuccess,
           },
-          '.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon': {
-            backgroundImage: zoomIconBackgroundImage(ZOOM_OUT_ICON_PATH, iconColor),
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
+          '.mapWidgetOverlay .mapTocEntry-isInEditingMode': {
+            backgroundColor: `${euiTheme.colors.backgroundBasePrimary} !important`,
           },
-        },
-        // The layer table-of-contents entries live in the right-side overlay
-        // (a sibling of `.mapContainer`), so their divider and state background
-        // colors are themed here to react to reload-less light/dark switches.
-        '.mapWidgetOverlay .mapTocEntry': {
-          borderBottomColor: euiTheme.border.color,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isSelected': {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isDraggingOver': {
-          backgroundColor: euiTheme.colors.emptyShade,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isCombineLayer': {
-          backgroundColor: euiTheme.colors.backgroundBaseSuccess,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isInEditingMode': {
-          backgroundColor: `${euiTheme.colors.backgroundBasePrimary} !important`,
-        },
-        '.mapWidgetOverlay .mapLayerControl': {
-          borderTopColor: euiTheme.border.color,
-        },
-        '.mapWidgetOverlay .mapLayerControl__addLayerButton.euiButton-isDisabled': {
-          backgroundColor: `${euiTheme.colors.lightShade} !important`,
-        },
-        '.mapWidgetOverlay .mapLayerToc-droppable-isCombining': {
-          backgroundColor: `${euiTheme.colors.emptyShade} !important`,
-        },
-        '.mapWidgetOverlay .mapTocEntry__detailsToggleButton': {
-          backgroundColor: euiTheme.colors.emptyShade,
-          borderColor: euiTheme.border.color,
-          color: euiTheme.colors.textParagraph,
-        },
-      })}
+          '.mapWidgetOverlay .mapLayerControl': {
+            borderTopColor: euiTheme.border.color,
+          },
+          '.mapWidgetOverlay .mapLayerControl__addLayerButton.euiButton-isDisabled': {
+            backgroundColor: `${euiTheme.colors.lightShade} !important`,
+          },
+          '.mapWidgetOverlay .mapLayerToc-droppable-isCombining': {
+            backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
+          },
+          '.mapWidgetOverlay .mapTocEntry__detailsToggleButton': {
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+            borderColor: euiTheme.border.color,
+            color: euiTheme.colors.textParagraph,
+          },
+        }),
+      ]}
     />
   );
 }
 
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
-  private _isInitalLoadRenderTimerStarted: boolean = false;
   private _prevIsDarkMode: boolean = getIsDarkMode();
   private _themeSubscription?: Subscription;
 
   state: State = {
-    isInitialLoadRenderTimeoutComplete: false,
-    domId: uuidv4(),
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };
@@ -180,14 +173,6 @@ export class MapContainer extends Component<Props, State> {
   componentDidUpdate() {
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
-    if (
-      this.props.isSharable &&
-      !this.props.isMapLoading &&
-      !this._isInitalLoadRenderTimerStarted
-    ) {
-      this._isInitalLoadRenderTimerStarted = true;
-      this._startInitialLoadRenderTimer();
-    }
   }
 
   componentWillUnmount() {
@@ -195,21 +180,6 @@ export class MapContainer extends Component<Props, State> {
     this._themeSubscription?.unsubscribe();
     this.props.cancelAllInFlightRequests();
   }
-
-  // Reporting uses both a `data-render-complete` attribute and a DOM event listener to determine
-  // if a visualization is done loading. The process roughly is:
-  // - See if the `data-render-complete` attribute is "true". If so we're done!
-  // - If it's not, then reporting injects a listener into the browser for a custom "renderComplete" event.
-  // - When that event is fired, we snapshot the viz and move on.
-  // Failure to not have the dom attribute, or custom event, will timeout the job.
-  // See x-pack/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
-  _onInitialLoadRenderComplete = () => {
-    const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
-
-    if (el) {
-      el.dispatchEvent(new CustomEvent(RENDER_COMPLETE_EVENT, { bubbles: true }));
-    }
-  };
 
   async _loadShowFitToBoundsButton() {
     const promises = this.props.layerList.map(async (layer) => {
@@ -240,15 +210,6 @@ export class MapContainer extends Component<Props, State> {
     }
   }
 
-  _startInitialLoadRenderTimer = () => {
-    window.setTimeout(() => {
-      if (this._isMounted) {
-        this.setState({ isInitialLoadRenderTimeoutComplete: true });
-        this._onInitialLoadRenderComplete();
-      }
-    }, RENDER_TIMEOUT);
-  };
-
   render() {
     const {
       addFilters,
@@ -264,20 +225,13 @@ export class MapContainer extends Component<Props, State> {
 
     if (mapInitError) {
       return (
-        <div
-          data-render-complete
-          data-shared-item
-          data-title={this.props.title}
-          data-description={this.props.description}
-        >
-          <KbnDangerCallout
-            announceOnMount
-            title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
-              defaultMessage: 'Unable to initialize map',
-            })}
-            text={mapInitError}
-          />
-        </div>
+        <KbnDangerCallout
+          announceOnMount
+          title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
+            defaultMessage: 'Unable to initialize map',
+          })}
+          text={mapInitError}
+        />
       );
     }
 
@@ -285,18 +239,9 @@ export class MapContainer extends Component<Props, State> {
     if (isFullScreen) {
       exitFullScreenButton = <ExitFullScreenButton onExit={exitFullScreen} />;
     }
-    const shareAttributes = this.props.isSharable
-      ? {
-          ['data-dom-id']: this.state.domId,
-          ['data-render-complete']: this.state.isInitialLoadRenderTimeoutComplete,
-          ['data-shared-item']: true,
-          ['data-title']: this.props.title,
-          ['data-description']: this.props.description,
-        }
-      : {};
 
     return (
-      <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem
           css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
