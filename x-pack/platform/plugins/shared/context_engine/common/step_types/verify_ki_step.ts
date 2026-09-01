@@ -57,7 +57,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'Runs the verifiers listed in `verifiers` and returns a pass/fail result per verifier. At least one id is required; an unknown id fails the step. ES|QL verifiers: `esql-valid-syntax` validates each query locally (no cluster call); `esql-valid-runtime` executes each query against live data, bounded to one row. Both read from the `esql` attribute. Requires the Context Engine advanced setting.',
+        'Runs the verifiers listed in `verifiers` and returns a pass/fail result per verifier. At least one id is required; an unknown id fails the step. ES|QL verifiers: `esql-valid-syntax` validates each query locally (no cluster call); `esql-valid-runtime` executes each query against live data, bounded to one row. Requires the Context Engine advanced setting.',
     }),
     examples: [
       `## Verify a knowledge indicator's ES|QL
