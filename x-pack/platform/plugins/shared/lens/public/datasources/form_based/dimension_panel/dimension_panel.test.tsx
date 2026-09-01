@@ -302,7 +302,7 @@ describe('FormBasedDimensionEditor', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
     renderDimensionPanel({ filterOperations });
-    expect(filterOperations).toBeCalled();
+    expect(filterOperations).toHaveBeenCalled();
   });
 
   it('should show field select', () => {
@@ -1829,7 +1829,7 @@ describe('FormBasedDimensionEditor', () => {
     expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
       {
         label: 'nonexistent',
-        value: { type: 'field', field: 'nonexistent' },
+        value: { type: 'field', field: 'nonexistent', operationType: 'date_histogram' },
       },
     ]);
   });
