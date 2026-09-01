@@ -10,6 +10,7 @@ import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
@@ -100,6 +101,7 @@ describe('ai indices routes', () => {
   let esSearch: jest.Mock;
   let esGet: jest.Mock;
   let improvementsClients: unknown[];
+  const logger = loggerMock.create();
 
   const createContext = () =>
     ({
@@ -126,6 +128,7 @@ describe('ai indices routes', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     routes = {};
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
@@ -143,7 +146,7 @@ describe('ai indices routes', () => {
       list: jest.fn(),
       delete: jest.fn(),
     };
-    improvementsService = { deleteByAiIndex: jest.fn() };
+    improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     improvementsClients = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
@@ -170,6 +173,7 @@ describe('ai indices routes', () => {
 
     registerAiIndexRoutes({
       router,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getImprovementsService: (esClient) => {
         improvementsClients.push(esClient);
@@ -716,6 +720,23 @@ describe('ai indices routes', () => {
       });
 
       expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
+    });
+
+    it('audits the deletion even when the improvements cleanup fails afterwards', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+      improvementsService.deleteByAiIndex.mockRejectedValue(new Error('security_exception'));
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      // The index is gone either way, so the audit record is owed and the caller is not sent to
+      // retry a delete that would now 404.
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
     });
 
     it("deletes the improvements as the request's user, since the store is a user index", async () => {

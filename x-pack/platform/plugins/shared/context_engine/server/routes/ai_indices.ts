@@ -7,7 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, KibanaResponseFactory } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
@@ -198,11 +198,13 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
 
 export const registerAiIndexRoutes = ({
   router,
+  logger,
   getAiIndexService,
   getImprovementsService,
   getActions,
 }: {
   router: IRouter;
+  logger: Logger;
   getAiIndexService: () => AiIndexService;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
@@ -484,12 +486,25 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         try {
           await getAiIndexService().delete(aiIndexId);
-          // The improvements store is keyed by AI index id, so revisions left behind would
-          // resurface if an AI index were later recreated under the same id.
-          await getImprovementsService(core.elasticsearch.client.asCurrentUser).deleteByAiIndex(
-            aiIndexId
-          );
+          // Audited here rather than after the cleanup below: the deletion is done and cannot be
+          // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+
+          // The improvements store is keyed by AI index id, so revisions left behind would
+          // resurface if an AI index were later recreated under the same id. Best-effort: the store
+          // is a user-owned index and the caller may well have no privileges on it, and reporting a
+          // failure for an index that is already gone would only send them to retry a delete that
+          // now 404s. What is left behind is inert until an id is reused.
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser)
+            .deleteByAiIndex(aiIndexId)
+            .catch((error) => {
+              logger.warn(
+                `Deleted AI index '${aiIndexId}', but failed to clear its improvements: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            });
+
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });
         } catch (error) {

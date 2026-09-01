@@ -238,11 +238,17 @@ export class ImprovementsService implements ImprovementsServiceApi {
       latest: true,
       '@timestamp': now,
       status: to,
+      // Every terminal field is derived from `to`, never carried over from the prior head, so a
+      // head always describes the status it is in. Retrying a `failed` improvement into `applied`
+      // would otherwise keep the `resolution.error` explaining a failure that no longer happened,
+      // and reopening a `rejected` one would keep its `rejected_at`. The prior values are not lost:
+      // they stay on the prior revision, which is where the history lives.
+      //
       // A `failed` apply never reached the target, so it gets no `applied_at`; the reason lives on
       // `resolution.error` and the improvement stays actionable for a retry.
-      ...(to === 'applied' ? { applied_at: now } : {}),
-      ...(to === 'rejected' ? { rejected_at: now } : {}),
-      ...(resolution ? { resolution } : {}),
+      applied_at: to === 'applied' ? now : undefined,
+      rejected_at: to === 'rejected' ? now : undefined,
+      resolution,
     };
 
     await this.indexRevisions([revision]);
@@ -282,7 +288,11 @@ export class ImprovementsService implements ImprovementsServiceApi {
       size,
       track_total_hits: true,
       query: { bool: { filter } },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      // `revision_id` breaks ties, because `@timestamp` alone does not: one `write` stamps its
+      // whole batch with a single `now`, so an analysis run's improvements are all equal on it and
+      // Elasticsearch leaves their relative order undefined. Paging with `from`/`size` over an
+      // unstable order silently skips and repeats rows across page boundaries.
+      sort: [{ '@timestamp': { order: 'desc' } }, { revision_id: { order: 'desc' } }],
     });
   }
 
@@ -308,7 +318,10 @@ export class ImprovementsService implements ImprovementsServiceApi {
       query: {
         bool: { filter: [LATEST_ONLY, { terms: { improvement_id: improvementIds } }] },
       },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      // Same tiebreaker as the head reads: duplicate heads of one lineage are written by concurrent
+      // runs, so they carry the same `@timestamp` and it alone would not settle which one the
+      // successor names as its predecessor.
+      sort: [{ '@timestamp': { order: 'desc' } }, { revision_id: { order: 'desc' } }],
     });
 
     const heads = new Map<string, HeadRevision[]>();

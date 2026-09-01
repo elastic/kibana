@@ -115,6 +115,7 @@ export class ContextEnginePlugin
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
+      logger: this.logger.get('routes'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
           throw new Error('AI index service not available — plugin has not started');

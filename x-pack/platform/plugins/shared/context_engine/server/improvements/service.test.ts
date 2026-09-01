@@ -180,7 +180,10 @@ describe('ImprovementsService', () => {
       // A lineage should have one head, but a lost creation race can leave two. Asking for exactly
       // one per lineage would hide the duplicate and leave it live forever.
       expect(request.size).toBeGreaterThan(1);
-      expect(request.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(request.sort).toEqual([
+        { '@timestamp': { order: 'desc' } },
+        { revision_id: { order: 'desc' } },
+      ]);
     });
 
     it('retires every head of a lineage, converging a duplicate left by a creation race', async () => {
@@ -281,8 +284,28 @@ describe('ImprovementsService', () => {
       expect(result).toEqual({ items: [head], total: 3 });
       const [request] = search.mock.calls[0];
       expect(request.query.bool.filter).toEqual([{ term: { latest: true } }]);
-      expect(request.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(request.sort).toEqual([
+        { '@timestamp': { order: 'desc' } },
+        { revision_id: { order: 'desc' } },
+      ]);
       expect(request.track_total_hits).toBe(true);
+    });
+
+    it('breaks @timestamp ties on a unique field, so paging cannot skip or repeat a row', async () => {
+      // A batch shares one `@timestamp`, so every improvement a run produces sorts equal on it and
+      // Elasticsearch leaves their relative order undefined — which `from`/`size` paging cannot
+      // tolerate.
+      const batch = await service.write([
+        makeInput({ improvement_id: 'imp-1' }),
+        makeInput({ improvement_id: 'imp-2' }),
+      ]);
+      expect(batch[0]['@timestamp']).toBe(batch[1]['@timestamp']);
+      expect(batch[0].revision_id).not.toBe(batch[1].revision_id);
+
+      await service.list();
+
+      const [request] = search.mock.calls[search.mock.calls.length - 1];
+      expect(request.sort[1]).toEqual({ revision_id: { order: 'desc' } });
     });
 
     it('filters by AI index and status when asked', async () => {
@@ -385,6 +408,37 @@ describe('ImprovementsService', () => {
       });
       // A rejection is a judgement, not a fault; `error` stays for a failed apply.
       expect(revision.resolution?.error).toBeUndefined();
+    });
+
+    it('drops the failure resolution when a failed improvement is retried into applied', async () => {
+      const failed = makeHead({
+        status: 'failed',
+        resolution: { by: 'elastic', error: 'the workflow no longer exists' },
+      });
+      search.mockResolvedValue(searchResponse([hitOf(failed)]));
+
+      const revision = await service.transition('imp-1', 'applied');
+
+      // Carrying it forward would leave an applied improvement reporting an apply error.
+      expect(revision.status).toBe('applied');
+      expect(revision.resolution).toBeUndefined();
+      expect(revision.applied_at).toBe(revision['@timestamp']);
+    });
+
+    it('drops rejected_at when a rejected improvement is reopened', async () => {
+      const rejected = makeHead({
+        status: 'rejected',
+        rejected_at: '2026-01-03T00:00:00.000Z',
+        resolution: { by: 'elastic', reason: 'not now' },
+      });
+      search.mockResolvedValue(searchResponse([rejected].map((head) => hitOf(head))));
+
+      const revision = await service.transition('imp-1', 'applied', { by: 'elastic' });
+
+      // Each head describes the status it is in; the rejection stays on the revision that made it.
+      expect(revision.rejected_at).toBeUndefined();
+      expect(revision.resolution).toEqual({ by: 'elastic' });
+      expect(rejected.rejected_at).toBe('2026-01-03T00:00:00.000Z');
     });
 
     it('records a failed apply without claiming it was applied', async () => {
