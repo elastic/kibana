@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { UIAM_LOGS_REPAIR_TAGS } from '../../constants';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { isErrorWithReason } from '../../lib/error_with_reason';
@@ -81,6 +81,24 @@ export const isMissingUiamApiKeyLastRunError = (
   errors.some(({ message, userError }) => !userError && isMissingUiamApiKeyMessage(message));
 
 /**
+ * True when the rule write is known not to have committed, so a freshly minted UIAM key is
+ * referenced by nothing and can be queued for invalidation.
+ *
+ * Elasticsearch can reject the write outright (conflict / 404). Client-side validation can
+ * also fail before any request is sent: Saved Objects 400s, and the Spaces extension throwing
+ * when a caller-supplied namespace is passed to a client that still has that extension
+ * enabled. Ambiguous failures (timeouts, dropped connections) are excluded — they may have
+ * committed, and revoking a key that did persist would break every subsequent run.
+ */
+const isDefiniteNonWrite = (error: Error): boolean =>
+  SavedObjectsErrorHelpers.isConflictError(error) ||
+  SavedObjectsErrorHelpers.isNotFoundError(error) ||
+  SavedObjectsErrorHelpers.isBadRequestError(error) ||
+  error.message.includes(
+    'Namespace cannot be specified by the caller when the spaces extension is enabled'
+  );
+
+/**
  * Re-grants a rule's unusable UIAM API key by converting its Elasticsearch API key into a fresh
  * UIAM one and persisting it on the rule, so the rule's next scheduled run authenticates with a
  * working credential instead of staying broken until someone re-saves it.
@@ -111,8 +129,14 @@ export const repairUiamApiKey = async ({
     return;
   }
 
+  // Drop the Spaces extension so the caller-supplied namespace is honoured. The extension
+  // otherwise throws on any truthy namespace ("Namespace cannot be specified by the caller"),
+  // which is exactly `spaceIdToNamespace` for every space other than `default`. Dropping the
+  // option instead would silently write to the default space: this client's fake request has
+  // no active space, so the extension would fall back there. Encryption stays on.
   const savedObjectsClient = context.savedObjects.getUnsafeInternalClient({
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
+    excludedExtensions: [SPACES_EXTENSION_ID],
   });
   // Set once the convert API has minted a key, so a failed write can tell whether there is a live
   // UIAM key left over to clean up.
@@ -127,6 +151,7 @@ export const repairUiamApiKey = async ({
     // means a rule re-saved mid-run is judged on the credential it holds now.
     const { rawRule, version } = await getDecryptedRule(context, ruleId, spaceId);
     const { apiKey, uiamApiKey, apiKeyCreatedByUser } = rawRule;
+    const namespace = context.spaceIdToNamespace(spaceId);
 
     // Each reason gets its own message: these are the lines an operator reads to understand why a
     // broken rule was left alone, so "which check skipped it" has to be obvious from the log alone.
@@ -163,7 +188,7 @@ export const repairUiamApiKey = async ({
         {
           mergeAttributes: false,
           version,
-          namespace: context.spaceIdToNamespace(spaceId),
+          namespace,
         }
       );
 
@@ -206,7 +231,7 @@ export const repairUiamApiKey = async ({
       {
         mergeAttributes: false,
         version,
-        namespace: context.spaceIdToNamespace(spaceId),
+        namespace,
       }
     );
 
@@ -219,17 +244,14 @@ export const repairUiamApiKey = async ({
       tags: logTags,
     });
 
-    // The convert API had already minted a key, and Elasticsearch rejected the write outright — a
-    // concurrent update won the version check, or the rule is gone — so that key is certainly
-    // referenced by nothing and is queued for invalidation. Any other failure (a timeout, a dropped
-    // connection) may have committed after all, and revoking a key that did persist would break
-    // every subsequent run, so those are left alone as a bounded leak. Same split as the UIAM
-    // provisioning task makes between per-item and whole-call `bulkUpdate` failures.
-    if (
-      freshUiamApiKey &&
-      (SavedObjectsErrorHelpers.isConflictError(error) ||
-        SavedObjectsErrorHelpers.isNotFoundError(error))
-    ) {
+    // The convert API had already minted a key, and the write is known not to have committed —
+    // Elasticsearch rejected it outright, or client-side validation failed before any request
+    // was sent — so that key is certainly referenced by nothing and is queued for invalidation.
+    // Any other failure (a timeout, a dropped connection) may have committed after all, and
+    // revoking a key that did persist would break every subsequent run, so those are left
+    // alone as a bounded leak. Same split as the UIAM provisioning task makes between
+    // per-item and whole-call `bulkUpdate` failures.
+    if (freshUiamApiKey && isDefiniteNonWrite(error)) {
       await bulkMarkApiKeysForInvalidation(
         { apiKeys: [freshUiamApiKey] },
         logger,

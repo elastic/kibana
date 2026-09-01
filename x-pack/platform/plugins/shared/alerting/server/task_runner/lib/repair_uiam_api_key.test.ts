@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ErrorWithReason } from '../../lib/error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../../types';
@@ -204,12 +204,49 @@ describe('repairUiamApiKey()', () => {
     expect(context.uiamConvert).toHaveBeenCalledWith([rawRule.apiKey]);
     expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
+      excludedExtensions: [SPACES_EXTENSION_ID],
     });
     expect(unsafeClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       'rule-1',
       { ...rawRule, uiamApiKey: Buffer.from('fresh-id:essu_fresh').toString('base64') },
       { mergeAttributes: false, version: 'WzQyLDFd', namespace: 'space-a' }
+    );
+  });
+
+  test('honours a non-default space on both the re-grant and leak-removal writes', async () => {
+    // The Spaces extension rejects a caller-supplied namespace on `update`. Excluding it is
+    // what makes this write target `my-space` instead of throwing (or silently hitting
+    // `default`). The default space is unaffected either way: `spaceIdToNamespace('default')`
+    // is undefined, which is falsy and slips past the extension.
+    const { context: regrantContext, unsafeClient: regrantClient } = setup();
+    await repairUiamApiKey({
+      context: regrantContext,
+      logger,
+      ruleId: 'rule-1',
+      spaceId: 'my-space',
+    });
+    expect(regrantClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-1',
+      expect.any(Object),
+      expect.objectContaining({ namespace: 'my-space' })
+    );
+
+    const { context: leakContext, unsafeClient: leakClient } = setup({
+      rawRule: getRawRule({ apiKeyCreatedByUser: true }),
+    });
+    await repairUiamApiKey({
+      context: leakContext,
+      logger,
+      ruleId: 'rule-1',
+      spaceId: 'my-space',
+    });
+    expect(leakClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-1',
+      expect.any(Object),
+      expect.objectContaining({ namespace: 'my-space' })
     );
   });
 
@@ -385,6 +422,16 @@ describe('repairUiamApiKey()', () => {
     [
       'the rule was deleted while the run was in flight',
       SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-1'),
+    ],
+    [
+      'Saved Objects rejects the write as a client-side validation error',
+      SavedObjectsErrorHelpers.createBadRequestError('invalid attributes'),
+    ],
+    [
+      'the Spaces extension rejects the caller-supplied namespace before the write reaches Elasticsearch',
+      new Error(
+        'Namespace cannot be specified by the caller when the spaces extension is enabled. Spaces currently determines the namespace.'
+      ),
     ],
   ])('queues the minted key for invalidation when %s', async (_, writeError) => {
     const { context, unsafeClient } = setup();
