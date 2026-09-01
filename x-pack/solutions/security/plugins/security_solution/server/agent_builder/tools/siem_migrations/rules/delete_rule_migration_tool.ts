@@ -49,7 +49,8 @@ export const deleteRuleMigrationTool = (
     confirmation: { askUser: 'always' },
     description: `Delete a rule migration and all its associated rule items. Destructive and irreversible.
 
-Returns { ok: true, migration_id }.
+Returns { ok: true, migration_id } (the DELETE endpoint returns no body today;
+additional fields are spread if the endpoint later returns them).
 
 See the ${RULE_MIGRATION_SKILLS.DELETE} skill for the full workflow.`,
     schema,
@@ -74,7 +75,13 @@ See the ${RULE_MIGRATION_SKILLS.DELETE} skill for the full workflow.`,
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { ok: true, migration_id: migrationId },
+            // The DELETE endpoint currently returns no body (res.ok() with no payload).
+            // Spread response.body so any future fields flow through automatically.
+            data: {
+              ok: true,
+              migration_id: migrationId,
+              ...(response.body != null ? (response.body as object) : {}),
+            },
           },
         ],
       };

@@ -12,19 +12,17 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../common/siem_migrations/constants';
 import type { GetRuleMigrationResourcesMissingResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
+import { MigrationId } from '../common/schemas';
 import { SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe(
-    'The id of the rule migration whose missing resources to retrieve.'
-  ),
+  migration_id: MigrationId,
 });
 
 const buildPath = (migrationId: string): string =>

@@ -11,7 +11,6 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
 import { MigrationId } from '../common/schemas';
@@ -24,7 +23,11 @@ import { SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
   migration_id: MigrationId,
-  name: NonEmptyString.describe('The new name for the rule migration.'),
+  name: z
+    .string()
+    .min(1)
+    .max(256)
+    .describe('The new name for the rule migration. 1–256 characters.'),
 });
 
 const buildPath = (migrationId: string): string =>
@@ -51,7 +54,8 @@ export const updateRuleMigrationTool = (
     confirmation: { askUser: 'always' },
     description: `Update a rule migration's name. Mutating.
 
-Accepts { name }. Returns { ok: true, migration_id }.
+Accepts { name }. Returns { ok: true, migration_id } (the PATCH endpoint returns no body today;
+additional fields are spread if the endpoint later returns them).
 
 See the ${RULE_MIGRATION_SKILLS.UPDATE} skill for the full workflow.`,
 
@@ -80,7 +84,13 @@ See the ${RULE_MIGRATION_SKILLS.UPDATE} skill for the full workflow.`,
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { ok: true, migration_id: migrationId },
+            // The PATCH endpoint currently returns no body (res.ok() with no payload).
+            // Spread response.body so any future fields flow through automatically.
+            data: {
+              ok: true,
+              migration_id: migrationId,
+              ...(response.body != null ? (response.body as object) : {}),
+            },
           },
         ],
       };

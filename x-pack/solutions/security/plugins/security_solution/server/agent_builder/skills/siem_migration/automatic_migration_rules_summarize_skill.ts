@@ -69,7 +69,9 @@ ${NAME_NEVER_ID_BLOCK}
 ## Rendering
 
 - **Overview**: a compact table — name, vendor, status, and a progress summary
-  (completed/total). Sort by last-updated descending unless the user asks otherwise.
+  (completed/total). Rows are shown newest-first (matching the Kibana UI).
+  Sorting can be requested via the \`sort_field\` parameter on the rules-list tool if the user
+  asks for a different order within a migration's rules; the migrations overview cannot be sorted.
 - **Single migration**: open with one sentence naming the migration. Show name, vendor, task status,
   and a counts breakdown (pending / processing / completed / failed; full / partial /
   untranslatable / installable). If \`last_execution\` is present (from \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`),

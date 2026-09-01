@@ -54,6 +54,7 @@ export const getAllRuleMigrationStatsTool = (
     description: `List stats for every Automatic Rule Migration in the current space.
 
 Returns { total, migrations: [{ id, name, status, items: { total, pending, processing, completed, failed }, created_at, last_updated_at, vendor?, last_execution? }] }.
+Migrations are ordered newest-first (most recently created first), matching the Kibana UI.
 
 \`status\` is one of ready|running|stopped|finished|interrupted and drives START vs RESUME vs REPROCESS decisions.
 \`vendor\` is splunk|qradar|microsoft-sentinel.
@@ -82,12 +83,15 @@ Read-only.`,
         return createToolErrorResult(response, 'Failed to list rule migration stats');
       }
 
+      // Server returns migrations in creation-asc order (terms-agg `order: { createdAt: 'asc' }`).
+      // The Kibana UI reverses this to show newest-first — mirror that here so both surfaces agree.
+      const migrations = response.body.slice().reverse();
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { total: response.body.length, migrations: response.body },
+            data: { total: migrations.length, migrations },
           },
         ],
       };

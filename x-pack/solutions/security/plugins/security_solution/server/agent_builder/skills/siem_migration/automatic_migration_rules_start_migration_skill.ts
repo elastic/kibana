@@ -62,7 +62,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
   for \`selection.ids\` (page is zero-based).
 - \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` — list resources the migration
   is still missing (macros, lookups, reference sets, watchlists). Used as a pre-flight check on
-  fresh STARTs (see Pre-flight section below).
+  fresh STARTs and REPROCESS (see Pre-flight section below).
 - \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` — the mutating action. See decision policy below.
 - \`${platformCoreTools.listInferenceEndpoints}\` — list available inference endpoints (AI connectors)
   so the user can pick one.
@@ -225,9 +225,17 @@ between them.
 1. \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` → migration id.
 2. \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` with \`{ migration_id, search_term: '<partial title>' }\` (paginate if
    total > per_page) → collect the \`id\` field for every title the user named.
-3. \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` with:
+   - **Title not found**: tell the user which titles did not match and ask them to clarify.
+     Never silently drop a rule the user named.
+   - **Cross-migration rules**: \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` filters by
+     \`migration_id\`, so only rules in the resolved migration are eligible. If the user names rules
+     that are not in it, say so rather than reprocessing a silently-narrowed subset.
+3. \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` — run the same missing-resources
+   pre-flight as for a regular REPROCESS. Show the result and apply the Pre-flight: Missing
+   Resources decision above. Do not skip this step.
+4. \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` with:
    \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids: [<id1>, <id2>] } }\`
-4. Report the count of rules reprocessed; confirm it is running **asynchronously**.
+5. Report the count of rules reprocessed; confirm it is running **asynchronously**.
 
 Never skip step 2 — you must resolve titles to item ids; titles are not accepted by the tool.
 

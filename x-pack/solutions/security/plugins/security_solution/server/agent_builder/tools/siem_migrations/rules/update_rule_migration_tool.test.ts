@@ -65,6 +65,22 @@ describe('updateRuleMigrationTool', () => {
     expect(result.results[0].data).toEqual({ ok: true, migration_id: 'abc' });
   });
 
+  it('should reject a name that exceeds 256 characters', () => {
+    const result = tool.schema.safeParse({
+      migration_id: 'abc',
+      name: 'x'.repeat(257),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject a migration_id that exceeds 256 characters', () => {
+    const result = tool.schema.safeParse({
+      migration_id: 'x'.repeat(257),
+      name: 'Valid Name',
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('should return an error result without calling the endpoint when privileges are missing', async () => {
     mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
 
@@ -78,6 +94,7 @@ describe('updateRuleMigrationTool', () => {
     expect((result.results[0].data as { message: string }).message).toContain(
       'Automatic Migration: All'
     );
+    expect((result.results[0].data as { message: string }).message).toContain('Rules: Read');
   });
 
   it('should surface an endpoint failure as an error result', async () => {

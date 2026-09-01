@@ -105,6 +105,7 @@ describe('startRuleMigrationTool', () => {
     expect((result.results[0].data as { message: string }).message).toContain(
       'Automatic Migration: All'
     );
+    expect((result.results[0].data as { message: string }).message).toContain('Rules: Read');
   });
 
   it('should surface an endpoint failure as an error result', async () => {
