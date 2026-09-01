@@ -11,6 +11,7 @@ import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
 import { validateStepNameUniqueness } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
+import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
@@ -18,12 +19,28 @@ import {
   validateLiquidTemplate,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import { collectVariableDiagnostics } from './collect_variable_diagnostics';
 import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
 
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
+  /**
+   * Registry of registered step, connector and trigger metadata. Passing one
+   * runs the `variable-validation` rule group, which resolves every `{{ … }}`
+   * reference against the step context schema; the rules need the registry to
+   * type step outputs, so the two travel together.
+   *
+   * Omitted by default on purpose. `validateWorkflowYaml` also gates
+   * create/update: an `error` diagnostic stores the workflow with
+   * `definition: null`, `enabled: false`, so switching this on everywhere would
+   * stop authors from saving or enabling workflows that save today. Until the
+   * suppression and type-assertion escape hatches land
+   * (elastic/security-team#18778), only `POST /api/workflows/validate` asks for
+   * these rules, where the diagnostics are reported rather than enforced.
+   */
+  variableValidationRegistry?: WorkflowContextRegistry;
 }
 
 export function validateWorkflowYaml(
@@ -112,8 +129,9 @@ export function validateWorkflowYaml(
     // invalid at create/update time with the actionable message, instead of
     // letting it pass as `valid: true` and crash the run task later (which would
     // surface only an opaque TaskRecoveryError with no step records).
+    let workflowGraph: WorkflowGraph | undefined;
     try {
-      WorkflowGraph.fromWorkflowDefinition(parsedWorkflow);
+      workflowGraph = WorkflowGraph.fromWorkflowDefinition(parsedWorkflow);
     } catch (error) {
       // The GraphBuildError message already names the offending step, so a plain
       // diagnostic carries enough context for the author without extending the
@@ -121,6 +139,19 @@ export function validateWorkflowYaml(
       const message =
         isGraphBuildError(error) || error instanceof Error ? error.message : String(error);
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
+    }
+
+    // Variable validation resolves references against the step graph, so it only
+    // runs once the graph builds. Same guard the editor applies.
+    if (options?.variableValidationRegistry && workflowGraph) {
+      diagnostics.push(
+        ...collectVariableDiagnostics(
+          options.variableValidationRegistry,
+          yaml,
+          parsedWorkflow,
+          workflowGraph
+        )
+      );
     }
   }
 

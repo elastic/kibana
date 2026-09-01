@@ -14,6 +14,7 @@ import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import type { WorkflowValidationDeps } from './types';
+import { createWorkflowContextRegistry } from '../../common/lib/create_workflow_context_registry';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAvailableConnectors } from '../api/lib/workflow_connectors';
@@ -44,7 +45,18 @@ export class WorkflowValidationService {
   ): Promise<ValidateWorkflowResponseDto> {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
-    return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+    // `/validate` reports diagnostics, it does not gate storage, so it asks for
+    // the full rule set the editor runs — including the variable rules.
+    return validateWorkflowYaml(yaml, zodSchema, {
+      triggerDefinitions,
+      ...(this.deps.workflowsExtensions
+        ? {
+            variableValidationRegistry: createWorkflowContextRegistry(
+              this.deps.workflowsExtensions
+            ),
+          }
+        : {}),
+    });
   }
 
   async getWorkflowZodSchema(
