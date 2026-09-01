@@ -11,6 +11,7 @@ import { fireEvent } from '@testing-library/react';
 import { CertMonitors } from './cert_monitors';
 import { render } from '../../utils/testing';
 import type { CertMonitor } from '../../../../../common/runtime_types';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import * as useKibanaSpaceModule from '../../../../hooks/use_kibana_space';
 
 const createMockMonitors = (count: number): CertMonitor[] =>
@@ -130,7 +131,7 @@ describe('CertMonitors', () => {
 
     it('threads the active space into the remote deep link', () => {
       jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
-        space: { id: 'team-a', name: 'Team A', disabledFeatures: [] },
+        space: { id: asSpaceId('team-a'), name: 'Team A', disabledFeatures: [] },
         loading: false,
         error: undefined,
       });
