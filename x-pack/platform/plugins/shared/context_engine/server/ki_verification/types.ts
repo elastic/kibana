@@ -25,8 +25,6 @@ export interface KiVerifierContext {
   esClient: ElasticsearchClient;
   logger: Logger;
   abortSignal?: AbortSignal;
-  /** KI attribute names containing ES|QL; defaults to ['esql']. */
-  esqlAttributes?: string[];
 }
 
 /**

@@ -20,14 +20,11 @@ export const MAX_ESQL_QUERY_LENGTH = MAX_KI_ATTRIBUTE_VALUE_LENGTH;
 
 const REASON_QUERY_PREVIEW_LENGTH = 200;
 
-export const resolveEsqlAttributeKeys = ({ esqlAttributes }: KiVerifierContext): string[] =>
-  esqlAttributes && esqlAttributes.length > 0 ? [...new Set(esqlAttributes)] : [ESQL_ATTRIBUTE_KEY];
-
 const describeAttribute = (key: string): string => `attributes.${key}`;
 
-/** Returns whether the KI contains any configured ES|QL attribute. */
-export const hasEsqlAttribute = (ki: KnowledgeIndicator, context: KiVerifierContext): boolean =>
-  resolveEsqlAttributeKeys(context).some((key) => ki.attributes?.[key] !== undefined);
+/** Returns whether the KI contains the ES|QL attribute. */
+export const hasEsqlAttribute = (ki: KnowledgeIndicator, _context: KiVerifierContext): boolean =>
+  ki.attributes?.[ESQL_ATTRIBUTE_KEY] !== undefined;
 
 export const previewQuery = (query: string): string =>
   query.length > REASON_QUERY_PREVIEW_LENGTH
@@ -62,7 +59,7 @@ export const getEsqlQueries = (
   const queries: EsqlQueryRef[] = [];
   const failures: string[] = [];
 
-  for (const key of resolveEsqlAttributeKeys(context)) {
+  for (const key of [ESQL_ATTRIBUTE_KEY]) {
     const source = describeAttribute(key);
     const value = ki.attributes?.[key];
 
