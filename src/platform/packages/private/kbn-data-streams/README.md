@@ -157,22 +157,25 @@ When writing integration tests that touch system streams, use a client that send
 
 The three issues below are partially or fully owned by Elasticsearch. They are documented here so Kibana developers understand the current security boundary and do not accidentally rely on protections that do not yet exist. Alignment with the ES team is tracked in [kibana-team#3902](https://github.com/elastic/kibana-team/issues/3902).
 
-#### 1. Backing indices do not inherit the `system` flag
+#### 1. Backing index protection depends on descriptor landing order
 
-`GET _data_stream/<name>` reports `system: true` for a correctly registered system data stream, but the _backing indices_ (`.ds-<name>-*`) do **not** carry that flag. This means:
+When a stream is created with a `SystemDataStreamDescriptor` already registered in ES, its backing indices do receive the system flag and are protected against direct access the same way the stream itself is. The gap is an **ordering risk**: if Kibana creates the stream before the ES descriptor exists — because it has not shipped in that ES version yet — the initial backing indices are stamped without the system flag. A cluster-level upgrade service corrects this retroactively once the master sees the descriptor, but there is a window.
 
-- Requests that target a backing index directly (e.g. `GET .ds-<name>-000001/_search`) bypass system-data-stream restrictions and succeed without a product-origin header.
-- Any client with index-level read access can query backing indices even when the stream is system-protected.
+This race is a downstream effect of Gap 3 below (the descriptor cannot be registered without a template body). Resolving Gap 3 removes the ordering dependency and closes this gap with it.
 
-Until ES closes this gap, Kibana cannot rely on the `system` flag alone to prevent direct backing-index access. Teams holding sensitive data should apply additional index-level security rules.
+Until then, do not ship Kibana code that writes to a system stream before the matching `SystemDataStreamDescriptor` is present in the ES version you are targeting. See [Landing order](#landing-order) for examples.
 
-#### 2. The `.kibana_*` wildcard pattern creates ambiguous classification
+#### 2. The `.kibana_*` wildcard must be narrowed for each new data stream
 
-Elasticsearch has a `SystemIndexDescriptor` pattern that matches `.kibana_*`. When a data stream whose name matches that pattern is created _without_ a corresponding `SystemDataStreamDescriptor`, ES silently classifies it as a system index through the wildcard match rather than throwing an error.
+Elasticsearch has a `SystemIndexDescriptor` that historically matched `.kibana_*`. When a stream name matches that pattern but has no matching `SystemDataStreamDescriptor`, ES logs a warning at creation time and proceeds — the stream is created without system protection, even though its name suggests otherwise.
 
-The expected — and safer — behavior would be: if a `SystemDataStreamDescriptor` exists for the pattern, apply it; if none exists, reject the stream creation rather than falling through to the wildcard index descriptor.
+The ES Kibana plugin has already worked around this for all currently registered streams by using complement-syntax patterns (e.g. `.kibana_~(change_history*)` instead of `.kibana_*`). This excludes known data streams from the index-descriptor wildcard. Any future Kibana data stream under `.kibana_*` or `.workflows-*` must:
 
-Until this is corrected, a `.kibana_*` named data stream may appear protected when it is not actually registered as a system data stream, giving a false sense of security.
+1. Register a `SystemDataStreamDescriptor` in the ES Kibana plugin, **and**
+2. Update the complement pattern in the `SystemIndexDescriptor` to exclude the new stream name, **and**
+3. Do both before or alongside the Kibana code that first writes to the stream.
+
+Failing any of these steps produces a warning-only, not an error, so the problem is easy to miss. Until ES tightens this to a hard rejection (a behavior change the ES team would need to own), every new `.kibana_*` or `.workflows-*` data stream requires explicit coordination across both repos.
 
 #### 3. `SystemDataStreamDescriptor` requires index templates to be defined in Elasticsearch at startup
 
