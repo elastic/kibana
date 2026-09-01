@@ -56,11 +56,22 @@ describe('registerFeaturePrivileges', () => {
     });
   });
 
-  it('marks every feature as experimental', () => {
+  it('describes access for every experimental feature', () => {
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.rules.id).description).toBe(
+      'Experimental. Controls access to rules in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id).description).toBe(
+      'Experimental. Controls access to alerts in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id).description).toBe(
+      'Experimental. Controls access to action policies in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id).description).toBe(
+      'Experimental. Controls access to execution history in the experimental alerting system.'
+    );
+
     for (const feature of Object.values(ALERTING_V2_FEATURES)) {
-      const registered = getRegisteredFeature(feature.id);
-      expect(registered.description).toBe('Experimental');
-      expect(registered.privilegesTooltip).toBeUndefined();
+      expect(getRegisteredFeature(feature.id).privilegesTooltip).toBeUndefined();
     }
   });
 
