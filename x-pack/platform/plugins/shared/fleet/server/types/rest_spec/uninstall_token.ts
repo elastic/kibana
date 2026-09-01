@@ -36,10 +36,12 @@ export const GetUninstallTokensMetadataRequestSchema = {
 };
 
 const UninstallTokenMetadataSchema = schema.object({
-  id: schema.string(),
-  policy_id: schema.string(),
-  policy_name: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  created_at: schema.string(),
+  id: schema.string({ maxLength: 50 }),
+  policy_id: schema.string({ maxLength: 50 }),
+  policy_name: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: 255 })])
+  ),
+  created_at: schema.string({ maxLength: 50 }),
   namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });
 
@@ -49,13 +51,16 @@ export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
 
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
-    uninstallTokenId: schema.string({ meta: { description: 'The ID of the uninstall token' } }),
+    uninstallTokenId: schema.string({
+      maxLength: 50,
+      meta: { description: 'The ID of the uninstall token' },
+    }),
   }),
 };
 
 export const GetUninstallTokenResponseSchema = schema.object({
   item: UninstallTokenMetadataSchema.extends({
-    token: schema.string(),
+    token: schema.string({ maxLength: 10000 }),
   }),
 });
 
@@ -69,5 +74,5 @@ export const RotateUninstallTokenRequestSchema = {
 };
 
 export const RotateUninstallTokenResponseSchema = schema.object({
-  message: schema.string(),
+  message: schema.string({ maxLength: 500 }),
 });

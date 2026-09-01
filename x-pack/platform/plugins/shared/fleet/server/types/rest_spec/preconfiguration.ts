@@ -18,6 +18,6 @@ export const PutPreconfigurationSchema = {
 
 export const PostResetOnePreconfiguredAgentPoliciesSchema = {
   params: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.string({ maxLength: 50 }),
   }),
 };

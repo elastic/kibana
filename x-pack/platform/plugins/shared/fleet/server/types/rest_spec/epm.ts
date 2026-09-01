@@ -46,7 +46,9 @@ export const GetCategoriesResponseSchema = schema.object(
 
 export const GetPackagesRequestSchema = {
   query: schema.object({
-    category: schema.maybe(schema.string({ meta: { description: 'Filter packages by category' } })),
+    category: schema.maybe(
+      schema.string({ maxLength: 100, meta: { description: 'Filter packages by category' } })
+    ),
     prerelease: schema.maybe(
       schema.boolean({
         meta: { description: 'When true, include prerelease packages in the results' },
@@ -712,7 +714,9 @@ export const GetInstalledPackagesRequestSchema = {
         meta: { description: 'When true, only return packages with active data streams' },
       })
     ),
-    nameQuery: schema.maybe(schema.string({ meta: { description: 'Filter packages by name' } })),
+    nameQuery: schema.maybe(
+      schema.string({ maxLength: 255, meta: { description: 'Filter packages by name' } })
+    ),
     searchAfter: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.string(), schema.number()]), {
         maxSize: 10,
@@ -745,7 +749,10 @@ export const GetDataStreamsRequestSchema = {
       )
     ),
     datasetQuery: schema.maybe(
-      schema.string({ meta: { description: 'Filter data streams by dataset name' } })
+      schema.string({
+        maxLength: 255,
+        meta: { description: 'Filter data streams by dataset name' },
+      })
     ),
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
@@ -772,9 +779,12 @@ export const GetLimitedPackagesRequestSchema = {
 
 export const GetFileRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
-    filePath: schema.string({ meta: { description: 'File path within the package' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
+    filePath: schema.string({
+      maxLength: 2048,
+      meta: { description: 'File path within the package' },
+    }),
   }),
 };
 
@@ -794,8 +804,8 @@ export const NamespacePreflightCheckRequestSchema = {
 };
 
 const PackageVersionRequestParamsSchema = schema.object({
-  pkgName: schema.string({ meta: { description: 'Package name' } }),
-  pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+  pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+  pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
 });
 
 const GetInfoQuerySchema = schema.object({
@@ -833,16 +843,22 @@ export const GetInfoWithoutVersionRequestSchema = {
 };
 export const GetKnowledgeBaseRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
   }),
 };
 
 export const GetBulkAssetsRequestSchema = {
   body: schema.object(
     {
-      assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }), {
-        maxSize: 10000,
-      }),
+      assetIds: schema.arrayOf(
+        schema.object({
+          id: schema.string({ maxLength: 50 }),
+          type: schema.string({ maxLength: 100 }),
+        }),
+        {
+          maxSize: 10000,
+        }
+      ),
     },
     { meta: { id: 'get_bulk_assets_request' } }
   ),
@@ -908,7 +924,7 @@ export const UpdatePackageWithoutVersionRequestSchema = {
 export const BulkNamespaceCustomizationRequestSchema = {
   body: schema.object(
     {
-      packages: schema.arrayOf(schema.string(), {
+      packages: schema.arrayOf(schema.string({ maxLength: 255 }), {
         minSize: 1,
         maxSize: 1000,
         meta: {
@@ -918,6 +934,7 @@ export const BulkNamespaceCustomizationRequestSchema = {
       enable: schema.maybe(
         schema.arrayOf(
           schema.string({
+            maxLength: 100,
             validate: (v) => {
               if (!v.length) {
                 return 'Must not be empty';
@@ -937,7 +954,7 @@ export const BulkNamespaceCustomizationRequestSchema = {
         )
       ),
       disable: schema.maybe(
-        schema.arrayOf(schema.string(), {
+        schema.arrayOf(schema.string({ maxLength: 100 }), {
           maxSize: 100,
           meta: {
             description: 'Namespaces to disable namespace-level customization for on each package.',
@@ -976,6 +993,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object(
 export const ReviewUpgradeRequestSchema = {
   params: schema.object({
     pkgName: schema.string({
+      maxLength: 255,
       meta: { description: 'Package name to review upgrade for' },
     }),
   }),
@@ -986,7 +1004,7 @@ export const ReviewUpgradeRequestSchema = {
         schema.literal('decline'),
         schema.literal('pending'),
       ]),
-      target_version: schema.string(),
+      target_version: schema.string({ maxLength: 50 }),
     },
     { meta: { id: 'review_upgrade_request' } }
   ),
@@ -999,14 +1017,14 @@ export const ReviewUpgradeResponseSchema = schema.object(
 
 export const GetStatsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
   }),
 };
 
 export const GetDependenciesRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
   }),
 };
 
@@ -1071,8 +1089,10 @@ export const InstallPackageFromRegistryWithoutVersionRequestSchema = {
 
 export const ReauthorizeTransformRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.maybe(schema.string({ meta: { description: 'Package version' } })),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.maybe(
+      schema.string({ maxLength: 50, meta: { description: 'Package version' } })
+    ),
   }),
   query: schema.object({
     prerelease: schema.maybe(
@@ -1081,9 +1101,12 @@ export const ReauthorizeTransformRequestSchema = {
   }),
   body: schema.object(
     {
-      transforms: schema.arrayOf(schema.object({ transformId: schema.string() }), {
-        maxSize: 1000,
-      }),
+      transforms: schema.arrayOf(
+        schema.object({ transformId: schema.string({ maxLength: 255 }) }),
+        {
+          maxSize: 1000,
+        }
+      ),
     },
     { meta: { id: 'reauthorize_transform_request' } }
   ),
@@ -1099,10 +1122,10 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.oneOf([
-          schema.string(),
+          schema.string({ maxLength: 255 }),
           schema.object({
-            name: schema.string(),
-            version: schema.string(),
+            name: schema.string({ maxLength: 255 }),
+            version: schema.string({ maxLength: 50 }),
             prerelease: schema.maybe(schema.boolean()),
           }),
         ]),
@@ -1124,6 +1147,7 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 export const GetOneBulkOperationPackagesRequestSchema = {
   params: schema.object({
     taskId: schema.string({
+      maxLength: 50,
       meta: {
         description: 'Task ID of the bulk operation',
       },
@@ -1136,8 +1160,8 @@ export const BulkUpgradePackagesRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.object({
-          name: schema.string(),
-          version: schema.maybe(schema.string()),
+          name: schema.string({ maxLength: 255 }),
+          version: schema.maybe(schema.string({ maxLength: 50 })),
         }),
         { minSize: 1, maxSize: 1000 }
       ),
@@ -1154,8 +1178,8 @@ export const BulkUninstallPackagesRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.object({
-          name: schema.string(),
-          version: schema.string(),
+          name: schema.string({ maxLength: 255 }),
+          version: schema.string({ maxLength: 50 }),
         }),
         { minSize: 1, maxSize: 1000 }
       ),
@@ -1171,6 +1195,7 @@ export const BulkRollbackPackagesRequestSchema = {
       packages: schema.arrayOf(
         schema.object({
           name: schema.string({
+            maxLength: 255,
             meta: {
               description: 'Package name to rollback',
             },
@@ -1200,10 +1225,10 @@ export const InstallPackageByUploadRequestSchema = {
 export const CreateCustomIntegrationRequestSchema = {
   body: schema.object(
     {
-      integrationName: schema.string(),
+      integrationName: schema.string({ maxLength: 255 }),
       datasets: schema.arrayOf(
         schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 255 }),
           type: schema.oneOf([
             schema.literal('logs'),
             schema.literal('metrics'),
@@ -1240,15 +1265,15 @@ export const DeletePackageWithoutVersionRequestSchema = {
 
 export const InstallKibanaAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
     schema.object(
       {
         force: schema.maybe(schema.boolean()),
         space_ids: schema.maybe(
-          schema.arrayOf(schema.string(), {
+          schema.arrayOf(schema.string({ maxLength: 50 }), {
             minSize: 1,
             maxSize: 100,
             meta: {
@@ -1265,8 +1290,8 @@ export const InstallKibanaAssetsRequestSchema = {
 
 export const InstallRuleAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
     schema.object(
@@ -1280,25 +1305,28 @@ export const InstallRuleAssetsRequestSchema = {
 
 export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
   }),
 };
 
 export const DeletePackageDatastreamAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
   }),
   query: schema.object({
-    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
+    packagePolicyId: schema.string({
+      maxLength: 50,
+      meta: { description: 'The ID of the package policy' },
+    }),
   }),
 };
 
 export const GetInputsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 50, meta: { description: 'Package version' } }),
   }),
   query: schema.object({
     format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')], {
@@ -1321,6 +1349,7 @@ export const GetInputsRequestSchema = {
 export const RollbackPackageRequestSchema = {
   params: schema.object({
     pkgName: schema.string({
+      maxLength: 255,
       meta: { description: 'Package name to roll back' },
     }),
   }),
