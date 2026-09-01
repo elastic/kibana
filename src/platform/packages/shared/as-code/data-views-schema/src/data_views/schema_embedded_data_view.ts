@@ -16,6 +16,7 @@ import { fieldSettingsBaseSchema } from '../schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
 import {
   allowHiddenIndicesSchema,
+  fieldFiltersSchema,
   fieldSettingsFieldNameSchema,
   indexPatternSchema,
   timeFieldSchema,
@@ -49,6 +50,7 @@ export const dataViewSpecSchema = z
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     allow_hidden_indices: allowHiddenIndicesSchema,
+    field_filters: fieldFiltersSchema,
     field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
   })
   .strict()
