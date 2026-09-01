@@ -567,13 +567,17 @@ const createBulkCreateCaseRequest = async ({
   // Single authoritative validation pass over the FINAL, post-pairing representations — mirrors
   // create.ts. Unlike the pairing checks above (which only cover actively-linked fields), this
   // rejects unknown extended_fields keys, wrong-typed values, and missing required fields for
-  // every case — including pure v2-native fields with no linked v1 customField. `partial` reflects
-  // the caller's original direct intent (see hadExtendedFieldsBeforeDefaults above), not whether
-  // pairing populated extended_fields from a linked customFields value — matching create.ts's
-  // manual-path leniency: a required field with no value anywhere is only enforced when the caller
-  // explicitly sent extended_fields themselves. `relaxRequiredFields` overrides that inference
-  // outright: an automated caller sends whatever defaults it could resolve, so "did it send
-  // extended_fields" says nothing about its ability to fill the fields it didn't.
+  // every case — including pure v2-native fields with no linked v1 customField.
+  //
+  // Two callers, two contracts:
+  //   API / workflow-step callers (relaxRequiredFields: false): strict when the caller explicitly
+  //     sends extended_fields (partial: false → required fields enforced). When they omit
+  //     extended_fields entirely, partial: true preserves backward compatibility — callers that
+  //     predate required global fields would otherwise 400. Note: close-time required_on_close is
+  //     checked separately; PATCH enforces required on the keys it receives.
+  //   Connector / alert-driven callers (relaxRequiredFields: true): always partial — the connector
+  //     sends whatever defaults it can resolve; "did it send extended_fields" says nothing about
+  //     its ability to fill the fields it didn't, and a required miss will be visible on the case.
   validateRequiredCustomFields({
     requestCustomFields: normalizedCase.customFields,
     customFieldsConfiguration,

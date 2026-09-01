@@ -1,5 +1,8 @@
 {
   "sha1": "945a4a1ca3e8affb32730d1e5b2399515ead8da9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "adde72de5d4952a-8c143bc778948f8",
@@ -12,7 +15,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities_stateful.spec.ts",
         "line": 66,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -31,8 +34,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 92,
-        "column": 12
+        "line": 103,
+        "column": 25
       }
     },
     {
@@ -51,8 +54,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 110,
+        "column": 16
       }
     },
     {
@@ -71,8 +74,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 138,
+        "column": 14
       }
     },
     {
@@ -91,8 +94,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 142,
-        "column": 12
+        "line": 156,
+        "column": 16
       }
     },
     {
@@ -111,8 +114,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 154,
-        "column": 12
+        "line": 167,
+        "column": 80
       }
     },
     {
@@ -131,8 +134,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 175,
+        "column": 7
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 177,
-        "column": 12
+        "line": 183,
+        "column": 14
       }
     },
     {
@@ -171,8 +174,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 191,
+        "column": 58
       }
     },
     {
@@ -191,8 +194,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 200,
-        "column": 12
+        "line": 202,
+        "column": 32
       }
     },
     {
@@ -212,7 +215,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
         "line": 213,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -231,8 +234,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 223,
-        "column": 12
+        "line": 220,
+        "column": 92
       }
     },
     {
@@ -251,8 +254,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
-        "line": 236,
-        "column": 12
+        "line": 229,
+        "column": 14
       }
     },
     {
@@ -272,7 +275,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/es_config.spec.ts",
         "line": 32,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -285,8 +288,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_stateful.spec.ts",
-        "line": 27,
-        "column": 12
+        "line": 23,
+        "column": 50
       }
     },
     {
@@ -299,8 +302,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_stateful.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 30,
+        "column": 9
       }
     },
     {
@@ -320,7 +323,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route.spec.ts",
         "line": 34,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -340,7 +343,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/spec_definitions.spec.ts",
         "line": 32,
-        "column": 12
+        "column": 13
       }
     }
   ]

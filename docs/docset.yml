@@ -37,6 +37,7 @@ subs:
   package-manager:   "Elastic Package Manager"
   stack:   "Elastic Stack"
   elastic-sec:   "Elastic Security"
+  elastic-endpoint:   "Elastic Endpoint"
   es:   "Elasticsearch"
   esql:   "ES|QL"
   infer: "inference"

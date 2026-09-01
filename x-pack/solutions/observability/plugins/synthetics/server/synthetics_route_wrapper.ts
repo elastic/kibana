@@ -8,6 +8,7 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
 import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
@@ -63,6 +64,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
           heartbeatIndices,
+          // CRUD / settings stay origin-only even if a client sends the header.
+          projectRouting:
+            !syntheticsRoute.writeAccess && server.isCpsEnabled
+              ? getProjectRoutingFromRequest(request)
+              : undefined,
         }
       );
 

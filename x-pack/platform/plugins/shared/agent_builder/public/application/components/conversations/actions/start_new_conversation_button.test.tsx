@@ -67,7 +67,7 @@ describe('StartNewConversationButton', () => {
       navigateToAgentBuilderUrl,
     } as unknown as ReturnType<typeof useNavigation>);
 
-    mockUseLastAgentId.mockReturnValue('agent-1');
+    mockUseLastAgentId.mockReturnValue({ agentId: 'agent-1', isReady: true });
   });
 
   it('calls resetAttachments and setConversationId when in embedded context', () => {
@@ -100,5 +100,39 @@ describe('StartNewConversationButton', () => {
     expect(navigateToAgentBuilderUrl).toHaveBeenCalledTimes(1);
     expect(resetAttachments).not.toHaveBeenCalled();
     expect(setConversationId).not.toHaveBeenCalled();
+  });
+
+  it('is disabled while useLastAgentId is not ready in non-embedded context', () => {
+    mockUseConversationContext.mockReturnValue({
+      isEmbeddedContext: false,
+      setConversationId,
+      resetAttachments,
+      conversationActions: {} as never,
+    });
+    mockUseLastAgentId.mockReturnValue({ agentId: 'agent-1', isReady: false });
+
+    renderButton();
+    const button = screen.getByTestId('startNewConversationButton');
+
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(navigateToAgentBuilderUrl).not.toHaveBeenCalled();
+  });
+
+  it('stays enabled in embedded context even while useLastAgentId is not ready', () => {
+    mockUseConversationContext.mockReturnValue({
+      isEmbeddedContext: true,
+      setConversationId,
+      resetAttachments,
+      conversationActions: {} as never,
+    });
+    mockUseLastAgentId.mockReturnValue({ agentId: 'agent-1', isReady: false });
+
+    renderButton();
+    const button = screen.getByTestId('startNewConversationButton');
+
+    expect(button).not.toBeDisabled();
+    fireEvent.click(button);
+    expect(resetAttachments).toHaveBeenCalledTimes(1);
   });
 });

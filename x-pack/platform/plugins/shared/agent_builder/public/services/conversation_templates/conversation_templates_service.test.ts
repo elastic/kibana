@@ -17,6 +17,7 @@ const overviewTab: ConversationTemplateTabDefinition = {
 };
 
 const phishingDefinition: ConversationTemplateUIDefinition = {
+  name: 'Phishing Investigation',
   tabs: ['overview'],
 };
 

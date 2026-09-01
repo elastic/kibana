@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { ProjectPicker } from './project_picker';
-import type { HeaderContextMenuItemProps } from './project_picker_update/blocks/frame/partials/header';
-
 interface ProjectPickerContainerProps {
   cpsManager: ICPSManager;
-  customHeaderContextMenuItems?: HeaderContextMenuItemProps[];
 }
 
 /**
@@ -25,10 +22,7 @@ interface ProjectPickerContainerProps {
  * Delegates to ActiveProjectPicker or DisabledProjectPicker based on access level,
  * so the fetch hook only runs when the picker is actually active.
  */
-export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({
-  cpsManager,
-  customHeaderContextMenuItems,
-}) => {
+export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
   const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
 
   return (
@@ -36,7 +30,6 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({
       cpsManager={cpsManager}
       isReadonly={access === ProjectRoutingAccess.READONLY}
       isDisabled={access === ProjectRoutingAccess.DISABLED}
-      customHeaderContextMenuItems={customHeaderContextMenuItems}
     />
   );
 };
@@ -45,14 +38,12 @@ interface ActiveProjectPickerProps {
   cpsManager: ICPSManager;
   isReadonly: boolean;
   isDisabled: boolean;
-  customHeaderContextMenuItems?: HeaderContextMenuItemProps[];
 }
 
 const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
   cpsManager,
   isReadonly,
   isDisabled,
-  customHeaderContextMenuItems,
 }) => {
   const fetchProjectsByRouting = useCallback(
     (projectRouting?: ProjectRouting) => cpsManager.fetchProjects(projectRouting),
@@ -71,6 +62,11 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
     (newRouting: ProjectRouting) => {
       cpsManager.setProjectRouting(newRouting);
     },
+    [cpsManager]
+  );
+
+  const customHeaderContextMenuItems = useMemo(
+    () => Object.values(cpsManager.getConfigurationLinks()),
     [cpsManager]
   );
 

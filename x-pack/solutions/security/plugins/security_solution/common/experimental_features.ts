@@ -347,6 +347,19 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.5
    */
   perOsPolicySettings: false,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * Threat-intel supply pipeline (indices, ingest adapters, create
+   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
+   * off. Enable with:
+   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
+   */
+  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
