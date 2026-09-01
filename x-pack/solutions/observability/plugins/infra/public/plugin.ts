@@ -324,7 +324,7 @@ export class Plugin implements InfraClientPluginClass {
       // The logs app only contains the ML anomaly detection results pages, where project
       // routing is a per-job property derived from each job's stored configuration rather
       // than from the global project picker, so the picker is explicitly disabled there.
-      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.READONLY);
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.DISABLED);
       plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
     }
 
