@@ -89,12 +89,23 @@ function addNodesToStepsSchema(
   return schema;
 }
 
+export interface StepsCollectionSchema {
+  schema: z.ZodObject;
+  /**
+   * Number of `steps.*` entries. Reported here so callers can test emptiness
+   * without reading `.shape`, which forces zod to materialise the shape
+   * dictionary — an O(visible steps) spread per step context, and quadratic over
+   * a whole document.
+   */
+  size: number;
+}
+
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string,
   precomputedPredecessors?: GraphNodeUnion[]
-) {
+): StepsCollectionSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
 
@@ -138,5 +149,7 @@ export function getStepsCollectionSchema(
     stepsSchema = addNodesToStepsSchema(innerNodes, stepsSchema, seenStepIds, stepContextSchema);
   }
 
-  return stepsSchema;
+  // Trigger nodes and repeated step ids are skipped before being recorded, so
+  // the set size is exactly the number of entries added.
+  return { schema: stepsSchema, size: seenStepIds.size };
 }
