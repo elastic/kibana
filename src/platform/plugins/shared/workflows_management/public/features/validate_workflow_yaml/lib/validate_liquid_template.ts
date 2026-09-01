@@ -15,7 +15,7 @@ export function validateLiquidTemplate(
   yamlString: string,
   yamlDocument: Document
 ): YamlValidationResult[] {
-  return validateLiquidYamlScalars(yamlString, yamlDocument, null).filter(
+  return validateLiquidYamlScalars(yamlString, yamlDocument).filter(
     (result) => result.owner === 'liquid-template-validation'
   );
 }

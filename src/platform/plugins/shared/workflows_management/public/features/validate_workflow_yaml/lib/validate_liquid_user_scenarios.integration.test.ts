@@ -29,7 +29,6 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
   const collectionResults = validateLiquidForLoopCollections(
     scenario.yaml,
     doc,
-    model,
     graph,
     scenario.definition
   );
@@ -55,7 +54,13 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
     };
   });
 
-  const variableResults = validateVariables(variableItems, graph, scenario.definition, doc, model);
+  const variableResults = validateVariables(
+    variableItems,
+    graph,
+    scenario.definition,
+    doc,
+    scenario.yaml
+  );
   const variableErrors = variableResults.filter((r) => r.severity === 'error');
   expect(variableErrors).toEqual([]);
 }
@@ -147,7 +152,7 @@ steps:
     const model = createFakeMonacoModel(yaml);
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
 
-    const collectionResults = validateLiquidForLoopCollections(yaml, doc, model, graph, definition);
+    const collectionResults = validateLiquidForLoopCollections(yaml, doc, graph, definition);
     expect(collectionResults.filter((r) => r.severity === 'error')).toEqual([]);
 
     const match = matchAllVariables(yaml).find((m) => m.groups?.key === 'row.typo');
@@ -173,7 +178,7 @@ steps:
       graph,
       definition,
       doc,
-      model
+      yaml
     );
 
     const rowTypoResult = variableResults.find((r) => r.id === 'row.typo-var');

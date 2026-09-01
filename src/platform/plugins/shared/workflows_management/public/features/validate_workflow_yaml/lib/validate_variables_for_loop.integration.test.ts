@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
@@ -59,7 +59,7 @@ describe('validateVariables for-loop integration', () => {
       workflowGraph,
       forLoopValidationWorkflowDefinition,
       yamlDocument,
-      model
+      FOR_LOOP_VALIDATION_YAML
     );
 
     const yyResult = results.find((r) => r.id === 'yy.name-var');
@@ -74,7 +74,7 @@ describe('validateVariables for-loop integration', () => {
       workflowGraph,
       forLoopValidationWorkflowDefinition,
       yamlDocument,
-      model
+      FOR_LOOP_VALIDATION_YAML
     );
     const xxVarResult = varResults.find((r) => r.id === 'xx-var');
     expect(xxVarResult?.severity).toBeNull();
@@ -82,7 +82,6 @@ describe('validateVariables for-loop integration', () => {
     const collectionResults = validateLiquidForLoopCollections(
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
-      model,
       workflowGraph,
       forLoopValidationWorkflowDefinition
     );
@@ -157,7 +156,7 @@ steps:
       graph,
       definition,
       doc,
-      innerModel
+      templateYaml
     );
 
     expect(results.find((r) => r.id === 'forloop-index')?.severity).toBeNull();
@@ -252,7 +251,7 @@ steps:
       literalGraph,
       literalDefinition,
       literalDoc,
-      literalModel
+      yamlSource
     );
 
     expect(results.find((r) => r.id === 'yy-literal')?.severity).toBeNull();
@@ -287,17 +286,22 @@ steps:
       nestedGraph,
       forLoopNestedWorkflowDefinition,
       nestedDoc,
-      nestedModel
+      FOR_LOOP_NESTED_YAML
     );
     expect(innerResults.find((r) => r.id === 'inner-var')?.severity).toBeNull();
   });
 
   it('warns instead of erroring for a foreach step iterating an ES|QL result cell', () => {
     const esqlGraph = WorkflowGraph.fromWorkflowDefinition(foreachStepEsqlCellWorkflowDefinition);
-    const esqlDoc = parseDocument(FOREACH_STEP_ESQL_CELL_YAML);
-    const esqlModel = createFakeMonacoModel(FOREACH_STEP_ESQL_CELL_YAML);
+    const esqlLineCounter = new LineCounter();
+    const esqlDoc = parseDocument(FOREACH_STEP_ESQL_CELL_YAML, { lineCounter: esqlLineCounter });
 
-    const variableItems = collectAllVariables(esqlModel, esqlDoc, esqlGraph);
+    const variableItems = collectAllVariables(
+      FOREACH_STEP_ESQL_CELL_YAML,
+      esqlDoc,
+      esqlLineCounter,
+      esqlGraph
+    );
     const collectionItem = variableItems.find((item) => item.type === 'foreach');
     expect(collectionItem?.key).toBe('steps.run_query.output.values[0][0]');
 
@@ -306,7 +310,7 @@ steps:
       esqlGraph,
       foreachStepEsqlCellWorkflowDefinition,
       esqlDoc,
-      esqlModel
+      FOREACH_STEP_ESQL_CELL_YAML
     );
 
     expect(results.filter((r) => r.severity === 'error')).toHaveLength(0);
