@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -41,13 +42,13 @@ import type {
   AttentionEntry,
   AttentionReason,
   FaceliftIdentity,
-  PageFilters,
 } from './data';
-import { ATTENTION_RANKING_EXPLANATION, getAttentionList, riskDeltaPercent } from './data';
+import { ATTENTION_RANKING_EXPLANATION, riskDeltaPercent } from './data';
 
 export interface NeedsAttentionPanelProps {
   activeFilter: ActiveFilter | null;
-  pageFilters: PageFilters;
+  entries: AttentionEntry[];
+  isLoading?: boolean;
   onSelectIdentity: (identity: FaceliftIdentity) => void;
 }
 
@@ -114,7 +115,6 @@ const AttentionRow: React.FC<{
 
   const openDetails = useCallback(
     (event: React.MouseEvent) => {
-      // The row itself filters the table; the name opens the entity flyout.
       event.stopPropagation();
       onOpenDetails(identity);
     },
@@ -133,7 +133,6 @@ const AttentionRow: React.FC<{
 
   return (
     <EuiPanel
-      // A div rather than the default button, so the entity name can be its own control.
       element="div"
       hasBorder={false}
       hasShadow={false}
@@ -224,11 +223,10 @@ const AttentionRow: React.FC<{
 /** Row 2, left panel — ranked list of entities that most need investigation. */
 export const NeedsAttentionPanel: React.FC<NeedsAttentionPanelProps> = ({
   activeFilter,
-  pageFilters,
+  entries,
+  isLoading,
   onSelectIdentity,
 }) => {
-  const entries = useMemo(() => getAttentionList(pageFilters), [pageFilters]);
-
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
@@ -262,6 +260,31 @@ export const NeedsAttentionPanel: React.FC<NeedsAttentionPanelProps> = ({
     [enableNewFlyout, openEntityFlyout, openFlyout]
   );
 
+  const renderBody = () => {
+    if (isLoading) {
+      return <EuiLoadingSpinner size="m" data-test-subj="eaFaceliftNeedsAttentionLoading" />;
+    }
+    if (entries.length === 0) {
+      return (
+        <EuiText size="s" color="subdued" data-test-subj="eaFaceliftNeedsAttentionEmpty">
+          {'No entities need attention with the current filters.'}
+        </EuiText>
+      );
+    }
+    return entries.map((entry, index) => (
+      <AttentionRow
+        key={entry.identity.id}
+        rank={index + 1}
+        entry={entry}
+        selected={
+          activeFilter?.type === 'identity' && activeFilter.identityId === entry.identity.id
+        }
+        onSelect={() => onSelectIdentity(entry.identity)}
+        onOpenDetails={onOpenDetails}
+      />
+    ));
+  };
+
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="eaFaceliftNeedsAttentionPanel">
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -282,24 +305,7 @@ export const NeedsAttentionPanel: React.FC<NeedsAttentionPanelProps> = ({
 
       <EuiSpacer size="s" />
 
-      {entries.length === 0 ? (
-        <EuiText size="s" color="subdued" data-test-subj="eaFaceliftNeedsAttentionEmpty">
-          {'No entities need attention with the current filters.'}
-        </EuiText>
-      ) : (
-        entries.map((entry, index) => (
-          <AttentionRow
-            key={entry.identity.id}
-            rank={index + 1}
-            entry={entry}
-            selected={
-              activeFilter?.type === 'identity' && activeFilter.identityId === entry.identity.id
-            }
-            onSelect={() => onSelectIdentity(entry.identity)}
-            onOpenDetails={onOpenDetails}
-          />
-        ))
-      )}
+      {renderBody()}
     </EuiPanel>
   );
 };
