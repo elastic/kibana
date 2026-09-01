@@ -14,10 +14,7 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../..';
 import { FILE_UPLOAD_ERROR } from '../../../../translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
@@ -37,7 +34,7 @@ export interface LookupsFileUploadProps {
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   ({ createResources, apiError, isLoading, migrationSource, onSkip }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
     const { lookupsFileUpload } = useRuleMigrationVendorCopy(migrationSource);
 
     const createLookups = useCallback(() => {
@@ -172,7 +169,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
             <EuiFilePicker
               isInvalid={errors.length > 0}
               id={lookupsFileUpload.filePickerId}
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">

@@ -296,10 +296,10 @@ export class LensApp {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
-    const operationButton = this.page.testSubj.locator(operationSelector);
-    await operationButton.waitFor({ state: 'visible' });
-    await operationButton.scrollIntoViewIfNeeded();
-    await operationButton.click();
+    const operationLabel = this.page.testSubj.locator(`${operationSelector}-label`);
+    await operationLabel.waitFor({ state: 'visible' });
+    await operationLabel.scrollIntoViewIfNeeded();
+    await operationLabel.click();
     await this.page.waitForFunction(
       (selector) =>
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
@@ -315,6 +315,18 @@ export class LensApp {
       .setSelectedOptions([field], {
         timeout: 10_000,
       });
+    // ComboBox can show the typed option before Lens layer state commits.
+    // data-selected-field is the committed display name and updates only after
+    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
+    // metacharacters are not interpolated into a selector.
+    await this.page.waitForFunction(
+      (expected) =>
+        document
+          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+          ?.getAttribute('data-selected-field') === expected,
+      field,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**
