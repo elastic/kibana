@@ -351,7 +351,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
             {isLoadingCurrentRound ? (
               <EuiLoadingElastic size="l" aria-label={labels.streamingResponse} />
             ) : (
-              agent && <AgentAvatar agent={agent} size="s" iconSize="l" iconPaddingSize="none" />
+              agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={true} data-test-subj="agentBuilderRoundAgentContent">

@@ -23,7 +23,7 @@ const builtInAgent: AgentDefinition = {
 
 describe('AgentAvatar', () => {
   it('centers icon avatars in a square matching the requested avatar size', () => {
-    render(<AgentAvatar agent={builtInAgent} size="s" iconPaddingSize="none" />);
+    render(<AgentAvatar agent={builtInAgent} size="s" />);
 
     expect(screen.getByTestId('agentBuilderAgentIconAvatar')).toHaveStyleRule(
       'inline-size',

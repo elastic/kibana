@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiAvatar, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { EuiAvatarProps, EuiPanelProps } from '@elastic/eui';
+import type { EuiAvatarProps } from '@elastic/eui';
 import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
@@ -53,7 +53,6 @@ const getIconSize = ({ size }: { size: 's' | 'm' | 'l' | 'xl' | undefined }) => 
 interface BaseAgentAvatarProps {
   /** Size that will be used if the avatar is rendered as an icon. By default uses 1 size larger than `size` prop. */
   iconSize?: EuiAvatarProps['size'];
-  iconPaddingSize?: EuiPanelProps['paddingSize'];
   size: EuiAvatarProps['size'];
   shape?: 'circle' | 'square';
 }
@@ -85,7 +84,6 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     readonly,
     icon,
     agentId,
-    iconPaddingSize,
   } = 'agent' in props && props.agent
     ? {
         name: props.agent.name,
@@ -95,7 +93,6 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
         agentId: props.agent.id,
-        iconPaddingSize: props.iconPaddingSize ?? 'xs',
       }
     : {
         agentId: props.agentId,
@@ -103,7 +100,6 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         symbol: props.symbol,
         color: props.color,
         readonly: false,
-        iconPaddingSize: props.iconPaddingSize,
       };
 
   const { euiTheme } = useEuiTheme();
@@ -123,7 +119,6 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     const iconType = icon ?? 'logoElastic';
     const iconSize = iconSizeProp || getIconSize({ size });
     const avatarSize = getAvatarSize({ euiTheme, size });
-    const panelPaddingSize = avatarSize ? 'none' : iconPaddingSize;
     const panelStyles = css`
       ${hasBackground ? `background-color: ${color};` : ''}
       ${borderAndShapeStyles}
@@ -138,7 +133,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         hasBorder={false}
         hasShadow={false}
         css={panelStyles}
-        paddingSize={panelPaddingSize}
+        paddingSize="none"
         data-test-subj="agentBuilderAgentIconAvatar"
       >
         <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
