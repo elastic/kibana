@@ -13,13 +13,12 @@ Copy the nearest sibling in the target file. These snippets show the usual shape
         default: true
         applies_to:
           stack: ga
-          ech: unavailable
           self: ga
 ```
 
 ## New kibana.yml setting available on Elastic Cloud Hosted
 
-Set `ech` to a non-removed lifecycle. Confirm Cloud actually allowlists the key. Then include the YAML from `elastic-cloud-kibana-settings.md` with `:deployment: ech` if that include is not already present for this file.
+Set `ech: ga` if Cloud supports the key. Confirm Cloud actually allowlists it. Then include the YAML from `elastic-cloud-kibana-settings.md` with `:deployment: ech` if that include is not already present for this file.
 
 ```yaml
       - setting: xpack.example.mode
@@ -46,7 +45,7 @@ Set `ech` to a non-removed lifecycle. Confirm Cloud actually allowlists the key.
 
 ## New space-level Advanced Settings entry
 
-`setting` is the `uiSettings` key. `group` matches `category`.
+`setting` is the `uiSettings` key. `group` matches `category`. This example is preview on Stack. Deployment keys stay `ga`.
 
 ```yaml
       - setting: "example:enableFeature"
@@ -56,7 +55,7 @@ Set `ech` to a non-removed lifecycle. Confirm Cloud actually allowlists the key.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: preview
           ech: ga
           ece: ga
           eck: ga
@@ -64,11 +63,11 @@ Set `ech` to a non-removed lifecycle. Confirm Cloud actually allowlists the key.
           serverless: ga
 ```
 
-If 9.5 is unreleased, do not write `stack: preview 9.5` as the only stack value. That hides the Supported on line. Use `stack: preview` with no version, and keep deployment keys on the same lifecycle.
+`ech: ga` is correct here even though `stack` is `preview`. Deployment keys are support flags. They are not lifecycle.
 
 ## New global Advanced Settings entry
 
-Use `advanced-settings-global.yml`. Global settings are not available on serverless.
+Use `advanced-settings-global.yml`. Omit `serverless` when the setting is not available on serverless.
 
 ```yaml
       - setting: hideAnnouncements
@@ -83,7 +82,6 @@ Use `advanced-settings-global.yml`. Global settings are not available on serverl
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
 ```
 
 ## Nested kibana.yml keys
@@ -96,7 +94,6 @@ Use `advanced-settings-global.yml`. Global settings are not available on serverl
         default: "[]"
         applies_to:
           stack: ga
-          ech: unavailable
           self: ga
         settings:
           - setting: "[n].url"
@@ -127,7 +124,6 @@ Keep the old key. Change lifecycle. Add `deprecation_details` when the replaceme
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
         deprecation_details: "Use `example:newKey` instead."
 ```
 

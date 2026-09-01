@@ -40,7 +40,6 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
 ```
 
 ### Fields on a setting
@@ -80,34 +79,36 @@ Do not invent a datatype the file never uses.
 
 ## applies_to in settings YAML
 
-Preferred map form (matches docs-builder examples):
+This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-tagging` rule that stack and deployment keys must share the same lifecycle.
+
+| Key | What it means here | Write |
+|---|---|---|
+| `stack` | Lifecycle and version for Elastic Stack | `ga`, `preview`, `ga 9.4+`, `ga 9.0-9.3, deprecated 9.4+`, and so on |
+| `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | `ga` if supported. Omit the key if not. Never a version. Never `preview`, `experimental`, `deprecated`, or `unavailable` |
+| `serverless` | Supported on serverless, or not | `ga` if supported. Omit the key if not. Never a version |
+
+`ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and Elastic Cloud Hosted supports the setting, write `ech: ga`.
+
+Preferred map form:
 
 ```yaml
 applies_to:
-  stack: ga 9.4+
+  stack: preview
   ech: ga
   ece: ga
   eck: ga
   self: ga
-  serverless: ga
 ```
 
-Some existing files use a list of strings:
+Self-managed only. Elastic Cloud Hosted does not support this setting, so `ech` is absent:
 
 ```yaml
 applies_to:
-  - "stack: preview"
-  - "ech: unavailable"
-  - "self: ga"
+  stack: ga
+  self: ga
 ```
 
-Match the file. Do not convert a whole file from list to map in the same PR as a setting add.
-
-### Keys this repo uses on settings
-
-- `stack` for Elastic Stack version and lifecycle
-- `ech`, `ece`, `eck`, `self` as deployment keys at the same level (not nested under `deployment:`)
-- `serverless` on Advanced Settings entries and on dual-audience pages
+Some existing files use a list of strings. Match the file's map-versus-list shape. Do not convert a whole file in the same PR as a setting add. Older entries may still say `ech: unavailable`. For new work, omit the unsupported key instead.
 
 `ech` is Elastic Cloud Hosted. Do not add new `ess` keys.
 
@@ -115,18 +116,25 @@ Match the file. Do not convert a whole file from list to map in the same PR as a
 
 `docs/reference/cloud/elastic-cloud-kibana-settings.md` includes YAML with `:deployment: ech`.
 
-docs-builder shows a setting on that page when `applies_to.ech` is present and not `removed`. Treat `ech: unavailable` as hidden. Settings with no `applies_to` at all are always shown. Always set `applies_to`.
+docs-builder shows a setting on that page when the entry has `ech: ga`. Omit `ech` when Cloud does not support the setting. A missing `applies_to` block on the entry shows the setting on the Cloud page. Always set `applies_to`.
 
-### Lifecycle symmetry
+### Do not copy stack lifecycle onto deployments
 
-`stack` and the Stack deployments are the same product surface. Align their lifecycles.
-
-Wrong:
+Wrong (deployment keys must not carry preview or experimental):
 
 ```yaml
 applies_to:
-  stack: experimental
-  ech: ga
+  stack: preview
+  ech: preview
+  self: preview
+```
+
+Wrong (do not mark unsupported deployments with `unavailable`):
+
+```yaml
+applies_to:
+  stack: ga
+  ech: unavailable
   self: ga
 ```
 
@@ -134,15 +142,20 @@ Right:
 
 ```yaml
 applies_to:
-  stack: experimental
-  ech: experimental
-  ece: experimental
-  eck: experimental
-  self: experimental
-  serverless: unavailable
+  stack: preview
+  ech: ga
+  ece: ga
+  eck: ga
+  self: ga
 ```
 
-If Cloud truly is GA while self-managed is experimental, split the description. Do not put contradictory badges on one entry.
+Right (not supported on Elastic Cloud Hosted):
+
+```yaml
+applies_to:
+  stack: ga
+  self: ga
+```
 
 ### Unreleased version drops the Supported on line
 
@@ -153,7 +166,7 @@ If `stack` has a single lifecycle whose version is not released yet, docs-builde
 | `stack: preview 9.5` as the only stack value | No Supported on line |
 | `stack: preview` (no version) | Line renders (Preview) |
 | `stack: preview 9.4` when 9.4 is released | Line renders (Preview 9.4+) |
-| `stack: preview 9.4, ga 9.5` | Follow the badge table. Do not use this to hide a contradiction. |
+| `stack: preview 9.4, ga 9.5` | Follow the badge table. |
 
 If the setting is already preview on the current released stack, omit the unreleased version. If it is truly new in the unreleased minor, either omit the version until that minor ships, or accept the missing line on the PR preview.
 
@@ -173,7 +186,7 @@ description: |
 
 ### Version syntax
 
-Tag at the minor: `ga 9.4+`, not `ga 9.4.2`. Prefer `x.x+` for open-ended availability. Serverless is unversioned: `serverless: ga`.
+Tag `stack` at the minor: `ga 9.4+`, not `ga 9.4.2`. Prefer `x.x+` for open-ended availability. Do not put a version on deployment keys or on `serverless`.
 
 A `vX.Y.Z` label on a Kibana PR is a backport target. Confirm the patch shipped before you use that minor as the floor.
 

@@ -107,21 +107,25 @@ Create or update a host file only when you add a new YAML collection:
 - Add the page under `docs/reference/toc.yml` → `configuration-reference.md`.
 - If Elastic Cloud Hosted should list the setting, include the YAML from `docs/reference/cloud/elastic-cloud-kibana-settings.md` with `:deployment: ech`.
 
-That Cloud filter shows a setting only when `applies_to` has `ech` with a non-removed lifecycle. `ech: unavailable` hides it. A missing `applies_to` shows it on the Cloud page. Always set `applies_to`.
+That Cloud filter shows a setting only when `applies_to` includes `ech: ga`. Omit `ech` when Elastic Cloud Hosted does not support the setting. Do not write `ech: unavailable`. A missing `applies_to` block shows the setting on the Cloud page. Always set `applies_to`.
 
 Reporting settings already split across several YAML files included from `reporting-settings.md`. Add to the matching include, not a new page.
 
 ### 6. applies_to
 
-Canonical rules: [docs-builder applies](https://elastic.github.io/docs-builder/syntax/applies/) and [cumulative docs](https://www.elastic.co/docs/contribute-docs/how-to/cumulative-docs). For tag syntax, follow the `docs-applies-to-tagging` skill.
+This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. Details and examples: [yaml-schema.md](references/yaml-schema.md).
 
-Settings YAML uses a per-entry `applies_to` map (preferred) or a list of `"key: value"` strings. Match the file you are editing.
+- **`stack`** is the only key that carries lifecycle and version (`ga`, `preview`, `deprecated 9.4+`, and so on).
+- **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported:
+  - Write `key: ga` if that deployment supports it, even when `stack` is `preview`.
+  - Omit the key if that deployment does not support it.
+  - Do not copy the stack lifecycle onto deployments.
+  - Do not write `unavailable` or a version on those keys.
+- **`serverless`:** write `serverless: ga` when the setting exists on serverless. Omit it when it does not. Do not put a version on `serverless`.
 
-Keep `stack` lifecycle aligned with the Stack deployment keys (`ech`, `ece`, `eck`, `self`). `stack: experimental` next to `ech: ga` renders contradictory badges.
+If the in-development minor is not released yet, do not use `stack: preview 9.x` (or `ga 9.x`) as the only stack lifecycle. That unreleased value resolves to Planned and **drops the entire "Supported on:" line**, including deployment badges. Use `stack: preview` with no version, or accept that the line stays hidden until the version ships.
 
-If the in-development minor is not released yet, do not use `stack: preview 9.x` (or `ga 9.x`) as the only stack lifecycle. That unreleased value resolves to Planned and **drops the entire "Supported on:" line**, including deployment badges. Use `stack: preview` with no version, or accept that the line stays hidden until the version ships. Details are in [yaml-schema.md](references/yaml-schema.md).
-
-Tag at the minor. Do not put version numbers in the description next to a badge.
+Tag `stack` at the minor. Do not put version numbers in the description next to a badge.
 
 ### 7. Preview and badge check
 
@@ -157,10 +161,10 @@ Do this when it applies. Skip it when it does not.
 - [ ] Entry is in the YAML that matches kibana.yml vs space vs global
 - [ ] `setting` matches the runtime key at HEAD
 - [ ] Default and datatype match the schema or `uiSettings` registration
-- [ ] `applies_to` includes stack, the relevant deployments, and serverless when the page is dual-audience
-- [ ] `stack` lifecycle matches `ech` / `ece` / `eck` / `self`
+- [ ] `stack` carries the lifecycle and version. Deployment keys are `ga` or omitted
+- [ ] Unsupported deployments are omitted, not tagged `unavailable`
 - [ ] Unreleased-only `stack: <lifecycle> <version>` is not the only stack value, or the missing Supported on line is an accepted preview-time gap
-- [ ] Cloud page include exists only if `ech` is a non-removed lifecycle
+- [ ] Cloud page include exists only if the entry has `ech: ga`
 - [ ] Live preview DOM shows `p.settings-supported-on` when badges should render
 - [ ] No UI label, test ID, or component name used as the YAML `setting` key
 
