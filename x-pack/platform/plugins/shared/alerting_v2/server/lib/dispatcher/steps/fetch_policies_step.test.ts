@@ -99,7 +99,7 @@ describe('FetchPoliciesStep', () => {
         id: 'p-scoped',
         attributes: {
           name: 'Scoped',
-          matcher: 'rule.id: "rule-7"',
+          matcher: { expression: 'rule.id: "rule-7"' },
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           apiKey: 'k',
           apiKeyOwner: 'elastic',
@@ -116,7 +116,7 @@ describe('FetchPoliciesStep', () => {
 
     if (result.type !== 'continue') throw new Error('expected continue');
     const policy = result.data?.policies?.get('p-scoped');
-    expect(policy?.matcher).toBe('rule.id: "rule-7"');
+    expect(policy?.matcher).toEqual({ expression: 'rule.id: "rule-7"' });
   });
 
   it('fetches multiple policies', async () => {
