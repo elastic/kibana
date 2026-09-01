@@ -79,7 +79,7 @@ describe('applyDeprecations', () => {
       createAddDeprecation
     );
 
-    expect(createAddDeprecation).toBeCalledTimes(2);
+    expect(createAddDeprecation).toHaveBeenCalledTimes(2);
     expect(createAddDeprecation).toHaveBeenNthCalledWith(1, 'pathA');
     expect(createAddDeprecation).toHaveBeenNthCalledWith(2, 'pathB');
   });
