@@ -49,6 +49,7 @@ const PackageListGridWrapper = ({
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: true,
+    enableCollectionGrouping: true,
   });
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
