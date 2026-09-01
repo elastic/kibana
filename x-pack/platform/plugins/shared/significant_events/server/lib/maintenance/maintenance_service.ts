@@ -213,7 +213,8 @@ export const createSignificantEventsMaintenanceService = ({
     raw
       ? {
           continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
-          scheduledDiscoveryEnabledSpaceIds: raw.scheduledDiscoveryEnabledSpaceIds.map(brandSpaceId),
+          scheduledDiscoveryEnabledSpaceIds:
+            raw.scheduledDiscoveryEnabledSpaceIds.map(brandSpaceId),
         }
       : undefined;
 
