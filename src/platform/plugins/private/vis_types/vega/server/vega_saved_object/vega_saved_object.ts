@@ -20,7 +20,10 @@ import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
 export const vegaLibraryItemSavedObjectSchema = schema.object({
   title: schema.string(),
   description: schema.maybe(schema.string()),
-  spec: schema.object({ format: schema.string(), value: schema.any() }),
+  spec: schema.object({
+    format: schema.string(),
+    value: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
+  }),
 });
 
 const modelVersion1: SavedObjectsFullModelVersion = {
