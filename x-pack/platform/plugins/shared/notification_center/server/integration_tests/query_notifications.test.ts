@@ -17,6 +17,7 @@ import {
   notificationDataStreamDefinition,
 } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
+import { queryUnreadCount } from '../lib/query_unread_count';
 import type { NotificationReadState } from '../lib/read_state';
 import { cleanupExpiredNotifications } from '../cleanup_task/cleanup_expired_notifications';
 
@@ -154,6 +155,21 @@ describe('queryNotifications [integration]', () => {
       ['old-error', true],
       ['old-info', true],
     ]);
+  });
+
+  it('counts unread collapsed representatives using the same read state', async () => {
+    const result = await queryUnreadCount(
+      { dataStreams, logger },
+      {
+        overrides: {
+          'recent-warning': { read: true, markedAt: new Date().toISOString() },
+        },
+        readAllBefore: daysAgo(3),
+      }
+    );
+
+    // `dup` has two source documents but contributes one unread representative.
+    expect(result).toEqual({ unreadCount: 2 });
   });
 
   it('leaves items unannotated when there is no read state', async () => {

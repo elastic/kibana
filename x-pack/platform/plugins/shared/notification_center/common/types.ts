@@ -93,3 +93,8 @@ export interface NotificationQueryResult {
   /** Ensure the client knows if the query hit the result limit and older matches are omitted. */
   truncated: boolean;
 }
+
+/** The bounded unread count for the caller's profile-scoped notification state. */
+export interface NotificationUnreadCount {
+  unreadCount: number;
+}
