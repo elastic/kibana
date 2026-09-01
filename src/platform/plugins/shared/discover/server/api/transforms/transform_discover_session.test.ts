@@ -119,23 +119,11 @@ describe('discover session API transforms', () => {
       searchSource.index = { id: inlineDataViewId, title: 'logs-*' };
       searchSource.filter = [
         {
-          meta: {
-            index: inlineDataViewId,
-            key: 'service.name',
-            field: 'service.name',
-            params: { query: 'api' },
-            type: 'phrase',
-          },
+          meta: { index: inlineDataViewId },
           query: { match_phrase: { 'service.name': 'api' } },
         },
         {
-          meta: {
-            index: 'foreign-data-view-id',
-            key: 'host.name',
-            field: 'host.name',
-            params: { query: 'web-01' },
-            type: 'phrase',
-          },
+          meta: { index: 'foreign-data-view-id' },
           query: { match_phrase: { 'host.name': 'web-01' } },
         },
       ];
@@ -160,9 +148,7 @@ describe('discover session API transforms', () => {
 
       const { attributes, references } = transformDiscoverSessionIn(sessionState);
       const roundTrippedSearchSource = injectReferences(
-        parseSearchSourceJSON(
-          attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
-        ),
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
         references
       );
 
