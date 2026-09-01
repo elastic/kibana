@@ -20,6 +20,8 @@
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
+    "@kbn/cps",
+    "@kbn/cps-utils",
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
@@ -118,6 +120,7 @@
     "@kbn/core-chrome-browser-components",
     "@kbn/core-logging-server",
     "@kbn/projects-solutions-groups",
+    "@kbn/app-header",
     "@kbn/unsaved-changes-prompt",
     "@kbn/ui-callout",
   ],

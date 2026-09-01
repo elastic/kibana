@@ -538,15 +538,27 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       }
 
+      const dimensionTestSubj = `lns-indexPatternDimension-${operationType}${
+        compatibleWithCurrentField ? '' : ' incompatible'
+      }`;
+
       return {
         id: operationType as string,
-        label,
+        // Click target is the label (`-label`). The item button is width 100% and the
+        // function-help extraAction overlays its right edge, so a center-click on the
+        // button opens help instead of selecting the function.
+        label: (
+          <span
+            data-test-subj={`${dimensionTestSubj}-label`}
+            css={{ display: 'inline-block', maxWidth: '100%' }}
+          >
+            {label}
+          </span>
+        ),
         isActive,
         isDisabled: !!disabledStatus,
         css: operationsButtonStyles(euiThemeContext),
-        'data-test-subj': `lns-indexPatternDimension-${operationType}${
-          compatibleWithCurrentField ? '' : ' incompatible'
-        }`,
+        'data-test-subj': dimensionTestSubj,
         [`aria-pressed`]: isActive,
         extraAction: operationDefinitionMap[operationType].helpComponent
           ? {
