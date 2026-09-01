@@ -735,6 +735,7 @@ function getPreviewExpression(
             layerId,
             state: datasourceState,
             indexPatterns: frame.dataViews.indexPatterns,
+            activeData: frame.activeData?.[layerId],
           });
         }
         suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];

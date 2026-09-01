@@ -752,7 +752,12 @@ export function getTextBasedDatasource({
     },
     getDropProps,
     onDrop,
-    getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
+    getPublicAPI({
+      state,
+      layerId,
+      indexPatterns,
+      activeData,
+    }: PublicAPIProps<TextBasedPrivateState>) {
       return {
         datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
@@ -769,9 +774,16 @@ export function getTextBasedDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
+          if (!column) {
+            return null;
+          }
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
+          const dataType = resolveTextBasedColumnType(
+            column,
+            activeData?.columns.find((col) => col.id === columnId)
+          );
           let scale: OperationMetadata['scale'] = 'ordinal';
-          switch (column?.meta?.type) {
+          switch (dataType) {
             case 'date':
               scale = 'interval';
               break;
@@ -783,19 +795,16 @@ export function getTextBasedDatasource({
               break;
           }
 
-          if (column) {
-            return {
-              dataType: column?.meta?.type as DataType,
-              label: columnLabelMap[columnId] ?? column?.fieldName,
-              isBucketed: Boolean(isNotNumeric(column)),
-              inMetricDimension: column.inMetricDimension,
-              hasTimeShift: false,
-              hasReducedTimeRange: false,
-              ...(column.customLabel ? { customLabel: true } : {}),
-              scale,
-            };
-          }
-          return null;
+          return {
+            dataType,
+            label: columnLabelMap[columnId] ?? column.fieldName,
+            isBucketed: Boolean(isNotNumeric(column)),
+            inMetricDimension: column.inMetricDimension,
+            hasTimeShift: false,
+            hasReducedTimeRange: false,
+            ...(column.customLabel ? { customLabel: true } : {}),
+            scale,
+          };
         },
         getVisualDefaults: () => ({}),
         isTextBasedLanguage: () => true,

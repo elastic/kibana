@@ -256,6 +256,8 @@ export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
   indexPatterns: IndexPatternMap;
+  /** Inspector table for this layer. Text-based overlays Query Result Type in getOperationForColumnId; form-based ignores it. */
+  activeData?: Datatable;
 }
 
 export type FieldOnlyDataType =
@@ -504,12 +506,6 @@ export interface IndexPatternServiceAPI {
     newState: Partial<DataViewsState>,
     options?: { applyImmediately: boolean }
   ) => void;
-}
-
-export interface PublicAPIProps<T> {
-  state: T;
-  layerId: string;
-  indexPatterns: IndexPatternMap;
 }
 
 export interface EditorFrameProps {

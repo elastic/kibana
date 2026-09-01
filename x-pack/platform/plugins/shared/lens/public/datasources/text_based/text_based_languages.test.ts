@@ -1459,6 +1459,50 @@ describe('Textbased Data Source', () => {
       it('should return null for non-existant columns', () => {
         expect(publicAPI.getOperationForColumnId('col2')).toBe(null);
       });
+
+      it('should overlay type from activeData by columnId if present', () => {
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'heatmap_value_accessor_x',
+                  fieldName: '@timestamp',
+                  meta: {
+                    type: 'string',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+          activeData: {
+            type: 'datatable',
+            columns: [
+              {
+                id: 'heatmap_value_accessor_x',
+                name: '@timestamp',
+                meta: { type: 'date' },
+              },
+            ],
+            rows: [],
+          },
+        });
+        expect(publicAPI.getOperationForColumnId('heatmap_value_accessor_x')).toEqual({
+          label: '@timestamp',
+          dataType: 'date',
+          isBucketed: true,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'interval',
+        });
+      });
     });
 
     describe('getSourceId', () => {
