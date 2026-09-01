@@ -39,6 +39,17 @@ interface FormatContext {
 // should be dropped entirely rather than added to the document.
 const OMIT_FIELD = Symbol('omitField');
 
+const emptyObject = (): Record<string, unknown> => Object.create(null);
+
+const setOwn = (object: Record<string, unknown>, key: string, value: unknown): void => {
+  Object.defineProperty(object, key, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+};
+
 export interface NestedDocument {
   tree: JsonValue;
   truncated: boolean;
@@ -79,7 +90,7 @@ export const flattenedToNestedDocument = ({
   };
   const budget: ValueBudget = { remaining: MAX_TREE_VALUES, truncated: false };
   const metaFields = new Set(dataView.metaFields);
-  const documentFlat: Record<string, unknown> = {};
+  const documentFlat = emptyObject();
 
   // Step 1. Process field values. Nested fields / unwrap scalar values / expand JSON strings.
   // The result is still a flat object.
@@ -103,7 +114,7 @@ export const flattenedToNestedDocument = ({
 
     const value = processFieldValue(row.flattened[fieldName], fieldName, ctx, budget);
     if (value !== OMIT_FIELD) {
-      documentFlat[fieldName] = value;
+      setOwn(documentFlat, fieldName, value);
     }
   }
 
@@ -158,7 +169,7 @@ const processFieldValue = (
         budget.truncated = true;
         break;
       }
-      const inner: Record<string, unknown> = {};
+      const inner = emptyObject();
       for (const key of Object.keys(object)) {
         const qualifiedName = `${fieldName}.${key}`;
         if (!ctx.shouldShowFieldHandler(qualifiedName)) continue;
@@ -169,7 +180,7 @@ const processFieldValue = (
         }
         const value = processFieldValue(object[key], qualifiedName, ctx, budget);
         if (value !== OMIT_FIELD) {
-          inner[key] = value;
+          setOwn(inner, key, value);
         }
       }
       nested.push(unflattenKeys(inner));
@@ -236,10 +247,10 @@ const tryParsePerfectJson = (value: unknown, budget: ValueBudget): unknown => {
 
 // Build the nested document from the flat, dotted-key map. Parents are applied
 // first so a scalar (`aws.s3.bucket.name`) is not overwritten by a child key
-// (`aws.s3.bucket.name.keyword`). Numeric segments stay object keys, never array
-// indices — lodash `set` would otherwise build a sparse array for `latency.50`.
+// (`aws.s3.bucket.name.keyword`). Not using lodash `set` because it would otherwise build an array for `latency.50` key.
+// Using `emptyObject` and `setOwn` to avoid protoptype pollution.
 const unflattenKeys = (source: Record<string, unknown>): Record<string, unknown> => {
-  const target: Record<string, unknown> = {};
+  const target = emptyObject();
   const keys = Object.keys(source).sort(
     (left, right) => left.split('.').length - right.split('.').length
   );
@@ -253,23 +264,23 @@ const setNested = (target: Record<string, unknown>, path: string[], value: unkno
   let current = target;
   for (let i = 0; i < path.length - 1; i++) {
     const segment = path[i];
-    const existing = current[segment];
+    const existing = Object.hasOwn(current, segment) ? current[segment] : undefined;
     if (isPlainObject(existing)) {
       current = existing;
       continue;
     }
     if (existing === undefined) {
-      const next: Record<string, unknown> = {};
-      current[segment] = next;
+      const next = emptyObject();
+      setOwn(current, segment, next);
       current = next;
       continue;
     }
     // A scalar already occupies this path (parent field + multi-field). Keep the
     // scalar and store the remainder as a dotted key so both values stay visible.
-    current[path.slice(i).join('.')] = value;
+    setOwn(current, path.slice(i).join('.'), value);
     return;
   }
-  current[path[path.length - 1]] = value;
+  setOwn(current, path[path.length - 1], value);
 };
 
 // A flattened field is kept when it is a selected column, or a descendant of a selected object

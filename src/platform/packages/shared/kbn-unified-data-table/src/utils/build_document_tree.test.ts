@@ -177,6 +177,56 @@ describe('flattenedToNestedDocument', () => {
     });
   });
 
+  it('does not pollute Object.prototype when unflattening a nested __proto__ key', () => {
+    const { tree } = flattenedToNestedDocument({
+      row: {
+        id: '1',
+        raw: { _id: '1', _index: 'test' },
+        flattened: { '__proto__.polluted': true },
+      },
+      dataView: dataViewMock,
+      columnsMeta: undefined,
+      shouldShowFieldHandler: () => true,
+    });
+    if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
+      throw new Error('expected an object document tree');
+    }
+
+    expect(Object.hasOwn(Object.prototype, 'polluted')).toBe(false);
+    const canary: Record<string, unknown> = {};
+    expect(canary.polluted).toBeUndefined();
+    expect(Object.getPrototypeOf(tree)).toBeNull();
+    expect(Object.getOwnPropertyDescriptor(tree, '__proto__')?.value).toEqual({ polluted: true });
+  });
+
+  it('stores a __proto__ field as an own property instead of changing the document prototype', () => {
+    // A `{ __proto__: ... }` literal sets the object's prototype; define the field name explicitly.
+    const flattened: Record<string, unknown> = {};
+    Object.defineProperty(flattened, '__proto__', {
+      value: 'own',
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const { tree } = flattenedToNestedDocument({
+      row: {
+        id: '1',
+        raw: { _id: '1', _index: 'test' },
+        flattened,
+      },
+      dataView: dataViewMock,
+      columnsMeta: undefined,
+      shouldShowFieldHandler: () => true,
+    });
+    if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
+      throw new Error('expected an object document tree');
+    }
+
+    expect(Object.getPrototypeOf(tree)).toBeNull();
+    expect(Object.getOwnPropertyDescriptor(tree, '__proto__')?.value).toBe('own');
+  });
+
   it('preserves number and boolean types (so the tree still colours them by type)', () => {
     const tree = buildTree({
       _id: '1',
