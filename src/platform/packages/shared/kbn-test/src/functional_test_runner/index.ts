@@ -16,8 +16,10 @@ export {
   Lifecycle,
   LifecyclePhase,
   runCheckFtrConfigsCli,
+  runFtrConfigTestFilesCli,
   DedicatedTaskRunner,
 } from './lib';
+export type { FtrConfigTestFilesIndex } from './lib';
 export * from './cli';
 export * from './lib/docker_servers';
 export * from './public_types';

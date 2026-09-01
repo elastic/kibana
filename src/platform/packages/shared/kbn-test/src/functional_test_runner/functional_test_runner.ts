@@ -311,6 +311,45 @@ export class FunctionalTestRunner {
     });
   }
 
+  /**
+   * Enumerate the absolute paths of every test file this config would load, without
+   * booting ES/Kibana. Reuses the same stubbed-provider setup as `getTestStats`, then
+   * walks the assembled Mocha suite. Returns `undefined` for configs with a custom
+   * `testRunner` (their file set can't be introspected via Mocha).
+   */
+  async getTestFiles(): Promise<string[] | undefined> {
+    return await this.runHarness({ realServices: false }, async (lifecycle, coreProviders) => {
+      if (this.config.get('testRunner')) {
+        return undefined;
+      }
+
+      const providers = this.getStubProviderCollection(coreProviders);
+      const mocha = await setupMocha({
+        lifecycle,
+        log: this.log,
+        config: this.config,
+        providers,
+        skipRootHooks: true,
+        esVersion: this.esVersion,
+        reporter: 'base',
+      });
+
+      const files = new Set<string>();
+      const collect = (suite: Suite) => {
+        for (const test of suite.tests) {
+          if (test.file) files.add(test.file);
+        }
+        for (const child of suite.suites) {
+          if (child.file) files.add(child.file);
+          collect(child);
+        }
+      };
+      collect(mocha.suite);
+
+      return [...files];
+    });
+  }
+
   private getStubProviderCollection(coreProviders: Providers) {
     // when we want to load the tests but not actually run anything we can
     // use stubbed providers which allow mocha to do it's thing without taking
