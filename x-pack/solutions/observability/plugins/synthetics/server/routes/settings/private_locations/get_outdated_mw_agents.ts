@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { escapeQuotes } from '@kbn/es-query';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -21,6 +22,7 @@ interface AgentLocalMetadata {
 
 const PER_PAGE = 1000;
 const MAX_PAGES = 10;
+const LOCATION_AGENT_CONCURRENCY = 5;
 
 /**
  * True when the policy has at least one active enrolled agent whose version
@@ -80,18 +82,24 @@ export const getOutdatedMwAgentLocations: SyntheticsRestApiRouteFactory<
     );
 
     const outdatedLocationIds = (
-      await Promise.all(
-        locations.map(async (location) => {
+      await pMap(
+        locations,
+        async (location) => {
           if (!location.agentPolicyId || !server.fleet) {
             return null;
           }
           try {
             const outdated = await locationHasOutdatedMwAgent(server, location.agentPolicyId);
             return outdated ? location.id : null;
-          } catch {
+          } catch (error) {
+            server.logger.error(
+              `Failed to list Fleet agents for outdated MW check at private location ${location.id}`,
+              { error }
+            );
             return null;
           }
-        })
+        },
+        { concurrency: LOCATION_AGENT_CONCURRENCY, stopOnError: false }
       )
     )
       .filter((id): id is string => id != null)

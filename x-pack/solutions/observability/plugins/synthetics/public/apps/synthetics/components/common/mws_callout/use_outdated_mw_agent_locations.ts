@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import type { OutdatedMwAgentLocationsResponse } from '../../../../../../common/utils/agent_mw_support';
 import { apiService } from '../../../../../utils/api_service/api_service';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 /**
@@ -19,7 +20,8 @@ import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
  */
 export const useOutdatedMwAgentLocationIds = () => {
   const spaceId = useUrlSpaceId();
-  const { data } = useFetcher(
+  const { lastRefresh } = useSyntheticsRefreshContext();
+  const fetchOutdatedLocations = useCallback(
     () =>
       apiService.get<OutdatedMwAgentLocationsResponse>(
         SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS,
@@ -27,6 +29,7 @@ export const useOutdatedMwAgentLocationIds = () => {
       ),
     [spaceId]
   );
+  const { data } = useFetcher(fetchOutdatedLocations, [fetchOutdatedLocations, lastRefresh]);
 
   const outdatedLocationIds = useMemo(() => new Set(data?.outdatedLocationIds ?? []), [data]);
 

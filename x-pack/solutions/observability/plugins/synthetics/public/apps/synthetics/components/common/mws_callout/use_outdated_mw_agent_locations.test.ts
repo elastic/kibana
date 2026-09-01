@@ -21,6 +21,10 @@ jest.mock('../../../hooks/use_url_space_id', () => ({
   useUrlSpaceId: jest.fn(),
 }));
 
+jest.mock('../../../contexts', () => ({
+  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+}));
+
 jest.mock('../../../../../utils/api_service/api_service', () => ({
   apiService: { get: jest.fn() },
 }));
@@ -62,7 +66,7 @@ describe('useOutdatedMwAgentLocationIds', () => {
     expect(result.current.outdatedLocationIds.has('loc-ok')).toBe(false);
   });
 
-  it('fetches in the viewed monitor space and refetches when that space changes', async () => {
+  it('fetches in the viewed monitor space and refetches when that space or lastRefresh changes', async () => {
     mockUseUrlSpaceId.mockReturnValue('team-a');
     setData([]);
     mockApiGet.mockResolvedValue({ outdatedLocationIds: [] });
@@ -70,7 +74,7 @@ describe('useOutdatedMwAgentLocationIds', () => {
     renderHook(() => useOutdatedMwAgentLocationIds());
 
     const [fetch, deps] = mockUseFetcher.mock.calls[0];
-    expect(deps).toEqual(['team-a']);
+    expect(deps).toEqual([fetch, 0]);
     await fetch({ signal: new AbortController().signal });
     expect(mockApiGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS,

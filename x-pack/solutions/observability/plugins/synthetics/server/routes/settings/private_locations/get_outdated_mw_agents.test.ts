@@ -28,8 +28,11 @@ const agent = (over: FakeAgent = {}): FakeAgent => ({
   ...over,
 });
 
-const makeContext = (listAgentsImpl: jest.Mock) => ({
-  server: { fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } } },
+const makeContext = (listAgentsImpl: jest.Mock, loggerError = jest.fn()) => ({
+  server: {
+    fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
+    logger: { error: loggerError },
+  },
   savedObjectsClient: {},
   syntheticsMonitorClient: {},
 });
@@ -149,9 +152,14 @@ describe('getOutdatedMwAgentLocations route', () => {
 
   it('skips a location when Fleet listing fails', async () => {
     const listAgents = jest.fn().mockRejectedValue(new Error('fleet down'));
+    const loggerError = jest.fn();
 
-    const result = await run(makeContext(listAgents));
+    const result = await run(makeContext(listAgents, loggerError));
 
     expect(result.outdatedLocationIds).toEqual([]);
+    expect(loggerError).toHaveBeenCalledWith(
+      'Failed to list Fleet agents for outdated MW check at private location loc-1',
+      { error: expect.any(Error) }
+    );
   });
 });
