@@ -14,53 +14,72 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ApiConfig, Replacements } from '../common_attributes.gen';
 import { AttackDiscoveries } from './attack_discovery.gen';
 
+export const CreateAttackDiscoveryAlertsParams = lazySchema(() =>
+  z.object({
+    /**
+     * The number of alerts provided as context to the LLM
+     */
+    alerts_context_count: z
+      .number()
+      .int()
+      .describe('The number of alerts provided as context to the LLM'),
+    /**
+     * The anonymized alerts that were used to generate the attack discovery
+     */
+    anonymized_alerts: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          metadata: z.object({}).catchall(z.unknown()),
+          page_content: z.string(),
+        })
+      )
+      .describe('The anonymized alerts that were used to generate the attack discovery'),
+    /**
+     * LLM API configuration
+     */
+    api_config: ApiConfig.describe('LLM API configuration'),
+    /**
+     * The generated Attack discoveries
+     */
+    attack_discoveries: AttackDiscoveries.describe('The generated Attack discoveries'),
+    /**
+     * The name of the connector that generated the attack discovery
+     */
+    connector_name: z
+      .string()
+      .describe('The name of the connector that generated the attack discovery'),
+    /**
+     * Enables a markdown syntax used to render pivot fields.
+     */
+    enable_field_rendering: z
+      .boolean()
+      .describe('Enables a markdown syntax used to render pivot fields.'),
+    /**
+     * The generation ID of the run that created the attack discovery
+     */
+    generation_uuid: z
+      .string()
+      .describe('The generation ID of the run that created the attack discovery'),
+    /**
+     * Replacements enable anonymization of data sent to the LLM.
+     */
+    replacements: Replacements.optional().describe(
+      'Replacements enable anonymization of data sent to the LLM.'
+    ),
+    /**
+     * When true, return the created Attack discoveries with text replacements applied to markdown fields.
+     */
+    with_replacements: z
+      .boolean()
+      .describe(
+        'When true, return the created Attack discoveries with text replacements applied to markdown fields.'
+      ),
+  })
+);
 export type CreateAttackDiscoveryAlertsParams = z.infer<typeof CreateAttackDiscoveryAlertsParams>;
-export const CreateAttackDiscoveryAlertsParams = z.object({
-  /**
-   * The number of alerts provided as context to the LLM
-   */
-  alerts_context_count: z.number().int(),
-  /**
-   * The anonymized alerts that were used to generate the attack discovery
-   */
-  anonymized_alerts: z.array(
-    z.object({
-      id: z.string().optional(),
-      metadata: z.object({}).catchall(z.unknown()),
-      page_content: z.string(),
-    })
-  ),
-  /**
-   * LLM API configuration
-   */
-  api_config: ApiConfig,
-  /**
-   * The generated Attack discoveries
-   */
-  attack_discoveries: AttackDiscoveries,
-  /**
-   * The name of the connector that generated the attack discovery
-   */
-  connector_name: z.string(),
-  /**
-   * Enables a markdown syntax used to render pivot fields.
-   */
-  enable_field_rendering: z.boolean(),
-  /**
-   * The generation ID of the run that created the attack discovery
-   */
-  generation_uuid: z.string(),
-  /**
-   * Replacements enable anonymization of data sent to the LLM.
-   */
-  replacements: Replacements.optional(),
-  /**
-   * When true, return the created Attack discoveries with text replacements applied to markdown fields.
-   */
-  with_replacements: z.boolean(),
-});

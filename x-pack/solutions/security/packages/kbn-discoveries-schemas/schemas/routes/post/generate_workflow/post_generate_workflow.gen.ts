@@ -14,29 +14,37 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const PostGenerateWorkflowRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The connector ID for the LLM to use for workflow generation
+     */
+    connector_id: z
+      .string()
+      .describe('The connector ID for the LLM to use for workflow generation'),
+    /**
+     * A natural language description of the alert retrieval workflow to generate
+     */
+    description: z
+      .string()
+      .describe('A natural language description of the alert retrieval workflow to generate'),
+  })
+);
 export type PostGenerateWorkflowRequestBody = z.infer<typeof PostGenerateWorkflowRequestBody>;
-export const PostGenerateWorkflowRequestBody = z.object({
-  /**
-   * The connector ID for the LLM to use for workflow generation
-   */
-  connector_id: z.string(),
-  /**
-   * A natural language description of the alert retrieval workflow to generate
-   */
-  description: z.string(),
-});
 export type PostGenerateWorkflowRequestBodyInput = z.input<typeof PostGenerateWorkflowRequestBody>;
 
+export const PostGenerateWorkflowResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the generated workflow
+     */
+    workflow_id: z.string().describe('The unique identifier of the generated workflow'),
+    /**
+     * The human-readable name of the generated workflow
+     */
+    workflow_name: z.string().describe('The human-readable name of the generated workflow'),
+  })
+);
 export type PostGenerateWorkflowResponse = z.infer<typeof PostGenerateWorkflowResponse>;
-export const PostGenerateWorkflowResponse = z.object({
-  /**
-   * The unique identifier of the generated workflow
-   */
-  workflow_id: z.string(),
-  /**
-   * The human-readable name of the generated workflow
-   */
-  workflow_name: z.string(),
-});

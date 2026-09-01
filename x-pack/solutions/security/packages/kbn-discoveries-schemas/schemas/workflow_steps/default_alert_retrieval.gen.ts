@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AnonymizationFieldResponse } from '../anonymization_fields/anonymization_field_response.gen';
 import { ApiConfig, Replacements } from '../common_attributes.gen';
@@ -22,77 +22,90 @@ import { ApiConfig, Replacements } from '../common_attributes.gen';
 /**
  * Input for the default alert retrieval workflow step
  */
+export const DefaultAlertRetrievalInput = lazySchema(() =>
+  z.object({
+    /**
+     * The index pattern for security alerts
+     */
+    alerts_index_pattern: z.string().describe('The index pattern for security alerts'),
+    /**
+     * Fields to anonymize
+     */
+    anonymization_fields: z.array(AnonymizationFieldResponse).describe('Fields to anonymize'),
+    /**
+     * Connector configuration
+     */
+    api_config: ApiConfig.describe('Connector configuration'),
+    /**
+     * Query filter for alerts
+     */
+    filter: z.object({}).catchall(z.unknown()).optional().describe('Query filter for alerts'),
+    /**
+     * Maximum number of alerts to retrieve
+     */
+    size: z.number().int().describe('Maximum number of alerts to retrieve'),
+    /**
+     * Start time for alert query (ISO 8601 or relative like 'now-24h')
+     */
+    start: z
+      .string()
+      .optional()
+      .describe("Start time for alert query (ISO 8601 or relative like 'now-24h')"),
+    /**
+     * End time for alert query (ISO 8601 or relative like 'now')
+     */
+    end: z
+      .string()
+      .optional()
+      .describe("End time for alert query (ISO 8601 or relative like 'now')"),
+    /**
+     * Existing anonymization replacements to use
+     */
+    replacements: Replacements.optional().describe('Existing anonymization replacements to use'),
+  })
+);
 export type DefaultAlertRetrievalInput = z.infer<typeof DefaultAlertRetrievalInput>;
-export const DefaultAlertRetrievalInput = z.object({
-  /**
-   * The index pattern for security alerts
-   */
-  alerts_index_pattern: z.string(),
-  /**
-   * Fields to anonymize
-   */
-  anonymization_fields: z.array(AnonymizationFieldResponse),
-  /**
-   * Connector configuration
-   */
-  api_config: ApiConfig,
-  /**
-   * Query filter for alerts
-   */
-  filter: z.object({}).catchall(z.unknown()).optional(),
-  /**
-   * Maximum number of alerts to retrieve
-   */
-  size: z.number().int(),
-  /**
-   * Start time for alert query (ISO 8601 or relative like 'now-24h')
-   */
-  start: z.string().optional(),
-  /**
-   * End time for alert query (ISO 8601 or relative like 'now')
-   */
-  end: z.string().optional(),
-  /**
-   * Existing anonymization replacements to use
-   */
-  replacements: Replacements.optional(),
-});
 
 /**
  * Output from the default alert retrieval workflow step
  */
+export const DefaultAlertRetrievalOutput = lazySchema(() =>
+  z.object({
+    /**
+     * Retrieved alerts in a format compatible with the Attack Discovery prompt
+     */
+    alerts: z
+      .array(z.string())
+      .describe('Retrieved alerts in a format compatible with the Attack Discovery prompt'),
+    /**
+     * Updated anonymization replacements map
+     */
+    replacements: Replacements.describe('Updated anonymization replacements map'),
+    /**
+     * Connector configuration (passed through for generation step)
+     */
+    api_config: ApiConfig.describe('Connector configuration (passed through for generation step)'),
+    /**
+     * Name of the connector
+     */
+    connector_name: z.string().optional().describe('Name of the connector'),
+    /**
+     * Number of alerts retrieved
+     */
+    alerts_context_count: z.number().int().describe('Number of alerts retrieved'),
+    /**
+     * Anonymized alerts as Document objects
+     */
+    anonymized_alerts: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          metadata: z.object({}),
+          page_content: z.string(),
+        })
+      )
+      .optional()
+      .describe('Anonymized alerts as Document objects'),
+  })
+);
 export type DefaultAlertRetrievalOutput = z.infer<typeof DefaultAlertRetrievalOutput>;
-export const DefaultAlertRetrievalOutput = z.object({
-  /**
-   * Retrieved alerts in a format compatible with the Attack Discovery prompt
-   */
-  alerts: z.array(z.string()),
-  /**
-   * Updated anonymization replacements map
-   */
-  replacements: Replacements,
-  /**
-   * Connector configuration (passed through for generation step)
-   */
-  api_config: ApiConfig,
-  /**
-   * Name of the connector
-   */
-  connector_name: z.string().optional(),
-  /**
-   * Number of alerts retrieved
-   */
-  alerts_context_count: z.number().int(),
-  /**
-   * Anonymized alerts as Document objects
-   */
-  anonymized_alerts: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        metadata: z.object({}),
-        page_content: z.string(),
-      })
-    )
-    .optional(),
-});
