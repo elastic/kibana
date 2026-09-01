@@ -198,7 +198,7 @@ Invalid (schema rejects; assemble the completed object offline instead): `{}`, `
 
 Same failure class as a prior `80-critical` open event: emit `80-critical`. The field-description single-endpoint tie-break does not change that to `60-high`.
 
-Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true }] }`. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an ES item failure returns `written: false, reason: "bulk_error"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and severity, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
+Response: `{ "results": [{ "index": 0, "event_id": "...", "severity": "...", "written": true }] }`. The returned `severity` is the server-materialized value and may differ from the submitted assessment when a fresh investigation assessment wins. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; an ES item failure returns `written: false, reason: "bulk_error"`.
 
 </tool_examples>
 
@@ -436,16 +436,15 @@ Only after grounding, routing, grouping, and status/severity decisions for remai
 4. **Persist once.** Complete the request object shown in `<tool_examples>` for `platform_sig_events_events_write`, including top-level `"source": "discovery"`, apply <field_rules>, then pass that exact non-empty object to `platform_sig_events_events_write` once. An event decision is incomplete until its `items` array is populated. If a missing-`items` schema error occurs, the next call is the already-completed `{ "source": "discovery", "items": [ ... ] }` object — one recovery write, not another empty body. If the populated write is rejected because a `confirms` item includes `not_checked` or a `rule_uuid` appears more than once, rebuild `items` from the ownership map (each UUID once; each `not_checked` on its own `dismissed` item) and call once more. Do not retry any other field-validation rejection. Retry strategy by reason:
 
    - `bulk_error`: retry the item once, unchanged.
-   - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
    - All other failures: do not retry.
 5. **Optional memory write-back.** Consider one patch only after a `written: true` item whose grounded mechanism matched a read page and whose history lacks that item's rule UUID. Never patch a known-noise exit, `unchanged_outcome`, `existing_active_event`, an unrelated page, or a page already patched this cycle. Append one production-style history bullet under `Detection history`; when the item's grounding produced rate evidence, include the observed background rate (approximate matching rows per minute) in the bullet so later cycles can tell background from a step-up. If that patch fails, continue without retrying or creating a new page.
 6. **Cold-start page creation.** When a `written: true` item's grounded mechanism is chronic — rate evidence shows matching rows at a steady pre/post rate across the grounding window, or the item is a third-or-later unchanged continuation — and no read page covers that mechanism, call `platform_sig_events_memory_write` once to create one known-ongoing page: name the mechanism, the `rule_uuid`, the stream, and the observed background rate (approximate matching rows per minute) so future cycles can match it, apply the cap, and detect step-ups against that baseline. Create at most one page per cycle, never for a known-noise exit or an off-topic row, and do not retry a failed write.
 
-Build structured `significant_events` from tool results — copy `event_uuid`, `event_id`, `status`, `written`, and `reason` exactly. Include `narrative_preserved: true` when the tool result carries it (the server preserved the stored title and symptom_hypothesis because no new rules were introduced).
+Build structured `significant_events` from tool results — copy `event_uuid`, `event_id`, `severity`, `status`, `written`, and `reason` exactly when each field is present. Omit severity for a failed result that does not return one; never substitute the submitted value. Include `narrative_preserved: true` when the tool result carries it (the server preserved the stored title and symptom_hypothesis because no new rules were introduced).
 
 Set `written_rule_uuids` to the union of:
 (a) every already-recorded-noise exit `rule_uuid`, and
-(b) every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`. Exclude `bulk_error` and `duplicate_in_batch` items that were not successfully retried.
+(b) every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"`. Exclude `bulk_error` and `duplicate_in_batch` items that were not successfully retried.
 
 </procedure>
 

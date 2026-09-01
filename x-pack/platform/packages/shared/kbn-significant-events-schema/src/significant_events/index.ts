@@ -31,10 +31,12 @@ export {
   type SignificantEvent,
   type SignificantEventResponse,
   type SignificantEventInvestigation,
+  type SeverityAssessment,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   significantEventInvestigationSchema,
+  severityAssessmentSchema,
   significantEventSchema,
   significantEventStatusSchema,
 } from './events';

@@ -110,6 +110,34 @@ describe('updateSignificantEventStatus', () => {
     expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
   });
 
+  it('preserves severity assessment history without rematerializing severity', async () => {
+    const severityAssessments: SignificantEvent['severity_assessments'] = [
+      {
+        source: 'investigation',
+        severity: '20-low',
+        assessed_at: '2026-01-01T00:00:00.000Z',
+        workflow_execution_id: 'workflow-1',
+      },
+    ];
+    const existing = createSignificantEvent({
+      severity: '60-high',
+      severity_assessments: severityAssessments,
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await updateSignificantEventStatus({
+      eventClient: client,
+      eventUuid: existing.event_uuid,
+      status: 'closed',
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0]).toMatchObject({
+      severity: '60-high',
+      severity_assessments: severityAssessments,
+    });
+  });
+
   it('ignores when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 
