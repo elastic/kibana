@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Exercises the management app's registration and routing contract against real
-// shipped sections instead of a synthetic --plugin-path test plugin, which rspack
-// does not build browser bundles for. A registered section mounts from the
-// sidebar, routes within itself via the scoped history it receives from mount(),
-// and browser history returns to the landing page; a section whose owning feature
-// is disabled in a space redirects to the landing page.
-//
-// Index Management stands in for the test plugin's in-app routing: its header tabs
-// call `history.push('/<section>')` on the section's own scoped history, the same
-// contract the original test asserted with a synthetic basePath-prefixed link.
+// Exercises the management app's registration and routing contract against a real
+// shipped section instead of a synthetic --plugin-path test plugin, which rspack
+// does not build browser bundles for. This asserts only what the management
+// framework owns: a registered section opens from the sidebar into its own route,
+// browser history returns to the landing page, and a section whose owning feature
+// is disabled in a space redirects to the landing page. Routing *within* a section
+// (the scoped history a section receives from mount()) is that section's own
+// contract — Index Management covers it in
+// x-pack/.../index_management/test/scout/ui/tests/home_page.spec.ts.
 //
 // FTR source: src/platform/test/plugin_functional/test_suites/management/management_plugin.ts
 
@@ -47,32 +46,21 @@ test.describe('Management plugin routing', { tag: tags.stateful.classic }, () =>
     await apiServices.spaces.delete(disabledSectionSpaceId);
   });
 
-  test('mounts a registered section and routes within it', async ({ page, pageObjects }) => {
+  test('opens a registered section from the sidebar and returns home', async ({
+    page,
+    pageObjects,
+  }) => {
     await pageObjects.management.goto();
 
     await test.step('open a registered section from the management sidebar', async () => {
       await page.testSubj.locator('index_management').click();
 
-      // Assert the section app actually mounted, not just that the URL changed.
-      await expect(page.testSubj.locator('indicesTab')).toBeVisible();
-      await expect(page).toHaveURL(/\/app\/management\/data\/index_management\/indices(?:[?#/]|$)/);
-    });
-
-    await test.step('navigate within the section via its scoped history', async () => {
-      // The tab click is an in-app `history.push` on the section's own history,
-      // not a full navigation — the URL changes client-side and the app stays
-      // mounted, which is what the original test's basePath link proved.
-      await page.testSubj.locator('templatesTab').click();
-
-      await expect(page).toHaveURL(
-        /\/app\/management\/data\/index_management\/templates(?:[?#/]|$)/
-      );
-      await expect(page.testSubj.locator('templateList')).toBeVisible();
+      // Management owns the routing, not the section content: assert the section
+      // route without reaching into the section's internal DOM.
+      await expect(page).toHaveURL(/\/app\/management\/data\/index_management(?:[?#/]|$)/);
     });
 
     await test.step('return to the management landing page', async () => {
-      // Two back steps: templates -> indices (in-app) -> management landing.
-      await page.goBack();
       await page.goBack();
 
       await expect(page.testSubj.locator('managementHome')).toBeVisible();

@@ -29,12 +29,6 @@ const { KBN_ARCHIVES, NDJSON_EXPORTS, IMPORT_FIXTURE_OBJECTS } = testData;
 
 const ndjsonPath = (relativePath: string) => Path.resolve(REPO_ROOT, relativePath);
 
-// Flyout row order is not guaranteed, so compare on a stable ordering.
-const sortRelationships = <T extends { title: string; relationship: string }>(rows: T[]): T[] =>
-  [...rows].sort((a, b) =>
-    `${a.title}:${a.relationship}`.localeCompare(`${b.title}:${b.relationship}`)
-  );
-
 test.describe('Saved objects management - import objects', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects }) => {
     // Seeds the `logstash-*` data view the imported objects reference, plus the
@@ -66,12 +60,13 @@ test.describe('Saved objects management - import objects', { tag: tags.stateful.
 
       // The archive contributes the Shared-Item visualization; the import adds
       // Log Agents. Both reference the data view, so both are listed as parents.
-      // Poll: the flyout table renders its rows asynchronously, so a single read
-      // can catch a partially-populated table.
+      // Assert containment, not totality: another suite on the shared server
+      // could reference the same data view. Poll because the flyout table
+      // renders its rows asynchronously.
       await expect
-        .poll(() => som.getRelationships().then(sortRelationships))
+        .poll(() => som.getRelationships())
         .toStrictEqual(
-          sortRelationships([
+          expect.arrayContaining([
             { title: IMPORT_FIXTURE_OBJECTS.SHARED_ITEM_VIZ_TITLE, relationship: 'Parent' },
             { title: IMPORT_FIXTURE_OBJECTS.LOG_AGENTS_TITLE, relationship: 'Parent' },
           ])
@@ -86,12 +81,13 @@ test.describe('Saved objects management - import objects', { tag: tags.stateful.
     await som.clickRelationshipsByTitle(IMPORT_FIXTURE_OBJECTS.CIRCULAR_DASHBOARD_A);
 
     // dashboard-a and dashboard-b reference each other, so the single related
-    // object is listed twice — once in each direction. Poll: the flyout table
-    // renders its rows asynchronously.
+    // object is listed twice — once in each direction. The flyout here is scoped
+    // to the just-imported dashboard-a, so containment still fully proves the
+    // both-directions relationship. Poll: the flyout table renders asynchronously.
     await expect
-      .poll(() => som.getRelationships().then(sortRelationships))
+      .poll(() => som.getRelationships())
       .toStrictEqual(
-        sortRelationships([
+        expect.arrayContaining([
           { title: IMPORT_FIXTURE_OBJECTS.CIRCULAR_DASHBOARD_B, relationship: 'Parent' },
           { title: IMPORT_FIXTURE_OBJECTS.CIRCULAR_DASHBOARD_B, relationship: 'Child' },
         ])

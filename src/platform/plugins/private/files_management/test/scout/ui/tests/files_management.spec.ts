@@ -16,11 +16,12 @@
 //
 // FTR source: src/platform/test/functional/apps/management/group4/_files.ts
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-const { FILES_API, FILE_KIND } = testData;
+const { FILES_API } = testData;
 
 test.describe('Files management', { tag: tags.stateful.classic }, () => {
   const createdFileIds: string[] = [];
@@ -30,9 +31,12 @@ test.describe('Files management', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    while (createdFileIds.length > 0) {
-      const id = createdFileIds.pop()!;
-      await kbnClient.request({ method: 'DELETE', path: FILES_API.delete(FILE_KIND, id) });
+    for (const id of createdFileIds.splice(0)) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: FILES_API.delete(id),
+        ignoreErrors: [404],
+      });
     }
   });
 
@@ -45,7 +49,7 @@ test.describe('Files management', { tag: tags.stateful.classic }, () => {
     const { data } = await kbnClient.request<{ file: { id: string } }>({
       method: 'POST',
       path: FILES_API.CREATE,
-      body: { name: `diagnostics-${Math.random().toString(36).slice(2)}`, mimeType: 'image/png' },
+      body: { name: `diagnostics-${randomUUID()}`, mimeType: 'image/png' },
     });
     createdFileIds.push(data.file.id);
 

@@ -123,12 +123,12 @@ apiTest.describe(
         // references is absent.
         //
         // The visualization references the saved search, and a reference to an
-        // object in the same file counts as satisfied — so the visualization is
-        // created even though the saved search it points at was rejected,
-        // leaving a dangling reference. The FTR test this replaces asserted the
-        // opposite ("saved object connected to saved search" absent from the
-        // SOM table); that expectation does not match the API, which reports
-        // `successCount: 1` for exactly this payload.
+        // object in the same file counts as satisfied — so the raw `_import`
+        // API creates the visualization even though the saved search it points
+        // at was rejected, leaving a dangling reference. This asserts that API
+        // contract; the end-to-end UI flow (import via the flyout, Confirm
+        // Changes with the reference unresolved, and the visualization dropped
+        // from the table) is covered in `ui/tests/import_conflicts.spec.ts`.
         const response = await importFixture(apiClient, NDJSON_EXPORTS.WITH_SAVED_SEARCH);
 
         expect(response).toHaveStatusCode(200);

@@ -18,6 +18,7 @@
 // FTR source: src/platform/test/functional/apps/management/group4/_kibana_settings.ts
 //             -> describe('state:storeInSessionStorage')
 
+import { randomUUID } from 'crypto';
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -29,7 +30,7 @@ const SETTING = 'state:storeInSessionStorage';
 // app shows the "no data" prompt and `openNewDashboard` never finds its toolbar).
 // The title is namespaced per run so it never collides with (or clobbers) a
 // well-known data view another suite on the shared server might rely on.
-const DATA_VIEW_TITLE = `state-store-${Math.random().toString(36).slice(2)}-*`;
+const DATA_VIEW_TITLE = `state-store-${randomUUID()}-*`;
 
 // Kibana stamps hashed state with this literal prefix (kibana_utils
 // state_hash.ts HASH_PREFIX), so `_g=h@…` is an exact hashed/unhashed signal.
@@ -61,7 +62,10 @@ test.describe(
       dataViewId = data.id;
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      // Normalize the shared setting up front too: an aborted earlier run could
+      // leave it enabled, which would fail step 1's default-off assertion.
+      await kbnClient.uiSettings.unset(SETTING);
       await browserAuth.loginAsAdmin();
     });
 
