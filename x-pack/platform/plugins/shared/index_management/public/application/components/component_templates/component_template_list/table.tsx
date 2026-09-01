@@ -227,7 +227,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
     <EuiButton
       key="reloadButton"
       iconType="refresh"
-      color="success"
       data-test-subj="reloadButton"
       onClick={onReloadClick}
     >

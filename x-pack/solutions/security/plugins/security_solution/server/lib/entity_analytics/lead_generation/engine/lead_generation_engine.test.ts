@@ -7,9 +7,9 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { LeadEntity, Observation, ObservationModule } from '../types';
+import type { LeadEntity, Observation, ObservationModule, ScoredEntity } from '../types';
 import { createLeadGenerationEngine, computeCohortContext } from './lead_generation_engine';
-import { llmSynthesizeBatch, type ScoredEntityInput } from './llm_synthesize';
+import { llmSynthesizeBatch } from './llm_synthesize';
 
 jest.mock('./llm_synthesize');
 
@@ -686,8 +686,8 @@ describe('LeadGenerationEngine', () => {
 });
 
 describe('computeCohortContext', () => {
-  const scored = (id: string, types: string[]): ScoredEntityInput => ({
-    entity: { id, type: 'user', name: id, record: {} as ScoredEntityInput['entity']['record'] },
+  const scored = (id: string, types: string[]): ScoredEntity => ({
+    entity: { id, type: 'user', name: id, record: {} as ScoredEntity['entity']['record'] },
     priority: 5,
     observations: types.map((type) => ({
       entityId: id,
@@ -699,10 +699,12 @@ describe('computeCohortContext', () => {
       description: 'd',
       metadata: {},
     })),
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
   });
 
   it('counts each entity once per observation type', () => {
-    const candidates: ScoredEntityInput[] = [
+    const candidates: ScoredEntity[] = [
       scored('user:a', ['risk_escalation_24h', 'risk_escalation_24h', 'ml_anomaly']),
       scored('user:b', ['risk_escalation_24h']),
       scored('user:c', ['governance_gap']),

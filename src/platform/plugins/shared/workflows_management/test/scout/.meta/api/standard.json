@@ -1,5 +1,5 @@
 {
-  "sha1": "27ccd3fe231a0ff084a7a50cf51361ca3122efae",
+  "sha1": "3d95fd57753b202e119d85c68b8ae33ae5602565",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -188,7 +188,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 109,
+        "line": 112,
         "column": 21
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 137,
+        "line": 142,
         "column": 15
       }
     },
@@ -228,7 +228,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 165,
+        "line": 172,
         "column": 22
       }
     },
