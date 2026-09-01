@@ -961,7 +961,7 @@ export const resolveSharedPackagePolicyShard = (
 };
 
 // ---------------------------------------------------------------------------
-// Targeting scope helpers (tasks 1.1 and 1.2)
+// Targeting scope helpers
 // ---------------------------------------------------------------------------
 
 /** Classification of a resolved package policy relative to a pack's target set. */

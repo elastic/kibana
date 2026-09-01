@@ -10,6 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
+import { API_VERSIONS, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
@@ -61,8 +62,14 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
     ['osquery-package-policies-for-targeting-check'],
     () =>
       http.get('/api/fleet/package_policies', {
+        // Public versioned route: without an explicit version it 400s in
+        // production (dev mode masks this by falling back to the latest).
+        version: API_VERSIONS.public.v1,
         query: {
-          kuery: `package_policies.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          // Prefix is the saved-object type, not `package_policies.` (Fleet
+          // rejects an unknown type with a 400) and without `.attributes.`
+          // (this endpoint rejects that path as a non-existent key).
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:"${OSQUERY_INTEGRATION_NAME}"`,
           perPage: FLEET_LOOKUP_PER_PAGE,
         },
       }),
@@ -100,14 +107,17 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
     [untargetedPolicyIds]
   );
 
+  // `_bulk_get` rather than a `kuery` on `/agent_policies`: an agent policy's id
+  // is the saved-object id, which is not a queryable field on that endpoint
+  // (`agent_policies.id:"<id>"` is rejected as a non-existent key, and `id:"<id>"`
+  // silently matches nothing). This mirrors the server's `getByIds`, including
+  // `ignoreMissing` for a policy deleted since the package-policy read.
   const { data: agentPoliciesData } = useQuery<AgentPoliciesResponse>(
     ['osquery-agent-policies-for-targeting-warning', untargetedIdsKey],
     () =>
-      http.get('/api/fleet/agent_policies', {
-        query: {
-          kuery: untargetedPolicyIds.map((id) => `agent_policies.id:"${id}"`).join(' or '),
-          perPage: FLEET_LOOKUP_PER_PAGE,
-        },
+      http.post('/api/fleet/agent_policies/_bulk_get', {
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({ ids: untargetedPolicyIds, ignoreMissing: true }),
       }),
     {
       enabled: untargetedPolicyIds.length > 0,
@@ -134,6 +144,7 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
 
   return (
     <>
+      <EuiSpacer size="m" />
       {/* aria-live region so assistive technology announces this as a status message */}
       <div role="status" aria-live="polite" aria-atomic="true">
         <EuiCallOut
@@ -151,7 +162,6 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
           />
         </EuiCallOut>
       </div>
-      <EuiSpacer size="m" />
     </>
   );
 };

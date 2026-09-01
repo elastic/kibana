@@ -1818,16 +1818,26 @@ describe('resolvePackTargetScope (classify package policies as exact or over-bro
   });
 
   it('global pack is always exact even if the package policy is shared', () => {
+    // `agentPolicyIds` is deliberately NARROWER than the package policy's
+    // `policy_ids`: with `isGlobalPack` false this is `over-broad`, so the
+    // assertion below only holds because the flag short-circuits. An identical
+    // fixture with `agentPolicyIds === policy_ids` would pass either way and
+    // would not pin this branch at all.
     const targets = makeWriteTargets([
       {
         ppId: 'pp-shared',
         policyIds: ['agent-a', 'agent-b'],
-        agentPolicyIds: ['agent-a', 'agent-b'],
+        agentPolicyIds: ['agent-a'],
       },
     ]);
     const [result] = resolvePackTargetScope(targets, true);
     expect(result.kind).toBe('exact');
     expect(result.untargetedAgentPolicyIds).toEqual([]);
+
+    // Same input, non-global: proves the flag is what makes the difference.
+    const [nonGlobal] = resolvePackTargetScope(targets, false);
+    expect(nonGlobal.kind).toBe('over-broad');
+    expect(nonGlobal.untargetedAgentPolicyIds).toEqual(['agent-b']);
   });
 
   it('returns empty array for an empty write-targets map', () => {

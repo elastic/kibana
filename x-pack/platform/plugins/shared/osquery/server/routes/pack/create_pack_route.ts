@@ -242,13 +242,15 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ? groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies)
           : new Map<string, { packagePolicy: PackagePolicy; agentPolicyIds: string[] }>();
 
-        // Detect over-broad package policies (targeting warning).
+        // Detect over-broad package policies (targeting warning). Only meaningful
+        // when the pack is actually written below — a disabled pack reaches no
+        // agent policy at all, so warning about over-reach would be misleading
+        // (and would cost a needless agent-policy lookup).
         const scopeResults = resolvePackTargetScope(packagePolicyWriteTargets, isGlobalPack);
-        const targetingWarning: TargetingWarning | undefined = await buildTargetingWarning(
-          scopeResults,
-          agentPolicyService,
-          spaceScopedClient
-        );
+        const targetingWarning: TargetingWarning | undefined =
+          enabled && policiesList.length
+            ? await buildTargetingWarning(scopeResults, agentPolicyService, spaceScopedClient)
+            : undefined;
 
         if (enabled && policiesList.length) {
           const packKey = makePackKey(packSO.attributes.name, spaceId);

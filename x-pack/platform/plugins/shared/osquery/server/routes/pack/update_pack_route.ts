@@ -555,8 +555,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               retargetScopeResults.map(({ packagePolicy }) => packagePolicy.id)
             );
 
-            // Detach: strip the pack from any package policy that no longer carries
-            // it (wire-scan driven; also strips over-broad policies task 3.3).
+            // Detach: strip the pack from any package policy that is no longer a
+            // write target (wire-scan driven, so it also repairs drifted blocks).
             await Promise.all(
               currentPackagePolicies
                 .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
@@ -785,9 +785,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           throw err;
         }
 
-        // Detect over-broad package policies and build a targeting warning.
+        // Detect over-broad package policies and build a targeting warning. Only
+        // meaningful while the pack is enabled: a disabled pack is stripped from
+        // every package policy above, so it reaches no agent policy at all and
+        // warning about over-reach would be misleading.
+        const isPackEnabled = enabled ?? currentPackSO.attributes.enabled;
         let targetingWarning: TargetingWarning | undefined;
-        if (policiesList.length) {
+        if (isPackEnabled && policiesList.length) {
           const writeTargets = groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies);
           const scopeResults = resolvePackTargetScope(
             writeTargets,

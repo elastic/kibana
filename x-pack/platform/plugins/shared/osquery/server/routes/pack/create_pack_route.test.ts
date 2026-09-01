@@ -627,6 +627,30 @@ describe('createPackRoute', () => {
       });
     });
 
+    it('does not warn when the pack is created disabled (nothing is written)', async () => {
+      // A disabled pack reaches no agent policy at all, so reporting over-reach
+      // would be misleading — and would cost a needless agent-policy lookup.
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyCreate = jest.fn();
+      setupOverBroadRoute({ packagePolicyUpdate, packagePolicyCreate });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: ['agent-policy-a'],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(packagePolicyUpdate).not.toHaveBeenCalled();
+      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toBeUndefined();
+    });
+
     it('global pack (shards.*) is exactly targeted and carries no warning', async () => {
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
       const packagePolicyCreate = jest.fn();

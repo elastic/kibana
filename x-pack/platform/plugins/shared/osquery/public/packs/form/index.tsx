@@ -457,11 +457,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {policyIds.length > 0 ? (
-              <TargetingWarningCallout policyIds={policyIds} />
-            ) : (
-              <EuiSpacer size="m" />
-            )}
+            {/* The callout renders nothing when targeting is exact, so the
+                spacer stays unconditional to keep the layout stable. */}
+            <TargetingWarningCallout policyIds={policyIds} />
+            <EuiSpacer size="m" />
 
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>

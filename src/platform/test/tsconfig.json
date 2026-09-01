@@ -65,6 +65,7 @@
     "@kbn/core-deprecations-common",
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
+    "@kbn/synthtrace-client",
     "@kbn/synthtrace",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
