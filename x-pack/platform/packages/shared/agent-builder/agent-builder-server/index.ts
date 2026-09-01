@@ -133,6 +133,8 @@ export type {
   InternalAgentDefinition,
   InternalAgentDefinitionAvailabilityHandler,
   AgentRegistry,
+  AiIndexDetail,
+  AiIndexResolver,
 } from './agents';
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
@@ -158,3 +160,9 @@ export type {
 } from './plugin_contract';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
+export type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from './availability';
