@@ -39,15 +39,27 @@ consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
+  # Written onto every alert that reached a decision, and filtered out by the harvest,
+  # so a later sweep cannot rediagnose the same alerts into the same proposal.
+  reviewed_tag: "detection-watch:tuning-reviewed"
+  dismissed_tag: "detection-watch:tuning-dismissed"
+  applied_tag: "detection-watch:tuning-applied"
 steps:
+  # Scoped to one space because the tag API writes to the space's own alerts index, so
+  # a cross-space harvest would keep rediagnosing alerts it can never mark.
+  # `allow_partial_results: false` because a partial aggregation would undercount
+  # fp_count and return a short alert list, leaving alerts that drove a decision
+  # untagged. The reviewed_tag filter ensures already-processed alerts are excluded.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
+      allow_partial_results: false
       query: |-
         FROM .alerts-security.alerts-*
         | WHERE `kibana.alert.workflow_status` == "closed"
           AND `kibana.alert.workflow_reason` == "false_positive"
           AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+          AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detection-watch:tuning-reviewed")
         | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count }}
         | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at
@@ -90,6 +102,25 @@ steps:
             | STATS fp_count = COUNT(*) BY `host.name`, `user.name`, `source.ip`, `process.name`
             | SORT fp_count DESC
             | LIMIT 10
+        on-failure:
+          continue: true
+
+      # Fetch the individual alert IDs so we can tag them after the decision.
+      # Capped at 1000 to stay within the tag API's payload limit; a rule noisier
+      # than that surfaces again on the next sweep once untagged alerts are marked.
+      - name: fetch_alert_ids
+        type: elasticsearch.esql.query
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+        with:
+          query: |-
+            FROM .alerts-security.alerts-*
+            | WHERE `kibana.alert.workflow_status` == "closed"
+              AND `kibana.alert.workflow_reason` == "false_positive"
+              AND `kibana.alert.rule.uuid` == "{{ foreach.item.0 }}"
+              AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+              AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "detection-watch:tuning-reviewed")
+            | KEEP `kibana.alert.id`
+            | LIMIT 1000
         on-failure:
           continue: true
 
@@ -430,6 +461,34 @@ steps:
           note: >-
             The approved tuning change failed to apply automatically. Apply it in the
             Detection Rules UI.
+
+      # Mark every alert that fed this diagnosis so the next harvest sweep skips them.
+      # Both paths write the reviewed tag; the outcome tag differentiates approved vs dismissed.
+      - name: tag_applied
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.fetch_alert_ids.output.values != null }}
+        on-failure:
+          continue: true
+        with:
+          alert_ids: "${{ steps.fetch_alert_ids.output.values | map: 0 }}"
+          tags_to_add:
+            - "{{ consts.reviewed_tag }}"
+            - "{{ consts.applied_tag }}"
+
+      - name: tag_dismissed
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == false
+            and steps.fetch_alert_ids.output.values != null }}
+        on-failure:
+          continue: true
+        with:
+          alert_ids: "${{ steps.fetch_alert_ids.output.values | map: 0 }}"
+          tags_to_add:
+            - "{{ consts.reviewed_tag }}"
+            - "{{ consts.dismissed_tag }}"
 
   # Size is computed on its own because comparison operators cannot follow a filter chain.
   - name: count_examined_rules

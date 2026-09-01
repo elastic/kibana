@@ -31,7 +31,7 @@ export const PND_RULE_TUNING_WORKFLOW = {
   id: PND_RULE_TUNING_WORKFLOW_ID,
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: RULE_TUNING_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
