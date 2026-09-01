@@ -7,57 +7,48 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { SIEM_MIGRATIONS_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   createToolTestMocks,
   createToolHandlerContext,
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
-import { getRuleMigrationTranslationStatsTool } from './get_rule_migration_translation_stats_tool';
+import { stopRuleMigrationTool } from './stop_rule_migration_tool';
 
 const mockProductFeaturesService = {
   isEnabled: jest.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
-describe('getRuleMigrationTranslationStatsTool', () => {
-  const { mockCore, mockLogger, mockEsClient, mockSecurityStart, mockRequest } =
-    createToolTestMocks();
-  const tool = getRuleMigrationTranslationStatsTool(
+describe('stopRuleMigrationTool', () => {
+  const {
     mockCore,
     mockLogger,
-    mockProductFeaturesService
-  );
+    mockEsClient,
+    mockSecurityStart,
+    mockCheckPrivileges,
+    mockRequest,
+  } = createToolTestMocks();
   let mockFetch: jest.Mock;
+
+  const tool = stopRuleMigrationTool(mockCore, mockLogger, mockProductFeaturesService);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
     mockFetch = jest.fn();
+    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
     (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
       fetch: mockFetch,
     });
   });
 
-  it('should return the translation stats body on a 200', async () => {
-    const stats = {
-      id: 'abc',
-      rules: {
-        total: 10,
-        success: {
-          total: 8,
-          result: { full: 5, partial: 2, untranslatable: 1 },
-          installable: 4,
-          prebuilt: 1,
-          missing_index: 0,
-        },
-        failed: 2,
-      },
-    };
+  it('should stop a migration and return { stopped: true } on success', async () => {
     mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc/translation_stats' },
+      fetchOptions: { path: '/internal/siem_migrations/rules/abc/stop' },
       request: new Request('http://localhost/x'),
       response: new Response(null, { status: 200 }),
-      body: stats,
+      body: { stopped: true },
     });
 
     const result = (await tool.handler(
@@ -65,55 +56,46 @@ describe('getRuleMigrationTranslationStatsTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
+    expect(mockSecurityStart.authz.actions.api.get).toHaveBeenCalledWith(
+      SIEM_MIGRATIONS_API_ACTION_ALL
+    );
+    expect(mockSecurityStart.authz.actions.api.get).toHaveBeenCalledWith(RULES_API_READ);
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({
+      kibana: [`api:${SIEM_MIGRATIONS_API_ACTION_ALL}`, `api:${RULES_API_READ}`],
+    });
     expect(mockFetch).toHaveBeenCalledWith(
-      '/internal/siem_migrations/rules/abc/translation_stats',
-      expect.objectContaining({ method: 'GET', access: 'internal' })
+      '/internal/siem_migrations/rules/abc/stop',
+      expect.objectContaining({ method: 'POST', access: 'internal' })
     );
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toEqual(stats);
+    expect(result.results[0].data).toEqual({ stopped: true });
   });
 
-  it('should normalize a 204 (no items) to an explicit empty zero-shape', async () => {
-    mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc/translation_stats' },
-      request: new Request('http://localhost/x'),
-      response: new Response(null, { status: 204 }),
-      body: null,
-    });
+  it('should return an error result without calling the endpoint when privileges are missing', async () => {
+    mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
 
     const result = (await tool.handler(
       { migration_id: 'abc' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
-    expect(result.results[0].type).toBe(ToolResultType.other);
-    const data = result.results[0].data as {
-      id: string;
-      rules: { total: number; success: Record<string, number>; failed: number };
-    };
-    expect(data.id).toBe('abc');
-    expect(data.rules.total).toBe(0);
-    expect(data.rules.success.installable).toBe(0);
-    expect(data.rules.failed).toBe(0);
-    expect(data.rules.success.result).toEqual({
-      full: 0,
-      partial: 0,
-      untranslatable: 0,
-    });
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect((result.results[0].data as { message: string }).message).toContain(
+      'Automatic Migration: All'
+    );
+    expect((result.results[0].data as { message: string }).message).toContain('Rules: Read');
   });
 
-  it('should return an error result when the call fails', async () => {
-    const error = new Error('Not Found') as Error & {
-      response?: Response;
-      body?: unknown;
-    };
+  it('should surface an endpoint failure as an error result', async () => {
+    const error = new Error('Not Found') as Error & { response?: Response; body?: unknown };
     error.name = 'HttpSelfFetchError';
     error.response = new Response(null, { status: 404 });
     error.body = { message: 'Migration not found' };
     mockFetch.mockRejectedValueOnce(error);
 
     const result = (await tool.handler(
-      { migration_id: 'missing' },
+      { migration_id: 'abc' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 

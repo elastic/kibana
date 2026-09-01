@@ -11,24 +11,24 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
-import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
-import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
-import { SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
+import { SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { MigrationId } from '../common/schemas';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to retrieve.'),
+  migration_id: MigrationId,
 });
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
 
-export const getRuleMigrationTool = (
+export const deleteRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   productFeaturesService: ProductFeaturesService
@@ -36,39 +36,38 @@ export const getRuleMigrationTool = (
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
-    id: SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+    id: SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
+    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     annotations: {
-      title: 'Get Rule Migration',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
+      title: 'Delete Rule Migration',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
       openWorldHint: false,
     },
-    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Retrieve a single Automatic rule migration by id.
+    confirmation: { askUser: 'always' },
+    description: `Delete a rule migration and all its associated rule items. Destructive and irreversible.
 
-Returns its name, creation time, last_execution details
+Returns { ok: true, migration_id } (the DELETE endpoint returns no body today;
+additional fields are spread if the endpoint later returns them).
 
-Use this to inspect name or last execution details of an Automatic Migration (rules) before starting, stopping, or installing translated rules.`,
+See the ${RULE_MIGRATION_SKILLS.DELETE} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
       const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+
       if (!hasPrivilege) {
-        return createMissingPrivilegeError('view a rule migration');
+        return createMissingPrivilegeError('delete a rule migration');
       }
 
-      const response = await callSelfClient<GetRuleMigrationResponse>(
-        request,
-        buildPath(migrationId),
-        {
-          method: 'GET',
-        }
-      );
+      const response = await callSelfClient(request, buildPath(migrationId), {
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
-        return createToolErrorResult(response, `Failed to get rule migration "${migrationId}"`);
+        return createToolErrorResult(response, `Failed to delete rule migration "${migrationId}"`);
       }
 
       return {
@@ -76,7 +75,13 @@ Use this to inspect name or last execution details of an Automatic Migration (ru
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: response.body,
+            // The DELETE endpoint currently returns no body (res.ok() with no payload).
+            // Spread response.body so any future fields flow through automatically.
+            data: {
+              ok: true,
+              migration_id: migrationId,
+              ...(response.body != null ? (response.body as object) : {}),
+            },
           },
         ],
       };

@@ -10,25 +10,28 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
-import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../common/siem_migrations/constants';
+import type { GetRuleMigrationResourcesMissingResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
-import { SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { MigrationId } from '../common/schemas';
+import { SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to retrieve.'),
+  migration_id: MigrationId,
 });
 
 const buildPath = (migrationId: string): string =>
-  SIEM_RULE_MIGRATION_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
+  SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH.replace(
+    '{migration_id}',
+    encodeURIComponent(migrationId)
+  );
 
-export const getRuleMigrationTool = (
+export const getMissingRuleMigrationResourcesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   productFeaturesService: ProductFeaturesService
@@ -36,39 +39,40 @@ export const getRuleMigrationTool = (
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
-    id: SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+    id: SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
     type: ToolType.builtin,
+    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     annotations: {
-      title: 'Get Rule Migration',
+      title: 'Get Missing Rule Migration Resources',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
       openWorldHint: false,
     },
-    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Retrieve a single Automatic rule migration by id.
+    description: `List the resources (macros, lookups, reference sets, watchlists) that a rule migration is still missing.
 
-Returns its name, creation time, last_execution details
+Returns a flat array of { name, type } objects. An empty array means no resources are missing.
 
-Use this to inspect name or last execution details of an Automatic Migration (rules) before starting, stopping, or installing translated rules.`,
+The start skill groups this array by type before presenting it to the user. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
       const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
       if (!hasPrivilege) {
-        return createMissingPrivilegeError('view a rule migration');
+        return createMissingPrivilegeError('view missing rule migration resources');
       }
 
-      const response = await callSelfClient<GetRuleMigrationResponse>(
+      const response = await callSelfClient<GetRuleMigrationResourcesMissingResponse>(
         request,
         buildPath(migrationId),
-        {
-          method: 'GET',
-        }
+        { method: 'GET' }
       );
 
       if (!response.ok) {
-        return createToolErrorResult(response, `Failed to get rule migration "${migrationId}"`);
+        return createToolErrorResult(
+          response,
+          `Failed to get missing resources for migration "${migrationId}"`
+        );
       }
 
       return {
@@ -76,7 +80,7 @@ Use this to inspect name or last execution details of an Automatic Migration (ru
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: response.body,
+            data: response.body ?? [],
           },
         ],
       };

@@ -7,21 +7,19 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { SIEM_MIGRATIONS_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   createToolTestMocks,
   createToolHandlerContext,
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
-import { startRuleMigrationTool } from './start_rule_migration_tool';
+import { updateRuleMigrationTool } from './update_rule_migration_tool';
 
 const mockProductFeaturesService = {
   isEnabled: jest.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
-describe('startRuleMigrationTool', () => {
+describe('updateRuleMigrationTool', () => {
   const {
     mockCore,
     mockLogger,
@@ -32,7 +30,7 @@ describe('startRuleMigrationTool', () => {
   } = createToolTestMocks();
   let mockFetch: jest.Mock;
 
-  const tool = startRuleMigrationTool(mockCore, mockLogger, mockProductFeaturesService);
+  const tool = updateRuleMigrationTool(mockCore, mockLogger, mockProductFeaturesService);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,60 +41,51 @@ describe('startRuleMigrationTool', () => {
     });
   });
 
-  it('should forward the start body to the endpoint on a successful privilege check', async () => {
+  it('should update a migration name and return { ok: true }', async () => {
     mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc/start' },
+      fetchOptions: { path: '/internal/siem_migrations/rules/abc' },
       request: new Request('http://localhost/x'),
       response: new Response(null, { status: 200 }),
-      body: { started: true },
+      body: null,
     });
 
     const result = (await tool.handler(
-      {
-        migration_id: 'abc',
-        settings: { connector_id: 'c1' },
-      },
+      { migration_id: 'abc', name: 'Renamed Migration' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
-    expect(mockSecurityStart.authz.actions.api.get).toHaveBeenCalledWith(
-      SIEM_MIGRATIONS_API_ACTION_ALL
-    );
-    expect(mockSecurityStart.authz.actions.api.get).toHaveBeenCalledWith(RULES_API_READ);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith({
-      kibana: [`api:${SIEM_MIGRATIONS_API_ACTION_ALL}`, `api:${RULES_API_READ}`],
-    });
     expect(mockFetch).toHaveBeenCalledWith(
-      '/internal/siem_migrations/rules/abc/start',
-      expect.objectContaining({ method: 'POST', access: 'internal' })
+      '/internal/siem_migrations/rules/abc',
+      expect.objectContaining({ method: 'PATCH', access: 'internal' })
     );
+    const body = (mockFetch.mock.calls[0][1] as { body: unknown }).body;
+    expect(body).toEqual({ name: 'Renamed Migration' });
+    expect(body).not.toHaveProperty('migration_id');
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toEqual({ started: true });
+    expect(result.results[0].data).toEqual({ ok: true, migration_id: 'abc' });
   });
 
-  it('should omit migration_id from the forwarded body', async () => {
-    mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc/start' },
-      request: new Request('http://localhost/x'),
-      response: new Response(null, { status: 200 }),
-      body: { started: true },
+  it('should reject a name that exceeds 256 characters', () => {
+    const result = tool.schema.safeParse({
+      migration_id: 'abc',
+      name: 'x'.repeat(257),
     });
+    expect(result.success).toBe(false);
+  });
 
-    await tool.handler(
-      { migration_id: 'abc', settings: { connector_id: 'c1' } },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    const body = (mockFetch.mock.calls[0][1] as { body: unknown }).body;
-    expect(body).toEqual({ settings: { connector_id: 'c1' } });
-    expect(body).not.toHaveProperty('migration_id');
+  it('should reject a migration_id that exceeds 256 characters', () => {
+    const result = tool.schema.safeParse({
+      migration_id: 'x'.repeat(257),
+      name: 'Valid Name',
+    });
+    expect(result.success).toBe(false);
   });
 
   it('should return an error result without calling the endpoint when privileges are missing', async () => {
     mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
 
     const result = (await tool.handler(
-      { migration_id: 'abc', settings: { connector_id: 'c1' } },
+      { migration_id: 'abc', name: 'New Name' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
@@ -109,23 +98,20 @@ describe('startRuleMigrationTool', () => {
   });
 
   it('should surface an endpoint failure as an error result', async () => {
-    const error = new Error('Bad Request') as Error & {
-      response?: Response;
-      body?: unknown;
-    };
+    const error = new Error('Bad Request') as Error & { response?: Response; body?: unknown };
     error.name = 'HttpSelfFetchError';
     error.response = new Response(null, { status: 400 });
-    error.body = { message: 'Connector not found' };
+    error.body = { message: 'Invalid index pattern' };
     mockFetch.mockRejectedValueOnce(error);
 
     const result = (await tool.handler(
-      { migration_id: 'abc', settings: { connector_id: 'bad' } },
+      { migration_id: 'abc', name: 'New Name' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect((result.results[0].data as { message: string }).message).toContain(
-      'Connector not found'
+      'Invalid index pattern'
     );
   });
 });

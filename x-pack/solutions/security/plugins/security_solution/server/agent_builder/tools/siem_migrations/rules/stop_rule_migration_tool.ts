@@ -10,25 +10,26 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
-import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/constants';
+import type { StopRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
-import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
-import { SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
+import { SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { MigrationId } from '../common/schemas';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to retrieve.'),
+  migration_id: MigrationId,
 });
 
 const buildPath = (migrationId: string): string =>
-  SIEM_RULE_MIGRATION_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
+  SIEM_RULE_MIGRATION_STOP_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
 
-export const getRuleMigrationTool = (
+export const stopRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   productFeaturesService: ProductFeaturesService
@@ -36,39 +37,39 @@ export const getRuleMigrationTool = (
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
-    id: SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+    id: SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
+    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     annotations: {
-      title: 'Get Rule Migration',
-      readOnlyHint: true,
+      title: 'Stop Rule Migration',
+      readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: true,
       openWorldHint: false,
     },
-    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Retrieve a single Automatic rule migration by id.
+    confirmation: { askUser: 'once' },
+    description: `Stop a running Automatic Rule Migration. Mutating.
 
-Returns its name, creation time, last_execution details
+Returns { stopped: boolean }.
 
-Use this to inspect name or last execution details of an Automatic Migration (rules) before starting, stopping, or installing translated rules.`,
+See the ${RULE_MIGRATION_SKILLS.STOP} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
       const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+
       if (!hasPrivilege) {
-        return createMissingPrivilegeError('view a rule migration');
+        return createMissingPrivilegeError('stop a rule migration');
       }
 
-      const response = await callSelfClient<GetRuleMigrationResponse>(
+      const response = await callSelfClient<StopRuleMigrationResponse>(
         request,
         buildPath(migrationId),
-        {
-          method: 'GET',
-        }
+        { method: 'POST' }
       );
 
       if (!response.ok) {
-        return createToolErrorResult(response, `Failed to get rule migration "${migrationId}"`);
+        return createToolErrorResult(response, `Failed to stop rule migration "${migrationId}"`);
       }
 
       return {
