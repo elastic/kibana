@@ -2248,8 +2248,10 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
               "HCM": Object {
                 "colors": Object {
                   "DARK": Object {
+                    "text": "#CAD3E2",
                     "textGhost": "#FFFFFF",
                     "textInk": "#000000",
+                    "textParagraph": "#CAD3E2",
                   },
                   "LIGHT": Object {
                     "severity": Object {
@@ -2261,8 +2263,10 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                       "unknown": "#798EAF",
                       "warning": "#AD7E00",
                     },
+                    "text": "#1D2A3E",
                     "textGhost": "#FFFFFF",
                     "textInk": "#000000",
+                    "textParagraph": "#1D2A3E",
                     "vis": Object {
                       "euiColorVis0": "#065B58",
                       "euiColorVis1": "#009E99",
