@@ -202,6 +202,11 @@ export const allowedExperimentalValues = Object.freeze({
   automaticDashboardsMigration: true,
 
   /**
+   * Automatic Migration of vendor workflows (Tines first).
+   */
+  automaticWorkflowsMigration: false,
+
+  /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
