@@ -15,8 +15,10 @@ import {
   createUserRequests,
 } from '../test_utils';
 import {
+  INDICATOR_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
+  OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '../../../../common/constants';
 
@@ -92,8 +94,10 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
         limiter.countOfItemsInRequest([
           { type: LENS_ATTACHMENT_TYPE, data: {}, owner: 'test' },
           { type: SECURITY_ENDPOINT_ATTACHMENT_TYPE, attachmentId: 'so-id', owner: 'test' },
+          { type: OSQUERY_ATTACHMENT_TYPE, attachmentId: 'osquery-id', owner: 'test' },
+          { type: INDICATOR_ATTACHMENT_TYPE, attachmentId: 'indicator-id', owner: 'test' },
         ])
-      ).toBe(2);
+      ).toBe(4);
     });
 
     it('excludes unified file attachments from the count', () => {

@@ -48,7 +48,7 @@ import {
   GENERAL_CASES_OWNER,
   OWNER_INFO,
   PERSISTABLE_ATTACHMENT_TYPES,
-  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
@@ -407,17 +407,16 @@ export const isUnifiedFileAttachmentRequest = (
 };
 
 /**
- * True for a unified request whose type is a migrated persistable-state (e.g. `lens`) or
- * externalReference (e.g. `security.endpoint`) type, excluding `file` — the unified
- * counterpart of {@link isPersistableStateOrExternalReference} for legacy requests.
+ * True for a unified persistable-state or external-reference request, excluding `file`.
+ * Counterpart of {@link isPersistableStateOrExternalReference}.
  */
 export const isUnifiedPersistableStateOrExternalReference = (
   context: AttachmentRequestV2
 ): boolean => {
   return (
-    context.type !== FILE_ATTACHMENT_TYPE &&
-    (PERSISTABLE_ATTACHMENT_TYPES.has(context.type) ||
-      context.type === SECURITY_ENDPOINT_ATTACHMENT_TYPE)
+    PERSISTABLE_ATTACHMENT_TYPES.has(context.type) ||
+    (context.type in UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP &&
+      context.type !== FILE_ATTACHMENT_TYPE)
   );
 };
 
