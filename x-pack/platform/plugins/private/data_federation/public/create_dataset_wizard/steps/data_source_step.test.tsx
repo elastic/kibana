@@ -52,6 +52,14 @@ const renderStep = ({
   return { ...view, ref, onSelectDataSource, onCreateDataSource, onConnectionTestResultChange };
 };
 
+const selectAuthenticationMode = (
+  getByTestId: (testSubject: string) => HTMLElement,
+  mode: string
+) => {
+  fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+  fireEvent.click(getByTestId(`createDataSourceFlyoutAuthentication-${mode}`));
+};
+
 const runConnectionTest = async (testButton: HTMLElement) => {
   fireEvent.click(testButton);
 
@@ -133,13 +141,13 @@ describe('DataSourceStep', () => {
 
     expect(getByTestId('createDataSourceFlyoutS3FederatedRoleArn')).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication-access_and_secret_keys'));
+    selectAuthenticationMode(getByTestId, 'access_and_secret_keys');
 
     expect(getByTestId('createDataSourceFlyoutS3AccessKey')).toBeInTheDocument();
     expect(getByTestId('createDataSourceFlyoutS3SecretKey')).toBeInTheDocument();
     expect(queryByTestId('createDataSourceFlyoutS3FederatedRoleArn')).toBeNull();
 
-    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication-anonymous'));
+    selectAuthenticationMode(getByTestId, 'anonymous');
 
     expect(queryByTestId('createDataSourceFlyoutS3AccessKey')).toBeNull();
     expect(
@@ -180,7 +188,7 @@ describe('DataSourceStep', () => {
   it('stores no credentials for a public bucket', async () => {
     const { getByTestId, ref, onCreateDataSource } = renderStep();
 
-    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication-anonymous'));
+    selectAuthenticationMode(getByTestId, 'anonymous');
 
     expect(await submit(ref)).toBe(true);
     expect(onCreateDataSource).toHaveBeenCalledWith(
@@ -253,7 +261,7 @@ describe('DataSourceStep', () => {
     await runConnectionTest(getByTestId('datasetWizardTestConnection'));
     expect(getByTestId('datasetWizardTestConnectionCallout-success')).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication-access_and_secret_keys'));
+    selectAuthenticationMode(getByTestId, 'access_and_secret_keys');
 
     expect(queryByTestId('datasetWizardTestConnectionCallout-success')).toBeNull();
     expect(onConnectionTestResultChange).toHaveBeenLastCalledWith(undefined);

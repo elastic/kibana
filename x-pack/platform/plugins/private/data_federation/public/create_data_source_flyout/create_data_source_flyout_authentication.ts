@@ -36,93 +36,115 @@ export const getDefaultAuthenticationMode = (
   return firstOption?.value ?? 'access_and_secret_keys';
 };
 
+const getFederatedIdentityAuthenticationDescription = (dataSourceType: DataSourceType): string => {
+  switch (dataSourceType) {
+    case 'gcs':
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.federatedIdentityDescription.gcs',
+        {
+          defaultMessage:
+            'Elastic impersonates a service account you grant read access. No keys are stored.',
+        }
+      );
+    case 'azure':
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.federatedIdentityDescription.azure',
+        {
+          defaultMessage:
+            'Elastic signs in through an app registration you grant read access. No keys are stored.',
+        }
+      );
+    default:
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.federatedIdentityDescription.s3',
+        {
+          defaultMessage: 'Elastic assumes an IAM role you grant read access. No keys are stored.',
+        }
+      );
+  }
+};
+
+const getStoredCredentialsAuthenticationDescription = (dataSourceType: DataSourceType): string => {
+  switch (dataSourceType) {
+    case 'gcs':
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.storedCredentialsDescription.gcs',
+        {
+          defaultMessage: 'Elastic stores a service account key that can read your bucket.',
+        }
+      );
+    case 'azure':
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.storedCredentialsDescription.azure',
+        {
+          defaultMessage:
+            'Elastic stores your storage account name and access key. Rotating the key breaks the connection until you update it.',
+        }
+      );
+    default:
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.storedCredentialsDescription.s3',
+        {
+          defaultMessage:
+            'Elastic stores an access key and secret key. Rotating them breaks the connection until you update it.',
+        }
+      );
+  }
+};
+
 export const getCreateDataSourceAuthenticationOptions = (
   dataSourceType: DataSourceType
 ): Array<{
   value: CreateDataSourceAuthenticationMode;
   text: string;
+  description: string;
+  isRecommended?: boolean;
 }> => {
   const federatedIdentityOption = {
     value: 'federated_identity' as const,
     text: i18n.translate('xpack.dataFederation.createFlyout.authentication.federatedIdentity', {
       defaultMessage: 'Federated Identity',
     }),
+    description: getFederatedIdentityAuthenticationDescription(dataSourceType),
+    isRecommended: true,
   };
 
-  if (dataSourceType === 'azure') {
-    return [
-      federatedIdentityOption,
-      {
-        value: 'credentials',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.azure.credentials', {
-          defaultMessage: 'Credentials',
-        }),
-      },
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
+  const storedCredentialsOption =
+    dataSourceType === 'azure'
+      ? {
+          value: 'credentials' as const,
+          text: i18n.translate(
+            'xpack.dataFederation.createFlyout.authentication.azure.credentials',
+            {
+              defaultMessage: 'Credentials',
+            }
+          ),
+          description: getStoredCredentialsAuthenticationDescription(dataSourceType),
+        }
+      : {
+          value: 'access_and_secret_keys' as const,
+          text: i18n.translate(
+            'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
+            {
+              defaultMessage: 'Access and Secret Keys',
+            }
+          ),
+          description: getStoredCredentialsAuthenticationDescription(dataSourceType),
+        };
+
+  const anonymousOption = {
+    value: 'anonymous' as const,
+    text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
+      defaultMessage: 'Anonymous',
+    }),
+    description: getAnonymousAuthenticationDescription(dataSourceType),
+  };
+
+  if (!DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType)) {
+    return [storedCredentialsOption, anonymousOption];
   }
 
-  if (dataSourceType === 's3') {
-    return [
-      federatedIdentityOption,
-      {
-        value: 'access_and_secret_keys',
-        text: i18n.translate(
-          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
-          {
-            defaultMessage: 'Access and Secret Keys',
-          }
-        ),
-      },
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
-
-  if (dataSourceType === 'gcs') {
-    return [
-      federatedIdentityOption,
-      {
-        value: 'access_and_secret_keys',
-        text: i18n.translate(
-          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
-          {
-            defaultMessage: 'Access and Secret Keys',
-          }
-        ),
-      },
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
-
-  return [
-    {
-      value: 'access_and_secret_keys',
-      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys', {
-        defaultMessage: 'Access and Secret Keys',
-      }),
-    },
-    {
-      value: 'anonymous',
-      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-        defaultMessage: 'Anonymous',
-      }),
-    },
-  ];
+  return [federatedIdentityOption, storedCredentialsOption, anonymousOption];
 };
 
 export const showsAuthenticationCredentialFields = (
@@ -146,6 +168,11 @@ export const createDataSourceFlyoutAuthenticationLabel = (): string =>
     defaultMessage: 'Preferred method',
   });
 
+export const createDataSourceFlyoutAuthenticationRecommendedBadge = (): string =>
+  i18n.translate('xpack.dataFederation.createFlyout.authentication.recommendedBadge', {
+    defaultMessage: 'Recommended',
+  });
+
 export const createDataSourceFlyoutAuthenticationTitle = (): string =>
   i18n.translate('xpack.dataFederation.createFlyout.authentication.title', {
     defaultMessage: 'Authentication',
@@ -164,15 +191,21 @@ export const createDataSourceFlyoutAuthenticationDocumentationLabel = (): string
 export const getAnonymousAuthenticationDescription = (dataSourceType: DataSourceType): string => {
   switch (dataSourceType) {
     case 's3':
-      return i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymousDescription.s3', {
-        defaultMessage:
-          'No credentials are stored. Your S3 bucket must allow anonymous public read access.',
-      });
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.anonymousDescription.s3',
+        {
+          defaultMessage:
+            'No credentials are stored. Your S3 bucket must allow anonymous public read access.',
+        }
+      );
     case 'gcs':
-      return i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymousDescription.gcs', {
-        defaultMessage:
-          'No credentials are stored. Your GCS bucket must allow anonymous public read access.',
-      });
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.anonymousDescription.gcs',
+        {
+          defaultMessage:
+            'No credentials are stored. Your GCS bucket must allow anonymous public read access.',
+        }
+      );
     case 'azure':
       return i18n.translate(
         'xpack.dataFederation.createFlyout.authentication.anonymousDescription.azure',

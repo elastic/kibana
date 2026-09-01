@@ -6,13 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiButtonGroupProps, EuiSpacerProps } from '@elastic/eui';
+import type { EuiSpacerProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -22,12 +24,33 @@ import {
   createDataSourceFlyoutAuthenticationDocumentationLabel,
   createDataSourceFlyoutAuthenticationHelpAriaLabel,
   createDataSourceFlyoutAuthenticationLabel,
+  createDataSourceFlyoutAuthenticationRecommendedBadge,
   createDataSourceFlyoutAuthenticationTitle,
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
   getAnonymousAuthenticationDescription,
   getCreateDataSourceAuthenticationOptions,
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
+
+const AuthenticationOptionLabel = ({
+  text,
+  isRecommended,
+  isBold = false,
+}: {
+  text: string;
+  isRecommended?: boolean;
+  /** Set in the dropdown, where the label heads a description. */
+  isBold?: boolean;
+}) => (
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+    <EuiFlexItem grow={false}>{isBold ? <strong>{text}</strong> : text}</EuiFlexItem>
+    {isRecommended ? (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{createDataSourceFlyoutAuthenticationRecommendedBadge()}</EuiBadge>
+      </EuiFlexItem>
+    ) : null}
+  </EuiFlexGroup>
+);
 
 const DATA_FEDERATION_AUTH_DOCS_URL =
   'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-sources#authentication';
@@ -44,13 +67,29 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
   /** Gap between the preceding content and the authentication heading. */
   leadingSpacerSize?: EuiSpacerProps['size'];
 }) {
-  const buttonGroupOptions = useMemo(
-    (): EuiButtonGroupProps['options'] =>
-      getCreateDataSourceAuthenticationOptions(dataSourceType).map((option) => ({
-        id: option.value,
-        label: option.text,
-        'data-test-subj': `createDataSourceFlyoutAuthentication-${option.value}`,
-      })),
+  const options = useMemo(
+    (): Array<EuiSuperSelectOption<CreateDataSourceAuthenticationMode>> =>
+      getCreateDataSourceAuthenticationOptions(dataSourceType).map((option) => {
+        return {
+          value: option.value,
+          inputDisplay: (
+            <AuthenticationOptionLabel text={option.text} isRecommended={option.isRecommended} />
+          ),
+          dropdownDisplay: (
+            <>
+              <AuthenticationOptionLabel
+                text={option.text}
+                isRecommended={option.isRecommended}
+                isBold
+              />
+              <EuiText size="s" color="subdued">
+                <p>{option.description}</p>
+              </EuiText>
+            </>
+          ),
+          'data-test-subj': `createDataSourceFlyoutAuthentication-${option.value}`,
+        };
+      }),
     [dataSourceType]
   );
 
@@ -83,15 +122,15 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiButtonGroup
-        legend={createDataSourceFlyoutAuthenticationLabel()}
-        type="single"
-        options={buttonGroupOptions}
-        idSelected={authenticationMode}
-        onChange={(id) => onAuthenticationModeChange(id as CreateDataSourceAuthenticationMode)}
-        isFullWidth
-        data-test-subj="createDataSourceFlyoutAuthentication"
-      />
+      <EuiFormRow label={createDataSourceFlyoutAuthenticationLabel()} fullWidth>
+        <EuiSuperSelect
+          options={options}
+          valueOfSelected={authenticationMode}
+          onChange={onAuthenticationModeChange}
+          fullWidth
+          data-test-subj="createDataSourceFlyoutAuthentication"
+        />
+      </EuiFormRow>
       {authenticationMode === 'anonymous' ? (
         <>
           <EuiSpacer size="m" />
