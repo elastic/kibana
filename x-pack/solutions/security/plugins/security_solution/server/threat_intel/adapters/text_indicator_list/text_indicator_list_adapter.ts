@@ -70,17 +70,16 @@ const chunkBlocks = (
 
   for (const block of blocks) {
     const blockIocs = iocsByBlock.get(block.block_index) ?? [];
-    if (blockIocs.length === 0) continue;
-
-    if (blockIocs.length <= MAX_NESTED_PER_DOC) {
-      if (currentIocs.length + blockIocs.length > MAX_NESTED_PER_DOC) flush();
-      currentIocs.push(...blockIocs);
-      continue;
-    }
-
-    flush();
-    for (let offset = 0; offset < blockIocs.length; offset += MAX_NESTED_PER_DOC) {
-      chunks.push(blockIocs.slice(offset, offset + MAX_NESTED_PER_DOC));
+    if (blockIocs.length > 0) {
+      if (blockIocs.length <= MAX_NESTED_PER_DOC) {
+        if (currentIocs.length + blockIocs.length > MAX_NESTED_PER_DOC) flush();
+        currentIocs.push(...blockIocs);
+      } else {
+        flush();
+        for (let offset = 0; offset < blockIocs.length; offset += MAX_NESTED_PER_DOC) {
+          chunks.push(blockIocs.slice(offset, offset + MAX_NESTED_PER_DOC));
+        }
+      }
     }
   }
 
