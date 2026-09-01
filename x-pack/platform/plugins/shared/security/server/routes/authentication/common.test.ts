@@ -808,7 +808,7 @@ describe('Common authentication routes', () => {
       authc.acknowledgeAccessAgreement.mockRejectedValue(unhandledException);
 
       const request = httpServerMock.createKibanaRequest();
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrowError(
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrow(
         unhandledException
       );
     });

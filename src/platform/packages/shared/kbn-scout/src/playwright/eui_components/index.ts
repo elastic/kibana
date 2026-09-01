@@ -16,9 +16,6 @@ export {
   EuiGlobalToastListObject,
   EuiSuperSelectObject,
   EuiSelectableObject,
+  EuiBasicTableObject,
+  EuiDraggableObject,
 } from '@elastic/eui-test-helpers';
-
-// Prototype destined for `@elastic/eui-test-helpers`; lives here until it is
-// ported and published.
-export { EuiBasicTableObject } from './basic_table_object';
-export { EuiDraggableObject } from './draggable_object';
