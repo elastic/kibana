@@ -250,7 +250,7 @@ steps:
 
   - name: finalize_watermark
     type: if
-    condition: 'variables.issuesProcessed : {{ consts.batchSize }}'
+    condition: '${{ variables.issuesProcessed >= consts.batchSize }}'
     steps:
       - name: use_last_updated_watermark
         type: data.set

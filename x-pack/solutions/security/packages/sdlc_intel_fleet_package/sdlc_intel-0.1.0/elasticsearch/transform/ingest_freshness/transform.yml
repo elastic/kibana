@@ -15,6 +15,11 @@
 source:
   index:
     - "github-intel-*"
+    # Exclude DERIVED indices that carry a sync.source field but are not ingest
+    # sources. github-intel-lookup-teams is a lookup-mode projection whose
+    # sync.source is mapped as `text` (fielddata disabled) -> terms agg throws
+    # and the whole transform goes health:red while still reporting state:started.
+    - "-github-intel-lookup-*"
     - "sdlc-epic-phases"
     - "sdlc-team-dimension"
     - "sdlc-release-calendar"
@@ -40,3 +45,11 @@ _meta:
   managed: true
   package:
     name: sdlc_intel
+  # Fleet installs transforms as kibana_system by default, which has no read
+  # privilege on github-intel-* / sdlc-* (they are not Fleet-managed datastreams).
+  # The transform then installs DEFERRED and never starts: "indexed: 0" forever.
+  # false => Fleet mints an API key from the INSTALLING user and passes it as
+  # es-secondary-authorization, so the transform runs with privileges that can
+  # actually read the source indices. Deferred installs are resumable via
+  # POST /api/fleet/epm/packages/sdlc_intel/0.1.0/transforms/authorize
+  run_as_kibana_system: false
