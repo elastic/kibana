@@ -466,8 +466,6 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     return true;
   }
 
-  // OTLP outputs: compare programmatically. TypeScript narrows existingOutput after this branch.
-  // Partial<Output> cast is safe given the type-equality check above.
   if (existingOutput.type === outputType.Otlp) {
     const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
     const existingTls = existingOutput.secrets?.otlp_exporter?.tls;

@@ -19,8 +19,8 @@ import type {
   EnrollmentSettingsFleetServerPolicy,
   FleetProxy,
   FleetServerHost,
-  DownloadSource,
   Output,
+  DownloadSource,
 } from '../../../common/types';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { agentPolicyService, appContextService, downloadSourceService } from '../../services';

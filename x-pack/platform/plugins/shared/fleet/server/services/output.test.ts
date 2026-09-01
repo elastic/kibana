@@ -1587,75 +1587,6 @@ describe('Output Service', () => {
           expect.anything()
         );
       });
-
-      it('should extract tls secrets as ESO secret refs when secret storage is enabled', async () => {
-        const soClient = getMockedSoClient();
-        mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedExtractAndWriteOutputSecrets.mockResolvedValueOnce({
-          output: {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test OTLP secrets',
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'owner-auth-secret-id' },
-                    auth: { id: 'auth-secret-id' },
-                  },
-                },
-              },
-            },
-          },
-        } as any);
-
-        await outputService.create(
-          soClient,
-          esClientMock,
-          {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test OTLP secrets',
-            type: 'otlp',
-            otlp_exporter: {
-              endpoint: 'https://otel.example.com:4317',
-              protocol: 'grpc',
-            },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: 'my-key-pem',
-                  tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
-                },
-              },
-            },
-          },
-          { id: 'output-test' }
-        );
-
-        expect(soClient.create).toBeCalledWith(
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'owner-auth-secret-id' },
-                    auth: { id: 'auth-secret-id' },
-                  },
-                },
-              },
-            },
-          }),
-          expect.anything()
-        );
-      });
     });
 
     it('should throw FleetError when given an invalid id', async () => {
@@ -3517,46 +3448,8 @@ describe('Output Service', () => {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
         });
-<<<<<<< HEAD
-=======
 
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
->>>>>>> a197df3a3cc0 (Gate OTLP output usage on min fleet-server versions)
-      });
-
-      it('Should always extract tls key_pem as ESO secret ref on OTLP update', async () => {
-        const soClient = getMockedSoClient({});
-        mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
-          secretsToDelete: [],
-          outputUpdate: {
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
-            },
-          },
-        } as any);
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://new.example.com:4317',
-            protocol: 'grpc',
-          },
-          secrets: {
-            otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
-            },
-          })
-        );
       });
 
       it('Should null gRPC-exclusive fields when switching an OTLP output from gRPC to HTTP', async () => {
@@ -3789,62 +3682,6 @@ describe('Output Service', () => {
           expect.anything(),
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
-        );
-      });
-
-      it('Should extract tls secrets as ESO secret refs on OTLP update when secret storage is enabled', async () => {
-        const soClient = getMockedSoClient({});
-        mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
-          secretsToDelete: [],
-          outputUpdate: {
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'updated-key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'updated-owner-auth-secret-id' },
-                    auth: { id: 'updated-auth-secret-id' },
-                  },
-                },
-              },
-            },
-          },
-        } as any);
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://new.example.com:4317',
-            protocol: 'grpc',
-          },
-          secrets: {
-            otlp_exporter: {
-              tls: {
-                key_pem: 'updated-key-pem',
-                tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
-              },
-            },
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'updated-key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'updated-owner-auth-secret-id' },
-                    auth: { id: 'updated-auth-secret-id' },
-                  },
-                },
-              },
-            },
-          })
         );
       });
     });

@@ -12,14 +12,6 @@
  * provisions `xpack.cloud.managed_otlp.url` and the managed-bulk infrastructure, and its
  * comment anticipated this addition. Enabling `managedOtlpOutput` only in this config keeps
  * the flag scoped to where it is meaningful.
- *
- * Coverage:
- *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
- *     inline tls credential rejection (400), secret round-trip (tls.key_pem and
- *     tls.tpm.owner_auth/auth via .fleet-secrets).
- *   - Update: otlp_exporter update, ES→OTLP type change, OTLP→ES type change.
- *   - Delete: ESO secrets are removed when the output is deleted (key_pem and tpm credentials).
- *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
  */
 
 import expect from '@kbn/expect';

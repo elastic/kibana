@@ -138,19 +138,6 @@ export function outputIdToUuid(id: string) {
 const isBeatsSOOutput = (attrs: OutputSOAttributes): attrs is BeatsOutputSOAttributes =>
   isBeatsOutput(attrs);
 
-/** Throws OutputInvalidError when OTLP output is not allowed; no-ops for non-OTLP types. */
-const assertOtlpOutputAllowed = async (
-  output: { type: ValueOf<OutputType> },
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
-): Promise<void> => {
-  if (!isOtlpOutput(output)) return;
-  const { result, error } = await checkOtlpOutputAllowed(esClient, soClient);
-  if (!result) {
-    throw new OutputInvalidError(error!);
-  }
-};
-
 const isOtlpSOOutput = (attrs: OutputSOAttributes): attrs is OutputSoOtlpAttributes =>
   isOtlpOutput(attrs);
 
@@ -493,6 +480,18 @@ class OutputService {
     return appContextService.getEncryptedSavedObjects();
   }
 
+  private async assertOtlpOutputAllowed(
+    output: { type: ValueOf<OutputType> },
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ): Promise<void> {
+    if (!isOtlpOutput(output)) return;
+    const { result, error } = await checkOtlpOutputAllowed(esClient, soClient);
+    if (!result) {
+      throw new OutputInvalidError(error!);
+    }
+  }
+
   private async _getDefaultDataOutputsSO() {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
@@ -677,7 +676,7 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    await assertOtlpOutputAllowed(output, esClient, soClient);
+    await this.assertOtlpOutputAllowed(output, esClient, soClient);
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -1133,7 +1132,7 @@ class OutputService {
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const isTypeChanged = mergedType !== originalOutput.type;
 
-    await assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
+    await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
@@ -1360,10 +1359,6 @@ class OutputService {
       }
     }
 
-    // When otlp_exporter is included in an update and the protocol changes, ES's partial-update
-    // deep-merges the stored object, so fields exclusive to the old protocol survive unless
-    // explicitly set to null here. null is written into the doc (unlike undefined, which is omitted
-    // from the payload and leaves the old value intact).
     const isOtlpProtocolChange =
       isOtlpOutput(updateData) &&
       isOtlpOutput(originalOutput) &&
