@@ -13,6 +13,7 @@ import type { RuleApiResponse } from '../services/rules_api';
 const mockCreateMutate = jest.fn();
 const mockUpdateMutate = jest.fn();
 const mockSetupMutate = jest.fn();
+const mockRulesUpdateRule = jest.fn();
 
 let capturedFlyoutProps: Record<string, unknown> = {};
 
@@ -26,6 +27,7 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   RULE_BUILDER_REGISTRY: {
     threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
   },
+  resolveRuleNotificationTag: jest.fn().mockReturnValue('notify-my-rule'),
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
@@ -47,18 +49,22 @@ jest.mock('./use_setup_rule_notifications', () => ({
 }));
 
 const mockNavigateToUrl = jest.fn();
+const mockAddWarning = jest.fn();
 
 jest.mock('@kbn/core-di', () => ({
   PluginStart: (key: string) => `plugin:${key}`,
 }));
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `core:${key}`,
-  useService: (key: string) => {
+  useService: (key: unknown) => {
+    if (typeof key === 'function' && (key as { name?: string }).name === 'RulesApi') {
+      return { updateRule: mockRulesUpdateRule };
+    }
     switch (key) {
       case 'core:http':
         return { basePath: { prepend: (path: string) => path } };
       case 'core:notifications':
-        return { toasts: { addWarning: jest.fn(), addInfo: jest.fn() } };
+        return { toasts: { addWarning: mockAddWarning, addInfo: jest.fn() } };
       case 'core:application':
         return { navigateToUrl: mockNavigateToUrl };
       default:
@@ -82,6 +88,11 @@ const updatedRule = {
 const createdRule = {
   id: 'rule-new',
   metadata: { name: 'My rule' },
+} as unknown as RuleApiResponse;
+
+const taggedCreatedRule = {
+  id: 'rule-new',
+  metadata: { name: 'My rule', tags: ['notify-my-rule'] },
 } as unknown as RuleApiResponse;
 
 const REDIRECT_PATH = '/app/alerting_v2/rules';
@@ -148,6 +159,7 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     capturedFlyoutProps = {};
     hookApi = undefined;
     mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+    mockRulesUpdateRule.mockResolvedValue(taggedCreatedRule);
   });
 
   it('opens in create mode with no ruleId and provides onCreateRule', async () => {
@@ -158,24 +170,58 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     expect(capturedFlyoutProps.onCreateRule).toBeDefined();
   });
 
-  it('creates the rule then sets up notifications and redirects on success', async () => {
+  it('writes notification tag to untagged rule before setting up notifications', async () => {
     mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
 
     await renderAndOpenCreate(REDIRECT_PATH);
     callOnCreateRule({ workflows: [existingAction] });
 
-    expect(mockCreateMutate).toHaveBeenCalledWith(
-      { payload: { metadata: { name: 'My rule' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
-    expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: createdRule, actions: [existingAction] },
-      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
-    );
-
     await waitFor(() => {
+      expect(mockRulesUpdateRule).toHaveBeenCalledWith('rule-new', {
+        metadata: { tags: ['notify-my-rule'] },
+      });
+      expect(mockSetupMutate).toHaveBeenCalledWith(
+        { rule: taggedCreatedRule, actions: [existingAction] },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+      );
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('skips rule tag update when rule already has tags', async () => {
+    const alreadyTaggedRule = {
+      id: 'rule-new',
+      metadata: { name: 'My rule', tags: ['production'] },
+    } as unknown as RuleApiResponse;
+    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(alreadyTaggedRule));
+    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
+
+    await renderAndOpenCreate(REDIRECT_PATH);
+    callOnCreateRule({ workflows: [existingAction] });
+
+    await waitFor(() => {
+      expect(mockRulesUpdateRule).not.toHaveBeenCalled();
+      expect(mockSetupMutate).toHaveBeenCalledWith(
+        { rule: alreadyTaggedRule, actions: [existingAction] },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+      );
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
+    });
+  });
+
+  it('shows warning toast and redirects without setup when tag update fails', async () => {
+    mockRulesUpdateRule.mockRejectedValue(new Error('patch failed'));
+
+    await renderAndOpenCreate(REDIRECT_PATH);
+    callOnCreateRule({ workflows: [existingAction] });
+
+    await waitFor(() => {
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockSetupMutate).not.toHaveBeenCalled();
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
     });
   });
 
@@ -185,9 +231,8 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     await renderAndOpenCreate(REDIRECT_PATH);
     callOnCreateRule({ workflows: [existingAction] });
 
-    expect(mockSetupMutate).toHaveBeenCalledTimes(1);
-
     await waitFor(() => {
+      expect(mockSetupMutate).toHaveBeenCalledTimes(1);
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
