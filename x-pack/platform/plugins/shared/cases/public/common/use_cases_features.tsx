@@ -12,7 +12,6 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useLicense } from './use_license';
 
 export interface UseCasesFeatures {
-  isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
   observablesAuthorized: boolean;
   connectorsAuthorized: boolean;
@@ -44,14 +43,12 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
     const { syncAlerts, extractObservables, observablesEnabled } = getCaseSettings(
       caseOwner || owner[0] || ''
     );
-    // `alerts.enabled` / `alerts.all` stay host/privilege flags; sync itself comes from OWNER_INFO.
-    const isSyncAlertsEnabled =
-      !features.alerts.enabled || !features.alerts.all ? false : syncAlerts;
+    // `alerts.all` is a host/privilege flag; sync itself comes from OWNER_INFO.
+    const isSyncAlertsEnabled = Boolean(features.alerts.all && syncAlerts);
     const observablesAuthorized = hasLicenseGreaterThanPlatinum;
     const metricsFeatures = features.metrics;
 
     return {
-      isAlertsEnabled: features.alerts.enabled,
       isSyncAlertsEnabled,
       metricsFeatures,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
@@ -68,7 +65,6 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
   }, [
     caseOwner,
     owner,
-    features.alerts.enabled,
     features.alerts.all,
     features.metrics,
     hasLicenseGreaterThanPlatinum,

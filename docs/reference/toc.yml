@@ -104,6 +104,7 @@ toc:
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-monitoring-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
+          - file: connectors-kibana/google-docs-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md

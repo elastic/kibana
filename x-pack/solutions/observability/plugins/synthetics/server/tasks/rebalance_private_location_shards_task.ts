@@ -24,10 +24,22 @@ import {
 } from '../synthetics_service/private_location/plan_rebalance';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
+import {
+  isRebalancePrivateLocationShardsEnabled,
+  REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
+  REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+  REBALANCE_SHARDS_TASK_ID,
+  REBALANCE_SHARDS_TASK_TYPE,
+} from './rebalance_shards_enabled';
 
-const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
-export const REBALANCE_SHARDS_TASK_ID = `${TASK_TYPE}-single-instance`;
+export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
+export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+
+const PIN_DRAIN_RESET = {
+  [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+  [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+} as const;
 
 interface RebalanceTaskState extends Record<string, unknown> {
   /**
@@ -37,6 +49,16 @@ interface RebalanceTaskState extends Record<string, unknown> {
    * streak restarts next time they recover.
    */
   healthySince?: Record<string, number>;
+  /**
+   * True after a disabled cycle finished draining with no failed writes.
+   * Reset when the switch turns back on.
+   */
+  pinsCleared?: boolean;
+  /**
+   * Consecutive failed drain attempts while the switch is off. Stops retrying
+   * after MAX_PIN_CLEAR_ATTEMPTS; reset when the switch turns back on.
+   */
+  pinClearAttempts?: number;
 }
 
 /**
@@ -54,7 +76,7 @@ export class RebalancePrivateLocationShardsTask {
 
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
-      [TASK_TYPE]: {
+      [REBALANCE_SHARDS_TASK_TYPE]: {
         title: 'Synthetics Rebalance Private Location Shards Task',
         description:
           'Reassigns monitors across the healthy agents of scalable private locations (by rewriting per-monitor agent conditions) for at-most-once execution and failover.',
@@ -85,13 +107,24 @@ export class RebalancePrivateLocationShardsTask {
 
     try {
       signal.throwIfAborted();
+      if (!isRebalancePrivateLocationShardsEnabled(taskInstance)) {
+        return {
+          state: await this.runDisabledDrain(taskInstance),
+          schedule,
+        };
+      }
+
       const soClient = coreStart.savedObjects.createInternalRepository();
+
       const scalableLocations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
         isConditionShardedLocation
       );
 
       if (scalableLocations.length === 0) {
-        return { state: taskInstance.state, schedule };
+        return {
+          state: await this.returnedState(taskInstance, PIN_DRAIN_RESET),
+          schedule,
+        };
       }
 
       const now = Date.now();
@@ -173,7 +206,10 @@ export class RebalancePrivateLocationShardsTask {
       }
 
       return {
-        state: { ...taskInstance.state, healthySince: nextHealthySince },
+        state: await this.returnedState(taskInstance, {
+          healthySince: nextHealthySince,
+          ...PIN_DRAIN_RESET,
+        }),
         schedule,
       };
     } catch (error) {
@@ -186,23 +222,13 @@ export class RebalancePrivateLocationShardsTask {
       );
     }
 
-    return { state: taskInstance.state, schedule };
+    return { state: await this.returnedState(taskInstance), schedule };
   }
 
   async start() {
     const {
-      config,
       pluginsStart: { taskManager },
     } = this.serverSetup;
-
-    if (!config.rebalancePrivateLocationShardsTaskEnabled) {
-      // Actively unschedule a previously-scheduled instance (not just skip
-      // scheduling), so flipping the kill-switch off stops the task firing
-      // instead of leaving a zombie that keeps running every cycle.
-      this.debugLog('Rebalance private location shards task disabled by config; unscheduling');
-      await taskManager.removeIfExists(REBALANCE_SHARDS_TASK_ID);
-      return;
-    }
 
     // Read the existing task schedule so ensureScheduled doesn't reset a
     // user-configured interval on every Kibana restart. Falls back to
@@ -221,10 +247,85 @@ export class RebalancePrivateLocationShardsTask {
       id: REBALANCE_SHARDS_TASK_ID,
       state: {},
       schedule,
-      taskType: TASK_TYPE,
+      taskType: REBALANCE_SHARDS_TASK_TYPE,
       params: {},
     });
+    // Earlier iterations stored the kill-switch on `task.enabled`. This task
+    // must stay claimable so a disabled cycle can drain leftover agent pins.
+    await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /**
+   * While off: drain leftover pins once, then skip Fleet listing until the
+   * switch turns back on. Failed writes retry up to MAX_PIN_CLEAR_ATTEMPTS,
+   * then stop until the next on→off. A mid-run PUT true drops the latch.
+   */
+  private async runDisabledDrain(
+    taskInstance: ConcreteTaskInstance
+  ): Promise<Record<string, unknown>> {
+    const attemptsSoFar =
+      Number(taskInstance.state[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]) || 0;
+
+    if (taskInstance.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY] === true) {
+      this.debugLog('disabled; pins already cleared');
+      return this.returnedState(taskInstance);
+    }
+    if (attemptsSoFar >= MAX_PIN_CLEAR_ATTEMPTS) {
+      this.debugLog('disabled; pin drain retries exhausted');
+      return this.returnedState(taskInstance);
+    }
+
+    let cleared = 0;
+    let failed = 0;
+    try {
+      const result = await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
+      cleared = result.cleared;
+      failed = result.failed ?? 0;
+      this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
+    } catch (error) {
+      failed = 1;
+      const message = error instanceof Error ? error.message : String(error);
+      this.serverSetup.logger.warn(
+        `[RebalancePrivateLocationShardsTask] disabled; pin drain failed: ${message}`
+      );
+    }
+
+    const live = await this.returnedState(taskInstance);
+    if (isRebalancePrivateLocationShardsEnabled({ state: live })) {
+      return { ...live, ...PIN_DRAIN_RESET };
+    }
+    if (failed > 0) {
+      const attempts = attemptsSoFar + 1;
+      if (attempts >= MAX_PIN_CLEAR_ATTEMPTS) {
+        this.serverSetup.logger.warn(
+          `[RebalancePrivateLocationShardsTask] disabled; pin drain failed after ${MAX_PIN_CLEAR_ATTEMPTS} attempts, giving up until the setting is turned back on`
+        );
+      }
+      return { ...live, [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: attempts };
+    }
+    return {
+      ...live,
+      [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+    };
+  }
+
+  // Re-read: TM persists run() state and would clobber a mid-run bulkUpdateState PUT.
+  private async returnedState(
+    taskInstance: ConcreteTaskInstance,
+    patch: Record<string, unknown> = {}
+  ): Promise<Record<string, unknown>> {
+    let liveState: Record<string, unknown> = taskInstance.state;
+    try {
+      const live = await this.serverSetup.pluginsStart.taskManager.get(REBALANCE_SHARDS_TASK_ID);
+      if (live?.state) {
+        liveState = live.state;
+      }
+    } catch {
+      // claimed instance is the best we have
+    }
+    return { ...liveState, ...patch };
   }
 
   private debugLog(message: string) {

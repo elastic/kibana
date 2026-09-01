@@ -428,6 +428,23 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).not.toHaveProperty('eventTriggerId');
     });
 
+    it('should default to manual for custom provenance strings without event evidence', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'attack-discovery-pipeline',
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        triggerType: 'manual',
+      });
+      expect(eventData).not.toHaveProperty('eventTriggerId');
+    });
+
     it('should include managed workflow execution fields when present', () => {
       const workflowExecution = createMockWorkflowExecution({
         isTestRun: true,
@@ -692,6 +709,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'cases.updated',
         status: ExecutionStatus.SKIPPED,
+        context: {
+          event: { timestamp: '2025-01-01T00:00:00.000Z', spaceId: 'default' },
+          metadata: { eventTriggerId: 'cases.updated' },
+        },
         managed: true,
         managedBy: 'workflowsExtensionsExample',
         originManagedWorkflowId: 'system-example-greeting',
