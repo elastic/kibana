@@ -9,7 +9,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   DEFAULT_RUN_LIMITS,
-  DEFAULT_RUN_QUOTA_TIME_ZONE,
   type RunBudgetGroupId,
   type RunLimit,
 } from '../../../common/run_quotas';
@@ -40,7 +39,6 @@ export const createRunQuotaInternalRepository = (
   ]);
 
 export interface RunQuotaSettingsPatch extends Record<string, unknown> {
-  timezone?: string;
   limits?: Record<string, RunLimit>;
   enforcementEnabled?: boolean;
   enabledBy?: string;
@@ -59,7 +57,6 @@ const cloneDefaultLimits = (): Record<string, RunLimit> =>
   );
 
 export const createDefaultRunQuotaSettingsAttributes = (): RunQuotaSettingsAttributes => ({
-  timezone: DEFAULT_RUN_QUOTA_TIME_ZONE,
   limits: cloneDefaultLimits(),
   enforcementEnabled: false,
 });

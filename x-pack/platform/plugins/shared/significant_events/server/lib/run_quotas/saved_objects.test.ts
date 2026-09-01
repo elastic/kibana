@@ -29,7 +29,6 @@ const getSchemas = (type: string) => {
 };
 
 const settingsAttributes = {
-  timezone: 'UTC',
   limits: {
     detection: { enabled: true, max: 100 },
     future_group: { enabled: true, max: 7 },

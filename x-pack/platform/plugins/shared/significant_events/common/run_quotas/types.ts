@@ -40,12 +40,10 @@ export const DEFAULT_RUN_LIMITS: Readonly<Record<RunBudgetGroupId, RunLimit>> = 
 };
 
 export interface RunQuotaSettings {
-  timezone: typeof DEFAULT_RUN_QUOTA_TIME_ZONE;
   limits: Record<RunBudgetGroupId, RunLimit>;
 }
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
-  timezone: DEFAULT_RUN_QUOTA_TIME_ZONE,
   limits: DEFAULT_RUN_LIMITS,
 };
 

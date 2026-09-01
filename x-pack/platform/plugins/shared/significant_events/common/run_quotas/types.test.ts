@@ -21,7 +21,6 @@ describe('run quota defaults', () => {
       memory: { enabled: false, max: 0 },
     });
     expect(DEFAULT_RUN_QUOTA_SETTINGS).toEqual({
-      timezone: 'UTC',
       limits: DEFAULT_RUN_LIMITS,
     });
     expect(MIN_RUN_LIMIT).toBe(1);

@@ -25,7 +25,6 @@ const MAX_ACTOR_LENGTH = 1024;
 const MAX_SPACE_ID_LENGTH = 1024;
 
 export interface RunQuotaSettingsAttributes extends Record<string, unknown> {
-  timezone: string;
   limits: Record<string, RunLimit>;
   enforcementEnabled?: boolean;
   enabledBy?: string;
@@ -77,7 +76,6 @@ const runLimitSchemaV1 = schema.oneOf([
 ]);
 
 const runQuotaSettingsAttributesV1 = schema.object({
-  timezone: schema.string({ maxLength: MAX_DATE_LENGTH }),
   limits: schema.recordOf(schema.string({ maxLength: MAX_GROUP_LENGTH }), runLimitSchemaV1),
   enforcementEnabled: schema.maybe(schema.boolean()),
   enabledBy: schema.maybe(schema.string({ maxLength: MAX_ACTOR_LENGTH })),

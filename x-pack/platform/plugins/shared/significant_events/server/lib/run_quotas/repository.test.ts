@@ -38,7 +38,6 @@ describe('run quota OCC repository', () => {
   it('preserves unknown settings fields and budget groups across conflict retries', async () => {
     const repository = makeRepository();
     const first: RunQuotaSettingsAttributes = {
-      timezone: 'UTC',
       enforcementEnabled: false,
       limits: {
         detection: { enabled: true, max: 100 },
