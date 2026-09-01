@@ -35,7 +35,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          stack: ga
+          stack: ga 9.5+
           ech: ga
           ece: ga
           eck: ga
@@ -83,8 +83,8 @@ This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-t
 
 | Key | What it means here | Write |
 |---|---|---|
-| `stack` | Lifecycle and version for Elastic Stack | `ga`, `preview`, `ga 9.4+`, `ga 9.0-9.3, deprecated 9.4+`, and so on |
-| `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | `ga` if supported. Omit the key if not. Never a version. Never `preview`, `experimental`, `deprecated`, or `unavailable` |
+| `stack` | Lifecycle and version history for Elastic Stack | Always include the version. Multiple values are allowed: `ga 9.4+`, `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
+| `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | `ga` if supported. Omit the key if not. Never a version. Never `preview`, `experimental`, `deprecated`, `removed`, or `unavailable` |
 | `serverless` | Supported on serverless, or not | `ga` if supported. Omit the key if not. Never a version |
 
 `ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and Elastic Cloud Hosted supports the setting, write `ech: ga`.
@@ -93,7 +93,7 @@ Preferred map form:
 
 ```yaml
 applies_to:
-  stack: preview
+  stack: preview 9.5+
   ech: ga
   ece: ga
   eck: ga
@@ -104,7 +104,7 @@ Self-managed only. Elastic Cloud Hosted does not support this setting, so `ech` 
 
 ```yaml
 applies_to:
-  stack: ga
+  stack: ga 9.5+
   self: ga
 ```
 
@@ -124,7 +124,7 @@ Wrong (deployment keys must not carry preview or experimental):
 
 ```yaml
 applies_to:
-  stack: preview
+  stack: preview 9.5+
   ech: preview
   self: preview
 ```
@@ -142,7 +142,7 @@ Right:
 
 ```yaml
 applies_to:
-  stack: preview
+  stack: preview 9.5+
   ech: ga
   ece: ga
   eck: ga
@@ -153,24 +153,32 @@ Right (not supported on Elastic Cloud Hosted):
 
 ```yaml
 applies_to:
-  stack: ga
+  stack: ga 9.5+
   self: ga
 ```
 
-### Unreleased version drops the Supported on line
+### Always put the version on stack
 
-If `stack` has a single lifecycle whose version is not released yet, docs-builder treats it as Planned. The settings component then omits the entire `p.settings-supported-on` line. Deployment badges on the same entry disappear too.
+Write `stack: preview 9.5+` or `stack: ga 9.5+`, not `stack: preview` with no version.
 
-| Tag while 9.5 is unreleased | Result |
-|---|---|
-| `stack: preview 9.5` as the only stack value | No Supported on line |
-| `stack: preview` (no version) | Line renders (Preview) |
-| `stack: preview 9.4` when 9.4 is released | Line renders (Preview 9.4+) |
-| `stack: preview 9.4, ga 9.5` | Follow the badge table. |
-
-If the setting is already preview on the current released stack, omit the unreleased version. If it is truly new in the unreleased minor, either omit the version until that minor ships, or accept the missing line on the PR preview.
+If that minor is not released yet, the docs show Planned. That is automated rendering. The same tag shows the real lifecycle after the version ships. Do not omit the version to hide Planned.
 
 Rules: [badge rendering reference](https://elastic.github.io/docs-builder/syntax/applies/#badge-rendering-reference).
+
+### Lifecycle history on stack
+
+`stack` accepts more than one lifecycle. Separate them with a comma. Append the new state. Do not overwrite the previous one.
+
+| Change | Write |
+|---|---|
+| Preview, then GA | `stack: preview 9.0-9.2, ga 9.3+` |
+| GA, then deprecated | `stack: ga 9.0-9.3, deprecated 9.4+` |
+| Then removed | `stack: ga 9.0-9.3, deprecated 9.4-9.5, removed 9.6+` |
+| Preview, then removed | `stack: preview 9.0-9.2, removed 9.3+` |
+
+When you remove a setting from the product, keep the YAML entry. Users on earlier versions still need to find the key. Append `removed` and the version on `stack`. Keep the same deployment `ga` keys the setting already had. Do not write `removed` on `ech`, `ece`, `eck`, or `self`. Older files may still say `ech: removed`. Do not copy that for new work.
+
+If the setting leaves serverless, omit `serverless`. Serverless has no version history on these keys.
 
 ### Inline badges in descriptions
 
@@ -186,7 +194,7 @@ description: |
 
 ### Version syntax
 
-Tag `stack` at the minor: `ga 9.4+`, not `ga 9.4.2`. Prefer `x.x+` for open-ended availability. Do not put a version on deployment keys or on `serverless`.
+Tag `stack` at the minor: `ga 9.4+`, not `ga 9.4.2`. Prefer `x.x+` for open-ended availability. Prefer an explicit range for a closed lifecycle: `preview 9.0-9.2`, not a bare `preview 9.0` next to a later state. Do not put a version on deployment keys or on `serverless`.
 
 A `vX.Y.Z` label on a Kibana PR is a backport target. Confirm the patch shipped before you use that minor as the floor.
 

@@ -45,7 +45,7 @@ Task progress:
 - [ ] 3. Verify key, default, type, and availability from origin/main
 - [ ] 4. Edit the YAML entry
 - [ ] 5. Update host Markdown, toc.yml, or Cloud include only if needed
-- [ ] 6. Tag applies_to (stack + deployments + serverless as required)
+- [ ] 6. Tag applies_to (stack history + deployments + serverless as required)
 - [ ] 7. Preview and check the Supported on line
 - [ ] 8. Note release notes, docker env list, and Cloud allowlist if they apply
 ```
@@ -85,7 +85,7 @@ The `name` i18n string is the UI label. It is not the YAML `setting` key.
 
 ### 4. Edit the YAML
 
-Follow [yaml-schema.md](references/yaml-schema.md). Copy the nearest sibling entry and change only what this setting needs.
+Follow [yaml-schema.md](references/yaml-schema.md). Copy the nearest sibling entry and change only what this setting needs. If the product removes the setting, keep the YAML entry and update `applies_to`. Do not delete it.
 
 Required on every setting:
 
@@ -113,17 +113,17 @@ Reporting settings already split across several YAML files included from `report
 
 ### 6. applies_to
 
-This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. Details and examples: [yaml-schema.md](references/yaml-schema.md).
+This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. It also does not allow deleting a preview-only setting when that setting is removed. Details and examples: [yaml-schema.md](references/yaml-schema.md).
 
-- **`stack`** is the only key that carries lifecycle and version (`ga`, `preview`, `deprecated 9.4+`, and so on).
+- **`stack`** is the only key that carries lifecycle and version. Always include the version, even when that minor is not released yet. Docs render an unreleased version as Planned until the version ships. That is by design. Do not omit the version to avoid Planned.
+- **`stack` accepts multiple values.** Append a new lifecycle. Do not replace the old one. Example: `stack: preview 9.0-9.2, ga 9.3+`.
+- **Do not delete a removed setting.** Keep the YAML entry so users on earlier versions can still find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`.
 - **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported:
-  - Write `key: ga` if that deployment supports it, even when `stack` is `preview`.
+  - Write `key: ga` if that deployment supports it, even when `stack` is `preview` or `removed`.
   - Omit the key if that deployment does not support it.
   - Do not copy the stack lifecycle onto deployments.
   - Do not write `unavailable` or a version on those keys.
 - **`serverless`:** write `serverless: ga` when the setting exists on serverless. Omit it when it does not. Do not put a version on `serverless`.
-
-If the in-development minor is not released yet, do not use `stack: preview 9.x` (or `ga 9.x`) as the only stack lifecycle. That unreleased value resolves to Planned and **drops the entire "Supported on:" line**, including deployment badges. Use `stack: preview` with no version, or accept that the line stays hidden until the version ships.
 
 Tag `stack` at the minor. Do not put version numbers in the description next to a badge.
 
@@ -143,9 +143,7 @@ On a Kibana PR, open the docs preview:
 YAML that parses is not proof that badges render. Inspect the live DOM for the setting's `<dd>`:
 
 - A rendered line is `dd > p.settings-supported-on` with `<applies-to-popover>` children.
-- A missing line means that `<p>` is absent.
-
-Compare with a sibling `<dd>` that already shows badges. If only your entry lacks the line, the `stack` tag is the first suspect.
+- An unreleased `stack` version can show as Planned until that minor ships. Do not strip the version to force a different badge.
 
 ### 8. Companion work
 
@@ -161,16 +159,17 @@ Do this when it applies. Skip it when it does not.
 - [ ] Entry is in the YAML that matches kibana.yml vs space vs global
 - [ ] `setting` matches the runtime key at HEAD
 - [ ] Default and datatype match the schema or `uiSettings` registration
-- [ ] `stack` carries the lifecycle and version. Deployment keys are `ga` or omitted
+- [ ] `stack` carries lifecycle and version. Deployment keys are `ga` or omitted
+- [ ] New or changed `stack` tags include the version, even if that minor is unreleased
+- [ ] Lifecycle changes append on `stack` (for example `preview 9.0-9.2, ga 9.3+`). They do not replace the previous value
+- [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
 - [ ] Unsupported deployments are omitted, not tagged `unavailable`
-- [ ] Unreleased-only `stack: <lifecycle> <version>` is not the only stack value, or the missing Supported on line is an accepted preview-time gap
 - [ ] Cloud page include exists only if the entry has `ech: ga`
-- [ ] Live preview DOM shows `p.settings-supported-on` when badges should render
 - [ ] No UI label, test ID, or component name used as the YAML `setting` key
 
 ## Additional resources
 
-- YAML field reference and badge traps: [yaml-schema.md](references/yaml-schema.md)
+- YAML field reference and `applies_to` rules: [yaml-schema.md](references/yaml-schema.md)
 - File and group map: [file-map.md](references/file-map.md)
 - Copy-paste entries: [examples.md](examples.md)
 - Schema source: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md)

@@ -12,7 +12,7 @@ Copy the nearest sibling in the target file. These snippets show the usual shape
         datatype: bool
         default: true
         applies_to:
-          stack: ga
+          stack: ga 9.5+
           self: ga
 ```
 
@@ -45,7 +45,7 @@ Set `ech: ga` if Cloud supports the key. Confirm Cloud actually allowlists it. T
 
 ## New space-level Advanced Settings entry
 
-`setting` is the `uiSettings` key. `group` matches `category`. This example is preview on Stack. Deployment keys stay `ga`.
+`setting` is the `uiSettings` key. `group` matches `category`. This example is preview on Stack. Put the version on `stack`. Deployment keys stay `ga`.
 
 ```yaml
       - setting: "example:enableFeature"
@@ -55,7 +55,7 @@ Set `ech: ga` if Cloud supports the key. Confirm Cloud actually allowlists it. T
         datatype: bool
         default: false
         applies_to:
-          stack: preview
+          stack: preview 9.5+
           ech: ga
           ece: ga
           eck: ga
@@ -108,18 +108,45 @@ Use `advanced-settings-global.yml`. Omit `serverless` when the setting is not av
               - option: strict
               - option: lenient
             applies_to:
-              stack: preview
+              stack: preview 9.5+
 ```
 
 Child entries inherit parent `applies_to` unless they set their own.
 
-## Deprecation
+## Lifecycle evolution
 
-Keep the old key. Change lifecycle. Add `deprecation_details` when the replacement is not obvious from the description.
+Append the new `stack` lifecycle. Do not replace the previous value.
+
+Preview, then GA:
+
+```yaml
+        applies_to:
+          stack: preview 9.0-9.2, ga 9.3+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+```
+
+GA, then deprecated. Keep the old key. Add `deprecation_details` when the replacement is not obvious from the description:
 
 ```yaml
         applies_to:
           stack: ga 9.0-9.3, deprecated 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+        deprecation_details: "Use `example:newKey` instead."
+```
+
+## Removal
+
+Keep the YAML entry. Do not delete it. Append `removed` and the version on `stack`. Keep the deployment `ga` keys.
+
+```yaml
+        applies_to:
+          stack: ga 9.0-9.3, removed 9.4+
           ech: ga
           ece: ga
           eck: ga
