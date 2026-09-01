@@ -62,7 +62,13 @@ const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
 const memoizeAsyncByKey = <K, T>(fn: (key: K) => Promise<T>): ((key: K) => Promise<T>) => {
   const cache = new Map<K, Promise<T>>();
   return (key: K) => {
-    if (!cache.has(key)) cache.set(key, fn(key));
+    if (!cache.has(key)) {
+      const pending = fn(key).catch((err) => {
+        cache.delete(key);
+        throw err;
+      });
+      cache.set(key, pending);
+    }
     return cache.get(key)!;
   };
 };
@@ -111,8 +117,6 @@ export const createModelProvider = ({
   });
 
   const getFastModelConnectorId = memoizeAsync(async () => {
-    let connectorId: string | undefined;
-
     const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
       request
@@ -120,27 +124,14 @@ export const createModelProvider = ({
 
     const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
     if (recommendedEndpoint.length > 0) {
-      connectorId = recommendedEndpoint[0].connectorId;
+      return recommendedEndpoint[0].connectorId;
     }
 
-    const resolvedDefaultConnectorId = await getDefaultConnectorId();
-    if (!connectorId) {
-      connectorId = resolvedDefaultConnectorId;
-      logger.debug(
-        `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: ${connectorId}. Fast model and default model are the SAME.`
-      );
-    } else {
-      const isSame = connectorId === resolvedDefaultConnectorId;
-      logger.debug(
-        `[model_provider] Fast connector: ${connectorId}, default connector: ${resolvedDefaultConnectorId}. ${
-          isSame
-            ? 'Fast model and default model are the SAME.'
-            : 'Fast model is a DISTINCT connector — latency gains expected.'
-        }`
-      );
-    }
-
-    return connectorId;
+    const fallbackId = await getDefaultConnectorId();
+    logger.debug(
+      `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: ${fallbackId}. Fast model and default model are the SAME.`
+    );
+    return fallbackId;
   });
 
   const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
