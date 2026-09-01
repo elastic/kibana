@@ -737,6 +737,61 @@ describe('createFieldDefinitionsSubClient', () => {
       });
     });
 
+    it('tags both create counters with the calling client source', async () => {
+      const clientArgsWithCounter = {
+        ...createClientArgsWithCounter(),
+        clientSource: 'plugin_contract' as const,
+      };
+      clientArgsWithCounter.authorization.ensureAuthorized.mockResolvedValue();
+      clientArgsWithCounter.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      clientArgsWithCounter.services.fieldDefinitionsService.createFieldDefinition.mockResolvedValue(
+        makeFieldDefinitionSO({ isGlobal: true })
+      );
+
+      const subClient = createFieldDefinitionsSubClient(clientArgsWithCounter);
+      await subClient.createFieldDefinition({ ...writeInput, isGlobal: true });
+
+      // The scope counter builds `counterType` independently of `withUsageCounter`; the two must
+      // agree or the split stops joining to its parent counter in analysis.
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_field_definition',
+        counterType: 'cases_client.plugin_contract',
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_field_definition_global',
+        counterType: 'cases_client.plugin_contract',
+      });
+    });
+
+    it('surfaces a throwing attempt counter to the caller and skips the write', () => {
+      // Unlike incrementIdentityRejectionCounters, the attempt wrapper is not try/caught, and it
+      // increments synchronously before the wrapped async body runs — so a telemetry failure
+      // throws synchronously and the write never happens. This is `withUsageCounter`'s shared
+      // behavior across cases, attachments, and templates, not something specific to this client.
+      const throwingCounter = {
+        domainId: 'cases',
+        incrementCounter: jest.fn().mockImplementation((args: { counterName: string }) => {
+          if (args.counterName === 'create_field_definition') {
+            throw new Error('counter unavailable');
+          }
+        }),
+      };
+      const clientArgsWithCounter = {
+        ...createCasesClientMockArgs(),
+        usageCounter: throwingCounter,
+      };
+
+      const subClient = createFieldDefinitionsSubClient(clientArgsWithCounter);
+
+      expect(() => subClient.createFieldDefinition(writeInput)).toThrow('counter unavailable');
+      expect(
+        clientArgsWithCounter.services.fieldDefinitionsService.createFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
     it('does not increment on reads', async () => {
       const clientArgsWithCounter = createClientArgsWithCounter();
       clientArgsWithCounter.authorization.ensureAuthorized.mockResolvedValue();

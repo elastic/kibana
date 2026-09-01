@@ -54,6 +54,11 @@ export interface FieldDefinitionsSubClient {
  * cases, attachments, and templates. Create also increments a scope counter
  * (`create_field_definition_global` or `create_field_definition_reusable`) because usage
  * counters have no structured properties.
+ *
+ * Two caveats: `ensureGlobalFieldDefinitions` and the v1 → v2 migration create global definitions
+ * through the service, so the snapshot is the source of truth for how many exist; and reordering
+ * has no client method of its own, so `update_field_definition` also counts one increment per
+ * definition per reorder.
  */
 const usageCounterByMethod = {
   getFieldDefinitions: null,
