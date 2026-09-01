@@ -74,7 +74,7 @@ Do not copy defaults, types, or availability from the issue body or PR title.
 | Default | `schema.*({ defaultValue })` | `value` or `getValue` |
 | Type | Schema type | `schema` plus optional `type` |
 | Options | `schema.oneOf` / literals | `options` / `optionLabels` |
-| Availability | `offeringBasedSchema`, `schema.contextRef('serverless')`, Cloud support | Same, plus `technicalPreview` / `experimental` / `deprecation` |
+| Availability | `offeringBasedSchema`, `schema.contextRef('serverless')`, Cloud support | Serverless allowlist: start at `src/platform/packages/shared/serverless/settings/common/index.ts`. Also `technicalPreview` / `experimental` / `deprecation` |
 | UI category / group | n/a | `category` array. YAML `group` title. |
 
 Fetch `origin/main` first. Read the implementation at HEAD, not only the original PR diff.
@@ -134,6 +134,11 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
   - Do not copy the stack lifecycle onto deployments.
   - Do not write a version on those keys.
 - **`serverless`:** write `serverless: ga` when the setting exists on serverless. Write `serverless: unavailable` when it does not. Do not put a version on `serverless`.
+  - For Advanced Settings, check `src/platform/packages/shared/serverless/settings/common/index.ts`. That file lists settings on every serverless project.
+  - Also grep the project files in that folder: `observability_project`, `security_project`, `search_project`, `vectordb_project`, `workplace_ai_project`.
+  - Those files use ID constants such as `DATE_FORMAT_ID`, not the YAML key. Resolve the constant in `src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts`.
+  - If the ID is on any of those lists, write `serverless: ga`. If it is not, write `serverless: unavailable`.
+  - For `kibana.yml`, keep using `offeringBasedSchema` or `schema.contextRef('serverless')`.
 - **Gated notes:** To scope a `note`, `tip`, `warning`, or `important` to a version or deployment, put `:applies_to:` on the first line of that field. Do not wrap the field in `:::{note}`.
 
 Tag `stack` at the minor. Do not put version numbers in the description next to a badge.
@@ -176,6 +181,7 @@ Skip this when the reference entry is enough.
 - [ ] `stack` has no version only when the setting applies to all versions
 - [ ] New settings include a version, unless the key already existed and was missing from the docs
 - [ ] Deployment keys are always listed. Use `ga` or `unavailable`
+- [ ] For Advanced Settings, `serverless` matches the allowlist in `src/platform/packages/shared/serverless/settings/`
 - [ ] If you add a version that is not released yet, keep it. Do not strip it to avoid Planned
 - [ ] Lifecycle changes append on `stack` (for example `preview 9.0-9.2, ga 9.3+`). They do not replace the previous value
 - [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
