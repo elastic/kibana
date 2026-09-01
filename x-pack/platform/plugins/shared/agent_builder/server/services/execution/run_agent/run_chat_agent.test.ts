@@ -349,6 +349,8 @@ describe('runDefaultAgentMode', () => {
       // UUID v4 format sanity: 36 chars with dashes at expected positions.
       expect(call.roundId).toMatch(/^[0-9a-f-]{36}$/);
     });
+  });
+
   it('passes an image resolver built from the attachment state manager to the prompt factory', async () => {
     const context = createAgentHandlerContextMock();
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
