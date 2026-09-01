@@ -86,7 +86,9 @@ describe('JsonEditorWithMessageVariables', () => {
   });
 
   test('renders the validation decorations by default', () => {
-    render(<JsonEditorWithMessageVariables {...props} inputTargetValue={'{"foo": "test"}'} />);
+    mountWithIntl(
+      <JsonEditorWithMessageVariables {...props} inputTargetValue={'{"foo": "test"}'} />
+    );
 
     expect(mockCodeEditor).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -96,7 +98,7 @@ describe('JsonEditorWithMessageVariables', () => {
   });
 
   test('does not render the validation decorations when the value contains a mustache template', () => {
-    render(
+    mountWithIntl(
       <JsonEditorWithMessageVariables {...props} inputTargetValue={'{"foo": {{context.value}}}'} />
     );
 
@@ -108,7 +110,7 @@ describe('JsonEditorWithMessageVariables', () => {
   });
 
   test('does not render the validation decorations when the value is empty', () => {
-    render(<JsonEditorWithMessageVariables {...props} />);
+    mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
 
     expect(mockCodeEditor).toHaveBeenCalledWith(
       expect.objectContaining({
