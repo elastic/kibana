@@ -144,10 +144,10 @@ export const INTERNAL_API_ACCESS = 'internal' as const;
 
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
-  'danger' | 'warning' | 'primary' | 'accent'
+  'danger' | 'warning' | 'accentSecondary' | 'accent'
 > = {
   contain: 'danger',
   escalate: 'warning',
-  investigate: 'primary',
+  investigate: 'accentSecondary',
   tune: 'accent',
 };

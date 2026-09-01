@@ -621,7 +621,7 @@ export class DataGrid {
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
-    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+    await expect(table).toHaveAttribute('data-table-loaded', 'true', {
       timeout: totalTimeoutMs,
     });
   }

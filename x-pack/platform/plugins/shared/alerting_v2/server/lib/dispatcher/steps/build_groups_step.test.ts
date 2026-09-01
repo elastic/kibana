@@ -6,6 +6,7 @@
  */
 
 import { BuildGroupsStep, buildActionGroups } from './build_groups_step';
+import { RuleCatalog } from '../state';
 import {
   createActionPolicy,
   createAlertEpisode,
@@ -315,7 +316,7 @@ describe('buildActionGroups', () => {
       }),
     ];
 
-    const groups = buildActionGroups(matched, rules);
+    const groups = buildActionGroups(matched, RuleCatalog.of(rules));
 
     expect(groups[0].rules).toEqual({
       r1: { name: 'CPU spike' },
@@ -337,7 +338,7 @@ describe('buildActionGroups', () => {
       }),
     ];
 
-    const groups = buildActionGroups(matched, rules);
+    const groups = buildActionGroups(matched, RuleCatalog.of(rules));
 
     expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike' } });
     expect(groups[1].rules).toEqual({});

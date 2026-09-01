@@ -106,7 +106,13 @@ The structure of the notification document is defined in [`common/`](./common):
 ### Severity
 
 `severity` is one of `info | warning | error | critical`. It is **optional on submit and
-defaults to `info`**. Severity drives the per-document retention TTL applied by the cleanup task.
+defaults to `info`**. Severity drives retention in the daily cleanup task.
+A notification can remain visible for up to one cleanup interval after its TTL expires.
+In the case of duplicate "state" notification IDs with different severity values,
+cleanup expires a notification as a group, deleting every copy through its newest expired copy so
+an older, longer-lived severity cannot resurface.
+Unknown future severity values are normalized to `info` on read, but the cleanup task does not
+match them; those documents remain until the data stream's 180-day retention removes them.
 
 ### Call-to-action (CTA)
 
@@ -181,7 +187,8 @@ notification type.
 - NC supplies `namespace`, `type`, the `notification_id` (built from the type's `kind`), and `@timestamp`.
 
 Re-pushing a `state` notification with the same parts appends another document; at query time
-duplicates are collapsed and a separate cleanup-task keeps the index size under control. Invalid
+duplicates are collapsed and a daily cleanup task enforces severity retention while keeping the
+index size under control. Invalid
 content throws `NotificationValidationError` and nothing is written.
 
 `submit` returns a promise with value: `{ status: 'submitted' | 'skipped_disabled' }`.
