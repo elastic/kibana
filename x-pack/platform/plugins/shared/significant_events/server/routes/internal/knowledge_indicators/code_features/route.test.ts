@@ -24,6 +24,19 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 jest.mock('../../../utils/resolve_connector_for_feature', () => ({
   resolveConnectorForFeature: (...args: unknown[]) => mockResolveConnectorForFeature(...args),
 }));
+jest.mock('../../../../lib/knowledge_indicators/code_intelligence/codebox_client', () => ({
+  getCodeboxClient: jest.fn().mockReturnValue({
+    health: jest.fn().mockResolvedValue({ status: 'ok' }),
+    listRepos: jest.fn().mockResolvedValue([]),
+    grep: jest.fn().mockResolvedValue([]),
+    show: jest.fn().mockResolvedValue(''),
+    tree: jest.fn().mockResolvedValue([]),
+    languages: jest.fn().mockResolvedValue({}),
+    refs: jest.fn().mockResolvedValue([]),
+  }),
+  resetCodeboxClient: jest.fn(),
+}));
+
 jest.mock('../../../../lib/knowledge_indicators/code_intelligence', () => ({
   ...jest.requireActual('../../../../lib/knowledge_indicators/code_intelligence'),
   classifyLoggingSites: (...args: unknown[]) => mockClassifyLoggingSites(...args),
@@ -344,65 +357,13 @@ describe('Code Intelligence routes', () => {
     ).resolves.toEqual({ status: 'gate_bypassed', queriesGenerated: 1 });
 
     expect(mockExtractOtelSignalsResult).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: sourceEsClient })
+      expect.objectContaining({ repository: 'repository' })
     );
     expect(mockIdentifyCodeQueries).toHaveBeenCalledWith(
       expect.objectContaining({ esClient: streamDataEsClient, otelGateBypassed: true })
     );
     expect(mockDiscoverLoggingSites).toHaveBeenCalledWith(
-      expect.objectContaining({ gitRefKey: undefined })
-    );
-  });
-
-  it('threads gitRefKey to discoverLoggingSites in the template fallback path', async () => {
-    const sourceEsClient = { source: true };
-    const streamDataEsClient = { streamData: true };
-    mockExtractOtelSignalsResult.mockResolvedValue({ signals: [], failed: true });
-    mockDiscoverLoggingSites.mockResolvedValue([]);
-    mockClassifyLoggingSites.mockResolvedValue([]);
-    mockIdentifyCodeQueries.mockResolvedValue({ generatedCount: 1 });
-    mockResolveConnectorForFeature.mockResolvedValue('connector');
-
-    await identifyOtelSignalsRoute.handler({
-      params: {
-        body: {
-          repository: 'repository',
-          gitSha: 'sha',
-          gitRefKey: 'repository@main',
-          serviceRoot: 'service',
-          name: 'service',
-          language: 'typescript',
-          hasOtel: true,
-          signalCounts: {
-            instrumentation_grpc: 0,
-            instrumentation_http: 0,
-            instrumentation_other: 0,
-            start_span: 0,
-            set_attribute: 0,
-            add_event: 0,
-            record_exception: 0,
-            set_status_error: 0,
-            create_metric: 0,
-          },
-        },
-      },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        inferenceClient: {},
-        scopedClusterClient: { asCurrentUser: sourceEsClient },
-        streamDataEsClient,
-        streamsClient: { listStreams: jest.fn().mockResolvedValue([]) },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
-      }),
-      getSpaceId: jest.fn().mockResolvedValue('default'),
-      server: {},
-      logger: { get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn() }) },
-      maintenanceService: createMaintenanceService(),
-    } as unknown as IdentifyOtelHandlerParams);
-
-    expect(mockDiscoverLoggingSites).toHaveBeenCalledWith(
-      expect.objectContaining({ gitRefKey: 'repository@main' })
+      expect.objectContaining({ repository: 'repository' })
     );
   });
 

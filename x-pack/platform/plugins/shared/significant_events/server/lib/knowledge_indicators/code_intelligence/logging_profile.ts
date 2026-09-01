@@ -6,13 +6,13 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   CODE_ANALYSIS_FEATURE_TYPE,
   type Feature,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
+import type { CodeboxClient } from './codebox_client';
+
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import {
   CODE_FEATURE_META_LOGGING_PROFILE_COMMIT,
@@ -21,8 +21,6 @@ import {
   CODE_FEATURE_SUBTYPE_LOGGING_PROFILE,
   LOGGING_PROFILE_DRIFT_RATIO,
   OVER_CAPTURE_CEILING,
-  SOURCERER_LINES_INDEX,
-  SOURCERER_REFS_LOOKUP_INDEX,
 } from './constants';
 import { getRepositoryFeatureStreamName } from './identify_code_features';
 import { splitRepository } from './discover_logging_sites';
@@ -304,16 +302,11 @@ export interface DriftDetectionResult {
 }
 
 export interface DetectLoggingProfileDriftOptions {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   /** Repository as `"org/repo"`. */
   repository: string;
   /** Immutable commit SHA the greps were validated against (and recounted on). */
   gitCommit: string;
-  /**
-   * Composite ref key (`git.ref_key`) scoping an incremental (branch-indexed)
-   * corpus via a `LOOKUP JOIN`. Defaults to `''` (snapshot mode).
-   */
-  gitRefKey?: string;
   /** The persisted profile to recount. */
   profile: LoggingProfile;
   /**
@@ -337,26 +330,23 @@ export interface DetectLoggingProfileDriftOptions {
  * already validated against its evidence at persistence time).
  */
 export async function detectLoggingProfileDrift({
-  esClient,
+  codebox,
   repository,
   gitCommit,
-  gitRefKey = '',
   profile,
   driftRatio = LOGGING_PROFILE_DRIFT_RATIO,
   logger,
 }: DetectLoggingProfileDriftOptions): Promise<DriftDetectionResult> {
   const { org, repo } = splitRepository(repository);
-  const gitCommitPattern = gitCommit || '*';
 
   const greps: GrepDriftResult[] = [];
   for (const stored of profile.greps) {
     greps.push(
       await recountOneGrep({
-        esClient,
+        codebox,
         org,
         repo,
-        gitCommit: gitCommitPattern,
-        gitRefKey,
+        ref: gitCommit,
         stored,
         driftRatio,
         logger,
@@ -376,55 +366,33 @@ export async function detectLoggingProfileDrift({
 }
 
 async function recountOneGrep({
-  esClient,
+  codebox,
   org,
   repo,
-  gitCommit,
-  gitRefKey,
+  ref,
   stored,
   driftRatio,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   org: string;
   repo: string;
-  gitCommit: string;
-  gitRefKey: string;
+  ref: string;
   stored: LoggingProfileGrep;
   driftRatio: number;
   logger: Logger;
 }): Promise<GrepDriftResult> {
   const expected = stored.expect_call_sites;
   try {
-    const response = (await esClient.esql.query({
-      query: `
-        FROM ${SOURCERER_LINES_INDEX}
-        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
-                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
-             OR (?git_ref_key != "" AND update_mode == "incremental"
-                    AND git.ref_key == ?git_ref_key)
-        | WHERE line.content RLIKE ?regex
-        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
-        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
-        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
-        | WHERE git.commit IS NOT NULL
-        | STATS hits = COUNT(*)`,
-      params: [
-        { git_ref_key: gitRefKey },
-        { git_org: org },
-        { git_repo: repo },
-        { git_commit: gitCommit },
-        { regex: stored.regex },
-      ],
-      drop_null_columns: false,
-    })) as ESQLSearchResponse;
-
-    const hitsCol = response.columns.findIndex((c) => c.name === 'hits');
-    if (hitsCol === -1 || response.values.length === 0) {
-      // No rows means zero hits with no error — a parseable-but-empty result.
-      return classifyDrift(stored.regex, expected, 0, false, null, driftRatio);
-    }
-    const actual = Number(response.values[0][hitsCol] ?? 0);
+    // Strip leading/trailing .* anchors for ERE compatibility with Codebox grep
+    const erePattern = stored.regex.replace(/^\.\*/, '').replace(/\.\*$/, '') || stored.regex;
+    const hits = await codebox.grep({
+      org,
+      repo,
+      ref,
+      pattern: erePattern,
+    });
+    const actual = hits.length;
     return classifyDrift(stored.regex, expected, actual, false, null, driftRatio);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

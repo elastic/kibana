@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { CodeboxClient } from './codebox_client';
 import { isExcludedLoggingPath, OTEL_INSTRUMENTATION_PATTERNS } from './constants';
 import { codeGrep, splitRepository } from './discover_logging_sites';
 import type { OtelDetection, OtelSignalCounts } from './types';
@@ -74,7 +75,7 @@ const isEligibleSite = (
 };
 
 export interface DetectOtelInstrumentationOptions {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   repository: string;
   gitSha: string;
   serviceRoot: string;
@@ -108,14 +109,14 @@ const computeDetection = (counts: OtelSignalCounts): OtelDetection => {
  * `root/**` counts exactly. Never throws.
  */
 export async function detectOtelInstrumentationForRoots({
-  esClient,
+  codebox,
   repository,
   gitSha,
   serviceRoots,
   logger,
   perPatternLimit = 2000,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   repository: string;
   gitSha: string;
   serviceRoots: string[];
@@ -139,16 +140,27 @@ export async function detectOtelInstrumentationForRoots({
   );
 
   try {
+    // Flatten all (kind, regex) pairs and run them in parallel.
+    const pairs: Array<{ kind: keyof OtelSignalCounts; regex: string }> = [];
     for (const [kind, patterns] of Object.entries(OTEL_INSTRUMENTATION_PATTERNS) as Array<
       [keyof OtelSignalCounts, readonly string[]]
     >) {
       for (const regex of patterns) {
+        pairs.push({ kind, regex });
+      }
+    }
+
+    const CONCURRENCY = 10;
+    let next = 0;
+    const worker = async () => {
+      while (next < pairs.length) {
+        const idx = next++;
+        const { kind, regex } = pairs[idx];
         const hits = await codeGrep({
-          esClient,
+          codebox,
           gitOrg: org,
           gitRepo: repo,
-          gitCommit: gitSha || '*',
-          filePath: '**',
+          ref: gitSha,
           regex,
           limit: perPatternLimit,
         });
@@ -162,7 +174,8 @@ export async function detectOtelInstrumentationForRoots({
           }
         }
       }
-    }
+    };
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, pairs.length) }, () => worker()));
   } catch (error) {
     logger.debug(
       `otel_detection: batched grep failed for "${repository}": ${
@@ -190,7 +203,7 @@ export async function detectOtelInstrumentationForRoots({
 
 /** Detects OTel imports and idiom sites for one service. Never throws. */
 export async function detectOtelInstrumentation({
-  esClient,
+  codebox,
   repository,
   gitSha,
   serviceRoot,
@@ -203,26 +216,42 @@ export async function detectOtelInstrumentation({
   const filePath = root ? `${root}/**` : '**';
 
   try {
+    // Run all kind×pattern pairs in parallel.
+    const pairs: Array<{ kind: keyof OtelSignalCounts; regex: string }> = [];
     for (const [kind, patterns] of Object.entries(OTEL_INSTRUMENTATION_PATTERNS) as Array<
       [keyof OtelSignalCounts, readonly string[]]
     >) {
-      const sites = new Set<string>();
       for (const regex of patterns) {
+        pairs.push({ kind, regex });
+      }
+    }
+    const sitesByKind = new Map<keyof OtelSignalCounts, Set<string>>();
+    const CONCURRENCY = 10;
+    let next = 0;
+    const worker = async () => {
+      while (next < pairs.length) {
+        const idx = next++;
+        const { kind, regex } = pairs[idx];
         const hits = await codeGrep({
-          esClient,
+          codebox,
           gitOrg: org,
           gitRepo: repo,
-          gitCommit: gitSha || '*',
-          filePath,
+          ref: gitSha,
+          filePath: filePath !== '**' ? filePath : undefined,
           regex,
           limit: perPatternLimit,
         });
         for (const hit of hits) {
           if (isEligibleSite(kind, hit.filePath, hit.content)) {
+            const sites = sitesByKind.get(kind) ?? new Set<string>();
             sites.add(`${hit.filePath}:${hit.lineNumber}`);
+            sitesByKind.set(kind, sites);
           }
         }
       }
+    };
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, pairs.length) }, () => worker()));
+    for (const [kind, sites] of sitesByKind) {
       counts[kind] = sites.size;
     }
   } catch (error) {

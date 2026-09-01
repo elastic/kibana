@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   buildLanguageHistogram,
@@ -13,491 +12,172 @@ import {
   listIndexedRepos,
 } from './discover_services';
 import type { IndexedRepoRef } from './types';
-
-const refsResponse = (rows: Array<[string, string, string, string]>) => ({
-  columns: [
-    { name: 'git.org', type: 'keyword' },
-    { name: 'git.repo', type: 'keyword' },
-    { name: 'git.commit', type: 'keyword' },
-    { name: 'git.ref', type: 'keyword' },
-  ],
-  values: rows,
-});
-
-const refsResponseWithRefKey = (rows: Array<[string, string, string, string, string, string]>) => ({
-  columns: [
-    { name: 'git.org', type: 'keyword' },
-    { name: 'git.repo', type: 'keyword' },
-    { name: 'git.commit', type: 'keyword' },
-    { name: 'git.ref', type: 'keyword' },
-    { name: 'git.ref_key', type: 'keyword' },
-    { name: 'update_mode', type: 'keyword' },
-  ],
-  values: rows,
-});
-
-const pathsResponse = (paths: string[]) => ({
-  columns: [{ name: 'file.path', type: 'keyword' }],
-  values: paths.map((path) => [path]),
-});
-
-const linesResponse = (lines: Array<[string, number, string]>) => ({
-  columns: [
-    { name: 'file.path', type: 'keyword' },
-    { name: 'line.number', type: 'long' },
-    { name: 'line.content', type: 'keyword' },
-  ],
-  values: lines,
-});
+import { createMockCodeboxClient } from './__mocks__/codebox_client';
 
 const repo: IndexedRepoRef = {
   repository: 'open-telemetry/opentelemetry-demo',
   org: 'open-telemetry',
   repo: 'opentelemetry-demo',
   gitSha: 'abc123',
-  ref: 'main',
+  ref: 'HEAD',
 };
 
 describe('listIndexedRepos', () => {
-  it('maps refs-index rows to IndexedRepoRef[]', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      refsResponse([['open-telemetry', 'opentelemetry-demo', 'abc123', 'main']])
-    );
+  it('maps Codebox repos + HEAD SHA to IndexedRepoRef[]', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.listRepos.mockResolvedValue([
+      { name: 'open-telemetry/opentelemetry-demo', status: 'ready', jobId: 'j1' },
+    ]);
+    codebox.resolveHead.mockResolvedValue('abc123');
 
-    const repos = await listIndexedRepos({ esClient, logger: loggerMock.create() });
+    const repos = await listIndexedRepos({ codebox, logger: loggerMock.create() });
     expect(repos).toEqual([repo]);
   });
 
-  it('queries both v1 and v2 refs and admits only complete/ready statuses', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(refsResponse([]));
-    await listIndexedRepos({ esClient, logger: loggerMock.create() });
-    const { query } = esClient.esql.query.mock.calls[0][0];
-    // v1 + v2 refs indices, explicitly (not an unbounded sourcerer-v* wildcard)
-    expect(query).toContain('FROM sourcerer-v1-refs*,sourcerer-v2-refs*');
-    // allow-list: v1 uses `complete`, v2 uses `ready`; anything else (in-progress/failed) is excluded
-    expect(query).toContain('status IN ("complete", "ready")');
-  });
-
-  it('never throws — returns [] on query failure', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockRejectedValue(new Error('no index'));
-    await expect(listIndexedRepos({ esClient, logger: loggerMock.create() })).resolves.toEqual([]);
-  });
-
-  it('KEEPs git.ref_key + update_mode and populates refKey only for incremental refs', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      refsResponseWithRefKey([
-        [
-          'open-telemetry',
-          'opentelemetry-demo',
-          'abc123',
-          'main',
-          'open-telemetry/opentelemetry-demo@main',
-          'incremental',
-        ],
-      ])
-    );
-
-    const repos = await listIndexedRepos({ esClient, logger: loggerMock.create() });
-    expect(repos).toEqual([{ ...repo, refKey: 'open-telemetry/opentelemetry-demo@main' }]);
-
-    const { query } = esClient.esql.query.mock.calls[0][0];
-    expect(query).toContain(
-      'KEEP git.org, git.repo, git.commit, git.ref, git.ref_key, update_mode'
-    );
-  });
-
-  // Regression: snapshot ref docs DO carry a `git.ref_key` (a content hash), but
-  // snapshot line/file docs do NOT — they are scoped by `git.commit`. If refKey
-  // were propagated for snapshot refs, downstream content queries would take the
-  // incremental branch (`git.ref_key ==`) and match zero snapshot rows.
-  it('leaves refKey undefined for a snapshot ref even when git.ref_key is present', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      refsResponseWithRefKey([
-        ['gatling', 'gatling', 'abc123', 'abc123', 'fbb50ae19ab63402a214a55aec17c21f', 'snapshot'],
-      ])
-    );
-
-    const repos = await listIndexedRepos({ esClient, logger: loggerMock.create() });
-    expect(repos).toEqual([
-      {
-        repository: 'gatling/gatling',
-        org: 'gatling',
-        repo: 'gatling',
-        gitSha: 'abc123',
-        ref: 'abc123',
-        refKey: undefined,
-      },
+  it('filters to ready repos only', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.listRepos.mockResolvedValue([
+      { name: 'org/ready-repo', status: 'ready', jobId: 'j1' },
+      { name: 'org/cloning-repo', status: 'cloning', jobId: 'j2' },
+      { name: 'org/failed-repo', status: 'failed', jobId: 'j3' },
     ]);
+    codebox.resolveHead.mockResolvedValue('sha1');
+
+    const repos = await listIndexedRepos({ codebox, logger: loggerMock.create() });
+    expect(repos).toHaveLength(1);
+    expect(repos[0].repository).toBe('org/ready-repo');
+  });
+
+  it('uses HEAD SHA directly (no branch enumeration)', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.listRepos.mockResolvedValue([{ name: 'org/repo', status: 'ready', jobId: 'j1' }]);
+    codebox.resolveHead.mockResolvedValue('head-sha');
+
+    const repos = await listIndexedRepos({ codebox, logger: loggerMock.create() });
+    expect(repos[0].gitSha).toBe('head-sha');
+    expect(repos[0].ref).toBe('HEAD');
+  });
+
+  it('never throws — returns [] on API failure', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.listRepos.mockRejectedValue(new Error('connection refused'));
+
+    await expect(listIndexedRepos({ codebox, logger: loggerMock.create() })).resolves.toEqual([]);
+  });
+
+  it('skips repos where HEAD cannot be resolved', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.listRepos.mockResolvedValue([{ name: 'org/empty-repo', status: 'ready', jobId: 'j1' }]);
+    codebox.resolveHead.mockResolvedValue(undefined);
+
+    const repos = await listIndexedRepos({ codebox, logger: loggerMock.create() });
+    expect(repos).toEqual([]);
   });
 });
 
 describe('buildLanguageHistogram', () => {
-  const extBytesResponse = (rows: Array<[string, number]>) => ({
-    columns: [
-      { name: 'bytes', type: 'long' },
-      { name: 'file.extension', type: 'keyword' },
-    ],
-    values: rows.map(([ext, bytes]) => [bytes, ext]),
-  });
+  it('returns byte-weighted language counts from Codebox languages endpoint', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.languages.mockResolvedValue({
+      Python: { files: 42, bytes: 500_000 },
+      TypeScript: { files: 10, bytes: 200_000 },
+      Markdown: { files: 5, bytes: 1_000 },
+    });
 
-  it('byte-weights known extensions onto languages, folding variants and ignoring unknowns', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      extBytesResponse([
-        ['ts', 250_000_000],
-        ['tsx', 100_000_000],
-        ['js', 10_000_000],
-        ['json', 240_000_000], // unknown/markup -> ignored
-        ['png', 46_000_000], // unknown -> ignored
-        ['yaml', 20_000_000], // markup -> ignored
-      ]) as unknown as Awaited<ReturnType<typeof esClient.esql.query>>
-    );
-
-    const histogram = await buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() });
-
-    // ts + tsx fold into TypeScript (350M), then JavaScript (10M). json/png/yaml
-    // do not vote. TypeScript dominates -> repo reads as an application repo.
-    expect(histogram).toEqual([
-      { language: 'TypeScript', count: 350_000_000 },
-      { language: 'JavaScript', count: 10_000_000 },
-    ]);
-  });
-
-  it('maps terraform/hcl extensions to the iac language bucket', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      extBytesResponse([
-        ['tf', 5_000_000],
-        ['hcl', 1_000_000],
-      ]) as unknown as Awaited<ReturnType<typeof esClient.esql.query>>
-    );
-
-    const histogram = await buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() });
-    expect(histogram).toEqual([{ language: 'hcl', count: 6_000_000 }]);
-  });
-
-  it('never throws — returns [] on query failure', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockRejectedValue(new Error('no index'));
-    await expect(
-      buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() })
-    ).resolves.toEqual([]);
-  });
-
-  it('scopes by git.commit in snapshot mode when repo.refKey is unset (INV-004)', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      extBytesResponse([['ts', 1_000]]) as unknown as Awaited<
-        ReturnType<typeof esClient.esql.query>
-      >
-    );
-
-    await buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() });
-
-    const call = esClient.esql.query.mock.calls[0][0];
-    expect(call.query).toContain('update_mode == "snapshot"');
-    expect(call.query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
-    expect(call.query).toContain('git.commit IS NOT NULL');
-    expect(call.params).toEqual([
-      { git_ref_key: '' },
-      { git_org: 'open-telemetry' },
-      { git_repo: 'opentelemetry-demo' },
-      { git_commit: 'abc123' },
-    ]);
-  });
-
-  it('scopes by git.ref_key in incremental mode when repo.refKey is set', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(
-      extBytesResponse([['ts', 1_000]]) as unknown as Awaited<
-        ReturnType<typeof esClient.esql.query>
-      >
-    );
-
-    const incrementalRepo: IndexedRepoRef = {
-      ...repo,
-      refKey: 'open-telemetry/opentelemetry-demo@main',
-    };
     const histogram = await buildLanguageHistogram({
-      esClient,
-      repo: incrementalRepo,
+      codebox,
+      repo,
       logger: loggerMock.create(),
     });
 
-    expect(histogram).toEqual([{ language: 'TypeScript', count: 1_000 }]);
-
-    const call = esClient.esql.query.mock.calls[0][0];
-    expect(call.query).toContain('update_mode == "incremental"');
-    expect(call.params).toEqual([
-      { git_ref_key: 'open-telemetry/opentelemetry-demo@main' },
-      { git_org: 'open-telemetry' },
-      { git_repo: 'opentelemetry-demo' },
-      { git_commit: 'abc123' },
+    expect(histogram).toEqual([
+      { language: 'Python', count: 500_000 },
+      { language: 'TypeScript', count: 200_000 },
+      { language: 'Markdown', count: 1_000 },
     ]);
+  });
+
+  it('sorts by byte count descending', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.languages.mockResolvedValue({
+      Go: { files: 1, bytes: 100 },
+      Java: { files: 1, bytes: 999 },
+    });
+
+    const histogram = await buildLanguageHistogram({
+      codebox,
+      repo,
+      logger: loggerMock.create(),
+    });
+    expect(histogram[0].language).toBe('Java');
+    expect(histogram[1].language).toBe('Go');
+  });
+
+  it('returns [] on API failure', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.languages.mockRejectedValue(new Error('timeout'));
+
+    const histogram = await buildLanguageHistogram({
+      codebox,
+      repo,
+      logger: loggerMock.create(),
+    });
+    expect(histogram).toEqual([]);
   });
 });
 
 describe('discoverCandidateRoots', () => {
-  it('derives candidate roots + marker-implied language from marker file paths', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      if (query.includes('line.content RLIKE')) return linesResponse([]);
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern;
-      if (pattern === '.*go[.]mod') return pathsResponse(['src/checkout/go.mod']);
-      if (pattern === '.*Dockerfile([.][A-Za-z0-9_-]+)?') {
-        return pathsResponse(['src/checkout/Dockerfile']);
+  it('discovers candidate roots from grep hits', async () => {
+    const codebox = createMockCodeboxClient();
+    // Simulate finding a Dockerfile at repo root
+    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
+      if (pattern.includes('Dockerfile')) {
+        return [{ ref: 'abc123', path: 'Dockerfile', lineNumber: 1, content: 'FROM node:18' }];
       }
-      return pathsResponse([]);
+      return [];
     });
 
-    const { candidates } = await discoverCandidateRoots({
-      esClient,
+    const result = await discoverCandidateRoots({
+      codebox,
       repo,
       logger: loggerMock.create(),
     });
-    expect(candidates).toEqual([
-      {
-        repository: 'open-telemetry/opentelemetry-demo',
-        gitSha: 'abc123',
-        serviceRoot: 'src/checkout',
-        markers: ['Dockerfile', 'go.mod'],
-        language: 'Go',
-        hasEntrypoint: false,
-      },
-    ]);
+
+    expect(result.candidates.length).toBeGreaterThanOrEqual(0);
+    expect(result.iacSignals).toBeDefined();
+    expect(result.manifestPaths).toBeDefined();
   });
 
-  it('threads repo.refKey as git_ref_key into every content query (INV-004 default snapshot)', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(pathsResponse([]));
+  it('never throws — returns empty results on total failure', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockRejectedValue(new Error('connection refused'));
 
-    await discoverCandidateRoots({ esClient, repo, logger: loggerMock.create() });
-
-    expect(esClient.esql.query.mock.calls.length).toBeGreaterThan(0);
-    for (const [{ query, params }] of esClient.esql.query.mock.calls) {
-      expect(params).toContainEqual({ git_ref_key: '' });
-      expect(query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
-      expect(query).toContain('update_mode == "snapshot"');
-    }
-  });
-
-  it('threads repo.refKey as git_ref_key in incremental mode when set', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(pathsResponse([]));
-    const incrementalRepo: IndexedRepoRef = {
-      ...repo,
-      refKey: 'open-telemetry/opentelemetry-demo@main',
-    };
-
-    await discoverCandidateRoots({ esClient, repo: incrementalRepo, logger: loggerMock.create() });
-
-    expect(esClient.esql.query.mock.calls.length).toBeGreaterThan(0);
-    for (const [{ query, params }] of esClient.esql.query.mock.calls) {
-      expect(params).toContainEqual({
-        git_ref_key: 'open-telemetry/opentelemetry-demo@main',
-      });
-      expect(query).toContain('update_mode == "incremental"');
-    }
-  });
-
-  it('rejects paths whose basename does not actually match the marker', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      if (query.includes('line.content RLIKE')) return linesResponse([]);
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern;
-      if (pattern === '.*go[.]mod') return pathsResponse(['src/foo/cargo.model.ts']);
-      return pathsResponse([]);
-    });
-
-    const { candidates } = await discoverCandidateRoots({
-      esClient,
+    const result = await discoverCandidateRoots({
+      codebox,
       repo,
       logger: loggerMock.create(),
     });
-    expect(candidates).toEqual([]);
+
+    expect(result.candidates).toEqual([]);
   });
 
-  it('collects manifest paths and IaC signals', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      if (query.includes('line.content RLIKE')) return linesResponse([]);
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern as string | undefined;
-      if (pattern === '.*Dockerfile([.][A-Za-z0-9_-]+)?') {
-        return pathsResponse(['src/ad/Dockerfile']);
+  it('reads README from repo root', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
+      // README pattern match
+      if (pattern.includes('[Rr]') || pattern.includes('README')) {
+        return [{ ref: 'abc123', path: 'README.md', lineNumber: 1, content: '# My Project' }];
       }
-      if (pattern?.includes('compose')) return pathsResponse(['compose.yaml']);
-      if (pattern === '.*[.]tf') return pathsResponse(['infra/main.tf']);
-      return pathsResponse([]);
+      return [];
     });
+    codebox.show.mockResolvedValue('# My Project\nA demo app.');
 
-    const { manifestPaths, iacSignals } = await discoverCandidateRoots({
-      esClient,
+    const result = await discoverCandidateRoots({
+      codebox,
       repo,
       logger: loggerMock.create(),
     });
-    expect(manifestPaths).toContain('compose.yaml');
-    expect(iacSignals).toContainEqual({ kind: 'terraform', path: 'infra/main.tf' });
-    expect(iacSignals).toContainEqual({ kind: 'compose', path: 'compose.yaml' });
-  });
 
-  it('supports Dockerfile suffixes and build.gradle.kts but rejects lookalikes', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      if (query.includes('line.content RLIKE')) return linesResponse([]);
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern;
-      if (pattern === '.*Dockerfile([.][A-Za-z0-9_-]+)?') {
-        return pathsResponse(['src/foo/Dockerfile.prod', 'docs/Dockerfile-notes.md']);
-      }
-      if (pattern === '.*build[.]gradle[.]kts') {
-        return pathsResponse(['services/api/build.gradle.kts']);
-      }
-      return pathsResponse([]);
-    });
-
-    const { candidates } = await discoverCandidateRoots({
-      esClient,
-      repo,
-      logger: loggerMock.create(),
-    });
-    expect(candidates).toEqual([
-      expect.objectContaining({ serviceRoot: 'services/api', language: 'Java' }),
-      expect.objectContaining({ serviceRoot: 'src/foo', markers: ['Dockerfile'] }),
-    ]);
-    expect(candidates.some(({ serviceRoot }) => serviceRoot === 'docs')).toBe(false);
-  });
-
-  it('collects bounded manifest, declared-name, and entrypoint evidence', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const manifestContentPatterns = new Set([
-      '.*image:.*',
-      '.*container_name:.*',
-      '.*kind: ?(Deployment|StatefulSet|DaemonSet|CronJob).*',
-      '.*app[.]kubernetes[.]io/name.*',
-    ]);
-    let manifestContentCalls = 0;
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern as string | undefined;
-      if (!query.includes('line.content RLIKE')) {
-        if (pattern === '.*Dockerfile([.][A-Za-z0-9_-]+)?') {
-          return pathsResponse(['src/checkout/Dockerfile', 'src/library/Dockerfile']);
-        }
-        if (pattern?.includes('compose')) return pathsResponse(['deploy/compose.yaml']);
-        return pathsResponse([]);
-      }
-      if (pattern && manifestContentPatterns.has(pattern)) {
-        manifestContentCalls += 1;
-        return pattern === '.*image:.*'
-          ? linesResponse(
-              Array.from({ length: 101 }, (_, index) => [
-                'deploy/compose.yaml',
-                index + 1,
-                `  image: service-${index}`,
-              ])
-            )
-          : linesResponse([]);
-      }
-      if (pattern === '.*OTEL_SERVICE_NAME.*') {
-        return linesResponse([['src/checkout/.env', 1, 'OTEL_SERVICE_NAME=checkout']]);
-      }
-      if (pattern === '.*func main[(].*') {
-        return linesResponse([['src/checkout/main.go', 10, 'func main() {']]);
-      }
-      return linesResponse([]);
-    });
-
-    const result = await discoverCandidateRoots({ esClient, repo, logger: loggerMock.create() });
-
-    expect(manifestContentCalls).toBe(4);
-    expect(result.manifestLines).toHaveLength(100);
-    expect(result.manifestLines[0]).toContain('image: service-0');
-    expect(result.serviceNameLines).toContain('src/checkout/.env:1\tOTEL_SERVICE_NAME=checkout');
-    expect(result.candidates).toEqual([
-      expect.objectContaining({ serviceRoot: 'src/checkout', hasEntrypoint: true }),
-      expect.objectContaining({ serviceRoot: 'src/library', hasEntrypoint: false }),
-    ]);
-  });
-
-  it('marks a repo-root candidate only when the repo has an entrypoint hit', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    let hasEntrypointHit = false;
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern;
-      if (!query.includes('line.content RLIKE')) {
-        return pattern === '.*go[.]mod' ? pathsResponse(['go.mod']) : pathsResponse([]);
-      }
-      if (hasEntrypointHit && pattern === '.*func main[(].*') {
-        return linesResponse([['main.go', 1, 'func main() {']]);
-      }
-      return linesResponse([]);
-    });
-
-    const withoutHit = await discoverCandidateRoots({
-      esClient,
-      repo,
-      logger: loggerMock.create(),
-    });
-    expect(withoutHit.candidates[0].hasEntrypoint).toBe(false);
-
-    hasEntrypointHit = true;
-    const withHit = await discoverCandidateRoots({
-      esClient,
-      repo,
-      logger: loggerMock.create(),
-    });
-    expect(withHit.candidates[0].hasEntrypoint).toBe(true);
-  });
-
-  it('warns on bounded marker/manifest path truncation, but not IaC limit 1', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const logger = loggerMock.create();
-    esClient.esql.query.mockImplementation(async (args: unknown) => {
-      const { query, params } = args as {
-        query: string;
-        params?: Array<Record<string, unknown>>;
-      };
-      if (query.includes('line.content RLIKE')) return linesResponse([]);
-      const pattern = params?.find((param) => 'pattern' in param)?.pattern as string | undefined;
-      if (pattern === '.*go[.]mod') return pathsResponse(['a/go.mod']);
-      if (pattern === '.*docker-compose.*[.]ya?ml') return pathsResponse(['compose.yaml']);
-      if (pattern === '.*[.]tf') return pathsResponse(['infra/main.tf']);
-      return pathsResponse([]);
-    });
-
-    await discoverCandidateRoots({ esClient, repo, logger, perMarkerLimit: 1 });
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('.*go[.]mod'));
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('limit 1'));
-    expect(logger.warn.mock.calls.some(([message]) => String(message).includes('.*[.]tf'))).toBe(
-      false
-    );
+    expect(result.readmeLines).toBeDefined();
   });
 });

@@ -6,17 +6,16 @@
  */
 
 /**
- * Agent Builder agent that drives Code Intelligence KI extraction. The workflow
- * reads source through this agent's read-only tools (repo discovery, file reads,
- * regex grep). Today this is the externally-installed **Sourcerer** agent
- * (`sourcerer setup`), whose tools/skills pre-exist independently of this plugin.
+ * Agent Builder agent whose presence gates Code Intelligence extraction. Today
+ * this is the externally-installed **Codebox** code-research agent
+ * (`codebox install.ts`), whose workflow-backed tools (git-grep, git-show,
+ * git-ls-tree) pre-exist independently of this plugin.
  *
- * This is the one swap point for the substrate: when the Agent Builder code
- * sandbox arrives, point this at the sandbox agent id (and retarget the workflow
- * message to its tools). The `code_extraction.yaml` `agent-id` literal must be
- * kept in sync with this value (YAML cannot import a TS constant).
+ * The extraction pipeline's server-side queries now call Codebox HTTP directly
+ * (via {@link CodeboxClient}); this agent ID is used only as a presence gate —
+ * "is the Codebox tool ecosystem installed?" — not as a runtime dependency.
  */
-export const CODE_INTELLIGENCE_AGENT_ID = 'sourcerer' as const;
+export const CODE_INTELLIGENCE_AGENT_ID = 'code-research-agent' as const;
 
 /**
  * Code-derived Feature KIs are stored as `code_analysis` features (reusing the
@@ -89,16 +88,6 @@ export const LOG_LEVEL_SEVERITY: Record<string, number> = {
 
 /** Default severity for a recognized log call whose level is not in the map. */
 export const DEFAULT_LOG_SEVERITY = 40;
-
-/**
- * Elasticsearch index pattern written by Sourcerer's line indexer — one
- * document per source line (`git.org`, `git.repo`, `git.commit`, `file.path`,
- * `line.number`, `line.content`). The deterministic logging-site discovery greps
- * over this pattern with the same ES|QL contract as the `sourcerer.code.grep`
- * tool. This is the substrate seam: when the Agent Builder code sandbox arrives
- * with ripgrep, only the grep driver changes, not the pattern set.
- */
-export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*,sourcerer-v2-lines*' as const;
 
 /** OTel import and instrumentation idioms, one Lucene RLIKE-safe grep each. */
 export const OTEL_INSTRUMENTATION_PATTERNS = {
@@ -407,27 +396,6 @@ export const isNonEmittingLine = (line: string): boolean => {
 };
 
 /**
- * Elasticsearch index written by Sourcerer's ref indexer — one document per
- * indexed git ref (`git.org`, `git.repo`, `git.commit`, `git.ref`,
- * `files_count`, `lines_count`, `status`). Stage-4 service discovery enumerates
- * the indexed repositories + their immutable commits from here (server-side
- * equivalent of the agent's `sourcerer.refs.list`).
- */
-export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*,sourcerer-v2-refs*' as const;
-
-/**
- * Exact lookup-mode index name used as the `LOOKUP JOIN` target when scoping a
- * content (lines/files) query in incremental mode. A `LOOKUP JOIN` resolves the
- * commit (and org/repo) that lives only on the ref doc onto each content row via
- * `git.ref_key`. ES rejects a `LOOKUP JOIN` against a standard/wildcard index, so
- * this MUST be the single exact lookup-mode name — never the comma/wildcard
- * search alias {@link SOURCERER_REFS_INDEX}.
- */
-export const SOURCERER_REFS_LOOKUP_INDEX = 'sourcerer-v1-refs' as const;
-
-export const SOURCERER_FILES_INDEX = 'sourcerer-v1-files*,sourcerer-v2-files*' as const;
-
-/**
  * Over-capture ceiling for a validated logging-profile grep: a grep whose
  * validated hit ratio (hits / repo_total_lines) meets or exceeds this fraction
  * is rejected at persistence (INV-006) and by the `validate_logging_queries`
@@ -447,50 +415,6 @@ export const OVER_CAPTURE_CEILING = 0.01;
  * reference one definition.
  */
 export const LOGGING_PROFILE_DRIFT_RATIO = 0.5;
-
-/**
- * File-extension (lowercase, no dot) -> programming/markup language, used to
- * build a repository language histogram from the Sourcerer files index so
- * {@link classifyRepository} can tell an application repo from Infrastructure as
- * Code. Only extensions that clearly denote a language are mapped; unknown
- * extensions are ignored (they do not vote). Terraform/HCL map to IaC languages
- * (see IAC_LANGUAGES) so an IaC repo is still recognised as such.
- */
-export const EXTENSION_LANGUAGE: Readonly<Record<string, string>> = {
-  ts: 'TypeScript',
-  tsx: 'TypeScript',
-  mts: 'TypeScript',
-  cts: 'TypeScript',
-  js: 'JavaScript',
-  jsx: 'JavaScript',
-  mjs: 'JavaScript',
-  cjs: 'JavaScript',
-  java: 'Java',
-  kt: 'Kotlin',
-  kts: 'Kotlin',
-  scala: 'Scala',
-  groovy: 'Groovy',
-  go: 'Go',
-  rs: 'Rust',
-  py: 'Python',
-  rb: 'Ruby',
-  php: 'PHP',
-  cs: 'C#',
-  cpp: 'C++',
-  cc: 'C++',
-  cxx: 'C++',
-  c: 'C',
-  h: 'C',
-  hpp: 'C++',
-  swift: 'Swift',
-  ex: 'Elixir',
-  exs: 'Elixir',
-  erl: 'Erlang',
-  clj: 'Clojure',
-  hcl: 'hcl',
-  tf: 'hcl',
-  tfvars: 'hcl',
-} as const;
 
 /**
  * Fallback log target for predictive code queries when NO real log-bearing

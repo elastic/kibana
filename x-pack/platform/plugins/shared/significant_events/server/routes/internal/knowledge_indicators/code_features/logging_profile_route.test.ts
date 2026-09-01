@@ -21,6 +21,14 @@ jest.mock('../../../utils/assert_not_paused', () => ({
 jest.mock('../../../../agent_builder/tools/validate_logging_queries/handler', () => ({
   validateLoggingQueriesHandler: (...args: unknown[]) => mockValidateLoggingQueriesHandler(...args),
 }));
+jest.mock('../../../../lib/knowledge_indicators/code_intelligence/codebox_client', () => ({
+  getCodeboxClient: jest.fn().mockReturnValue({
+    health: jest.fn().mockResolvedValue({ status: 'ok' }),
+    grep: jest.fn().mockResolvedValue([]),
+  }),
+  resetCodeboxClient: jest.fn(),
+}));
+
 jest.mock('../../../../lib/knowledge_indicators/code_intelligence', () => ({
   readLoggingProfile: (...args: unknown[]) => mockReadLoggingProfile(...args),
   writeLoggingProfile: (...args: unknown[]) => mockWriteLoggingProfile(...args),
@@ -232,7 +240,7 @@ describe('persistLoggingProfileRoute — server-side re-validation (INV-001 / IN
     );
 
     expect(mockValidateLoggingQueriesHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ gitRefKey: 'supabase/realtime@main' })
+      expect.objectContaining({ repository: 'supabase/realtime', gitCommit: 'f5abfb19445404' })
     );
   });
 });
@@ -338,7 +346,7 @@ describe('checkLoggingProfileRoute', () => {
     );
 
     expect(mockDetectLoggingProfileDrift).toHaveBeenCalledWith(
-      expect.objectContaining({ gitRefKey: 'supabase/realtime@main' })
+      expect.objectContaining({ repository: 'supabase/realtime', gitCommit: 'f5abfb19445404' })
     );
   });
 });

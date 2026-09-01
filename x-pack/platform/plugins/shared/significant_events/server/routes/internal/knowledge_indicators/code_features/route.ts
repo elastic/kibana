@@ -70,6 +70,7 @@ import {
   type ServiceCodeMetadata,
   type StreamSamplingSource,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
+import { getCodeboxClient } from '../../../../lib/knowledge_indicators/code_intelligence/codebox_client';
 
 /** Whether a KI carries code evidence (code-derived or corroborated by code). */
 const hasCodeSource = (
@@ -817,15 +818,16 @@ const identifyOtelSignalsRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamDataEsClient, licensing, inferenceClient } = scopedClients;
+    const { streamDataEsClient, licensing, inferenceClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
-    const { repository, gitSha, gitRefKey, serviceRoot, name, language, signalCounts } =
-      params.body;
+    const { repository, gitSha, serviceRoot, name, language, signalCounts } = params.body;
     const routeLogger = logger.get('code_intelligence', 'identify_otel_signals', name);
-    // Sourcerer is always in the origin project. Stream sampling may route to a
-    // connected project, so it must use the space-routed data client.
-    const sourceEsClient = scopedClusterClient.asCurrentUser;
+    const codebox = await getCodeboxClient({
+      actions: server.actions,
+      request,
+      logger: routeLogger,
+    });
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
     const authorizedStreamNames = new Set(
@@ -841,10 +843,9 @@ const identifyOtelSignalsRoute = createServerRoute({
         logger: routeLogger,
       });
       const candidates = await discoverLoggingSites({
-        esClient: sourceEsClient,
+        codebox,
         repository,
         gitSha,
-        gitRefKey,
         serviceRoot,
         language,
         logger: routeLogger,
@@ -892,7 +893,7 @@ const identifyOtelSignalsRoute = createServerRoute({
     };
 
     const extraction = await extractOtelSignalsResult({
-      esClient: sourceEsClient,
+      codebox,
       repository,
       gitSha,
       serviceRoot,
@@ -1077,7 +1078,7 @@ const identifyServiceRoute = createServerRoute({
     queriesGenerated: number;
   }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamDataEsClient, licensing, inferenceClient } = scopedClients;
+    const { streamDataEsClient, licensing, inferenceClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -1085,7 +1086,6 @@ const identifyServiceRoute = createServerRoute({
     const {
       repository,
       gitSha,
-      gitRefKey,
       repositoryLanguages,
       iacSignals,
       service,
@@ -1096,7 +1096,11 @@ const identifyServiceRoute = createServerRoute({
     const spaceId = await getSpaceId(request);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const esClient = scopedClusterClient.asCurrentUser;
+    const codebox = await getCodeboxClient({
+      actions: server.actions,
+      request,
+      logger: routeLogger,
+    });
 
     const hasOtel = params.body.hasOtel ?? false;
 
@@ -1114,10 +1118,9 @@ const identifyServiceRoute = createServerRoute({
         logger: routeLogger,
       });
       const candidates = await discoverLoggingSites({
-        esClient,
+        codebox,
         repository,
         gitSha,
-        gitRefKey,
         serviceRoot: service.serviceRoot,
         language: service.language,
         logger: routeLogger,
@@ -1231,12 +1234,15 @@ const identifyServiceRoute = createServerRoute({
 // request to this route.
 // ---------------------------------------------------------------------------
 
-const discoverServicesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/code_intelligence/_discover_services',
+// ---------------------------------------------------------------------------
+// List indexed repositories (lightweight — no grepping).
+// ---------------------------------------------------------------------------
+
+const listReposRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/code_intelligence/_list_repos',
   options: {
     access: 'internal',
-    summary: 'Deterministically discover deployable services across indexed repositories',
-    timeout: { idleSocket: 600_000 },
+    summary: 'List repositories indexed in Codebox with their HEAD commit SHAs',
   },
   security: {
     authz: {
@@ -1250,18 +1256,69 @@ const discoverServicesRoute = createServerRoute({
     server,
     logger,
     maintenanceService,
+  }): Promise<{
+    repos: Array<{ repository: string; org: string; repo: string; gitSha: string; ref?: string }>;
+  }> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const routeLogger = logger.get('code_intelligence', 'list_repos');
+    const codebox = await getCodeboxClient({
+      actions: server.actions,
+      request,
+      logger: routeLogger,
+    });
+    const repos = await listIndexedRepos({ codebox, logger: routeLogger });
+    return { repos };
+  },
+});
+
+const discoverServicesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/code_intelligence/_discover_services',
+  options: {
+    access: 'internal',
+    summary: 'Deterministically discover deployable services in indexed repositories',
+    timeout: { idleSocket: 600_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      /** Scope discovery to a single repository. When omitted, discovers across all repos. */
+      repository: z.string().max(MAX_ID_LENGTH).optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    maintenanceService,
   }): Promise<{ services: DiscoveredService[] }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
+    const { licensing, inferenceClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
     const routeLogger = logger.get('code_intelligence', 'discover_services');
-    const esClient = scopedClusterClient.asCurrentUser;
+    const codebox = await getCodeboxClient({
+      actions: server.actions,
+      request,
+      logger: routeLogger,
+    });
 
-    // Enumerate indexed repos, then grep candidate roots + manifests per repo.
-    const repos = await listIndexedRepos({ esClient, logger: routeLogger });
+    // Enumerate indexed repos, optionally filtered to a single repository.
+    let repos = await listIndexedRepos({ codebox, logger: routeLogger });
+    const repoFilter = params.body?.repository;
+    if (repoFilter) {
+      repos = repos.filter((r) => r.repository === repoFilter);
+    }
     if (repos.length === 0) {
       return { services: [] };
     }
@@ -1283,7 +1340,7 @@ const discoverServicesRoute = createServerRoute({
         iacSignals,
         readmeLines,
       } = await discoverCandidateRoots({
-        esClient,
+        codebox,
         repo,
         logger: routeLogger,
       });
@@ -1291,7 +1348,7 @@ const discoverServicesRoute = createServerRoute({
       // Batched: 1 repo-scoped grep per pattern, bucketed to every root, instead
       // of O(roots × patterns) searches inside this single request handler.
       const detectionByRoot = await detectOtelInstrumentationForRoots({
-        esClient,
+        codebox,
         repository: repo.repository,
         gitSha: repo.gitSha,
         serviceRoots: roots.map((root) => root.serviceRoot),
@@ -1307,7 +1364,7 @@ const discoverServicesRoute = createServerRoute({
       readmeLinesByRepo.set(repo.repository, readmeLines);
       repositoryLanguagesByRepo.set(
         repo.repository,
-        await buildLanguageHistogram({ esClient, repo, logger: routeLogger })
+        await buildLanguageHistogram({ codebox, repo, logger: routeLogger })
       );
     }
 
@@ -1573,6 +1630,7 @@ export const internalKICodeFeaturesRoutes = {
   ...serviceDistributionRoute,
   ...identifyServiceRoute,
   ...identifyOtelSignalsRoute,
+  ...listReposRoute,
   ...discoverServicesRoute,
   ...runCodeIntelligenceRoute,
   ...codeIntelligenceRunStatusRoute,

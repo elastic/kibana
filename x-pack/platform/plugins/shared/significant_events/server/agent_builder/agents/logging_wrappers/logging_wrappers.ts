@@ -24,14 +24,13 @@ export const SIGNIFICANT_EVENTS_LOGGING_WRAPPERS_AGENT_TYPE_ID =
   'platform.sig_events.logging-wrappers-type';
 
 /**
- * Sourcerer read-only code tools the wrapper investigator needs to survey the
- * repository. These IDs are owned by the externally-installed Sourcerer agent
- * (`sourcerer setup`); the dotted namespace matches the tool names Sourcerer
- * registers.
+ * Codebox git tools the wrapper investigator needs to survey the repository.
+ * These IDs are registered by the Codebox Agent Builder provisioner
+ * (`codebox install.ts`); the workflow-backed tools call the Codebox HTTP API.
  */
-const SOURCERER_CODE_GREP_TOOL_ID = 'sourcerer.code.grep';
-const SOURCERER_FILES_CAT_TOOL_ID = 'sourcerer.files.cat';
-const SOURCERER_FILES_LS_TOOL_ID = 'sourcerer.files.ls';
+const CODEBOX_GREP_TOOL_ID = 'git-grep';
+const CODEBOX_SHOW_TOOL_ID = 'git-show';
+const CODEBOX_LS_TREE_TOOL_ID = 'git-ls-tree';
 
 export const loggingWrappersAgentType = {
   id: SIGNIFICANT_EVENTS_LOGGING_WRAPPERS_AGENT_TYPE_ID,
@@ -50,9 +49,9 @@ export const loggingWrappersAgentType = {
     tools: [
       {
         tool_ids: [
-          SOURCERER_CODE_GREP_TOOL_ID,
-          SOURCERER_FILES_CAT_TOOL_ID,
-          SOURCERER_FILES_LS_TOOL_ID,
+          CODEBOX_GREP_TOOL_ID,
+          CODEBOX_SHOW_TOOL_ID,
+          CODEBOX_LS_TREE_TOOL_ID,
           SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID,
         ],
       },

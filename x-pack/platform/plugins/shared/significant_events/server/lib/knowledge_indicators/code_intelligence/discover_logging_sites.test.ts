@@ -5,234 +5,18 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isExcludedLoggingPath, isNonEmittingLine, LOGGER_IDIOM_PATTERNS } from './constants';
-import { codeGrep, discoverLoggingSites, splitRepository } from './discover_logging_sites';
-
-const COLUMNS = [
-  { name: 'git.org', type: 'keyword' },
-  { name: 'git.repo', type: 'keyword' },
-  { name: 'git.commit', type: 'keyword' },
-  { name: 'file.path', type: 'keyword' },
-  { name: 'line.number', type: 'long' },
-  { name: 'line.content', type: 'keyword' },
-];
-
-const WINDOW_COLUMNS = [
-  { name: 'line.number', type: 'long' },
-  { name: 'line.content', type: 'keyword' },
-];
-
-// grep calls issued when there are zero hits (no window fetch): one per idiom.
-const GREP_CALLS = LOGGER_IDIOM_PATTERNS.length;
-
-// The window fetch is the only query that filters on an exact file.path (==) and
-// a line.number range; grep patterns use RLIKE. Distinguish by the range clause.
-const isWindowQuery = (query: string): boolean => query.includes('line.number >= ?lo');
-
-const row = (path: string, line: number, content: string) => [
-  'open-telemetry',
-  'opentelemetry-demo',
-  'abc123',
-  path,
-  line,
-  content,
-];
-
-describe('logging-site patterns', () => {
-  const matcher = (pattern: string) => new RegExp(`^${pattern}$`);
-
-  const matchesAnyIdiom = (line: string): boolean =>
-    LOGGER_IDIOM_PATTERNS.some((pattern) => matcher(pattern).test(line));
-  // Look patterns up by their distinguishing token rather than by index, so
-  // adding a pattern cannot silently repoint an assertion at the wrong regex.
-  const patternContaining = (token: string) => {
-    const found = LOGGER_IDIOM_PATTERNS.filter((pattern) => pattern.includes(token));
-    expect(found).toHaveLength(1);
-    return matcher(found[0]);
-  };
-
-  it('matches the logger idioms without matching unrelated properties', () => {
-    const uppercaseLogger = patternContaining('(LOG|LOGGER)');
-    const microsoftLogger = patternContaining('Log(Trace');
-    const javaStreams = patternContaining('System[.]');
-    expect(uppercaseLogger.test('LOG.error("boom");')).toBe(true);
-    expect(uppercaseLogger.test('catalog.info = parse(x);')).toBe(false);
-    expect(microsoftLogger.test('_logger.LogError("boom");')).toBe(true);
-    expect(microsoftLogger.test('logger.LogInformation("hi");')).toBe(true);
-    expect(javaStreams.test('System.out.println("hi");')).toBe(true);
-  });
-
-  it('matches process-aborting emits that print their own message', () => {
-    expect(patternContaining('panic[(]').test('panic("unable to start server")')).toBe(true);
-    expect(patternContaining('panic![(]').test('panic!("error when parsing uuid");')).toBe(true);
-    expect(patternContaining('eprintln').test('eprintln!("failed to bind: {}", err);')).toBe(true);
-    const rustExpect = patternContaining('[.]expect[(]');
-    expect(rustExpect.test('let cfg = load().expect("config is required");')).toBe(true);
-    expect(rustExpect.test('expect(result).toBe(true);')).toBe(false);
-  });
-
-  it('does not match value-returning error constructors', () => {
-    expect(matchesAnyIdiom('return fmt.Errorf("failed to charge card: %+v", err)')).toBe(false);
-    expect(matchesAnyIdiom('return errors.New("failed connecting to database")')).toBe(false);
-    expect(matchesAnyIdiom('throw new RpcException("Can\'t access cart storage.")')).toBe(false);
-  });
-
-  it('matches chained builder calls where the level is not adjacent to the logger', () => {
-    expect(matchesAnyIdiom('logrus.WithField("id", id).Error("charge failed")')).toBe(true);
-    expect(matchesAnyIdiom('logger.bind(order=id).error("charge failed")')).toBe(true);
-    expect(matchesAnyIdiom('this.logger.get("billing").debug("x");')).toBe(true);
-    expect(matchesAnyIdiom('col.service.Logger().Error("boom", zap.Error(err))')).toBe(true);
-  });
-
-  it('requires `log` to start an identifier, so catalog/backlog chains do not match', () => {
-    const chained = patternContaining('[^;]*');
-    const accessor = patternContaining('[(][)][.]');
-    expect(chained.test('productCatalogService.Client.Info(ctx, req)')).toBe(false);
-    expect(chained.test('catalogService.metrics.Error(err)')).toBe(false);
-    expect(chained.test('topology.Node.Info(x)')).toBe(false);
-    expect(accessor.test('getCatalog().Error(x)')).toBe(false);
-    expect(accessor.test('backlog().Debug(x)')).toBe(false);
-    // The chain may not span a statement boundary.
-    expect(chained.test('logger = build(); other.Error(x)')).toBe(false);
-  });
-
-  it('matches go-kit, zerolog, and the Laravel facade', () => {
-    expect(matchesAnyIdiom('level.Error(logger).Log("msg", "charge failed", "err", err)')).toBe(
-      true
-    );
-    expect(matchesAnyIdiom('level.Debug(util_log.Logger).Log(')).toBe(true);
-    expect(matchesAnyIdiom('log.Error().Str("id", id).Msg("charge failed")')).toBe(true);
-    expect(matchesAnyIdiom('Log::error("charge failed");')).toBe(true);
-  });
-
-  it('matches dynamic-level calls where severity is a runtime argument', () => {
-    expect(matchesAnyIdiom('Logger.log(level, msg, error_code: code)')).toBe(true);
-    expect(matchesAnyIdiom('    logger.log($level, $e->getMessage(), $context);')).toBe(true);
-    expect(matchesAnyIdiom('$this->logger->log($level, $message);')).toBe(true);
-    // `log` must start an identifier, so a dialog/catalog chain does not match.
-    expect(matchesAnyIdiom('catalog.log(x)')).toBe(false);
-  });
-
-  it('matches stdout/stderr emits that have no logging facade', () => {
-    expect(matchesAnyIdiom('fprintf(stderr, "fatal: %s\\n", msg);')).toBe(true);
-    expect(matchesAnyIdiom('println("started")')).toBe(true);
-    expect(matchesAnyIdiom('println "deploy failed"')).toBe(true);
-  });
-});
-
-describe('isNonEmittingLine', () => {
-  it('drops declarations, imports, guards, and comments', () => {
-    expect(isNonEmittingLine('import org.slf4j.LoggerFactory;')).toBe(true);
-    expect(
-      isNonEmittingLine('  private static final Logger LOG = LoggerFactory.getLogger(Foo.class);')
-    ).toBe(true);
-    expect(isNonEmittingLine('    if (LOG.isDebugEnabled()) {')).toBe(true);
-    expect(isNonEmittingLine('  // System.out.println("debugging")')).toBe(true);
-    expect(isNonEmittingLine('Logger.metadata(external_id: tenant_id)')).toBe(true);
-    expect(isNonEmittingLine('#[tracing::instrument(skip_all, name = "index")]')).toBe(true);
-  });
-
-  it('keeps real emissions', () => {
-    expect(isNonEmittingLine('logger.error("charge failed", err)')).toBe(false);
-    expect(isNonEmittingLine('level.Error(logger).Log("msg", "charge failed")')).toBe(false);
-    expect(isNonEmittingLine('serverLog(LL_WARNING, "Failed to bind");')).toBe(false);
-  });
-
-  it('keeps a line that both acquires a logger and calls it', () => {
-    expect(isNonEmittingLine('LoggerFactory.getLogger(Foo.class).info("started")')).toBe(false);
-    // A filtered phrase inside the MESSAGE must not suppress the emission.
-    expect(isNonEmittingLine('log.info("cache getLogger(x) invoked")')).toBe(false);
-  });
-
-  it('does not let a commented-out logger call escape via the emitting veto', () => {
-    expect(isNonEmittingLine('  // logger.error("this call is commented out")')).toBe(true);
-    expect(isNonEmittingLine('  # logger.error("this call is commented out")')).toBe(true);
-  });
-
-  it('suppresses a bare error constructor but not one passed to a real emit', () => {
-    expect(isNonEmittingLine('  return fmt.Errorf("failed to charge card: %+v", err)')).toBe(true);
-    expect(isNonEmittingLine('  return nil, status.Errorf(codes.Unimplemented, "nope")')).toBe(
-      true
-    );
-    // The error value is an ARGUMENT here; the line still emits.
-    expect(isNonEmittingLine('logger.Error(kverrors.New("flag requires TLS"), "")')).toBe(false);
-    expect(isNonEmittingLine('panic(fmt.Errorf("error creating overrides file: %w", err))')).toBe(
-      false
-    );
-    // Accessor-call idiom carrying an error constructor argument.
-    expect(isNonEmittingLine('svc.Logger().Error(errors.New("connection refused"))')).toBe(false);
-  });
-});
-
-describe('isExcludedLoggingPath', () => {
-  it('excludes test files and test directories', () => {
-    expect(isExcludedLoggingPath('src/foo/bar.test.ts')).toBe(true);
-    expect(isExcludedLoggingPath('src/foo/bar.spec.ts')).toBe(true);
-    expect(isExcludedLoggingPath('pkg/handler_test.go')).toBe(true);
-    expect(isExcludedLoggingPath('src/__tests__/thing.ts')).toBe(true);
-    expect(isExcludedLoggingPath('test/fixtures/data.go')).toBe(true);
-    expect(isExcludedLoggingPath('e2e/login.ts')).toBe(true);
-  });
-
-  it('excludes build/CI tooling files', () => {
-    expect(isExcludedLoggingPath('Makefile')).toBe(true);
-    expect(isExcludedLoggingPath('o11y/Makefile')).toBe(true);
-    expect(isExcludedLoggingPath('build.mk')).toBe(true);
-    expect(isExcludedLoggingPath('Dockerfile')).toBe(true);
-    expect(isExcludedLoggingPath('.buildkite/scripts/bootstrap.sh')).toBe(true);
-    expect(isExcludedLoggingPath('.github/workflows/ci.yml')).toBe(true);
-    expect(isExcludedLoggingPath('build.gradle')).toBe(true);
-    expect(isExcludedLoggingPath('gradle/wrapper/x.properties')).toBe(true);
-  });
-
-  it('excludes prose files (documentation quotes logger calls it never runs)', () => {
-    expect(isExcludedLoggingPath('discovery/README.md')).toBe(true);
-    expect(isExcludedLoggingPath('docs/logging.mdx')).toBe(true);
-    expect(isExcludedLoggingPath('CHANGELOG.rst')).toBe(true);
-    expect(isExcludedLoggingPath('guide/index.adoc')).toBe(true);
-    expect(isExcludedLoggingPath('notes.txt')).toBe(true);
-    // A source file whose name merely contains the token is not prose.
-    expect(isExcludedLoggingPath('src/markdown_renderer.go')).toBe(false);
-  });
-
-  it('excludes shell scripts wholesale (terminal output, not service logs)', () => {
-    expect(isExcludedLoggingPath('scripts/util.sh')).toBe(true);
-    expect(
-      isExcludedLoggingPath('x-pack/.../observability_onboarding/public/assets/auto_detect.sh')
-    ).toBe(true);
-    expect(isExcludedLoggingPath('tools/setup.bash')).toBe(true);
-  });
-
-  it('excludes JVM test classes outside a /test/ dir (camelCase boundary)', () => {
-    expect(
-      isExcludedLoggingPath(
-        'modules/reindex/src/internalClusterTest/java/org/elasticsearch/BulkTests.java'
-      )
-    ).toBe(true);
-    expect(isExcludedLoggingPath('server/src/main/java/org/elasticsearch/FooTest.java')).toBe(true);
-    expect(isExcludedLoggingPath('x/src/GcsProxyIntegrationIT.java')).toBe(true);
-    expect(isExcludedLoggingPath('x/AzureRepositoryIntegTests.java')).toBe(true);
-    expect(isExcludedLoggingPath('svc/HandlerTests.kt')).toBe(true);
-    // internalClusterTest / yamlRestTest source-set dirs.
-    expect(isExcludedLoggingPath('modules/x/src/yamlRestTest/java/org/x/Thing.java')).toBe(true);
-  });
-
-  it('keeps production application source', () => {
-    expect(isExcludedLoggingPath('src/ad/Main.java')).toBe(false);
-    expect(isExcludedLoggingPath('server/http_server.ts')).toBe(false);
-    expect(isExcludedLoggingPath('cmd/service/main.go')).toBe(false);
-    // "latest" contains "test" but is not a test path segment/suffix.
-    expect(isExcludedLoggingPath('src/latest/handler.ts')).toBe(false);
-    // Case-sensitive JVM guard: `Latest.java` / `Manifest.java` are not tests.
-    expect(isExcludedLoggingPath('server/src/main/java/org/x/Latest.java')).toBe(false);
-    expect(isExcludedLoggingPath('server/src/main/java/org/x/Manifest.java')).toBe(false);
-  });
-});
+import { LOGGER_IDIOM_PATTERNS } from './constants';
+import {
+  codeGrep,
+  discoverLoggingSites,
+  fetchLineWindows,
+  splitRepository,
+} from './discover_logging_sites';
+import { createMockCodeboxClient } from './__mocks__/codebox_client';
 
 describe('splitRepository', () => {
-  it('splits "org/repo" into org and repo', () => {
+  it('splits on the first slash', () => {
     expect(splitRepository('open-telemetry/opentelemetry-demo')).toEqual({
       org: 'open-telemetry',
       repo: 'opentelemetry-demo',
@@ -249,19 +33,23 @@ describe('splitRepository', () => {
 });
 
 describe('codeGrep', () => {
-  it('passes the scope + regex as named params and maps rows to GrepLine[]', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({
-      columns: COLUMNS,
-      values: [row('src/ad/Main.java', 42, 'logger.info("started");')],
-    });
+  it('passes the scope + regex and maps to GrepLine[]', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([
+      {
+        ref: 'abc123',
+        path: 'src/ad/Main.java',
+        lineNumber: 42,
+        content: 'logger.info("started");',
+      },
+    ]);
 
     const lines = await codeGrep({
-      esClient,
+      codebox,
       gitOrg: 'open-telemetry',
       gitRepo: 'opentelemetry-demo',
-      gitCommit: 'abc123',
-      filePath: 'src/ad/**',
+      ref: 'abc123',
+      filePath: 'src/ad/',
       regex: '.*logger[.]info.*',
       limit: 500,
     });
@@ -270,80 +58,78 @@ describe('codeGrep', () => {
       { filePath: 'src/ad/Main.java', lineNumber: 42, content: 'logger.info("started");' },
     ]);
 
-    const call = esClient.esql.query.mock.calls[0][0];
-    expect(call.query).toContain('FROM sourcerer-v1-lines*,sourcerer-v2-lines*');
-    expect(call.query).toContain('line.content RLIKE ?regex');
-    expect(call.query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
-    expect(call.query).toContain('git.commit IS NOT NULL');
-    expect(call.params).toEqual([
-      { git_ref_key: '' },
-      { git_org: 'open-telemetry' },
-      { git_repo: 'opentelemetry-demo' },
-      { git_commit: 'abc123' },
-      { file_path: 'src/ad/**' },
-      { regex: '.*logger[.]info.*' },
-    ]);
+    expect(codebox.grep).toHaveBeenCalledWith({
+      org: 'open-telemetry',
+      repo: 'opentelemetry-demo',
+      ref: 'abc123',
+      pattern: expect.any(String),
+      path: 'src/ad/',
+      maxCount: 500,
+    });
   });
 
-  it('scopes by git.ref_key in incremental mode when gitRefKey is set', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({
-      columns: COLUMNS,
-      values: [row('src/ad/Main.java', 42, 'logger.info("started");')],
-    });
+  it('returns [] when Codebox returns no matches', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([]);
 
     const lines = await codeGrep({
-      esClient,
-      gitOrg: 'open-telemetry',
-      gitRepo: 'opentelemetry-demo',
-      gitCommit: 'abc123',
-      gitRefKey: 'open-telemetry/opentelemetry-demo@main',
-      filePath: 'src/ad/**',
-      regex: '.*logger[.]info.*',
-      limit: 500,
+      codebox,
+      gitOrg: '*',
+      gitRepo: '*',
+      ref: 'abc123',
+      regex: '.*x.*',
+      limit: 10,
     });
 
-    expect(lines).toEqual([
-      { filePath: 'src/ad/Main.java', lineNumber: 42, content: 'logger.info("started");' },
-    ]);
+    expect(lines).toEqual([]);
+  });
+});
 
-    const call = esClient.esql.query.mock.calls[0][0];
-    expect(call.query).toContain('update_mode == "incremental"');
-    expect(call.params).toEqual([
-      { git_ref_key: 'open-telemetry/opentelemetry-demo@main' },
-      { git_org: 'open-telemetry' },
-      { git_repo: 'opentelemetry-demo' },
-      { git_commit: 'abc123' },
-      { file_path: 'src/ad/**' },
-      { regex: '.*logger[.]info.*' },
-    ]);
+describe('fetchLineWindows', () => {
+  it('fetches a line range per file and returns a Map<file, Map<lineNumber, content>>', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.show.mockResolvedValue('line 41\nlogger.info("hi");\nnext();');
+
+    const result = await fetchLineWindows({
+      codebox,
+      gitOrg: 'open-telemetry',
+      gitRepo: 'opentelemetry-demo',
+      ref: 'abc123',
+      hitsByFile: new Map([['src/ad/Main.java', new Set([42])]]),
+      logger: loggerMock.create(),
+    });
+
+    expect(result.has('src/ad/Main.java')).toBe(true);
+    const fileLines = result.get('src/ad/Main.java')!;
+    expect(fileLines.get(41)).toBe('line 41');
+    expect(fileLines.get(42)).toBe('logger.info("hi");');
+    expect(fileLines.get(43)).toBe('next();');
   });
 
-  it('returns [] when expected columns are missing', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+  it('skips files that fail to fetch', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.show.mockRejectedValue(new Error('404'));
 
-    await expect(
-      codeGrep({
-        esClient,
-        gitOrg: '*',
-        gitRepo: '*',
-        gitCommit: '*',
-        filePath: '**',
-        regex: '.*x.*',
-        limit: 10,
-      })
-    ).resolves.toEqual([]);
+    const result = await fetchLineWindows({
+      codebox,
+      gitOrg: 'org',
+      gitRepo: 'repo',
+      ref: 'abc123',
+      hitsByFile: new Map([['missing.ts', new Set([1])]]),
+      logger: loggerMock.create(),
+    });
+
+    expect(result.size).toBe(0);
   });
 });
 
 describe('discoverLoggingSites', () => {
-  it('greps every idiom pattern, scoped to <serviceRoot>/**', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
+  it('greps every idiom pattern, scoped to serviceRoot', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([]);
 
     await discoverLoggingSites({
-      esClient,
+      codebox,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
       serviceRoot: 'src/ad',
@@ -351,37 +137,24 @@ describe('discoverLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    // No hits -> no window fetch, so exactly one grep per pattern.
-    expect(esClient.esql.query.mock.calls).toHaveLength(GREP_CALLS);
-    for (const [{ params }] of esClient.esql.query.mock.calls) {
-      expect(params).toContainEqual({ file_path: 'src/ad/**' });
-      expect(params).toContainEqual({ git_commit: 'abc123' });
+    // One grep per idiom pattern
+    expect(codebox.grep).toHaveBeenCalledTimes(LOGGER_IDIOM_PATTERNS.length);
+    for (const call of codebox.grep.mock.calls) {
+      expect(call[0].path).toBe('src/ad/');
+      expect(call[0].ref).toBe('abc123');
     }
-    const regexes = esClient.esql.query.mock.calls.flatMap(([{ params }]) =>
-      (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
-    );
-    expect(regexes).toEqual([...LOGGER_IDIOM_PATTERNS]);
   });
 
   it('returns windowed candidates, deduped by path:line', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return {
-          columns: WINDOW_COLUMNS,
-          values: [
-            [41, 'logger.info('],
-            [42, '"hi");'],
-            [43, 'next();'],
-          ],
-        };
-      }
-      // every grep pattern returns the same idiom hit -> single deduped candidate.
-      return { columns: COLUMNS, values: [row('src/ad/Main.java', 42, 'logger.info(')] };
-    }) as unknown as typeof esClient.esql.query);
+    const codebox = createMockCodeboxClient();
+    // Every grep returns the same hit -> single deduped candidate
+    codebox.grep.mockResolvedValue([
+      { ref: 'abc123', path: 'src/ad/Main.java', lineNumber: 42, content: 'logger.info(' },
+    ]);
+    codebox.show.mockResolvedValue('logger.info(\n"hi");\nnext();');
 
     const candidates = await discoverLoggingSites({
-      esClient,
+      codebox,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
       serviceRoot: 'src/ad',
@@ -399,25 +172,22 @@ describe('discoverLoggingSites', () => {
   });
 
   it('drops grep hits in test/build/shell paths before they become candidates', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[42, 'logger.info("hi")']] };
-      }
-      // Each grep returns one real hit and three excluded-path hits.
-      return {
-        columns: COLUMNS,
-        values: [
-          row('src/ad/Main.java', 42, 'logger.info("hi")'),
-          row('src/ad/Main.test.java', 10, 'logger.info("hi")'),
-          row('scripts/deploy.sh', 5, 'echo "Error: boom"'),
-          row('o11y/Makefile', 62, 'echo "Error: usage"'),
-        ],
-      };
-    }) as unknown as typeof esClient.esql.query);
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([
+      { ref: 'abc123', path: 'src/ad/Main.java', lineNumber: 42, content: 'logger.info("hi")' },
+      {
+        ref: 'abc123',
+        path: 'src/ad/Main.test.java',
+        lineNumber: 10,
+        content: 'logger.info("hi")',
+      },
+      { ref: 'abc123', path: 'scripts/deploy.sh', lineNumber: 5, content: 'echo "Error: boom"' },
+      { ref: 'abc123', path: 'o11y/Makefile', lineNumber: 62, content: 'echo "Error: usage"' },
+    ]);
+    codebox.show.mockResolvedValue('logger.info("hi")');
 
     const candidates = await discoverLoggingSites({
-      esClient,
+      codebox,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
       serviceRoot: 'src/ad',
@@ -425,27 +195,27 @@ describe('discoverLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    // Only the production-source hit survives; test/shell/Makefile are excluded.
+    // Only the production-source hit survives
     expect(candidates.map((c) => c.location)).toEqual(['src/ad/Main.java:42']);
   });
 
   it('warns at the per-pattern limit but not below it', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const codebox = createMockCodeboxClient();
     const logger = loggerMock.create();
     let first = true;
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[7, 'console.error("boom")']] };
-      }
+    codebox.grep.mockImplementation(async () => {
       if (first) {
         first = false;
-        return { columns: COLUMNS, values: [row('src/main.ts', 7, 'console.error("boom")')] };
+        return [
+          { ref: 'abc123', path: 'src/main.ts', lineNumber: 7, content: 'console.error("boom")' },
+        ];
       }
-      return { columns: COLUMNS, values: [] };
-    }) as unknown as typeof esClient.esql.query);
+      return [];
+    });
+    codebox.show.mockResolvedValue('console.error("boom")');
 
     await discoverLoggingSites({
-      esClient,
+      codebox,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
       serviceRoot: 'src',
@@ -453,69 +223,20 @@ describe('discoverLoggingSites', () => {
       perPatternLimit: 1,
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(LOGGER_IDIOM_PATTERNS[0]));
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('limit 1'));
-
-    const belowLimitLogger = loggerMock.create();
-    const belowLimitClient = elasticsearchServiceMock.createElasticsearchClient();
-    belowLimitClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
-    await discoverLoggingSites({
-      esClient: belowLimitClient,
-      repository: 'open-telemetry/opentelemetry-demo',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: belowLimitLogger,
-      perPatternLimit: 1,
-    });
-    expect(belowLimitLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('never throws: a failing grep pattern is skipped and the rest still run', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    let firstGrep = true;
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[7, 'console.error("boom");']] };
-      }
-      if (firstGrep) {
-        firstGrep = false;
-        throw new Error('bad regex');
-      }
-      return { columns: COLUMNS, values: [row('src/ad/Main.java', 7, 'console.error("boom");')] };
-    }) as unknown as typeof esClient.esql.query);
-
-    const candidates = await discoverLoggingSites({
-      esClient,
-      repository: 'open-telemetry/opentelemetry-demo',
-      gitSha: 'abc123',
-      serviceRoot: 'src/ad',
-      logger: loggerMock.create(),
-    });
-
-    expect(candidates).toEqual([
-      {
-        location: 'src/ad/Main.java:7',
-        content: 'console.error("boom");',
-        language: undefined,
-      },
-    ]);
   });
 
   it('stops issuing greps once the aggregate candidate ceiling is reached', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const codebox = createMockCodeboxClient();
     const logger = loggerMock.create();
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[1, 'logger.info("hi")']] };
-      }
-      return {
-        columns: COLUMNS,
-        values: [row('src/a.ts', 1, 'logger.info("hi")'), row('src/b.ts', 2, 'logger.warn("hi")')],
-      };
-    }) as unknown as typeof esClient.esql.query);
+    codebox.grep.mockResolvedValue([
+      { ref: 'abc123', path: 'src/a.ts', lineNumber: 1, content: 'logger.info("hi")' },
+      { ref: 'abc123', path: 'src/b.ts', lineNumber: 2, content: 'logger.warn("hi")' },
+    ]);
+    codebox.show.mockResolvedValue('logger.info("hi")');
 
     const candidates = await discoverLoggingSites({
-      esClient,
+      codebox,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
       serviceRoot: 'src',
@@ -523,295 +244,77 @@ describe('discoverLoggingSites', () => {
       maxCandidates: 2,
     });
 
-    // First grep alone fills the ceiling, so only that one plus the window runs.
-    const grepCalls = esClient.esql.query.mock.calls.filter(([{ query }]) => !isWindowQuery(query));
-    expect(grepCalls).toHaveLength(1);
+    // First grep alone fills the ceiling
+    const grepCalls = codebox.grep.mock.calls.length;
+    expect(grepCalls).toBe(1);
     expect(candidates).toHaveLength(2);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2-candidate ceiling'));
   });
 
   it('drops hits whose own line cannot emit', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return {
-          columns: WINDOW_COLUMNS,
-          values: [
-            [10, 'import org.slf4j.LoggerFactory;'],
-            [20, '    if (LOG.isDebugEnabled()) {'],
-            [30, '    LOG.error("charge failed", e);'],
-          ],
-        };
-      }
-      return {
-        columns: COLUMNS,
-        values: [
-          row('src/Main.java', 10, 'import org.slf4j.LoggerFactory;'),
-          row('src/Main.java', 20, 'if (LOG.isDebugEnabled()) {'),
-          row('src/Main.java', 30, 'LOG.error("charge failed", e);'),
-        ],
-      };
-    }) as unknown as typeof esClient.esql.query);
-
-    const candidates = await discoverLoggingSites({
-      esClient,
-      repository: 'open-telemetry/opentelemetry-demo',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: loggerMock.create(),
-    });
-
-    expect(candidates.map(({ location }) => location)).toEqual(['src/Main.java:30']);
-  });
-
-  it('greps the whole repo (**) when the service root is empty', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
-
-    await discoverLoggingSites({
-      esClient,
-      repository: 'open-telemetry/opentelemetry-demo',
-      gitSha: 'abc123',
-      serviceRoot: '',
-      logger: loggerMock.create(),
-    });
-
-    for (const [{ params }] of esClient.esql.query.mock.calls) {
-      expect(params).toContainEqual({ file_path: '**' });
-    }
-  });
-});
-
-describe('discoverLoggingSites — logging profile lane', () => {
-  // A profile grep that matches a line the idioms do NOT (a house wrapper call).
-  const PROFILE_REGEX = '.*log_error[(].*';
-
-  const setupProfileHit = (
-    esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
-    profilePath: string,
-    profileLine: number,
-    profileContent: string,
-    idiomHits: Array<[string, number, string]> = []
-  ) => {
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[profileLine, profileContent]] };
-      }
-      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
-      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
-      if (regex === PROFILE_REGEX) {
-        return { columns: COLUMNS, values: [row(profilePath, profileLine, profileContent)] };
-      }
-      // Idiom greps return whatever the test asked for (default: nothing).
-      if (idiomHits.length > 0) {
-        return {
-          columns: COLUMNS,
-          values: idiomHits.map(([p, l, c]) => row(p, l, c)),
-        };
-      }
-      return { columns: COLUMNS, values: [] };
-    }) as unknown as typeof esClient.esql.query);
-  };
-
-  it('unions profile greps with idiom hits (INV-004: strict superset)', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Idiom hit at src/Main.java:10; profile hit at lib/realtime/logs.ex:21.
-    setupProfileHit(esClient, 'lib/realtime/logs.ex', 21, 'log_error("charge failed", err)', [
-      ['src/Main.java', 10, 'logger.info("started")'],
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([
+      // non-emitting: declaration
+      {
+        ref: 'abc123',
+        path: 'src/logger.ts',
+        lineNumber: 1,
+        content: 'const logger = getLogger("app");',
+      },
+      // emitting: actual log call
+      { ref: 'abc123', path: 'src/app.ts', lineNumber: 10, content: 'logger.info("started");' },
     ]);
-
-    const withProfile = await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: loggerMock.create(),
-      profileGreps: [PROFILE_REGEX],
+    codebox.show.mockImplementation(async ({ path }: { path: string }) => {
+      if (path === 'src/logger.ts') return 'const logger = getLogger("app");';
+      return 'logger.info("started");';
     });
-    const withoutProfile = await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: loggerMock.create(),
-    });
-
-    const withLocs = new Set(withProfile.map((c) => c.location));
-    const withoutLocs = new Set(withoutProfile.map((c) => c.location));
-    // INV-004: profile greps are additive — strict superset.
-    expect(withLocs.size).toBeGreaterThan(withoutLocs.size);
-    for (const loc of withoutLocs) {
-      expect(withLocs).toContain(loc);
-    }
-    expect(withLocs).toContain('lib/realtime/logs.ex:21');
-  });
-
-  it('profile greps pass through isExcludedLoggingPath (INV-005: excluded path)', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Profile hit in a test file (excluded) and a production file (kept).
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[5, 'log_error("boom")']] };
-      }
-      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
-      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
-      if (regex === PROFILE_REGEX) {
-        return {
-          columns: COLUMNS,
-          values: [
-            row('src/Main.test.ts', 5, 'log_error("boom")'), // excluded test path
-            row('src/service.ex', 5, 'log_error("boom")'), // kept
-          ],
-        };
-      }
-      return { columns: COLUMNS, values: [] };
-    }) as unknown as typeof esClient.esql.query);
 
     const candidates = await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc',
       serviceRoot: 'src',
       logger: loggerMock.create(),
-      profileGreps: [PROFILE_REGEX],
     });
 
-    const locs = candidates.map((c) => c.location);
-    expect(locs).toContain('src/service.ex:5');
-    // INV-005: the excluded test path never becomes a candidate.
-    expect(locs).not.toContain('src/Main.test.ts:5');
+    // Only the emitting line survives
+    const locations = candidates.map((c) => c.location);
+    expect(locations).toContain('src/app.ts:10');
+    expect(locations).not.toContain('src/logger.ts:1');
   });
 
-  it('profile greps pass through isNonEmittingLine (INV-005: comment line)', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Profile hit on a comment line (non-emitting) and a real emission.
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return {
-          columns: WINDOW_COLUMNS,
-          values: [
-            [10, '// log_error("commented out")'],
-            [20, 'log_error("real emission", err)'],
-          ],
-        };
-      }
-      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
-      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
-      if (regex === PROFILE_REGEX) {
-        return {
-          columns: COLUMNS,
-          values: [
-            row('src/service.ex', 10, '// log_error("commented out")'),
-            row('src/service.ex', 20, 'log_error("real emission", err)'),
-          ],
-        };
-      }
-      return { columns: COLUMNS, values: [] };
-    }) as unknown as typeof esClient.esql.query);
-
-    const candidates = await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: loggerMock.create(),
-      profileGreps: [PROFILE_REGEX],
-    });
-
-    const locs = candidates.map((c) => c.location);
-    // INV-005: the comment line never becomes a candidate.
-    expect(locs).toContain('src/service.ex:20');
-    expect(locs).not.toContain('src/service.ex:10');
-  });
-
-  it('profile greps share the maxCandidates ceiling with idioms', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Idiom lane produces one hit (filling the maxCandidates:1 ceiling), so the
-    // profile grep is skipped. The profile regex would also match, but it never
-    // runs because the shared ceiling was reached by the idiom lane first.
-    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[1, 'log_error("boom")']] };
-      }
-      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
-      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
-      if (regex === PROFILE_REGEX) {
-        return {
-          columns: COLUMNS,
-          values: [row('src/a.ex', 1, 'log_error("boom")')],
-        };
-      }
-      // An idiom pattern matches the production line, filling the ceiling.
-      return {
-        columns: COLUMNS,
-        values: [row('src/Main.java', 10, 'logger.info("started")')],
-      };
-    }) as unknown as typeof esClient.esql.query);
-
-    const candidates = await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: loggerMock.create(),
-      maxCandidates: 1,
-      profileGreps: [PROFILE_REGEX],
-    });
-
-    const grepCalls = esClient.esql.query.mock.calls.filter(([{ query }]) => !isWindowQuery(query));
-    const profileGrepRan = grepCalls.some(([{ params }]) =>
-      (params as Array<Record<string, unknown>>).some(
-        (p) => 'regex' in p && p.regex === PROFILE_REGEX
-      )
-    );
-    // The idiom lane filled the ceiling, so the profile grep was skipped.
-    expect(profileGrepRan).toBe(false);
-    expect(candidates).toHaveLength(1);
-  });
-
-  it('useLoggingProfile: false issues no profile greps', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
+  it('merges profile greps alongside idiom greps (additive)', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([]);
+    codebox.show.mockResolvedValue('');
 
     await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc',
       serviceRoot: 'src',
       logger: loggerMock.create(),
-      profileGreps: [PROFILE_REGEX],
+      profileGreps: ['.*my_custom_logger.*'],
+    });
+
+    // idiom patterns + 1 profile grep
+    expect(codebox.grep).toHaveBeenCalledTimes(LOGGER_IDIOM_PATTERNS.length + 1);
+  });
+
+  it('skips profile greps when useLoggingProfile is false', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([]);
+
+    await discoverLoggingSites({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      profileGreps: ['.*my_custom_logger.*'],
       useLoggingProfile: false,
     });
 
-    const grepRegexes = esClient.esql.query.mock.calls
-      .filter(([{ query }]) => !isWindowQuery(query))
-      .flatMap(([{ params }]) =>
-        (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
-      );
-    // Only idiom patterns ran; the profile regex was NOT issued.
-    expect(grepRegexes).toEqual([...LOGGER_IDIOM_PATTERNS]);
-    expect(grepRegexes).not.toContain(PROFILE_REGEX);
-  });
-
-  it('defaults to useLoggingProfile: true', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
-
-    await discoverLoggingSites({
-      esClient,
-      repository: 'supabase/realtime',
-      gitSha: 'abc123',
-      serviceRoot: 'src',
-      logger: loggerMock.create(),
-      profileGreps: [PROFILE_REGEX],
-    });
-
-    const grepRegexes = esClient.esql.query.mock.calls
-      .filter(([{ query }]) => !isWindowQuery(query))
-      .flatMap(([{ params }]) =>
-        (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
-      );
-    // Profile regex ran after the idiom patterns.
-    expect(grepRegexes).toEqual([...LOGGER_IDIOM_PATTERNS, PROFILE_REGEX]);
+    expect(codebox.grep).toHaveBeenCalledTimes(LOGGER_IDIOM_PATTERNS.length);
   });
 });

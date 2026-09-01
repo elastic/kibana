@@ -1,20 +1,17 @@
-# Sourcerer-driven KI (Knowledge Indicator) extraction proof of concept.
+# Codebox-driven KI (Knowledge Indicator) extraction proof of concept.
 #
-# Fully deterministic + LLM-classify pipeline (no agentic passes):
-#  1. _discover_services greps the indexed corpus for deploy markers/manifests to
-#     find candidate service roots, then one batched classify call judges which
-#     are real services and collapses env/region duplicates.
-#  2. The workflow fans out one request per service to _identify_service, which
-#     greps that service's production logging call sites and classifies them.
+# Two-phase pipeline:
+#  1. _list_repos enumerates indexed repositories (lightweight, no grepping).
+#  2. Per-repo fan-out: _discover_services(repository) greps one repo's deploy
+#     markers/manifests, classifies candidate service roots, then the inner
+#     foreach fans out per-service to _identify_service for logging-site
+#     discovery, classification, and query generation.
 #
-# Both stages read the Sourcerer index (`sourcerer-v1-*`) server-side; the corpus
-# is populated out of band by `sourcerer setup` + indexing. The plugin gates
-# install/enable on the sourcerer agent's presence as a proxy for "Sourcerer is
-# set up" (the agent itself is no longer called by this workflow; re-pointing the
-# gate at the index is a follow-up).
+# Both stages query a Codebox git repository service over HTTP via the .http
+# connector. The plugin gates on the Codebox connector's presence.
 #
-# It runs manually in a concrete user space; the fingerprint noop guard keeps
-# unchanged runs cheap.
+# Per-repo batching ensures each repo gets its own bounded request, so large
+# repos (elastic/kibana) don't block or time out the entire pipeline.
 
 version: '1'
 name: 'Code KI Extraction'
@@ -27,10 +24,8 @@ tags:
   - knowledge-indicators
   - code-extraction
 settings:
-  timeout: '60m'
+  timeout: '120m'
   concurrency:
-    # The workflow definition is managed globally but each run has a concrete
-    # execution space. Keep concurrent tenant runs independent.
     key: 'significant-events-code-ki-extraction-{{ workflow.spaceId }}'
     strategy: drop
     max: 1
@@ -41,199 +36,202 @@ triggers:
         type: string
         default: '.openai-gpt-5.2-chat_completion'
         required: false
-        description: 'Connector ID for the code-intelligence (Sourcerer) agent.'
+        description: 'Connector ID for the code-intelligence agent.'
+
 steps:
-  - name: discover_services
+  # Phase 1: lightweight repo enumeration (no grepping — fast).
+  - name: list_repos
     type: kibana.request
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_discover_services'
+      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_list_repos'
       headers:
         x-elastic-internal-origin: 'kibana'
       body: {}
     on-failure:
       continue: false
 
-  - name: has_services
+  - name: has_repos
     type: if
-    condition: '${{ steps.discover_services.error == null and steps.discover_services.output.services != null }}'
+    condition: '${{ steps.list_repos.error == null and steps.list_repos.output.repos != null }}'
     steps:
-      # Intentionally serial for the POC so the per-service workload is observable
-      # without concurrency-induced bursts.
-      - name: process_services
+      # Phase 2: per-repo fan-out. Each repo gets its own _discover_services
+      # call, bounded to that repo, so a slow/large repo doesn't block others.
+      - name: process_repos
         type: foreach
-        foreach: '${{ steps.discover_services.output.services }}'
+        foreach: '${{ steps.list_repos.output.repos }}'
         max-concurrency: 1
         iteration-on-failure:
           continue: true
         steps:
-          # -----------------------------------------------------------------
-          # Logging profile lane (Tasks 4, 7). The profile is keyed by
-          # repository + commit, so it is checked per iteration; the gate
-          # (INV-003) ensures the agent runs at most once per repository +
-          # commit — after the first iteration persists a profile, later
-          # iterations for the same repo see `needs_refresh: false` and skip.
-          # A failed drift recount never requests refresh (INV-002): the
-          # profile is kept and the failure is reported on the check output.
-          # -----------------------------------------------------------------
-          - name: check_logging_profile
+          - name: discover_services
             type: kibana.request
             with:
               method: POST
-              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_check_logging_profile'
+              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_discover_services'
               headers:
                 x-elastic-internal-origin: 'kibana'
               body:
                 repository: '{{ foreach.item.repository }}'
-                gitSha: '{{ foreach.item.gitSha }}'
-                gitRefKey: '{{ foreach.item.refKey }}'
-                runId: '{{ execution.id }}'
             on-failure:
               continue: true
 
-          - name: needs_logging_profile
+          - name: has_services
             type: if
-            condition: '${{ steps.check_logging_profile.error == null and steps.check_logging_profile.output.needs_refresh == true }}'
+            condition: '${{ steps.discover_services.error == null and steps.discover_services.output.services != null }}'
             steps:
-              - name: run_logging_wrappers_agent
-                type: ai.agent
-                # The agent-id literal must stay in sync with
-                # SIGNIFICANT_EVENTS_LOGGING_WRAPPERS_AGENT_ID in
-                # server/agent_builder/agents/logging_wrappers/logging_wrappers.ts
-                # (YAML cannot import a TS constant).
-                agent-id: 'significant-events.logging-wrappers'
-                # Wrapper discovery is a low-volume, high-judgment task: it must
-                # distinguish a repo's house wrapper from any function merely named
-                # `log_*`. Use the KI-extraction inference feature (strong-model tier:
-                # GPT-5.4 / GPT-OSS-120B / Sonnet 4.6) rather than the code-intelligence
-                # classification feature, whose recommended flash-lite/haiku tier
-                # over-emits here (it validated 26 bespoke helpers as "wrappers" for one
-                # repo). Billing attribution stays on code intelligence via plugin-id.
-                connector-id-by-feature: 'significant_events_ki_extraction'
-                plugin-id: 'significant_events_code_intelligence'
-                aggregate-by: 'significant_events'
-                create-conversation: true
-                with:
-                  message: |
-                    Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}` (ref key `{{ foreach.item.refKey }}`).
-
-                    Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`, passing `git_ref_key` (`{{ foreach.item.refKey }}`) alongside `git_commit`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
-                  # Scope the agent to its read-only Sourcerer code tools plus the
-                  # validate_logging_queries builtin (configuration_overrides replaces
-                  # the stored tool set for this execution only).
-                  configuration_overrides:
-                    enable_elastic_capabilities: false
-                    tools:
-                      - tool_ids:
-                          - sourcerer.code.grep
-                          - sourcerer.files.cat
-                          - sourcerer.files.ls
-                          - platform.sig_events.logging_queries_validate
-                  # Lets a live run be located via findExecutions to follow tool
-                  # calls and reasoning before this step returns.
-                  metadata:
-                    workflow_execution_id: "{{ execution.id }}"
-                  schema:
-                    type: object
-                    properties:
-                      greps:
-                        type: array
-                        description: >-
-                          Validated Lucene RLIKE greps matching this repository's
-                          house logging-wrapper call sites. Empty when the repository
-                          has no house wrapper.
-                        items:
-                          type: object
-                          properties:
-                            regex:
-                              type: string
-                              description: 'Lucene RLIKE, whole-value anchored (wrap in .*). A literal paren is [()].'
-                            expect_call_sites:
-                              type: integer
-                              description: 'Validated hit count on the indexed commit (the drift baseline).'
-                            evidence:
-                              type: object
-                              properties:
-                                path:
-                                  type: string
-                                  description: 'Repository-relative file path the grep was written to match.'
-                                line:
-                                  type: integer
-                                  description: 'Line number in that file the grep was written to match.'
-                              required: [path, line]
-                          required: [regex, expect_call_sites, evidence]
-                    required: [greps]
-                on-failure:
+              - name: process_services
+                type: foreach
+                foreach: '${{ steps.discover_services.output.services }}'
+                max-concurrency: 1
+                iteration-on-failure:
                   continue: true
+                steps:
+                  # ---------------------------------------------------------------
+                  # Logging profile lane (Tasks 4, 7). Checked per service; the
+                  # gate (INV-003) ensures the agent runs at most once per
+                  # repository + commit.
+                  # ---------------------------------------------------------------
+                  - name: check_logging_profile
+                    type: kibana.request
+                    with:
+                      method: POST
+                      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_check_logging_profile'
+                      headers:
+                        x-elastic-internal-origin: 'kibana'
+                      body:
+                        repository: '{{ foreach.item.repository }}'
+                        gitSha: '{{ foreach.item.gitSha }}'
+                        gitRefKey: '{{ foreach.item.refKey }}'
+                        runId: '{{ execution.id }}'
+                    on-failure:
+                      continue: true
 
-              - name: persist_logging_profile
-                type: kibana.request
-                with:
-                  method: POST
-                  path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_persist_logging_profile'
-                  headers:
-                    x-elastic-internal-origin: 'kibana'
-                  body:
-                    repository: '{{ foreach.item.repository }}'
-                    gitSha: '{{ foreach.item.gitSha }}'
-                    gitRefKey: '{{ foreach.item.refKey }}'
-                    runId: '{{ execution.id }}'
-                    greps: '${{ steps.run_logging_wrappers_agent.output.structured_output.greps }}'
-                on-failure:
+                  - name: needs_logging_profile
+                    type: if
+                    condition: '${{ steps.check_logging_profile.error == null and steps.check_logging_profile.output.needs_refresh == true }}'
+                    steps:
+                      - name: run_logging_wrappers_agent
+                        type: ai.agent
+                        agent-id: 'significant-events.logging-wrappers'
+                        connector-id-by-feature: 'significant_events_ki_extraction'
+                        plugin-id: 'significant_events_code_intelligence'
+                        aggregate-by: 'significant_events'
+                        create-conversation: true
+                        with:
+                          message: |
+                            Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}` (ref key `{{ foreach.item.refKey }}`).
+
+                            Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`, passing `git_ref_key` (`{{ foreach.item.refKey }}`) alongside `git_commit`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
+                          configuration_overrides:
+                            enable_elastic_capabilities: false
+                            tools:
+                              - tool_ids:
+                                  - git-grep
+                                  - git-show
+                                  - git-ls-tree
+                                  - platform.sig_events.logging_queries_validate
+                          metadata:
+                            workflow_execution_id: "{{ execution.id }}"
+                          schema:
+                            type: object
+                            properties:
+                              greps:
+                                type: array
+                                description: >-
+                                  Validated Lucene RLIKE greps matching this repository's
+                                  house logging-wrapper call sites. Empty when the repository
+                                  has no house wrapper.
+                                items:
+                                  type: object
+                                  properties:
+                                    regex:
+                                      type: string
+                                      description: 'Lucene RLIKE, whole-value anchored (wrap in .*). A literal paren is [()].'
+                                    expect_call_sites:
+                                      type: integer
+                                      description: 'Validated hit count on the indexed commit (the drift baseline).'
+                                    evidence:
+                                      type: object
+                                      properties:
+                                        path:
+                                          type: string
+                                          description: 'Repository-relative file path the grep was written to match.'
+                                        line:
+                                          type: integer
+                                          description: 'Line number in that file the grep was written to match.'
+                                      required: [path, line]
+                                  required: [regex, expect_call_sites, evidence]
+                            required: [greps]
+                        on-failure:
+                          continue: true
+
+                      - name: persist_logging_profile
+                        type: kibana.request
+                        with:
+                          method: POST
+                          path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_persist_logging_profile'
+                          headers:
+                            x-elastic-internal-origin: 'kibana'
+                          body:
+                            repository: '{{ foreach.item.repository }}'
+                            gitSha: '{{ foreach.item.gitSha }}'
+                            gitRefKey: '{{ foreach.item.refKey }}'
+                            runId: '{{ execution.id }}'
+                            greps: '${{ steps.run_logging_wrappers_agent.output.structured_output.greps }}'
+                        on-failure:
+                          continue: true
+
+                  - name: identify_service
+                    type: kibana.request
+                    with:
+                      method: POST
+                      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_service'
+                      headers:
+                        x-elastic-internal-origin: 'kibana'
+                      body:
+                        repository: '{{ foreach.item.repository }}'
+                        gitSha: '{{ foreach.item.gitSha }}'
+                        gitRefKey: '{{ foreach.item.refKey }}'
+                        repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
+                        iacSignals: '${{ foreach.item.iacSignals }}'
+                        hasOtel: '${{ foreach.item.hasOtel }}'
+                        service:
+                          name: '{{ foreach.item.name }}'
+                          serviceRoot: '{{ foreach.item.serviceRoot }}'
+                          language: '{{ foreach.item.language }}'
+                    on-failure:
+                      retry:
+                        max-attempts: 2
+                        delay: '5s'
+                        strategy: exponential
+
+              - name: process_otel_services
+                type: foreach
+                foreach: '${{ steps.discover_services.output.services | where: "hasOtel", true }}'
+                max-concurrency: 1
+                iteration-on-failure:
                   continue: true
-
-          - name: identify_service
-            type: kibana.request
-            with:
-              method: POST
-              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_service'
-              headers:
-                x-elastic-internal-origin: 'kibana'
-              body:
-                repository: '{{ foreach.item.repository }}'
-                gitSha: '{{ foreach.item.gitSha }}'
-                gitRefKey: '{{ foreach.item.refKey }}'
-                repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
-                iacSignals: '${{ foreach.item.iacSignals }}'
-                hasOtel: '${{ foreach.item.hasOtel }}'
-                service:
-                  name: '{{ foreach.item.name }}'
-                  serviceRoot: '{{ foreach.item.serviceRoot }}'
-                  language: '{{ foreach.item.language }}'
-            on-failure:
-              retry:
-                max-attempts: 2
-                delay: '5s'
-                strategy: exponential
-
-      - name: process_otel_services
-        type: foreach
-        foreach: '${{ steps.discover_services.output.services | where: "hasOtel", true }}'
-        max-concurrency: 1
-        iteration-on-failure:
-          # A bad service must not prevent later tenant services from getting
-          # their typed queries; each failed iteration remains visible.
-          continue: true
-        steps:
-          - name: identify_otel_signals
-            type: kibana.request
-            with:
-              method: POST
-              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_otel_signals'
-              headers:
-                x-elastic-internal-origin: 'kibana'
-                elastic-api-version: '1'
-              body:
-                repository: '{{ foreach.item.repository }}'
-                gitSha: '{{ foreach.item.gitSha }}'
-                gitRefKey: '{{ foreach.item.refKey }}'
-                serviceRoot: '{{ foreach.item.serviceRoot }}'
-                name: '{{ foreach.item.name }}'
-                language: '{{ foreach.item.language }}'
-                hasOtel: '${{ foreach.item.hasOtel }}'
-                signalCounts: '${{ foreach.item.signalCounts }}'
-            on-failure:
-              retry:
-                max-attempts: 2
-                delay: '5s'
-                strategy: exponential
+                steps:
+                  - name: identify_otel_signals
+                    type: kibana.request
+                    with:
+                      method: POST
+                      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_otel_signals'
+                      headers:
+                        x-elastic-internal-origin: 'kibana'
+                        elastic-api-version: '1'
+                      body:
+                        repository: '{{ foreach.item.repository }}'
+                        gitSha: '{{ foreach.item.gitSha }}'
+                        gitRefKey: '{{ foreach.item.refKey }}'
+                        serviceRoot: '{{ foreach.item.serviceRoot }}'
+                        name: '{{ foreach.item.name }}'
+                        language: '{{ foreach.item.language }}'
+                        hasOtel: '${{ foreach.item.hasOtel }}'
+                        signalCounts: '${{ foreach.item.signalCounts }}'
+                    on-failure:
+                      retry:
+                        max-attempts: 2
+                        delay: '5s'
+                        strategy: exponential

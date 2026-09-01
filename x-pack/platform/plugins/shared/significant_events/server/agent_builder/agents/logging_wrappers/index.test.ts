@@ -39,9 +39,9 @@ describe('logging wrappers agent types', () => {
     const tools = loggingWrappersAgentType.baseConfiguration.tools;
     expect(tools).toHaveLength(1);
     expect(tools[0].tool_ids).toEqual([
-      'sourcerer.code.grep',
-      'sourcerer.files.cat',
-      'sourcerer.files.ls',
+      'git-grep',
+      'git-show',
+      'git-ls-tree',
       SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID,
     ]);
   });

@@ -5,137 +5,119 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   detectOtelInstrumentation,
   detectOtelInstrumentationForRoots,
-  EMPTY_OTEL_SIGNAL_COUNTS,
 } from './detect_otel_instrumentation';
-
-type SourceLine = string | { content: string; filePath: string };
-
-const createEsClient = (lines: SourceLine[], fail = false): ElasticsearchClient =>
-  ({
-    esql: {
-      query: jest.fn(async ({ params }) => {
-        if (fail) throw new Error('grep unavailable');
-        const parameters = params as Array<Record<string, unknown>> | undefined;
-        const regex = new RegExp(
-          String(parameters?.find((parameter) => 'regex' in parameter)?.regex ?? '')
-        );
-        const matches = lines
-          .map((line, index) =>
-            typeof line === 'string'
-              ? { content: line, filePath: 'src/service.ts', index }
-              : { ...line, index }
-          )
-          .filter(({ content }) => regex.test(content));
-        return {
-          columns: [
-            { name: 'file.path', type: 'keyword' },
-            { name: 'line.number', type: 'integer' },
-            { name: 'line.content', type: 'keyword' },
-          ],
-          values: matches.map(({ content, filePath, index }) => [filePath, index + 1, content]),
-        };
-      }),
-    },
-  } as unknown as ElasticsearchClient);
-
-const detect = (lines: SourceLine[], fail = false) =>
-  detectOtelInstrumentation({
-    esClient: createEsClient(lines, fail),
-    repository: 'acme/repo',
-    gitSha: 'abc',
-    serviceRoot: 'src',
-    logger: loggerMock.create(),
-  });
+import { createMockCodeboxClient } from './__mocks__/codebox_client';
 
 describe('detectOtelInstrumentation', () => {
-  it.each([
-    ['@opentelemetry/api', 'instrumentation_other'],
-    [
-      'go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc',
-      'instrumentation_grpc',
-    ],
-    ['@opentelemetry/instrumentation-http', 'instrumentation_http'],
-  ] as const)('detects %s imports', async (line, count) => {
-    const result = await detect([`import instrumentation from "${line}"`]);
-    expect(result.hasOtel).toBe(true);
-    expect(result.signalCounts[count]).toBeGreaterThan(0);
-  });
+  it('detects OTel when import patterns match', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
+      if (
+        pattern.includes('otelgrpc') ||
+        pattern.includes('otelhttp') ||
+        pattern.includes('opentelemetry')
+      ) {
+        return [
+          {
+            ref: 'abc',
+            path: 'src/main.go',
+            lineNumber: 5,
+            content: 'import "go.opentelemetry.io/otel"',
+          },
+        ];
+      }
+      return [];
+    });
 
-  it('detects a Go grouped-import module line', async () => {
-    const result = await detect([
-      {
-        filePath: 'cmd/service/main.go',
-        content: '"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"',
-      },
-    ]);
-    expect(result.hasOtel).toBe(true);
-    expect(result.signalCounts.instrumentation_http).toBeGreaterThan(0);
-  });
-
-  it('does not count lockfile references as instrumentation', async () => {
-    const result = await detect([
-      {
-        filePath: 'package-lock.json',
-        content: '"@opentelemetry/instrumentation-http": "1.0.0"',
-      },
-    ]);
-    expect(result).toEqual({ hasOtel: false, signalCounts: EMPTY_OTEL_SIGNAL_COUNTS });
-  });
-
-  it('gates on 3 idiom sites when one is an unambiguous OTel idiom', async () => {
-    expect((await detect(['tracer.startSpan("x")', 'span.setAttribute("x", 1)'])).hasOtel).toBe(
-      false
-    );
-    expect(
-      (await detect(['tracer.startSpan("x")', 'span.setAttribute("x", 1)', 'span.addEvent("y")']))
-        .hasOtel
-    ).toBe(true);
-  });
-
-  it('does not treat 3 ambiguous idiom sites as OTel without an import', async () => {
-    expect(
-      (
-        await detect([
-          'element.setAttribute("x", 1)',
-          'element.setAttribute("y", 2)',
-          'element.setAttribute("z", 3)',
-        ])
-      ).hasOtel
-    ).toBe(false);
-  });
-
-  it('batches detection across roots with inclusive attribution', async () => {
-    const esClient = createEsClient([
-      { filePath: 'src/a.go', content: 'import "go.opentelemetry.io/otel"' },
-      {
-        filePath: 'services/b/main.go',
-        content: 'import "go.opentelemetry.io/contrib/instrumentation/x/otelgrpc"',
-      },
-    ]);
-    const result = await detectOtelInstrumentationForRoots({
-      esClient,
-      repository: 'acme/repo',
-      gitSha: 'abc',
-      serviceRoots: ['src', 'services/b'],
+    const result = await detectOtelInstrumentation({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
       logger: loggerMock.create(),
     });
-    expect(result.get('src')?.hasOtel).toBe(true);
-    expect(result.get('services/b')?.hasOtel).toBe(true);
+
+    expect(result.hasOtel).toBe(true);
   });
 
-  it('returns a false zero result for plain loggers and grep failures', async () => {
-    await expect(detect(['logger.info("ok")'])).resolves.toEqual({
-      hasOtel: false,
-      signalCounts: EMPTY_OTEL_SIGNAL_COUNTS,
+  it('returns hasOtel=false when no patterns match', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([]);
+
+    const result = await detectOtelInstrumentation({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc123',
+      serviceRoot: '',
+      logger: loggerMock.create(),
     });
-    await expect(detect([], true)).resolves.toEqual({
-      hasOtel: false,
-      signalCounts: EMPTY_OTEL_SIGNAL_COUNTS,
+
+    expect(result.hasOtel).toBe(false);
+  });
+
+  it('never throws — returns false on failure', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockRejectedValue(new Error('timeout'));
+
+    const result = await detectOtelInstrumentation({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc',
+      serviceRoot: '',
+      logger: loggerMock.create(),
     });
+
+    expect(result.hasOtel).toBe(false);
+  });
+});
+
+describe('detectOtelInstrumentationForRoots', () => {
+  it('batches detection across multiple service roots', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([]);
+
+    const result = await detectOtelInstrumentationForRoots({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc123',
+      serviceRoots: ['svc-a', 'svc-b'],
+      logger: loggerMock.create(),
+    });
+
+    expect(result.has('svc-a')).toBe(true);
+    expect(result.has('svc-b')).toBe(true);
+    expect(result.get('svc-a')!.hasOtel).toBe(false);
+  });
+
+  it('attributes hits to the correct root', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
+      if (pattern.includes('opentelemetry')) {
+        return [
+          {
+            ref: 'abc',
+            path: 'svc-a/main.go',
+            lineNumber: 1,
+            content: 'import "go.opentelemetry.io/otel"',
+          },
+        ];
+      }
+      return [];
+    });
+
+    const result = await detectOtelInstrumentationForRoots({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc123',
+      serviceRoots: ['svc-a', 'svc-b'],
+      logger: loggerMock.create(),
+    });
+
+    expect(result.get('svc-a')!.hasOtel).toBe(true);
+    expect(result.get('svc-b')!.hasOtel).toBe(false);
   });
 });

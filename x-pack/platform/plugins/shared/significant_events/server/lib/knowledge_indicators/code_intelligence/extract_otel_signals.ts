@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { CodeboxClient } from './codebox_client';
 import { codeGrep, fetchLineWindows, splitRepository } from './discover_logging_sites';
 import { isProductionOtelPath } from './detect_otel_instrumentation';
 import type { OtelMetricKind, OtelSignal, OtelSignalKind, OtelValueHint } from './types';
@@ -241,7 +242,7 @@ export function extractOtelSignalsFromWindows(windows: OtelSourceWindow[]): Otel
 }
 
 export interface ExtractOtelSignalsOptions {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   repository: string;
   gitSha: string;
   serviceRoot: string;
@@ -264,7 +265,7 @@ export async function extractOtelSignals(
 
 /** Preserves source-discovery failures so the OTel route never treats them as an empty gate. */
 export async function extractOtelSignalsResult({
-  esClient,
+  codebox,
   repository,
   gitSha,
   serviceRoot,
@@ -278,11 +279,11 @@ export async function extractOtelSignalsResult({
   try {
     for (const regex of EXTRACT_PATTERNS) {
       const hits = await codeGrep({
-        esClient,
+        codebox,
         gitOrg: org,
         gitRepo: repo,
-        gitCommit: gitSha || '*',
-        filePath: root ? `${root}/**` : '**',
+        ref: gitSha,
+        filePath: root ? `${root}/` : undefined,
         regex,
         limit: perPatternLimit,
       });
@@ -307,10 +308,10 @@ export async function extractOtelSignalsResult({
       expandedHitsByFile.set(file, expanded);
     }
     const windows = await fetchLineWindows({
-      esClient,
+      codebox,
       gitOrg: org,
       gitRepo: repo,
-      gitCommit: gitSha || '*',
+      ref: gitSha,
       hitsByFile: expandedHitsByFile,
       logger,
     });

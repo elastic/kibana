@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
+import { getCodeboxClient } from '../../../../lib/knowledge_indicators/code_intelligence/codebox_client';
 import {
   detectLoggingProfileDrift,
   readLoggingProfile,
@@ -82,14 +83,18 @@ const checkLoggingProfileRoute = createServerRoute({
     };
   }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing } = scopedClients;
+    const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
     const routeLogger = logger.get('code_intelligence', 'logging_profile');
     const spaceId = await getSpaceId(request);
-    const esClient = scopedClusterClient.asCurrentUser;
+    const codebox = await getCodeboxClient({
+      actions: server.actions,
+      request,
+      logger: routeLogger,
+    });
 
     const profile = await readLoggingProfile({
       kiClient: await scopedClients.getKnowledgeIndicatorClient(),
@@ -103,10 +108,9 @@ const checkLoggingProfileRoute = createServerRoute({
     }
 
     const drift = await detectLoggingProfileDrift({
-      esClient,
+      codebox,
       repository: params.body.repository,
       gitCommit: params.body.gitSha,
-      gitRefKey: params.body.gitRefKey,
       profile,
       logger: routeLogger,
     });
@@ -189,7 +193,7 @@ const persistLoggingProfileRoute = createServerRoute({
     maintenanceService,
   }): Promise<{ persisted: number; repository: string; commit: string }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing } = scopedClients;
+    const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -197,7 +201,11 @@ const persistLoggingProfileRoute = createServerRoute({
     const routeLogger = logger.get('code_intelligence', 'logging_profile');
     const spaceId = await getSpaceId(request);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const esClient = scopedClusterClient.asCurrentUser;
+    const codebox = await getCodeboxClient({
+      actions: server.actions,
+      request,
+      logger: routeLogger,
+    });
 
     // Re-validate every grep server-side against the indexed commit. The agent's
     // self-reported `expect_call_sites` is discarded; the server-derived `hits`
@@ -208,10 +216,9 @@ const persistLoggingProfileRoute = createServerRoute({
     }));
 
     const validation = await validateLoggingQueriesHandler({
-      esClient,
+      codebox,
       repository: params.body.repository,
       gitCommit: params.body.gitSha,
-      gitRefKey: params.body.gitRefKey,
       greps: candidates,
       logger: routeLogger,
     });

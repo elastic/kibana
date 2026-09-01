@@ -17,6 +17,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID } from '../tool_ids';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { validateLoggingQueriesHandler, type ValidateLoggingQueriesOutput } from './handler';
+import { getCodeboxClient } from '../../../lib/knowledge_indicators/code_intelligence/codebox_client';
 
 export { SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID } from '../tool_ids';
 
@@ -150,11 +151,11 @@ export function createValidateLoggingQueriesTool({
           licensing: scopedClients.licensing,
         });
 
+        const codebox = await getCodeboxClient({ actions: server.actions, request, logger });
         const output: ValidateLoggingQueriesOutput = await validateLoggingQueriesHandler({
-          esClient: scopedClients.scopedClusterClient.asCurrentUser,
+          codebox,
           repository: toolParams.repository,
           gitCommit: toolParams.git_commit,
-          gitRefKey: toolParams.git_ref_key,
           greps: toolParams.greps,
           logger,
         });

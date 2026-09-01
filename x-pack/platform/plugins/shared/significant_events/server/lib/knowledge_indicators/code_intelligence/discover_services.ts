@@ -6,18 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import {
-  EXTENSION_LANGUAGE,
-  IAC_PATH_MARKERS,
-  MANIFEST_PATH_PATTERNS,
-  SERVICE_DEPLOY_MARKERS,
-  SOURCERER_FILES_INDEX,
-  SOURCERER_LINES_INDEX,
-  SOURCERER_REFS_INDEX,
-  SOURCERER_REFS_LOOKUP_INDEX,
-} from './constants';
+import { IAC_PATH_MARKERS, MANIFEST_PATH_PATTERNS, SERVICE_DEPLOY_MARKERS } from './constants';
+import type { CodeboxClient } from './codebox_client';
 import type {
   IacSignal,
   IacKind,
@@ -26,69 +16,57 @@ import type {
   ServiceCandidateRoot,
 } from './types';
 
+/** Default concurrency for parallel Codebox calls within one function. */
+const DEFAULT_CONCURRENCY = 10;
+
 /**
- * Builds a repository language histogram by aggregating indexed file bytes per
- * extension (from the Sourcerer files index) and mapping known extensions to a
- * language via {@link EXTENSION_LANGUAGE}. Byte-weighted so a repo's dominant
- * language reflects real code volume, not incidental file counts. Unknown
- * extensions do not vote. Never throws — a query failure yields an empty
- * histogram (classification then degrades, it does not error).
+ * Runs `fn` over `items` with bounded concurrency. Errors in individual items
+ * are caught and returned as `undefined` so one failure doesn't abort the batch.
+ */
+async function pMap<T, R>(
+  items: readonly T[],
+  fn: (item: T) => Promise<R>,
+  concurrency = DEFAULT_CONCURRENCY
+): Promise<Array<R | undefined>> {
+  const results: Array<R | undefined> = new Array(items.length);
+  let next = 0;
+
+  const worker = async () => {
+    while (next < items.length) {
+      const idx = next++;
+      try {
+        results[idx] = await fn(items[idx]);
+      } catch {
+        results[idx] = undefined;
+      }
+    }
+  };
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
+  return results;
+}
+
+/**
+ * Builds a repository language histogram using the Codebox languages endpoint.
+ * Returns byte-weighted language counts so a repo's dominant language reflects
+ * real code volume. Never throws — a request failure yields an empty histogram.
  */
 export async function buildLanguageHistogram({
-  esClient,
+  codebox,
   repo,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   repo: IndexedRepoRef;
   logger: Logger;
 }): Promise<LanguageCount[]> {
-  const { org, repo: repoName, gitSha, refKey, repository } = repo;
-  const gitRefKey = refKey ?? '';
+  const { org, repo: repoName, gitSha, repository } = repo;
   try {
-    const response = (await esClient.esql.query({
-      query: `
-        FROM ${SOURCERER_FILES_INDEX}
-        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
-                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
-             OR (?git_ref_key != "" AND update_mode == "incremental"
-                    AND git.ref_key == ?git_ref_key)
-        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
-        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
-        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
-        | WHERE git.commit IS NOT NULL
-        | STATS bytes = SUM(file.size) BY file.extension
-        | SORT bytes DESC
-        | LIMIT 200`,
-      params: [
-        { git_ref_key: gitRefKey },
-        { git_org: org },
-        { git_repo: repoName },
-        { git_commit: gitSha || '*' },
-      ],
-      drop_null_columns: false,
-    })) as ESQLSearchResponse;
+    const histogram = await codebox.languages({ org, repo: repoName, ref: gitSha });
 
-    const extCol = response.columns.findIndex((c) => c.name === 'file.extension');
-    const bytesCol = response.columns.findIndex((c) => c.name === 'bytes');
-    if (extCol === -1 || bytesCol === -1) {
-      return [];
-    }
-
-    // Fold extensions onto their language and sum bytes as the weight.
-    const byLanguage = new Map<string, number>();
-    for (const row of response.values) {
-      const ext = String(row[extCol] ?? '').toLowerCase();
-      const bytes = Number(row[bytesCol] ?? 0);
-      const language = EXTENSION_LANGUAGE[ext];
-      if (!language || bytes <= 0) {
-        continue;
-      }
-      byLanguage.set(language, (byLanguage.get(language) ?? 0) + bytes);
-    }
-
-    return [...byLanguage.entries()]
-      .map(([language, count]) => ({ language, count }))
+    return Object.entries(histogram)
+      .map(([language, { bytes }]) => ({ language, count: bytes }))
+      .filter(({ count }) => count > 0)
       .sort((a, b) => b.count - a.count);
   } catch (error) {
     logger.debug(
@@ -124,103 +102,44 @@ const ENTRYPOINT_PATTERNS: readonly string[] = [
 
 const EVIDENCE_LINE_LIMIT = 100;
 
-/**
- * Repo-root README path (case-insensitive, common extensions). Only the repo
- * root is matched — a README states what the repository *is*, which helps the
- * classifier judge deployable-service vs library/monorepo. Nested READMEs are
- * intentionally excluded to keep the single classify call cheap.
- */
 const README_PATH_PATTERN = '[Rr][Ee][Aa][Dd][Mm][Ee]([.][A-Za-z0-9]+)?';
-
-/** Max README lines (from the top) fed to the classifier per repo. */
 const README_LINE_LIMIT = 40;
 
 /**
- * Enumerates the repositories + immutable commits indexed in Sourcerer, from the
- * refs indices (`sourcerer-v1-refs*` and `sourcerer-v2-refs*`). Server-side
- * equivalent of the agent's `sourcerer.refs.list`. One entry per indexed ref;
- * only successfully-indexed refs are returned — the ready-state value differs by
- * index version (`complete` in v1, `ready` in v2), so the allow-list below admits
- * exactly those two and excludes any in-progress/failed states. Never throws — a
- * missing index yields an empty list.
+ * Lists repositories cloned and ready in Codebox. Resolves HEAD commit SHAs
+ * in parallel. Never throws — a missing repo yields an empty list.
  */
 export async function listIndexedRepos({
-  esClient,
+  codebox,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   logger: Logger;
 }): Promise<IndexedRepoRef[]> {
   try {
-    const response = (await esClient.esql.query({
-      query: `
-        FROM ${SOURCERER_REFS_INDEX}
-        | WHERE status IN ("complete", "ready")
-        | KEEP git.org, git.repo, git.commit, git.ref, git.ref_key, update_mode
-        | SORT git.org, git.repo
-        | LIMIT 1000`,
-      drop_null_columns: false,
-    })) as ESQLSearchResponse;
+    const repos = await codebox.listRepos();
+    const readyRepos = repos.filter((r) => r.status === 'ready');
 
-    const col = (name: string) => response.columns.findIndex((c) => c.name === name);
-    const orgCol = col('git.org');
-    const repoCol = col('git.repo');
-    const commitCol = col('git.commit');
-    const refCol = col('git.ref');
-    const refKeyCol = col('git.ref_key');
-    const updateModeCol = col('update_mode');
-    if (orgCol === -1 || repoCol === -1 || commitCol === -1) {
-      return [];
-    }
+    const resolved = await pMap(readyRepos, async ({ name }) => {
+      const parts = name.split('/');
+      if (parts.length !== 2) return undefined;
+      const [org, repo] = parts;
 
-    const refs: IndexedRepoRef[] = [];
-    for (const row of response.values) {
-      const org = String(row[orgCol] ?? '');
-      const repo = String(row[repoCol] ?? '');
-      const gitSha = String(row[commitCol] ?? '');
-      if (!org || !repo || !gitSha) {
-        continue;
-      }
-      // Mode is decided by the ref doc's `update_mode`, not by the mere presence
-      // of `git.ref_key`. Snapshot ref docs DO carry a `git.ref_key` (a content
-      // hash), but snapshot line/file docs do NOT — they are scoped by `git.commit`.
-      // Only propagate `refKey` for incremental refs so downstream content queries
-      // take the snapshot branch (empty ref key) for snapshot repos; otherwise the
-      // incremental branch's `git.ref_key ==` predicate matches zero snapshot rows.
-      const updateMode = updateModeCol === -1 ? '' : String(row[updateModeCol] ?? '');
-      const refKey =
-        updateMode === 'incremental' && refKeyCol !== -1
-          ? String(row[refKeyCol] ?? '') || undefined
-          : undefined;
-      refs.push({
-        repository: `${org}/${repo}`,
+      const headSha = await codebox.resolveHead(org, repo);
+      if (!headSha) return undefined;
+
+      return {
+        repository: name,
         org,
         repo,
-        gitSha,
-        ref: refCol === -1 ? undefined : String(row[refCol] ?? '') || undefined,
-        refKey,
-      });
-    }
+        gitSha: headSha,
+        ref: 'HEAD',
+      } as IndexedRepoRef;
+    });
 
-    // One deterministic ref per repository. Sourcerer can index multiple refs,
-    // but downstream discovery state (candidate roots, evidence, OTel detection,
-    // gitSha) is keyed by repository; collapsing here keeps a service discovered
-    // from one ref from being extracted against another ref's commit. Prefer a
-    // default branch, else the lexicographically greatest commit for stability.
-    const isDefaultRef = (ref?: string): boolean => !!ref && /(^|\/)(main|master)$/i.test(ref);
-    const preferred = new Map<string, IndexedRepoRef>();
-    for (const candidate of refs) {
-      const current = preferred.get(candidate.repository);
-      const better =
-        !current ||
-        (isDefaultRef(candidate.ref) && !isDefaultRef(current.ref)) ||
-        (isDefaultRef(candidate.ref) === isDefaultRef(current.ref) &&
-          candidate.gitSha > current.gitSha);
-      if (better) {
-        preferred.set(candidate.repository, candidate);
-      }
-    }
-    return [...preferred.values()].sort((a, b) => a.repository.localeCompare(b.repository));
+    return resolved
+      .filter((r): r is IndexedRepoRef => r != null)
+      .sort((a, b) => a.repository.localeCompare(b.repository));
   } catch (error) {
     logger.warn(
       `discover_services: failed to list indexed repos: ${
@@ -237,55 +156,61 @@ const dirOf = (path: string): string => {
   return idx === -1 ? '' : path.slice(0, idx);
 };
 
-/** Lists distinct paths in a repo that match one RLIKE pattern. */
+/**
+ * Strips the leading/trailing `.*` anchors from a Lucene RLIKE pattern to
+ * produce an equivalent ERE pattern for `git grep --extended-regexp`.
+ */
+const rlikeToEre = (rlike: string): string =>
+  rlike.replace(/^\.\*/, '').replace(/\.\*$/, '') || rlike;
+
+/**
+ * Lists file paths in a repository matching a path regex pattern.
+ *
+ * Uses Codebox's `tree` endpoint with `recursive: true, nameOnly: true` to get
+ * a flat list of all repo-relative file paths in one call (`git ls-tree -r
+ * --name-only`), then filters client-side against the RLIKE-derived regex.
+ *
+ * When `allPaths` is provided, the API call is skipped (caller pre-fetched it
+ * once and shares across multiple `listPaths` calls for the same repo).
+ */
 async function listPaths({
-  esClient,
+  codebox,
   org,
   repo,
-  gitSha,
-  gitRefKey,
+  ref,
   pattern,
   limit,
+  allPaths,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   org: string;
   repo: string;
-  gitSha: string;
-  gitRefKey: string;
+  ref: string;
   pattern: string;
   limit: number;
+  /** Pre-fetched full file listing to avoid redundant API calls. */
+  allPaths?: string[];
 }): Promise<string[]> {
-  const response = (await esClient.esql.query({
-    query: `
-      FROM ${SOURCERER_LINES_INDEX}
-      | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
-                  AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
-           OR (?git_ref_key != "" AND update_mode == "incremental"
-                  AND git.ref_key == ?git_ref_key)
-      | WHERE file.path RLIKE ?pattern
-      | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
-      | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
-      | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
-      | WHERE git.commit IS NOT NULL
-      | STATS n = COUNT(*) BY file.path
-      | KEEP file.path
-      | SORT file.path
-      | LIMIT ${limit}`,
-    params: [
-      { git_ref_key: gitRefKey },
-      { git_org: org },
-      { git_repo: repo },
-      { git_commit: gitSha },
-      { pattern },
-    ],
-    drop_null_columns: false,
-  })) as ESQLSearchResponse;
-
-  const pathCol = response.columns.findIndex((c) => c.name === 'file.path');
-  if (pathCol === -1) {
-    return [];
+  const ere = rlikeToEre(pattern);
+  let regex: RegExp;
+  try {
+    regex = new RegExp(ere);
+  } catch {
+    regex = new RegExp(ere.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   }
-  return response.values.map((row) => String(row[pathCol] ?? '')).filter(Boolean);
+
+  const filePaths =
+    allPaths ??
+    ((await codebox.tree({ org, repo, ref, recursive: true, nameOnly: true })) as string[]);
+
+  const matched: string[] = [];
+  for (const path of filePaths) {
+    if (regex.test(path)) {
+      matched.push(path);
+      if (matched.length >= limit) break;
+    }
+  }
+  return matched.sort();
 }
 
 interface EvidenceLine {
@@ -294,129 +219,77 @@ interface EvidenceLine {
   content: string;
 }
 
-/** Greps line contents, optionally restricted to a known set of file paths. */
+/**
+ * Greps line contents via Codebox, optionally restricted to a known set of
+ * file paths.
+ */
 async function grepLines({
-  esClient,
+  codebox,
   org,
   repo,
-  gitSha,
-  gitRefKey,
+  ref,
   pattern,
   filePaths,
   limit,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   org: string;
   repo: string;
-  gitSha: string;
-  gitRefKey: string;
+  ref: string;
   pattern: string;
   filePaths?: string[];
   limit: number;
 }): Promise<EvidenceLine[]> {
-  const pathParams = (filePaths ?? []).map((path, index) => ({ [`file_path_${index}`]: path }));
-  const pathClause = filePaths?.length
-    ? `\n          AND file.path IN (${filePaths
-        .map((_, index) => `?file_path_${index}`)
-        .join(', ')})`
-    : '';
-  const response = (await esClient.esql.query({
-    query: `
-      FROM ${SOURCERER_LINES_INDEX}
-      | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
-                  AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
-           OR (?git_ref_key != "" AND update_mode == "incremental"
-                  AND git.ref_key == ?git_ref_key)
-      | WHERE line.content RLIKE ?pattern${pathClause}
-      | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
-      | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
-      | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
-      | WHERE git.commit IS NOT NULL
-      | KEEP file.path, line.number, line.content
-      | SORT file.path, line.number
-      | LIMIT ${limit}`,
-    params: [
-      { git_ref_key: gitRefKey },
-      { git_org: org },
-      { git_repo: repo },
-      { git_commit: gitSha },
-      ...pathParams,
-      { pattern },
-    ],
-    drop_null_columns: false,
-  })) as ESQLSearchResponse;
+  const hits = await codebox.grep({
+    org,
+    repo,
+    ref,
+    pattern: rlikeToEre(pattern),
+    maxCount: filePaths ? undefined : limit,
+  });
 
-  const pathCol = response.columns.findIndex((c) => c.name === 'file.path');
-  const lineCol = response.columns.findIndex((c) => c.name === 'line.number');
-  const contentCol = response.columns.findIndex((c) => c.name === 'line.content');
-  if (pathCol === -1 || lineCol === -1 || contentCol === -1) {
-    return [];
+  const pathSet = filePaths ? new Set(filePaths) : undefined;
+  const result: EvidenceLine[] = [];
+  for (const hit of hits) {
+    if (pathSet && !pathSet.has(hit.path)) continue;
+    result.push({
+      filePath: hit.path,
+      lineNumber: hit.lineNumber,
+      content: hit.content,
+    });
+    if (result.length >= limit) break;
   }
-  return response.values.map((row) => ({
-    filePath: String(row[pathCol] ?? ''),
-    lineNumber: Number(row[lineCol] ?? 0),
-    content: String(row[contentCol] ?? ''),
-  }));
+  return result;
 }
 
 const formatEvidenceLine = ({ filePath, lineNumber, content }: EvidenceLine): string =>
   `${filePath}:${lineNumber}\t${content}`;
 
-/** Reads the first `limit` lines (ordered) of one file's indexed content. */
+/** Reads the first `limit` lines of one file via Codebox show. */
 async function readFileHead({
-  esClient,
+  codebox,
   org,
   repo,
-  gitSha,
-  gitRefKey,
+  ref,
   filePath,
   limit,
 }: {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   org: string;
   repo: string;
-  gitSha: string;
-  gitRefKey: string;
+  ref: string;
   filePath: string;
   limit: number;
 }): Promise<string[]> {
-  const response = (await esClient.esql.query({
-    query: `
-      FROM ${SOURCERER_LINES_INDEX}
-      | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
-                  AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
-           OR (?git_ref_key != "" AND update_mode == "incremental"
-                  AND git.ref_key == ?git_ref_key)
-      | WHERE file.path == ?file_path
-      | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
-      | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
-      | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
-      | WHERE git.commit IS NOT NULL
-      | KEEP line.number, line.content
-      | SORT line.number
-      | LIMIT ${limit}`,
-    params: [
-      { git_ref_key: gitRefKey },
-      { git_org: org },
-      { git_repo: repo },
-      { git_commit: gitSha },
-      { file_path: filePath },
-    ],
-    drop_null_columns: false,
-  })) as ESQLSearchResponse;
-
-  const contentCol = response.columns.findIndex((c) => c.name === 'line.content');
-  if (contentCol === -1) {
-    return [];
-  }
-  return response.values.map((row) => String(row[contentCol] ?? ''));
+  const text = await codebox.show({ org, repo, ref, path: filePath, head: limit });
+  return text.split('\n');
 }
 
-/** Escapes a literal basename for use inside an RLIKE pattern (dots -> `[.]`). */
-const escapeForRlike = (basename: string): string => basename.replace(/\./g, '[.]');
+/** Escapes a literal basename for use inside an ERE pattern (dots -> `[.]`). */
+const escapeForPattern = (basename: string): string => basename.replace(/\./g, '[.]');
 
 export interface DiscoverCandidateRootsOptions {
-  esClient: ElasticsearchClient;
+  codebox: CodeboxClient;
   repo: IndexedRepoRef;
   logger: Logger;
   /** Max matching files per marker pattern (defaults to 500). */
@@ -425,69 +298,92 @@ export interface DiscoverCandidateRootsOptions {
 
 export interface DiscoverCandidateRootsResult {
   candidates: ServiceCandidateRoot[];
-  /** Manifest file paths found in the repo (fed to the classifier as evidence). */
   manifestPaths: string[];
-  /** Selected content lines from the matched manifest files. */
   manifestLines: string[];
-  /** Lines that declare runtime service names. */
   serviceNameLines: string[];
-  /** Repository-level IaC signals derived from file paths. */
   iacSignals: IacSignal[];
-  /** First {@link README_LINE_LIMIT} lines of the repo-root README, if present. */
   readmeLines: string[];
 }
 
 /**
  * Deterministically finds candidate service roots and supporting classification
- * evidence in one repository. No LLM. The classifier then judges + collapses.
+ * evidence in one repository. Greps run in parallel for speed. No LLM.
  */
 export async function discoverCandidateRoots({
-  esClient,
+  codebox,
   repo,
   logger,
   perMarkerLimit = 500,
 }: DiscoverCandidateRootsOptions): Promise<DiscoverCandidateRootsResult> {
-  const { org, repo: repoName, gitSha, refKey, repository } = repo;
-  const gitRefKey = refKey ?? '';
+  const { org, repo: repoName, gitSha, repository } = repo;
+  const ref = gitSha;
   const rootMarkers = new Map<string, Set<string>>();
   const rootLanguages = new Map<string, Set<string>>();
 
-  for (const { marker, language, patternOverride, basenameMatches } of SERVICE_DEPLOY_MARKERS) {
-    const pattern = patternOverride ?? `.*${escapeForRlike(marker)}`;
-    let paths: string[];
+  // Pre-fetch the full file listing once so all listPaths calls share it.
+  // Uses `git ls-tree -r --name-only` via the recursive+nameOnly tree endpoint.
+  let allPaths: string[];
+  try {
+    allPaths = (await codebox.tree({
+      org,
+      repo: repoName,
+      ref,
+      recursive: true,
+      nameOnly: true,
+    })) as string[];
+  } catch (error) {
+    logger.debug(
+      `discover_services: file listing failed for "${repository}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    allPaths = [];
+  }
+
+  // --- Phase 1: run all marker, manifest, service-name, entrypoint, and IaC
+  // greps in parallel. Each returns its own result set; we merge afterward.
+
+  // 1a. Service deploy marker greps
+  const markerResults = await pMap(SERVICE_DEPLOY_MARKERS, async (markerDef) => {
+    const { marker, language, patternOverride, basenameMatches } = markerDef;
+    const pattern = patternOverride ?? `.*${escapeForPattern(marker)}`;
     try {
-      paths = await listPaths({
-        esClient,
+      const paths = await listPaths({
+        codebox,
         org,
         repo: repoName,
-        gitSha,
-        gitRefKey,
+        ref,
         pattern,
         limit: perMarkerLimit,
+        allPaths,
       });
+      if (paths.length === perMarkerLimit) {
+        logger.warn(
+          `discover_services: marker grep for "${repository}" pattern ${JSON.stringify(
+            pattern
+          )} reached limit ${perMarkerLimit}`
+        );
+      }
+      return { marker, language, basenameMatches, paths };
     } catch (error) {
       logger.debug(
         `discover_services: marker grep failed for "${repository}" marker ${JSON.stringify(
           marker
         )}: ${error instanceof Error ? error.message : String(error)}`
       );
-      continue;
+      return undefined;
     }
-    if (paths.length === perMarkerLimit) {
-      logger.warn(
-        `discover_services: marker grep for "${repository}" pattern ${JSON.stringify(
-          pattern
-        )} reached limit ${perMarkerLimit}; path-sorted results may be truncated with alphabetical bias`
-      );
-    }
+  });
+
+  for (const result of markerResults) {
+    if (!result) continue;
+    const { marker, language, basenameMatches, paths } = result;
     for (const path of paths) {
       const base = path.slice(path.lastIndexOf('/') + 1);
       const matches = basenameMatches
         ? basenameMatches(base)
         : base === marker || base.endsWith(marker);
-      if (!matches) {
-        continue;
-      }
+      if (!matches) continue;
       const root = dirOf(path);
       const markers = rootMarkers.get(root) ?? new Set<string>();
       markers.add(marker);
@@ -500,105 +396,189 @@ export async function discoverCandidateRoots({
     }
   }
 
-  const manifestPaths = new Set<string>();
-  for (const pattern of MANIFEST_PATH_PATTERNS) {
-    try {
-      const paths = await listPaths({
-        esClient,
-        org,
-        repo: repoName,
-        gitSha,
-        gitRefKey,
-        pattern,
-        limit: perMarkerLimit,
-      });
-      if (paths.length === perMarkerLimit) {
-        logger.warn(
-          `discover_services: manifest-path grep for "${repository}" pattern ${JSON.stringify(
-            pattern
-          )} reached limit ${perMarkerLimit}; path-sorted results may be truncated with alphabetical bias`
-        );
-      }
-      paths.forEach((path) => manifestPaths.add(path));
-    } catch (error) {
-      logger.debug(
-        `discover_services: manifest grep failed for "${repository}" pattern ${JSON.stringify(
-          pattern
-        )}: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
+  // 1b. Manifest paths, service names, entrypoints, IaC — all in parallel
+  const [manifestPathResults, serviceNameResults, entrypointResults, iacResults, readmeResult] =
+    await Promise.all([
+      // Manifest path greps
+      pMap(MANIFEST_PATH_PATTERNS, async (pattern) => {
+        try {
+          const paths = await listPaths({
+            codebox,
+            org,
+            repo: repoName,
+            ref,
+            pattern,
+            limit: perMarkerLimit,
+            allPaths,
+          });
+          if (paths.length === perMarkerLimit) {
+            logger.warn(
+              `discover_services: manifest-path grep for "${repository}" pattern ${JSON.stringify(
+                pattern
+              )} reached limit ${perMarkerLimit}`
+            );
+          }
+          return paths;
+        } catch (error) {
+          logger.debug(
+            `discover_services: manifest grep failed for "${repository}" pattern ${JSON.stringify(
+              pattern
+            )}: ${error instanceof Error ? error.message : String(error)}`
+          );
+          return undefined;
+        }
+      }),
 
-  const manifestLines: string[] = [];
+      // Service name greps
+      pMap(SERVICE_NAME_PATTERNS, async (pattern) => {
+        try {
+          return await grepLines({
+            codebox,
+            org,
+            repo: repoName,
+            ref,
+            pattern,
+            limit: EVIDENCE_LINE_LIMIT,
+          });
+        } catch (error) {
+          logger.debug(
+            `discover_services: service-name grep failed for "${repository}" pattern ${JSON.stringify(
+              pattern
+            )}: ${error instanceof Error ? error.message : String(error)}`
+          );
+          return undefined;
+        }
+      }),
+
+      // Entrypoint greps
+      pMap(ENTRYPOINT_PATTERNS, async (pattern) => {
+        try {
+          return await grepLines({
+            codebox,
+            org,
+            repo: repoName,
+            ref,
+            pattern,
+            limit: EVIDENCE_LINE_LIMIT,
+          });
+        } catch (error) {
+          logger.debug(
+            `discover_services: entrypoint grep failed for "${repository}" pattern ${JSON.stringify(
+              pattern
+            )}: ${error instanceof Error ? error.message : String(error)}`
+          );
+          return undefined;
+        }
+      }),
+
+      // IaC marker greps
+      pMap(IAC_PATH_MARKERS, async ({ pattern, kind }) => {
+        try {
+          const paths = await listPaths({
+            codebox,
+            org,
+            repo: repoName,
+            ref,
+            pattern,
+            limit: 1,
+            allPaths,
+          });
+          return paths.length > 0 ? { kind: kind as IacKind, path: paths[0] } : undefined;
+        } catch {
+          return undefined;
+        }
+      }),
+
+      // README
+      (async () => {
+        try {
+          const readmePaths = await listPaths({
+            codebox,
+            org,
+            repo: repoName,
+            ref,
+            pattern: README_PATH_PATTERN,
+            limit: perMarkerLimit,
+            allPaths,
+          });
+          const rootReadme = readmePaths
+            .filter((path) => !path.includes('/'))
+            .sort((a, b) => a.localeCompare(b))[0];
+          if (rootReadme) {
+            return await readFileHead({
+              codebox,
+              org,
+              repo: repoName,
+              ref,
+              filePath: rootReadme,
+              limit: README_LINE_LIMIT,
+            });
+          }
+          return [];
+        } catch (error) {
+          logger.debug(
+            `discover_services: README read failed for "${repository}": ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return [];
+        }
+      })(),
+    ]);
+
+  // --- Phase 2: merge parallel results
+
+  // Manifest paths
+  const manifestPaths = new Set<string>();
+  for (const paths of manifestPathResults) {
+    if (paths) paths.forEach((path) => manifestPaths.add(path));
+  }
   const sortedManifestPaths = [...manifestPaths].sort();
+
+  // Manifest content greps (need sorted manifest paths from above, so run after phase 1)
+  let manifestLines: string[] = [];
   if (sortedManifestPaths.length > 0) {
-    for (const pattern of MANIFEST_CONTENT_PATTERNS) {
+    const contentResults = await pMap(MANIFEST_CONTENT_PATTERNS, async (pattern) => {
       try {
-        const lines = await grepLines({
-          esClient,
+        return await grepLines({
+          codebox,
           org,
           repo: repoName,
-          gitSha,
-          gitRefKey,
+          ref,
           pattern,
           filePaths: sortedManifestPaths,
           limit: EVIDENCE_LINE_LIMIT,
         });
-        manifestLines.push(...lines.map(formatEvidenceLine));
       } catch (error) {
         logger.debug(
           `discover_services: manifest-content grep failed for "${repository}" pattern ${JSON.stringify(
             pattern
           )}: ${error instanceof Error ? error.message : String(error)}`
         );
+        return undefined;
       }
-    }
+    });
+    manifestLines = contentResults
+      .filter((r): r is EvidenceLine[] => r != null)
+      .flat()
+      .map(formatEvidenceLine)
+      .slice(0, EVIDENCE_LINE_LIMIT);
   }
 
-  const serviceNameLines: string[] = [];
-  for (const pattern of SERVICE_NAME_PATTERNS) {
-    try {
-      const lines = await grepLines({
-        esClient,
-        org,
-        repo: repoName,
-        gitSha,
-        gitRefKey,
-        pattern,
-        limit: EVIDENCE_LINE_LIMIT,
-      });
-      serviceNameLines.push(...lines.map(formatEvidenceLine));
-    } catch (error) {
-      logger.debug(
-        `discover_services: service-name grep failed for "${repository}" pattern ${JSON.stringify(
-          pattern
-        )}: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
+  // Service name lines
+  const serviceNameLines = serviceNameResults
+    .filter((r): r is EvidenceLine[] => r != null)
+    .flat()
+    .map(formatEvidenceLine)
+    .slice(0, EVIDENCE_LINE_LIMIT);
 
+  // Entrypoint paths
   const entrypointPaths = new Set<string>();
-  for (const pattern of ENTRYPOINT_PATTERNS) {
-    try {
-      const lines = await grepLines({
-        esClient,
-        org,
-        repo: repoName,
-        gitSha,
-        gitRefKey,
-        pattern,
-        limit: EVIDENCE_LINE_LIMIT,
-      });
-      lines.forEach(({ filePath }) => entrypointPaths.add(filePath));
-    } catch (error) {
-      logger.debug(
-        `discover_services: entrypoint grep failed for "${repository}" pattern ${JSON.stringify(
-          pattern
-        )}: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
+  for (const lines of entrypointResults) {
+    if (lines) lines.forEach(({ filePath }) => entrypointPaths.add(filePath));
   }
 
+  // Candidates
   const candidates: ServiceCandidateRoot[] = [];
   for (const [serviceRoot, markers] of rootMarkers) {
     const langs = rootLanguages.get(serviceRoot);
@@ -615,68 +595,16 @@ export async function discoverCandidateRoots({
   }
   candidates.sort((a, b) => a.serviceRoot.localeCompare(b.serviceRoot));
 
+  // IaC signals (deduplicate by kind)
   const iacByKind = new Map<IacKind, string>();
-  for (const { pattern, kind } of IAC_PATH_MARKERS) {
-    if (iacByKind.has(kind as IacKind)) {
-      continue;
-    }
-    try {
-      const paths = await listPaths({
-        esClient,
-        org,
-        repo: repoName,
-        gitSha,
-        gitRefKey,
-        pattern,
-        limit: 1,
-      });
-      if (paths.length > 0) {
-        iacByKind.set(kind as IacKind, paths[0]);
-      }
-    } catch {
-      // best-effort; skip
+  for (const result of iacResults) {
+    if (result && !iacByKind.has(result.kind)) {
+      iacByKind.set(result.kind, result.path);
     }
   }
   const iacSignals: IacSignal[] = [...iacByKind].map(([kind, path]) => ({ kind, path }));
-  const cappedManifestLines = manifestLines.slice(0, EVIDENCE_LINE_LIMIT);
-  const cappedServiceNameLines = serviceNameLines.slice(0, EVIDENCE_LINE_LIMIT);
 
-  // Repo-root README: pick the shallowest matching README file (root over any
-  // that slipped through), then read its first README_LINE_LIMIT lines in order.
-  const readmeLines: string[] = [];
-  try {
-    const readmePaths = await listPaths({
-      esClient,
-      org,
-      repo: repoName,
-      gitSha,
-      gitRefKey,
-      pattern: README_PATH_PATTERN,
-      limit: perMarkerLimit,
-    });
-    const rootReadme = readmePaths
-      .filter((path) => !path.includes('/'))
-      .sort((a, b) => a.localeCompare(b))[0];
-    if (rootReadme) {
-      readmeLines.push(
-        ...(await readFileHead({
-          esClient,
-          org,
-          repo: repoName,
-          gitSha,
-          gitRefKey,
-          filePath: rootReadme,
-          limit: README_LINE_LIMIT,
-        }))
-      );
-    }
-  } catch (error) {
-    logger.debug(
-      `discover_services: README read failed for "${repository}": ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
+  const readmeLines = readmeResult ?? [];
 
   logger.debug(
     `discover_services: "${repository}" -> ${candidates.length} candidate root(s), ` +
@@ -686,8 +614,8 @@ export async function discoverCandidateRoots({
   return {
     candidates,
     manifestPaths: sortedManifestPaths,
-    manifestLines: cappedManifestLines,
-    serviceNameLines: cappedServiceNameLines,
+    manifestLines,
+    serviceNameLines,
     iacSignals,
     readmeLines,
   };
