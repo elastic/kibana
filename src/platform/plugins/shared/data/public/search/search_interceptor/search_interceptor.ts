@@ -126,7 +126,7 @@ export class SearchInterceptor {
   private protocolSupportsMultiplexing: boolean = false;
   private performanceObserver?: PerformanceObserver;
   private readonly activeAsyncSearches = new Map<string, string>(); // id -> strategy
-  private boundBeforeUnloadHandler: (() => void) | null = null;
+  private boundPageHideHandler: ((event: PageTransitionEvent) => void) | null = null;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -173,8 +173,8 @@ export class SearchInterceptor {
       })
     );
 
-    this.boundBeforeUnloadHandler = this.cancelAllActiveSearches.bind(this);
-    window.addEventListener('beforeunload', this.boundBeforeUnloadHandler);
+    this.boundPageHideHandler = this.handlePageHide.bind(this);
+    window.addEventListener('pagehide', this.boundPageHideHandler);
 
     // Set up PerformanceObserver to capture search requests as they happen
     try {
@@ -194,9 +194,9 @@ export class SearchInterceptor {
 
   public stop() {
     this.cancelAllActiveSearches();
-    if (this.boundBeforeUnloadHandler) {
-      window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler);
-      this.boundBeforeUnloadHandler = null;
+    if (this.boundPageHideHandler) {
+      window.removeEventListener('pagehide', this.boundPageHideHandler);
+      this.boundPageHideHandler = null;
     }
 
     this.responseCache.clear();
@@ -218,6 +218,10 @@ export class SearchInterceptor {
       this.sendCancelRequest(searchId, strategy).catch(() => {}); // Fire-and-forget
     }
     this.activeAsyncSearches.clear();
+  }
+
+  private handlePageHide(event: PageTransitionEvent): void {
+    this.cancelAllActiveSearches();
   }
 
   /*

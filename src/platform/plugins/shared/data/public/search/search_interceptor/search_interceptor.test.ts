@@ -2338,8 +2338,8 @@ describe('SearchInterceptor', () => {
       });
     });
 
-    describe('cancel on browser navigation (beforeunload)', () => {
-      test('should send DELETE via http.delete with keepalive when beforeunload fires during active async search', async () => {
+    describe('cancel on browser navigation (pagehide)', () => {
+      test('should send DELETE via http.delete with keepalive when pagehide fires during active async search', async () => {
         const responses = [
           {
             time: 10,
@@ -2369,7 +2369,7 @@ describe('SearchInterceptor', () => {
 
         expect(next).toHaveBeenCalled();
 
-        window.dispatchEvent(new Event('beforeunload'));
+        window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
 
         expect(mockCoreSetup.http.delete).toHaveBeenCalledWith(
           '/internal/search/ese/async-id-1',
@@ -2377,7 +2377,7 @@ describe('SearchInterceptor', () => {
         );
       });
 
-      test('should not send DELETE via http.delete if search completes before beforeunload', async () => {
+      test('should not send DELETE via http.delete if search completes before pagehide', async () => {
         const responses = [
           {
             time: 10,
@@ -2398,7 +2398,7 @@ describe('SearchInterceptor', () => {
 
         expect(complete).toHaveBeenCalled();
 
-        window.dispatchEvent(new Event('beforeunload'));
+        window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
 
         const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
         const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-2'));
@@ -2432,7 +2432,7 @@ describe('SearchInterceptor', () => {
 
         await timeTravel(10);
 
-        window.dispatchEvent(new Event('beforeunload'));
+        window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
 
         const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
         const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-3'));
