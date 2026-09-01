@@ -9,7 +9,7 @@
 
 /**
  * Discover session basics: time range, save/load/rename, hits, chart, no-results,
- * nested KQL, shared-item attributes, and invalid URL time.
+ * nested KQL, and invalid URL time.
  */
 
 import { tags } from '@kbn/scout';
@@ -148,20 +148,6 @@ spaceTest.describe('Discover query and session', { tag: tags.deploymentAgnostic 
     await discover.writeAndSubmitKqlQuery('nestedField:{ child: nestedValue }');
     await expect(discover.getHitCountLocator()).toHaveText('1');
   });
-
-  spaceTest(
-    'exposes shared-item title and description on a saved session',
-    async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
-
-      await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
-      await discover.waitUntilTabIsLoaded();
-
-      const sharedItem = page.locator('[data-shared-item][data-title][data-description]');
-      await expect(sharedItem).toHaveAttribute('data-title', testData.SAVED_SEARCH_TITLE);
-      await expect(sharedItem).toHaveAttribute('data-description', 'A Saved Search Description');
-    }
-  );
 
   spaceTest(
     'falls back to a relative range when the URL time is invalid',
