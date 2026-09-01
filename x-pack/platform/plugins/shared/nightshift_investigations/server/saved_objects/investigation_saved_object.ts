@@ -55,7 +55,6 @@ const opaqueArray = (maxSize: number) =>
   schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize }));
 
 const investigationAttributesSchemaV1 = schema.object({
-  investigation_id: keyword,
   status: enumOf(INVESTIGATION_STATUSES),
   subject_type: enumOf(INVESTIGATION_SUBJECT_TYPES),
   subject_id: keyword,
@@ -63,6 +62,7 @@ const investigationAttributesSchemaV1 = schema.object({
   trigger_type: enumOf(INVESTIGATION_TRIGGER_TYPES),
   concurrency_key: optionalKeyword,
   created_at: isoDateStringSchema,
+  started_at: schema.maybe(isoDateStringSchema),
   completed_at: schema.maybe(isoDateStringSchema),
   executed_by: optionalKeyword,
   error: optionalText,
@@ -96,6 +96,7 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       subject_summary: { type: 'text' },
       concurrency_key: { type: 'keyword', ignore_above: 1024 },
       created_at: { type: 'date' },
+      started_at: { type: 'date' },
       completed_at: { type: 'date' },
       summary: { type: 'text' },
       conclusion: { type: 'text' },
