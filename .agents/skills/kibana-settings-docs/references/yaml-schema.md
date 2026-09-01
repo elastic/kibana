@@ -35,7 +35,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          stack: ga 9.5+
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -83,17 +83,17 @@ This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-t
 
 | Key | What it means here | Write |
 |---|---|---|
-| `stack` | Lifecycle and version history for Elastic Stack | Always include the version. Multiple values are allowed: `ga 9.4+`, `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
+| `stack` | Lifecycle and optional version history for Elastic Stack | No version means all versions: `ga`, `preview`. A new setting should include a version: `ga 9.4+`. Multiple values are allowed: `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
 | `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | `ga` if supported. Omit the key if not. Never a version. Never `preview`, `experimental`, `deprecated`, `removed`, or `unavailable` |
 | `serverless` | Supported on serverless, or not | `ga` if supported. Omit the key if not. Never a version |
 
 `ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and Elastic Cloud Hosted supports the setting, write `ech: ga`.
 
-Preferred map form:
+Preferred map form (all versions):
 
 ```yaml
 applies_to:
-  stack: preview 9.5+
+  stack: ga
   ech: ga
   ece: ga
   eck: ga
@@ -104,7 +104,7 @@ Self-managed only. Elastic Cloud Hosted does not support this setting, so `ech` 
 
 ```yaml
 applies_to:
-  stack: ga 9.5+
+  stack: ga
   self: ga
 ```
 
@@ -124,7 +124,7 @@ Wrong (deployment keys must not carry preview or experimental):
 
 ```yaml
 applies_to:
-  stack: preview 9.5+
+  stack: preview
   ech: preview
   self: preview
 ```
@@ -142,7 +142,7 @@ Right:
 
 ```yaml
 applies_to:
-  stack: preview 9.5+
+  stack: preview
   ech: ga
   ece: ga
   eck: ga
@@ -153,15 +153,19 @@ Right (not supported on Elastic Cloud Hosted):
 
 ```yaml
 applies_to:
-  stack: ga 9.5+
+  stack: ga
   self: ga
 ```
 
-### Always put the version on stack
+### When to put a version on stack
 
-Write `stack: preview 9.5+` or `stack: ga 9.5+`, not `stack: preview` with no version.
+No version means the setting applies to all versions: `stack: ga` or `stack: preview`.
 
-If that minor is not released yet, the docs show Planned. That is automated rendering. The same tag shows the real lifecycle after the version ships. Do not omit the version to hide Planned.
+A new setting should include a version: `stack: ga 9.5+` or `stack: preview 9.5+`.
+
+Omit the version only if the setting already existed in the product and was missing from the docs.
+
+If that minor is not released yet, still write the version. The docs show Planned until it ships. That is automated rendering. Do not omit the version to hide Planned.
 
 Rules: [badge rendering reference](https://elastic.github.io/docs-builder/syntax/applies/#badge-rendering-reference).
 

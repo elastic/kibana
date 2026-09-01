@@ -115,7 +115,11 @@ Reporting settings already split across several YAML files included from `report
 
 This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. It also does not allow deleting a preview-only setting when that setting is removed. Details and examples: [yaml-schema.md](references/yaml-schema.md).
 
-- **`stack`** is the only key that carries lifecycle and version. Always include the version, even when that minor is not released yet. Docs render an unreleased version as Planned until the version ships. That is by design. Do not omit the version to avoid Planned.
+- **`stack`** is the only key that carries lifecycle and version:
+  - No version means all versions: `stack: ga` or `stack: preview`.
+  - A new setting should include a version, for example `stack: ga 9.5+`.
+  - Omit the version only if the setting already existed in the product and was missing from the docs.
+  - If you add a version that is not released yet, keep it. Docs show Planned until it ships. Do not omit a version to avoid Planned.
 - **`stack` accepts multiple values.** Append a new lifecycle. Do not replace the old one. Example: `stack: preview 9.0-9.2, ga 9.3+`.
 - **Do not delete a removed setting.** Keep the YAML entry so users on earlier versions can still find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`.
 - **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported:
@@ -143,7 +147,7 @@ On a Kibana PR, open the docs preview:
 YAML that parses is not proof that badges render. Inspect the live DOM for the setting's `<dd>`:
 
 - A rendered line is `dd > p.settings-supported-on` with `<applies-to-popover>` children.
-- An unreleased `stack` version can show as Planned until that minor ships. Do not strip the version to force a different badge.
+- If `stack` names an unreleased version, the docs can show Planned until that minor ships. Do not strip that version.
 
 ### 8. Companion work
 
@@ -159,8 +163,10 @@ Do this when it applies. Skip it when it does not.
 - [ ] Entry is in the YAML that matches kibana.yml vs space vs global
 - [ ] `setting` matches the runtime key at HEAD
 - [ ] Default and datatype match the schema or `uiSettings` registration
-- [ ] `stack` carries lifecycle and version. Deployment keys are `ga` or omitted
-- [ ] New or changed `stack` tags include the version, even if that minor is unreleased
+- [ ] `stack` has no version only when the setting applies to all versions
+- [ ] New settings include a version, unless the key already existed and was missing from the docs
+- [ ] Deployment keys are `ga` or omitted
+- [ ] If you add a version that is not released yet, keep it. Do not strip it to avoid Planned
 - [ ] Lifecycle changes append on `stack` (for example `preview 9.0-9.2, ga 9.3+`). They do not replace the previous value
 - [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
 - [ ] Unsupported deployments are omitted, not tagged `unavailable`

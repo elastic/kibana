@@ -4,6 +4,8 @@ Copy the nearest sibling in the target file. These snippets show the usual shape
 
 ## New kibana.yml setting (self-managed, not on Cloud)
 
+This setting is new in the product, so `stack` includes a version.
+
 ```yaml
       - setting: xpack.example.enabled
         id: xpack-example-enabled
@@ -13,6 +15,21 @@ Copy the nearest sibling in the target file. These snippets show the usual shape
         default: true
         applies_to:
           stack: ga 9.5+
+          self: ga
+```
+
+## Existing setting that was missing from the docs
+
+If the key already existed in the product and you are only adding the YAML, omit the version. That means all versions.
+
+```yaml
+      - setting: xpack.example.legacy
+        description: |
+          Controls the legacy example behavior.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
           self: ga
 ```
 
@@ -45,7 +62,7 @@ Set `ech: ga` if Cloud supports the key. Confirm Cloud actually allowlists it. T
 
 ## New space-level Advanced Settings entry
 
-`setting` is the `uiSettings` key. `group` matches `category`. This example is preview on Stack. Put the version on `stack`. Deployment keys stay `ga`.
+`setting` is the `uiSettings` key. `group` matches `category`. This setting is new and preview on Stack, so `stack` includes a version. Deployment keys stay `ga`.
 
 ```yaml
       - setting: "example:enableFeature"
@@ -108,7 +125,7 @@ Use `advanced-settings-global.yml`. Omit `serverless` when the setting is not av
               - option: strict
               - option: lenient
             applies_to:
-              stack: preview 9.5+
+              stack: preview
 ```
 
 Child entries inherit parent `applies_to` unless they set their own.
