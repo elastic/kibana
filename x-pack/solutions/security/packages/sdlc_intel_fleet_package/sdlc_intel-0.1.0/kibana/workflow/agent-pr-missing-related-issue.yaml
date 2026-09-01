@@ -6,7 +6,7 @@ description: >
   indexes findings to sdlc-pr-missing-related-issue for the Security detection rule, then
   runs an agent summary into sdlc-agent-insights. Read-only toward GitHub (NFR-003).
   Run github-activity-pull-requests and github-enrich-pull-requests-graph first.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - agent
