@@ -916,6 +916,7 @@
     "@kbn/ml-chi2test": "workspace:*",
     "@kbn/ml-common-types": "workspace:*",
     "@kbn/ml-cps": "workspace:*",
+    "@kbn/ml-cps-common": "workspace:*",
     "@kbn/ml-creation-wizard-utils": "workspace:*",
     "@kbn/ml-data-frame-analytics-utils": "workspace:*",
     "@kbn/ml-data-grid": "workspace:*",

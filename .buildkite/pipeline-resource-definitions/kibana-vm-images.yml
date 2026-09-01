@@ -58,12 +58,12 @@ spec:
 
           message: '[24.04] Daily build of Kibana cache-warmed VM image'
 
-        "[ubuntu26.04] Daily Minimal Image Build":
+        "[ubuntu26.04] 6-Hourly Minimal Image Build":
           branch: main
-          cronline: '0 3 * * *'
+          cronline: '0 */6 * * *'
           env:
             IMAGES_CONFIG: kibana/minimal.tpl.yml
-          message: '[26.04] Daily build of Kibana minimal VM image'
+          message: '[26.04] 6-hourly build of Kibana minimal VM image'
 
         "[ubuntu24.04] Daily FIPS Image Build":
           branch: main
