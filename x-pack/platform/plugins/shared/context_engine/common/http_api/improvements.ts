@@ -36,18 +36,7 @@ export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
  * flag, a hard delete, a sibling index — is owned by the KI lifecycle and settled by the apply
  * step; nothing in this store depends on the answer.
  */
-export type ImprovementAction =
-  | 'add_ki'
-  | 'edit_ki'
-  | 'remove_ki'
-  | 'add_workflow'
-  | 'edit_workflow'
-  | 'remove_workflow'
-  | 'add_source'
-  | 'edit_source'
-  | 'remove_source';
-
-export const IMPROVEMENT_ACTIONS: readonly ImprovementAction[] = [
+export const IMPROVEMENT_ACTIONS = [
   'add_ki',
   'edit_ki',
   'remove_ki',
@@ -57,7 +46,9 @@ export const IMPROVEMENT_ACTIONS: readonly ImprovementAction[] = [
   'add_source',
   'edit_source',
   'remove_source',
-];
+] as const;
+
+export type ImprovementAction = (typeof IMPROVEMENT_ACTIONS)[number];
 
 /** The `add_*` actions create their target, so they carry no {@link ImprovementTarget}. */
 export const isAddAction = (action: ImprovementAction): boolean => action.startsWith('add_');
