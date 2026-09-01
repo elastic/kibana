@@ -22,6 +22,10 @@ const buildRuleIdsFilter = (ids: string[]): string =>
     nodeBuilder.or(ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true))))
   );
 
+/**
+ * Resolves rules by id via the find API and a KQL id filter.
+ * Missing/deleted ids are omitted from the response without failing the request.
+ */
 export const fetchRulesByIds = async ({
   http,
   ids,

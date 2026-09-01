@@ -40,6 +40,10 @@ export interface UseFetchAlertingEpisodesQueryOptions {
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
+/**
+ * Hook to fetch alerting episodes data with filters and sort.
+ * Returns an ad-hoc data view too, constructed from the query columns.
+ */
 export const useFetchAlertingEpisodesQuery = ({
   pageSize,
   services,

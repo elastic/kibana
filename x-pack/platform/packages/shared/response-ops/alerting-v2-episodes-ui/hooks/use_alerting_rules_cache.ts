@@ -23,6 +23,11 @@ export interface UseAlertingRulesCacheOptions {
 
 type Rule = FindRulesResponse['items'][number];
 
+/**
+ * Provides a rules cache by id, fetching uncached rules
+ * with the minimum number of find requests possible.
+ * Returns rulesCache as state so consumers re-render when rules are loaded.
+ */
 export const useAlertingRulesCache = ({
   ruleIds,
   services,
