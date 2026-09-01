@@ -53,7 +53,6 @@ export function TransactionDetailFlyoutTraceSample() {
     end,
     traceId,
     entryTransactionId,
-    serviceName,
   });
 
   const isLoading =
@@ -168,7 +167,6 @@ export function TransactionDetailFlyoutTraceSample() {
                 isLoading={isLoading}
                 transaction={entryTransaction}
                 traceItems={unifiedWaterfallFetchResult.traceItems}
-                variant="flyout"
                 onViewFullTrace={openSelectedFullTrace}
               />
             </EuiFlexItem>

@@ -277,6 +277,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
 
     expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
     expect(transactionsSectionProps?.onTransactionClick).toEqual(expect.any(Function));
+    expect(transactionsSectionProps?.isTransactionExpanded).toEqual(expect.any(Function));
 
     act(() => {
       transactionsSectionProps!.onTransactionClick!({
@@ -289,6 +290,38 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     });
 
     expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+    expect(
+      transactionsSectionProps!.isTransactionExpanded!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      })
+    ).toBe(true);
+  });
+
+  it('closes TransactionDetailFlyout when the same transaction is clicked again', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    const item = {
+      name: 'GET /api/orders',
+      transactionType: 'request',
+      latency: { value: 1 },
+      throughput: { value: 1 },
+      errorRate: { value: 0 },
+    };
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
   });
 
   it('does not open TransactionDetailFlyout when transaction type is missing', () => {

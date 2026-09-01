@@ -94,6 +94,12 @@ describe('TransactionDetailFlyoutTraceSample', () => {
   it('renders trace sample section with summary and timeline', () => {
     render(<TransactionDetailFlyoutTraceSample />);
 
+    expect(mockedUseUnifiedWaterfallFetcher).toHaveBeenCalledWith({
+      start: '2026-08-20T10:00:00.000Z',
+      end: '2026-08-21T10:43:35.610Z',
+      traceId: 'trace-1',
+      entryTransactionId: 'tx-1',
+    });
     expect(screen.getByTestId('transactionDetailFlyoutSection-traceSample')).toBeInTheDocument();
     expect(screen.getByTestId('transactionDetailFlyoutTraceSampleTitle')).toHaveTextContent(
       'Trace sample'

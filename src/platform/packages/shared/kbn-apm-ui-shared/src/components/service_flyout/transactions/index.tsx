@@ -61,8 +61,9 @@ interface ServiceFlyoutTransactionsSectionProps {
   latencyAggregationType?: LatencyAggregationType;
   locators?: SharePluginStart['url']['locators'];
   refreshToken?: number;
-  /** When set, name clicks call this instead of the APM transaction details locator. */
   onTransactionClick?: (item: TransactionGroup) => void;
+  /** When set with onTransactionClick, drives the expand/collapse icon state. */
+  isTransactionExpanded?: (item: TransactionGroup) => boolean;
 }
 
 export function ServiceFlyoutTransactionsSection({
@@ -77,6 +78,7 @@ export function ServiceFlyoutTransactionsSection({
   locators,
   refreshToken,
   onTransactionClick,
+  isTransactionExpanded,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -179,7 +181,7 @@ export function ServiceFlyoutTransactionsSection({
         name: {
           // Hosts with nested tx flyouts pass onTransactionClick; others keep the APM deep link.
           ...(onTransactionClick
-            ? { onClick: onTransactionClick }
+            ? { onClick: onTransactionClick, isExpanded: isTransactionExpanded }
             : { href: getTransactionDetailHref }),
           ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_NAME },
         },

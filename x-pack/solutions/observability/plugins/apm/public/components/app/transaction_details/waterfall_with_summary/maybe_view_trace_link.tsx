@@ -55,17 +55,11 @@ export function MaybeViewTraceLink({
   transaction,
   traceItems = [],
   onViewFullTrace,
-  /**
-   * `flyout` always enables the button (including for root/OTel traces) so the
-   * nested full-trace flyout can open from the transaction detail flyout.
-   */
-  variant = 'transactionDetails',
 }: {
   isLoading: boolean;
   transaction?: ITransaction;
   traceItems?: TraceItem[];
   onViewFullTrace: () => void;
-  variant?: 'transactionDetails' | 'flyout';
 }) {
   const rootTransactionInfo = useMemo(() => {
     const traceMap = getTraceParentChildrenMap(traceItems, false);
@@ -83,11 +77,6 @@ export function MaybeViewTraceLink({
 
   if (isLoading || !transaction) {
     return <FullTraceButton isLoading={isLoading} />;
-  }
-
-  // Nested flyout hosts always allow opening the full trace timeline.
-  if (variant === 'flyout') {
-    return <FullTraceButton onClick={onViewFullTrace} />;
   }
 
   // the traceroot cannot be found, so we cannot link to it

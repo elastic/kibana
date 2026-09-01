@@ -200,16 +200,38 @@ export function ServiceFlyoutOverview() {
       if (!resolvedTransactionType) {
         return;
       }
-      setTransactionDetailFilters({
-        serviceName: service.name,
-        transactionName: item.name,
-        transactionType: resolvedTransactionType,
-        environment,
-        rangeFrom,
-        rangeTo,
+      setTransactionDetailFilters((prev) => {
+        if (
+          prev?.transactionName === item.name &&
+          prev.transactionType === resolvedTransactionType
+        ) {
+          return null;
+        }
+        return {
+          serviceName: service.name,
+          transactionName: item.name,
+          transactionType: resolvedTransactionType,
+          environment,
+          rangeFrom,
+          rangeTo,
+        };
       });
     },
     [service.name, transactionType, environment, rangeFrom, rangeTo]
+  );
+
+  const isTransactionExpanded = useCallback(
+    (item: TransactionGroup) => {
+      if (!transactionDetailFilters) {
+        return false;
+      }
+      const resolvedTransactionType = item.transactionType || transactionType;
+      return (
+        transactionDetailFilters.transactionName === item.name &&
+        transactionDetailFilters.transactionType === resolvedTransactionType
+      );
+    },
+    [transactionDetailFilters, transactionType]
   );
 
   const { keyMetrics, infrastructureMetrics } = useMemo(
@@ -308,6 +330,7 @@ export function ServiceFlyoutOverview() {
               latencyAggregationType={latencyAggregationType}
               refreshToken={refreshToken}
               onTransactionClick={onTransactionClick}
+              isTransactionExpanded={isTransactionExpanded}
             />
           </EuiFlexItem>
         )}
