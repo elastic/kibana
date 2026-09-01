@@ -77,6 +77,7 @@ const createRequiredTermsEvaluator = ({
 }): Evaluator => ({
   name,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
     const raw = metadata?.[metadataKey];
     const required = Array.isArray(raw)
@@ -167,6 +168,7 @@ function configureExperiment({
     {
       name: 'ExpectedToolCalled',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedToolId = getStringMeta(metadata, 'expectedToolId');
         if (!expectedToolId) return { score: 1 };
@@ -191,6 +193,7 @@ function configureExperiment({
     {
       name: 'ShouldNotCallTool',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const shouldNotCallToolId = getStringMeta(metadata, 'shouldNotCallToolId');
         if (!shouldNotCallToolId) return { score: 1 };
@@ -208,6 +211,7 @@ function configureExperiment({
     {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
@@ -236,6 +240,7 @@ function configureExperiment({
     {
       name: 'DocVersionReleaseDate',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) return { score: 1 };
 
@@ -296,6 +301,7 @@ function configureExperiment({
     {
       name: 'ExpectedSkillInvocation',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedSkill = getStringMeta(metadata, 'expectedSkill');
         const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');

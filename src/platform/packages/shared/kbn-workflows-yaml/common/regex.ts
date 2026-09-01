@@ -7,10 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const VARIABLE_REGEX = /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"'])\s*\}\}/;
+/**
+ * The characters a mustache key may contain. `}` is deliberately absent: it is what
+ * terminates the greedy match below, and keeping it out of the class is what makes the
+ * pattern linear.
+ */
+const VARIABLE_KEY_CHARS = String.raw`[\w.\s|()\[\],"']`;
+
+/**
+ * Matches `{{ … }}`. The key is greedy and bounded by the closing braces, with no
+ * surrounding `\s*`: an earlier form padded a lazy key with `\s*` on both sides, and
+ * because the key class also matches whitespace, the engine had to try every split of a
+ * whitespace run between the three (CodeQL `js/polynomial-redos`). `matchVariable` and
+ * friends trim the captured key, so callers see the same value as before.
+ */
+export const VARIABLE_REGEX = new RegExp(String.raw`\{\{(?<key>${VARIABLE_KEY_CHARS}*)\}\}`);
 export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
-export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
-  /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
+/** Matches a `{{ …` that runs to the end of the line, for autocomplete. */
+export const UNFINISHED_VARIABLE_REGEX_GLOBAL = new RegExp(
+  String.raw`\{\{(?<key>${VARIABLE_KEY_CHARS}*)$`,
+  'g'
+);
+
+/**
+ * A match of a mustache-variable pattern above. The `key` group is unconditional in each
+ * of them, so it always participates in a successful match and is never `undefined`. It
+ * can be the empty string: `{{}}` and `{{ }}` both capture nothing.
+ */
+export type VariableMatch = RegExpMatchArray & { groups: { key: string } };
+
+/** Trims the captured key in place, so callers never see the padding the class absorbed. */
+const withTrimmedKey = (match: RegExpMatchArray | null): VariableMatch | null => {
+  if (!match?.groups) {
+    return null;
+  }
+  match.groups.key = match.groups.key.trim();
+  return match as VariableMatch;
+};
+
+/** The first complete `{{ … }}` expression in `text`, or `null`. */
+export const matchVariable = (text: string): VariableMatch | null =>
+  withTrimmedKey(VARIABLE_REGEX.exec(text));
+
+/** Every complete `{{ … }}` expression in `text`, in source order. */
+export const matchAllVariables = (text: string): VariableMatch[] =>
+  Array.from(text.matchAll(VARIABLE_REGEX_GLOBAL), withTrimmedKey).filter(
+    (match): match is VariableMatch => match !== null
+  );
+
+/** The last complete `{{ … }}` expression in `text`, or `null`. */
+export const matchLastVariable = (text: string): VariableMatch | null =>
+  matchAllVariables(text).pop() ?? null;
+
+/** The last unterminated `{{ …` expression in `text`, or `null`. */
+export const matchLastUnfinishedVariable = (text: string): VariableMatch | null =>
+  withTrimmedKey(Array.from(text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)).pop() ?? null);
 
 export const ALLOWED_KEY_REGEX =
   /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;

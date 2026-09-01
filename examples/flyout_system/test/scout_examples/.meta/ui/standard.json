@@ -1,5 +1,8 @@
 {
   "sha1": "8280a58a1c69d0c447576fc30068a2c139dbe375",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "41a78a77f1ad1c5-f17c8832d70b41f",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
-        "line": 22,
-        "column": 7
+        "line": 17,
+        "column": 5
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 33,
+        "column": 11
       }
     }
   ]

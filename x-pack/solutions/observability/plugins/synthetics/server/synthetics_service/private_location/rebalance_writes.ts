@@ -7,19 +7,10 @@
 
 import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { agentIdCondition, agentIdFromCondition } from './assign_by_condition';
+import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
 import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
 
-/**
- * Config id embedded in a package-policy id, or undefined when the id doesn't
- * belong to this location. New format is `${configId}-${locationId}`; legacy
- * space-suffixed format is `${configId}-${locationId}-${spaceId}`, so the
- * location id is an infix — `indexOf` (not a fixed trailing strip) handles both.
- */
-export const configIdOf = (policyId: string, locationId: string): string | undefined => {
-  const idx = policyId.indexOf(`-${locationId}`);
-  return idx > 0 ? policyId.slice(0, idx) : undefined;
-};
+export { configIdOf };
 
 /**
  * Monitor type of a synthetics package policy, read from its single enabled
@@ -76,7 +67,7 @@ export const toMonitorPlacements = (
  */
 export const toConditionUpdate = (
   pkgPolicy: PackagePolicy,
-  condition: string
+  condition: string | null
 ): UpdatePackagePolicyWithId => ({
   id: pkgPolicy.id,
   version: pkgPolicy.version,
@@ -132,6 +123,26 @@ export const toConditionUpdates = (
     const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     const updates = bySpace.get(spaceId) ?? [];
     updates.push(toConditionUpdate(pkgPolicy, desiredCondition));
+    bySpace.set(spaceId, updates);
+  }
+  return bySpace;
+};
+
+/**
+ * Condition-only updates that drop every existing agent pin. Used when shard
+ * rebalancing is turned off so monitors go back to unfiltered (classic) scheduling.
+ */
+export const toClearedConditionUpdates = (
+  pkgPolicies: PackagePolicy[]
+): Map<string, UpdatePackagePolicyWithId[]> => {
+  const bySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+  for (const pkgPolicy of pkgPolicies) {
+    if (typeof pkgPolicy.condition !== 'string') {
+      continue;
+    }
+    const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
+    const updates = bySpace.get(spaceId) ?? [];
+    updates.push(toConditionUpdate(pkgPolicy, null));
     bySpace.set(spaceId, updates);
   }
   return bySpace;

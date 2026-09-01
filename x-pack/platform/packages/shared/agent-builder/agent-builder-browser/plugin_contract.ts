@@ -146,6 +146,14 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
+ * Options passed when opening conversation details.
+ */
+export interface OpenConversationDetailsOptions {
+  conversationId: string;
+  onClose?: () => void;
+}
+
+/**
  * Handle to control a conversation sidebar programmatically.
  */
 export interface ConversationSidebarRef {
@@ -297,4 +305,5 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

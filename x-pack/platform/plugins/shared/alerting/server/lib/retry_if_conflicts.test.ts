@@ -21,9 +21,9 @@ describe('retry_if_conflicts', () => {
   });
 
   test('should throw error if not a conflict error', async () => {
-    await expect(
-      retryIfConflicts(MockLogger, MockOperationName, OperationFailure)
-    ).rejects.toThrowError('wops');
+    await expect(retryIfConflicts(MockLogger, MockOperationName, OperationFailure)).rejects.toThrow(
+      'wops'
+    );
   });
 
   for (let i = 1; i <= RetryForConflictsAttempts; i++) {
@@ -34,9 +34,12 @@ describe('retry_if_conflicts', () => {
         getOperationConflictsTimes(i)
       );
       expect(result).toBe(MockResult);
-      expect(MockLogger.debug).toBeCalledTimes(i);
+      expect(MockLogger.debug).toHaveBeenCalledTimes(i);
       for (let j = 0; j < i; j++) {
-        expect(MockLogger.debug).nthCalledWith(i, `${MockOperationName} conflict, retrying ...`);
+        expect(MockLogger.debug).toHaveBeenNthCalledWith(
+          i,
+          `${MockOperationName} conflict, retrying ...`
+        );
       }
     });
   }
@@ -48,12 +51,12 @@ describe('retry_if_conflicts', () => {
         MockOperationName,
         getOperationConflictsTimes(RetryForConflictsAttempts + 1)
       )
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
     );
-    expect(MockLogger.debug).toBeCalledTimes(RetryForConflictsAttempts);
-    expect(MockLogger.warn).toBeCalledTimes(1);
-    expect(MockLogger.warn).toBeCalledWith(`${MockOperationName} conflict, exceeded retries`);
+    expect(MockLogger.debug).toHaveBeenCalledTimes(RetryForConflictsAttempts);
+    expect(MockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(MockLogger.warn).toHaveBeenCalledWith(`${MockOperationName} conflict, exceeded retries`);
   });
 });
 

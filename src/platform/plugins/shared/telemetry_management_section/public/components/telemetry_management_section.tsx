@@ -182,7 +182,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
     const securityDataLink = (
       <EuiLink
-        href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+        href={docLinks.telemetry.securityData}
         data-test-id="endpoint_security_example"
         target="_blank"
       >

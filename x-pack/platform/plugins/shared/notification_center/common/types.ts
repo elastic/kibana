@@ -81,9 +81,15 @@ export type NotificationQueryParams = z.input<typeof notificationQueryParamsSche
 /** Parsed params for the internal query function (after applying some normalization) */
 export type NotificationQueryParamsParsed = z.output<typeof notificationQueryParamsSchema>;
 
+/**
+ * A notification as the list route returns it. `isRead` is omitted for callers without a
+ * user profile (API keys, headless consumers), which have no read state to resolve.
+ */
+export type NotificationListItem = Notification & { isRead?: boolean };
+
 /** The full collapsed, filtered notification set the client paginates over. */
 export interface NotificationQueryResult {
-  items: Notification[];
+  items: NotificationListItem[];
   /** Ensure the client knows if the query hit the result limit and older matches are omitted. */
   truncated: boolean;
 }

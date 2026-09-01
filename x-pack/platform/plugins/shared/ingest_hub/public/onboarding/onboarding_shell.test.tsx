@@ -18,24 +18,24 @@ jest.mock('react-use/lib/useSessionStorage');
 jest.mock('./use_aws_service_matrix', () => {
   const matrix = [
     {
-      id: 'apigateway_logs',
-      name: 'AWS API Gateway',
-      category: 'networking_content_delivery',
-      signalType: 'logs',
+      id: 'cloudtrail',
+      name: 'AWS CloudTrail',
+      category: 'management_governance',
+      signalTypes: ['logs'],
+      dataStreams: [],
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       packageName: 'aws',
-      policyTemplate: 'apigateway',
       defaultEnabled: true,
       showInUI: true,
     },
     {
-      id: 'apigateway_metrics',
-      name: 'AWS API Gateway',
-      category: 'networking_content_delivery',
-      signalType: 'metrics',
+      id: 'ec2',
+      name: 'Amazon EC2',
+      category: 'compute',
+      signalTypes: ['logs', 'metrics'],
+      dataStreams: [],
       deploymentMethods: [{ method: 'managed_integration', preferred: true }],
       packageName: 'aws',
-      policyTemplate: 'apigateway',
       defaultEnabled: true,
       showInUI: true,
     },
@@ -77,8 +77,8 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
-const NON_AGENTLESS_ID = 'apigateway_logs';
-const AGENTLESS_ID = 'apigateway_metrics';
+const NON_AGENTLESS_ID = 'cloudtrail';
+const AGENTLESS_ID = 'ec2';
 
 function stepIndicatorStatus(stepId: string): string | null {
   return screen.getByTestId(`onboardingStepIndicator-${stepId}`).getAttribute('data-step-status');

@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -28,6 +29,11 @@ interface KindSelectProps {
 
 const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.kindField.label', {
   defaultMessage: "What's your goal?",
+});
+
+const READ_ONLY_TOOLTIP = i18n.translate('xpack.alertingV2.ruleForm.kindField.readOnlyTooltip', {
+  defaultMessage:
+    "Changing the outcome isn't available when editing. Duplicate this rule or create a new one.",
 });
 
 const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.kindField.alert.title', {
@@ -92,7 +98,21 @@ export const KindSelect = ({
 
   return (
     <EuiFormRow
-      label={LABEL_TEXT}
+      label={
+        readOnly ? (
+          <>
+            {LABEL_TEXT}{' '}
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={READ_ONLY_TOOLTIP}
+              iconProps={{ 'data-test-subj': `${dataTestSubj}-readOnlyTooltip` }}
+            />
+          </>
+        ) : (
+          LABEL_TEXT
+        )
+      }
       labelType="legend"
       aria-label={LABEL_TEXT}
       fullWidth

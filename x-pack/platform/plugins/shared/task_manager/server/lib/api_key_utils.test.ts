@@ -78,6 +78,17 @@ describe('api_key_utils', () => {
       const result = getApiKeyFromRequest(request);
       expect(result).toBeNull();
     });
+
+    test('should return a raw user-created UIAM API key without an id', () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_user_created_key`,
+        },
+      });
+
+      const result = getApiKeyFromRequest(request);
+      expect(result).toEqual({ api_key: 'essu_user_created_key' });
+    });
   });
 
   describe('createApiKey', () => {
@@ -137,6 +148,29 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('should throw if the request was made by a raw user-created UIAM API key', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_user_created_key`,
+        },
+      });
+
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      await expect(
+        createApiKey([mockTask], request, coreStart.security)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required."`
+      );
     });
 
     test('should clone the API key if the request is a fake request', async () => {
@@ -332,6 +366,33 @@ describe('api_key_utils', () => {
       await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'Could not create API key.',
       });
+    });
+
+    test('reports keys created before a later task type grant fails', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createStart();
+      const onApiKeyCreated = jest.fn();
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockResolvedValue(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue({
+        authentication_type: 'basic',
+        username: 'testUser',
+      });
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({ id: 'first-key-id', api_key: 'first-key-secret' })
+        .mockRejectedValueOnce(new Error('second grant failed'));
+
+      await expect(
+        createApiKey(
+          [mockTask, { ...mockTask, id: 'second-task', taskType: 'second-report' }],
+          request,
+          coreStart.security,
+          { onApiKeyCreated }
+        )
+      ).rejects.toThrow('second grant failed');
+
+      expect(onApiKeyCreated).toHaveBeenCalledTimes(1);
+      expect(onApiKeyCreated).toHaveBeenCalledWith({ apiKeyId: 'first-key-id' });
     });
   });
 
