@@ -50,6 +50,11 @@ describe('cases-user-actions model versions', () => {
     });
 
     it('rejects an unknown source.type in create', () => {
+      const schema = modelVersion2.schemas?.create;
+      if (!schema) {
+        throw new Error('expected a create schema');
+      }
+
       const attrs = {
         action: 'create',
         created_at: '2020-01-01T00:00:00.000Z',
@@ -59,7 +64,7 @@ describe('cases-user-actions model versions', () => {
         source: { type: 'some_future_source', id: '1' },
       };
 
-      expect(() => modelVersion2.schemas.create?.validate(attrs)).toThrow();
+      expect(() => schema.validate(attrs)).toThrow();
     });
   });
 });
