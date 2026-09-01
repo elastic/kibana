@@ -142,8 +142,8 @@ const iocDedupKey = (type: IocType, value: string): string =>
  * Lowercasing the whole URL made `/PAYLOAD/Stage2.exe` into
  * `/payload/stage2.exe`, so the promoted indicator no longer matched telemetry
  * carrying the real URL. Scheme and host are case-insensitive and worth folding;
- * path, query, and fragment are not. The STIX parser already preserves them, so
- * this brings the regex path in line.
+ * path, query, and fragment are not. `URL` preserves those parts while
+ * canonicalizing scheme and host.
  */
 const normalizeUrlCase = (url: string): string => {
   try {
@@ -1336,8 +1336,8 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   }
 
   // ── Section override post-pass ────────────────────────────────────────────
-  // Runs only when the input text contains ## headings (HTML path). Plain-text
-  // fallback produces no section spans, leaving all tier assignments unchanged.
+  // Runs only when the input text contains structured ## headings. Ordinary
+  // plain text produces no section spans, leaving all tier assignments unchanged.
   applySectionOverrides(iocs, classifySectionSpans(refangedText), refangedText);
 
   // Sorted-set fingerprint of the anchor-eligible IOC values in this report.
