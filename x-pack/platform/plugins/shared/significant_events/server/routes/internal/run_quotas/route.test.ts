@@ -13,10 +13,7 @@ import {
   mutateRunQuotaSettings,
   readRunQuotaSettings,
 } from '../../../lib/run_quotas/repository';
-import {
-  RUN_QUOTA_LEDGER_SO_TYPE,
-  type RunQuotaLedgerAttributes,
-} from '../../../lib/run_quotas/saved_objects';
+import { RUN_QUOTA_LEDGER_SO_TYPE } from '../../../lib/run_quotas/saved_objects';
 import { internalRunQuotaRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -32,7 +29,6 @@ const consumeRoute =
 const reserveRoute =
   internalRunQuotaRoutes['POST /internal/significant_events/run_quotas/investigation/_reserve'];
 const statusRoute = internalRunQuotaRoutes['GET /internal/significant_events/run_quotas/_status'];
-const skippedRoute = internalRunQuotaRoutes['GET /internal/significant_events/run_quotas/_skipped'];
 
 const makeServer = ({
   repository,
@@ -87,7 +83,6 @@ describe('run quota route authorization matrix', () => {
     [consumeRoute, STREAMS_API_PRIVILEGES.manage],
     [reserveRoute, STREAMS_API_PRIVILEGES.manage],
     [statusRoute, STREAMS_API_PRIVILEGES.read],
-    [skippedRoute, STREAMS_API_PRIVILEGES.read],
   ])('declares the required Streams privilege', (route, requiredPrivilege) => {
     expect(route.security.authz).toEqual({
       requiredPrivileges: [requiredPrivilege],
@@ -125,7 +120,6 @@ describe('run quota route schemas', () => {
         },
       }).success
     ).toBe(false);
-    expect(skippedRoute.params.safeParse({ query: { date: '31-08-2026' } }).success).toBe(false);
   });
 });
 
@@ -224,14 +218,9 @@ describe('run quota read routes', () => {
         date: new Date().toISOString().slice(0, 10),
         group: 'investigation',
         count: 31,
-        withinLimitGrantCount: 30,
-        criticalPastLimitGrantCount: 1,
+        criticalOverrideCount: 1,
         allowedGrantKeys: [],
-        deniedGrantKeys: [],
-        decisions: [],
-        skipped: [],
-        totalSkipped: 4,
-        decisionsEvicted: false,
+        allowedInvestigationKeys: [],
       }
     );
     const { server } = makeServer({ repository: repository.client, canManage: false });
@@ -246,9 +235,7 @@ describe('run quota read routes', () => {
         group: 'investigation',
         used: 0,
         counted: 31,
-        withinLimitGrantCount: 30,
-        criticalPastLimitGrantCount: 1,
-        totalSkipped: 4,
+        criticalOverrideCount: 1,
       })
     );
   });
@@ -274,58 +261,5 @@ describe('run quota read routes', () => {
         canManageLimits: true,
       })
     );
-  });
-
-  it('returns only the current space skipped rows, newest first, capped at 200', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const spaceRows = Array.from({ length: 201 }, (_, index) => ({
-      eventUuid: `uuid-${index}`,
-      eventId: `event-${index}`,
-      spaceId: 'space-a',
-      severity: '60-high',
-      decidedAt: new Date(Date.UTC(2026, 7, 31, 0, 0, index)).toISOString(),
-    }));
-    const ledger: RunQuotaLedgerAttributes = {
-      date: '2026-08-31',
-      group: 'investigation',
-      count: 0,
-      withinLimitGrantCount: 0,
-      criticalPastLimitGrantCount: 0,
-      allowedGrantKeys: [],
-      deniedGrantKeys: [],
-      decisions: [],
-      skipped: [
-        ...spaceRows,
-        {
-          eventUuid: 'other-uuid',
-          eventId: 'other-event',
-          spaceId: 'space-b',
-          severity: '60-high',
-          decidedAt: '2026-08-31T23:59:59.000Z',
-        },
-      ],
-      totalSkipped: 202,
-      decisionsEvicted: true,
-    };
-    repository.seed(
-      RUN_QUOTA_LEDGER_SO_TYPE,
-      getRunQuotaLedgerId('2026-08-31', 'investigation'),
-      ledger
-    );
-    const { server } = makeServer({ repository: repository.client, canManage: false });
-
-    const response = await skippedRoute.handler({
-      ...baseHandlerParams(server),
-      params: { query: { date: '2026-08-31' } },
-    } as never);
-
-    expect(response.rows).toHaveLength(200);
-    expect(response.rows[0].eventUuid).toBe('uuid-200');
-    expect(response.rows).not.toContainEqual(
-      expect.objectContaining({ spaceId: expect.anything() })
-    );
-    expect(response.totalSkipped).toBe(202);
-    expect(response.truncated).toBe(true);
-    expect(response.decisionsEvicted).toBe(true);
   });
 });

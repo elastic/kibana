@@ -247,7 +247,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toMatchObject({ granted: true, pastLimit: false });
+        expect(response.body).toMatchObject({ granted: true });
 
         const after = await readGroup(apiClient, 'investigation');
         expect(after.counted).toBe(before.counted + 1);

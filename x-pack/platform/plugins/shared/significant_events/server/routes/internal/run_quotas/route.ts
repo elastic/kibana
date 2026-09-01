@@ -35,7 +35,6 @@ import {
 import { assertCanManageRunQuotas, canManageRunQuotas } from '../../../lib/run_quotas/privileges';
 
 const MAX_ROUTE_ID_LENGTH = 1024;
-const SKIPPED_ROWS_LIMIT = 200;
 
 const runLimitSchema = z.discriminatedUnion('enabled', [
   z.object({ enabled: z.literal(false), max: z.literal(0) }),
@@ -124,10 +123,7 @@ const getRunQuotasRoute = createServerRoute({
           used: displayCounts[group],
           counted,
           remaining: limit.enabled ? Math.max(0, limit.max - counted) : null,
-          withinLimitGrantCount: ledger?.withinLimitGrantCount ?? 0,
-          criticalPastLimitGrantCount: ledger?.criticalPastLimitGrantCount ?? 0,
-          totalSkipped: ledger?.totalSkipped ?? 0,
-          decisionsEvicted: ledger?.decisionsEvicted ?? false,
+          criticalOverrideCount: ledger?.criticalOverrideCount ?? 0,
         };
       }),
     };
@@ -376,55 +372,6 @@ const statusRoute = createServerRoute({
   },
 });
 
-const skippedRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/run_quotas/_skipped',
-  options: {
-    access: 'internal',
-    summary: 'Get denied investigation requests for the current space',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: z.object({
-      date: z
-        .string()
-        .max(10)
-        .regex(/^\d{4}-\d{2}-\d{2}$/),
-    }),
-  }),
-  handler: async ({ params, request, server, getScopedClients, getSpaceId }) => {
-    const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
-    const ledger = await readLedger(
-      createRunQuotaInternalRepository(server),
-      params.query.date,
-      'investigation'
-    );
-    if (!ledger) {
-      return {
-        rows: [],
-        totalSkipped: 0,
-        truncated: false,
-        decisionsEvicted: false,
-      };
-    }
-    const spaceId = await getSpaceId(request);
-    const rows = ledger.skipped
-      .filter((row) => row.spaceId === spaceId)
-      .sort((left, right) => right.decidedAt.localeCompare(left.decidedAt));
-
-    return {
-      rows: rows.slice(0, SKIPPED_ROWS_LIMIT).map(({ spaceId: _spaceId, ...row }) => row),
-      totalSkipped: ledger.totalSkipped,
-      truncated: rows.length > SKIPPED_ROWS_LIMIT,
-      decisionsEvicted: ledger.decisionsEvicted,
-    };
-  },
-});
-
 export const internalRunQuotaRoutes = {
   ...getRunQuotasRoute,
   ...putRunQuotasRoute,
@@ -432,5 +379,4 @@ export const internalRunQuotaRoutes = {
   ...consumeRoute,
   ...reserveInvestigationRoute,
   ...statusRoute,
-  ...skippedRoute,
 };
