@@ -16,5 +16,5 @@ export function assertConnectorSucceeded(result: {
     return;
   }
 
-  throw new Error(result.message ?? result.serviceMessage ?? 'Connector execution failed');
+  throw new Error(result.serviceMessage ?? result.message ?? 'Connector execution failed');
 }
