@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { of, forkJoin, switchMap, from, ignoreElements, firstValueFrom } from 'rxjs';
+import { of, forkJoin, switchMap, from, firstValueFrom } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -186,7 +186,7 @@ export const updateConversation$ = ({
 /**
  * Receipt-time input write.
  */
-export const persistRoundInput$ = ({
+export const persistRoundInput = async ({
   conversation,
   conversationClient,
   roundId,
@@ -194,7 +194,6 @@ export const persistRoundInput$ = ({
   input,
   author,
   origin,
-  inFlightWrites,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -203,62 +202,52 @@ export const persistRoundInput$ = ({
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
-  /** Registers the write so teardown cleanup can wait for it before discarding. */
-  inFlightWrites: InFlightWrites;
-}): Observable<ChatEvent> => {
-  return from(
-    inFlightWrites.track(
-      (async () => {
-        const event = userMessageEvent(
-          {
-            id: roundId,
-            input: {
-              message: input.message ?? '',
-              ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
-            },
-            started_at: receivedAt.toISOString(),
-            ...(author ? { author } : {}),
-            ...(origin ? { origin } : {}),
-          },
-          conversation
-        );
+}): Promise<void> => {
+  const event = userMessageEvent(
+    {
+      id: roundId,
+      input: {
+        message: input.message ?? '',
+        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
+      },
+      started_at: receivedAt.toISOString(),
+      ...(author ? { author } : {}),
+      ...(origin ? { origin } : {}),
+    },
+    conversation
+  );
 
-        if (conversation.operation === 'CREATE') {
-          const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
-          const hasResolvedParentUser =
-            Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
-          try {
-            await conversationClient.create({
-              id: conversation.id,
-              title: DEFAULT_CONVERSATION_TITLE,
-              agent_id: conversation.agent_id,
-              access_control: conversation.access_control,
-              origin: conversation.origin,
-              read_only: conversation.read_only,
-              rounds: [],
-              events: [event],
-              ...(isPersistentSubagentCreate && hasResolvedParentUser
-                ? { user: conversation.user }
-                : {}),
-              ...(conversation.parent_conversation
-                ? { parent_conversation: conversation.parent_conversation }
-                : {}),
-            });
-            return;
-          } catch (error) {
-            if (!isConversationAlreadyExistsError(error)) {
-              throw error;
-            }
-          }
-        }
+  if (conversation.operation === 'CREATE') {
+    const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
+    const hasResolvedParentUser =
+      Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+    try {
+      await conversationClient.create({
+        id: conversation.id,
+        title: DEFAULT_CONVERSATION_TITLE,
+        agent_id: conversation.agent_id,
+        access_control: conversation.access_control,
+        origin: conversation.origin,
+        read_only: conversation.read_only,
+        rounds: [],
+        events: [event],
+        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
+        ...(conversation.parent_conversation
+          ? { parent_conversation: conversation.parent_conversation }
+          : {}),
+      });
+      return;
+    } catch (error) {
+      if (!isConversationAlreadyExistsError(error)) {
+        throw error;
+      }
+    }
+  }
 
-        await conversationClient.appendEvents(
-          { id: conversation.id, events: [event] },
-          { access: 'converse' }
-        );
-      })()
-    )
-  ).pipe(ignoreElements());
+  await conversationClient.appendEvents(
+    { id: conversation.id, events: [event] },
+    { access: 'converse' }
+  );
 };
 
 export const appendRoundTerminated$ = ({

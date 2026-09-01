@@ -13,7 +13,7 @@ export {
   getConversation,
   updateConversation$,
   createConversation$,
-  persistRoundInput$,
+  persistRoundInput,
   appendRoundTerminated$,
   createInFlightWrites,
   placeholderConversation,

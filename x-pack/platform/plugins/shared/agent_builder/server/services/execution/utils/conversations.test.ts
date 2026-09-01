@@ -34,7 +34,7 @@ import {
   appendRoundTerminated$,
   createInFlightWrites,
   getConversation,
-  persistRoundInput$,
+  persistRoundInput,
   updateConversation$,
 } from './conversations';
 
@@ -383,7 +383,7 @@ describe('conversations utils', () => {
     });
   });
 
-  describe('persistRoundInput$ (receipt-time input write)', () => {
+  describe('persistRoundInput (receipt-time input write)', () => {
     const withOperation = (
       conversation: Conversation,
       operation: 'CREATE' | 'UPDATE'
@@ -405,18 +405,14 @@ describe('conversations utils', () => {
       author?: ConversationRoundAuthor;
     }) => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
-      const inFlightWrites = createInFlightWrites();
-      const events$ = persistRoundInput$({
+      await persistRoundInput({
         conversation,
         conversationClient,
         roundId,
         receivedAt,
         input,
         author,
-        inFlightWrites,
       });
-      await lastValueFrom(events$, { defaultValue: undefined });
-      await inFlightWrites.settled();
     };
 
     it('atomically creates the conversation doc with the user_message seeded on CREATE (single write, no separate append)', async () => {
@@ -486,15 +482,15 @@ describe('conversations utils', () => {
       const boom = new Error('boom');
       conversationClient.create.mockRejectedValueOnce(boom);
 
-      const events$ = persistRoundInput$({
-        conversation,
-        conversationClient,
-        roundId: 'round-1',
-        receivedAt: new Date(),
-        input: { message: 'hi' },
-        inFlightWrites: createInFlightWrites(),
-      });
-      await expect(lastValueFrom(events$, { defaultValue: undefined })).rejects.toBe(boom);
+      await expect(
+        persistRoundInput({
+          conversation,
+          conversationClient,
+          roundId: 'round-1',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+        })
+      ).rejects.toBe(boom);
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
@@ -507,24 +503,6 @@ describe('conversations utils', () => {
 
       const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
       expect((appendArgs.events[0].data as { message: string }).message).toBe('');
-    });
-
-    it('emits no chat events itself (side effects only)', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
-      conversationClient.appendEvents.mockResolvedValue(conversation);
-
-      const emitted = await lastValueFrom(
-        persistRoundInput$({
-          conversation,
-          conversationClient,
-          roundId: 'round-1',
-          receivedAt: new Date(),
-          input: { message: 'hi' },
-          inFlightWrites: createInFlightWrites(),
-        }).pipe(toArray())
-      );
-      expect(emitted).toEqual([]);
     });
   });
 

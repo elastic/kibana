@@ -594,34 +594,33 @@ describe('handleAgentExecution', () => {
       expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
     });
 
-    it('waits for the in-flight input write to settle on CREATE before deleting the placeholder doc', async () => {
+    it('awaits the receipt write before the agent starts on CREATE (no tool can run before the input is stored)', async () => {
       const conversationClient = createConversationClientMock();
-      let resolveInputWrite!: (value: ReturnType<typeof createEmptyConversation>) => void;
+      let resolveReceipt!: (value: ReturnType<typeof createEmptyConversation>) => void;
       conversationClient.create.mockReturnValue(
         new Promise((resolve) => {
-          resolveInputWrite = resolve;
+          resolveReceipt = resolve;
         })
       );
-      conversationClient.delete.mockResolvedValue(true);
 
-      mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
+      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
       stubResolveServices(conversationClient);
 
-      const events$ = await runHandle({
+      // Kick off the handler without awaiting — the receipt write (create) is still pending.
+      const handlePromise = runHandle({
         agentParams: { agentId: 'test-agent', nextInput: { message: 'Hello' } },
         conversationClient,
       });
-
-      await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
       await flushMicrotasks();
 
-      // The stream is dead but the input write is still pending: no delete yet.
-      expect(conversationClient.delete).not.toHaveBeenCalled();
+      // The agent is not started until the receipt lands.
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      expect(executeAgentMock).not.toHaveBeenCalled();
 
-      resolveInputWrite(createEmptyConversation({ id: 'new-conversation' }));
-      await flushMicrotasks();
+      resolveReceipt(createEmptyConversation({ id: 'new-conversation' }));
+      await handlePromise;
 
-      expect(conversationClient.delete).toHaveBeenCalledTimes(1);
+      expect(executeAgentMock).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -15,7 +15,6 @@ import {
   EMPTY,
   shareReplay,
   ignoreElements,
-  concat,
   concatMap,
   finalize,
   take,
@@ -28,12 +27,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type {
-  ChatEvent,
-  ConversationAction,
-  ConversationRoundAuthor,
-  ConverseInput,
-} from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -54,7 +48,6 @@ import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import type {
   AgentExecution,
   ConversationAgentExecution,
-  ExecutionConversationOrigin,
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -69,9 +62,8 @@ import {
   getConversation,
   updateConversation$,
   createConversation$,
-  persistRoundInput$,
+  persistRoundInput,
   appendRoundTerminated$,
-  createInFlightWrites,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -227,6 +219,19 @@ const handleConversationExecution = async ({
   const roundId = uuidv4();
   const receivedAt = new Date();
 
+  const useTwoPhase = action !== 'regenerate' && !isPendingResumeConversation(conversation);
+  if (storeConversation && useTwoPhase) {
+    await persistRoundInput({
+      conversation,
+      conversationClient,
+      roundId,
+      receivedAt,
+      input: nextInput,
+      author,
+      origin: origin ? { type: origin.type } : undefined,
+    });
+  }
+
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
     storeConversation && conversation.operation === 'CREATE'
@@ -283,10 +288,6 @@ const handleConversationExecution = async ({
         action,
         logger,
         roundId,
-        receivedAt,
-        nextInput,
-        author,
-        origin,
       })
     : EMPTY;
 
@@ -520,10 +521,6 @@ const buildPersistenceEvents = ({
   action,
   logger,
   roundId,
-  receivedAt,
-  nextInput,
-  author,
-  origin,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -531,18 +528,8 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
   logger: Logger;
-  /** Round id minted at receipt time and threaded into the run. */
+  /** Round id at receipt time and threaded into the run. */
   roundId: string;
-  /** Request receipt timestamp; used to timestamp the raw `user_message` write. */
-  receivedAt: Date;
-  /** Raw input as received on the wire; persisted immediately, before the run starts. */
-  nextInput: ConverseInput;
-  /** Resolved author for the round input (external system or Kibana user). */
-  author?: ConversationRoundAuthor;
-  /**
-   * Full execution origin (from the caller).
-   */
-  origin?: ExecutionConversationOrigin;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -558,21 +545,6 @@ const buildPersistenceEvents = ({
         : undefined;
 
     let roundReachedTerminal = false;
-
-    const inFlightWrites = createInFlightWrites();
-
-    const roundOrigin = origin ? { type: origin.type } : undefined;
-
-    const input$ = persistRoundInput$({
-      conversation,
-      conversationClient,
-      roundId,
-      receivedAt,
-      input: nextInput,
-      author,
-      origin: roundOrigin,
-      inFlightWrites,
-    });
 
     const twoPhase$ = roundStartedEvents$.pipe(
       concatMap((startEvent) =>
@@ -591,7 +563,7 @@ const buildPersistenceEvents = ({
       )
     );
 
-    return concat(input$, twoPhase$).pipe(
+    return twoPhase$.pipe(
       finalize(() => {
         if (roundReachedTerminal) {
           return;
@@ -600,7 +572,6 @@ const buildPersistenceEvents = ({
           return;
         }
         const cleanup = async () => {
-          await inFlightWrites.settled();
           await conversationClient.delete(conversation.id);
         };
         cleanup().catch((error) => {
