@@ -75,6 +75,17 @@ const DEFAULT_POLICY_LINES = [
 
 const SHARED_DYNAMIC_STEP_COUNT = 5;
 
+const getSharedStepCountLine = (): string => {
+  const summary = Object.entries(chartTypeRegistry)
+    .flatMap(([chartType, { prompt }]) => {
+      const count = prompt.config?.options?.coloring?.dynamic?.recommendedStepCount;
+      return count === undefined ? [] : [`${chartType}: ${count}`];
+    })
+    .join(', ');
+
+  return `- Step count by chart type: ${summary}. Every \`steps[*].color\` hex MUST come from the ${SHARED_DYNAMIC_STEP_COUNT}-stop preview line below; for charts with fewer steps, use the first N colors.`;
+};
+
 const getDynamicStepsLines = (stepCountLine: string): string[] => [
   'DYNAMIC STEPS — mechanics for when the rules above call for explicit `steps`:',
   '- Pick exactly ONE dynamic palette from the list below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, or "Cool"/"Warm"/"Gray" for neutral magnitude.',
@@ -100,9 +111,7 @@ export const getSharedColorPalettesPromptContent = ({
   if (includeMechanics) {
     lines.push(
       '',
-      ...getDynamicStepsLines(
-        '- Step count by chart type: metric: 3, gauge: 4, heatmap and data_table: 5. Every `steps[*].color` hex MUST come from the 5-stop preview line below; for 3- and 4-step charts use the first 3 or 4 colors.'
-      ),
+      ...getDynamicStepsLines(getSharedStepCountLine()),
       `Available dynamic palettes (canonical ${SHARED_DYNAMIC_STEP_COUNT}-stop previews from the Lens UI palette picker):`,
       ...getDynamicPalettePreviews(SHARED_DYNAMIC_STEP_COUNT)
     );
