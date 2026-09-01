@@ -1212,10 +1212,16 @@ export class DiscoverApp {
     // 3. Explicitly wait for the report to finish generating
     // Ensure the button is ready before we try to download
     const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
-    await downloadBtn.waitFor({
+    const reportFailure = this.page.locator('[data-test-errorText]');
+    await downloadBtn.or(reportFailure).waitFor({
       state: 'visible',
       timeout: options?.timeout ?? 30_000,
     });
+
+    if (await reportFailure.isVisible()) {
+      const errorText = await reportFailure.getAttribute('data-test-errorText');
+      throw new Error(`CSV report generation failed: ${errorText ?? 'Unknown error'}`);
+    }
 
     // 4. Coordinate the click and the event listener
     const [download] = await Promise.all([

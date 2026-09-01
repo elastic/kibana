@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags, testData } from '../../../common/ui/fixtures';
 
 const REPORT_GENERATION_TIMEOUT = 120_000;
+const NEW_SEARCH_TITLE = 'Scout CSV export new search';
 
 spaceTest.describe('Discover CSV export', () => {
   spaceTest.setTimeout(REPORT_GENERATION_TIMEOUT + 30_000);
@@ -30,9 +31,11 @@ spaceTest.describe('Discover CSV export', () => {
   });
 
   spaceTest(
-    'exports an unsaved classic session',
+    'exports a newly saved classic session',
     { tag: tags.deploymentAgnostic },
     async ({ pageObjects }) => {
+      await pageObjects.discover.saveSearch(NEW_SEARCH_TITLE);
+
       const download = await pageObjects.discover.exportAsCsv({
         timeout: REPORT_GENERATION_TIMEOUT,
       });
