@@ -607,40 +607,59 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               <AnimatedSearchBarContainer
                 className={!searchToggled && showToggleSearch ? 'toggled-off' : undefined}
               >
-                <SearchBar<Query>
-                  showFilterBar={true}
-                  showDatePicker={true}
-                  showAutoRefreshOnly={false}
-                  showSaveQuery={false}
-                  showQueryInput={true}
-                  disableQueryLanguageSwitcher={true}
-                  isLoading={isFetching}
-                  isAutoRefreshDisabled={true}
-                  dateRangeFrom={timeRange.from}
-                  dateRangeTo={timeRange.to}
-                  query={kquery}
-                  indexPatterns={[dataView]}
-                  filters={searchFilters}
-                  prependFilterBar={
-                    defaultFilters.length > 0 ? (
+                <div>
+                  <SearchBar<Query>
+                    showFilterBar={true}
+                    showDatePicker={true}
+                    showAutoRefreshOnly={false}
+                    showSaveQuery={false}
+                    showQueryInput={true}
+                    disableQueryLanguageSwitcher={true}
+                    isLoading={isFetching}
+                    isAutoRefreshDisabled={true}
+                    dateRangeFrom={timeRange.from}
+                    dateRangeTo={timeRange.to}
+                    query={kquery}
+                    indexPatterns={[dataView]}
+                    filters={searchFilters}
+                    prependFilterBar={
+                      defaultFilters.length > 0 ? (
+                        <FilterItems
+                          filters={defaultFilters}
+                          indexPatterns={[dataView]}
+                          readOnly={true}
+                        />
+                      ) : undefined
+                    }
+                    submitButtonStyle={'iconOnly'}
+                    onFiltersUpdated={setSearchFilters}
+                    onQuerySubmit={(payload, isUpdate) => {
+                      if (isUpdate) {
+                        setTimeRange({ ...payload.dateRange });
+                        setKQuery(payload.query || EMPTY_QUERY);
+                      } else {
+                        refresh();
+                      }
+                    }}
+                  />
+                  {defaultFilters.length > 0 && searchFilters.length === 0 && (
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      wrap={true}
+                      responsive={false}
+                      alignItems="center"
+                      css={css`
+                        padding-top: 4px;
+                      `}
+                    >
                       <FilterItems
                         filters={defaultFilters}
                         indexPatterns={[dataView]}
                         readOnly={true}
                       />
-                    ) : undefined
-                  }
-                  submitButtonStyle={'iconOnly'}
-                  onFiltersUpdated={setSearchFilters}
-                  onQuerySubmit={(payload, isUpdate) => {
-                    if (isUpdate) {
-                      setTimeRange({ ...payload.dateRange });
-                      setKQuery(payload.query || EMPTY_QUERY);
-                    } else {
-                      refresh();
-                    }
-                  }}
-                />
+                    </EuiFlexGroup>
+                  )}
+                </div>
               </AnimatedSearchBarContainer>
             </EuiFlexItem>
           )}
