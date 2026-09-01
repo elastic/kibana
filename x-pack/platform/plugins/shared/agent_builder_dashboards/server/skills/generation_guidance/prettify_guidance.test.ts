@@ -35,4 +35,14 @@ describe('getDashboardPrettifyPromptContent', () => {
 
     expect(content.endsWith(review)).toBe(true);
   });
+
+  it('keeps vis-author exact phrases in review, not HITL', () => {
+    const hitl = content.slice(0, content.indexOf('## Dashboard Review'));
+
+    expect(hitl).not.toContain('remove the panel title');
+    expect(hitl).not.toContain('show avg/min/max in the legend');
+    expect(hitl).toContain('Apply only the review criticals');
+    expect(content).toContain('remove the panel title');
+    expect(content).toContain('show avg/min/max in the legend');
+  });
 });

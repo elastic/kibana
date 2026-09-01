@@ -28,13 +28,13 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Region map** → \`w: 24, h: 10\`. Stay at least 24 wide.
 - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
 - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
-- **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable. Narrower than \`w: 24\` is wrong.
+- **Datatable** → \`w: 48, h: 12–16\` on its own row so columns are readable. \`w: 24\` only when sharing a row with another half-width panel. Never narrower than \`w: 24\` — \`w: 16\` is wrong. Do not shrink a table to fill a leftover sliver; give it its own row instead.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 **Grid Packing Rules:**
 
-- **Stretch the last panel in a row:** Table sizes are the default when panels pack evenly. If leftover columns remain, the last panel in that row — any chart type — stretches so the row sums to 48. A single panel on a row is last, so it is full-width (e.g. the breakdown \`xy-bar\` at \`w: 48\` in the example). Do not leave unused columns beside the last panel. Metric and gauge still must not sit alone at \`w: 48\` — keep those small.
+- **Stretch the last panel in a row:** Table sizes are the default when panels pack evenly. If leftover columns remain, the last panel in that row — any chart type except a datatable that would end up narrower than \`w: 24\` — stretches so the row sums to 48. A single panel on a row is last, so it is full-width (e.g. the breakdown \`xy-bar\` at \`w: 48\` in the example). Do not leave unused columns beside the last panel. Metric and gauge still must not sit alone at \`w: 48\` — keep those small. If leftover columns are fewer than 24 and the next panel is a datatable, start a new row at \`w: 48\` instead of squeezing the table into the sliver.
 - **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
   placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
 - **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
@@ -49,7 +49,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
 3. **Same \`h\` per row** when possible, so rows align cleanly.
 4. Panels' \`x + w\` must never exceed 48.
-5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below — but never fill a KPI-row gap with a different chart type (table, trend, pie). Start a new row instead. Choose \`w\` and \`h\` to fit the available space.
+5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below — but never fill a KPI-row gap with a different chart type (table, trend, pie), and never drop a datatable into a gap narrower than \`w: 24\`. Start a new row instead. Choose \`w\` and \`h\` to fit the available space.
 6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
 
 ### Reflow after removals

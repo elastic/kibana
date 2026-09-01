@@ -53,6 +53,17 @@ describe('dashboard guidance', () => {
     expect(design).toMatch(/\*\*Region map\*\*.*w: 24/);
   });
 
+  it('keeps datatables at least 24 wide and flags narrower widths as critical', () => {
+    const design = getDashboardDesignPromptContent();
+    const review = getDashboardReviewTopicsContent();
+
+    expect(design).toMatch(/\*\*Datatable\*\*.*w: 48/);
+    expect(design).toMatch(/Never narrower than `w: 24`/);
+    expect(design).toMatch(/leftover columns are fewer than 24 and the next panel is a datatable/);
+    expect(review).toContain('A datatable with w less than 24 is a critical issue');
+    expect(review).toContain('except a datatable with w less than 24');
+  });
+
   it('appends chart-type review as a whole without restating it', () => {
     const review = getDashboardReviewPromptContent();
     const dashboardTopics = getDashboardReviewTopicsContent();
@@ -112,13 +123,13 @@ describe('dashboard guidance', () => {
       - **Region map** → \`w: 24, h: 10\`. Stay at least 24 wide.
       - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
       - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
-      - **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable. Narrower than \`w: 24\` is wrong.
+      - **Datatable** → \`w: 48, h: 12–16\` on its own row so columns are readable. \`w: 24\` only when sharing a row with another half-width panel. Never narrower than \`w: 24\` — \`w: 16\` is wrong. Do not shrink a table to fill a leftover sliver; give it its own row instead.
 
       Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
       **Grid Packing Rules:**
 
-      - **Stretch the last panel in a row:** Table sizes are the default when panels pack evenly. If leftover columns remain, the last panel in that row — any chart type — stretches so the row sums to 48. A single panel on a row is last, so it is full-width (e.g. the breakdown \`xy-bar\` at \`w: 48\` in the example). Do not leave unused columns beside the last panel. Metric and gauge still must not sit alone at \`w: 48\` — keep those small.
+      - **Stretch the last panel in a row:** Table sizes are the default when panels pack evenly. If leftover columns remain, the last panel in that row — any chart type except a datatable that would end up narrower than \`w: 24\` — stretches so the row sums to 48. A single panel on a row is last, so it is full-width (e.g. the breakdown \`xy-bar\` at \`w: 48\` in the example). Do not leave unused columns beside the last panel. Metric and gauge still must not sit alone at \`w: 48\` — keep those small. If leftover columns are fewer than 24 and the next panel is a datatable, start a new row at \`w: 48\` instead of squeezing the table into the sliver.
       - **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
         placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
       - **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
@@ -133,7 +144,7 @@ describe('dashboard guidance', () => {
       2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
       3. **Same \`h\` per row** when possible, so rows align cleanly.
       4. Panels' \`x + w\` must never exceed 48.
-      5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below — but never fill a KPI-row gap with a different chart type (table, trend, pie). Start a new row instead. Choose \`w\` and \`h\` to fit the available space.
+      5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below — but never fill a KPI-row gap with a different chart type (table, trend, pie), and never drop a datatable into a gap narrower than \`w: 24\`. Start a new row instead. Choose \`w\` and \`h\` to fit the available space.
       6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
 
       ### Reflow after removals
@@ -199,9 +210,10 @@ describe('dashboard guidance', () => {
       - A dashboard that has time-series XY panels but none with legend statistics (avg/min/max) is a critical issue. Add them on one primary overview trend (at most two). The edit query MUST include the exact phrase \\"show avg/min/max in the legend\\" (e.g. \\"log volume over time, show avg/min/max in the legend\\"). Skip categorical bars and queries whose measure is already AVG/MIN/MAX of a field. If at least one already has them, this is not an issue.
       ### grid
       Critical:
-      - Any w or h that violates ### Grid sizes by chart type or Grid Packing Rules is a critical issue. A last panel in a row stretched to fill leftover columns (row sums to 48) is not this issue.
+      - Any w or h that violates ### Grid sizes by chart type or Grid Packing Rules is a critical issue. A last panel in a row stretched to fill leftover columns (row sums to 48) is not this issue — except a datatable with w less than 24, which is always this issue.
       - Visible gaps or dead space is a critical issue: unused columns in a row, leftover odd widths (not 6/8/12/24/48), or a row/section that was only partly reflowed. Rethink where panels live — do not patch a subset.
       - An L-shaped hole is a critical issue — a short panel with empty space beside it while a taller neighbor continues. Do not invent that packing.
+      - A datatable with w less than 24 is a critical issue — give it its own row at w: 48, or w: 24 beside another half-width panel.
       ### controls
       Critical:
       - A new multi-entity dashboard with no categorical controls is a critical issue.

@@ -103,7 +103,7 @@ describe('chart type guidance', () => {
       - Use \`type: \\"bar\\"\` only for meaningful progress-to-max.
       - For trend/delta secondary metrics, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`. Show labels only for distinct named measures.
       Critical:
-      - A title on a metric is a critical issue — clear it.
+      - A title on a metric is a critical issue. The query MUST include the exact phrase \\"remove the panel title\\" — on \`add_section.panels\` when wrapping, otherwise on \`edit_panels\`.
       - Invented static colors or BACKGROUND fills on the primary metric are a critical issue.
       Suggestions:
       - When a trend or status could be shown (time series available, or a clear threshold/comparison) and the panel is a lone number on white, suggest adding a sparkline or secondary. A single number with nothing to compare or trend is fine.
@@ -126,6 +126,8 @@ describe('chart type guidance', () => {
       - A solid area fill on the painted chart is a critical issue.
       - A visible legend on a one-series categorical chart is a critical issue.
       - Invented static or custom series colors (explicit hex or \`type: \\"static\\"\`) are a critical issue.
+      Suggestions:
+      - Most time-series line charts should be gradient area. Keep at most one line (the primary overview trend); convert the rest to area with \`styling.areas.fill: \\"gradient\\"\`. Skip bars, categorical charts, and a lone line that is already the only time series.
       ### heatmap
       HEATMAP COLORING RULES:
       - Lens binds heatmap colors to the data automatically using the \\"Temperature\\" palette; keep that default (omit \`color\` or use \`color: { type: \\"auto\\" }\`) and generate explicit \`steps\` only when the user requests a custom palette or gives thresholds.
@@ -190,7 +192,7 @@ describe('chart type guidance', () => {
 
   it('flags a duplicated title on a metric as critical', () => {
     expect(getChartTypeReviewPromptContent()).toContain(
-      'A title on a metric is a critical issue — clear it.'
+      'A title on a metric is a critical issue. The query MUST include the exact phrase "remove the panel title"'
     );
   });
 
@@ -199,6 +201,15 @@ describe('chart type guidance', () => {
     expect(review.match(/COLOR PALETTE RULES:/g)).toHaveLength(1);
     expect(review.match(/Never introduce or switch to legacy palette IDs/g)).toHaveLength(1);
     expect(review.indexOf('### shared')).toBeLessThan(review.indexOf('### metric'));
+  });
+
+  it('suggests converting most time-series lines to gradient area', () => {
+    const review = getChartTypeReviewPromptContent();
+    const xySection = review.slice(review.indexOf('### xy'), review.indexOf('### heatmap'));
+
+    expect(xySection).toContain('Suggestions:');
+    expect(xySection).toContain('gradient area');
+    expect(xySection).toContain('at most one line');
   });
 
   it('does not restate the legacy palette ban on XY review', () => {
