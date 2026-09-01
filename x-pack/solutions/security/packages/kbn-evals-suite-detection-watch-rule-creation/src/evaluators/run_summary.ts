@@ -139,14 +139,21 @@ export const logPairedScores = ({
   for (const line of payload.match(/.{1,8000}/g) ?? [payload]) {
     log.info(`PAIRED_SCORES ${line}`);
   }
-  // Human-traceable mapping: hashed key -> technique (the stable part of every input).
-  for (const [key, inputJson] of exampleKeyLog) {
-    try {
-      const technique =
-        (JSON.parse(inputJson) as { technique?: string }).technique ?? inputJson.slice(0, 60);
-      log.info(`PAIRED_KEY ${key} -> ${technique}`);
-    } catch {
-      log.info(`PAIRED_KEY ${key} -> ${inputJson.slice(0, 60)}`);
+  // Human-traceable mapping for this dataset only. exampleKeyLog is process-wide;
+  // iterating it directly re-printed every earlier dataset (279 lines in build 498).
+  const datasetHashes = new Set(
+    pairedSink.keys().map((key) => key.slice(key.lastIndexOf('::') + 2))
+  );
+  for (const hash of datasetHashes) {
+    const inputJson = exampleKeyLog.get(hash);
+    if (inputJson) {
+      try {
+        const technique =
+          (JSON.parse(inputJson) as { technique?: string }).technique ?? inputJson.slice(0, 60);
+        log.info(`PAIRED_KEY ${hash} -> ${technique}`);
+      } catch {
+        log.info(`PAIRED_KEY ${hash} -> ${inputJson.slice(0, 60)}`);
+      }
     }
   }
 };
