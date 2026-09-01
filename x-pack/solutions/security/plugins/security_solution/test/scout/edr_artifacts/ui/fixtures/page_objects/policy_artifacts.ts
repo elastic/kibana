@@ -157,7 +157,7 @@ export class PolicyArtifactsPage {
     }
     // Field autocomplete is backed by ES field caps and can lag after first
     // document ingest; the EUI helper default (2.5s) is too short.
-    await combo.setSelectedOptions([value], { timeout: 15_000 });
+    await combo.setSelectedOptions([value], { timeout: 10_000 });
   }
 
   private async fillTrustedAppsForm() {

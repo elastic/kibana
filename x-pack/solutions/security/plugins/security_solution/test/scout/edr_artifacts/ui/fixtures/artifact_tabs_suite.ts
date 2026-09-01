@@ -49,7 +49,7 @@ export const describeArtifactTabPolicyDetails = (
       });
 
       spaceTest(
-        `${artifact.title} tab is hidden when the user has no artifact privilege`,
+        `Tab is hidden when the user has no artifact privilege`,
         async ({ browserAuth, pageObjects, endpointPolicy, config }) => {
           spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
 
@@ -63,7 +63,7 @@ export const describeArtifactTabPolicyDetails = (
       );
 
       spaceTest(
-        `${artifact.title} READ user can view artifacts but cannot add, assign, or remove`,
+        `READ user can view artifacts but cannot add, assign, or remove`,
         async ({ browserAuth, pageObjects, apiServices, endpointPolicy, config }) => {
           spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
           // One login plus two policy-details reloads; default 60s is tight.
@@ -135,7 +135,7 @@ export const describeArtifactTabPolicyDetails = (
       );
 
       spaceTest(
-        `${artifact.title} ALL user can add an artifact from an empty tab`,
+        `ALL user can add an artifact from an empty tab`,
         async ({ browserAuth, pageObjects, endpointPolicy }) => {
           await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
@@ -170,7 +170,7 @@ export const describeArtifactTabPolicyDetails = (
       );
 
       spaceTest(
-        `${artifact.title} ALL user can manage and assign unassigned artifacts`,
+        `ALL user can manage and assign unassigned artifacts`,
         async ({ browserAuth, page, pageObjects, apiServices, endpointPolicy }) => {
           await apiServices.endpointArtifacts.createList({
             listId: artifact.listId,
@@ -199,12 +199,17 @@ export const describeArtifactTabPolicyDetails = (
             await pageObjects.policyArtifactsPage.openAssignFromUnassigned();
             await expect(pageObjects.policyArtifactsPage.assignConfirmButton).toBeDisabled();
             await pageObjects.policyArtifactsPage.assignArtifact(artifact.artifactName);
+            await expect(
+              page.getByText(`"${artifact.artifactName}" has been added to your artifacts list.`)
+            ).toBeVisible();
+            await pageObjects.policyArtifactsPage.waitForAssignedList();
+            await expect(pageObjects.policyArtifactsPage.artifactCard).toHaveCount(1);
           });
         }
       );
 
       spaceTest(
-        `${artifact.title} ALL user can assign and remove artifacts from the policy`,
+        `ALL user can assign and remove artifacts from the policy`,
         async ({ browserAuth, page, pageObjects, apiServices, endpointPolicy }) => {
           await apiServices.endpointArtifacts.createList({
             listId: artifact.listId,
