@@ -14,7 +14,6 @@ import type {
 } from '../../common';
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
-  investigation_id: string;
   status: InvestigationStatus;
   subject_type: InvestigationSubjectType;
   subject_id: string;
@@ -22,6 +21,7 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   trigger_type: InvestigationTriggerType;
   concurrency_key?: string;
   created_at: string;
+  started_at?: string;
   completed_at?: string;
   executed_by?: string;
   error?: string;
