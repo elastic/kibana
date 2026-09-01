@@ -49,7 +49,7 @@ export function registerA2ARoutes({
       description:
         'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery. To learn more about the Agent Builder A2A server, refer to the [A2A server documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/a2a-server).',
       options: {
-        tags: ['a2a', 'oas-tag:agent builder'],
+        tags: ['a2a', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -94,7 +94,7 @@ To learn more about the Agent Builder A2A server, refer to the [A2A server docum
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
-        tags: ['a2a', 'oas-tag:agent builder'],
+        tags: ['a2a', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',

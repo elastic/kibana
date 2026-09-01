@@ -390,8 +390,10 @@ export const ConfigSchema = schema.object({
             authorization_servers: schema.arrayOf(schema.uri({ scheme: ['https', 'http'] }), {
               minSize: 1,
             }),
-            // Canonical resource identifier for this protected resource (the full MCP server URL).
-            resource: schema.uri({ scheme: ['https', 'http'] }),
+            // Canonical resource identifier for this protected resource (RFC 8707 / RFC 9728).
+            // Optional: defaults to the Kibana server's public base URL, which covers all
+            // OAuth-accepting Kibana endpoints (e.g. MCP and A2A) in all spaces.
+            resource: schema.maybe(schema.uri({ scheme: ['https', 'http'] })),
             // Methods supported for sending bearer tokens. Defaults to ["header"].
             bearer_methods_supported: schema.maybe(
               schema.arrayOf(

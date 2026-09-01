@@ -17,10 +17,20 @@ describe('A2A routes - socket timeout', () => {
   // larger than this default; otherwise the route falls back to it and the bug reproduces.
   const DEFAULT_SERVER_SOCKET_TIMEOUT_MS = 120 * 1000;
 
-  let postRouteConfig: { path: string; options?: { timeout?: { idleSocket?: number } } };
+  let getRouteConfig: { path: string; options?: { tags?: string[] } };
+  let postRouteConfig: {
+    path: string;
+    options?: { timeout?: { idleSocket?: number }; tags?: string[] };
+  };
 
   beforeEach(() => {
+    getRouteConfig = undefined as unknown as typeof getRouteConfig;
     postRouteConfig = undefined as unknown as typeof postRouteConfig;
+
+    const versionedGet = jest.fn().mockImplementation((config) => {
+      getRouteConfig = config;
+      return { addVersion: jest.fn() };
+    });
 
     const versionedPost = jest.fn().mockImplementation((config) => {
       postRouteConfig = config;
@@ -29,7 +39,7 @@ describe('A2A routes - socket timeout', () => {
 
     const mockRouter = {
       versioned: {
-        get: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+        get: versionedGet,
         post: versionedPost,
       },
     } as unknown as jest.Mocked<IRouter>;
@@ -54,6 +64,18 @@ describe('A2A routes - socket timeout', () => {
   it('sets an idle socket timeout greater than the server default, since A2A responses are synchronous and can outlive it', () => {
     expect(postRouteConfig.options?.timeout?.idleSocket).toBeGreaterThan(
       DEFAULT_SERVER_SOCKET_TIMEOUT_MS
+    );
+  });
+
+  it('tags the agent-card GET route to accept UIAM OAuth tokens', () => {
+    expect(getRouteConfig.options?.tags).toEqual(
+      expect.arrayContaining(['a2a', 'security:acceptUiamOAuth'])
+    );
+  });
+
+  it('tags the send-task POST route to accept UIAM OAuth tokens', () => {
+    expect(postRouteConfig.options?.tags).toEqual(
+      expect.arrayContaining(['a2a', 'security:acceptUiamOAuth'])
     );
   });
 });

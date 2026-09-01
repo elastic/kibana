@@ -261,7 +261,12 @@ MCP clients can authenticate with an OAuth 2.1 access token instead of an API ke
    server.publicBaseUrl: http://localhost:5601
    xpack.security.mcp.oauth2.metadata:
      authorization_servers: [https://localhost:8444/oauth2]
-     resource: http://localhost:5601/api/agent_builder/mcp
+     # resource is optional. When omitted, Kibana defaults to the canonical form of
+     # server.publicBaseUrl (e.g. http://localhost:5601/). This base-URL default is
+     # what makes a single OAuth token work across MCP, A2A, and space-prefixed
+     # endpoints (/s/<space>/api/agent_builder/mcp). Override it only when you need
+     # the audience to be a specific path:
+     # resource: http://localhost:5601/api/agent_builder/mcp
    ```
 
    `server.publicBaseUrl` determines the resource metadata URL that Kibana advertises in the `WWW-Authenticate` header when an MCP request is rejected with a 401. Without it, Kibana falls back to the incoming request URL, which is not necessarily reachable by the client.

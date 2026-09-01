@@ -96,6 +96,72 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       });
     });
 
+    it('falls back to the public base URL when resource is not configured', async () => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create(
+        { mcp: { oauth2: { metadata: { authorization_servers: ['https://auth.example.com'] } } } },
+        { serverless: true }
+      );
+      defineOAuthProtectedResourceRoute(mockRouteDefinitionParams);
+
+      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
+      const response = await handler(
+        securityRequestHandlerContextMock.create(),
+        httpServerMock.createKibanaRequest({ method: 'get' }),
+        kibanaResponseFactory
+      );
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        authorization_servers: ['https://auth.example.com'],
+        resource: 'http://myhost.com/mock-server-basepath',
+      });
+    });
+
+    it('falls back to the server base URL when neither resource nor public base URL is configured', async () => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create(
+        { mcp: { oauth2: { metadata: { authorization_servers: ['https://auth.example.com'] } } } },
+        { serverless: true }
+      );
+      Object.defineProperty(mockRouteDefinitionParams.basePath, 'publicBaseUrl', {
+        value: undefined,
+        configurable: true,
+      });
+      defineOAuthProtectedResourceRoute(mockRouteDefinitionParams);
+
+      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
+      const response = await handler(
+        securityRequestHandlerContextMock.create(),
+        httpServerMock.createKibanaRequest({ method: 'get' }),
+        kibanaResponseFactory
+      );
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        authorization_servers: ['https://auth.example.com'],
+        resource: 'http://localhost:5601/',
+      });
+    });
+
+    it('prefers the public base URL over the server base URL and emits canonical form', async () => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create(
+        { mcp: { oauth2: { metadata: { authorization_servers: ['https://auth.example.com'] } } } },
+        { serverless: true }
+      );
+      Object.assign(mockRouteDefinitionParams.basePath, {
+        publicBaseUrl: 'https://kibana.example.com/',
+      });
+      defineOAuthProtectedResourceRoute(mockRouteDefinitionParams);
+
+      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
+      const response = await handler(
+        securityRequestHandlerContextMock.create(),
+        httpServerMock.createKibanaRequest({ method: 'get' }),
+        kibanaResponseFactory
+      );
+      expect(response.payload).toEqual({
+        authorization_servers: ['https://auth.example.com'],
+        resource: 'https://kibana.example.com/',
+      });
+    });
+
     it('returns all configured metadata fields', async () => {
       const fullMcpConfig = {
         mcp: {
