@@ -107,11 +107,24 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
       (panel) => (panel.attributes.tabId as string) === activeTab?.id
     );
 
-    // Reached when the selected tab's panel has not been supplied; consumers that mount panels on
-    // demand pass through this state on every switch, so it renders empty rather than warning.
-    if (!activeTab || !activePanel) {
+    if (!activeTab) {
       return (
         <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef} />
+      );
+    }
+
+    // Panel not yet supplied (e.g. on-demand mounting). Keep the tabpanel wrapper so the selected
+    // tab's aria-controls points at a real element rather than dangling.
+    if (!activePanel) {
+      return (
+        <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef}>
+          <div
+            role="tabpanel"
+            id={activeTab.panelDomId}
+            aria-labelledby={activeTab.tabDomId}
+            tabIndex={0}
+          />
+        </EuiFlyoutBody>
       );
     }
 

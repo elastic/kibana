@@ -350,7 +350,7 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getByRole('tab', { name: 'Metadata' })).toBeEnabled();
   });
 
-  it('renders an empty body when the selected tab has no panel supplied', () => {
+  it('renders an empty tabpanel wrapper when the selected tab has no panel supplied', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="metadata">
         <FlyoutTemplate.Header title="Alert" />
@@ -362,8 +362,13 @@ describe('FlyoutTemplate tabs', () => {
       </FlyoutTemplate>
     );
 
-    expect(screen.getByRole('tab', { name: 'Metadata' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.queryByRole('tabpanel')).not.toBeInTheDocument();
+    const metadataTab = screen.getByRole('tab', { name: 'Metadata' });
+    expect(metadataTab).toHaveAttribute('aria-selected', 'true');
+    // The wrapper must exist so aria-controls is not dangling.
+    const panel = screen.getByRole('tabpanel');
+    expect(panel).toBeInTheDocument();
+    expect(panel).toHaveAttribute('aria-labelledby', metadataTab.id);
+    expect(panel).toBeEmptyDOMElement();
     expect(screen.queryByText('overview content')).not.toBeInTheDocument();
   });
 
