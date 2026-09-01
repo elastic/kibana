@@ -167,7 +167,6 @@ export function AlertActions(
       ? [
           <EuiContextMenuItem
             key="investigate"
-            icon="inspect"
             disabled={isInvestigating}
             onClick={handleInvestigate}
             data-test-subj="o11yAlertActionsInvestigate"
