@@ -24,6 +24,7 @@ const getExistingQueries = (
 export const exactDuplicateAvoidanceEvaluator: KIQueryGenerationEvaluator = {
   name: 'exact_duplicate_avoidance',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ input, output }) => {
     const existingQueries = getExistingQueries(input);
     if (!existingQueries) {

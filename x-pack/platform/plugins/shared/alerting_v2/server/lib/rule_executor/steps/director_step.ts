@@ -24,18 +24,14 @@ export class DirectorStep implements RuleExecutionStep {
       const logger = state.logger.withLabels({ step: step.name });
 
       if (rule.kind !== 'alert') {
-        logger.debug({
-          message: `[${step.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
-        });
+        logger.debug({ message: 'Skipping episode tracking for signal rule' });
 
         yield { type: 'continue', state };
         return;
       }
 
       if (alertEventsBatch.length === 0) {
-        logger.debug({
-          message: `[${step.name}] No alert events to process for rule ${input.ruleId}`,
-        });
+        logger.debug({ message: 'No alert events to process' });
 
         yield { type: 'continue', state };
         return;

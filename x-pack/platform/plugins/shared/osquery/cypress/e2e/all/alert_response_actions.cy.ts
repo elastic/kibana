@@ -342,7 +342,9 @@ describe(
       // `ruleSwitch` aria-checked update to stall.
       before(() => {
         initializeDataViews();
-        loadRule(true).then((data) => {
+        // Scope alerts to those carrying `host.os.name` so the `{{host.os.name}}`
+        // substitution below always has a value (a blind `_id:*` alert may lack it).
+        loadRule(true, 'host.os.name:*').then((data) => {
           ruleId = data.id;
           ruleName = data.name;
           loadRuleAlerts(data.name);
@@ -378,17 +380,19 @@ describe(
           );
           cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
           cy.getBySel('osquery-action-item').click();
-          // Use only the alert's pre-selected host agent. Adding "All agents" pulls in
-          // other enrolled-but-offline agents in CI, whose results never arrive, so the
-          // assertion below would depend on a second agent that may never respond.
           cy.contains(/^1 agent selected/);
+          cy.intercept('POST', '/api/osquery/live_queries').as('runLiveQuery');
           inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
             parseSpecialCharSequences: false,
           });
           submitQuery();
-          // Results only come back when `{{host.os.name}}` was substituted with the
-          // alert's host OS name — an unsubstituted query matches no os_version row.
-          checkResults();
+          // Assert substitution on the dispatched request rather than on live results:
+          // the `{{host.os.name}}` placeholder must be replaced with the alert's host OS
+          // name before the query is sent, independent of whether an agent returns rows.
+          cy.wait('@runLiveQuery').should(({ request }) => {
+            expect(request.body.query).to.match(/^SELECT \* FROM os_version where name='.+';$/);
+            expect(request.body.query).to.not.contain('{{host.os.name}}');
+          });
         }
       );
 

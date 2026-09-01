@@ -8,7 +8,8 @@ UI components for the Kibana Chrome shell. Extracted from `@kbn/core-chrome-brow
 src/
   context.tsx             ChromeComponentsDeps type + ChromeComponentsProvider / useChromeComponentsDeps
   classic/                Two-row classic header and its exclusive sub-components
-  project/                Project-layout header, breadcrumbs, app menu, sidenav
+  project/                Project chrome app header renderer and sidenav
+  chrome_next/            Chrome Next global header and related controls
   shared/                 Components used by both classic and project (nav controls, help menu, etc.)
   sidebar/                Chrome-level sidebar wrapper
 ```
@@ -20,13 +21,12 @@ src/
 | `ChromeComponentsDeps` | External-service deps (`application`, `http`, `docLinks`, `customBranding`) passed to `ChromeComponentsProvider` — assembled by the layout layer using `Pick` from service interfaces |
 | `ChromeComponentsProvider` | Context provider; wrap the layout tree once with the assembled `ChromeComponentsDeps` |
 | `ClassicHeader` | Classic header; self-hydrates from context |
-| `ProjectHeader` | Project header; self-hydrates from context |
+| `ChromeNextGlobalHeader` | Project / Chrome Next global header; self-hydrates from context |
+| `ChromeAppHeaderRenderer` | Renders chrome-owned app header content into the application top bar |
 | `GridLayoutProjectSideNav` | Project side-navigation for grid layout; self-hydrates from context |
 | `ChromelessHeader` | Chromeless loading bar; self-hydrates from context |
 | `HeaderTopBanner` | Top banner; self-hydrates from context |
-| `AppMenuBar` | Project app menu bar; self-hydrates from context |
 | `Sidebar` | Sidebar wrapper |
-| `useHasAppMenu` | Whether an app menu (legacy or new) is active |
 | `HeaderBreadcrumbsBadges` | Breadcrumb badge renderer, used by `browser-internal` state |
 
 ## Context architecture

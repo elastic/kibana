@@ -52,7 +52,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
     },
     apm: {
-      kibanaSettings: `${ELASTIC_DOCS}solutions/observability/apm/applications-ui-settings`,
+      kibanaSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#observability-advanced-settings`,
       supportedServiceMaps: `${ELASTIC_DOCS}solutions/observability/apm/service-map`,
       supportedServiceMapsLegend: `${ELASTIC_DOCS}solutions/observability/apm/service-map#service-maps-legend`,
       customLinks: `${ELASTIC_DOCS}solutions/observability/apm/create-custom-links`,
@@ -733,6 +733,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apiKeyServiceSettings: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings#api-key-service-settings`,
       clusterPrivileges: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#privileges-list-cluster`,
       definingRoles: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles`,
+      elasticCloudApiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elastic-cloud-api-keys#project-access`,
       elasticsearchSettings: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings`,
       elasticsearchEnableSecurity: `${ELASTIC_DOCS}deploy-manage/deploy/self-managed/installing-elasticsearch`,
       elasticsearchEnableApiKeys: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings#api-key-service-settings`,
@@ -989,6 +990,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elasticAgentLogFileRetention: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-file-rotation-retention`,
       elasticAgentDownloads: `${ELASTIC_WEBSITE_URL}downloads/past-releases/elastic-agent-`,
       integrationsReference: `${ELASTIC_DOCS}reference/integrations`,
+      datastreamsTemplateConflicts: `${ELASTIC_DOCS}reference/fleet/data-streams-template-conflicts`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
@@ -1092,6 +1094,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     telemetry: {
       settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings`,
+      securityData: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings#security-telemetry`,
     },
     playground: {
       chatPlayground: `${ELASTIC_DOCS}solutions/search/rag/playground`,

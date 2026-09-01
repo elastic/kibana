@@ -23,6 +23,7 @@ import type { PluginsService } from './plugins/plugins_service';
 import type { OAuthClientsService } from './oauth_clients';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
+import type { SpaceSettingsService } from './space_settings';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -38,6 +39,7 @@ export interface AgentBuilderInternalService {
   smlService: SmlService;
   pluginsService: PluginsService;
   oauthClientsService: OAuthClientsService;
+  spaceSettingsService: SpaceSettingsService;
   startDependencies: AgentBuilderStartDependencies;
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;

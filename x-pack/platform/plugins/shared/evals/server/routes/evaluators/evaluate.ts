@@ -15,6 +15,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
@@ -35,6 +36,7 @@ export const registerEvaluateRoute = ({
   logger,
   evaluatorRegistry,
   getInferenceStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -79,6 +81,9 @@ export const registerEvaluateRoute = ({
           });
         }
 
+        const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+        const scopedRegistry = evaluatorRegistry.asScoped({ spaceId });
+
         const resolvedEvaluators: Array<{
           config: (typeof evaluators)[number];
           definition: EvaluatorDefinition;
@@ -86,7 +91,7 @@ export const registerEvaluateRoute = ({
         }> = [];
 
         for (const config of evaluators) {
-          const definition = evaluatorRegistry.get(config.name, config.version);
+          const definition = await scopedRegistry.get(config.name, config.version);
           if (!definition) {
             const message = config.version
               ? `Evaluator not found: ${config.name}@${config.version}`
@@ -218,6 +223,7 @@ export const registerEvaluateRoute = ({
             name: definition.name,
             version: definition.version,
             kind: definition.kind,
+            direction: definition.direction,
           };
           if (definition.kind !== 'llm' || !config.connector_id) {
             return base;

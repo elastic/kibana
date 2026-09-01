@@ -496,11 +496,8 @@ export class DiscoverPlugin
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-        const discoverServices = await getDiscoverServicesForEmbeddable();
         const { getTransformOut } = await getEmbeddableServices();
-        return getTransformOut(transformDrilldownsOut, () =>
-          discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled()
-        );
+        return getTransformOut(transformDrilldownsOut);
       }
     );
   }

@@ -502,7 +502,7 @@ describe('TaskStore', () => {
         taskType: 'report',
         schedule: { interval: 'invalid-interval' },
       };
-      await expect(testSchedule(task)).rejects.toThrowError(
+      await expect(testSchedule(task)).rejects.toThrow(
         `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
     });
@@ -1450,7 +1450,7 @@ describe('TaskStore', () => {
         }
       );
 
-      await expect(store.update(task, { validate: true })).rejects.toThrowError(
+      await expect(store.update(task, { validate: true })).rejects.toThrow(
         `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
     });
@@ -2965,6 +2965,66 @@ describe('TaskStore', () => {
       expect(serialized).not.toContain('apiKey');
       expect(serialized).not.toContain('uiamApiKey');
     });
+
+    test(`maps each result to its own doc when two partial updates target the same task id`, async () => {
+      // All runners share one BufferedTaskStore, so partial updates for the same task
+      // id can be batched together; each result must echo its own doc, not the first.
+      const finishingUpdate: PartialConcreteTaskInstance = {
+        id: 'task_dup',
+        version: 'WzQsMV0=',
+        status: 'idle' as TaskStatus,
+        runAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      };
+      const retryAtUpdate: PartialConcreteTaskInstance = {
+        id: 'task_dup',
+        retryAt: mockedDate,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task_dup',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task_dup',
+              _version: 3,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 85,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([finishingUpdate, retryAtUpdate]);
+
+      expect(result[0]).toMatchObject({
+        value: { id: 'task_dup', status: 'idle', startedAt: null, retryAt: null },
+      });
+      // If the retryAt-only update inherits the finishing update's `startedAt: null`,
+      // the long-running retryAt updater builds a ready-to-run instance with a null
+      // startedAt, which later crashes the poll cycle.
+      expect(result[1]).toMatchObject({ value: { id: 'task_dup', retryAt: mockedDate } });
+      expect(result[1]).not.toMatchObject({ value: { startedAt: null } });
+    });
   });
 
   describe('remove', () => {
@@ -4132,7 +4192,7 @@ describe('TaskStore', () => {
       }));
 
       // allowReadingInvalidState: false, should throw an error
-      await expect(store.schedule(task as TaskInstance)).rejects.toThrowError(
+      await expect(store.schedule(task as TaskInstance)).rejects.toThrow(
         `[TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]`
       );
     });

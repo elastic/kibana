@@ -22,6 +22,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
+import { registerStepDefinitions } from './step_types';
 import type {
   AgentBuilderIntegration,
   ContextEnginePluginSetup,
@@ -59,9 +60,22 @@ export class ContextEnginePlugin
   constructor(_context: PluginInitializerContext) {}
 
   setup(
-    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
+    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>,
+    setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
+    setupDeps.workflowsExtensions.registerStepDefinition(() =>
+      import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
+    );
+
     this.setupAgentBuilderStart(core);
+    registerStepDefinitions({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      isContextEngineEnabled: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+      },
+    });
+
     const startServices = core.getStartServices();
     const getAgentBuilder = () => this.agentBuilderPromise;
     const getAppChromeAdapter = () => this.appChromeAdapter;

@@ -760,7 +760,7 @@ export const labels = {
           defaultMessage: 'For common local agent (Claude Desktop, Cursor etc) you can use:',
         }),
         remoteUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.remoteUrlsLabel', {
-          defaultMessage: 'Remote URL',
+          defaultMessage: 'Remote URLs',
         }),
         remoteUrlsHelpText: i18n.translate(
           'xpack.agentBuilder.mcpClients.form.remoteUrlsHelpText',
@@ -2763,6 +2763,13 @@ export const labels = {
     notSetBadge: i18n.translate('xpack.agentBuilder.overview.customizations.notSetBadge', {
       defaultMessage: 'Not set',
     }),
+    aiIndicesTitle: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTitle', {
+      defaultMessage: 'AI indices',
+    }),
+    aiIndicesTooltip: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTooltip', {
+      defaultMessage:
+        'The AI indices this agent retrieves from. Default indices apply to every agent and are always included.',
+    }),
     preExecutionWorkflowTitle: i18n.translate(
       'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
       { defaultMessage: 'Pre-execution workflows' }
@@ -2934,6 +2941,66 @@ export const labels = {
     }),
     confirmButton: i18n.translate('xpack.agentBuilder.navigationAbort.confirmButton', {
       defaultMessage: 'Yes, abort',
+    }),
+  },
+  aiIndices: {
+    sectionTitle: i18n.translate('xpack.agentBuilder.aiIndices.sectionTitle', {
+      defaultMessage: 'AI indices',
+    }),
+    sectionDescription: i18n.translate('xpack.agentBuilder.aiIndices.sectionDescription', {
+      defaultMessage:
+        'Choose which AI indices this agent retrieves from. Default indices are always included and cannot be removed.',
+    }),
+    notAffectedByElasticCapabilities: i18n.translate(
+      'xpack.agentBuilder.aiIndices.notAffectedByElasticCapabilities',
+      {
+        defaultMessage: 'Not affected by Elastic capabilities; retrieval is configured only here.',
+      }
+    ),
+    defaultIndicesLabel: i18n.translate('xpack.agentBuilder.aiIndices.defaultIndicesLabel', {
+      defaultMessage: 'Default indices',
+    }),
+    defaultIndicesHelpText: i18n.translate('xpack.agentBuilder.aiIndices.defaultIndicesHelpText', {
+      defaultMessage: 'Registered by your solution; applies to every agent.',
+    }),
+    defaultIndexBadge: (id: string) =>
+      i18n.translate('xpack.agentBuilder.aiIndices.defaultIndexBadge', {
+        defaultMessage: '{id} (default)',
+        values: { id },
+      }),
+    additionalIndicesLabel: i18n.translate('xpack.agentBuilder.aiIndices.additionalIndicesLabel', {
+      defaultMessage: 'Additional indices',
+    }),
+    additionalIndicesPlaceholder: i18n.translate(
+      'xpack.agentBuilder.aiIndices.additionalIndicesPlaceholder',
+      {
+        defaultMessage: 'Select AI indices',
+      }
+    ),
+    optionalLabel: i18n.translate('xpack.agentBuilder.aiIndices.optionalLabel', {
+      defaultMessage: 'Optional',
+    }),
+    loadErrorMessage: i18n.translate('xpack.agentBuilder.aiIndices.loadErrorMessage', {
+      defaultMessage: 'Failed to fetch AI indices',
+    }),
+    loadInheritedErrorMessage: i18n.translate(
+      'xpack.agentBuilder.aiIndices.loadInheritedErrorMessage',
+      {
+        defaultMessage: 'Failed to fetch default AI indices',
+      }
+    ),
+    warningsTitle: i18n.translate('xpack.agentBuilder.aiIndices.warningsTitle', {
+      defaultMessage: 'Some AI index details could not be loaded',
+    }),
+    warningMessage: ({ message, agentType }: { message: string; agentType?: string }) =>
+      agentType
+        ? i18n.translate('xpack.agentBuilder.aiIndices.warningMessageWithAgentType', {
+            defaultMessage: '{agentType}: {message}',
+            values: { agentType, message },
+          })
+        : message,
+    columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
+      defaultMessage: 'AI indices',
     }),
   },
 };

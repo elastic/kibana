@@ -71,7 +71,6 @@ export function useFieldStatsSearchStrategy(
     services: {
       data,
       notifications: { toasts },
-      cps,
     },
   } = useDataVisualizerKibana();
 
@@ -171,8 +170,8 @@ export function useFieldStatsSearchStrategy(
       samplingProbability,
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       samplingOption: searchStrategyParams.samplingOption,
-      ...(cps?.cpsManager?.getProjectRouting()
-        ? { projectRouting: cps.cpsManager.getProjectRouting() }
+      ...(searchStrategyParams.projectRouting
+        ? { projectRouting: searchStrategyParams.projectRouting }
         : {}),
     };
 

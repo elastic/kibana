@@ -1,0 +1,161 @@
+version: "1"
+# Every 1h: for recently enriched threat reports, count how many Detection Engine
+# alerts in the last 7d tie back to that report, then write the totals onto the doc.
+# IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
+# with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
+# Unlike enrich/ingest, this pass does not include space_id: "*" catalog rows:
+# environment_hits are per-space alert totals, and writing them onto a shared
+# global doc would let each space's hourly run clobber the others.
+name: Attribute alerts to reports
+description: Count environment alerts linked to each threat report and store totals on the report
+tags:
+  - threat-intel
+enabled: true
+settings:
+  concurrency:
+    key: "threat-intel-attribute-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "1h"
+steps:
+  - name: set_space_context
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
+  - name: load_reports_with_extractions
+    type: elasticsearch.search
+    with:
+      index: .kibana-threat-reports
+      size: 100
+      query:
+        bool:
+          filter:
+            - range:
+                lineage.extracted_at:
+                  gte: "now-30d"
+            - term:
+                space_id: "{{ variables.spaceId }}"
+          should:
+            # nested `exists`; `exists` on the parent path matches nothing.
+            - nested:
+                path: extracted.iocs
+                query:
+                  exists:
+                    field: extracted.iocs.value
+            - nested:
+                path: extracted.behaviors
+                query:
+                  exists:
+                    field: extracted.behaviors.technique_id
+          minimum_should_match: 1
+      # Body sort must be a field name string, not `"@timestamp:desc"`.
+      sort:
+        - "@timestamp"
+
+  - name: init_attribution_bulk
+    type: data.set
+    with:
+      bulk_operations: []
+
+  # One search for all layer-1 counts. Per-report `term` queries inside foreach
+  # were 100 sequential alert searches per hourly pass.
+  - name: count_all_layer1_hits
+    type: elasticsearch.search
+    if: "steps.load_reports_with_extractions.output.hits.total.value > 0"
+    with:
+      index: .alerts-security.alerts-{{ variables.spaceId }}
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+            - term:
+                kibana.alert.rule.type: threat_match
+            - term:
+                kibana.space_ids: "{{ variables.spaceId }}"
+            - nested:
+                path: threat.enrichments
+                query:
+                  regexp:
+                    threat.enrichments.indicator.reference: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+      aggs:
+        by_report_ref:
+          nested:
+            path: threat.enrichments
+          aggs:
+            refs:
+              terms:
+                field: threat.enrichments.indicator.reference
+                size: 100
+                include: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+              aggs:
+                alert_count:
+                  reverse_nested: {}
+    on-failure:
+      continue: true
+
+  - name: backfill_each_report
+    type: foreach
+    if: "steps.load_reports_with_extractions.output.hits.total.value > 0"
+    foreach: "{{ steps.load_reports_with_extractions.output.hits.hits }}"
+    steps:
+      - name: capture_report_ref
+        type: data.set
+        with:
+          report_ref: "threat-report:{{ foreach.item._id }}"
+
+      # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
+      # with this report's `extracted.behaviors.technique_id` values.
+      - name: layer2_search
+        type: elasticsearch.search
+        with:
+          index: .alerts-security.alerts-{{ variables.spaceId }}
+          size: 0
+          query:
+            bool:
+              filter:
+                - range:
+                    "@timestamp":
+                      gte: "now-7d"
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - terms:
+                    kibana.alert.rule.threat.technique.id:
+                      index: "{{ foreach.item._index }}"
+                      id: "{{ foreach.item._id }}"
+                      path: extracted.behaviors.technique_id
+              must_not:
+                - term:
+                    kibana.alert.rule.type: threat_match
+        on-failure:
+          continue: true
+
+      - name: capture_hit_counts
+        type: data.set
+        with:
+          layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'alert_count' | map: 'doc_count' | first | default: 0 }}"
+          layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
+
+      - name: queue_bulk_update_meta
+        type: data.set
+        with:
+          bulk_operations: "${{ variables.bulk_operations | push: {'update': {'_index': foreach.item._index, '_id': foreach.item._id}} }}"
+
+      - name: queue_bulk_update_doc
+        type: data.set
+        with:
+          bulk_operations: "${{ variables.bulk_operations | push: {'doc': {'attribution': {'environment_hits': {'window': '7d', 'computed_at': now, 'layer_1_ioc_match': variables.layer1_count, 'layer_2_behavioral': variables.layer2_count}, 'environment_hits_total': variables.layer1_count | plus: variables.layer2_count}}}} }}"
+
+  - name: write_attributions_bulk
+    type: elasticsearch.bulk
+    if: "variables.bulk_operations.size > 0"
+    with:
+      operations: "${{ variables.bulk_operations }}"
+    on-failure:
+      continue: true
