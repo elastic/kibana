@@ -38,7 +38,7 @@ import {
 } from '../../fixtures/ml_anomaly_summary_test_data';
 
 const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
-const ENTITY_STORE_LATEST_ALIAS = 'entities-latest-default'; // '.entities.v2.latest.default-00001';
+const ENTITY_STORE_LATEST_ALIAS = 'entities-latest-default';
 const UNKNOWN_ENTITY_EUID = 'user:does-not-exist@a1b2c3d4e5f6789012345678901234ab@local';
 const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
 
