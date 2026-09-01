@@ -921,18 +921,17 @@ export const groupAgentPolicyIdsByPackagePolicy = (
 };
 
 /**
- * Resolves the single, deterministic shard to write for a package policy
- * that is targeted by one or more of the pack's agent policies. When every
- * targeting agent policy carries the same shard (the common case, including
- * 1:1 targeting), that value is returned unchanged. When they differ, the
- * chosen rule is the MAXIMUM shard value: it is order-independent (unlike
- * "first seen"), so repeating the same operation always yields the same
- * result regardless of array/Map iteration order.
+ * Resolves the shard to write for a package policy targeted by one or more
+ * of the pack's agent policies.
  *
- * The reduce is seeded with `-Infinity` (the identity for `Math.max`) so a
- * single value — including a negative one — passes through unchanged, keeping
- * exact parity with the previous per-agent-policy `policyShards[id] ?? 100`
- * behaviour. An empty input returns `DEFAULT_PACK_SHARD`.
+ * When each targeted agent policy has its own dedicated package policy, each
+ * entry in `agentPolicyIds` is the sole agent policy for that package policy,
+ * so the value passes through unchanged. When multiple agent policies resolve
+ * to the same package policy (shared integration), all of their shard values
+ * are the same target set and exact delivery is handled by the split path; the
+ * first non-default value wins (order-stable for a single-element set, which
+ * is the exact-targeting post-split case). Falls back to `DEFAULT_PACK_SHARD`
+ * for an empty input or when no agent policy carries an explicit shard.
  */
 export const resolveSharedPackagePolicyShard = (
   agentPolicyIds: string[],
@@ -942,9 +941,107 @@ export const resolveSharedPackagePolicyShard = (
     return DEFAULT_PACK_SHARD;
   }
 
-  return agentPolicyIds.reduce(
-    (maxShard, agentPolicyId) =>
-      Math.max(maxShard, policyShards[agentPolicyId] ?? DEFAULT_PACK_SHARD),
-    -Infinity
-  );
+  for (const agentPolicyId of agentPolicyIds) {
+    const shard = policyShards[agentPolicyId];
+    if (shard !== undefined) {
+      return shard;
+    }
+  }
+
+  return DEFAULT_PACK_SHARD;
+};
+
+// ---------------------------------------------------------------------------
+// Targeting scope helpers (tasks 1.1 and 1.2)
+// ---------------------------------------------------------------------------
+
+/** Classification of a resolved package policy relative to a pack's target set. */
+export type PackagePolicyScopeKind = 'exact' | 'over-broad';
+
+/** Result of classifying one resolved package policy. */
+export interface PackagePolicyScopeResult {
+  packagePolicy: PackagePolicy;
+  kind: PackagePolicyScopeKind;
+  /** The pack's targeted agent policy ids that this package policy covers. */
+  agentPolicyIds: string[];
+  /** Agent policy ids in `packagePolicy.policy_ids` that are outside the pack's target set. */
+  untargetedAgentPolicyIds: string[];
+}
+
+/**
+ * Classifies each resolved package policy as `exact` (its `policy_ids` ⊆ the
+ * pack's target set) or `over-broad` (covers agent policies outside the target
+ * set). Global (`*`-shard) packs are always `exact` — they intend to reach
+ * every agent policy.
+ *
+ * `writeTargets` is the output of `groupAgentPolicyIdsByPackagePolicy`.
+ * `isGlobalPack` is true when `shards` contains the `*` key.
+ */
+export const resolvePackTargetScope = (
+  writeTargets: Map<string, PackagePolicyWriteTarget>,
+  isGlobalPack: boolean
+): PackagePolicyScopeResult[] => {
+  const results: PackagePolicyScopeResult[] = [];
+
+  for (const { packagePolicy, agentPolicyIds } of writeTargets.values()) {
+    if (isGlobalPack) {
+      results.push({
+        packagePolicy,
+        kind: 'exact',
+        agentPolicyIds,
+        untargetedAgentPolicyIds: [],
+      });
+      continue;
+    }
+
+    const targetSet = new Set(agentPolicyIds);
+    const untargetedAgentPolicyIds = packagePolicy.policy_ids.filter((id) => !targetSet.has(id));
+
+    results.push({
+      packagePolicy,
+      kind: untargetedAgentPolicyIds.length > 0 ? 'over-broad' : 'exact',
+      agentPolicyIds,
+      untargetedAgentPolicyIds,
+    });
+  }
+
+  return results;
+};
+
+/** Intent returned by `resolveDedicatedPackagePolicy`. */
+export type DedicatedPackagePolicyIntent =
+  | { action: 'reuse'; packagePolicy: PackagePolicy }
+  | { action: 'create'; name: string; targetAgentPolicyIds: string[] };
+
+/**
+ * Finds an existing `osquery_manager` package policy whose `policy_ids`
+ * exactly matches `targetAgentPolicyIds` (reuse), or describes one to create
+ * with a deterministic name. No Fleet writes are performed here — callers
+ * act on the returned intent.
+ *
+ * Naming convention: `osquery-targeted-<sortedIds.join('-')>` so the Fleet
+ * integrations list is self-explanatory and the name is idempotent.
+ */
+export const resolveDedicatedPackagePolicy = (
+  targetAgentPolicyIds: string[],
+  allPackagePolicies: PackagePolicy[]
+): DedicatedPackagePolicyIntent => {
+  const sortedTarget = [...targetAgentPolicyIds].sort();
+  const targetSet = new Set(sortedTarget);
+
+  const existing = allPackagePolicies.find((pp) => {
+    if (pp.policy_ids.length !== sortedTarget.length) return false;
+
+    return pp.policy_ids.every((id) => targetSet.has(id));
+  });
+
+  if (existing) {
+    return { action: 'reuse', packagePolicy: existing };
+  }
+
+  return {
+    action: 'create',
+    name: `osquery-targeted-${sortedTarget.join('-')}`,
+    targetAgentPolicyIds: sortedTarget,
+  };
 };

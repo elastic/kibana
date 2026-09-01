@@ -9,6 +9,15 @@ import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import type { SOShard } from '../../common/types';
 import type { PackQueryInput } from './utils';
 
+/** Warning emitted when a targeted pack's integration is shared with agent
+ * policies that are outside the pack's target set. Additive and optional —
+ * absent when targeting is fully enforced. */
+export interface TargetingWarning {
+  /** Human-readable names of the agent policies that would receive the pack
+   * despite not being in the pack's target set. */
+  untargeted_agent_policy_names: string[];
+}
+
 export interface PackResponseData {
   saved_object_id: string;
   name: string;
@@ -31,6 +40,8 @@ export interface PackResponseData {
   interval?: number;
   /** Pack-level RRULE schedule — present only when `schedule_type === 'rrule'`. */
   rrule_schedule?: RRuleScheduleConfig;
+  /** Present only when targeting cannot be fully enforced. */
+  targeting_warning?: TargetingWarning;
 }
 
 export interface ReadPackResponseData {

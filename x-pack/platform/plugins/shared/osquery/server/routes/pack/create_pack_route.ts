@@ -31,6 +31,8 @@ import {
   getInitialPolicies,
   groupAgentPolicyIdsByPackagePolicy,
   makePackKey,
+  resolveDedicatedPackagePolicy,
+  resolvePackTargetScope,
   resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
@@ -39,7 +41,7 @@ import {
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
-import type { PackResponseData } from './types';
+import type { PackResponseData, TargetingWarning } from './types';
 import type { PackQueryInput } from './utils';
 import { createPackRequestBodySchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
@@ -232,56 +234,134 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
         );
 
-        if (enabled && policiesList.length) {
-          // Group by resolved package-policy id first: a package policy's
-          // `policy_ids` can span multiple of this pack's agent policies, so
-          // writing per-agent-policy-id (as before) could issue concurrent
-          // updates against the same package policy from the same stale base.
-          const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
-            policiesList,
-            packagePolicies
+        const isGlobalPack = Boolean(shards?.['*']);
+
+        // Always group write targets so both the write path and warning detector
+        // operate on the same resolved topology.
+        const packagePolicyWriteTargets = policiesList.length
+          ? groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies)
+          : new Map<string, { packagePolicy: PackagePolicy; agentPolicyIds: string[] }>();
+
+        // Detect over-broad package policies (targeting warning — group 2).
+        const scopeResults = resolvePackTargetScope(packagePolicyWriteTargets, isGlobalPack);
+        const overBroadResults = scopeResults.filter((r) => r.kind === 'over-broad');
+        let targetingWarning: TargetingWarning | undefined;
+        if (overBroadResults.length > 0) {
+          const untargetedIds = new Set(
+            overBroadResults.flatMap((r) => r.untargetedAgentPolicyIds)
           );
+          const allAgentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, [
+            ...untargetedIds,
+          ]);
+          const untargetedNames = (allAgentPolicies ?? [])
+            .filter((ap) => untargetedIds.has(ap.id))
+            .map((ap) => ap.name);
+          targetingWarning = { untargeted_agent_policy_names: untargetedNames };
+        }
+
+        if (enabled && policiesList.length) {
+          const packKey = makePackKey(packSO.attributes.name, spaceId);
+          const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(queries, {
+            spaceId,
+            packSchedule: {
+              schedule_type: scheduleType,
+              interval: packInterval,
+              rrule_schedule: rruleSchedule,
+            },
+            isRruleFeatureEnabled,
+            fallbackStartDate: packSO.attributes.created_at,
+          });
+
+          const buildPackBlock = (agentPolicyIds: string[]) => ({
+            shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
+            pack_id: packSO.id,
+            pack_name: packSO.attributes.name,
+            ...packDefaults,
+            queries: builtQueries,
+          });
 
           await Promise.all(
-            Array.from(packagePolicyWriteTargets.values()).map(
-              ({ packagePolicy, agentPolicyIds }) =>
-                packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    if (!has(draft, 'inputs[0].streams')) {
-                      set(draft, 'inputs[0].streams', []);
-                    }
+            Array.from(scopeResults.values()).map(
+              async ({ packagePolicy, agentPolicyIds, kind }) => {
+                if (kind === 'exact') {
+                  // Fast path: 1:1 or global — write directly.
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
 
-                    const packKey = makePackKey(packSO.attributes.name, spaceId);
-                    const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
-                      queries,
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${packKey}`,
+                        buildPackBlock(agentPolicyIds)
+                      );
+
+                      return draft;
+                    })
+                  );
+                }
+
+                // Split path: package policy covers agent policies outside the
+                // pack's target set. Find or create a dedicated policy that
+                // covers only the targeted agent policy ids.
+                const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
+
+                try {
+                  let dedicatedPolicy: PackagePolicy;
+                  if (intent.action === 'reuse') {
+                    dedicatedPolicy = intent.packagePolicy;
+                  } else {
+                    // Create a dedicated package policy based on the shared one.
+                    const { id: _id, ...sharedBase } = packagePolicy;
+                    dedicatedPolicy = await packagePolicyService!.create(
+                      spaceScopedClient,
+                      esClient,
                       {
-                        spaceId,
-                        packSchedule: {
-                          schedule_type: scheduleType,
-                          interval: packInterval,
-                          rrule_schedule: rruleSchedule,
-                        },
-                        isRruleFeatureEnabled,
-                        fallbackStartDate: packSO.attributes.created_at,
+                        ...sharedBase,
+                        name: intent.name,
+                        policy_ids: intent.targetAgentPolicyIds,
                       }
                     );
-                    set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
-                      shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
-                      pack_id: packSO.id,
-                      // Human-readable name osquerybeat stamps on scheduled
-                      // result docs (config.Pack.pack_name contract).
-                      pack_name: packSO.attributes.name,
-                      ...packDefaults,
-                      queries: builtQueries,
-                    });
+                  }
 
-                    return draft;
-                  })
-                )
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    dedicatedPolicy.id,
+                    produce<PackagePolicy>(dedicatedPolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
+
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${packKey}`,
+                        buildPackBlock(agentPolicyIds)
+                      );
+
+                      return draft;
+                    })
+                  );
+                } catch (splitErr) {
+                  // Fleet refused the dedicated policy (e.g. multi-space agent
+                  // policy). Persist the pack SO, emit the warning, leave the
+                  // wire unchanged for the over-broad policy (do not write to it).
+                  // The targeting_warning is already populated above.
+                  osqueryContext.logFactory
+                    .get('pack')
+                    .warn(
+                      `create_pack_route: could not create dedicated package policy for pack ${
+                        packSO.id
+                      }: ${(splitErr as Error).message}`
+                    );
+                }
+              }
             )
           );
         }
@@ -310,6 +390,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
             isRruleFeatureEnabled
           ),
+          ...(targetingWarning ? { targeting_warning: targetingWarning } : {}),
         };
 
         return response.ok({

@@ -15,6 +15,8 @@ import {
   fetchAllPackagePolicies,
   groupAgentPolicyIdsByPackagePolicy,
   resolveSharedPackagePolicyShard,
+  resolvePackTargetScope,
+  resolveDedicatedPackagePolicy,
   DEFAULT_PACK_SHARD,
   validatePackScheduleFields,
   validateRruleConfig,
@@ -1748,23 +1750,136 @@ describe('resolveSharedPackagePolicyShard (deterministic shard for a shared pack
     ).toBe(30);
   });
 
-  it('resolves differing shards deterministically via the max rule', () => {
-    expect(
-      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 25, 'agent-b': 75 })
-    ).toBe(75);
+  it('returns the first explicit shard for divergent values (post-split: each write target has exactly one agent policy)', () => {
+    // With split-aware writes each package policy serves exactly one agent policy's
+    // target set, so the first entry is always the only entry.
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': 25 })).toBe(25);
+    expect(resolveSharedPackagePolicyShard(['agent-b'], { 'agent-b': 75 })).toBe(75);
   });
 
-  it('is independent of agent-policy-id ordering (repeat operations agree)', () => {
-    const shards = { 'agent-a': 25, 'agent-b': 75, 'agent-c': 50 };
-    const forward = resolveSharedPackagePolicyShard(['agent-a', 'agent-b', 'agent-c'], shards);
-    const reversed = resolveSharedPackagePolicyShard(['agent-c', 'agent-b', 'agent-a'], shards);
+  it('returns DEFAULT_PACK_SHARD when no agent policy in the list has an explicit shard', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], {})).toBe(DEFAULT_PACK_SHARD);
+  });
+});
 
-    expect(forward).toBe(75);
-    expect(reversed).toBe(forward);
+describe('resolvePackTargetScope (classify package policies as exact or over-broad)', () => {
+  const makePackagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
+    ({ id, policy_ids: policyIds } as PackagePolicy);
+
+  const makeWriteTargets = (
+    entries: Array<{ ppId: string; policyIds: string[]; agentPolicyIds: string[] }>
+  ) => {
+    const map = new Map<string, { packagePolicy: PackagePolicy; agentPolicyIds: string[] }>();
+    for (const { ppId, policyIds, agentPolicyIds } of entries) {
+      map.set(ppId, {
+        packagePolicy: makePackagePolicy(ppId, policyIds),
+        agentPolicyIds,
+      });
+    }
+
+    return map;
+  };
+
+  it('classifies a 1:1 package policy as exact', () => {
+    const targets = makeWriteTargets([
+      { ppId: 'pp-a', policyIds: ['agent-a'], agentPolicyIds: ['agent-a'] },
+    ]);
+    const [result] = resolvePackTargetScope(targets, false);
+    expect(result.kind).toBe('exact');
+    expect(result.untargetedAgentPolicyIds).toEqual([]);
   });
 
-  it('mixes explicit and default-shard agent policies using the max rule', () => {
-    // agent-b has no explicit shard (defaults to 100), which wins over agent-a's 40.
-    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 40 })).toBe(100);
+  it('classifies a shared package policy covering an extra agent policy as over-broad', () => {
+    const targets = makeWriteTargets([
+      { ppId: 'pp-shared', policyIds: ['agent-a', 'agent-b'], agentPolicyIds: ['agent-a'] },
+    ]);
+    const [result] = resolvePackTargetScope(targets, false);
+    expect(result.kind).toBe('over-broad');
+    expect(result.untargetedAgentPolicyIds).toEqual(['agent-b']);
+  });
+
+  it('global pack is always exact even if the package policy is shared', () => {
+    const targets = makeWriteTargets([
+      {
+        ppId: 'pp-shared',
+        policyIds: ['agent-a', 'agent-b'],
+        agentPolicyIds: ['agent-a', 'agent-b'],
+      },
+    ]);
+    const [result] = resolvePackTargetScope(targets, true);
+    expect(result.kind).toBe('exact');
+    expect(result.untargetedAgentPolicyIds).toEqual([]);
+  });
+
+  it('returns empty array for an empty write-targets map', () => {
+    const results = resolvePackTargetScope(new Map(), false);
+    expect(results).toEqual([]);
+  });
+
+  it('returns multiple results for multiple package policies', () => {
+    const targets = makeWriteTargets([
+      { ppId: 'pp-a', policyIds: ['agent-a'], agentPolicyIds: ['agent-a'] },
+      { ppId: 'pp-shared', policyIds: ['agent-b', 'agent-c'], agentPolicyIds: ['agent-b'] },
+    ]);
+    const results = resolvePackTargetScope(targets, false);
+    expect(results).toHaveLength(2);
+    const byId = Object.fromEntries(results.map((r) => [r.packagePolicy.id, r]));
+    expect(byId['pp-a'].kind).toBe('exact');
+    expect(byId['pp-shared'].kind).toBe('over-broad');
+    expect(byId['pp-shared'].untargetedAgentPolicyIds).toEqual(['agent-c']);
+  });
+});
+
+describe('resolveDedicatedPackagePolicy (reuse or describe creation intent)', () => {
+  const makePackagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
+    ({ id, policy_ids: policyIds } as PackagePolicy);
+
+  it('returns reuse intent when an existing policy exactly matches the target set', () => {
+    const existing = makePackagePolicy('pp-dedicated', ['agent-a']);
+    const result = resolveDedicatedPackagePolicy(['agent-a'], [existing]);
+    expect(result.action).toBe('reuse');
+    if (result.action === 'reuse') {
+      expect(result.packagePolicy).toBe(existing);
+    }
+  });
+
+  it('returns create intent when no existing policy matches the target set', () => {
+    const unrelated = makePackagePolicy('pp-other', ['agent-b']);
+    const result = resolveDedicatedPackagePolicy(['agent-a'], [unrelated]);
+    expect(result.action).toBe('create');
+    if (result.action === 'create') {
+      expect(result.name).toBe('osquery-targeted-agent-a');
+      expect(result.targetAgentPolicyIds).toEqual(['agent-a']);
+    }
+  });
+
+  it('does not reuse a policy that only partially matches', () => {
+    const partial = makePackagePolicy('pp-partial', ['agent-a', 'agent-b']);
+    const result = resolveDedicatedPackagePolicy(['agent-a'], [partial]);
+    expect(result.action).toBe('create');
+  });
+
+  it('sorts target ids when building the create name (idempotent naming)', () => {
+    const result = resolveDedicatedPackagePolicy(['agent-z', 'agent-a'], []);
+    expect(result.action).toBe('create');
+    if (result.action === 'create') {
+      expect(result.name).toBe('osquery-targeted-agent-a-agent-z');
+      expect(result.targetAgentPolicyIds).toEqual(['agent-a', 'agent-z']);
+    }
+  });
+
+  it('reuse matches regardless of the order targetAgentPolicyIds was supplied in', () => {
+    const existing = makePackagePolicy('pp-dedicated', ['agent-a', 'agent-b']);
+    const result = resolveDedicatedPackagePolicy(['agent-b', 'agent-a'], [existing]);
+    expect(result.action).toBe('reuse');
+  });
+
+  it('returns create for an empty target set with no empty matching policy', () => {
+    const result = resolveDedicatedPackagePolicy([], []);
+    expect(result.action).toBe('create');
+    if (result.action === 'create') {
+      expect(result.name).toBe('osquery-targeted-');
+      expect(result.targetAgentPolicyIds).toEqual([]);
+    }
   });
 });

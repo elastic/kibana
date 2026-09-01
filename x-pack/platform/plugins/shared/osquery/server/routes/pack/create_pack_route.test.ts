@@ -244,7 +244,7 @@ describe('createPackRoute', () => {
       );
     });
 
-    it('shared package policy with differing shards resolves deterministically (max rule)', async () => {
+    it('shared package policy with differing shards resolves deterministically (first-explicit rule)', async () => {
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
       setupRoute({
         agentPolicies: [
@@ -278,8 +278,10 @@ describe('createPackRoute', () => {
       const updatedPackagePolicy = packagePolicyUpdate.mock.calls[0][3];
       const writtenPack =
         updatedPackagePolicy.inputs[0].config.osquery.value.packs['default--my-pack'];
-      // Deterministic rule: the maximum of the two differing shards.
-      expect(writtenPack.shard).toBe(75);
+      // Deterministic rule: the shard of the first agent policy in the list (25).
+      // Post-split each package policy targets exactly one agent policy, so this
+      // is always the correct value for that policy's agents.
+      expect(writtenPack.shard).toBe(25);
     });
   });
 
@@ -353,6 +355,352 @@ describe('createPackRoute', () => {
       // Explicit override must survive convergence.
       expect(writtenQuery.interval).toBe(300);
       expect(writtenQuery.schedule_type).toBe('interval');
+    });
+  });
+
+  describe('targeting_warning (over-broad shared integration detection)', () => {
+    it('emits a targeting warning when the shared package policy covers an untargeted agent policy', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+
+      // Pack targets only agent-policy-a, but the shared policy also covers
+      // agent-policy-b — b is untargeted and should appear in the warning.
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          osqueryPackagePolicy({
+            id: 'shared-package-policy',
+            policy_ids: ['agent-policy-a', 'agent-policy-b'],
+          }),
+        ],
+      });
+
+      const mockClient = {
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        create: jest.fn().mockImplementation((_type, attributes, options) =>
+          Promise.resolve({
+            id: 'pack-id',
+            attributes,
+            references: options?.references ?? [],
+          })
+        ),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
+
+      const getByIds = jest
+        .fn()
+        // First call: resolve targeted agent policy (agent-policy-a)
+        .mockResolvedValueOnce([{ id: 'agent-policy-a', name: 'Agent Policy A' }])
+        // Second call: resolve untargeted agent policy (agent-policy-b) for warning
+        .mockResolvedValueOnce([{ id: 'agent-policy-b', name: 'Agent Policy B' }]);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({ getByIds }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      createPackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('post', '/api/osquery/packs');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: true,
+          policy_ids: ['agent-policy-a'],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const body = mockResponse.ok.mock.calls[0][0]?.body as { data: Record<string, unknown> };
+      expect(body.data.targeting_warning).toBeDefined();
+      expect(body.data.targeting_warning).toEqual({
+        untargeted_agent_policy_names: ['Agent Policy B'],
+      });
+    });
+
+    it('does not emit a targeting warning when the package policy is not over-broad', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      setupRoute({
+        agentPolicies: [{ id: 'agent-policy-a', name: 'Agent Policy A' }],
+        packagePolicies: [
+          osqueryPackagePolicy({
+            id: 'dedicated-package-policy',
+            // Dedicated: covers only the targeted agent policy
+            policy_ids: ['agent-policy-a'],
+          }),
+        ],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: true,
+          policy_ids: ['agent-policy-a'],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const body = mockResponse.ok.mock.calls[0][0]?.body as { data: Record<string, unknown> };
+      expect(body.data.targeting_warning).toBeUndefined();
+    });
+
+    it('does not emit a targeting warning for a global pack even with a shared integration', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      setupRoute({
+        agentPolicies: [
+          { id: 'agent-policy-a', name: 'Agent Policy A' },
+          { id: 'agent-policy-b', name: 'Agent Policy B' },
+        ],
+        packagePolicies: [
+          osqueryPackagePolicy({
+            id: 'shared-package-policy',
+            policy_ids: ['agent-policy-a', 'agent-policy-b'],
+          }),
+        ],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'global-pack',
+          enabled: true,
+          // Global pack: shards contains * key
+          shards: { '*': 100 },
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const body = mockResponse.ok.mock.calls[0][0]?.body as { data: Record<string, unknown> };
+      expect(body.data.targeting_warning).toBeUndefined();
+    });
+  });
+
+  describe('split-aware write (issue #285994 — shared integration leak prevention)', () => {
+    it('creates a dedicated package policy when a shared policy covers an untargeted agent policy', async () => {
+      const dedicatedPolicyId = 'pp-dedicated-a';
+      const packagePolicyCreate = jest.fn().mockResolvedValue({
+        id: dedicatedPolicyId,
+        policy_ids: ['agent-policy-a'],
+        package: { name: 'osquery_manager', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'osquery',
+            streams: [],
+            config: { osquery: { value: { packs: {} } } },
+          },
+        ],
+      });
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+
+      const packagePolicies = [
+        osqueryPackagePolicy({
+          id: 'shared-pp-ab',
+          policy_ids: ['agent-policy-a', 'agent-policy-b'],
+        }),
+      ];
+
+      const packagePolicyList = jest.fn().mockResolvedValue({ items: packagePolicies });
+      const mockClient = {
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        create: jest
+          .fn()
+          .mockImplementation((_type, attributes, options) =>
+            Promise.resolve({ id: 'pack-id', attributes, references: options?.references ?? [] })
+          ),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'agent-policy-a', name: 'policy-a' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+            create: packagePolicyCreate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      createPackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('post', '/api/osquery/packs');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: true,
+          // Only target agent-policy-a, NOT agent-policy-b
+          policy_ids: ['agent-policy-a'],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      // A dedicated policy was created targeting only agent-policy-a.
+      expect(packagePolicyCreate).toHaveBeenCalledTimes(1);
+      expect(packagePolicyCreate.mock.calls[0][2]).toMatchObject({
+        policy_ids: ['agent-policy-a'],
+        name: expect.stringContaining('osquery-targeted-'),
+      });
+      // The pack was written to the dedicated policy (never to the shared one).
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      expect(packagePolicyUpdate.mock.calls[0][2]).toBe(dedicatedPolicyId);
+    });
+
+    it('reuses a pre-existing dedicated policy with the exact target set', async () => {
+      const existingDedicatedPolicy = osqueryPackagePolicy({
+        id: 'pp-existing-dedicated',
+        policy_ids: ['agent-policy-a'],
+        name: 'osquery-targeted-agent-policy-a',
+      });
+      const packagePolicyCreate = jest.fn();
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+
+      const packagePolicies = [
+        osqueryPackagePolicy({
+          id: 'shared-pp-ab',
+          policy_ids: ['agent-policy-a', 'agent-policy-b'],
+        }),
+        existingDedicatedPolicy,
+      ];
+
+      const packagePolicyList = jest.fn().mockResolvedValue({ items: packagePolicies });
+      const mockClient = {
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        create: jest
+          .fn()
+          .mockImplementation((_type, attributes, options) =>
+            Promise.resolve({ id: 'pack-id', attributes, references: options?.references ?? [] })
+          ),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'agent-policy-a', name: 'policy-a' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+            create: packagePolicyCreate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      createPackRoute(mockRouter, mockOsqueryContext);
+      const route2 = mockRouter.versioned.getRoute('post', '/api/osquery/packs');
+      const routeVersion2 = route2.versions[API_VERSIONS.public.v1];
+      if (!routeVersion2) throw new Error('no route version');
+      routeHandler = routeVersion2.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: true,
+          policy_ids: ['agent-policy-a'],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      // No new policy created — reused the existing dedicated one.
+      expect(packagePolicyCreate).not.toHaveBeenCalled();
+      // Pack written to the existing dedicated policy.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      expect(packagePolicyUpdate.mock.calls[0][2]).toBe('pp-existing-dedicated');
+    });
+
+    it('global pack (shards.*) writes directly without splitting', async () => {
+      const packagePolicyCreate = jest.fn();
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      setupRoute({
+        agentPolicies: [
+          { id: 'agent-policy-a', name: 'agent-policy-a' },
+          { id: 'agent-policy-b', name: 'agent-policy-b' },
+        ],
+        packagePolicies: [
+          osqueryPackagePolicy({
+            id: 'shared-pp-ab',
+            policy_ids: ['agent-policy-a', 'agent-policy-b'],
+          }),
+        ],
+        packagePolicyUpdate,
+      });
+      // Patch create onto the context after setup
+      (mockOsqueryContext.service.getPackagePolicyService() as any).create = packagePolicyCreate;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'global-pack',
+          enabled: true,
+          shards: { '*': 100 },
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      // Global pack: no split, no dedicated policy created.
+      expect(packagePolicyCreate).not.toHaveBeenCalled();
     });
   });
 });

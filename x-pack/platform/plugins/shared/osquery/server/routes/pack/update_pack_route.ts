@@ -39,6 +39,8 @@ import {
   policyHasPack,
   removePackFromPolicy,
   makePackKey,
+  resolveDedicatedPackagePolicy,
+  resolvePackTargetScope,
   resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
@@ -51,7 +53,7 @@ import {
 
 import { convertShardsToArray, convertShardsToObject } from '../utils';
 import type { PackSavedObject } from '../../common/types';
-import type { PackResponseData } from './types';
+import type { PackResponseData, TargetingWarning } from './types';
 import type { PackQueryInput, PreservableQueryFields } from './utils';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
@@ -471,19 +473,25 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         try {
           if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
             if (enabled) {
-              const policyIds =
+              const enablePolicyIds =
                 policy_ids || !isEmpty(effectiveShards) ? policiesList : currentAgentPolicyIds;
               // Dedup by resolved package-policy id before writing: a
               // shared package policy must be written exactly once.
               const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
-                policyIds,
+                enablePolicyIds,
                 packagePolicies
               );
+              const enableScopeResults = resolvePackTargetScope(
+                packagePolicyWriteTargets,
+                Boolean(effectiveShards?.['*'])
+              );
+
+              const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
 
               await Promise.all(
-                Array.from(packagePolicyWriteTargets.values()).map(
-                  ({ packagePolicy, agentPolicyIds }) =>
-                    packagePolicyService?.update(
+                enableScopeResults.map(async ({ packagePolicy, agentPolicyIds, kind }) => {
+                  if (kind === 'exact') {
+                    return packagePolicyService?.update(
                       spaceScopedClient,
                       esClient,
                       packagePolicy.id,
@@ -493,7 +501,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                           set(draft, 'inputs[0].streams', []);
                         }
 
-                        const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
                         removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
                         set(
                           draft,
@@ -503,8 +510,56 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
                         return draft;
                       })
-                    )
-                )
+                    );
+                  }
+
+                  // Split: create/reuse a dedicated package policy.
+                  const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
+                  try {
+                    let dedicatedPolicy: PackagePolicy;
+                    if (intent.action === 'reuse') {
+                      dedicatedPolicy = intent.packagePolicy;
+                    } else {
+                      const { id: _id, ...sharedBase } = packagePolicy;
+                      dedicatedPolicy = await packagePolicyService!.create(
+                        spaceScopedClient,
+                        esClient,
+                        {
+                          ...sharedBase,
+                          name: intent.name,
+                          policy_ids: intent.targetAgentPolicyIds,
+                        }
+                      );
+                    }
+
+                    return packagePolicyService?.update(
+                      spaceScopedClient,
+                      esClient,
+                      dedicatedPolicy.id,
+                      produce<PackagePolicy>(dedicatedPolicy, (draft) => {
+                        unset(draft, 'id');
+                        if (!has(draft, 'inputs[0].streams')) {
+                          set(draft, 'inputs[0].streams', []);
+                        }
+
+                        removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                        set(
+                          draft,
+                          `inputs[0].config.osquery.value.packs.${pk}`,
+                          buildFleetPackBlock(agentPolicyIds)
+                        );
+
+                        return draft;
+                      })
+                    );
+                  } catch (splitErr) {
+                    logger.warn(
+                      `update_pack_route: could not create dedicated policy (enable branch) for pack ${
+                        updatedPackSO.id
+                      }: ${(splitErr as Error).message}`
+                    );
+                  }
+                })
               );
             } else {
               // Remove the pack from EVERY package policy that carries it on
@@ -533,16 +588,20 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           } else if (targetingChangeRequested) {
             // Retarget. Detach is driven off the wire, not SO references, so it
             // stays correct when the two have diverged (#279224).
-            const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+            const retargetWriteTargets = groupAgentPolicyIdsByPackagePolicy(
               policiesList,
               packagePolicies
             );
+            const retargetScopeResults = resolvePackTargetScope(
+              retargetWriteTargets,
+              Boolean(effectiveShards?.['*'])
+            );
             const writeTargetIds = new Set(
-              Array.from(packagePolicyWriteTargets.values()).map(
-                ({ packagePolicy }) => packagePolicy.id
-              )
+              retargetScopeResults.map(({ packagePolicy }) => packagePolicy.id)
             );
 
+            // Detach: strip the pack from any package policy that no longer carries
+            // it (wire-scan driven; also strips over-broad policies task 3.3).
             await Promise.all(
               currentPackagePolicies
                 .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
@@ -561,10 +620,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 )
             );
 
+            const retargetPk = makePackKey(updatedPackSO.attributes.name, spaceId);
+
             await Promise.all(
-              Array.from(packagePolicyWriteTargets.values()).map(
-                ({ packagePolicy, agentPolicyIds }) =>
-                  packagePolicyService?.update(
+              retargetScopeResults.map(async ({ packagePolicy, agentPolicyIds, kind }) => {
+                if (kind === 'exact') {
+                  return packagePolicyService?.update(
                     spaceScopedClient,
                     esClient,
                     packagePolicy.id,
@@ -574,91 +635,221 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         set(draft, 'inputs[0].streams', []);
                       }
 
-                      // Rename cleanup: drop the pack under its previous name so a
-                      // renamed pack doesn't linger under both keys.
                       if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
                         removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
                       }
 
-                      const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
                       removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
                       set(
                         draft,
-                        `inputs[0].config.osquery.value.packs.${pk}`,
+                        `inputs[0].config.osquery.value.packs.${retargetPk}`,
                         buildFleetPackBlock(agentPolicyIds)
                       );
 
                       return draft;
                     })
-                  )
-              )
+                  );
+                }
+
+                // Split path.
+                const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
+                try {
+                  let dedicatedPolicy: PackagePolicy;
+                  if (intent.action === 'reuse') {
+                    dedicatedPolicy = intent.packagePolicy;
+                  } else {
+                    const { id: _id, ...sharedBase } = packagePolicy;
+                    dedicatedPolicy = await packagePolicyService!.create(
+                      spaceScopedClient,
+                      esClient,
+                      {
+                        ...sharedBase,
+                        name: intent.name,
+                        policy_ids: intent.targetAgentPolicyIds,
+                      }
+                    );
+                  }
+
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    dedicatedPolicy.id,
+                    produce<PackagePolicy>(dedicatedPolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
+
+                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                      }
+
+                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${retargetPk}`,
+                        buildFleetPackBlock(agentPolicyIds)
+                      );
+
+                      return draft;
+                    })
+                  );
+                } catch (splitErr) {
+                  logger.warn(
+                    `update_pack_route: could not create dedicated policy (retarget branch) for pack ${
+                      updatedPackSO.id
+                    }: ${(splitErr as Error).message}`
+                  );
+                }
+              })
             );
           } else {
             // Edit-only. Write targets are the UNION of the wire scan (repairs
             // blocks whose SO references drifted) and the reference-resolved
             // policies (attach-on-edit). Wire-only would 200 while advertising
             // `policy_ids: [P]` and writing nothing to P.
-            const editWriteTargets = new Map<string, PackagePolicy>();
+            const editRawTargets = new Map<string, PackagePolicy>();
             for (const packagePolicy of currentPackagePolicies) {
-              editWriteTargets.set(packagePolicy.id, packagePolicy);
+              editRawTargets.set(packagePolicy.id, packagePolicy);
             }
 
             for (const { packagePolicy } of groupAgentPolicyIdsByPackagePolicy(
               policiesList,
               packagePolicies
             ).values()) {
-              editWriteTargets.set(packagePolicy.id, packagePolicy);
+              editRawTargets.set(packagePolicy.id, packagePolicy);
             }
 
+            // Build a map that mirrors groupAgentPolicyIdsByPackagePolicy shape
+            // so resolvePackTargetScope can classify each write target.
+            const editWriteTargetsForScope = new Map<
+              string,
+              { packagePolicy: PackagePolicy; agentPolicyIds: string[] }
+            >();
+            for (const [ppId, packagePolicy] of editRawTargets.entries()) {
+              const agentPolicyIds = (packagePolicy.policy_ids ?? []).filter((id) =>
+                policiesList.includes(id)
+              );
+              editWriteTargetsForScope.set(ppId, { packagePolicy, agentPolicyIds });
+            }
+
+            const editScopeResults = resolvePackTargetScope(
+              editWriteTargetsForScope,
+              Boolean(effectiveShards?.['*'])
+            );
+
+            const editPk = makePackKey(updatedPackSO.attributes.name, spaceId);
+
             await Promise.all(
-              [...editWriteTargets.values()].map((packagePolicy) =>
-                packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    if (!has(draft, 'inputs[0].streams')) {
-                      set(draft, 'inputs[0].streams', []);
-                    }
+              editScopeResults.map(async ({ packagePolicy, agentPolicyIds, kind }) => {
+                // Wire-scan-only entries (drift repair) have an empty intersection
+                // with policiesList — write directly with the original intersection
+                // logic so the shard is preserved from the wire.
+                const effectiveIds =
+                  agentPolicyIds.length > 0
+                    ? agentPolicyIds
+                    : (packagePolicy.policy_ids ?? []).filter((id) => policiesList.includes(id));
 
-                    if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                    }
+                if (kind === 'exact' || agentPolicyIds.length === 0) {
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
 
-                    const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
-                    // Read the LEGACY bare key too: `policyHasPack` matches it,
-                    // which is how a pre-space-key block enters this write set in
-                    // the first place. Canonical-only would leave `existingShard`
-                    // undefined and let an empty target intersection fall through
-                    // to DEFAULT_PACK_SHARD, resetting a deliberate 25 to 100 —
-                    // the exact drift this branch exists to repair.
-                    const existingShard = (get(
-                      draft,
-                      `inputs[0].config.osquery.value.packs.${pk}.shard`
-                    ) ??
-                      get(
+                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                      }
+
+                      // Read the LEGACY bare key too: `policyHasPack` matches it,
+                      // which is how a pre-space-key block enters this write set in
+                      // the first place. Canonical-only would leave `existingShard`
+                      // undefined and let an empty target intersection fall through
+                      // to DEFAULT_PACK_SHARD, resetting a deliberate 25 to 100 —
+                      // the exact drift this branch exists to repair.
+                      const existingShard = (get(
                         draft,
-                        `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
-                      )) as number | undefined;
-                    removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                    set(
-                      draft,
-                      `inputs[0].config.osquery.value.packs.${pk}`,
-                      buildFleetPackBlock(
-                        // Intersect with this pack's OWN targets: `policyShards`
-                        // is keyed off `policiesList`, so co-tenants on a shared
-                        // package policy resolve to DEFAULT_PACK_SHARD and
-                        // `Math.max` would promote a deliberate 25 to 100.
-                        (packagePolicy.policy_ids ?? []).filter((id) => policiesList.includes(id)),
-                        existingShard
-                      )
-                    );
+                        `inputs[0].config.osquery.value.packs.${editPk}.shard`
+                      ) ??
+                        get(
+                          draft,
+                          `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
+                        )) as number | undefined;
+                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${editPk}`,
+                        buildFleetPackBlock(effectiveIds, existingShard)
+                      );
 
-                    return draft;
-                  })
-                )
-              )
+                      return draft;
+                    })
+                  );
+                }
+
+                // Split path.
+                const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
+                try {
+                  let dedicatedPolicy: PackagePolicy;
+                  if (intent.action === 'reuse') {
+                    dedicatedPolicy = intent.packagePolicy;
+                  } else {
+                    const { id: _id, ...sharedBase } = packagePolicy;
+                    dedicatedPolicy = await packagePolicyService!.create(
+                      spaceScopedClient,
+                      esClient,
+                      {
+                        ...sharedBase,
+                        name: intent.name,
+                        policy_ids: intent.targetAgentPolicyIds,
+                      }
+                    );
+                  }
+
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    dedicatedPolicy.id,
+                    produce<PackagePolicy>(dedicatedPolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
+
+                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                      }
+
+                      const existingShard = (get(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${editPk}.shard`
+                      ) ??
+                        get(
+                          draft,
+                          `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
+                        )) as number | undefined;
+                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${editPk}`,
+                        buildFleetPackBlock(agentPolicyIds, existingShard)
+                      );
+
+                      return draft;
+                    })
+                  );
+                } catch (splitErr) {
+                  logger.warn(
+                    `update_pack_route: could not create dedicated policy (edit-only branch) for pack ${
+                      updatedPackSO.id
+                    }: ${(splitErr as Error).message}`
+                  );
+                }
+              })
             );
 
             // Heal references to match the wire. Best-effort: the save already
@@ -749,8 +940,38 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           throw err;
         }
 
+        // Detect over-broad package policies and build a targeting warning (group 2).
+        let targetingWarning: TargetingWarning | undefined;
+        if (policiesList.length) {
+          const isGlobalPack = Boolean(effectiveShards?.['*']);
+          if (!isGlobalPack) {
+            const writeTargets = groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies);
+            const scopeResults = resolvePackTargetScope(writeTargets, false);
+            const overBroadResults = scopeResults.filter((r) => r.kind === 'over-broad');
+            if (overBroadResults.length > 0) {
+              const untargetedIds = new Set(
+                overBroadResults.flatMap((r) => r.untargetedAgentPolicyIds)
+              );
+              const untargetedAgentPolicies = await agentPolicyService?.getByIds(
+                spaceScopedClient,
+                [...untargetedIds]
+              );
+              const untargetedNames = (untargetedAgentPolicies ?? [])
+                .filter((ap) => untargetedIds.has(ap.id))
+                .map((ap) => ap.name);
+              targetingWarning = { untargeted_agent_policy_names: untargetedNames };
+            }
+          }
+        }
+
+        const responseData = buildResponseData();
+
         return response.ok({
-          body: { data: buildResponseData() },
+          body: {
+            data: targetingWarning
+              ? { ...responseData, targeting_warning: targetingWarning }
+              : responseData,
+          },
         });
       }
     );

@@ -46,6 +46,7 @@ import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { TargetingWarningCallout } from './targeting_warning_callout';
 import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & {
@@ -456,7 +457,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
+            {policyIds.length > 0 ? (
+              <TargetingWarningCallout policyIds={policyIds} />
+            ) : (
+              <EuiSpacer size="m" />
+            )}
 
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
