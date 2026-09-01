@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/core-ui-settings-browser-mocks'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package
