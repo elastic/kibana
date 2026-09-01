@@ -2254,6 +2254,24 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(['Dataset contains invalid characters']);
     });
 
+    it('should not return an error message for integration packages with valid dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'aws_logs.audit', package: 'aws_logs' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(null);
+    });
+
     it('should not return an error message if the var is not dataset', () => {
       const res = validatePackagePolicyConfig(
         {
