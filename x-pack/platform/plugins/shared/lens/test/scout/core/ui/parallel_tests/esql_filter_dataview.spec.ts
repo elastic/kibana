@@ -8,12 +8,12 @@
 import type { ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { applyLensInlineEditorAndWaitClosed, spaceTest } from '../fixtures';
+import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
-const INITIAL_ESQL_QUERY = `FROM kibana_sample_data_logs
+const INITIAL_ESQL_QUERY = `FROM ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}
   | STATS count = COUNT(*) BY \`Over time\` = TBUCKET(50), agent.keyword`;
 
-const WILDCARD_ESQL_QUERY = `FROM kibana_sample_data_log*
+const WILDCARD_ESQL_QUERY = `FROM ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}*
   | STATS count = COUNT(*) BY \`Over time\` = TBUCKET(50), agent.keyword`;
 
 async function setEsqlQueryAndRun(page: ScoutPage, query: string) {
@@ -24,18 +24,20 @@ async function setEsqlQueryAndRun(page: ScoutPage, query: string) {
   await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/264654
-spaceTest.describe.skip(
+spaceTest.describe(
   'Lens ES|QL filter data view selector',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
-      await Promise.all([
-        apiServices.sampleData.install('logs', scoutSpace.id),
-        apiServices.sampleData.install('flights', scoutSpace.id),
-      ]);
+      await apiServices.dataViews.create({
+        title: testData.DATA_VIEW_ID.FLIGHTS,
+        name: testData.DATA_VIEW_ID.FLIGHTS,
+        timeFieldName: 'timestamp',
+        spaceId: scoutSpace.id,
+      });
       await scoutSpace.uiSettings.set({
-        'timepicker:timeDefaults': '{ "from": "now-7d", "to": "now" }',
+        'dateFormat:tz': 'UTC',
+        'timepicker:timeDefaults': JSON.stringify(testData.TSDB_IN_RANGE_DATES),
       });
     });
 
@@ -43,13 +45,9 @@ spaceTest.describe.skip(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('timepicker:timeDefaults');
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
-      await Promise.all([
-        apiServices.sampleData.remove('logs', scoutSpace.id),
-        apiServices.sampleData.remove('flights', scoutSpace.id),
-      ]);
     });
 
     spaceTest(
@@ -82,11 +80,10 @@ spaceTest.describe.skip(
           await expect(page.testSubj.locator('lnsApp')).toBeVisible();
 
           await page.testSubj.click('lns-dataView-switch-link');
-          await page.testSubj.fill('indexPattern-switcher--input', 'Kibana Sample Data Flights');
-          await page
-            .locator(
-              `[data-test-subj="indexPattern-switcher"] [title="Kibana Sample Data Flights"]`
-            )
+          await page.testSubj.fill('indexPattern-switcher--input', testData.DATA_VIEW_ID.FLIGHTS);
+          await page.testSubj
+            .locator('indexPattern-switcher')
+            .locator(`[data-test-subj="dataView-${testData.DATA_VIEW_ID.FLIGHTS}"]`)
             .click();
 
           await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 10_000 });
