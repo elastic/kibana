@@ -180,14 +180,14 @@ describe('Chart', () => {
     await mountComponent({ mockEditVisualization: undefined });
 
     expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
-    expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit visualization' })).not.toBeInTheDocument();
   });
 
   test('render when chart is defined and onEditVisualization is defined', async () => {
     await mountComponent();
 
     expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
-    expect(screen.getByText('Edit visualization')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Edit visualization' })).toBeVisible();
   });
 
   test('render when chart.hidden is true', async () => {
@@ -213,8 +213,8 @@ describe('Chart', () => {
 
     expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.getByText('Edit visualization')).toBeVisible();
-    expect(screen.getByText('Save visualization to dashboard')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Edit visualization' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Save visualization to dashboard' })).toBeVisible();
   });
 
   test('should not render when is text based, non-transformational and non-time-based', async () => {
@@ -226,8 +226,10 @@ describe('Chart', () => {
 
     expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
-    expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
-    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit visualization' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Save visualization to dashboard' })
+    ).not.toBeInTheDocument();
   });
 
   test('should not render when is text based, non-transformational, non-time-based and suggestions are available', async () => {
@@ -240,8 +242,10 @@ describe('Chart', () => {
 
     expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
-    expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
-    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit visualization' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Save visualization to dashboard' })
+    ).not.toBeInTheDocument();
   });
 
   test('should render when is text based, non-transformational and time-based', async () => {
@@ -252,8 +256,8 @@ describe('Chart', () => {
 
     expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.getByText('Edit visualization')).toBeVisible();
-    expect(screen.getByText('Save visualization to dashboard')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Edit visualization' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Save visualization to dashboard' })).toBeVisible();
   });
 
   test('should render when is text based, transformational and time-based', async () => {
@@ -264,8 +268,8 @@ describe('Chart', () => {
 
     expect(screen.getByTestId(toggleActionsTestId)).toBeVisible();
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.getByText('Edit visualization')).toBeVisible();
-    expect(screen.getByText('Save visualization to dashboard')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Edit visualization' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Save visualization to dashboard' })).toBeVisible();
   });
 
   test('should not render when is text based, transformational and no suggestions available', async () => {
@@ -277,8 +281,10 @@ describe('Chart', () => {
 
     expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
-    expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
-    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit visualization' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Save visualization to dashboard' })
+    ).not.toBeInTheDocument();
   });
 
   test('render progress bar when text based and request is loading', async () => {
@@ -305,7 +311,7 @@ describe('Chart', () => {
 
     expect(mockOnEditVisualization).not.toHaveBeenCalled();
 
-    await user.click(screen.getByText('Edit visualization'));
+    await user.click(screen.getByRole('button', { name: 'Edit visualization' }));
 
     expect(mockOnEditVisualization).toHaveBeenCalled();
   });
@@ -351,7 +357,9 @@ describe('Chart', () => {
     });
 
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Save visualization to dashboard' })
+    ).not.toBeInTheDocument();
   });
 
   it('should not render the save button when the dashboard save by value permissions are false', async () => {
@@ -361,7 +369,9 @@ describe('Chart', () => {
     });
 
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
-    expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Save visualization to dashboard' })
+    ).not.toBeInTheDocument();
   });
 
   it('opens save modal with an empty title', async () => {
@@ -374,7 +384,7 @@ describe('Chart', () => {
       dataView: dataViewMock,
     });
 
-    await user.click(screen.getByText('Save visualization to dashboard'));
+    await user.click(screen.getByRole('button', { name: 'Save visualization to dashboard' }));
 
     expect(lensSaveModalComponentMock).toHaveBeenCalled();
     const firstCall = lensSaveModalComponentMock.mock.calls[0] as unknown as
