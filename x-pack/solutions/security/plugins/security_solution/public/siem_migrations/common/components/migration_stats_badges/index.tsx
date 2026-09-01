@@ -7,44 +7,50 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { useResultVisColors } from '../../utils';
 import * as i18n from './translations';
 
 export interface MigrationStatsBadgesProps {
-  /** Stats for the currently selected migration */
-  migrationStats: MigrationTaskStats;
+  /** Translation stats for the currently selected migration */
+  translationStats: RuleMigrationTranslationStats;
 }
 
-interface StatBadgeProps {
+interface StatItemProps {
   count: number;
   label: string;
-  color: string;
+  /** Color used for both the label text and the count badge */
+  labelColor: string;
+  /** Named EUI badge color (or hex) for the count badge background */
+  badgeColor: string;
   testId: string;
 }
 
-const StatBadge: React.FC<StatBadgeProps> = React.memo(({ count, label, color, testId }) => (
-  <EuiFlexGroup
-    direction="row"
-    gutterSize="xs"
-    alignItems="center"
-    responsive={false}
-    css={css`
-      white-space: nowrap;
-    `}
-    data-test-subj={testId}
-  >
-    <EuiText size="xs" css={css({ color, fontWeight: 'bold' })}>
-      <span>{count}</span>
-    </EuiText>
-    <EuiText size="xs" css={css({ color })}>
-      <span>{label}</span>
-    </EuiText>
-  </EuiFlexGroup>
-));
+const StatItem: React.FC<StatItemProps> = React.memo(
+  ({ count, label, labelColor, badgeColor, testId }) => (
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={css`
+        white-space: nowrap;
+      `}
+      data-test-subj={testId}
+    >
+      <EuiText size="xs" css={css({ color: labelColor })}>
+        <span>{label}</span>
+      </EuiText>
+      <EuiBadge color={badgeColor} data-test-subj={`${testId}Badge`}>
+        {count}
+      </EuiBadge>
+    </EuiFlexGroup>
+  )
+);
 
-StatBadge.displayName = 'StatBadge';
+StatItem.displayName = 'StatItem';
 
 const Separator: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -64,48 +70,57 @@ const Separator: React.FC = () => {
 Separator.displayName = 'Separator';
 
 /**
- * Inline stats badges rendered in the migration toolbar. Shows a compact
- * summary of the selected migration's item counts (total, translated,
- * processing, pending, failed) separated by thin vertical dividers.
+ * Inline translation stats badges rendered in the migration toolbar. Shows a
+ * compact summary of the selected migration's translation results (total,
+ * translated, partially translated, not translated, failed) separated by
+ * thin vertical dividers. Each stat renders as `<label> <count_badge>` where
+ * the badge shares the translation result's semantic color, matching the
+ * translation results chart/table.
  */
 export const MigrationStatsBadges: React.FC<MigrationStatsBadgesProps> = React.memo(
-  ({ migrationStats }) => {
+  ({ translationStats }) => {
     const { euiTheme } = useEuiTheme();
+    const translationResultColors = useResultVisColors();
 
     const stats = useMemo(
       () => [
         {
-          count: migrationStats.items.total,
+          count: translationStats.rules.total,
           label: i18n.STATS_TOTAL_LABEL,
-          color: euiTheme.colors.text,
+          labelColor: euiTheme.colors.text,
+          badgeColor: 'hollow',
           testId: 'migrationStatsTotal',
         },
         {
-          count: migrationStats.items.completed,
+          count: translationStats.rules.success.result.full,
           label: i18n.STATS_TRANSLATED_LABEL,
-          color: euiTheme.colors.success,
+          labelColor: translationResultColors.full,
+          badgeColor: translationResultColors.full,
           testId: 'migrationStatsTranslated',
         },
         {
-          count: migrationStats.items.processing,
-          label: i18n.STATS_PROCESSING_LABEL,
-          color: euiTheme.colors.primary,
-          testId: 'migrationStatsProcessing',
+          count: translationStats.rules.success.result.partial,
+          label: i18n.STATS_PARTIAL_LABEL,
+          labelColor: translationResultColors.partial,
+          badgeColor: translationResultColors.partial,
+          testId: 'migrationStatsPartial',
         },
         {
-          count: migrationStats.items.pending,
-          label: i18n.STATS_PENDING_LABEL,
-          color: euiTheme.colors.subduedText,
-          testId: 'migrationStatsPending',
+          count: translationStats.rules.success.result.untranslatable,
+          label: i18n.STATS_UNTRANSLATABLE_LABEL,
+          labelColor: translationResultColors.untranslatable,
+          badgeColor: translationResultColors.untranslatable,
+          testId: 'migrationStatsUntranslatable',
         },
         {
-          count: migrationStats.items.failed,
+          count: translationStats.rules.failed,
           label: i18n.STATS_FAILED_LABEL,
-          color: euiTheme.colors.danger,
+          labelColor: translationResultColors.error,
+          badgeColor: translationResultColors.error,
           testId: 'migrationStatsFailed',
         },
       ],
-      [migrationStats.items, euiTheme.colors]
+      [translationStats, euiTheme.colors, translationResultColors]
     );
 
     return (
@@ -113,6 +128,7 @@ export const MigrationStatsBadges: React.FC<MigrationStatsBadgesProps> = React.m
         direction="row"
         gutterSize="m"
         alignItems="center"
+        justifyContent="spaceBetween"
         responsive={false}
         data-test-subj="migrationStatsBadges"
       >
@@ -124,7 +140,7 @@ export const MigrationStatsBadges: React.FC<MigrationStatsBadgesProps> = React.m
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <StatBadge {...stat} />
+              <StatItem {...stat} />
             </EuiFlexItem>
           </React.Fragment>
         ))}

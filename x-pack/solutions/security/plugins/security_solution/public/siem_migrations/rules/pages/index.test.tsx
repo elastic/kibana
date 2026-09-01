@@ -286,6 +286,15 @@ describe('Migrations: Translated Rules Page', () => {
 
       expect(await screen.findByTestId('addAnotherMigrationButton')).toBeInTheDocument();
     });
+
+    test('should render the missing integrations menu action', async () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('missingIntegrationsButton')).toBeInTheDocument();
+    });
   });
 
   describe('Migration selector', () => {
@@ -311,14 +320,16 @@ describe('Migrations: Translated Rules Page', () => {
   });
 
   describe('Migration stats badges', () => {
-    test('should render stats badges for the selected migration', () => {
+    test('should render translation stats badges for the selected migration', () => {
       useLatestStatsSpy.mockReturnValue(mockedLatestStats);
       renderTestComponent({ migrationId: '1' });
 
       expect(screen.getByTestId('migrationStatsBadges')).toBeVisible();
-      expect(screen.getByTestId('migrationStatsTotal')).toHaveTextContent('1');
-      expect(screen.getByTestId('migrationStatsTranslated')).toHaveTextContent('1');
-      expect(screen.getByTestId('migrationStatsFailed')).toHaveTextContent('0');
+      expect(screen.getByTestId('migrationStatsTotalBadge')).toHaveTextContent('2');
+      expect(screen.getByTestId('migrationStatsTranslatedBadge')).toHaveTextContent('1');
+      expect(screen.getByTestId('migrationStatsPartialBadge')).toHaveTextContent('0');
+      expect(screen.getByTestId('migrationStatsUntranslatableBadge')).toHaveTextContent('1');
+      expect(screen.getByTestId('migrationStatsFailedBadge')).toHaveTextContent('0');
     });
 
     test('should not render stats badges when no migration is selected', () => {

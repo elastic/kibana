@@ -58,6 +58,22 @@ export const useMigrationAppHeaderProps = ({
           href: getAppUrl({ deepLinkId: SecurityPageName.landing, path: onboardingPath }),
           run: () => navigateTo({ deepLinkId: SecurityPageName.landing, path: onboardingPath }),
         },
+        {
+          id: 'missingIntegrations',
+          testId: 'missingIntegrationsButton',
+          label: i18n.SIEM_MIGRATIONS_MISSING_INTEGRATIONS_TITLE,
+          iconType: 'indexOpen',
+          order: 1,
+          href: getAppUrl({
+            deepLinkId: SecurityPageName.landing,
+            path: `${OnboardingTopicId.siemMigrations}#${OnboardingCardId.siemMigrationIntegrations}`,
+          }),
+          run: () =>
+            navigateTo({
+              deepLinkId: SecurityPageName.landing,
+              path: `${OnboardingTopicId.siemMigrations}#${OnboardingCardId.siemMigrationIntegrations}`,
+            }),
+        },
       ],
     };
   }, [migrationsStats.length, migrationType, getAppUrl, navigateTo]);

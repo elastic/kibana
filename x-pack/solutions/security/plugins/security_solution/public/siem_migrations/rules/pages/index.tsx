@@ -15,6 +15,7 @@ import {
   EuiSkeletonTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
@@ -32,7 +33,10 @@ import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/d
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
-import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
+import {
+  useGetMigrationTranslationStats,
+  useInvalidateGetMigrationTranslationStats,
+} from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 import { useMigrationAppHeaderProps } from '../../common/hooks/use_migration_app_header_props';
@@ -110,6 +114,13 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       [ruleMigrationsStats, migrationId]
     );
 
+    // Translation stats for the selected migration, shared with MigrationRulesTable via the
+    // react-query cache (same cache key), so no extra network request is made.
+    const { data: selectedTranslationStats } = useGetMigrationTranslationStats(
+      migrationId ?? '',
+      !!migrationId
+    );
+
     const content = useMemo(() => {
       if (ruleMigrationsStats.length === 0 && !migrationId) {
         return <EmptyMigrationRulesPage />;
@@ -164,17 +175,23 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         {ruleMigrationsStats.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="flexEnd" gutterSize="l" responsive>
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="l" responsive>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  flex-basis: 40%;
+                  min-width: 40%;
+                `}
+              >
                 <MigrationSelector
                   migrationsStats={ruleMigrationsStats}
                   selectedMigrationId={migrationId}
                   onMigrationIdChange={onMigrationIdChange}
                 />
               </EuiFlexItem>
-              {selectedMigrationStats && (
-                <EuiFlexItem grow={false}>
-                  <MigrationStatsBadges migrationStats={selectedMigrationStats} />
+              {selectedTranslationStats && (
+                <EuiFlexItem grow>
+                  <MigrationStatsBadges translationStats={selectedTranslationStats} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

@@ -21,17 +21,17 @@ export const STATS_TRANSLATED_LABEL = i18n.translate(
   }
 );
 
-export const STATS_PROCESSING_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.statsBadges.processing',
+export const STATS_PARTIAL_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.statsBadges.partial',
   {
-    defaultMessage: 'Processing',
+    defaultMessage: 'Partially translated',
   }
 );
 
-export const STATS_PENDING_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.statsBadges.pending',
+export const STATS_UNTRANSLATABLE_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.statsBadges.untranslatable',
   {
-    defaultMessage: 'Pending',
+    defaultMessage: 'Not translated',
   }
 );
 

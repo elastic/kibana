@@ -7,19 +7,12 @@
 
 import React, { useMemo } from 'react';
 
+import { EuiBadge, EuiComboBox } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
-import * as i18n from '../header_buttons/translations';
 import { SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID } from '../header_buttons';
+import { SIEM_MIGRATIONS_OPTION_AREAL_LABEL } from '../header_buttons/translations';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 
@@ -78,37 +71,25 @@ export const MigrationSelector: React.FC<MigrationSelectorProps> = React.memo(
     }
 
     return (
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            width: 400px;
-          `}
-        >
-          <EuiTitle size="xxxs">
-            <h6>{i18n.SIEM_MIGRATIONS_OPTION_TITLE}</h6>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiComboBox
-            id={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
-            data-test-subj={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
-            aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
-            onChange={onChange}
-            options={migrationOptions}
-            selectedOptions={selectedMigrationOption}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-            inputPopoverProps={{
-              css: css`
-                & .euiComboBox__inputWrap div {
-                  inline-size: 100%;
-                }
-              `,
-            }}
-            fullWidth
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiComboBox
+        id={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
+        data-test-subj={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
+        aria-label={SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
+        onChange={onChange}
+        options={migrationOptions}
+        selectedOptions={selectedMigrationOption}
+        singleSelection={{ asPlainText: true }}
+        isClearable={false}
+        sortMatchesBy="startsWith"
+        inputPopoverProps={{
+          css: css`
+            & .euiComboBox__inputWrap div {
+              inline-size: 100%;
+            }
+          `,
+        }}
+        fullWidth
+      />
     );
   }
 );
