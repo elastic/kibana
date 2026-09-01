@@ -7,6 +7,7 @@
 
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 import type {
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
@@ -20,15 +21,6 @@ const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
 const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
-
-const API_VERSIONS = {
-  public: {
-    v1: '2023-10-31',
-  },
-  internal: {
-    v1: '1',
-  },
-};
 
 export type IndexEntityStoreEntryOptions =
   | { entityType?: 'host' }
@@ -91,14 +83,14 @@ export const getEntityAnalyticsApiService = ({
           const existingDataView = await kbnClient.request<{ data_view?: unknown }>({
             method: 'GET',
             path: `${basePath}/api/data_views/data_view/${dataViewId}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             ignoreErrors: [404],
           });
           if (!existingDataView?.data?.data_view) {
             await kbnClient.request({
               method: 'POST',
               path: `${basePath}/api/data_views/data_view`,
-              headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+              headers: PUBLIC_API_HEADERS,
               body: {
                 data_view: {
                   id: dataViewId,
@@ -112,9 +104,7 @@ export const getEntityAnalyticsApiService = ({
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_INSTALL_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
             body: { entityTypes },
           });
           await service.waitForEntityStoreStatus('running');
@@ -130,7 +120,7 @@ export const getEntityAnalyticsApiService = ({
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             body: { entityTypes },
             ignoreErrors: [404],
           });
@@ -189,7 +179,7 @@ export const getEntityAnalyticsApiService = ({
           const statusProbe = await kbnClient.request<GetEntityStoreStatusResponse>({
             method: 'GET',
             path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             ignoreErrors: [403],
           });
           if (statusProbe.status === 403) {
@@ -199,9 +189,7 @@ export const getEntityAnalyticsApiService = ({
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
             body: {},
             ignoreErrors: [403, 404, 500],
           });
@@ -253,9 +241,7 @@ export const getEntityAnalyticsApiService = ({
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}${RISK_ENGINE_INIT_URL}`,
-          headers: {
-            'elastic-api-version': API_VERSIONS.internal.v1,
-          },
+          headers: INTERNAL_API_HEADERS,
           body: {},
         });
       });
@@ -269,9 +255,7 @@ export const getEntityAnalyticsApiService = ({
           const response = await kbnClient.request<RiskEngineStatusResponse>({
             method: 'GET',
             path: `${basePath}${RISK_ENGINE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.internal.v1,
-            },
+            headers: INTERNAL_API_HEADERS,
           });
           return response.data;
         }
@@ -286,9 +270,7 @@ export const getEntityAnalyticsApiService = ({
           const response = await kbnClient.request<GetEntityStoreStatusResponse>({
             method: 'GET',
             path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
           });
           return response.data;
         }

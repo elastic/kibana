@@ -18,7 +18,7 @@ jest.mock('../../../../hooks/use_fetch_rule_events', () => ({
 }));
 
 jest.mock('./use_alert_timeline_url_state', () => ({
-  useAlertTimelineUrlState: () => [{ from: 'now-7d', to: 'now' }, jest.fn()],
+  useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, jest.fn()],
 }));
 
 jest.mock('../../../../utils/discover_href_for_episode', () => ({
@@ -137,7 +137,7 @@ describe('AlertTimelineSection', () => {
     expect(successResult.refetch).not.toHaveBeenCalled();
     expect(mockUseFetchRuleEvents).toHaveBeenCalledWith(
       expect.objectContaining({
-        windowStartMs: Date.parse('2026-08-07T12:05:00.000Z'),
+        windowStartMs: Date.parse('2026-08-13T12:05:00.000Z'),
         windowEndMs: Date.parse('2026-08-14T12:05:00.000Z'),
       })
     );
