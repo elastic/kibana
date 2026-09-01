@@ -20,6 +20,7 @@ import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { escapeQuotes } from '@kbn/es-query';
 
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
@@ -204,7 +205,7 @@ describe('ConditionalToolTip', () => {
       JSON.stringify({
         bool: {
           filter: {
-            match_phrase: { 'aws.rds.db_instance.arn': arn },
+            match_phrase: { 'aws.rds.db_instance.arn': escapeQuotes(arn) },
           },
         },
       })
