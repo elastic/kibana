@@ -741,9 +741,13 @@ export interface SectionSpan {
   kind: SectionKind;
 }
 
+const STRUCTURED_HEADING_PATTERN = /^##[ \t]+(.+?)\r?$/;
+
 /**
  * Segment structured text into labelled section spans.
- * Only `## <heading>` lines delimit sections; prose blocks have no span entry.
+ * The producer contract is one level-two Markdown heading per source heading,
+ * beginning at column zero and separated from its text by ASCII space or tab.
+ * Other Markdown heading levels and prose blocks do not delimit sections.
  *
  * Returns only 'ioc' and 'references' spans — other headings are ignored.
  * Spans cover from the heading line start to the next heading (or end of text).
@@ -757,7 +761,7 @@ export const classifySectionSpans = (text: string): readonly SectionSpan[] => {
   let currentStart = 0;
 
   for (const line of lines) {
-    const headingMatch = /^##\s+(.+)$/.exec(line);
+    const headingMatch = STRUCTURED_HEADING_PATTERN.exec(line);
     if (headingMatch) {
       if (currentKind !== null) {
         spans.push({ start: currentStart, end: offset, kind: currentKind });

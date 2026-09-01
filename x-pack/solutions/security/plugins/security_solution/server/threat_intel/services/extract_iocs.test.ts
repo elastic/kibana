@@ -1270,6 +1270,18 @@ describe('classifySectionSpans', () => {
     expect(spans[0].kind).toBe('ioc');
   });
 
+  test.each(['# IOCs', '### IOCs', '##IOCs', ' ## IOCs', '##\u00a0IOCs'])(
+    'does not treat %j as a structured source heading',
+    (heading) => {
+      expect(classifySectionSpans(`${heading}\nevil.com`)).toHaveLength(0);
+    }
+  );
+
+  test('accepts the producer contract with an ASCII tab and CRLF input', () => {
+    const text = '##\tIndicators of Compromise\r\nevil.com';
+    expect(classifySectionSpans(text)).toEqual([{ start: 0, end: text.length, kind: 'ioc' }]);
+  });
+
   test('classifies "## IOCs" as ioc kind', () => {
     const spans = classifySectionSpans('## IOCs\nevil.com');
     expect(spans[0].kind).toBe('ioc');
