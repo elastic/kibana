@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   THREAT_INTEL_SOURCES_INDEX,
@@ -74,7 +75,7 @@ const checkDiamondSummaryEmbeddingEndpoint = async (
       `Diamond summary embedding endpoint ${DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID} verified present`
     );
   } catch (err) {
-    const status = (err as { statusCode?: number }).statusCode;
+    const status = err instanceof errors.ResponseError ? err.statusCode : undefined;
     if (status === 404) {
       log.warn(
         `The Diamond summary fields are mapped as semantic_text against ` +
