@@ -69,6 +69,7 @@ import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
+import { updatePinnedBy } from './pinned_by';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -101,6 +102,7 @@ export interface ConversationClient {
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
+  setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
     roundId: string,
@@ -202,6 +204,7 @@ class ConversationClientImpl implements ConversationClient {
         'read',
         'read_by',
         'pinned',
+        'pinned_by',
         'read_only',
         'access_control',
         'origin',
@@ -466,6 +469,20 @@ class ConversationClientImpl implements ConversationClient {
           readBy: current.read_by,
           currentRead: current.read ?? false,
           nextRead: read,
+        }),
+    });
+  }
+
+  async setPinned(conversationId: string, pinned: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updatePinnedBy({
+          userId: this.user.id,
+          pinnedBy: current.pinned_by,
+          currentPinned: current.pinned ?? false,
+          nextPinned: pinned,
         }),
     });
   }

@@ -81,6 +81,7 @@ describe('ConversationClient', () => {
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
     hasReadBy = true,
+    pinnedBy = [{ userId: 'unrelated-pinner-id' }],
     schemaVersion,
     events,
   }: {
@@ -100,6 +101,7 @@ describe('ConversationClient', () => {
     read?: boolean;
     readBy?: Array<{ userId: string }>;
     hasReadBy?: boolean;
+    pinnedBy?: Array<{ userId: string }>;
     schemaVersion?: number;
     events?: TimelineEvent[];
   } = {}): Document =>
@@ -116,6 +118,7 @@ describe('ConversationClient', () => {
         updated_at: '2025-08-04T06:44:19.123Z',
         read,
         ...(hasReadBy ? { read_by: readBy } : {}),
+        pinned_by: pinnedBy,
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -130,6 +133,7 @@ describe('ConversationClient', () => {
 
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
+    expect(conversation).not.toHaveProperty('pinned_by');
   };
 
   const expectNoReadByInList = (conversations: unknown[]) => {
@@ -939,6 +943,100 @@ describe('ConversationClient', () => {
       const { document } = mockEsClient.index.mock.calls[0][0];
       expect(document.read_by).toEqual([]);
       expect(result.read).toBe(false);
+    });
+  });
+
+  describe('setPinned', () => {
+    it('adds only the calling user to pinned_by', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+              pinnedBy: [],
+            }),
+          ],
+        },
+      });
+
+      const result = await client.setPinned('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([{ userId: 'user-1' }]);
+      expectNoReadBy(result);
+      expect(result.pinned).toBe(true);
+    });
+
+    it('does not clobber pinned_by entries written by another user', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument({ pinnedBy: [] })] } })
+        // another user pinned it concurrently
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                pinnedBy: [{ userId: 'other-user-id' }],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      await client.setPinned('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[1][0];
+      expect(document.pinned_by).toEqual(
+        expect.arrayContaining([{ userId: 'other-user-id' }, { userId: 'user-1' }])
+      );
+    });
+
+    it('removes only the calling user when unpinning', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+            }),
+          ],
+        },
+      });
+
+      await client.setPinned('conversation-1', false);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([{ userId: 'other-id' }]);
+    });
+
+    it('is a no-op when the calling user has no stable id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              pinnedBy: [],
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      client = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { username: 'no-profile-user', isAdmin: false },
+      });
+
+      const result = await client.setPinned('conversation-1', true);
+
+      expectNoReadBy(result);
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([]);
+      expect(result.pinned).toBe(false);
     });
   });
 
