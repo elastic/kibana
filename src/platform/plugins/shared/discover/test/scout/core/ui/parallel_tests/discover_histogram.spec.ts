@@ -192,16 +192,18 @@ spaceTest.describe('Discover histogram', { tag: tags.deploymentAgnostic }, () =>
       });
       await discover.hideChart();
       await discover.revertUnsavedChanges();
-      await expect(discover.getHistogramChart()).toHaveAttribute(
+      await expect(discover.getHistogramChart()).not.toHaveAttribute(
         'data-request-data',
-        /"timeInterval":"auto"/
+        /"breakdownField"/
       );
-      expect(
-        JSON.parse((await discover.getHistogramChart().getAttribute('data-request-data')) ?? '')
-      ).toMatchObject({
+      const requestData = JSON.parse(
+        (await discover.getHistogramChart().getAttribute('data-request-data')) ?? ''
+      );
+      expect(requestData).toMatchObject({
         timeField: '@timestamp',
         timeInterval: 'auto',
       });
+      expect(requestData.breakdownField).toBeUndefined();
     }
   );
 
