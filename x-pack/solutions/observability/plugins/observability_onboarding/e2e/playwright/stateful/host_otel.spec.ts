@@ -30,13 +30,8 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await otelHostFlowPage.selectPlatform(osName);
   }
 
-  await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();
-  const collectorDownloadSnippet = (await page.evaluate(
-    'navigator.clipboard.readText()'
-  )) as string;
-
-  await otelHostFlowPage.copyCollectorStartSnippetToClipboard();
-  const collectorStartSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  const collectorDownloadSnippet = await otelHostFlowPage.getCollectorDownloadSnippet();
+  const collectorStartSnippet = await otelHostFlowPage.getCollectorStartSnippet();
 
   const codeSnippet = `${collectorDownloadSnippet}\n${collectorStartSnippet} > collector-output.log 2>&1 &`;
 

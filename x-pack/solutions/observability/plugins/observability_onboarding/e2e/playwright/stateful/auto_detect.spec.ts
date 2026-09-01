@@ -29,15 +29,13 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
   await onboardingHomePage.selectAutoDetectCollectionMethod();
 
   await autoDetectFlowPage.assertVisibilityCodeBlock();
-  await autoDetectFlowPage.copyToClipboard();
-
-  const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  const installCommand = await autoDetectFlowPage.getInstallCommand();
 
   /**
    * Ensemble story watches for the code snippet file
    * to be created and then executes it
    */
-  fs.writeFileSync(outputPath, clipboardData);
+  fs.writeFileSync(outputPath, installCommand);
 
   await autoDetectFlowPage.assertReceivedDataIndicator();
 
