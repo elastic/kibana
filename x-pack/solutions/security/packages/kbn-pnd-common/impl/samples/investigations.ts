@@ -40,6 +40,11 @@ const containInvestigations: Investigation[] = [
     pendingProposalCount: 2,
     recommendedAction: 'contain',
     affectedSurface: 'cfo@corp',
+    entities: [
+      { id: 'user:cfo@corp@corp@default', name: 'cfo@corp' },
+      { id: 'service:okta-sso', name: 'okta-sso' },
+      { id: 'service:m365-exchange', name: 'm365-exchange' },
+    ],
     summary:
       'MFA was satisfied from two countries in 40 minutes — that reads as a stolen session token, not a guessed password. The CFO’s live sessions are the blast radius.',
     priorityScore: 94,
@@ -77,6 +82,10 @@ const containInvestigations: Investigation[] = [
     pendingProposalCount: 1,
     recommendedAction: 'contain',
     affectedSurface: 'Sales-NAS',
+    entities: [
+      { id: 'host:Sales-NAS', name: 'Sales-NAS' },
+      { id: 'service:m365-exchange', name: 'm365-exchange' },
+    ],
     summary:
       'Overnight encryption on the Sales NAS — 1,431 files renamed in four minutes before the writing process died. Spread stayed local to one share.',
     priorityScore: 89,
@@ -107,6 +116,10 @@ const containInvestigations: Investigation[] = [
     pendingProposalCount: 1,
     recommendedAction: 'contain',
     affectedSurface: 'svc-helpdesk',
+    entities: [
+      { id: 'user:svc-helpdesk', name: 'svc-helpdesk' },
+      { id: 'service:okta-sso', name: 'okta-sso' },
+    ],
     summary:
       'svc-helpdesk was added to Domain Admins at 02:43, inside the FIN-WS-04 attack window — no change ticket. Morning sweep surfaced it 11 minutes ago.',
     priorityScore: 82,
@@ -137,6 +150,7 @@ const containInvestigations: Investigation[] = [
     pendingProposalCount: 0,
     recommendedAction: 'contain',
     affectedSurface: 'Sales-NAS',
+    entities: [{ id: 'host:Sales-NAS', name: 'Sales-NAS' }],
     summary:
       'Network isolation is executing — share offline for users while SNAP-7740 restore prepares. No decision needed until the run finishes.',
     priorityScore: 78,
@@ -170,6 +184,10 @@ const escalateInvestigations: Investigation[] = [
     pendingProposalCount: 1,
     recommendedAction: 'escalate',
     affectedSurface: 'FIN-DB-02',
+    entities: [
+      { id: 'host:FIN-DB-02', name: 'FIN-DB-02' },
+      { id: 'service:m365-exchange', name: 'm365-exchange' },
+    ],
     summary:
       'A 4.2 GB archive was assembled in C:\\temp on FIN-DB-02 from finance exports. Nothing has left the host yet — staged, not exfiltrated.',
     priorityScore: 74,
@@ -200,6 +218,10 @@ const escalateInvestigations: Investigation[] = [
     pendingProposalCount: 1,
     recommendedAction: 'escalate',
     affectedSurface: 'okta-sso',
+    entities: [
+      { id: 'service:okta-sso', name: 'okta-sso' },
+      { id: 'service:svc-backup', name: 'svc-backup' },
+    ],
     summary:
       'Four Finance users clicked an invoice lure; one credential submission confirmed. URL still reachable — fleet block recommended before broader spread.',
     priorityScore: 66,
@@ -233,6 +255,11 @@ const investigateInvestigations: Investigation[] = [
     pendingProposalCount: 1,
     recommendedAction: 'investigate',
     affectedSurface: 'host-srv-db02',
+    entities: [
+      { id: 'host:host-srv-db02', name: 'host-srv-db02' },
+      { id: 'host:host-srv-app01', name: 'host-srv-app01' },
+      { id: 'service:svc-backup', name: 'svc-backup' },
+    ],
     summary:
       'Dark Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
     priorityScore: 71,
@@ -272,6 +299,7 @@ const tuneInvestigations: Investigation[] = [
     pendingProposalCount: 1,
     recommendedAction: 'tune',
     affectedSurface: 'app-salesforce-sync',
+    entities: [{ id: 'service:app-salesforce-sync', name: 'app-salesforce-sync' }],
     summary:
       'Volume spike within the expected batch window. Rule threshold looks too sensitive for this SaaS sync pattern — review the tuning proposal.',
     priorityScore: 41,
@@ -297,6 +325,7 @@ const resolvedInvestigations: Investigation[] = [
     pendingProposalCount: 0,
     recommendedAction: 'contain',
     affectedSurface: 'j.reyes@corp',
+    entities: [{ id: 'user:j.reyes@corp', name: 'j.reyes@corp' }],
     summary:
       'Dark Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
     priorityScore: 0,

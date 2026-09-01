@@ -18,5 +18,6 @@
     "@kbn/zod",
     "@kbn/i18n",
     "@kbn/deeplinks-security",
+    "@kbn/agent-builder-common",
   ]
 }

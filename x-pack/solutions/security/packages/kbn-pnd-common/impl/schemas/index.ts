@@ -41,6 +41,7 @@ export {
 } from './components/watch_settings.gen';
 
 export {
+  ConversationEntity,
   TemplateId,
   RecommendedAction,
   ProposalStatus,

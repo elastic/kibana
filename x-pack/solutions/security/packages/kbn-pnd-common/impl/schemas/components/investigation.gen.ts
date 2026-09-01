@@ -45,6 +45,20 @@ export type WatchTier = z.infer<typeof WatchTier>;
 export type WatchTierEnum = typeof WatchTier.enum;
 export const WatchTierEnum = WatchTier.enum;
 
+export const ConversationEntity = lazySchema(() =>
+  z.object({
+    /**
+     * Unique entity key used for deduplication and chip identity
+     */
+    id: z.string(),
+    /**
+     * Display name for the entity chip (e.g. host.name, user.name)
+     */
+    name: z.string(),
+  })
+);
+export type ConversationEntity = z.infer<typeof ConversationEntity>;
+
 export const EvidenceRef = lazySchema(() =>
   z.object({
     id: z.string(),
@@ -100,9 +114,13 @@ export const Investigation = lazySchema(() =>
     pendingProposalCount: z.number().int().min(0),
     recommendedAction: RecommendedAction.optional(),
     /**
-     * Primary asset or surface impacted
+     * Primary asset or surface impacted (deprecated — use entities)
      */
     affectedSurface: z.string().optional(),
+    /**
+     * Entities attached to the conversation; absent means not yet projected
+     */
+    entities: z.array(ConversationEntity).optional(),
     summary: z.string().optional(),
     /**
      * Brief priority score (0-100) for queue ranking

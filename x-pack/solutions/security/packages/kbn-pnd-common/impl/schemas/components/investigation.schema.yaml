@@ -23,6 +23,17 @@ components:
       type: string
       enum: [floor, officer, dark, deep, detection]
 
+    ConversationEntity:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          description: Unique entity key used for deduplication and chip identity
+        name:
+          type: string
+          description: Display name for the entity chip (e.g. host.name, user.name)
+
     EvidenceRef:
       type: object
       required:
@@ -108,7 +119,12 @@ components:
           $ref: '#/components/schemas/RecommendedAction'
         affectedSurface:
           type: string
-          description: Primary asset or surface impacted
+          description: Primary asset or surface impacted (deprecated — use entities)
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationEntity'
+          description: Entities attached to the conversation; absent means not yet projected
         summary:
           type: string
         priorityScore:
