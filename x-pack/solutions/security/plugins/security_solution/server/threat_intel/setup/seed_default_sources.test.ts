@@ -11,7 +11,7 @@ import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
 
 const TOTAL = DEFAULT_SOURCES.length;
 
-const missingDocuments = () =>
+const missingDocuments = (): Array<Record<string, unknown>> =>
   DEFAULT_SOURCES.map(({ id }) => ({ _id: id, _index: 'sources', found: false }));
 
 const storedDocument = (
