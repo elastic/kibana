@@ -15,11 +15,19 @@ import {
   getAvailableMetricLabels,
   reconcileAlertConditionMetrics,
 } from './threshold/form_types';
+import {
+  thresholdBuilderFieldsToFormValues,
+  thresholdFormValuesToBuilderFields,
+} from './threshold/builder_fields';
 import { getInvalidExpressionReferences } from './threshold/validate_metric_references';
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
 import { parseThresholdEsql } from './threshold/parse_esql';
-import { THRESHOLD_CREATE_FLYOUT_TITLE, THRESHOLD_STEP_TITLE } from './threshold/translations';
+import {
+  THRESHOLD_CREATE_OPTION_DESCRIPTION,
+  THRESHOLD_CREATE_OPTION_TITLE,
+  THRESHOLD_STEP_TITLE,
+} from './threshold/translations';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
   def as RuleBuilderDefinition;
@@ -64,8 +72,13 @@ const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdForm
 
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
+  createOption: {
+    title: THRESHOLD_CREATE_OPTION_TITLE,
+    description: THRESHOLD_CREATE_OPTION_DESCRIPTION,
+    iconType: 'chartThreshold',
+    order: 10,
+  },
   stepTitle: THRESHOLD_STEP_TITLE,
-  createFlyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
   createDefaultState: () => ({
     ...DEFAULT_THRESHOLD_FORM_VALUES,
     stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),
@@ -92,8 +105,25 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
     // on queryCommitted alone before builder state is initialized).
     builderState ? isThresholdFormValid(getValidatedThresholdValues(builderState)) : false,
   parseState: parseThresholdEsql,
+  toFields: (state) => thresholdFormValuesToBuilderFields(getValidatedThresholdValues(state)),
+  fromFields: thresholdBuilderFieldsToFormValues,
 });
 
 export const RULE_BUILDER_REGISTRY: Record<string, RuleBuilderDefinition> = {
   threshold: thresholdDefinition,
+};
+
+/**
+ * Adds a builder UI to the registry, making it available in the rule creation and edit flows.
+ *
+ * The `type` must match the builder type registered on the server, which owns validation and
+ * ES|QL generation. Registering a UI is optional: rules created through the API for a
+ * server-only builder type still work, they just cannot be edited in the builder form.
+ */
+export const registerRuleBuilder = <TState>(definition: RuleBuilderDefinition<TState>): void => {
+  const { type } = definition;
+  if (RULE_BUILDER_REGISTRY[type]) {
+    throw new Error(`Rule builder "${type}" is already registered`);
+  }
+  RULE_BUILDER_REGISTRY[type] = definition as RuleBuilderDefinition;
 };

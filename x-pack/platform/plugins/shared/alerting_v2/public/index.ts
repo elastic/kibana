@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -41,9 +41,10 @@ import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
+import { queueRuleBuilderRegistration } from './lib/rule_builder_registrations';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
-import type { AlertingV2PublicStart } from './types';
+import type { AlertingV2PublicSetup, AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import { AlertingV2RuleLibraryLocatorDefinition } from './locator';
 
@@ -58,7 +59,11 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
-export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
+export type {
+  AlertingV2PublicSetup,
+  AlertingV2PublicStart,
+  CreateRuleOptionsFlyoutLegacyItem,
+} from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
 
@@ -72,6 +77,9 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
+  bind(Setup).toConstantValue({
+    registerRuleBuilder: queueRuleBuilderRegistration,
+  } satisfies AlertingV2PublicSetup);
   bind(Start).toConstantValue({
     CreateRuleOptionsFlyout,
   } satisfies AlertingV2PublicStart);
