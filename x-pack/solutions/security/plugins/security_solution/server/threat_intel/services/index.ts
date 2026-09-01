@@ -13,3 +13,4 @@ export { extractDiamond } from './extract_diamond';
 export { enrichTaxonomy } from './enrich_taxonomy';
 export { classifySeverity } from './classify_severity';
 export { assessRelevance } from './assess_relevance';
+export { normalizeProvenanceUrl } from './provenance_url';

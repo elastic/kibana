@@ -129,4 +129,44 @@ describe('createThreatReport', () => {
       .map(([name]) => name);
     expect(esMethodsCalled.sort()).toEqual(['create', 'search']);
   });
+
+  it('removes credentials from source provenance', async () => {
+    const esClient = buildEsClient();
+    await createThreatReport(esClient, logger, 'default', {
+      ...BASE_PARAMS,
+      source_url: 'https://analyst:secret@example.com/report',
+    });
+
+    const document = esClient.create.mock.calls[0][0].document as {
+      source: { url?: string };
+    };
+    expect(document.source.url).toBe('https://example.com/report');
+  });
+
+  it.each(['file:///etc/passwd', 'data:text/plain,secret', 'not a url'])(
+    'omits invalid source provenance %s',
+    async (sourceUrl) => {
+      const esClient = buildEsClient();
+      await createThreatReport(esClient, logger, 'default', {
+        ...BASE_PARAMS,
+        source_url: sourceUrl,
+      });
+
+      const document = esClient.create.mock.calls[0][0].document as {
+        source: { url?: string };
+      };
+      expect(document.source).not.toHaveProperty('url');
+    }
+  );
+
+  it('keeps title-as-body fallback without storing fallback metadata', async () => {
+    const esClient = buildEsClient();
+    await createThreatReport(esClient, logger, 'default', { ...BASE_PARAMS, body_text: ' ' });
+
+    const document = esClient.create.mock.calls[0][0].document as {
+      content: Record<string, unknown>;
+    };
+    expect(document.content.body_text).toBe(BASE_PARAMS.title);
+    expect(document.content).not.toHaveProperty('body_is_title_fallback');
+  });
 });

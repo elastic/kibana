@@ -13,6 +13,7 @@ import {
   type SeverityLevel,
 } from '../../../common/threat_intel';
 import { buildReportContent } from './report_content';
+import { normalizeProvenanceUrl } from './provenance_url';
 import { severityScore } from './severity';
 
 export interface CreateThreatReportParams {
@@ -56,6 +57,7 @@ export const createThreatReport = async (
     severity = 'medium',
     language = 'en',
   } = params;
+  const normalizedSourceUrl = normalizeProvenanceUrl(sourceUrl);
 
   const fp = fingerprint(`${title}\n${bodyText}`);
   const now = new Date().toISOString();
@@ -115,7 +117,7 @@ export const createThreatReport = async (
         source: {
           type: 'manual',
           name: sourceName,
-          url: sourceUrl,
+          ...(normalizedSourceUrl ? { url: normalizedSourceUrl } : {}),
           adapter_id: 'manual:analyst-paste',
         },
         content: buildReportContent({ title, bodyText, language }),

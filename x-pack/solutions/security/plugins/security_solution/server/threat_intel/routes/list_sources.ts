@@ -347,8 +347,8 @@ export const loadSourceForMutationForTest = loadSourceForMutation;
 export const updateSourceBodySchemaForTest = updateSourceBodySchema;
 
 /**
- * Bucket cap for the per-source activity aggregation. Sized well above the seeded
- * catalog plus any plausible number of operator-added feeds.
+ * Bucket cap for the per-source activity aggregation. Sized well above the fixed
+ * catalog so unexpected legacy documents cannot make this aggregation unbounded.
  */
 const MAX_STATS_BUCKETS = 500;
 

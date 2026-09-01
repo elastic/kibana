@@ -33,7 +33,6 @@ export interface ReportContentDocument {
   title: string;
   body_text: string;
   language: string;
-  body_is_title_fallback?: true;
 }
 
 /** Builds the bounded plain-text content block written by every ingest path. */
@@ -47,11 +46,9 @@ export const buildReportContent = ({
   language?: string;
 }): ReportContentDocument => {
   const hasBody = bodyText.trim().length > 0;
-  const isTitleFallback = !hasBody && title.trim().length > 0;
   return {
     title,
     body_text: hasBody ? bodyText : title,
     language,
-    ...(isTitleFallback ? { body_is_title_fallback: true as const } : {}),
   };
 };

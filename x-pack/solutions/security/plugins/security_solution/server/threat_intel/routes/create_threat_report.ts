@@ -30,6 +30,7 @@ const createThreatReportBodySchema = schema.object({
   // fetched. Kibana does not turn this URL into a report.
   source_url: schema.maybe(
     schema.uri({
+      scheme: ['http', 'https'],
       validate: (value) =>
         value.length > MAX_URL_LENGTH ? `must be ${MAX_URL_LENGTH} characters or fewer` : undefined,
     })
