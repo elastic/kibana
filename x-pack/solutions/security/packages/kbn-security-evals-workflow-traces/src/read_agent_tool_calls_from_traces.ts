@@ -116,7 +116,7 @@ const parseFailedToolIds = (response: EsqlResponse): string[] => {
   }
 
   return response.values
-    .filter((row) => row[outcomeCol] === 'error')
+    .filter((row) => row[outcomeCol] === 'failure')
     .map((row) => row[toolCol])
     .filter((value): value is string => typeof value === 'string' && value.length > 0);
 };

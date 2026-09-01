@@ -84,7 +84,7 @@ describe('readAgentToolCallsFromTraces', () => {
         columns: [{ name: 'tool_id' }, { name: 'event.outcome' }],
         values: [
           ['platform.core.search', 'success'],
-          ['platform.core.esql', 'error'],
+          ['platform.core.esql', 'failure'],
         ],
       },
     ]);
@@ -221,7 +221,7 @@ describe('readAgentToolCallsFromTraces', () => {
       {
         columns: [{ name: 'tool_id' }, { name: 'event.outcome' }],
         values: [
-          ['platform.core.esql', 'error'],
+          ['platform.core.esql', 'failure'],
           ['security.create_detection_rule', 'success'],
         ],
       },
