@@ -145,6 +145,77 @@ describe('dynamic settings routes', () => {
         REBALANCE_SHARDS_TASK_ID
       );
     });
+
+    it('returns 409 when the rebalance flag does not persist on the task', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      const server = buildServer();
+      // Live task state stays on after a requested off — the write did not stick.
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+      });
+      const conflict = jest.fn((opts: { body: { message: string } }) => ({
+        status: 409,
+        ...opts,
+      }));
+
+      const route = createPostDynamicSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server,
+          response: { conflict } as never,
+          request: { body: { rebalancePrivateLocationShardsEnabled: false } } as never,
+        })
+      );
+
+      expect(conflict).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringMatching(/could not be updated/i),
+          }),
+        })
+      );
+      expect(result).toMatchObject({ status: 409 });
+    });
+
+    it('returns 409 when the sync interval does not persist on the task', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      const server = buildServer();
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        schedule: { interval: '5m' },
+      });
+      const conflict = jest.fn((opts: { body: { message: string } }) => ({
+        status: 409,
+        ...opts,
+      }));
+
+      const route = createPostDynamicSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server,
+          response: { conflict } as never,
+          request: { body: { privateLocationsSyncInterval: 10 } } as never,
+        })
+      );
+
+      expect(conflict).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringMatching(/sync task is currently running/i),
+          }),
+        })
+      );
+      expect(result).toMatchObject({ status: 409 });
+    });
   });
 
   describe('DynamicSettingsSchema', () => {
