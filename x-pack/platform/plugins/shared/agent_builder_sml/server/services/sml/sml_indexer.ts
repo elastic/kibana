@@ -97,9 +97,8 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
-// Wraps an internal SO repository so that read calls (get/bulkGet/resolve/
-// bulkResolve) automatically include the given namespace. All other methods
-// fall through to the original client via the prototype chain.
+// Wraps a saved-objects client so reads (get/bulkGet/resolve/bulkResolve)
+// carry the given namespace. Every other method is delegated unchanged.
 const withNamespace = (
   client: SavedObjectsClientContract,
   namespace: string
@@ -116,9 +115,9 @@ const withNamespace = (
   return wrapped;
 };
 
-// The namespace an internal repository must target to read an item in the given
-// spaces. Undefined means no injection: the default space, an empty list, or the
-// "all spaces" identifier ('*'), which is not a valid single namespace.
+// Namespace an internal client must target to read an item in these spaces.
+// Undefined means no injection: the default space, an empty list, or the
+// "all spaces" marker ('*'), which is not a valid single namespace.
 const namespaceForSpaces = (spaces: string[]): string | undefined => {
   const [firstSpace] = spaces;
   return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
@@ -198,7 +197,6 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       savedObjectsClient: wrappedClient,
       logger: contextLogger,
-      spaces,
     };
 
     this.logger.info(

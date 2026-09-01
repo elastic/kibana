@@ -65,8 +65,8 @@ const createMockRegistry = (definition?: SmlTypeDefinition) => ({
   has: jest.fn().mockReturnValue(!!definition),
 });
 
-// Builds a `getSmlEntry` hook that captures the (possibly wrapped) client the
-// indexer hands to the type, so tests can assert how reads get namespaced.
+// A `getSmlEntry` hook that records the client the indexer passes in, so tests
+// can assert whether reads are namespaced.
 const captureSmlEntryClient = () => {
   const captured: { client?: SavedObjectsClientContract } = {};
   const getSmlEntry = jest.fn(async (_originId: string, context: SmlContext): Promise<SmlEntry> => {
@@ -177,13 +177,11 @@ describe('createSmlIndexer', () => {
         esClient,
         savedObjectsClient: {},
         logger: contextLogger,
-        spaces: ['default', 'space-2'],
       });
       expect(getPermissions).toHaveBeenCalledWith('att-2', {
         esClient,
         savedObjectsClient: {},
         logger: contextLogger,
-        spaces: ['default', 'space-2'],
       });
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.deleteByQuery).toHaveBeenCalledWith({

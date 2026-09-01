@@ -54,6 +54,7 @@ describe('buildIndexAttachment', () => {
     expect(callArgs.spaces).toEqual(['space-1']);
     expect(callArgs.esClient).toBe(deps.esInternalClient);
     expect(callArgs.savedObjectsClient).toBe(deps.soClient);
+    expect(callArgs.clientHasSpacesExtension).toBe(true);
   });
 
   it('falls back to the default space when no spaces service and no spaceId are provided', async () => {

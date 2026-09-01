@@ -90,7 +90,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       })) {
         pages.push(page);
       }
@@ -155,7 +154,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       })) {
         pages.push(page);
       }
@@ -179,7 +177,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       })) {
         pages.push(page);
       }
@@ -200,7 +197,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger,
-        spaces: [],
       })) {
         pages.push(page);
       }
@@ -227,7 +223,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       })) {
         pages.push(page);
       }
@@ -253,7 +248,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       })) {
         pages.push(page);
       }
@@ -284,7 +278,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
 
       expect(result).toEqual({
@@ -311,7 +304,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
 
       expect(esClient.search).toHaveBeenCalledWith(
@@ -339,7 +331,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
 
       expect(result).toBeUndefined();
@@ -362,7 +353,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
 
       expect(result).toEqual({
@@ -388,7 +378,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
 
       expect(result!.title).toBe('workflow-no-name');
@@ -406,7 +395,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger,
-        spaces: [],
       });
 
       expect(result).toBeUndefined();
@@ -435,7 +423,6 @@ describe('workflowSmlType', () => {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
 
       const { content } = result!;
@@ -452,7 +439,6 @@ describe('workflowSmlType', () => {
         esClient: createMockEsClient(),
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
-        spaces: [],
       });
       expect(permissions).toEqual({
         kibana: { privileges: { name: [`ai_index:${WORKFLOW_KI_TYPE}/read`] } },

@@ -107,9 +107,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       container.get(SettingsServiceToken).get(ALERTING_V2_ENABLED_SETTING_ID);
 
     // SML types are registered inline (not via a token registry like attachments):
-    // registration happens at setup, but their clients/repositories must be
-    // resolved lazily at crawl time (start phase), so deps cannot be eagerly
-    // injected at bind/resolution time.
+    // registration happens at setup, but their clients must be resolved lazily at
+    // crawl time (start phase), so deps cannot be eagerly injected at bind time.
     agentBuilderSml.registerType(
       createRuleSmlType({
         getScopedRulesClient: (request) =>

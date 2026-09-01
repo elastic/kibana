@@ -88,8 +88,6 @@ export interface SmlContext {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  /** Spaces the current item belongs to. Empty when called from `list`. */
-  spaces: string[];
 }
 
 /**

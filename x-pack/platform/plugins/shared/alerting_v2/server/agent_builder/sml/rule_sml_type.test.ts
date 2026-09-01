@@ -65,11 +65,9 @@ describe('createRuleSmlType', () => {
     esClient: {} as ElasticsearchClient,
     savedObjectsClient: soClient,
     logger,
-    spaces: [] as string[],
   });
 
-  // The crawler drives `list` and `getSmlEntry` through a point-in-time finder,
-  // so tests stub the finder the SML type opens on the shared client.
+  // `list` pages through a point-in-time finder opened on the shared client.
   const stubFinder = (find: () => AsyncGenerator<unknown>) => {
     const close = jest.fn().mockResolvedValue(undefined);
     soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<

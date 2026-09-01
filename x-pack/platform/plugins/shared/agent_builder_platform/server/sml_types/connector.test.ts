@@ -36,10 +36,9 @@ const mockSavedObjectsClient = {
 const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
 const mockLogger = loggingSystemMock.createLogger();
 
-const createContext = (spaces: string[] = ['default']) => ({
+const createContext = () => ({
   logger: loggingSystemMock.createLogger(),
   savedObjectsClient: mockSavedObjectsClient as any,
-  spaces,
 });
 
 const createAttachmentContext = () => ({

@@ -80,7 +80,6 @@ describe('createSignificantEventSmlType', () => {
       esClient: {} as never,
       savedObjectsClient: {} as never,
       logger: loggingSystemMock.createLogger(),
-      spaces: [],
     });
 
     await expect(iterator[Symbol.asyncIterator]().next()).resolves.toEqual({
@@ -106,7 +105,6 @@ describe('createSignificantEventSmlType', () => {
       esClient: {} as never,
       savedObjectsClient: {} as never,
       logger: loggingSystemMock.createLogger(),
-      spaces: [],
     });
 
     expect(result).toEqual(
@@ -128,7 +126,6 @@ describe('createSignificantEventSmlType', () => {
       esClient: {} as never,
       savedObjectsClient: {} as never,
       logger: loggingSystemMock.createLogger(),
-      spaces: [],
     });
     expect(permissions).toEqual({
       kibana: { privileges: { name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`] } },
