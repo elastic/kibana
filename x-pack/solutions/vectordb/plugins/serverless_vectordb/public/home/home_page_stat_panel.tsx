@@ -71,15 +71,6 @@ export const HomePageStatPanel = ({
   const primaryAction = showPrimary ? actions[0] : undefined;
   const menuActions = showPrimary ? actions.slice(1) : actions;
 
-  const euiThemeContext = useEuiTheme();
-  const { colorMode } = euiThemeContext;
-
-  // Shows a shadow in dark mode and removes the added border. Adds the border for light mode and no shadow.
-  const statPanelStyle = css`
-    ${colorMode === 'DARK' && euiShadow(euiThemeContext, 'xs', { border: 'none' })};
-    ${colorMode === 'LIGHT' && { border: euiThemeContext.euiTheme.border.thin }};
-    white-space: nowrap;
-  `;
   const actionsMenuLabel = i18n.translate('xpack.serverlessVectordb.home.statPanel.actionsMenu', {
     defaultMessage: '{title} actions',
     values: { title },
@@ -170,9 +161,7 @@ export const HomePageStatPanel = ({
             <EuiPanel
               color="plain"
               paddingSize="m"
-              hasBorder={false}
-              hasShadow={false}
-              css={statPanelStyle}
+              hasBorder={true}
             >
               <EuiStat
                 data-test-subj={`${testSubj}-${key}`}
