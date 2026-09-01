@@ -83,12 +83,15 @@ export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasource
     return null;
   }
 
-  const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  if (
-    firstDatasourceFromDoc === LENS_DATASOURCE_ID.FORM_BASED ||
-    firstDatasourceFromDoc === LENS_DATASOURCE_ID.TEXT_BASED
-  ) {
-    return firstDatasourceFromDoc as LensDatasourceId;
+  const datasourceIds = Object.keys(doc.state.datasourceStates);
+  // Mixed panels can hold both datasources (e.g. ES|QL data layers plus a
+  // form-based reference line layer). The text-based datasource always owns the
+  // data layers in that case, so it wins regardless of key order.
+  if (datasourceIds.includes(LENS_DATASOURCE_ID.TEXT_BASED)) {
+    return LENS_DATASOURCE_ID.TEXT_BASED;
+  }
+  if (datasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
+    return LENS_DATASOURCE_ID.FORM_BASED;
   }
   return null;
 }

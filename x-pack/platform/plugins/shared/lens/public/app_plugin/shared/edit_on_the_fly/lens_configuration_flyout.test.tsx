@@ -359,7 +359,12 @@ describe('LensEditConfigurationFlyout', () => {
       },
       filters: [],
       query: { esql: 'from index1 | limit 10' },
-      references: [],
+      // references from non-adhoc data views are kept even in ES|QL mode so that
+      // form-based layers (reference lines, query annotations) keep their data view
+      references: [
+        { type: 'index-pattern', id: 'mockip', name: 'mockip' },
+        { type: 'index-pattern', id: 'mockip', name: 'mockip' },
+      ],
     });
   });
 
