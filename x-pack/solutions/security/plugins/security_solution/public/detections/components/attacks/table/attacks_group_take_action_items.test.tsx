@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { getMockAttackDiscoveryAlerts } from '../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
@@ -355,6 +355,25 @@ describe('AttacksGroupTakeActionItems', () => {
         expect(await findByText('Apply alert tags')).toBeInTheDocument();
         expect(await findByText('Run workflow')).toBeInTheDocument();
         expect(await findByText('View in AI Assistant')).toBeInTheDocument();
+      });
+
+      it('keeps the other action items sub-panels reachable when the navigation item is omitted', async () => {
+        mockUseIsInSecurityApp.mockReturnValue(true);
+        mockUseAttackTagsContextMenuItems.mockReturnValue({
+          items: [{ name: 'Apply alert tags', key: 'applyAlertTags', panel: 'attackTagsPanel' }],
+          panels: [
+            {
+              id: 'attackTagsPanel',
+              title: 'Apply alert tags',
+              content: <div>{'Tag selector'}</div>,
+            },
+          ],
+        });
+
+        const { findByText } = renderWithNavigationAction(false);
+        fireEvent.click(await findByText('Apply alert tags'));
+
+        expect(await findByText('Tag selector')).toBeInTheDocument();
       });
 
       it('keeps the navigation-only menu for a remote document', async () => {
