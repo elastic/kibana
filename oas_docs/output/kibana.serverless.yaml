@@ -101335,6 +101335,8 @@ components:
           description: When `true`, allows the data view to match hidden indices.
           title: Allow hidden and system indices
           type: boolean
+        field_filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
@@ -101392,6 +101394,15 @@ components:
       minLength: 1
       title: Custom label
       type: string
+    Kibana_HTTP_APIs_kbn-field-filters-schema:
+      description: Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.
+      items:
+        maxLength: 1000
+        minLength: 1
+        type: string
+      maxItems: 10000
+      title: Field filters
+      type: array
     Kibana_HTTP_APIs_kbn-field-format:
       additionalProperties: false
       description: Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.
@@ -130738,7 +130749,6 @@ components:
             parameters:
               oneOf:
                 - description: Dump the entire kernel memory.
-                  type: object
                   properties:
                     type:
                       enum:
@@ -130746,8 +130756,19 @@ components:
                       type: string
                   required:
                     - type
-                - description: Dump the entire memory of a process using the PID.
+                  title: kernel
                   type: object
+                - description: Dump the entire raw memory.
+                  properties:
+                    type:
+                      enum:
+                        - raw
+                      type: string
+                  required:
+                    - type
+                  title: raw
+                  type: object
+                - description: Dump the entire memory of a process using the PID.
                   properties:
                     pid:
                       type: number
@@ -130758,8 +130779,9 @@ components:
                   required:
                     - type
                     - pid
-                - description: Dump the entire memory of a process using the entity ID.
+                  title: Process PID
                   type: object
+                - description: Dump the entire memory of a process using the entity ID.
                   properties:
                     entity_id:
                       maxLength: 256
@@ -130772,6 +130794,8 @@ components:
                   required:
                     - type
                     - entity_id
+                  title: Process Entity ID
+                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_MetadataListResponse:

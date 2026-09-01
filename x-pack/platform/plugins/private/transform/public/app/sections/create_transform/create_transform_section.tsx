@@ -41,6 +41,18 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
   const { esTransform } = useDocumentationLinks();
 
   const initialTransformFunction = getInitialTransformFunction(location.search);
+  const pageTitle =
+    initialTransformFunction === TRANSFORM_FUNCTION.LATEST ? (
+      <FormattedMessage
+        id="xpack.transform.transformsWizard.createLatestTransformTitle"
+        defaultMessage="Create latest transform"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.transform.transformsWizard.createPivotTransformTitle"
+        defaultMessage="Create pivot transform"
+      />
+    );
   const {
     error: searchItemsError,
     searchItems,
@@ -71,12 +83,7 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
       ]}
     >
       <EuiPageTemplate.Header
-        pageTitle={
-          <FormattedMessage
-            id="xpack.transform.transformsWizard.createTransformTitle"
-            defaultMessage="Create transform"
-          />
-        }
+        pageTitle={pageTitle}
         rightSideItems={[docsLink]}
         bottomBorder
         paddingSize={'none'}
