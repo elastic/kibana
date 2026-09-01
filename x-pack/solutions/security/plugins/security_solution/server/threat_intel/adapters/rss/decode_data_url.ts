@@ -8,9 +8,9 @@
 /**
  * Decode a `data:` URL body for offline / fixture RSS feeds.
  *
- * Mustard's shared `fetchUrl` SSRF guard only allows http/https, so local
- * generator fixtures that embed the feed as `data:application/rss+xml,...`
- * must be resolved before the network client runs.
+ * The shared HTTP client only allows http/https, so local generator fixtures
+ * that embed the feed as `data:application/rss+xml,...` must be resolved before
+ * the network client runs.
  *
  * Supports both percent-encoded and `;base64` payloads.
  */

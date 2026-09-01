@@ -16,6 +16,10 @@ describe('decodeDataUrl', () => {
     expect(isDataUrl('https://example.com/feed.xml')).toBe(false);
   });
 
+  it('rejects non-data URLs instead of decoding them', () => {
+    expect(() => decodeDataUrl('https://example.com/feed.xml')).toThrow(/Expected a data: URL/);
+  });
+
   it('decodes a percent-encoded RSS fixture payload', () => {
     const xml = '<?xml version="1.0"?><rss><channel><title>x</title></channel></rss>';
     const url = `data:application/rss+xml;charset=utf-8,${encodeURIComponent(xml)}`;
