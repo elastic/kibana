@@ -16,6 +16,36 @@ import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 
 /**
+ * One `steps.<id>` entry per graph node, shared by every step context that can
+ * see that node.
+ *
+ * The entry depends only on the node, so building a fresh one per context made
+ * the schema-object count grow with the square of the step count: at 300 steps
+ * the old code allocated ~45,000 wrappers around subschemas that were already
+ * shared by reference. Keyed by node identity, so entries die with the graph,
+ * which lives for one request.
+ *
+ * Only the non-foreach branch is shareable — a foreach entry closes over the
+ * context of the step being resolved.
+ */
+const stepEntrySchemaCache = new WeakMap<GraphNodeUnion, z.ZodTypeAny>();
+
+function getStepEntrySchema(node: GraphNodeUnion): z.ZodTypeAny {
+  const cached = stepEntrySchemaCache.get(node);
+  if (cached) {
+    return cached;
+  }
+  const schema = z.lazy(() =>
+    z.object({
+      output: getOutputSchemaForStepType(node).optional(),
+      error: z.any().optional(),
+    })
+  );
+  stepEntrySchemaCache.set(node, schema);
+  return schema;
+}
+
+/**
  * Folds an array of graph nodes into a steps schema, skipping already-seen
  * and trigger nodes. Mutates `seenStepIds` to track which step IDs have been
  * processed across multiple calls.
@@ -43,12 +73,7 @@ function addNodesToStepsSchema(
     seenStepIds.add(node.stepId);
 
     if (!isEnterForeach(node)) {
-      batch[node.stepId] = z.lazy(() =>
-        z.object({
-          output: getOutputSchemaForStepType(node).optional(),
-          error: z.any().optional(),
-        })
-      );
+      batch[node.stepId] = getStepEntrySchema(node);
     } else {
       flushBatch();
       schema = schema.extend({
