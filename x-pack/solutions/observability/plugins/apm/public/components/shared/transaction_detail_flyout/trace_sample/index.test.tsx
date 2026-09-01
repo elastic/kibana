@@ -147,4 +147,44 @@ describe('TransactionDetailFlyoutTraceSample', () => {
 
     expect(screen.getByTestId('transactionDetailFlyoutTraceSampleEmpty')).toBeInTheDocument();
   });
+
+  it('renders an error prompt when the trace samples fetch fails', () => {
+    mockedUseTransactionDetailFlyoutTraceSamplesFetcher.mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.FAILURE,
+      error: new Error('failed'),
+    });
+    mockedUseUnifiedWaterfallFetcher.mockReturnValue({
+      traceItems: [],
+      errors: [],
+      agentMarks: {},
+      entryTransaction: undefined,
+      traceDocsTotal: 0,
+      maxTraceItems: 1000,
+      status: FETCH_STATUS.NOT_INITIATED,
+    });
+
+    render(<TransactionDetailFlyoutTraceSample />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutTraceSampleError')).toBeInTheDocument();
+    expect(screen.getByTestId('transactionDetailFlyoutTraceSampleError')).toHaveTextContent(
+      'Unable to load the trace sample'
+    );
+    expect(
+      screen.queryByTestId('transactionDetailFlyoutTraceSampleTimelineLoading')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders an error prompt when the waterfall fetch fails', () => {
+    mockedUseUnifiedWaterfallFetcher.mockReturnValue({
+      ...DEFAULT_WATERFALL_RESULT,
+      entryTransaction: undefined,
+      traceItems: [],
+      status: FETCH_STATUS.FAILURE,
+    });
+
+    render(<TransactionDetailFlyoutTraceSample />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutTraceSampleError')).toBeInTheDocument();
+  });
 });

@@ -7,10 +7,8 @@
 
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiPanel, EuiTitle } from '@elastic/eui';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useServiceFlyoutContext } from '../service_flyout_context';
@@ -18,40 +16,28 @@ import type { LensESQLConfig } from './types';
 
 const CHART_HEIGHT = 200;
 
-export interface FlyoutLensChartDeps {
-  lens: LensPublicStart;
-  dataViews: DataViewsPublicPluginStart;
-}
-
-export interface FlyoutLensChartProps {
-  deps: FlyoutLensChartDeps;
+interface ServiceFlyoutLensChartProps {
   id: string;
   title: string;
   titleAction?: React.ReactNode;
   config?: LensESQLConfig;
   rangeFrom: string;
   rangeTo: string;
-  refreshToken?: number;
-  dataTestSubjPrefix?: string;
-  embeddableIdPrefix?: string;
-  executionContextDescription?: string;
-  executionContextProfileId?: string;
+  refreshToken: number;
 }
 
-function FlyoutLensChartComponent({
-  deps: { lens, dataViews },
+function ServiceFlyoutLensChartComponent({
   id,
   title,
   titleAction,
   config,
   rangeFrom,
   rangeTo,
-  refreshToken = 0,
-  dataTestSubjPrefix = 'serviceFlyoutLensChart',
-  embeddableIdPrefix = 'service-flyout',
-  executionContextDescription = 'apm service flyout chart data',
-  executionContextProfileId = 'service-flyout',
-}: FlyoutLensChartProps) {
+  refreshToken,
+}: ServiceFlyoutLensChartProps) {
+  const {
+    deps: { lens, dataViews },
+  } = useServiceFlyoutContext();
   const timeRange = useMemo(() => ({ from: rangeFrom, to: rangeTo }), [rangeFrom, rangeTo]);
 
   const { value: builtAttributes } = useAsync(async () => {
@@ -79,7 +65,7 @@ function FlyoutLensChartComponent({
       hasBorder
       hasShadow={false}
       paddingSize="none"
-      data-test-subj={`${dataTestSubjPrefix}-${id}`}
+      data-test-subj={`serviceFlyoutLensChart-${id}`}
       css={css`
         min-height: ${CHART_HEIGHT}px;
       `}
@@ -106,7 +92,7 @@ function FlyoutLensChartComponent({
       >
         {attributes && LensEmbeddableComponent ? (
           <LensEmbeddableComponent
-            id={`${embeddableIdPrefix}-${id}`}
+            id={`service-flyout-${id}`}
             attributes={attributes}
             timeRange={timeRange}
             hidePanelTitles
@@ -116,8 +102,8 @@ function FlyoutLensChartComponent({
             viewMode="view"
             style={{ height: CHART_HEIGHT }}
             executionContext={{
-              description: executionContextDescription,
-              meta: { profile_id: executionContextProfileId, metric_id: id },
+              description: 'apm service flyout chart data',
+              meta: { profile_id: 'service-flyout', metric_id: id },
             }}
           />
         ) : (
@@ -126,7 +112,7 @@ function FlyoutLensChartComponent({
             justifyContent="center"
             alignItems="center"
             responsive={false}
-            data-test-subj={`${dataTestSubjPrefix}Loading-${id}`}
+            data-test-subj={`serviceFlyoutLensChartLoading-${id}`}
           >
             <EuiFlexItem grow={false}>
               <EuiLoadingChart size="l" />
@@ -136,26 +122,6 @@ function FlyoutLensChartComponent({
       </div>
     </EuiPanel>
   );
-}
-
-export const FlyoutLensChart: React.FC<FlyoutLensChartProps> = memo(FlyoutLensChartComponent);
-
-interface ServiceFlyoutLensChartProps {
-  id: string;
-  title: string;
-  titleAction?: React.ReactNode;
-  config?: LensESQLConfig;
-  rangeFrom: string;
-  rangeTo: string;
-  refreshToken: number;
-}
-
-function ServiceFlyoutLensChartComponent(props: ServiceFlyoutLensChartProps) {
-  const {
-    deps: { lens, dataViews },
-  } = useServiceFlyoutContext();
-
-  return <FlyoutLensChart deps={{ lens, dataViews }} {...props} />;
 }
 
 export const ServiceFlyoutLensChart: React.FC<ServiceFlyoutLensChartProps> = memo(

@@ -194,10 +194,16 @@ export function ServiceFlyoutOverview() {
 
   const onTransactionClick = useCallback(
     (item: TransactionGroup) => {
+      const resolvedTransactionType = item.transactionType || transactionType;
+      // Fetchers in the transaction detail flyout require a truthy transactionType;
+      // opening without one leaves sections stuck on NOT_INITIATED / skeletons.
+      if (!resolvedTransactionType) {
+        return;
+      }
       setTransactionDetailFilters({
         serviceName: service.name,
         transactionName: item.name,
-        transactionType: item.transactionType || transactionType || '',
+        transactionType: resolvedTransactionType,
         environment,
         rangeFrom,
         rangeTo,

@@ -76,6 +76,8 @@ function FlyoutTimeseriesChartPanel({
   titleTip?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPanel
       hasBorder
@@ -89,7 +91,7 @@ function FlyoutTimeseriesChartPanel({
     >
       <div
         css={css`
-          padding: 8px 12px 0;
+          padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
         `}
       >
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>

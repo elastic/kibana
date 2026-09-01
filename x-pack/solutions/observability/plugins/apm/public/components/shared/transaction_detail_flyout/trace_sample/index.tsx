@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS, isPending, isSuccess } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isFailure, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
 import { MaybeViewTraceLink } from '../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link';
 import { TransactionSummary } from '../../summary/transaction_summary';
@@ -57,7 +57,11 @@ export function TransactionDetailFlyoutTraceSample() {
   });
 
   const isLoading =
-    isPending(unifiedWaterfallFetchResult.status) || isPending(traceSamplesFetchResult.status);
+    isPending(traceSamplesFetchResult.status) ||
+    (!!traceId && isPending(unifiedWaterfallFetchResult.status));
+
+  const hasFailed =
+    isFailure(traceSamplesFetchResult.status) || isFailure(unifiedWaterfallFetchResult.status);
 
   const isSucceeded =
     (isSuccess(unifiedWaterfallFetchResult.status) ||
@@ -94,6 +98,23 @@ export function TransactionDetailFlyoutTraceSample() {
     openFullTraceFlyout({ traceId, contextSpanIds });
   }, [traceId, contextSpanIds, openFullTraceFlyout]);
 
+  if (hasFailed) {
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        title={
+          <div>
+            {i18n.translate('xpack.apm.transactionDetailFlyout.traceSample.loadError', {
+              defaultMessage: 'Unable to load the trace sample',
+            })}
+          </div>
+        }
+        data-test-subj="transactionDetailFlyoutTraceSampleError"
+        titleSize="s"
+      />
+    );
+  }
+
   if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (
       <EuiEmptyPrompt
@@ -109,6 +130,8 @@ export function TransactionDetailFlyoutTraceSample() {
       />
     );
   }
+
+  const showSampleLoading = isLoading || !entryTransaction;
 
   return (
     <section data-test-subj="transactionDetailFlyoutSection-traceSample">
@@ -152,7 +175,7 @@ export function TransactionDetailFlyoutTraceSample() {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {isLoading || !entryTransaction ? (
+        {showSampleLoading ? (
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
             <EuiSkeletonText lines={1} data-test-subj="transactionDetailFlyoutTraceSampleLoading" />
@@ -168,7 +191,7 @@ export function TransactionDetailFlyoutTraceSample() {
         )}
 
         <EuiFlexItem grow={false}>
-          {isLoading || !entryTransaction ? (
+          {showSampleLoading ? (
             <EuiSkeletonText
               lines={3}
               data-test-subj="transactionDetailFlyoutTraceSampleTimelineLoading"

@@ -72,7 +72,13 @@ const service: ServiceFlyoutService = {
   agentName: 'java',
 };
 
-function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {}) {
+function buildContextValue({
+  refreshToken = 0,
+  transactionType = 'request',
+}: {
+  refreshToken?: number;
+  transactionType?: string;
+} = {}) {
   return {
     deps: {
       core: {
@@ -100,7 +106,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       setRange: jest.fn(),
-      transactionType: 'request',
+      transactionType,
       setTransactionType: jest.fn(),
       refreshToken,
       onRefresh: jest.fn(),
@@ -108,8 +114,14 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
   };
 }
 
-function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
-  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken }));
+function renderOverview({
+  refreshToken,
+  transactionType,
+}: {
+  refreshToken?: number;
+  transactionType?: string;
+} = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken, transactionType }));
   return render(
     <IntlProvider locale="en">
       <ServiceFlyoutOverview />
@@ -277,6 +289,22 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     });
 
     expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+  });
+
+  it('does not open TransactionDetailFlyout when transaction type is missing', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ transactionType: '' });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
   });
 
   it('closes TransactionDetailFlyout when onClose is called', () => {

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { useCallback, useMemo } from 'react';
 import { getFlyoutDiscoverNavigation } from '../../service_flyout/utils/get_flyout_discover_navigation';
 import { useApmIndices } from '../../service_flyout/hooks/use_apm_indices';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -18,6 +19,7 @@ export function useTransactionDetailFlyoutLinks() {
   } = useTransactionDetailFlyoutContext();
 
   const { indices, loading: indicesLoading } = useApmIndices({ http: core.http });
+  const openInNewDiscoverTab = contextActions?.openInNewDiscoverTab;
 
   const { href: discoverHref, esqlQuery: discoverEsqlQuery } = getFlyoutDiscoverNavigation({
     share,
@@ -34,21 +36,29 @@ export function useTransactionDetailFlyoutLinks() {
     },
   });
 
-  const openInDiscoverTab =
-    contextActions?.openInNewDiscoverTab && discoverEsqlQuery
-      ? () =>
-          contextActions.openInNewDiscoverTab!({
-            esqlQuery: discoverEsqlQuery,
-            timeRange: { from: rangeFrom, to: rangeTo },
-            tabLabel: i18n.translate('xpack.apm.transactionDetailFlyout.tracesDiscoverTabLabel', {
-              defaultMessage: 'Traces - {transactionName}',
-              values: { transactionName },
-            }),
-          })
-      : undefined;
+  const openInDiscoverTab = useCallback(() => {
+    if (!openInNewDiscoverTab || !discoverEsqlQuery) {
+      return;
+    }
+    openInNewDiscoverTab({
+      esqlQuery: discoverEsqlQuery,
+      timeRange: { from: rangeFrom, to: rangeTo },
+      tabLabel: i18n.translate('xpack.apm.transactionDetailFlyout.tracesDiscoverTabLabel', {
+        defaultMessage: 'Traces - {transactionName}',
+        values: { transactionName },
+      }),
+    });
+  }, [openInNewDiscoverTab, discoverEsqlQuery, rangeFrom, rangeTo, transactionName]);
 
-  return {
-    loading: indicesLoading,
-    discover: { href: discoverHref, openInDiscoverTab },
-  };
+  return useMemo(
+    () => ({
+      loading: indicesLoading,
+      discover: {
+        href: discoverHref,
+        openInDiscoverTab:
+          openInNewDiscoverTab && discoverEsqlQuery ? openInDiscoverTab : undefined,
+      },
+    }),
+    [indicesLoading, discoverHref, openInNewDiscoverTab, discoverEsqlQuery, openInDiscoverTab]
+  );
 }

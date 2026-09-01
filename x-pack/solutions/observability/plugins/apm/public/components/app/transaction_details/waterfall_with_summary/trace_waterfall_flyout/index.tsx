@@ -21,7 +21,7 @@ import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { getApmInternalServices } from '../../../../../plugin';
 
-export const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
+const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
 interface Props {
   traceId: string;
@@ -174,6 +174,7 @@ export function TraceWaterfallFlyout({
           onCloseFlyout={closeDetailFlyout}
           dataTestSubj="apmTraceWaterfallSpanDetailFlyout"
           size="fill"
+          historyKey={historyKey}
         />
       )}
     </EuiFlyout>
