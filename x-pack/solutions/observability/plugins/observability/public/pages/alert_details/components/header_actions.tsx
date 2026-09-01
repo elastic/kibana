@@ -49,6 +49,7 @@ import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
 import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
+import { buildAlertSnapshot } from '../../../components/alert_actions/alert_snapshot';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -100,7 +101,14 @@ export function HeaderActions({
     triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
     notifications,
+    nightshiftInvestigations,
   } = services;
+  const alertSnapshot = alert ? buildAlertSnapshot(alert) : undefined;
+  const showInvestigateAction = Boolean(
+    nightshiftInvestigations &&
+      services.application.capabilities.agentBuilder?.write === true &&
+      alertSnapshot
+  );
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -170,6 +178,39 @@ export function HeaderActions({
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
+  const handleInvestigate = async () => {
+    if (!nightshiftInvestigations || !alertSnapshot) return;
+
+    setIsPopoverOpen(false);
+    try {
+      await nightshiftInvestigations.investigationsClient.fetch(
+        'POST /internal/nightshift/investigations',
+        {
+          params: {
+            body: {
+              subject: { type: 'alert', id: alertSnapshot.id },
+              concurrency_key: alertSnapshot.id,
+              context: { alerts: [alertSnapshot] },
+            },
+          },
+          signal: null,
+        }
+      );
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.observability.alertDetails.investigateSuccessTitle', {
+          defaultMessage: 'Investigation started',
+        }),
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.observability.alertDetails.investigateErrorTitle', {
+          defaultMessage: 'Failed to start investigation',
+        }),
+        text: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
@@ -236,6 +277,22 @@ export function HeaderActions({
                 <div style={{ width: '220px' }}>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
+
+                    {showInvestigateAction && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        iconType="inspect"
+                        onClick={handleInvestigate}
+                        data-test-subj="alertDetailsInvestigate"
+                      >
+                        <EuiText size="s">
+                          {i18n.translate('xpack.observability.alertDetails.investigate', {
+                            defaultMessage: 'Investigate',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
                     {cases && canAddToCase && (
                       <AddToCaseButton

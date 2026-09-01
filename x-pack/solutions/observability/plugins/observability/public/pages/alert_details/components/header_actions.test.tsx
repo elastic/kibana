@@ -65,6 +65,7 @@ const useFetchRuleMock = useFetchRule as jest.Mock;
 const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
 const useAlertSnoozeMock = useAlertSnooze as jest.Mock;
 const mockCases = casesPluginMock.createStartContract();
+const startInvestigation = jest.fn();
 
 const mockHttp = {
   basePath: {
@@ -74,6 +75,7 @@ const mockHttp = {
 
 const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
+  capabilities: { agentBuilder: { write: true } },
 };
 
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
@@ -92,6 +94,9 @@ const mockKibana = () => {
       http: mockHttp,
       application: mockNavigateToApp,
       telemetryClient: createTelemetryClientMock(),
+      nightshiftInvestigations: {
+        investigationsClient: { fetch: startInvestigation },
+      },
     },
   });
 };
@@ -193,6 +198,36 @@ describe('Header Actions', () => {
           },
         },
       ]);
+    });
+
+    it('starts an investigation from the alert details menu', async () => {
+      startInvestigation.mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      fireEvent.click(await findByTestId('alertDetailsInvestigate'));
+
+      await waitFor(() => {
+        expect(startInvestigation).toHaveBeenCalledWith(
+          'POST /internal/nightshift/investigations',
+          expect.objectContaining({
+            params: {
+              body: expect.objectContaining({
+                subject: { type: 'alert', id: mockAlertUuid },
+                concurrency_key: mockAlertUuid,
+              }),
+            },
+          })
+        );
+      });
     });
 
     it('should NOT offer an "Add to case" button without cases privileges', async () => {
