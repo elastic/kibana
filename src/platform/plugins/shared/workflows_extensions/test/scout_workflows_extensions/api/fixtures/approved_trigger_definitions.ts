@@ -123,6 +123,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '7e13967e0f1185cbd309f016b25d3631b514706e5217da41f8655e93d23d90c6',
   },
   {
+    id: 'cases.extendedFieldsUpdated',
+    schemaHash: 'cfb4b84727e79d6826fa8a786b7591ea1a86661c7fff2bb2fa768abbc3aaf37c',
+  },
+  {
     id: 'entityStore.entityAssetCriticalityUpdated',
     schemaHash: 'ef5a71ccf64832ea19fda336a36fbf0b8200a1bd4f703d78417075deedb77c3f',
   },
