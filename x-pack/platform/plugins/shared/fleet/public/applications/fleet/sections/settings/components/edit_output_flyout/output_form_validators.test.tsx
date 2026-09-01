@@ -436,5 +436,43 @@ describe('Output form validation', () => {
       const res = validateDynamicKafkaTopics(invalidPercentTopic);
       expect(res).toEqual(['Opening brackets should be preceded by a percent sign']);
     });
+    it('should return error when fallback terminator is missing', () => {
+      const res = validateDynamicKafkaTopics([
+        { label: 'field', value: '%{[service.common_name]:agent-monitoring' },
+      ]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when closing bracket appears before opening bracket', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: ']}%{[field' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when opening square bracket is missing from token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{field]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when square brackets are omitted entirely', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{field}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when orphan closing delimiter precedes a valid token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: ']}%{[field]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when orphan closing delimiter follows a valid token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{[field]}]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
   });
 });

@@ -40,6 +40,8 @@ const makeTestLead = (overrides: Partial<Lead> = {}): Lead => {
     staleness: 'fresh',
     status: 'active',
     observations: [],
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
     executionUuid: '550e8400-e29b-41d4-a716-446655440000',
     sourceType: 'adhoc',
     ...overrides,

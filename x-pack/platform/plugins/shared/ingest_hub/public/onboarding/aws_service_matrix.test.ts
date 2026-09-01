@@ -101,8 +101,11 @@ describe('AWS service matrix', () => {
         expect(VALID_CATEGORIES).toContain(entry.category);
       });
 
-      it('has a valid signalType', () => {
-        expect(VALID_SIGNAL_TYPES).toContain(entry.signalType);
+      it('has a valid signalTypes array', () => {
+        expect(Array.isArray(entry.signalTypes)).toBe(true);
+        for (const st of entry.signalTypes) {
+          expect(VALID_SIGNAL_TYPES).toContain(st);
+        }
       });
 
       it('has a deploymentMethods array', () => {
@@ -209,7 +212,7 @@ describe('AWS service matrix', () => {
     const IF_PACKAGES = { aws: IF_MOCK_PKG_CONTENT } as any;
 
     const IF_STATIC = AWS_SERVICES_STATIC.filter((e) =>
-      ['guardduty', 'config', 'elb_logs'].includes(e.id)
+      ['guardduty', 'config', 'elb'].includes(e.id)
     );
     const IF_MATRIX = buildAwsServiceMatrix(IF_PACKAGES, IF_STATIC);
 
@@ -224,9 +227,9 @@ describe('AWS service matrix', () => {
     });
 
     it('is true when at least one input does not hide identity_federation', () => {
-      // elb_logs has aws-s3 (no hide) and aws-cloudwatch (hides IF).
+      // elb has aws-s3 (no hide) and aws-cloudwatch (hides IF).
       // Supported because one valid IF input path exists.
-      const elbLogs = IF_MATRIX.find((e) => e.id === 'elb_logs');
+      const elbLogs = IF_MATRIX.find((e) => e.id === 'elb');
       expect(elbLogs?.identityFederationSupported).toBe(true);
     });
 
@@ -260,6 +263,130 @@ describe('AWS service matrix', () => {
     });
   });
 
+  describe('ECF OTel twins', () => {
+    // firewall_otel aliases the 'firewall' ECS policy template. Its PT is agentless-enabled in
+    // this mock (matching a realistic EPR layout), but ecfOnly: true must suppress that flag so
+    // the entry stays ECF-only and the trigger-var restriction fires correctly.
+    const FIREWALL_PKG = {
+      policy_templates: [
+        {
+          name: 'firewall',
+          data_streams: ['firewall_logs', 'firewall_metrics'],
+          deployment_modes: { agentless: { enabled: true } },
+          inputs: [{ type: 'aws-s3', title: 'Firewall S3' }],
+        },
+      ],
+      data_streams: [
+        {
+          path: 'firewall_logs',
+          type: 'logs',
+          streams: [
+            {
+              input: 'aws-s3',
+              vars: [{ name: 'bucket_arn', required: true, type: 'text', show_user: true }],
+            },
+          ],
+        },
+        {
+          path: 'firewall_metrics',
+          type: 'metrics',
+          streams: [{ input: 'aws-s3', vars: [] }],
+        },
+      ],
+    };
+
+    const FIREWALL_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'firewall_otel');
+    const FIREWALL_OTEL_MATRIX = buildAwsServiceMatrix(
+      { aws: FIREWALL_PKG as any },
+      FIREWALL_OTEL_STATIC
+    );
+    const firewallOtel = FIREWALL_OTEL_MATRIX[0];
+
+    it('resolves vars from the aliased firewall PT despite having no *_otel PT in the manifest', () => {
+      expect(firewallOtel).toBeDefined();
+      expect(firewallOtel.varDefsByInput?.['aws-s3']).toBeDefined();
+    });
+
+    it('keeps deploymentMethods as ECF-only even though the aliased PT is agentless-enabled', () => {
+      expect(firewallOtel.deploymentMethods).toEqual([{ method: 'ecf', preferred: true }]);
+    });
+
+    it('collapses dataStreams to the single ecfDataStream (firewall_logs), excluding firewall_metrics', () => {
+      expect(firewallOtel.dataStreams).toEqual(['firewall_logs']);
+    });
+
+    it('restricts requiredConfig to ECF trigger vars only (bucket_arn)', () => {
+      expect(firewallOtel.requiredConfig).toEqual(['bucket_arn']);
+    });
+
+    it('sets identityFederationSupported based on the aliased PT inputs', () => {
+      // firewall's aws-s3 input has no hide_in_var_group_options → supported.
+      expect(firewallOtel.identityFederationSupported).toBe(true);
+    });
+  });
+
+  describe('input package entries (aws_cloudwatch_input_otel)', () => {
+    const INPUT_PKG = {
+      policy_templates: [
+        {
+          name: 'aws.ec2',
+          input: 'otelcol',
+          type: 'metrics',
+          title: 'AWS EC2 OpenTelemetry Metrics',
+          vars: [
+            { name: 'period', type: 'text', required: false, show_user: true },
+            {
+              name: 'autodiscover_limit',
+              type: 'integer',
+              required: false,
+              show_user: false,
+              default: 100,
+            },
+          ],
+          deployment_modes: { agentless: { enabled: true } },
+        },
+      ],
+      data_streams: [],
+    };
+
+    const EC2_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'ec2_otel');
+    const EC2_OTEL_MATRIX = buildAwsServiceMatrix(
+      { aws_cloudwatch_input_otel: INPUT_PKG as any },
+      EC2_OTEL_STATIC
+    );
+    const ec2Otel = EC2_OTEL_MATRIX[0];
+
+    it('uses a synthetic data stream keyed to the entry id', () => {
+      expect(ec2Otel.dataStreams).toEqual(['ec2_otel']);
+    });
+
+    it('sets inputs to the PT input type (otelcol)', () => {
+      expect(ec2Otel.inputs).toEqual(['otelcol']);
+    });
+
+    it('stores the PT title in inputTitles for the otelcol input', () => {
+      expect(ec2Otel.inputTitles?.otelcol).toBe('AWS EC2 OpenTelemetry Metrics');
+    });
+
+    it('defaults identityFederationSupported to false (input packages have no pt.inputs[])', () => {
+      expect(ec2Otel.identityFederationSupported).toBe(false);
+    });
+
+    it('injects data_stream.dataset with default = PT name into varDefsByDataStream', () => {
+      const dsInfo = ec2Otel.varDefsByDataStream?.ec2_otel;
+      expect(dsInfo?.varDefsByInput?.otelcol?.['data_stream.dataset']?.default).toBe('aws.ec2');
+    });
+
+    it('injects data_stream.type with default = PT signal type into varDefsByDataStream', () => {
+      const dsInfo = ec2Otel.varDefsByDataStream?.ec2_otel;
+      expect(dsInfo?.varDefsByInput?.otelcol?.['data_stream.type']?.default).toBe('metrics');
+    });
+
+    it('derives signalTypes from the PT type field', () => {
+      expect(ec2Otel.signalTypes).toContain('metrics');
+    });
+  });
+
   describe('defaultEnabledInputs derivation', () => {
     it('excludes inputs whose stream has enabled:false', () => {
       const pkg = {
@@ -276,7 +403,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb_logs', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
       ]);
       expect(result.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3']);
@@ -294,7 +421,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb_logs', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
       ]);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3', 'aws-cloudwatch']);
     });

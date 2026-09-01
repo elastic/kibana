@@ -274,7 +274,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -869,7 +875,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -886,7 +898,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout, type KbnCalloutProps } from '@kbn/ui-callout';
 
 export interface FrozenEnterpriseRequiredCalloutProps {
   onUpgradeEnterprise?: () => void;
   calloutTestSubj?: string;
   upgradeButtonTestSubj?: string;
-  calloutCss?: React.ComponentProps<typeof EuiCallOut>['css'];
+  calloutCss?: KbnCalloutProps['css'];
 }
 
 export const FrozenEnterpriseRequiredCallout = ({
@@ -23,41 +23,34 @@ export const FrozenEnterpriseRequiredCallout = ({
   calloutCss,
 }: FrozenEnterpriseRequiredCalloutProps) => {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       size="s"
-      color="warning"
       announceOnMount={false}
       title={i18n.translate('xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.title', {
         defaultMessage: 'Enterprise license required for frozen phase',
       })}
+      text={i18n.translate('xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.body', {
+        defaultMessage:
+          'Your current subscription tier does not support the frozen phase. This phase will be ignored until you remove it or upgrade your license.',
+      })}
+      actionProps={
+        onUpgradeEnterprise
+          ? {
+              primary: {
+                onClick: onUpgradeEnterprise,
+                children: i18n.translate(
+                  'xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.upgradeButton',
+                  {
+                    defaultMessage: 'Upgrade to enterprise',
+                  }
+                ),
+                'data-test-subj': upgradeButtonTestSubj,
+              },
+            }
+          : undefined
+      }
       data-test-subj={calloutTestSubj}
       css={calloutCss}
-    >
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.body', {
-          defaultMessage:
-            'Your current subscription tier does not support the frozen phase. This phase will be ignored until you remove it or upgrade your license.',
-        })}
-      </EuiText>
-
-      {onUpgradeEnterprise && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButton
-            size="s"
-            color="warning"
-            onClick={onUpgradeEnterprise}
-            data-test-subj={upgradeButtonTestSubj}
-          >
-            {i18n.translate(
-              'xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.upgradeButton',
-              {
-                defaultMessage: 'Upgrade to enterprise',
-              }
-            )}
-          </EuiButton>
-        </>
-      )}
-    </EuiCallOut>
+    />
   );
 };

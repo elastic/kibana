@@ -23,18 +23,13 @@ export class WaitForResourcesStep implements RuleExecutionStep {
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return mapStep(streamState, async (state) => {
-      const { input } = state;
       const logger = state.logger.withLabels({ step: this.name });
 
-      logger.debug({
-        message: `[${this.name}] Starting step for rule ${input.ruleId}`,
-      });
+      logger.debug({ message: 'Waiting for resources' });
 
       await this.resourcesService.waitUntilReady();
 
-      logger.debug({
-        message: `[${this.name}] Resources ready for rule ${input.ruleId}`,
-      });
+      logger.debug({ message: 'Resources ready' });
 
       return { type: 'continue', state };
     });

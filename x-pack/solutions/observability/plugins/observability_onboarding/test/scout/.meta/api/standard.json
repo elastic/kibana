@@ -1,5 +1,8 @@
 {
   "sha1": "ebc43539294f11ef3e7f332b1ac33b32b6d03f97",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "8a7a94441188b62-53d61478147c06c",
@@ -13,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
-        "line": 18,
-        "column": 12
+        "line": 19,
+        "column": 7
       }
     },
     {
@@ -29,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 37,
+        "column": 27
       }
     },
     {
@@ -45,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 94,
+        "column": 15
       }
     },
     {
@@ -61,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
-        "line": 147,
-        "column": 12
+        "line": 123,
+        "column": 20
       }
     },
     {
@@ -77,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
-        "line": 50,
-        "column": 12
+        "line": 41,
+        "column": 13
       }
     },
     {
@@ -93,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 50,
+        "column": 70
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 66,
+        "column": 42
       }
     },
     {
@@ -126,7 +129,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_update_progress_404.spec.ts",
         "line": 17,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -141,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_update_progress_updates.spec.ts",
-        "line": 17,
-        "column": 12
+        "line": 18,
+        "column": 7
       }
     }
   ]
