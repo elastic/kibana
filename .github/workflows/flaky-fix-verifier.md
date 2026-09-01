@@ -222,7 +222,7 @@ safe-outputs:
     protected-files: fallback-to-issue
     patch-format: am
     max: 1
-  # Keeps the PR title/body current after a pushed revision.
+  # Keeps the PR title/body current after a pushed revision or adds a required release note.
   update-pull-request:
     operation: replace
     footer: false
@@ -231,7 +231,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification clears it.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped` and completed release-note and backport labeling. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`, completed release-note and backport labeling, and added the PR-body release note required by `release_note:fix`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -428,7 +428,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 ## Opening the PR for review
 
-The fixer opens its PR as a **draft**, and verification decides whether it is fit to face a human. Only two verdicts earn that — `passed` (the fix held under repeated runs) and `skipped` (the runner can add no signal, so required CI is the whole verdict). For those, complete [Release-note and backport labels](#release-note-and-backport-labels), then take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal, release-note, and backport labels.
+The fixer opens its PR as a **draft**, and verification decides whether it is fit to face a human. Only two verdicts earn that — `passed` (the fix held under repeated runs) and `skipped` (the runner can add no signal, so required CI is the whole verdict). For those, complete [Release-note and backport labels](#release-note-and-backport-labels), including the PR-body release note required by `release_note:fix`, then take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal, release-note, and backport labels.
 
 - **Red verdicts stay a draft.** On `failed` or `inconclusive` the fix isn't trusted, so don't call `mark_pr_ready`: a patch we can't vouch for shouldn't cost a reviewer their time, let alone arm auto-merge behind it. The terminal label and your verdict comment are what hand it to the owning team — say in that comment that the PR is left as a draft, so nobody reads the draft state as "still running".
 - **Terminal only.** Never call `mark_pr_ready` while you are still iterating — i.e. whenever you leave `flaky-fix-check:started` in place to trigger another `/flaky` run. Marking a PR ready fires the downstream review and CI automation, which would be wasted on a commit you are about to replace.
@@ -437,18 +437,29 @@ The fixer opens its PR as a **draft**, and verification decides whether it is fi
 
 The fixer deliberately leaves every created PR with only the `flaky-test-fixer` label and no release-note or backport guidance in the PR body. Choose and explain the labels **only once the verdict is `passed` or `skipped`**, immediately before opening the PR for review. Do not spend time on this while verification is running, or for `failed`, `inconclusive`, or duplicate PRs.
 
-1. Choose exactly one release-note label from the diff:
-   - **`release_note:skip`** — the patch changes test code only.
-   - **`release_note:fix`** — the patch changes any application code.
-2. Read the active release branches and their current version labels from `versions.json` once.
-3. Use `pr-files.json` and `pr-diff.txt` to identify the files and hunks required by the fix. For each active release branch, fetch only those paths at that branch ref. Do not search commit history or attribution.
-4. Decide conservatively:
+1. Read the active release branches and their current version labels from `versions.json` once.
+2. Choose exactly one release-note label from the diff, originating issue, and release status:
+   - **`release_note:skip`** — internal changes, documentation changes, fixes for unreleased features, or any other non-user-facing change.
+   - **`release_note:fix`** — a user-facing bug fix for an issue in an already released version.
+
+   Do not choose `release_note:fix` merely because application code changed; confirm the affected behavior was released.
+3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!NOTE]` block (or at the end when that block is absent):
+
+   ```markdown
+   ## Release note
+
+   <one concise, user-focused description of what the change does for the user>
+   ```
+
+   Write the outcome in product language, not implementation, test, or flakiness terminology. Do not add this section for `release_note:skip`, and never create a duplicate if one already exists.
+4. Use `pr-files.json` and `pr-diff.txt` to identify the files and hunks required by the fix. For each active release branch, fetch only those paths at that branch ref. Do not search commit history or attribution.
+5. Decide conservatively:
    - **`backport:skip`** — the failing test/fixed behavior is main-only, or none of the active release branches contain the affected code.
    - **`backport:all-open`** — every active release branch contains the affected code and the patch applies there without adaptation.
    - **`backport:version` plus the matching `vX.Y.Z` labels** — only the named release branches contain the affected code and can take the patch. Map branch names to their current version labels using `versions.json`.
    - **No backport label** — applicability is uncertain or any target would require a materially adapted fix. Never guess.
-5. Add the release-note and confident backport labels in the same `add-labels` safe output as the terminal verdict when possible.
-6. Leave exactly one short rationale for developers. If the verdict already requires a skipped or passed-after-iteration comment, fold the label rationale into that comment. Otherwise post only:
+6. Add the release-note and confident backport labels in the same `add-labels` safe output as the terminal verdict when possible.
+7. Leave exactly one short rationale for developers. If the verdict already requires a skipped or passed-after-iteration comment, fold the label rationale into that comment. Otherwise post only:
 
    ```markdown
    ### 🏷️ Release and backport labels

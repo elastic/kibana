@@ -367,9 +367,9 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Release-note and backport labels
 
-Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification and leaves its rationale in a short PR comment; label guidance does not belong in the PR body.
+Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification, adds a user-focused `## Release note` section for `release_note:fix`, and leaves its label rationale in a short PR comment; label guidance does not belong in the PR body.
 
-The only exception is a failure that must be fixed directly on a version branch and therefore cannot produce a `main` PR for the verifier. In that no-PR hand-off, specify `release_note:skip` when the patch only touches test code or `release_note:fix` when it changes application code, plus any confident version-branch labels described below.
+The only exception is a failure that must be fixed directly on a version branch and therefore cannot produce a `main` PR for the verifier. In that no-PR hand-off, use `release_note:skip` for internal changes, documentation changes, fixes for unreleased features, or other non-user-facing changes; use `release_note:fix` for user-facing bug fixes to already released versions. For `release_note:fix`, include a `## Release note` section with one concise, user-focused description of what the change does for the user. Also include any confident version-branch labels described below.
 
 ## Fix already on `main`
 
@@ -419,14 +419,15 @@ Follow this format:
   <details>
   <summary>PR description</summary>
 
-  <the PR body per "PR format", without its "Verification" block>
+  <the PR body per "PR format", without its "Verification" block; for `release_note:fix`, insert `## Release note` with one concise, user-focused description immediately before the final NOTE>
 
   </details>
 
   <details>
   <summary>Backporting guidance</summary>
 
-  <one or two sentences explaining the branch evidence for the backport labels listed above>
+  - `<vX.Y.Z>` → <one very short sentence justifying this version's backport decision>.
+  <repeat once for every active version checked>
 
   </details>
 
