@@ -10,7 +10,6 @@ on:
         description: Issue number in this repository to fix
         required: true
         type: string
-  status-comment: true
 
 permissions:
   contents: read
@@ -119,12 +118,37 @@ network:
 sandbox:
   agent: awf
 
+jobs:
+  notify-failure:
+    needs: agent
+    if: always() && needs.agent.result == 'failure'
+    runs-on: ubuntu-slim
+    permissions:
+      issues: write
+    steps:
+      - name: Notify issue author of workflow failure
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const issueNumber = Number(process.env.ISSUE_NUMBER);
+            if (!Number.isInteger(issueNumber) || issueNumber <= 0) {
+              core.setFailed(`Invalid issue number: ${process.env.ISSUE_NUMBER}`);
+              return;
+            }
+            const { owner, repo } = context.repo;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const body = [
+              'The flaky test fixer failed before it could report an outcome. This is an automation failure, not an issue with your code; no investigation is required from the issue author.',
+              '',
+              'Remove and reapply `ai:fix-flaky` to retry.',
+              '',
+              `[Workflow run](${runUrl})`,
+            ].join('\n');
+            await github.rest.issues.createComment({ owner, repo, issue_number: issueNumber, body });
+
 safe-outputs:
-  activation-comments: true
+  activation-comments: false
   report-failure-as-issue: false
-  messages:
-    run-started: 'The flaky test fixer is investigating this issue. Follow progress in [{workflow_name}]({run_url}).'
-    run-failure: 'The flaky test fixer failed before it could report an outcome. Review [{workflow_name}]({run_url}), then remove and reapply `ai:fix-flaky` to retry.'
   mentions:
     allowed:
       - ${{ github.actor }}
