@@ -77,6 +77,7 @@ export interface KilledProcessDescendant {
   parent_pid?: number;
   entity_id?: string;
   parent_entity_id?: string;
+  process_name?: string;
   command?: string;
   was_killed?: boolean;
   error?: string;

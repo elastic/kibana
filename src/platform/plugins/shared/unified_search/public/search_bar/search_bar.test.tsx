@@ -375,7 +375,7 @@ describe('SearchBar', () => {
     const submitButton = screen.getByTestId('querySubmitButton');
     await user.click(submitButton);
 
-    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
       1,
       {
@@ -402,7 +402,7 @@ describe('SearchBar', () => {
     const submitButton = screen.getByTestId('querySubmitButton');
     await user.click(submitButton);
 
-    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
       1,
       {

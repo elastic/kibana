@@ -15,6 +15,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart } from '@kbn/core/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +30,7 @@ import type { CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
+import { ApiKeysCpsCallout } from './api_keys_cps_callout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable, categorizeAggregations } from './api_keys_table';
 import type { QueryFilters } from './api_keys_table';
@@ -78,7 +80,11 @@ const apiKeysDescription = i18n.translate(
   }
 );
 
-export const APIKeysGridPage: FunctionComponent = () => {
+export interface APIKeysGridPageProps {
+  cpsManager?: ICPSManager;
+}
+
+export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsManager }) => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
   const authc = useAuthentication();
@@ -321,20 +327,25 @@ export const APIKeysGridPage: FunctionComponent = () => {
     );
   } else if (totalKeys === 0) {
     body = (
-      <ApiKeysEmptyPrompt readOnly={readOnly}>
-        <EuiButton
-          {...reactRouterNavigate(history, '/create')}
-          fill
-          iconType="plusCircle"
-          data-test-subj="apiKeysCreatePromptButton"
-        >
-          {createApiKeyButtonLabel}
-        </EuiButton>
-      </ApiKeysEmptyPrompt>
+      <>
+        <ApiKeysCpsCallout cpsManager={cpsManager} />
+        <ApiKeysEmptyPrompt readOnly={readOnly}>
+          <EuiButton
+            {...reactRouterNavigate(history, '/create')}
+            fill
+            iconType="plusCircle"
+            data-test-subj="apiKeysCreatePromptButton"
+          >
+            {createApiKeyButtonLabel}
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
+      </>
     );
   } else {
     body = (
       <KibanaPageTemplate.Section paddingSize="none">
+        <ApiKeysCpsCallout cpsManager={cpsManager} />
+
         {createdApiKey && (
           <>
             <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
