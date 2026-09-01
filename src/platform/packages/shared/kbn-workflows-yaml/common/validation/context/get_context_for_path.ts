@@ -54,15 +54,15 @@ export function getContextSchemaForStep(
 
   const extension: Record<string, z.ZodType> = {};
 
-  const stepsCollectionSchema = getStepsCollectionSchema(
+  const stepsCollection = getStepsCollectionSchema(
     registry,
     baseSchema,
     workflowGraph,
     stepName,
     predecessors
   );
-  if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    extension.steps = stepsCollectionSchema;
+  if (stepsCollection.size > 0) {
+    extension.steps = stepsCollection.schema;
   }
 
   extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors);
