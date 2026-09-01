@@ -22,8 +22,9 @@ export function startTrackingHistory<T extends object = {}>({
   onStateChange$: Observable<T | undefined>;
   setState: (state: T) => Promise<void>;
   maxSize: number;
-  pause$: BehaviorSubject<boolean>;
+  pause$?: BehaviorSubject<boolean>;
 }) {
+  pause$ = pause$ ?? new BehaviorSubject(false);
   const history: jsondiffpatch.Delta[] = [];
   const pointer$ = new BehaviorSubject<number>(-1);
   let undoOrRedoAction = false;
