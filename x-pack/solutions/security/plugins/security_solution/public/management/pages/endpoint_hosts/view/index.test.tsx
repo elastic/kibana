@@ -708,6 +708,47 @@ describe('when on the endpoint list page', () => {
     });
   });
 
+  // The `host.ip` field is typed as `string[]`, but a custom ingest pipeline can
+  // overwrite it with a string, and the whole `host` object can be missing, which
+  // used to white-screen the list. See security-team#17020,
+  // sdh-security-team#1648/#1709.
+  describe('IP address column', () => {
+    const renderListWithHostIp = async (ip: unknown) => {
+      const mockedEndpointData = mockEndpointResultList({ total: 1 });
+      const hostListData = mockedEndpointData.data;
+      // @ts-expect-error simulate malformed `host.ip` coming back from the API
+      hostListData[0].metadata.host.ip = ip;
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: hostListData,
+      });
+
+      render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      });
+    };
+
+    it('should render comma-separated IPs when host.ip is an array', async () => {
+      await renderListWithHostIp(['10.0.0.1', '10.0.0.2']);
+
+      expect(await renderResult.findByText('10.0.0.1, 10.0.0.2')).toBeInTheDocument();
+    });
+
+    it('should render without crashing when host.ip is a single string', async () => {
+      await renderListWithHostIp('10.0.0.1');
+
+      expect(await renderResult.findByText('10.0.0.1')).toBeInTheDocument();
+    });
+
+    it('should render the host row without crashing when host.ip is undefined', async () => {
+      await renderListWithHostIp(undefined);
+
+      // The row (incl. the IP column) renders instead of white-screening the list.
+      expect(await renderResult.findByTestId('hostnameCellLink')).toBeInTheDocument();
+    });
+  });
+
   describe('when there is a selected host in the url', () => {
     let hostInfo: HostInfo;
     const endpointDetails: HostInfo = mockEndpointDetailsApiResult();
