@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/283177
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-18
-- product: kibana
-title: Fix Agent Builder chat errors with special tokens and empty Claude blocks
-description: "Fixes chat streams failing when prompts contain GPT special tokens such as `<|endoftext|>`, and fixes Claude models rejecting empty text content blocks."

@@ -106,6 +106,48 @@ describe('buildScheduledResponsesQuery', () => {
     });
   });
 
+  describe('agent cardinality sub-aggregations', () => {
+    const getSubAggs = () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
+
+      return scheduledExec.aggs as Record<string, unknown>;
+    };
+
+    test('counts agents per bucket by agent_id cardinality', () => {
+      expect(getSubAggs().agent_count).toEqual({ cardinality: { field: 'agent_id' } });
+    });
+
+    test('nests agent cardinality under the success filter', () => {
+      // processScheduledHistory reads `success_count.agents.value`; a flat
+      // cardinality would silently leave it on the doc_count fallback.
+      expect(getSubAggs().success_count).toEqual({
+        filter: { bool: { must_not: { exists: { field: 'error' } } } },
+        aggs: { agents: { cardinality: { field: 'agent_id' } } },
+      });
+    });
+
+    test('nests agent cardinality under the error filter', () => {
+      expect(getSubAggs().error_count).toEqual({
+        filter: { exists: { field: 'error' } },
+        aggs: { agents: { cardinality: { field: 'agent_id' } } },
+      });
+    });
+
+    test('leaves cardinality precision at the ES default on every agent agg', () => {
+      // Measured: `precision_threshold: 40000` on this agg trips the request
+      // circuit breaker at 10k+ buckets. All three must also share one precision.
+      const subAggs = getSubAggs();
+      const successAggs = (subAggs.success_count as { aggs: Record<string, unknown> }).aggs;
+      const errorAggs = (subAggs.error_count as { aggs: Record<string, unknown> }).aggs;
+
+      expect(JSON.stringify([subAggs.agent_count, successAggs, errorAggs])).not.toContain(
+        'precision_threshold'
+      );
+    });
+  });
+
   describe('base filters', () => {
     test('always includes exists filter on schedule_id', () => {
       const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });

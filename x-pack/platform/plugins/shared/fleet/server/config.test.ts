@@ -160,7 +160,7 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
-  it('should allow to specify iacProvisioner.api.tls.ca as a list of CA paths', () => {
+  it('should reject iacProvisioner.api.tls.ca as a list of CA paths', () => {
     expect(() => {
       config.schema.validate({
         iacProvisioner: {
@@ -175,7 +175,7 @@ describe('Config schema', () => {
           },
         },
       });
-    }).not.toThrow();
+    }).toThrow();
   });
 
   it('should allow to specify packageInstallation configuration', () => {

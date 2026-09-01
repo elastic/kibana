@@ -12,7 +12,8 @@ import { apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { COMMON_HEADERS } from '../fixtures';
 
-apiTest.describe('kibana status api', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/284046
+apiTest.describe.skip('kibana status api', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

@@ -13,12 +13,21 @@ import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/colori
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
+  CountIndexPatternColumn,
+  CardinalityIndexPatternColumn,
   DataType,
+  DateHistogramIndexPatternColumn,
   FormBasedPersistedState,
   GenericIndexPatternColumn,
+  LastValueIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
+  SumIndexPatternColumn,
+  TermsIndexPatternColumn,
   TextBasedPersistedState,
+  ValueFormatConfig,
+  RangeIndexPatternColumn,
 } from '@kbn/lens-common';
+import { hasTextBasedLayers } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
@@ -27,6 +36,9 @@ import { migrateFilter } from '@kbn/es-query';
 import type { Filter, FilterMeta } from '@kbn/es-query';
 
 import {
+  LENS_FORMAT_DURATION_COMPACT_DEFAULT,
+  LENS_FORMAT_DURATION_DECIMALS_DEFAULT,
+  LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
 } from '../../../../schema/constants';
@@ -45,12 +57,8 @@ const COMMON_STATE_IGNORE_PATHS = [
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
   'state.datasourceStates.formBased.currentIndexPatternId',
-  // Label and customLabel diffs
-  'state.datasourceStates.*.layers.*.columns.*.label', // is kept at state -> API only if it is a custom label
-  'state.datasourceStates.*.layers.*.columns.*.customLabel', // dropped at state -> API and only applied from API -> State if label is explicitly set
-  // TODO: check DSL differing properties changed in transforms
-  'state.datasourceStates.formBased.layers.*.columns.*.params',
-  'state.datasourceStates.formBased.layers.*.columns.*.scale', // conditionally set for data columns
+  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
+  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
@@ -357,18 +365,21 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
 }
 
 /**
- * For ES|QL panels, the layer query is the source of truth at runtime.
- * The top-level state.query may diverge in legacy SOs — sync it to the layer.
+ * For ES|QL panels, the layer query is the source of truth. Legacy SOs may
+ * still carry an aggregate copy in the top-level state.query slot (dead data,
+ * dropped at read time) and the API→SO transform emits an empty kuery default
+ * — normalize both to an absent slot for comparison.
  */
 function normalizeESQLQuery(attributes: LensAttributes) {
-  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
-  if (textBasedLayers.length > 0) {
-    const layerQuery = textBasedLayers[0].query;
-    // For ES|QL panels the layer query is authoritative; the transform always promotes it to the
-    // top-level state query, replacing any stale legacy query (even a different language).
-    if (layerQuery?.esql && attributes.state.query) {
-      attributes.state.query = layerQuery;
-    }
+  const isTextBased = hasTextBasedLayers(attributes);
+  const query: unknown = attributes.state.query;
+  if (!query || typeof query !== 'object') {
+    return;
+  }
+  const isAggregate = 'esql' in query;
+  const isEmpty = 'query' in query && query.query === '';
+  if (isAggregate || (isTextBased && isEmpty)) {
+    delete attributes.state.query;
   }
 }
 
@@ -488,6 +499,459 @@ function normalizeColumnReferences(
     (col as any).references = [];
   }
 }
+
+const isTermsColumn = (col: GenericIndexPatternColumn): col is TermsIndexPatternColumn =>
+  col.operationType === 'terms';
+
+/**
+ * Canonicalize a `terms` column's `params` empty defaults on the ORIGINAL side to match the SO -> API
+ * -> SO transform output.
+ */
+const normalizeTermsColumnParams = (
+  col: TermsIndexPatternColumn,
+  innerRefColumnIds: ReadonlySet<string> = new Set()
+): void => {
+  const { params } = col;
+
+  // `orderAgg`: only meaningful for a custom `orderBy` (`terms/index.tsx` writes
+  // `orderBy.type === 'custom' ? orderAgg : undefined`, and the transform only reconstructs it for
+  // custom ordering). A leftover `null`/absent value under a non-custom `orderBy` is dead residue.
+  if (params.orderAgg == null) {
+    delete params.orderAgg;
+  }
+
+  // `secondaryFields`: dropped when empty exactly like an absent value; a non-empty list is preserved verbatim.
+  if (!params.secondaryFields?.length) {
+    delete params.secondaryFields;
+  }
+
+  // `include`/`exclude`: dropped when empty. When present, the paired regex flag round-trips as
+  //  `as_regex ?? false`. Values themselves are left untouched.
+  if (params.include?.length) {
+    params.includeIsRegex = Boolean(params.includeIsRegex);
+  } else {
+    delete params.include;
+    delete params.includeIsRegex;
+  }
+  if (params.exclude?.length) {
+    params.excludeIsRegex = Boolean(params.excludeIsRegex);
+  } else {
+    delete params.exclude;
+    delete params.excludeIsRegex;
+  }
+
+  // `otherBucket`/`missingBucket`: when `otherBucket` is falsy both are dead at render and dropped by
+  //  the transform, so remove both regardless of `missingBucket`. When `otherBucket` is truthy,
+  // `missingBucket` round-trips as `Boolean(...)`, so default a missing value to `false`
+  if (params.otherBucket) {
+    params.missingBucket = Boolean(params.missingBucket);
+  } else {
+    delete params.otherBucket;
+    delete params.missingBucket;
+  }
+
+  // `orderBy.fallback`: editor-only hint (re-attach metric sorting when a metric appears). Render
+  // resolves alphabetical to `orderBy='_key'` regardless (`terms/index.tsx` toEsAggsFn).
+  if (params.orderBy && 'fallback' in params.orderBy) {
+    const { fallback: _fallback, ...orderByWithoutFallback } = params.orderBy;
+    params.orderBy = orderByWithoutFallback;
+  }
+
+  // Order By a Backing Column (e.g. `max` behind `differences`) is out of API contract: `rank_by`
+  // indexes Visible Metrics only, so SO→API→SO falls back to alphabetical+fallback. Rewrite after
+  // the fallback strip so the rewritten `fallback: true` is kept and matches the transform.
+  if (
+    params.orderBy?.type === 'column' &&
+    params.orderBy.columnId != null &&
+    innerRefColumnIds.has(params.orderBy.columnId)
+  ) {
+    params.orderBy = { type: 'alphabetical', fallback: true };
+  }
+
+  // `parentFormat`: the transform derives it from `secondaryFields` (`fromTermsLensApiToLensState`),
+  // mirroring runtime `getParentFormatter` (`terms/index.tsx`): `multi_terms` for multi-field terms,
+  // `terms` otherwise.
+  if (params.parentFormat == null) {
+    params.parentFormat = { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
+  }
+
+  // There is a panel with a stale `{id:'terms'}` on a multi-field terms column
+  if (params.parentFormat.id === 'terms' && params.secondaryFields?.length) {
+    params.parentFormat.id = 'multi_terms';
+  }
+};
+
+const isDateHistogramColumn = (
+  col: GenericIndexPatternColumn
+): col is DateHistogramIndexPatternColumn => col.operationType === 'date_histogram';
+
+/**
+ * Default missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` to `false` on `date_histogram`
+ * columns on the ORIGINAL side. The transform emits `Boolean(...)` in both directions
+ * (`transforms/columns/date_histogram.ts`), so a missing flag round-trips as an explicit `false`.
+ */
+const normalizeDateHistogramColumnParams = (col: DateHistogramIndexPatternColumn): void => {
+  const { params } = col;
+  params.ignoreTimeRange = Boolean(params.ignoreTimeRange);
+  params.dropPartials = Boolean(params.dropPartials);
+  params.includeEmptyRows = Boolean(params.includeEmptyRows);
+};
+
+const isRangeColumn = (col: GenericIndexPatternColumn): col is RangeIndexPatternColumn =>
+  col.operationType === 'range';
+
+/**
+ * Canonicalize `range` column params.
+ * - Histogram mode: empty unused `ranges`, default `includeEmptyRows`,`maxBars` must round-trip verbatim.
+ * - Custom-range mode: `maxBars` is dead at render (`toEsAggsFn` only reads `ranges`); the
+ *   transform always writes `'auto'`. Leftover numeric values (e.g. `499.5` from a prior
+ *   histogram slider position) are rewritten to `'auto'`.
+ */
+const normalizeRangeColumnParams = (col: RangeIndexPatternColumn): void => {
+  const { params } = col;
+
+  if (params.type === 'range') {
+    params.maxBars = 'auto';
+    return;
+  }
+
+  if (params.type !== 'histogram') {
+    return;
+  }
+
+  // Unused for histogram mode — transform hardcodes `[]`.
+  params.ranges = [];
+
+  // Missing ≡ `false` at render (`Boolean(params.includeEmptyRows)`).
+  params.includeEmptyRows = Boolean(params.includeEmptyRows);
+};
+
+// Metric operations with the "Hide zero values" (`emptyAsNull`) option
+// For these, `emptyAsNull` is a used param that the transform round-trips.
+type EmptyAsNullSupportedColumn =
+  | CountIndexPatternColumn
+  | SumIndexPatternColumn
+  | CardinalityIndexPatternColumn;
+
+const isEmptyAsNullSupportedColumn = (
+  col: GenericIndexPatternColumn
+): col is EmptyAsNullSupportedColumn =>
+  col.operationType === 'count' ||
+  col.operationType === 'sum' ||
+  col.operationType === 'unique_count';
+
+/**
+ * Canonicalize `emptyAsNull` on the ORIGINAL side.
+ *
+ * - `count`/`sum`/`unique_count` (`hideZeroOption`): real render param; transform round-trips as
+ *   `Boolean(...)`, so a missing value becomes an explicit `false`.
+ * - Auto-generated `cumulative_sum` backing `sum`/`count`: the transform regenerates them with
+ *   `empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE` (`false`). Editor-created refs often have
+ *   `true` (editor default). That drift is accepted: `emptyAsNull` only affects post-tabify
+ *   `getValue` (`0 → null`), and `cumulative_sum` treats `0` and `null` the same for the running
+ *   total, so the visible series is unchanged.
+ * - Every other operation: dead residue — strip open-ended (a closed denylist previously missed
+ *   `static_value`).
+ */
+const normalizeEmptyAsNull = (
+  col: GenericIndexPatternColumn,
+  { isCounterRateOrCumSumRefCol = false }: { isCounterRateOrCumSumRefCol?: boolean } = {}
+): void => {
+  if (isEmptyAsNullSupportedColumn(col)) {
+    col.params = {
+      ...col.params,
+      emptyAsNull: isCounterRateOrCumSumRefCol ? false : Boolean(col.params?.emptyAsNull),
+    };
+    return;
+  }
+
+  if (!('params' in col) || !col.params || !('emptyAsNull' in col.params)) {
+    return;
+  }
+
+  delete col.params.emptyAsNull;
+  if (Object.keys(col.params).length === 0) {
+    delete col.params;
+  }
+};
+
+/**
+ * Normalize formula/static_value columns.
+ *
+ * - `isFormulaBroken` is a validity flag recomputed at load/validation: `extractColumns`
+ * (`formula/parse.ts`) writes `isFormulaBroken: !isValid` whenever the formula column is regenerated,
+ * and `formula.tsx` resets it to `false`, so it is never authored.
+ *
+ * - `formula` is dead residue on a `static_value` column
+ */
+const normalizeFormulaAndStaticValueColumns = (col: GenericIndexPatternColumn): void => {
+  if (col.operationType !== 'formula' && col.operationType !== 'static_value') {
+    return;
+  }
+  // formula/static_value are reference-based columns, so `params` is typed via `FormattedIndexPatternColumn`.
+  if (!isReferenceBasedColumn(col)) {
+    return;
+  }
+
+  if (col.params && 'isFormulaBroken' in col.params) {
+    delete col.params.isFormulaBroken;
+  }
+
+  if (col.params && col.operationType === 'static_value' && 'formula' in col.params) {
+    delete col.params.formula;
+  }
+};
+
+/**
+ * Drop a stale `params.sortField` on any column that is not a `last_value`.
+ *
+ * `sortField` is a `last_value`-only param (`last_value.tsx`); other operations (e.g. `max`,
+ * `date_histogram`) never read it at render, and their transforms rebuild `params` without it.
+ */
+const normalizeStaleSortField = (col: GenericIndexPatternColumn): void => {
+  if (col.operationType === 'last_value') {
+    return;
+  }
+  if ('params' in col && col.params && 'sortField' in col.params) {
+    delete col.params.sortField;
+  }
+};
+
+/**
+ * Drop a dead display `format` on the auto-generated inner reference column of a
+ * `counter_rate`/`cumulative_sum`.
+ */
+const normalizeCounterRateOrCumSumRefFormat = (col: GenericIndexPatternColumn): void => {
+  if ('params' in col && col.params && 'format' in col.params) {
+    delete col.params.format;
+  }
+};
+
+/**
+ * Drop an empty `params: {}` that carries no value and is never reproduced by the round-trip.
+ */
+const normalizeEmptyFormatOnlyParams = (col: GenericIndexPatternColumn): void => {
+  if ('params' in col && col.params && Object.keys(col.params).length === 0) {
+    delete col.params;
+  }
+};
+
+/**
+ * Canonicalize a `terms` column's custom `orderAgg` (the nested rank-function metric).
+ *
+ * The order-agg is rebuilt from scratch, so only render-affecting state survives the round-trip:
+ * - `scale`: derived OperationMetadata, re-computed at load.
+ * - `label`/`customLabel`: display residue. The transform always emits a bare `label: ''` and never a
+ *   `customLabel`, mirroring `getCustomOrderAgg` (the nested rank editor has no custom-label input).
+ * - `filter`: dead — the terms agg builds the order-agg inline and never wraps it in an
+ *   `aggFilteredMetric`, so the filter never reaches the aggregation and the transform drops it.
+ * - `emptyAsNull`: dead on an order-agg for every op. Its agg param has a no-op writer
+ *   (`metric_agg_type.ts`), so it never reaches Elasticsearch (buckets are ordered by the raw metric
+ *   value), and an order-agg is never tabified (it only sorts terms), so the `getValue` `0 → null`
+ *   post-processing never runs for it either. The transform emits none, so drop the persisted flag.
+ */
+const normalizeOrderAgg = (orderAgg: GenericIndexPatternColumn): void => {
+  delete orderAgg.scale;
+
+  orderAgg.label = '';
+  delete orderAgg.customLabel;
+
+  if ('filter' in orderAgg) {
+    delete orderAgg.filter;
+  }
+
+  const { params } = orderAgg as { params?: { emptyAsNull?: unknown } };
+  if (params && 'emptyAsNull' in params) {
+    delete params.emptyAsNull;
+  }
+
+  normalizeEmptyFormatOnlyParams(orderAgg);
+};
+
+const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueIndexPatternColumn =>
+  col.operationType === 'last_value';
+
+/**
+ * Default a missing/`null` `params.showArrayValues` to `true` on `last_value` columns on the ORIGINAL
+ * side to match the 8.2.0 saved-object migration `commonSetLastValueShowArrayValues`
+ * (`server/migrations/common_migrations.ts`) that coerces any non-boolean `showArrayValues` to `true` at load.
+ */
+const normalizeLastValueShowArrayValues = (col: GenericIndexPatternColumn): void => {
+  if (!isLastValueColumn(col)) {
+    return;
+  }
+  if (col.params.showArrayValues == null) {
+    col.params.showArrayValues = true;
+  }
+};
+
+type FormatParams = NonNullable<ValueFormatConfig['params']>;
+
+/**
+ * Canonicalize `duration` value-format params.
+ *
+ * - `fromUnit`/`toUnit` are required on the API, so the transform always emits units and reconstructs
+ *   both on the way back. A saved object that omits them renders with the formatter defaults —
+ *   `inputFormat: params.fromUnit || DEFAULT_DURATION_INPUT_FORMAT.kind` (`seconds`) and
+ *   `outputFormat: params.toUnit || DEFAULT_DURATION_OUTPUT_FORMAT.method` (`humanize`)
+ *   (`format_column/supported_formats.ts`) — which is exactly what the round-trip produces (`s` → `seconds`,
+ *   `auto-approximate` → `humanize`).
+ * - `decimals`/`compact` depend on the output unit (`transforms/columns/format.ts`):
+ *   - `humanize` (approximate, API `auto-approximate`): the formatter ignores both, so the transform forces
+ *     `decimals: 0` to satisfy TS and omits `compact` entirely.
+ *   - every other unit (`humanizePrecise`/`asSeconds`/… → precise): both round-trip with editor-aligned
+ *     defaults, so default a missing `decimals` to `0` and a missing `compact` to `true`.
+ */
+const normalizeDurationFormatParams = (params: FormatParams): void => {
+  if (params.fromUnit == null) {
+    params.fromUnit = 'seconds';
+  }
+  if (params.toUnit == null) {
+    params.toUnit = 'humanize';
+  }
+
+  const isApproximate = params.toUnit === 'humanize';
+  if (isApproximate) {
+    params.decimals = LENS_FORMAT_DURATION_DECIMALS_DEFAULT;
+    delete params.compact;
+  } else {
+    if (params.decimals == null) {
+      params.decimals = LENS_FORMAT_DURATION_DECIMALS_DEFAULT;
+    }
+    if (params.compact == null) {
+      params.compact = LENS_FORMAT_DURATION_COMPACT_DEFAULT;
+    }
+  }
+};
+
+const normalizeNumberOrPercentFormatParams = (params: FormatParams): void => {
+  if (params.decimals == null && (params.compact != null || params.suffix)) {
+    params.decimals = LENS_FORMAT_NUMBER_DECIMALS_DEFAULT;
+  }
+};
+
+const normalizeBytesOrBitsFormatParams = (params: FormatParams): void => {
+  if (params.decimals == null && params.suffix) {
+    params.decimals = LENS_FORMAT_NUMBER_DECIMALS_DEFAULT;
+  }
+};
+
+/**
+ * Pattern is the only display input for custom; `decimals` is a TS/editor placeholder (`0`).
+ * Selecting Custom in the editor immediately persists `{id:'custom', params:{decimals:0}}`
+ * before a pattern is typed — drop that residue. When a pattern is present, canonicalize
+ * `decimals` to `0` to match `fromFormatAPIToLensState` / the UI default.
+ */
+const normalizeCustomFormat = (
+  format: ValueFormatConfig,
+  columnParams: { format?: ValueFormatConfig }
+): boolean => {
+  if (!format.params?.pattern) {
+    delete columnParams.format;
+    return false;
+  }
+
+  format.params.decimals = 0;
+  return true;
+};
+
+const normalizeFormatParamsForId = (
+  format: ValueFormatConfig,
+  columnParams: { format?: ValueFormatConfig }
+): boolean => {
+  switch (format.id) {
+    case 'custom':
+      return normalizeCustomFormat(format, columnParams);
+    case 'duration':
+      if (!format.params) {
+        return true;
+      }
+      normalizeDurationFormatParams(format.params);
+      return true;
+    case 'number':
+    case 'percent':
+      if (!format.params) {
+        return true;
+      }
+      normalizeNumberOrPercentFormatParams(format.params);
+      return true;
+    case 'bytes':
+    case 'bits':
+      if (!format.params) {
+        return true;
+      }
+      normalizeBytesOrBitsFormatParams(format.params);
+      return true;
+    default:
+      return true;
+  }
+};
+
+/**
+ * Canonicalize value-format `params`.
+ *
+ * - Missing `decimals` when other format params are present → `2`, matching
+ *   `decimalsToPattern(decimals = 2)` and the transform fill-in when compact/suffix are authored
+ *   without decimals.
+ * - Empty-string `suffix` is ignored at render and dropped by SO→API.
+ * - Pattern-less `custom` format is dropped; with a pattern, `decimals` → `0` — see `normalizeCustomFormat`.
+ * - `duration` units and mode-dependent `decimals`/`compact` — see `normalizeDurationFormatParams`.
+ */
+const normalizeFormatParams = (col: GenericIndexPatternColumn): void => {
+  if (!('params' in col) || !col.params) {
+    return;
+  }
+  const params = col.params as { format?: ValueFormatConfig };
+  const { format } = params;
+  if (!format) {
+    return;
+  }
+
+  if (format.id !== 'custom' && !format.params) {
+    return;
+  }
+
+  if (format.params?.suffix === '') {
+    delete format.params.suffix;
+  }
+
+  if (!normalizeFormatParamsForId(format, params)) {
+    return;
+  }
+};
+
+/**
+ * Canonicalize a column's `label`/`customLabel` on the ORIGINAL side to match what the transform emits.
+ *
+ * A custom label (`customLabel === true`) round-trips verbatim, so it is kept and compared exactly. A
+ * dropped or mutated custom label must fail the round-trip. Otherwise the stored `label` is a recomputed
+ * non-custom default (`getDefaultLabel`) that the transform does not persist:
+ * - form-based columns require `label` on the emitted `Operation`, so the transform emits `''`. Normalize
+ *   the original to `customLabel: false` with an empty `label`.
+ * - text-based columns keep both keys optional and the transform omits them, so drop both here.
+ */
+const normalizeColumnLabel = (
+  col: { label?: string; customLabel?: boolean },
+  {
+    isTextBased,
+    isCounterRateOrCumSumRefCol = false,
+  }: { isTextBased: boolean; isCounterRateOrCumSumRefCol?: boolean }
+): void => {
+  // For the inner referenced columns of `counter_rate`/`cumulative_sum`: we derive their displayed label
+  // from the referenced field's display name, never the inner column's label. So it's safe to normalize
+  // away the custom label.
+  if (col.customLabel === true && !isCounterRateOrCumSumRefCol) {
+    return;
+  }
+
+  if (isTextBased) {
+    delete col.label;
+    delete col.customLabel;
+  } else {
+    col.customLabel = false;
+    col.label = '';
+  }
+};
 
 export interface CommonNormalizerArgs {
   layerRemapping: IdRemapping;
@@ -777,10 +1241,12 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       textBased: normalizeDatasourceState(attributes.state.datasourceStates.textBased, (ds) => {
         for (const layer of Object.values(ds.layers)) {
           layer.columns = layer.columns.map((column) => {
-            return {
+            const remapped = {
               ...column,
               columnId: columnIdMap.get(column.columnId) ?? column.columnId,
             };
+            normalizeColumnLabel(remapped, { isTextBased: true });
+            return remapped;
           });
 
           // Datatable's ESQL output order is driven by `layer.columns` array order
@@ -850,9 +1316,52 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               layer.linkToLayers = layer.linkToLayers?.map((l) => layerIdMap.get(l) ?? l);
             }
 
+            // Inner referenced columns of counter_rate/cumulative_sum are regenerated (label-less) by
+            // the transform and their label never surfaces at runtime, so their (possibly custom) label
+            // must be dropped on the original side too. Collect their canonical IDs (references are
+            // remapped via columnIdMap, matching the already-remapped column keys).
+            const counterRateOrCumSumRefIds = new Set<string>();
+            // All Backing Columns (any reference target) — used for terms Order By contract loss.
+            const innerRefColumnIds = new Set<string>();
+            for (const col of Object.values(layer.columns)) {
+              if (isReferenceBasedColumn(col)) {
+                for (const refId of col.references) {
+                  innerRefColumnIds.add(columnIdMap.get(refId) ?? refId);
+                }
+                if (
+                  (col.operationType === 'counter_rate' ||
+                    col.operationType === 'cumulative_sum') &&
+                  col.references[0]
+                ) {
+                  counterRateOrCumSumRefIds.add(
+                    columnIdMap.get(col.references[0]) ?? col.references[0]
+                  );
+                }
+              }
+            }
+
             for (const [columnId, col] of Object.entries(layer.columns)) {
-              // scale is not preserved through transforms
+              // `scale` is derived OperationMetadata, not authored state. The runtime never reads the
+              // persisted `column.scale`: `columnToOperation` recomputes it on load from the operation
+              // definition or it is even field-type dependent (e.g. last_value -> getScale(field.type), ranges).
+              // Dropping it through the SO -> API -> SO round-trip is therefore behaviorally lossless.
               delete col.scale;
+
+              const isCounterRateOrCumSumRefCol = counterRateOrCumSumRefIds.has(columnId);
+
+              normalizeColumnLabel(col, {
+                isTextBased: false,
+                isCounterRateOrCumSumRefCol,
+              });
+
+              // The auto-generated backing column of a counter_rate/cumulative_sum loses its (dead)
+              // display format through the round-trip.
+              if (isCounterRateOrCumSumRefCol) {
+                normalizeCounterRateOrCumSumRefFormat(col);
+              }
+
+              // Drop a stale `sortField` on any non-`last_value` column (dead residue)
+              normalizeStaleSortField(col);
 
               // Empty-string timeShift is semantically "no shift" and is dropped by the transform
               if (col.timeShift === '') {
@@ -867,6 +1376,41 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
               normalizeColumnReferences(col, columnIdMap);
               normalizeDataTypes(col, inferColumnDataType?.(columnId));
+
+              // Canonicalize terms `params` empty defaults the transform never round-trips
+              if (isTermsColumn(col)) {
+                normalizeTermsColumnParams(col, innerRefColumnIds);
+
+                // Canonicalize a custom `orderAgg` (rank function) rebuilt by the transform
+                if (col.params.orderAgg) {
+                  normalizeOrderAgg(col.params.orderAgg);
+                }
+              }
+
+              // Canonicalize range-column params
+              if (isRangeColumn(col)) {
+                normalizeRangeColumnParams(col);
+              }
+
+              // Default missing date_histogram flags to `false` (transform emits `Boolean(...)`)
+              if (isDateHistogramColumn(col)) {
+                normalizeDateHistogramColumnParams(col);
+              }
+
+              // Normalize `emptyAsNull` param for metric operations
+              normalizeEmptyAsNull(col, { isCounterRateOrCumSumRefCol });
+
+              // Drop an empty `params: {}`
+              normalizeEmptyFormatOnlyParams(col);
+
+              // Normalizen formula/static_value columns
+              normalizeFormulaAndStaticValueColumns(col);
+
+              // Default missing/`null` `showArrayValues` to `true` on last_value columns (8.2 migration)
+              normalizeLastValueShowArrayValues(col);
+
+              // Strip empty `format.params` / empty-string `suffix`; canonicalize per format id
+              normalizeFormatParams(col);
             }
           }
           return ds;
@@ -880,6 +1424,8 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     return attributes;
   },
   transformed: (attributes: T) => {
+    normalizeESQLQuery(attributes);
+
     if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
       delete attributes.state.adHocDataViews;
     }

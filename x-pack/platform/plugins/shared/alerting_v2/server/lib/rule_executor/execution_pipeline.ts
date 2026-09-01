@@ -95,7 +95,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
         if (result.type === 'halt') {
           pipelineState.logger.debug({
-            message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
+            message: 'Pipeline halted',
+            labels: { resource: result.reason },
           });
 
           return {
@@ -154,7 +155,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
     if (!rule) {
       logger.warn({
-        message: `[rule_executor] Skipping rule.execution.succeeded for rule "${rawInput.ruleId}": no rule in final state.`,
+        message: 'Skipping rule execution succeeded event publish',
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_SKIPPED,
       });
       return;
@@ -174,9 +175,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (error) {
       logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        message: 'Failed to publish rule execution succeeded event',
+        error,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }
@@ -194,9 +194,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (publishError) {
       logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.failed event: ${
-          publishError instanceof Error ? publishError.message : String(publishError)
-        }`,
+        message: 'Failed to publish rule execution failed event',
+        error: publishError,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }

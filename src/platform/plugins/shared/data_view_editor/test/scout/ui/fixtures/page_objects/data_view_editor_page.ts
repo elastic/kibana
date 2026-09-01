@@ -9,6 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 // Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
 export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;
@@ -35,7 +36,7 @@ export class DataViewEditorPage {
     this.titleInput = page.testSubj.locator('createIndexPatternTitleInput');
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
-    this.detailPageTitle = page.testSubj.locator('indexPatternTitle');
+    this.detailPageTitle = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   // Fills the title field and waits for async validation to settle.

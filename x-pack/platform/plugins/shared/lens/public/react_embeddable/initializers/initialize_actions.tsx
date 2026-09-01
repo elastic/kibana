@@ -30,6 +30,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 import type { DrilldownsManager, HasDrilldowns } from '@kbn/embeddable-plugin/public';
+import { getRepresentativeQuery, isTextBasedAttributes } from '@kbn/lens-common';
 import {
   combineQueryAndFilters,
   findDataViewByIndexPatternId,
@@ -183,6 +184,13 @@ function loadViewUnderlyingDataArgs(
     return;
   }
 
+  // The ES|QL query of a text-based document lives on the authoritative
+  // text-based layer, not in the merged search context (the legacy
+  // `state.query` copy is dropped at read time), so source it structurally.
+  const representativeQuery = isTextBasedAttributes(activeAttributes)
+    ? getRepresentativeQuery(activeAttributes)
+    : undefined;
+
   const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
     activeDatasource,
     activeDatasourceState,
@@ -196,7 +204,9 @@ function loadViewUnderlyingDataArgs(
       navLinks: capabilities.navLinks,
       discover_v2: capabilities.discover_v2,
     },
-    query: mergedSearchContext.query,
+    query: representativeQuery
+      ? [...mergedSearchContext.query, representativeQuery]
+      : mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],
     timeRange: mergedSearchContext.timeRange,
     esQueryConfig: getEsQueryConfig(uiSettings),

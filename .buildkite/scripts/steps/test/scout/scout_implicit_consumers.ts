@@ -49,6 +49,24 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
       '@kbn/lens-plugin',
     ],
   },
+  {
+    reason:
+      'Workflow triggers are registered into workflows_extensions at runtime. Changes to these files would not select the trigger-approval tests by default.',
+    patterns: [
+      '**/common/triggers/**/*.{ts,tsx}',
+      '**/common/workflows/triggers/**/*.{ts,tsx}',
+      '**/common/workflow/triggers/**/*.{ts,tsx}',
+      '**/server/triggers/**/*.{ts,tsx}',
+      '**/server/workflows/triggers/**/*.{ts,tsx}',
+      '**/server/workflow/triggers/**/*.{ts,tsx}',
+      '**/public/triggers/**/*.{ts,tsx}',
+      '**/public/workflows/triggers/**/*.{ts,tsx}',
+      '**/public/workflow/triggers/**/*.{ts,tsx}',
+      '**/workflow_extensions/**/*.{ts,tsx}',
+      '**/register_trigger_definitions.ts',
+    ],
+    consumers: ['@kbn/workflows-extensions'],
+  },
 ];
 
 /**

@@ -108,8 +108,7 @@ export class ProjectNavigationService {
           this.customization$,
         ]).pipe(
           map(([def, deepLinks, links, customization]) =>
-            // Home is a regular, customizable sidebar item in the project shell.
-            applyCustomization(source.id, def, deepLinks, links, customization, true)
+            applyCustomization(source.id, def, deepLinks, links, customization)
           ),
           catchError((err) => {
             logger.error(err);

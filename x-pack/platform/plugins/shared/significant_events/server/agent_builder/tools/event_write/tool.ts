@@ -110,6 +110,8 @@ export const eventsWriteItemSchema = significantEventSchema
           'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
       });
     }
+    // Continuations inherit prior severity; this cycle's signals may be
+    // inconclusive (telemetry gap, errored query) without a new confirms.
     if (
       item.event_id === undefined &&
       item.status === 'open' &&
@@ -143,13 +145,14 @@ const eventsWriteItemsSchema = z
       return new Set(ruleUuids).size === ruleUuids.length;
     },
     {
-      message: 'Each detection rule UUID may appear in only one event item per write',
+      message:
+        'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
     }
   )
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id for new events; supply the existing event_id for continuations. Each detection rule_uuid may appear in only one item. A confirms item must not include not_checked signals.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
     })
   );
 
@@ -273,12 +276,14 @@ export function createEventsWriteTool({
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Do not retry a populated payload rejected for
       ownership or field validation.
+
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). Preserve the prior severity unless
       the discovery procedure establishes a different impact or applies its known-ongoing
       severity cap. When no new rule UUIDs are introduced, title and symptom_hypothesis are
       frozen to the stored values and narrative_preserved: true is returned.
+
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
       set contains the submitted rules and shares at least one stream name. If found, returns it
       without writing (written: false, reason: existing_active_event). Otherwise creates a new
