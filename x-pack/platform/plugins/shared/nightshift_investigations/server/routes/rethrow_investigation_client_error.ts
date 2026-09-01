@@ -12,7 +12,7 @@ import {
   InvestigationSubjectMissingError,
 } from '../client/errors';
 
-export const rethrowInvestigationClientError = (error: unknown): never => {
+export function rethrowInvestigationClientError(error: unknown): never {
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
   }
@@ -23,4 +23,4 @@ export const rethrowInvestigationClientError = (error: unknown): never => {
     throw conflict(error.message);
   }
   throw error;
-};
+}

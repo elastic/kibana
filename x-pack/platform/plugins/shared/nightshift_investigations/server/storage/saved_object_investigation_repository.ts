@@ -91,9 +91,12 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     version?: string;
   }): Promise<void> {
     try {
-      await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, patch, {
-        version,
-      });
+      await this.savedObjectsClient.update<InvestigationAttributes>(
+        NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+        id,
+        patch,
+        { version }
+      );
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
         throw new InvestigationStaleWriteError(id);
