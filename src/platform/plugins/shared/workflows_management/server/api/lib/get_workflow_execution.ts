@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -19,8 +20,8 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import { fetchStepExecutionsForExecutionDetail } from './fetch_step_executions_for_execution_detail';
 
 interface GetWorkflowExecutionParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -56,16 +57,30 @@ export const getWorkflowExecution = async ({
     if (!includeInput) sourceExcludes.push('input');
     if (!includeOutput) sourceExcludes.push('output');
 
-    const stepExecutions = await getStepExecutionsByWorkflowExecution({
-      stepExecutionsDataClient,
-      workflowExecutionId,
-      stepExecutionIds: doc.stepExecutionIds,
-      sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
-    });
+    const { stepExecutions, stepExecutionsTruncatedCount } =
+      await fetchStepExecutionsForExecutionDetail({
+        stepExecutionsDataClient,
+        logger,
+        workflowExecutionId,
+        stepExecutionIds: doc.stepExecutionIds,
+        sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
+      });
 
-    return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
+    return transformToWorkflowExecutionDetailDto(
+      workflowExecutionId,
+      doc,
+      stepExecutions,
+      logger,
+      stepExecutionsTruncatedCount
+    );
   } catch (error) {
-    logger.error(`Failed to get workflow: ${error}`);
+    if (isMaximumResponseSizeExceededError(error)) {
+      logger.warn(
+        `Workflow execution document ${workflowExecutionId} exceeded the maximum response size Kibana can process`
+      );
+      throw error;
+    }
+    logger.error(`Failed to get workflow execution ${workflowExecutionId}: ${error}`);
     throw error;
   }
 };
@@ -74,7 +89,8 @@ function transformToWorkflowExecutionDetailDto(
   id: string,
   workflowExecution: EsWorkflowExecution,
   stepExecutions: EsWorkflowStepExecution[],
-  logger: Logger
+  logger: Logger,
+  stepExecutionsTruncatedCount?: number
 ): WorkflowExecutionDto {
   const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
@@ -93,6 +109,7 @@ function transformToWorkflowExecutionDetailDto(
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
     stepExecutions,
+    ...(stepExecutionsTruncatedCount !== undefined ? { stepExecutionsTruncatedCount } : {}),
     executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
     triggeredBy: workflowExecution.triggeredBy,
     yaml,

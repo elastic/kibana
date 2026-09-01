@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
@@ -284,6 +285,104 @@ describe('getWorkflowExecution', () => {
       });
 
       expect(result?.version).toBeUndefined();
+    });
+
+    it('should include stepExecutionsTruncatedCount when step loading is truncated', async () => {
+      const manyIds = ['s1', 's2', 's3'];
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, stepExecutionIds: manyIds },
+        ] as unknown as EsWorkflowExecution[])
+      );
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      );
+      let singleIdCalls = 0;
+      mockStepDataClient.getByIds.mockImplementation(async (ids) => {
+        if (ids.length > 1) {
+          throw sizeError;
+        }
+        singleIdCalls += 1;
+        if (singleIdCalls === 1) {
+          return mockStepGetByIds([{ id: ids[0], stepId: ids[0], status: 'completed' }]);
+        }
+        throw sizeError;
+      });
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(result?.stepExecutions).toHaveLength(1);
+      expect(result?.stepExecutionsTruncatedCount).toBe(2);
+      expect(mockLogger.warn).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should return the execution with empty steps and truncatedCount when no step documents could be loaded', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
+      );
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      );
+      mockStepDataClient.getByIds.mockRejectedValue(sizeError);
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('exec-1');
+      expect(result?.status).toBe('completed');
+      expect(result?.stepExecutions).toEqual([]);
+      expect(result?.stepExecutionsTruncatedCount).toBe(2);
+      expect(mockLogger.warn).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should log a warn and rethrow when the execution document mget exceeds the response size', async () => {
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      );
+      mockWorkflowDataClient.getByIds.mockRejectedValue(sizeError);
+
+      await expect(
+        getWorkflowExecution({
+          ...baseParams,
+          workflowExecutionsDataClient: mockWorkflowDataClient,
+          stepExecutionsDataClient: mockStepDataClient,
+          logger: mockLogger,
+        })
+      ).rejects.toBe(sizeError);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Workflow execution document exec-1 exceeded the maximum response size Kibana can process'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should log the execution id for unexpected failures', async () => {
+      mockWorkflowDataClient.getByIds.mockRejectedValue(new Error('es down'));
+
+      await expect(
+        getWorkflowExecution({
+          ...baseParams,
+          workflowExecutionsDataClient: mockWorkflowDataClient,
+          stepExecutionsDataClient: mockStepDataClient,
+          logger: mockLogger,
+        })
+      ).rejects.toThrow('es down');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to get workflow execution exec-1: Error: es down'
+      );
     });
   });
 });

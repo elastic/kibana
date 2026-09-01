@@ -238,6 +238,35 @@ export const WorkflowStepExecutionTree = ({
       />
     );
   } else if (
+    (execution.stepExecutionsTruncatedCount ?? 0) > 0 &&
+    execution.stepExecutions.length === 0
+  ) {
+    const truncatedCount = execution.stepExecutionsTruncatedCount ?? 0;
+    return (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        data-test-subj="workflowStepExecutionTreeTruncatedEmpty"
+        icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeTitle"
+              defaultMessage="Unable to show step executions"
+            />
+          </h2>
+        }
+        body={
+          <EuiText>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeDescription"
+              defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
+              values={{ count: truncatedCount }}
+            />
+          </EuiText>
+        }
+      />
+    );
+  } else if (
     execution?.stepExecutions?.length === 0 &&
     !isInProgressStatus(execution?.status) &&
     !failedBeforeSteps

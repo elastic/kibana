@@ -11,12 +11,14 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -24,6 +26,7 @@ import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -43,6 +46,9 @@ const i18nTexts = {
   }),
   replay: i18n.translate('workflows.workflowStepExecutionList.replay', {
     defaultMessage: 'Run again',
+  }),
+  truncatedTitle: i18n.translate('workflows.workflowExecutionPanel.stepExecutionsTruncatedTitle', {
+    defaultMessage: 'Step executions truncated',
   }),
 };
 
@@ -78,6 +84,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     const showDoneButton = Boolean(
       !showBackButton && execution && isTerminalStatus(execution.status)
     );
+    const truncatedCount = execution?.stepExecutionsTruncatedCount ?? 0;
 
     return (
       <EuiFlexGroup
@@ -115,6 +122,25 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
           <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
+            {truncatedCount > 0 && (execution?.stepExecutions.length ?? 0) > 0 && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  size="s"
+                  title={i18nTexts.truncatedTitle}
+                  data-test-subj="workflowExecutionStepExecutionsTruncatedCallout"
+                >
+                  <FormattedMessage
+                    id="workflows.workflowExecutionPanel.stepExecutionsTruncatedDescription"
+                    defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
+                    values={{ count: truncatedCount }}
+                  />
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
             <WorkflowStepExecutionTree
               definition={definition}
               execution={execution ?? null}

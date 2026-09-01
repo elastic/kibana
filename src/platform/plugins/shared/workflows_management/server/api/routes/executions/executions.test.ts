@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -597,6 +598,29 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+
+    it('should return 413 when Elasticsearch aborts because the response is too large', async () => {
+      mockApi.getWorkflowExecution.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 413,
+        body: {
+          message: expect.stringContaining('too large to load'),
+        },
+      });
+      expect(result).toMatchObject({ type: 'customError', statusCode: 413 });
     });
 
     it('should reject managed executions without managed execution read privilege', async () => {
