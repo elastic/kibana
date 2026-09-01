@@ -30,6 +30,7 @@ import type {
   LensByValueSerializedState,
   LensDatasourceId,
 } from '@kbn/lens-common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
 import type { LensRootStore } from '../../../state_management';
