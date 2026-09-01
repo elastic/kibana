@@ -8,7 +8,7 @@
  */
 
 import type { monaco, ParsedRequest } from '@kbn/monaco';
-import { isInsideConsoleString } from '@kbn/monaco/src/languages/console/utils';
+import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/console/utils';
 import type { EditorRequest } from '../../types';
 import { startsWithMethodRegex } from '../constants';
 import { parseLine } from '../tokens_utils';
@@ -47,17 +47,6 @@ export const getRequestEndLineNumber = ({
     endLineNumber = model.getPositionAt(parsedRequest.endOffset).lineNumber;
   } else {
     const requestStartLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber;
-    const isInsideUnfinishedString = (lineNumber: number): boolean => {
-      const contentBeforeLine: string[] = [];
-      for (
-        let currentLineNumber = requestStartLineNumber;
-        currentLineNumber < lineNumber;
-        currentLineNumber++
-      ) {
-        contentBeforeLine.push(model.getLineContent(currentLineNumber));
-      }
-      return isInsideConsoleString(contentBeforeLine.join('\n'));
-    };
 
     // if no end offset, try to find the line before the next request starts
     if (nextRequest) {
@@ -66,17 +55,26 @@ export const getRequestEndLineNumber = ({
         nextRequestStartLine > startLineNumber ? nextRequestStartLine - 1 : startLineNumber;
     } else {
       // if there is no next request, find the end of the text or the line that starts with a method
+      const lineCount = model.getLineCount();
+      const tailLines: string[] = [];
+      for (let lineNumber = requestStartLineNumber; lineNumber <= lineCount; lineNumber++) {
+        tailLines.push(model.getLineContent(lineNumber));
+      }
+      // Scan the request tail once and query each candidate line by offset; rescanning the
+      // whole prefix for every method-like line is quadratic on large unfinished bodies.
+      const isInsideUnfinishedString = createInsideConsoleStringChecker(tailLines.join('\n'));
       let nextLineNumber = requestStartLineNumber + 1;
-      let nextLineContent: string;
-      while (nextLineNumber <= model.getLineCount()) {
-        nextLineContent = model.getLineContent(nextLineNumber).trim();
+      let nextLineStartOffset = tailLines[0].length + 1;
+      while (nextLineNumber <= lineCount) {
+        const nextLineContent = tailLines[nextLineNumber - requestStartLineNumber];
         if (
-          nextLineContent.match(startsWithMethodRegex) &&
-          !isInsideUnfinishedString(nextLineNumber)
+          nextLineContent.trim().match(startsWithMethodRegex) &&
+          !isInsideUnfinishedString(nextLineStartOffset)
         ) {
           // found a line that starts with a method, stop iterating
           break;
         }
+        nextLineStartOffset += nextLineContent.length + 1;
         nextLineNumber++;
       }
       // nextLineNumber is now either the line with a method or 1 line after the end of the text
