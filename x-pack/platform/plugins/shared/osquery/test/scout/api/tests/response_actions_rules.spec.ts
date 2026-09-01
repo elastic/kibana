@@ -539,7 +539,9 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(bulkResponse).toHaveStatusCode(200);
+        // The bulk actions route reports per-rule failures with a 500 envelope; the
+        // authz rejection itself is surfaced as `status_code: 403` in `attributes.errors`.
+        expect(bulkResponse).toHaveStatusCode(500);
         expect(bulkResponse.body).toStrictEqual(
           expect.objectContaining({
             attributes: expect.objectContaining({
