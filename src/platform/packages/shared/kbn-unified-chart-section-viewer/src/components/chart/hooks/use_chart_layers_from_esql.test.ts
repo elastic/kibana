@@ -121,6 +121,13 @@ describe('useChartLayers', () => {
     expect(layer.yAxis).toHaveLength(1);
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
+    expect(layer.yAxis[0]).toEqual(
+      expect.objectContaining({
+        format: 'number',
+        decimals: 0,
+        compactValues: true,
+      })
+    );
     expect(layer.seriesType).toBe('area');
     expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
   });

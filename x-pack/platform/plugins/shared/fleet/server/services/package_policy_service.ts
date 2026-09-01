@@ -341,7 +341,7 @@ export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'per
 
 export type PackagePolicyClientFetchAllItemsOptions = Pick<
   ListWithKuery,
-  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
+  'perPage' | 'kuery' | 'sortField' | 'sortOrder' | 'fields'
 > &
   WithSpaceIdsOption;
 

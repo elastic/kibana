@@ -483,7 +483,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package-policy',
         name: 'Test Package Policy',
@@ -526,7 +526,7 @@ describe('Package policy service', () => {
           // Skipping unique name verification just means we have to less mocking/setup
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
     });
@@ -570,7 +570,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
+      ).rejects.toThrow(/Input tcp in test is not allowed for deployment mode 'agentless'/);
     });
 
     it('should throw validation error when global_data_tags is set on a non-agentless package policy', async () => {
@@ -614,9 +614,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(
-        /`global_data_tags` can only be set on agentless integration policies/
-      );
+      ).rejects.toThrow(/`global_data_tags` can only be set on agentless integration policies/);
     });
 
     beforeEach(() => {
@@ -787,7 +785,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(agentPolicyService.bumpRevision).toBeCalledWith(
+      expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test',
@@ -873,7 +871,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(agentPolicyService.bumpRevision).toBeCalledWith(
+      expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test',
@@ -2134,7 +2132,7 @@ describe('Package policy service', () => {
 
       await packagePolicyService.get(soClient, 'test-package-policy');
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'test-package-policy',
         name: 'Test',
@@ -4597,7 +4595,7 @@ describe('Package policy service', () => {
               },
             }
           )
-        ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
+        ).rejects.toThrow(/Input tcp in test is not allowed for deployment mode 'agentless'/);
       });
     });
 
@@ -5614,7 +5612,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).toBeCalled();
+      expect(mockedSendTelemetryEvents).toHaveBeenCalled();
     });
 
     it('should not send telemetry event when updating a package policy without upgrade', async () => {
@@ -5714,7 +5712,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).not.toBeCalled();
+      expect(mockedSendTelemetryEvents).not.toHaveBeenCalled();
     });
 
     it('should call audit logger', async () => {
@@ -5840,8 +5838,8 @@ describe('Package policy service', () => {
         },
       ]);
 
-      expect(callbackOne).toBeCalledTimes(2);
-      expect(callbackTwo).toBeCalledTimes(2);
+      expect(callbackOne).toHaveBeenCalledTimes(2);
+      expect(callbackTwo).toHaveBeenCalledTimes(2);
     });
 
     describe('remove protections', () => {
