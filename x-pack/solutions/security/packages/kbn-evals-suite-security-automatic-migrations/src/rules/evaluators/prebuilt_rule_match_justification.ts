@@ -14,6 +14,7 @@ export const createPrebuiltRuleMatchJustificationEvaluator = (
 ): Evaluator<RuleExample, RuleMigrationResult> => ({
   name: 'Prebuilt Rule Match Justification',
   kind: 'LLM',
+  direction: 'maximize',
   evaluate: async ({ input, output, expected, metadata }): Promise<EvaluationResult> => {
     const ruleInput = input as RuleInput;
     const comments = output?.rule?.comments;
