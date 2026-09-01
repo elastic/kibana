@@ -28,14 +28,14 @@ test.describe(
     test.beforeAll(async ({ scoutSpace, kbnClient }) => {
       await scoutSpace.setSolutionView('classic');
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
       });
     });
 
-    test.afterAll(async ({ kbnClient }) => {
+    test.afterAll(async ({ scoutSpace, kbnClient }) => {
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
       });
     });
@@ -104,9 +104,10 @@ test.describe(
       pageObjects,
       page,
       kbnClient,
+      scoutSpace,
     }) => {
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: true,
       });
 

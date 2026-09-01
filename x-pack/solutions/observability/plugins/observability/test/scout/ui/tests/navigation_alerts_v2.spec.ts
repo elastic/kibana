@@ -28,14 +28,14 @@ test.describe(
     test.beforeAll(async ({ scoutSpace, kbnClient }) => {
       await scoutSpace.setSolutionView('oblt');
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
       });
     });
 
-    test.afterAll(async ({ kbnClient }) => {
+    test.afterAll(async ({ scoutSpace, kbnClient }) => {
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
       });
     });
@@ -62,9 +62,10 @@ test.describe(
       browserAuth,
       pageObjects,
       kbnClient,
+      scoutSpace,
     }) => {
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
       });
 
@@ -95,9 +96,10 @@ test.describe(
       browserAuth,
       pageObjects,
       kbnClient,
+      scoutSpace,
     }) => {
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: true,
       });
 
@@ -148,9 +150,10 @@ test.describe(
       browserAuth,
       pageObjects,
       kbnClient,
+      scoutSpace,
     }) => {
       await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
-      await kbnClient.uiSettings.update({
+      await scoutSpace.uiSettings.set({
         [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
       });
 
