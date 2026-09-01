@@ -10,7 +10,7 @@ import { useCurrentUser } from './use_current_user';
 
 const mockGetCurrent = jest.fn();
 
-jest.mock('../use_kibana', () => ({
+jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     services: {
       userProfile: {
@@ -24,7 +24,7 @@ const mockUseQuery = jest.fn();
 jest.mock('@kbn/react-query', () => ({
   useQuery: (options: {
     queryKey: string[];
-    queryFn: () => Promise<{ uid: string; user: { username: string } }>;
+    queryFn: () => Promise<{ uid: string; user: { username: string }; data?: unknown }>;
     enabled: boolean;
   }) => mockUseQuery(options),
 }));
@@ -40,7 +40,7 @@ describe('useCurrentUser', () => {
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ['agentBuilder', 'currentUser'],
+        queryKey: ['security', 'currentUser'],
         enabled: true,
       })
     );
@@ -51,18 +51,20 @@ describe('useCurrentUser', () => {
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ['agentBuilder', 'currentUser'],
+        queryKey: ['security', 'currentUser'],
         enabled: false,
       })
     );
     expect(mockGetCurrent).not.toHaveBeenCalled();
   });
 
-  it('passes enabled: true and queryFn that calls userProfile.getCurrent', async () => {
-    mockGetCurrent.mockResolvedValue({
+  it('passes enabled: true and queryFn that calls userProfile.getCurrent with avatar dataPath', async () => {
+    const profile = {
       uid: 'user-123',
       user: { username: 'testuser' },
-    });
+      data: { avatar: { initials: 'TU' } },
+    };
+    mockGetCurrent.mockResolvedValue(profile);
 
     let capturedQueryFn: (() => Promise<unknown>) | undefined;
     mockUseQuery.mockImplementation((options: { queryFn: () => Promise<unknown> }) => {
@@ -74,14 +76,14 @@ describe('useCurrentUser', () => {
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ['agentBuilder', 'currentUser'],
+        queryKey: ['security', 'currentUser'],
         enabled: true,
       })
     );
 
     const raw = await capturedQueryFn!();
-    expect(mockGetCurrent).toHaveBeenCalledTimes(1);
-    expect(raw).toEqual({ uid: 'user-123', user: { username: 'testuser' } });
+    expect(mockGetCurrent).toHaveBeenCalledWith({ dataPath: 'avatar' });
+    expect(raw).toBe(profile);
   });
 
   it('returns null currentUser when useQuery returns data undefined', () => {
@@ -93,18 +95,20 @@ describe('useCurrentUser', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('maps query data to currentUser', () => {
+  it('returns query data as currentUser', () => {
+    const profile = {
+      uid: 'user-123',
+      user: { username: 'testuser' },
+      data: { avatar: { initials: 'TU' } },
+    };
     mockUseQuery.mockReturnValue({
-      data: { uid: 'user-123', user: { username: 'testuser' } },
+      data: profile,
       isLoading: false,
     });
 
     const { result } = renderHook(() => useCurrentUser({ enabled: true }));
 
-    expect(result.current.currentUser).toEqual({
-      id: 'user-123',
-      username: 'testuser',
-    });
+    expect(result.current.currentUser).toBe(profile);
     expect(result.current.isLoading).toBe(false);
   });
 });

@@ -6,8 +6,9 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
-import { useKibana } from '../use_kibana';
+import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useKibana } from './use_kibana';
+import { queryKeys } from '../query_keys';
 
 /**
  * Fetches the current user from Kibana's User Profile service.
@@ -15,19 +16,12 @@ import { useKibana } from '../use_kibana';
 export const useCurrentUser = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { services } = useKibana();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['agentBuilder', 'currentUser'],
-    queryFn: async () => services.userProfile.getCurrent(),
+  const { data, isLoading } = useQuery<UserProfileWithAvatar | null>({
+    queryKey: queryKeys.security.currentUser,
+    queryFn: async () =>
+      services.userProfile.getCurrent<{ avatar?: UserProfileAvatarData }>({ dataPath: 'avatar' }),
     enabled,
   });
 
-  const currentUser: UserIdAndName | null =
-    data != null
-      ? {
-          id: data.uid,
-          username: data.user.username,
-        }
-      : null;
-
-  return { currentUser, isLoading };
+  return { currentUser: data ?? null, isLoading };
 };
