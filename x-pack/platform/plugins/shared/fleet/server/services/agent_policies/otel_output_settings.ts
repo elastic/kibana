@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import { parse } from 'yaml';
 
 import type { Output } from '../../types';
+import type { OutputPreset } from '../../../common/types/models/output';
 import {
   getDefaultPresetForEsOutput,
   outputTypeSupportPresets,
@@ -89,7 +90,7 @@ interface EsOutputPresetConfig {
 }
 
 /** Mirror of `presetConfigs` in `libbeat/outputs/elasticsearch/config_presets.go`. */
-const ES_OUTPUT_PRESETS: Readonly<Record<string, EsOutputPresetConfig>> = {
+const ES_OUTPUT_PRESETS: Readonly<Partial<Record<OutputPreset, EsOutputPresetConfig>>> = {
   balanced: {
     bulkMaxSize: 1600,
     worker: 1,
@@ -149,14 +150,14 @@ const DEFAULT_RETRY_ON_DOCUMENT_STATUS: readonly number[] = [
   429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511,
 ];
 
-/** Effective Beats-level output settings, after the performance preset has been applied. */
-interface EffectiveEsOutputSettings {
-  worker: number;
-  bulkMaxSize: number;
-  compressionLevel: number;
-  queueMemEvents: number;
-  queueFlushMinEvents: number;
-  queueFlushTimeout: string;
+/**
+ * Effective Beats-level output settings, after the performance preset has been applied.
+ * Extends `EsOutputPresetConfig` for the 6 fields the two types share, omitting the three
+ * that differ (`idleConnectionTimeout` is out of scope; `backoffInit`/`backoffMax` are
+ * required here because defaults have been applied, optional in the preset table).
+ */
+interface EffectiveEsOutputSettings
+  extends Omit<EsOutputPresetConfig, 'idleConnectionTimeout' | 'backoffInit' | 'backoffMax'> {
   maxRetries: number;
   backoffInit: string;
   backoffMax: string;
@@ -257,6 +258,17 @@ const getPresetConfig = (output: Output): EsOutputPresetConfig | undefined => {
  * over `config_yaml`, which wins over the Beats defaults. A named preset owns the whole queue
  * configuration, so `queue.*` from `config_yaml` is ignored when one is set — the same grouping
  * rule `ApplyPreset` implements.
+ *
+ * The keys read below (`worker`, `bulk_max_size`, `compression_level`, `queue.mem.*`) are a
+ * subset of `RESERVED_CONFIG_YML_KEYS` (common/constants/output.ts) — the keys whose presence
+ * in `config_yaml` causes `getDefaultPresetForEsOutput` to resolve `custom` rather than
+ * `balanced`. If a new key is added to that constant it must also be read here so the OTel
+ * translation stays consistent with the Beats-side preset detection.
+ *
+ * Note: `RESERVED_CONFIG_YML_KEYS` currently lists `'connection_idle_timeout'` but Beats and
+ * this file's preset table use `'idle_connection_timeout'` — that is a pre-existing discrepancy
+ * in the constant; it does not affect the translation here since `idleConnectionTimeout` is
+ * intentionally out of scope (see the module comment above).
  */
 const resolveEffectiveEsOutputSettings = (output: Output): EffectiveEsOutputSettings => {
   const configYaml = parseYamlRecord(output.config_yaml);
