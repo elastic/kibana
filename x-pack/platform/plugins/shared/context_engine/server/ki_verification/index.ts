@@ -15,6 +15,7 @@ export type {
   KiVerificationSummary,
 } from './types';
 export { KiVerifierRegistry } from './registry';
+export { KiVerificationInputError } from './errors';
 export { KiVerificationService } from './service';
 export { createKiVerifierRegistry } from './create_registry';
 export {

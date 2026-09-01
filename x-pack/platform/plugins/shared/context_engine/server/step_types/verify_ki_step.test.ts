@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ExecutionError } from '@kbn/workflows/server';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
 import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
@@ -13,6 +16,14 @@ import { mockKiStepTelemetry } from './test_utils';
 type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'];
 type VerifyKiHandlerContext = Parameters<VerifyKiHandler>[0];
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+const esResponseError = (type: string, reason: string) =>
+  new errors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 400,
+      body: { error: { type, reason } },
+    })
+  );
 
 const makeHandlerContext = (
   ki: VerifyKiHandlerContext['input']['ki'],
@@ -78,15 +89,43 @@ describe('verify_ki workflow step', () => {
 
   const ALL_ESQL_VERIFIERS = [ESQL_VALID_SYNTAX_VERIFIER_ID, ESQL_VALID_RUNTIME_VERIFIER_ID];
 
-  it('throws when verifiers is not specified', async () => {
-    setContextEngineEnabled(true);
+  it.each([
+    {
+      caseName: 'missing',
+      verifiers: undefined,
+      message: 'verifiers must list at least one verifier id',
+    },
+    {
+      caseName: 'duplicate',
+      verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID],
+      message: `Duplicate verifier id: "${ESQL_VALID_SYNTAX_VERIFIER_ID}"`,
+    },
+    {
+      caseName: 'unknown',
+      verifiers: ['unknown-verifier'],
+      message: 'Unknown verifier id: "unknown-verifier"',
+    },
+  ])(
+    'reports $caseName verifier selection as an input validation error',
+    async ({ verifiers, message }) => {
+      setContextEngineEnabled(true);
 
-    await expect(runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 10' } })).rejects.toThrow(
-      'verifiers must list at least one verifier id'
-    );
-  });
+      const thrown = await runHandler(
+        { attributes: { esql: 'FROM logs-* | LIMIT 10' } },
+        { verifiers }
+      ).catch((error) => error);
 
-  it('passes a KI with valid ES|QL', async () => {
+      expect(thrown).toBeInstanceOf(ExecutionError);
+      expect(thrown.type).toBe('InputValidationError');
+      expect(thrown.message).toBe(message);
+      expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+        outcome: 'failure',
+        errorType: 'InputValidationError',
+      });
+    }
+  );
+
+  it('reports both verifiers passing when syntax and runtime validation succeed', async () => {
     setContextEngineEnabled(true);
 
     const output = await runHandler(
@@ -115,8 +154,11 @@ describe('verify_ki workflow step', () => {
     expect(esClient.esql.query).toHaveBeenCalledTimes(1);
   });
 
-  it('fails a KI with invalid ES|QL and reports the reason', async () => {
+  it('reports both verifiers failing when syntax and runtime validation fail', async () => {
     setContextEngineEnabled(true);
+    esClient.esql.query.mockRejectedValue(
+      esResponseError('parsing_exception', 'Unknown function [NOT_A_FUNCTION]')
+    );
 
     const output = await runHandler(
       { attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } },
@@ -130,7 +172,33 @@ describe('verify_ki workflow step', () => {
         passed: false,
         reason: expect.stringContaining('NOT_A_FUNCTION'),
       },
-      { verifier: ESQL_VALID_RUNTIME_VERIFIER_ID, passed: true },
+      {
+        verifier: ESQL_VALID_RUNTIME_VERIFIER_ID,
+        passed: false,
+        reason: expect.stringContaining('Unknown function [NOT_A_FUNCTION]'),
+      },
+    ]);
+  });
+
+  it('reports mixed results when syntax passes but runtime validation fails', async () => {
+    setContextEngineEnabled(true);
+    esClient.esql.query.mockRejectedValue(
+      esResponseError('verification_exception', 'Unknown column [made_up_field]')
+    );
+
+    const output = await runHandler(
+      { attributes: { esql: 'FROM logs-* | WHERE made_up_field > 1' } },
+      { verifiers: ALL_ESQL_VERIFIERS }
+    );
+
+    expect(output.passed).toBe(false);
+    expect(output.results).toEqual([
+      { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
+      {
+        verifier: ESQL_VALID_RUNTIME_VERIFIER_ID,
+        passed: false,
+        reason: expect.stringContaining('Unknown column [made_up_field]'),
+      },
     ]);
   });
 

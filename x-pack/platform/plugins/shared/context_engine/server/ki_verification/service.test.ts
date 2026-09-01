@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { KiVerifierRegistry } from './registry';
+import { KiVerificationInputError } from './errors';
 import { KiVerificationService } from './service';
 import type { KiVerificationContext, KiVerifier, KiVerifierOutcome } from './types';
 
@@ -35,15 +36,23 @@ describe('KiVerificationService', () => {
     service.verifyKi({}, { ...context, verifiers: verifierIds });
 
   it('throws when verifiers is not specified', async () => {
-    await expect(service.verifyKi({}, context)).rejects.toThrow(
-      'verifiers must list at least one verifier id'
+    await expect(service.verifyKi({}, context)).rejects.toEqual(
+      expect.objectContaining({
+        name: KiVerificationInputError.name,
+        message: 'verifiers must list at least one verifier id',
+      })
     );
   });
 
   it('throws when the same verifier id appears more than once', async () => {
     registry.register(makeVerifier('a', { passed: true }));
 
-    await expect(run('a', 'a')).rejects.toThrow('Duplicate verifier id: "a"');
+    await expect(run('a', 'a')).rejects.toEqual(
+      expect.objectContaining({
+        name: KiVerificationInputError.name,
+        message: 'Duplicate verifier id: "a"',
+      })
+    );
   });
 
   it('passes when every applicable verifier passes', async () => {
@@ -109,6 +118,7 @@ describe('KiVerificationService', () => {
     registry.register(thrower);
 
     await expect(run('thrower')).rejects.toThrow('boom');
+    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'thrower' threw: Error");
   });
 
   it('rethrows abort errors', async () => {
@@ -124,6 +134,7 @@ describe('KiVerificationService', () => {
     registry.register(aborter);
 
     await expect(run('aborter')).rejects.toThrow(abortError);
+    expect(context.logger.warn).not.toHaveBeenCalled();
   });
 
   it('propagates a failure from applies()', async () => {
@@ -139,6 +150,7 @@ describe('KiVerificationService', () => {
     await expect(run('applies-thrower')).rejects.toThrow('applies boom');
 
     expect(thrower.verify).not.toHaveBeenCalled();
+    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'applies-thrower' threw: Error");
   });
 
   it('stamps the result with the verifier id from the registry', async () => {
@@ -160,7 +172,12 @@ describe('KiVerificationService', () => {
   it('throws when an unknown verifier id is specified', async () => {
     registry.register(makeVerifier('a', { passed: true }));
 
-    await expect(run('a', 'nonexistent')).rejects.toThrow('Unknown verifier id: "nonexistent"');
+    await expect(run('a', 'nonexistent')).rejects.toEqual(
+      expect.objectContaining({
+        name: KiVerificationInputError.name,
+        message: 'Unknown verifier id: "nonexistent"',
+      })
+    );
   });
 
   it('is a no-op that passes with no results when the feature flag is disabled', async () => {

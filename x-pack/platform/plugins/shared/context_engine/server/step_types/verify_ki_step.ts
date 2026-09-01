@@ -10,7 +10,11 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
-import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
+import {
+  createKiVerifierRegistry,
+  KiVerificationInputError,
+  KiVerificationService,
+} from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
@@ -37,24 +41,29 @@ export const createVerifyKiStepDefinition = (
       }
 
       const verifiers = context.input.verifiers as string[] | undefined;
-      if (!verifiers || verifiers.length === 0) {
-        throw new ExecutionError({
-          type: 'InputValidationError',
-          message: 'verifiers must list at least one verifier id.',
-        });
-      }
 
       const summary = await withKiVerificationTelemetry({
         analyticsService,
         logger,
-        run: () =>
-          service.verifyKi(context.input.ki, {
-            isEnabled,
-            esClient: context.contextManager.getScopedEsClient(),
-            logger,
-            abortSignal: context.abortSignal,
-            verifiers,
-          }),
+        run: async () => {
+          try {
+            return await service.verifyKi(context.input.ki, {
+              isEnabled,
+              esClient: context.contextManager.getScopedEsClient(),
+              logger,
+              abortSignal: context.abortSignal,
+              verifiers,
+            });
+          } catch (error) {
+            if (error instanceof KiVerificationInputError) {
+              throw new ExecutionError({
+                type: 'InputValidationError',
+                message: error.message,
+              });
+            }
+            throw error;
+          }
+        },
       });
 
       return { output: summary };

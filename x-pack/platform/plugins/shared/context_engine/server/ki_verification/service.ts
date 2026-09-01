@@ -6,12 +6,14 @@
  */
 
 import type { KiVerifierRegistry } from './registry';
+import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 import type {
   KiVerificationContext,
   KiVerificationSummary,
   KiVerifierResult,
   KnowledgeIndicator,
 } from './types';
+import { KiVerificationInputError } from './errors';
 
 export class KiVerificationService {
   constructor(private readonly registry: KiVerifierRegistry) {}
@@ -30,7 +32,7 @@ export class KiVerificationService {
     }
 
     if (!verifiers || verifiers.length === 0) {
-      throw new Error('verifiers must list at least one verifier id');
+      throw new KiVerificationInputError('verifiers must list at least one verifier id');
     }
 
     const results: KiVerifierResult[] = [];
@@ -38,20 +40,27 @@ export class KiVerificationService {
     const seen = new Set<string>();
     for (const id of verifiers) {
       if (seen.has(id)) {
-        throw new Error(`Duplicate verifier id: "${id}"`);
+        throw new KiVerificationInputError(`Duplicate verifier id: "${id}"`);
       }
       seen.add(id);
       const verifier = this.registry.get(id);
       if (!verifier) {
-        throw new Error(`Unknown verifier id: "${id}"`);
+        throw new KiVerificationInputError(`Unknown verifier id: "${id}"`);
       }
 
-      if (!verifier.applies(ki, verifierContext)) {
-        continue;
-      }
+      try {
+        if (!verifier.applies(ki, verifierContext)) {
+          continue;
+        }
 
-      const outcome = await verifier.verify(ki, verifierContext);
-      results.push({ ...outcome, verifier: id });
+        const outcome = await verifier.verify(ki, verifierContext);
+        results.push({ ...outcome, verifier: id });
+      } catch (error) {
+        if (!isAbortError(error)) {
+          verifierContext.logger.warn(`KI verifier '${id}' threw: ${errorTypeForTelemetry(error)}`);
+        }
+        throw error;
+      }
     }
 
     return { passed: results.every((result) => result.passed), results };

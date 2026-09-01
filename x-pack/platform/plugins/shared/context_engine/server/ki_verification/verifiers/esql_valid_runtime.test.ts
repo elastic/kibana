@@ -14,8 +14,8 @@ import {
 } from './esql_valid_runtime';
 import type { KiVerifierContext, KnowledgeIndicator } from '../types';
 
-const VALID_QUERY = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
-const OTHER_QUERY = 'FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.pct) BY host.name';
+const LOGS_QUERY = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
+const METRICS_QUERY = 'FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.pct) BY host.name';
 
 const makeKi = (esql: unknown): KnowledgeIndicator => ({
   type: 'detection',
@@ -61,14 +61,14 @@ describe('esql-valid-runtime verifier', () => {
     });
 
     it('is true for a query string and for an array of query strings', () => {
-      expect(verifier.applies(makeKi(VALID_QUERY), context)).toBe(true);
-      expect(verifier.applies(makeKi([VALID_QUERY, OTHER_QUERY]), context)).toBe(true);
+      expect(verifier.applies(makeKi(LOGS_QUERY), context)).toBe(true);
+      expect(verifier.applies(makeKi([LOGS_QUERY, METRICS_QUERY]), context)).toBe(true);
     });
   });
 
   describe('verify', () => {
     it('passes a query that executes', async () => {
-      const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
+      const outcome = await verifier.verify(makeKi(LOGS_QUERY), context);
 
       expect(outcome).toEqual({ passed: true });
       expect(esClient.esql.query).toHaveBeenCalledTimes(1);
@@ -80,13 +80,13 @@ describe('esql-valid-runtime verifier', () => {
         values: [],
       });
 
-      const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
+      const outcome = await verifier.verify(makeKi(LOGS_QUERY), context);
 
       expect(outcome).toEqual({ passed: true });
     });
 
     it('executes every query when the KI carries several', async () => {
-      const outcome = await verifier.verify(makeKi([VALID_QUERY, OTHER_QUERY]), context);
+      const outcome = await verifier.verify(makeKi([LOGS_QUERY, METRICS_QUERY]), context);
 
       expect(outcome).toEqual({ passed: true });
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
@@ -126,7 +126,7 @@ describe('esql-valid-runtime verifier', () => {
     it('refuses partial results and forwards the abort signal', async () => {
       const abortSignal = new AbortController().signal;
 
-      await verifier.verify(makeKi(VALID_QUERY), { ...context, abortSignal });
+      await verifier.verify(makeKi(LOGS_QUERY), { ...context, abortSignal });
 
       expect(esClient.esql.query).toHaveBeenCalledWith(
         expect.objectContaining({ allow_partial_results: false }),
@@ -139,11 +139,11 @@ describe('esql-valid-runtime verifier', () => {
         esResponseError('verification_exception', 'Unknown index [no-such-index]')
       );
 
-      const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
+      const outcome = await verifier.verify(makeKi(LOGS_QUERY), context);
 
       expect(outcome.passed).toBe(false);
       if (!outcome.passed) {
-        expect(outcome.reason).toContain(VALID_QUERY);
+        expect(outcome.reason).toContain(LOGS_QUERY);
         expect(outcome.reason).toContain('verification_exception');
         expect(outcome.reason).toContain('Unknown index [no-such-index]');
       }
@@ -170,24 +170,24 @@ describe('esql-valid-runtime verifier', () => {
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockRejectedValueOnce(esResponseError('parsing_exception', 'line 1:14: mismatched input'));
 
-      const outcome = await verifier.verify(makeKi([VALID_QUERY, OTHER_QUERY]), context);
+      const outcome = await verifier.verify(makeKi([LOGS_QUERY, METRICS_QUERY]), context);
 
       expect(outcome.passed).toBe(false);
       if (!outcome.passed) {
-        expect(outcome.reason).toContain(OTHER_QUERY);
-        expect(outcome.reason).not.toContain(VALID_QUERY);
+        expect(outcome.reason).toContain(METRICS_QUERY);
+        expect(outcome.reason).not.toContain(LOGS_QUERY);
       }
     });
 
     it('reports every failing query rather than stopping at the first', async () => {
       esClient.esql.query.mockRejectedValue(esResponseError('verification_exception', 'nope'));
 
-      const outcome = await verifier.verify(makeKi([VALID_QUERY, OTHER_QUERY]), context);
+      const outcome = await verifier.verify(makeKi([LOGS_QUERY, METRICS_QUERY]), context);
 
       expect(outcome.passed).toBe(false);
       if (!outcome.passed) {
-        expect(outcome.reason).toContain(VALID_QUERY);
-        expect(outcome.reason).toContain(OTHER_QUERY);
+        expect(outcome.reason).toContain(LOGS_QUERY);
+        expect(outcome.reason).toContain(METRICS_QUERY);
       }
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
     });
@@ -195,7 +195,7 @@ describe('esql-valid-runtime verifier', () => {
     it('fails a query that returns partial results', async () => {
       esClient.esql.query.mockResolvedValue({ columns: [], values: [], is_partial: true });
 
-      const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
+      const outcome = await verifier.verify(makeKi(LOGS_QUERY), context);
 
       expect(outcome.passed).toBe(false);
       if (!outcome.passed) {
@@ -222,7 +222,7 @@ describe('esql-valid-runtime verifier', () => {
       const connectionError = new errors.ConnectionError('socket hang up');
       esClient.esql.query.mockRejectedValue(connectionError);
 
-      await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow('socket hang up');
+      await expect(verifier.verify(makeKi(LOGS_QUERY), context)).rejects.toThrow('socket hang up');
       expect(esClient.esql.query).toHaveBeenCalledTimes(3);
     });
 
@@ -230,7 +230,7 @@ describe('esql-valid-runtime verifier', () => {
       const abortError = new errors.RequestAbortedError('Request aborted');
       esClient.esql.query.mockRejectedValue(abortError);
 
-      await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow(abortError);
+      await expect(verifier.verify(makeKi(LOGS_QUERY), context)).rejects.toThrow(abortError);
       expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     });
 
@@ -239,7 +239,7 @@ describe('esql-valid-runtime verifier', () => {
         esResponseError('security_exception', 'unauthorized', 403)
       );
 
-      await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow();
+      await expect(verifier.verify(makeKi(LOGS_QUERY), context)).rejects.toThrow();
       expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     });
 
@@ -249,7 +249,7 @@ describe('esql-valid-runtime verifier', () => {
           esResponseError('es_rejected_execution_exception', 'too many requests', statusCode)
         );
 
-        await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow();
+        await expect(verifier.verify(makeKi(LOGS_QUERY), context)).rejects.toThrow();
         expect(esClient.esql.query).toHaveBeenCalledTimes(3);
 
         esClient.esql.query.mockReset();
@@ -264,13 +264,13 @@ describe('esql-valid-runtime verifier', () => {
         )
         .mockResolvedValueOnce({ columns: [], values: [] });
 
-      const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
+      const outcome = await verifier.verify(makeKi(LOGS_QUERY), context);
 
       expect(outcome).toEqual({ passed: true });
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
     });
 
-    it('records a 400 query error as a verifier failure', async () => {
+    it('fails when the index does not exist', async () => {
       esClient.esql.query.mockRejectedValue(
         esResponseError('verification_exception', 'unknown index [nope]', 400)
       );
@@ -281,7 +281,7 @@ describe('esql-valid-runtime verifier', () => {
     });
 
     it('fails non-string and empty esql values without calling the cluster', async () => {
-      for (const value of [42, { query: VALID_QUERY }, null, '', '   ', []]) {
+      for (const value of [42, { query: LOGS_QUERY }, null, '', '   ', []]) {
         const outcome = await verifier.verify(makeKi(value), context);
 
         expect(outcome.passed).toBe(false);
@@ -293,7 +293,7 @@ describe('esql-valid-runtime verifier', () => {
     });
 
     it('fails a mixed array, naming the offending indexes', async () => {
-      const outcome = await verifier.verify(makeKi([VALID_QUERY, 42, null]), context);
+      const outcome = await verifier.verify(makeKi([LOGS_QUERY, 42, null]), context);
 
       expect(outcome.passed).toBe(false);
       if (!outcome.passed) {
@@ -303,7 +303,7 @@ describe('esql-valid-runtime verifier', () => {
     });
 
     it('fails when the KI carries more than the maximum number of queries', async () => {
-      const queries = Array.from({ length: 101 }, () => VALID_QUERY);
+      const queries = Array.from({ length: 101 }, () => LOGS_QUERY);
 
       const outcome = await verifier.verify(makeKi(queries), context);
 
@@ -317,7 +317,7 @@ describe('esql-valid-runtime verifier', () => {
     it('fails an oversized query without executing it, still executing the others', async () => {
       const oversized = `FROM logs-* | WHERE event.action == "${'x'.repeat(10_001)}"`;
 
-      const outcome = await verifier.verify(makeKi([oversized, VALID_QUERY]), context);
+      const outcome = await verifier.verify(makeKi([oversized, LOGS_QUERY]), context);
 
       expect(outcome.passed).toBe(false);
       if (!outcome.passed) {
@@ -333,7 +333,7 @@ describe('esql-valid-runtime verifier', () => {
       abortController.abort();
 
       await expect(
-        verifier.verify(makeKi(VALID_QUERY), { ...context, abortSignal: abortController.signal })
+        verifier.verify(makeKi(LOGS_QUERY), { ...context, abortSignal: abortController.signal })
       ).rejects.toThrow('Aborted');
       expect(esClient.esql.query).not.toHaveBeenCalled();
     });
@@ -346,7 +346,7 @@ describe('esql-valid-runtime verifier', () => {
       });
 
       await expect(
-        verifier.verify(makeKi([VALID_QUERY, OTHER_QUERY]), {
+        verifier.verify(makeKi([LOGS_QUERY, METRICS_QUERY]), {
           ...context,
           abortSignal: abortController.signal,
         })
