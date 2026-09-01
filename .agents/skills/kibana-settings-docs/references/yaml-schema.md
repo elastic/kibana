@@ -40,6 +40,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
+          serverless: ga
 ```
 
 ### Fields on a setting
@@ -84,12 +85,12 @@ This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-t
 | Key | What it means here | Write |
 |---|---|---|
 | `stack` | Lifecycle and optional version history for Elastic Stack | No version means all versions: `ga`, `preview`. A new setting should include a version: `ga 9.4+`. Multiple values are allowed: `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
-| `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | `ga` if supported. Omit the key if not. Never a version. Never `preview`, `experimental`, `deprecated`, `removed`, or `unavailable` |
-| `serverless` | Supported on serverless, or not | `ga` if supported. Omit the key if not. Never a version |
+| `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | Always list all four. `ga` if supported. `unavailable` if not. Never a version. Never `preview`, `experimental`, `deprecated`, or `removed` |
+| `serverless` | Supported on serverless, or not | Always list it. `ga` if supported. `unavailable` if not. Never a version |
 
 `ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and the Elastic Cloud Hosted user-settings allowlist includes the key, write `ech: ga`.
 
-Preferred map form (all versions):
+Preferred map form (supported everywhere):
 
 ```yaml
 applies_to:
@@ -98,17 +99,22 @@ applies_to:
   ece: ga
   eck: ga
   self: ga
+  serverless: ga
 ```
 
-Self-managed only. Elastic Cloud Hosted does not support this setting, so `ech` is absent:
+Self-managed only. `unavailable` keys are not rendered as badges. They also hide the setting from a `:deployment:` filter:
 
 ```yaml
 applies_to:
   stack: ga
+  ech: unavailable
+  ece: unavailable
+  eck: unavailable
   self: ga
+  serverless: unavailable
 ```
 
-Some existing files use a list of strings. Match the file's map-versus-list shape. Do not convert a whole file in the same PR as a setting add. Older entries may still say `ech: unavailable`. For new work, omit the unsupported key instead.
+Some existing files use a list of strings. Match the file's map-versus-list shape. Do not convert a whole file in the same PR as a setting add.
 
 `ech` is Elastic Cloud Hosted. Do not add new `ess` keys.
 
@@ -116,7 +122,7 @@ Some existing files use a list of strings. Match the file's map-versus-list shap
 
 `docs/reference/cloud/elastic-cloud-kibana-settings.md` includes YAML with `:deployment: ech`.
 
-docs-builder shows a setting on that page when the entry has `ech: ga`. Write `ech: ga` only if the Elastic Cloud Hosted Kibana user-settings allowlist includes the key. That list lives in the `cloud` repository. Omit `ech` when the key is not allowlisted. A missing `applies_to` block on the entry shows the setting on the Cloud page. Always set `applies_to`.
+docs-builder shows a setting on that page when the entry has `ech: ga`. Write `ech: ga` only if the Elastic Cloud Hosted Kibana user-settings allowlist includes the key. That list lives in the `cloud` repository. Write `ech: unavailable` when the key is not allowlisted. `unavailable` hides the setting from this page and does not render an ECH badge. A missing `applies_to` block on the entry shows the setting on the Cloud page. Always set `applies_to`.
 
 ### Do not copy stack lifecycle onto deployments
 
@@ -129,12 +135,11 @@ applies_to:
   self: preview
 ```
 
-Wrong (do not mark unsupported deployments with `unavailable`):
+Wrong (do not omit unsupported deployments):
 
 ```yaml
 applies_to:
   stack: ga
-  ech: unavailable
   self: ga
 ```
 
@@ -147,6 +152,7 @@ applies_to:
   ece: ga
   eck: ga
   self: ga
+  serverless: ga
 ```
 
 Right (not supported on Elastic Cloud Hosted):
@@ -154,7 +160,11 @@ Right (not supported on Elastic Cloud Hosted):
 ```yaml
 applies_to:
   stack: ga
+  ech: unavailable
+  ece: unavailable
+  eck: unavailable
   self: ga
+  serverless: unavailable
 ```
 
 ### When to put a version on stack
@@ -180,9 +190,9 @@ Rules: [badge rendering reference](https://elastic.github.io/docs-builder/syntax
 | Then removed | `stack: ga 9.0-9.3, deprecated 9.4-9.5, removed 9.6+` |
 | Preview, then removed | `stack: preview 9.0-9.2, removed 9.3+` |
 
-When you remove a setting from the product, keep the YAML entry. Users on earlier versions still need to find the key. Append `removed` and the version on `stack`. Keep the same deployment `ga` keys the setting already had. Do not write `removed` on `ech`, `ece`, `eck`, or `self`. Older files may still say `ech: removed`. Do not copy that for new work.
+When you remove a setting from the product, keep the YAML entry. Users on earlier versions still need to find the key. Append `removed` and the version on `stack`. Keep the same deployment `ga` or `unavailable` values the setting already had. Do not write `removed` on `ech`, `ece`, `eck`, or `self`. Older files may still say `ech: removed`. Do not copy that for new work.
 
-If the setting leaves serverless, omit `serverless`. Serverless has no version history on these keys.
+If the setting leaves serverless, write `serverless: unavailable`. Serverless has no version history on these keys.
 
 ### Inline badges in descriptions
 

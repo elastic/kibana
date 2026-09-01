@@ -15,7 +15,11 @@ This setting is new in the product, so `stack` includes a version.
         default: true
         applies_to:
           stack: ga 9.5+
+          ech: unavailable
+          ece: unavailable
+          eck: unavailable
           self: ga
+          serverless: unavailable
 ```
 
 ## Existing setting that was missing from the docs
@@ -30,12 +34,16 @@ If the key already existed in the product and you are only adding the YAML, omit
         default: true
         applies_to:
           stack: ga
+          ech: unavailable
+          ece: unavailable
+          eck: unavailable
           self: ga
+          serverless: unavailable
 ```
 
 ## New kibana.yml setting available on Elastic Cloud Hosted
 
-Set `ech: ga` if the Elastic Cloud Hosted user-settings allowlist includes the key. Then include the YAML from `elastic-cloud-kibana-settings.md` with `:deployment: ech` if that include is not already present for this file.
+Set `ech: ga` if the Elastic Cloud Hosted user-settings allowlist includes the key. Set `ech: unavailable` if it does not. Then include the YAML from `elastic-cloud-kibana-settings.md` with `:deployment: ech` if that include is not already present for this file.
 
 ```yaml
       - setting: xpack.example.mode
@@ -54,6 +62,7 @@ Set `ech: ga` if the Elastic Cloud Hosted user-settings allowlist includes the k
           ece: ga
           eck: ga
           self: ga
+          serverless: ga
         example: |
           ```yaml
           xpack.example.mode: strict
@@ -84,7 +93,7 @@ Set `ech: ga` if the Elastic Cloud Hosted user-settings allowlist includes the k
 
 ## New global Advanced Settings entry
 
-Use `advanced-settings-global.yml`. Omit `serverless` when the setting is not available on serverless.
+Use `advanced-settings-global.yml`. Write `serverless: unavailable` when the setting is not available on serverless.
 
 ```yaml
       - setting: hideAnnouncements
@@ -99,6 +108,7 @@ Use `advanced-settings-global.yml`. Omit `serverless` when the setting is not av
           ece: ga
           eck: ga
           self: ga
+          serverless: unavailable
 ```
 
 ## Nested kibana.yml keys
@@ -111,7 +121,11 @@ Use `advanced-settings-global.yml`. Omit `serverless` when the setting is not av
         default: "[]"
         applies_to:
           stack: ga
+          ech: unavailable
+          ece: unavailable
+          eck: unavailable
           self: ga
+          serverless: unavailable
         settings:
           - setting: "[n].url"
             description: |
@@ -143,6 +157,7 @@ Preview, then GA:
           ece: ga
           eck: ga
           self: ga
+          serverless: ga
 ```
 
 GA, then deprecated. Keep the old key. Add `deprecation_details` when the replacement is not obvious from the description:
@@ -154,12 +169,13 @@ GA, then deprecated. Keep the old key. Add `deprecation_details` when the replac
           ece: ga
           eck: ga
           self: ga
+          serverless: ga
         deprecation_details: "Use `example:newKey` instead."
 ```
 
 ## Removal
 
-Keep the YAML entry. Do not delete it. Append `removed` and the version on `stack`. Keep the deployment `ga` keys.
+Keep the YAML entry. Do not delete it. Append `removed` and the version on `stack`. Keep the same deployment `ga` or `unavailable` values.
 
 ```yaml
         applies_to:
@@ -168,6 +184,7 @@ Keep the YAML entry. Do not delete it. Append `removed` and the version on `stac
           ece: ga
           eck: ga
           self: ga
+          serverless: ga
         deprecation_details: "Use `example:newKey` instead."
 ```
 

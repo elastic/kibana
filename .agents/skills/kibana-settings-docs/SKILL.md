@@ -45,7 +45,7 @@ Task progress:
 - [ ] 3. Verify key, default, type, and availability from origin/main
 - [ ] 4. Edit the YAML entry
 - [ ] 5. Update host Markdown, toc.yml, or Cloud include only if needed
-- [ ] 6. Tag applies_to (stack history + deployments + serverless as required)
+- [ ] 6. Tag applies_to (stack history + all deployment keys + serverless)
 - [ ] 7. Preview and check the Supported on line
 - [ ] 8. If users need instructions, find the how-to page and open a docs-content issue or PR
 ```
@@ -107,7 +107,7 @@ Create or update a host file only when you add a new YAML collection:
 - Add the page under `docs/reference/toc.yml` → `configuration-reference.md`.
 - If Elastic Cloud Hosted should list the setting, include the YAML from `docs/reference/cloud/elastic-cloud-kibana-settings.md` with `:deployment: ech`.
 
-That filter shows a setting only when the entry has `ech: ga`. Decide `ech: ga` from the allowlist in step 6. A missing `applies_to` block shows the setting on the Cloud page. Always set `applies_to`.
+That filter shows a setting only when the entry has `ech: ga`. `ech: unavailable` hides it. Decide `ech: ga` from the allowlist in step 6. A missing `applies_to` block shows the setting on the Cloud page. Always set `applies_to`.
 
 Reporting settings already split across several YAML files included from `reporting-settings.md`. Add to the matching include, not a new page.
 
@@ -122,16 +122,16 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
   - If you add a version that is not released yet, keep it. Docs show Planned until it ships. Do not omit a version to avoid Planned.
 - **`stack` accepts multiple values.** Append a new lifecycle. Do not replace the old one. Example: `stack: preview 9.0-9.2, ga 9.3+`.
 - **Do not delete a removed setting.** Keep the YAML entry so users on earlier versions can still find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`.
-- **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported:
+- **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported. Always list all four:
   - Write `<key>: ga` if that deployment supports it, even when `stack` is `preview` or `removed`.
+  - Write `<key>: unavailable` if that deployment does not support it. docs-builder does not render that badge.
   - For `ech`, check the Elastic Cloud Hosted user-settings allowlist first. That list lives in the `cloud` repository.
   - `packages/kbn-check-kibana-settings-cli` compares Kibana keys against it.
-  - Write `ech: ga` if the key is on the list. Omit `ech` if it is not.
+  - Write `ech: ga` if the key is on the list. Write `ech: unavailable` if it is not.
   - Do not infer support from the published Cloud settings page. That page is generated from this YAML.
-  - Omit the key if that deployment does not support it.
   - Do not copy the stack lifecycle onto deployments.
-  - Do not write `unavailable` or a version on those keys.
-- **`serverless`:** write `serverless: ga` when the setting exists on serverless. Omit it when it does not. Do not put a version on `serverless`.
+  - Do not write a version on those keys.
+- **`serverless`:** write `serverless: ga` when the setting exists on serverless. Write `serverless: unavailable` when it does not. Do not put a version on `serverless`.
 
 Tag `stack` at the minor. Do not put version numbers in the description next to a badge.
 
@@ -171,11 +171,10 @@ Skip this when the reference entry is enough.
 - [ ] Default and datatype match the schema or `uiSettings` registration
 - [ ] `stack` has no version only when the setting applies to all versions
 - [ ] New settings include a version, unless the key already existed and was missing from the docs
-- [ ] Deployment keys are `ga` or omitted
+- [ ] Deployment keys are always listed. Use `ga` or `unavailable`
 - [ ] If you add a version that is not released yet, keep it. Do not strip it to avoid Planned
 - [ ] Lifecycle changes append on `stack` (for example `preview 9.0-9.2, ga 9.3+`). They do not replace the previous value
 - [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
-- [ ] Unsupported deployments are omitted, not tagged `unavailable`
 - [ ] `ech: ga` only if the Elastic Cloud Hosted user-settings allowlist includes the key
 - [ ] Cloud page include exists only if the entry has `ech: ga`
 - [ ] No UI label, test ID, or component name used as the YAML `setting` key
