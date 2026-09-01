@@ -142,3 +142,39 @@ export interface ListImprovementsResponse {
   items: Improvement[];
   total: number;
 }
+
+/**
+ * What an analysis run posts when it finishes.
+ *
+ * The window and spaces are echoed from the selection the run was handed rather than recomputed
+ * here, because relative date math (`now-30d`) resolves differently between the two calls and
+ * provenance should record the window the signals were actually read from.
+ */
+export interface RecordImprovementsRequest {
+  ai_index_id: string;
+  /** The workflow execution that produced these, so a reviewer can open the run. */
+  agent_run_id: string;
+  signal_window: { from: string; to: string };
+  signal_spaces: string[];
+  improvements: unknown[];
+}
+
+/** Why a proposal was not recorded. */
+export type SkippedImprovementReason =
+  | 'action_not_allowed'
+  | 'invalid'
+  | 'duplicate'
+  | 'conflict'
+  | 'limit_exceeded';
+
+export interface RecordImprovementsResponse {
+  /** Lineages that gained a revision, in the order they were proposed. */
+  recorded: Array<{ improvement_id: string; action: ImprovementAction; title: string }>;
+  /** Proposals that were dropped, each with the reason — what the run should surface. */
+  skipped: Array<{
+    action?: string;
+    title?: string;
+    reason: SkippedImprovementReason;
+    detail: string;
+  }>;
+}

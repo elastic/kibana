@@ -1,0 +1,104 @@
+version: '1'
+name: 'Context Engine Feedback Analysis'
+description: 'Analyzes the signals for one Context Engine AI index and records the improvements it proposes.'
+# Installed enabled, because the instance existing *is* the desired state: Context Engine installs
+# it when an AI index turns feedback analysis on and uninstalls it when the index turns it off.
+# Authority lives on the AI index's `feedback_analysis.enabled` rather than being mirrored onto the
+# workflow document, so there is only one flag to disagree with.
+enabled: true
+tags:
+  - context-engine
+  - feedback-loop
+  - scheduled
+settings:
+  # The agent reads signals, opens conversations behind them, and inspects the index before
+  # deciding. That is a long run, and it is cheaper to let it finish than to retry it.
+  timeout: '45m'
+  concurrency:
+    # Keyed on the AI index: a manual and a scheduled run overlapping would read the same window,
+    # propose the same changes, and race to de-duplicate against each other.
+    key: 'context-engine-feedback-analysis-__AI_INDEX_ID__'
+    strategy: drop
+    max: 1
+consts:
+  AI_INDEX_ID: '__AI_INDEX_ID__'
+  # LiquidJS has no array literal, so `| default: []` falls back to nothing rather than to an empty
+  # array. A run that proposes nothing is the most common outcome, so it needs something real to
+  # fall back to.
+  NO_IMPROVEMENTS: []
+outputs:
+  - name: analyzed
+    type: boolean
+  - name: recorded
+    type: number
+  - name: skipped
+    type: number
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+steps:
+  # Selection, grouping and the briefing all happen behind this one endpoint rather than as ES|QL
+  # steps here: the association rules have real branches that belong in tested TypeScript, and
+  # keeping them in one place is what will let the interactive "Analyze & improve" hand-off select
+  # the same way.
+  - name: fetch_context
+    type: kibana.request
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/context_engine/ai_index/__AI_INDEX_ID__/feedback_context'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        elastic-api-version: '1'
+
+  - name: analyze_and_record
+    type: if
+    # A window with no classified patterns has nothing to analyze. Skipping the agent here is what
+    # keeps a healthy index from costing an LLM call every interval to be told it is healthy.
+    condition: '${{ steps.fetch_context.output.has_signals == true }}'
+    steps:
+      - name: run_analysis_agent
+        type: ai.agent
+        # Resolved by the endpoint from `feedback_analysis.agent_id`, so changing the agent on an
+        # AI index takes effect on the next run rather than needing a reinstall.
+        agent-id: '{{ steps.fetch_context.output.agent_id }}'
+        plugin-id: 'context_engine_feedback_analysis'
+        aggregate-by: 'context_engine'
+        # Persisted so a reviewer can open the run and see which signals the agent read and which
+        # tools it called before judging a suggestion.
+        create-conversation: true
+        public-conversation: true
+        timeout: '30m'
+        with:
+          message: '{{ steps.fetch_context.output.briefing }}'
+          # Setting a schema forces the final inference to be structured, which is what stops the
+          # run from trying to apply anything. The schema is narrowed server-side to the actions
+          # this AI index permits.
+          schema: '${{ steps.fetch_context.output.output_schema }}'
+
+      - name: record_improvements
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/context_engine/improvements'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+            elastic-api-version: '1'
+            kbn-xsrf: 'true'
+          body:
+            ai_index_id: '{{ consts.AI_INDEX_ID }}'
+            agent_run_id: '{{ execution.id }}'
+            # Echoed from the selection rather than recomputed: relative date math resolves
+            # differently on a second evaluation, and provenance should record the window the
+            # signals were actually read from.
+            signal_window: '${{ steps.fetch_context.output.run.signal_window }}'
+            signal_spaces: '${{ steps.fetch_context.output.run.signal_spaces }}'
+            improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      analyzed: '${{ steps.fetch_context.output.has_signals | default: false }}'
+      recorded: '${{ steps.record_improvements.output.recorded | size | default: 0 }}'
+      skipped: '${{ steps.record_improvements.output.skipped | size | default: 0 }}'

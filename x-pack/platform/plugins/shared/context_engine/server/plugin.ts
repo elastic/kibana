@@ -9,9 +9,11 @@ import type {
   CoreSetup,
   CoreStart,
   ElasticsearchClient,
+  KibanaRequest,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +28,10 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerFeedbackAnalysisRoutes } from './routes/feedback_analysis';
 import { registerSignalRoutes } from './routes/signals';
+import type { FeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
+import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
@@ -37,6 +42,11 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
+
+/** Must match the `pluginId` on the managed workflow definition. */
+const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
+
+const DEFAULT_SPACE_ID = 'default';
 
 export class ContextEnginePlugin
   implements
@@ -52,6 +62,8 @@ export class ContextEnginePlugin
   private signalsService?: SignalsService;
   private createImprovementsService?: (esClient: ElasticsearchClient) => ImprovementsService;
   private esClient?: ElasticsearchClient;
+  private scheduleService?: FeedbackAnalysisScheduleService;
+  private spaces?: SpacesPluginStart;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
@@ -112,26 +124,54 @@ export class ContextEnginePlugin
       logger: this.logger.get('signal_generator'),
     });
 
+    // Makes this plugin the owner of the feedback-analysis workflow definition. Registration alone
+    // installs nothing — instances are installed per AI index when analysis is turned on.
+    setupDeps.workflowsExtensions.registerManagedWorkflowOwner(CONTEXT_ENGINE_WORKFLOW_OWNER);
+
+    const getAiIndexService = () => {
+      if (!this.aiIndexService) {
+        throw new Error('AI index service not available — plugin has not started');
+      }
+      return this.aiIndexService;
+    };
+
+    const getImprovementsService = (esClient: ElasticsearchClient) => {
+      if (!this.createImprovementsService) {
+        throw new Error('Improvements service not available — plugin has not started');
+      }
+      return this.createImprovementsService(esClient);
+    };
+
+    const getScheduleService = () => {
+      if (!this.scheduleService) {
+        throw new Error('Schedule service not available — plugin has not started');
+      }
+      return this.scheduleService;
+    };
+
+    const getSpaceId = (request: KibanaRequest) =>
+      this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
       logger: this.logger.get('routes'),
-      getAiIndexService: () => {
-        if (!this.aiIndexService) {
-          throw new Error('AI index service not available — plugin has not started');
-        }
-        return this.aiIndexService;
-      },
-      getImprovementsService: (esClient) => {
-        if (!this.createImprovementsService) {
-          throw new Error('Improvements service not available — plugin has not started');
-        }
-        return this.createImprovementsService(esClient);
-      },
+      getAiIndexService,
+      getImprovementsService,
+      getScheduleService,
+      getSpaceId,
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+    });
+
+    // The two endpoints an analysis run talks to.
+    registerFeedbackAnalysisRoutes({
+      router,
+      getAiIndexService,
+      getImprovementsService,
+      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
     registerStepDefinitions({
@@ -214,6 +254,14 @@ export class ContextEnginePlugin
           err instanceof Error ? err.message : String(err)
         }`
       );
+    });
+
+    this.spaces = startDeps.spaces;
+
+    this.scheduleService = createFeedbackAnalysisScheduleService({
+      logger: this.logger,
+      getManagedWorkflowsClient: () =>
+        startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
     });
 
     const aiIndexService = this.aiIndexService;

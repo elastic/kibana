@@ -12,8 +12,15 @@ export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
 export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
+export const aiIndexFeedbackContextPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_context`;
 export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
 export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+
+/** Where an analysis run records what it proposed. */
+export const improvementsPath = `${internalApiPath}/improvements`;
+
+/** Version of the internal Improvements API, shared between route registration and the runner. */
+export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -97,6 +104,29 @@ export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
 /** Applied when a feedback-analysis block omits the corresponding field. */
 export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
 export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
+
+/**
+ * Cap on the signals a single analysis run selects. The briefing shares the run's context window
+ * with the agent's own tool output, so the selection is a sample of the window rather than all of
+ * it; the groups carry the full counts, which is what the ranking is actually read from.
+ */
+export const MAX_ANALYSIS_SIGNALS = 500;
+
+/** Cap on the ranked pattern groups handed to a run. */
+export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
+
+/**
+ * Cap on the signal ids recorded per group. Provenance needs enough ids to follow a proposal back
+ * to its evidence, not every id behind it — a busy group can carry thousands.
+ */
+export const MAX_GROUP_SIGNAL_IDS = 20;
+
+/** Cap on the proposals one run may record, so a runaway run cannot flood the review queue. */
+export const MAX_IMPROVEMENTS_PER_RUN = 25;
+
+/** Bounds on the free text a run may attach to a proposal. */
+export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
+export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
