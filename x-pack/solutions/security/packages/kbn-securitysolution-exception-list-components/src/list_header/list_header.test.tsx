@@ -163,6 +163,6 @@ describe('ExceptionListHeader', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('Breadcrumb'));
-    expect(onNavigate).toBeCalledWith('test-path');
+    expect(onNavigate).toHaveBeenCalledWith('test-path');
   });
 });
