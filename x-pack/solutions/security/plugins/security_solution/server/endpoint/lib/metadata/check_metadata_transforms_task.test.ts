@@ -204,7 +204,7 @@ describe('check metadata transforms task', () => {
         });
       });
 
-      it('should still restart failing transforms when the installation has no transform assets', async () => {
+      it('should not restart any transform when the installation has no transform assets', async () => {
         getInstallationSpy.mockResolvedValue({
           installed_es: [],
           version: PACKAGE_VERSION,
@@ -212,17 +212,12 @@ describe('check metadata transforms task', () => {
         const transformStatsResponseMock = buildFailedStatsResponse();
         esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
-        await runTask();
+        const taskResponse = (await runTask()) as RunResult;
 
-        expect(esClient.transform.stopTransform).toHaveBeenCalledWith({
-          transform_id: failedTransformId,
-          allow_no_match: true,
-          wait_for_completion: true,
-          force: true,
-        });
-        expect(esClient.transform.startTransform).toHaveBeenCalledWith({
-          transform_id: failedTransformId,
-        });
+        expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+        expect(esClient.transform.startTransform).not.toHaveBeenCalled();
+        expect(taskResponse?.state?.restartAttempts).toEqual({});
+        expect(taskResponse?.runAt).toBeUndefined();
       });
 
       it('should correctly track transform restart attempts', async () => {

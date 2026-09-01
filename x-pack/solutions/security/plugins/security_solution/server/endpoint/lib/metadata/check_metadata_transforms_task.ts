@@ -163,41 +163,41 @@ export class CheckMetadataTransformsTask {
     let { reinstallAttempts } = taskInstance.state as LatestTaskStateSchema;
     let runAt: Date | undefined;
 
-    if (expectedTransformIds.size) {
-      const installedTransformIds = new Set(transforms.map(({ id }) => id));
-      const missingTransformIds = [...expectedTransformIds].filter(
-        (id) => !installedTransformIds.has(id)
-      );
-
-      if (missingTransformIds.length) {
-        const { attempts, didReinstallFail } = await this.reinstallTransformsIfNeeded(
-          installation.version,
-          missingTransformIds,
-          reinstallAttempts
-        );
-        reinstallAttempts = attempts;
-
-        // only a failed reinstall backs off, a successful one returns to the regular interval
-        if (didReinstallFail) {
-          runAt = this.getNextRunAt(reinstallAttempts);
-        }
-
-        return this.buildNextTask({ reinstallAttempts, runAt });
-      }
-    } else {
+    if (!expectedTransformIds.size) {
       // a same version package reinstall can strip the transform references from the installation,
-      // see https://github.com/elastic/kibana/issues/217503. Reinstalling without an expected set
-      // to compare against would delete and recreate the transform destination indices on repeat.
+      // see https://github.com/elastic/kibana/issues/217503. Without them there is no expected set
+      // to compare against, and acting on transforms of unknown provenance is what turns this task
+      // destructive: reinstalling deletes and recreates the transform destination indices.
       this.logger.warn(
-        `no metadata transforms are registered on the [${FLEET_ENDPOINT_PACKAGE}] package installation [${installation.version}], skipping the missing transform check`
+        `no metadata transforms are registered on the [${FLEET_ENDPOINT_PACKAGE}] package installation [${installation.version}], skipping transform health checks`
       );
+      return this.buildNextTask({ reinstallAttempts });
+    }
+
+    const installedTransformIds = new Set(transforms.map(({ id }) => id));
+    const missingTransformIds = [...expectedTransformIds].filter(
+      (id) => !installedTransformIds.has(id)
+    );
+
+    if (missingTransformIds.length) {
+      const { attempts, didReinstallFail } = await this.reinstallTransformsIfNeeded(
+        installation.version,
+        missingTransformIds,
+        reinstallAttempts
+      );
+      reinstallAttempts = attempts;
+
+      // only a failed reinstall backs off, a successful one returns to the regular interval
+      if (didReinstallFail) {
+        runAt = this.getNextRunAt(reinstallAttempts);
+      }
+
+      return this.buildNextTask({ reinstallAttempts, runAt });
     }
 
     // transforms of other package versions can linger in Elasticsearch, only the ones this
-    // installation owns should be restarted. Without an expected set every match is monitored.
-    const monitoredTransforms = expectedTransformIds.size
-      ? transforms.filter(({ id }) => expectedTransformIds.has(id))
-      : transforms;
+    // installation owns should be restarted
+    const monitoredTransforms = transforms.filter(({ id }) => expectedTransformIds.has(id));
 
     let didAttemptRestart: boolean = false;
     let highestAttempt: number = 0;
