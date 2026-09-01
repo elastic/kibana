@@ -55,6 +55,15 @@ export const eventsMappings = {
         completed_at: { type: 'date' as const },
       },
     }),
+    severity_assessments: mappings.object({
+      properties: {
+        source: mappings.keyword(),
+        severity: mappings.keyword(),
+        assessed_at: mappings.date({ format: 'strict_date_optional_time' }),
+        invalidated_at: mappings.date({ format: 'strict_date_optional_time' }),
+        workflow_execution_id: mappings.keyword(),
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
@@ -74,7 +83,7 @@ export const storedEventSchema = significantEventSchema.transform((doc) => ({
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 12,
+  version: 13,
   hidden: true,
   template: {
     priority: 500,

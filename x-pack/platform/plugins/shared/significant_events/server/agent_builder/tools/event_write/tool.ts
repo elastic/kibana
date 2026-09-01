@@ -30,7 +30,7 @@ import {
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
 } from '../bulk_write';
-import { eventsWriteBulkHandler } from './handler';
+import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -158,6 +158,12 @@ const eventsWriteItemsSchema = z
 
 export const eventsWriteSchema = z
   .object({
+    source: z
+      .literal('discovery')
+      .optional()
+      .describe(
+        'Source producing the severity assessment. Discovery calls must set this to "discovery".'
+      ),
     items: eventsWriteItemsSchema,
   })
   .describe(
@@ -274,15 +280,16 @@ export function createEventsWriteTool({
        Write a batch of significant events. Always pass the completed object
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
-      already-completed object once. Do not retry a populated payload rejected for
-      ownership or field validation.
+       already-completed object once. Do not retry a populated payload rejected for
+       ownership or field validation.
+
+      Set source to discovery when Discovery calls this tool. Every item written with that source
+      appends a discovery severity assessment and returns the server-materialized severity.
 
       **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. No-op if severity and status are
-      unchanged (written: false, reason: unchanged_outcome). Preserve the prior severity unless
-      the discovery procedure establishes a different impact or applies its known-ongoing
-      severity cap. When no new rule UUIDs are introduced, title and symptom_hypothesis are
-      frozen to the stored values and narrative_preserved: true is returned.
+      Signals and topology are merged with prior versions. A fresh investigation assessment can
+      preserve a different severity. When no new rule UUIDs are introduced, title and
+      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
       set contains the submitted rules and shares at least one stream name. If found, returns it
@@ -312,9 +319,23 @@ export function createEventsWriteTool({
           logger
         );
 
+        const assessedAt = new Date().toISOString();
+        const inputs: EventsWriteInput[] = items.map((item) => ({
+          ...item,
+          ...(toolParams.source === 'discovery' && {
+            severity_assessments: [
+              {
+                source: toolParams.source,
+                severity: item.severity,
+                assessed_at: assessedAt,
+              },
+            ],
+          }),
+        }));
+
         const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),
-          inputs: items,
+          inputs,
         });
 
         data.forEach((result) => {

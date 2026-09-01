@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import { significantEventBaseSchema } from '../common_schemas';
+import { severitySchema, significantEventBaseSchema } from '../common_schemas';
 import {
   ASSESSMENT_NOTE_ROLE_RULE,
   MAX_ASSESSMENT_NOTE_LENGTH,
@@ -57,6 +57,33 @@ export const significantEventInvestigationSchema = z.object({
 });
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
 
+const severityAssessmentBaseSchema = z.object({
+  severity: severitySchema,
+  assessed_at: z.iso.datetime({ offset: true }).describe('When the source made this assessment.'),
+  invalidated_at: z.iso
+    .datetime({ offset: true })
+    .optional()
+    .describe('When later evidence made this assessment ineligible for materialization.'),
+});
+
+const discoverySeverityAssessmentSchema = severityAssessmentBaseSchema.extend({
+  source: z.literal('discovery'),
+});
+
+const investigationSeverityAssessmentSchema = severityAssessmentBaseSchema.extend({
+  source: z.literal('investigation'),
+  workflow_execution_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe('ID of the investigation workflow execution that produced this assessment.'),
+});
+
+export const severityAssessmentSchema = z.discriminatedUnion('source', [
+  discoverySeverityAssessmentSchema,
+  investigationSeverityAssessmentSchema,
+]);
+export type SeverityAssessment = z.infer<typeof severityAssessmentSchema>;
+
 export const significantEventSchema = significantEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
   event_uuid: z.string().max(MAX_ID_LENGTH).describe('Unique ID of an event.'),
@@ -80,6 +107,10 @@ export const significantEventSchema = significantEventBaseSchema.extend({
       `
     ),
   investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
+  severity_assessments: z
+    .array(severityAssessmentSchema)
+    .optional()
+    .describe('Cumulative severity assessments retained across event versions.'),
 });
 
 export type SignificantEvent = z.infer<typeof significantEventSchema>;

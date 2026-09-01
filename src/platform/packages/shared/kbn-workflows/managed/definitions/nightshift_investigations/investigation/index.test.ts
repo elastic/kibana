@@ -14,7 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { body?: { status?: string }; path?: string };
+  with?: { body?: { status?: string }; path?: string; message?: string };
 }
 
 const investigation = parse(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.yaml) as {
@@ -29,7 +29,7 @@ const requireStep = (name: string): WorkflowStep => {
 
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(10);
+    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(11);
     expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
 
     const expectedStatuses: Record<string, string> = {
@@ -62,5 +62,11 @@ describe('investigation lifecycle contracts', () => {
 
     expect(requestSteps.length).toBeGreaterThan(0);
     expect(unscoped.map((step) => `${step.name}: ${step.with?.path}`)).toEqual([]);
+  });
+
+  it('requires a severity assessment for significant-event investigations', () => {
+    expect(requireStep('investigate').with?.message).toContain(
+      'must contain exactly one severity entry'
+    );
   });
 });
