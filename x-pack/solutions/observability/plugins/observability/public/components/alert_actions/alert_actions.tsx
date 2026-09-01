@@ -42,6 +42,7 @@ import {
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import type { AlertSnapshot } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
@@ -50,6 +51,52 @@ import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
+import type { TopAlert } from '../../typings/alerts';
+
+export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot | undefined => {
+  const start = fields[ALERT_START] ?? fields[TIMESTAMP];
+  if (
+    !fields[ALERT_UUID] ||
+    !fields[ALERT_RULE_UUID] ||
+    !fields[ALERT_RULE_NAME] ||
+    !fields[ALERT_RULE_TYPE_ID] ||
+    !fields[ALERT_RULE_CATEGORY] ||
+    !reason ||
+    !fields[ALERT_STATUS] ||
+    !start ||
+    typeof fields[ALERT_FLAPPING] !== 'boolean'
+  ) {
+    return;
+  }
+
+  return {
+    id: fields[ALERT_UUID],
+    rule_id: fields[ALERT_RULE_UUID],
+    rule_name: fields[ALERT_RULE_NAME],
+    rule_type_id: fields[ALERT_RULE_TYPE_ID],
+    rule_category: fields[ALERT_RULE_CATEGORY],
+    reason,
+    status: fields[ALERT_STATUS],
+    start,
+    flapping: fields[ALERT_FLAPPING],
+    ...(fields[ALERT_URL] ? { url: fields[ALERT_URL] } : {}),
+    ...(fields[ALERT_RULE_TAGS] ? { rule_tags: fields[ALERT_RULE_TAGS] } : {}),
+    ...(fields[ALERT_GROUPING] ? { grouping: fields[ALERT_GROUPING] } : {}),
+    ...(fields[ALERT_GROUP] ? { group: fields[ALERT_GROUP] } : {}),
+    ...(fields[ALERT_EVALUATION_VALUES] !== undefined ||
+    fields[ALERT_EVALUATION_VALUE] !== undefined ||
+    fields[ALERT_EVALUATION_THRESHOLD] !== undefined
+      ? {
+          evaluation: {
+            value: fields[ALERT_EVALUATION_VALUES] ?? fields[ALERT_EVALUATION_VALUE],
+            threshold: fields[ALERT_EVALUATION_THRESHOLD],
+          },
+        }
+      : {}),
+    ...(fields[ALERT_RULE_PARAMETERS] ? { rule_parameters: fields[ALERT_RULE_PARAMETERS] } : {}),
+    ...(fields[ALERT_INDEX_PATTERN] ? { index_pattern: fields[ALERT_INDEX_PATTERN] } : {}),
+  };
+};
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -136,48 +183,7 @@ export function AlertActions(
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
   const [isInvestigating, setIsInvestigating] = useState(false);
-  const fields = observabilityAlert.fields;
-  const start = fields[ALERT_START] ?? fields[TIMESTAMP];
-  const alertSnapshot =
-    fields[ALERT_UUID] &&
-    fields[ALERT_RULE_UUID] &&
-    fields[ALERT_RULE_NAME] &&
-    fields[ALERT_RULE_TYPE_ID] &&
-    fields[ALERT_RULE_CATEGORY] &&
-    observabilityAlert.reason &&
-    fields[ALERT_STATUS] &&
-    start &&
-    typeof fields[ALERT_FLAPPING] === 'boolean'
-      ? {
-          id: fields[ALERT_UUID],
-          rule_id: fields[ALERT_RULE_UUID],
-          rule_name: fields[ALERT_RULE_NAME],
-          rule_type_id: fields[ALERT_RULE_TYPE_ID],
-          rule_category: fields[ALERT_RULE_CATEGORY],
-          reason: observabilityAlert.reason,
-          status: fields[ALERT_STATUS],
-          start,
-          flapping: fields[ALERT_FLAPPING],
-          ...(fields[ALERT_URL] ? { url: fields[ALERT_URL] } : {}),
-          ...(fields[ALERT_RULE_TAGS] ? { rule_tags: fields[ALERT_RULE_TAGS] } : {}),
-          ...(fields[ALERT_GROUPING] ? { grouping: fields[ALERT_GROUPING] } : {}),
-          ...(fields[ALERT_GROUP] ? { group: fields[ALERT_GROUP] } : {}),
-          ...(fields[ALERT_EVALUATION_VALUES] !== undefined ||
-          fields[ALERT_EVALUATION_VALUE] !== undefined ||
-          fields[ALERT_EVALUATION_THRESHOLD] !== undefined
-            ? {
-                evaluation: {
-                  value: fields[ALERT_EVALUATION_VALUES] ?? fields[ALERT_EVALUATION_VALUE],
-                  threshold: fields[ALERT_EVALUATION_THRESHOLD],
-                },
-              }
-            : {}),
-          ...(fields[ALERT_RULE_PARAMETERS]
-            ? { rule_parameters: fields[ALERT_RULE_PARAMETERS] }
-            : {}),
-          ...(fields[ALERT_INDEX_PATTERN] ? { index_pattern: fields[ALERT_INDEX_PATTERN] } : {}),
-        }
-      : undefined;
+  const alertSnapshot = buildAlertSnapshot(observabilityAlert);
   const showInvestigateAction = Boolean(
     nightshiftInvestigations &&
       application.capabilities.agentBuilder?.write === true &&

@@ -22,13 +22,14 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
-import { AlertActions } from './alert_actions';
+import { AlertActions, buildAlertSnapshot } from './alert_actions';
 import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { createMemoryHistory } from 'history';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import type { TopAlert } from '../../typings/alerts';
 import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type {
@@ -73,6 +74,48 @@ mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
 
 mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 const mockLicensing = licensingMock.createStart();
+
+describe('buildAlertSnapshot', () => {
+  const parsedAlert = {
+    fields: {
+      'kibana.alert.uuid': 'alert-1',
+      'kibana.alert.rule.uuid': 'rule-1',
+      'kibana.alert.rule.name': 'Test rule',
+      'kibana.alert.rule.rule_type_id': 'test.rule',
+      'kibana.alert.rule.category': 'Test rule category',
+      'kibana.alert.status': 'active',
+      'kibana.alert.start': '2026-09-01T10:00:00.000Z',
+      'kibana.alert.flapping': false,
+      'kibana.alert.evaluation.value': 31,
+      'kibana.alert.evaluation.threshold': 5,
+    },
+    reason: 'Threshold exceeded',
+  } as TopAlert;
+
+  it('maps required and available optional fields', () => {
+    expect(buildAlertSnapshot(parsedAlert)).toEqual({
+      id: 'alert-1',
+      rule_id: 'rule-1',
+      rule_name: 'Test rule',
+      rule_type_id: 'test.rule',
+      rule_category: 'Test rule category',
+      reason: 'Threshold exceeded',
+      status: 'active',
+      start: '2026-09-01T10:00:00.000Z',
+      flapping: false,
+      evaluation: { value: 31, threshold: 5 },
+    });
+  });
+
+  it('returns undefined when required fields are missing', () => {
+    expect(
+      buildAlertSnapshot({
+        ...parsedAlert,
+        fields: { ...parsedAlert.fields, 'kibana.alert.flapping': undefined },
+      })
+    ).toBeUndefined();
+  });
+});
 
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();

@@ -55,7 +55,6 @@ const buildAlertDoc = ({ index, status }: AlertDocOptions) => {
     'event.action': isActive ? 'active' : 'close',
     'event.kind': 'signal',
     'kibana.alert.status': status,
-    'kibana.alert.flapping': false,
     'kibana.alert.workflow_status': 'open',
     'kibana.alert.duration.us': 1197194000,
     'kibana.alert.evaluation.threshold': 5,
