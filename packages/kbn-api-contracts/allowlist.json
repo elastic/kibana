@@ -71,6 +71,14 @@
       "method": "put",
       "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
       "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/detection_engine/rules/preview",
+      "method": "post",
+      "reason": "Security Solution sets max_signals default value in applyRuleDefaults and Zod schema. The latter started breaking rule PATCH API after Zod v4 migration by defaulting max_signals to 100 and overriding any existing value. Removing max_signals default value from the Zod schema to fix the issue,",
+      "approvedBy": "@elastic/security-detection-engineering",
+      "oasdiffId": "request-body-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/286518"
     }
   ]
 }

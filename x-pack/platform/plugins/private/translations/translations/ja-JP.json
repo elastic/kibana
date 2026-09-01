@@ -14433,7 +14433,6 @@
     "xpack.automaticImport.dataStreams.reanalyzeModal.cancelButton": "キャンセル",
     "xpack.automaticImport.dataStreams.reanalyzeModal.confirmButton": "再分析",
     "xpack.automaticImport.dataStreams.reanalyzeModal.title": "データストリーム「{dataStreamTitle}」を再分析しますか？",
-    "xpack.automaticImport.dataStreams.samplesNormalizedWarningLinesOmitted": "最初の{maxLines}行の空ではない行のみが送信されます。{omittedCount, plural, one {# additional line was not sent.} other {#件の追加の行は送信されませんでした。}}",
     "xpack.automaticImport.dataStreams.samplesNormalizedWarningTitle": "サンプルログ制限が適用されました",
     "xpack.automaticImport.dataStreams.selectIndexLabel": "インデックスを選択",
     "xpack.automaticImport.dataStreams.selectPlaceholder": "選択...",
