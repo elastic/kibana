@@ -92,8 +92,8 @@ steps:
                 "@timestamp": "{{ execution.startedAt }}",
                 "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
                 "person": {
-                  "login": "{{ edge.node.login }}",
-                  "name": "{{ edge.node.name }}",
+                  "login": {{ edge.node.login | json }},
+                  "name": {{ edge.node.name | json }},
                   "id": "{{ edge.node.id }}"
                 },
                 "payload": {{ edge | json }}
