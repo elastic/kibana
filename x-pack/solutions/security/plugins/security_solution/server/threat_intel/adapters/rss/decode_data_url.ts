@@ -36,6 +36,15 @@ export const decodeDataUrl = (dataUrl: string): string => {
   const payload = dataUrl.slice(commaIdx + 1);
   const isBase64 = /(?:^|;)base64(?:;|$)/i.test(meta);
 
+  // Bound before decoding. Base64 expands to roughly 3/4 of its payload length;
+  // percent-encoded payloads are checked after decode.
+  if (isBase64) {
+    const estimatedDecodedBytes = Math.floor((payload.length * 3) / 4);
+    if (estimatedDecodedBytes > MAX_DECODED_BYTES) {
+      throw new Error(`Decoded data URL exceeds the ${MAX_DECODED_BYTES}-byte feed cap`);
+    }
+  }
+
   const decoded = isBase64
     ? Buffer.from(payload, 'base64').toString('utf8')
     : decodeURIComponent(payload);

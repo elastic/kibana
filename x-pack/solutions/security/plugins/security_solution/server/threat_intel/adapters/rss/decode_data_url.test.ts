@@ -40,4 +40,10 @@ describe('decodeDataUrl', () => {
     const oversized = `data:application/rss+xml,${'a'.repeat(10 * 1024 * 1024 + 1)}`;
     expect(() => decodeDataUrl(oversized)).toThrow(/feed cap/);
   });
+
+  it('rejects base64 payloads whose decoded size exceeds the feed cap', () => {
+    const payload = Buffer.alloc(10 * 1024 * 1024 + 1, 0x61).toString('base64');
+    const oversized = `data:application/rss+xml;base64,${payload}`;
+    expect(() => decodeDataUrl(oversized)).toThrow(/feed cap/);
+  });
 });
