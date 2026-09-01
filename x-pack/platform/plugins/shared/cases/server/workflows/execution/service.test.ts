@@ -35,7 +35,6 @@ const mockEnsureAuthorizedToRunWorkflow = ensureAuthorizedToRunWorkflow as jest.
   typeof ensureAuthorizedToRunWorkflow
 >;
 
-
 describe('CasesWorkflowRunService', () => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
@@ -124,12 +123,12 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('starts the workflow with server-owned metadata', async () => {
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
+    });
 
-    expect(mockEnsureAuthorizedToRunWorkflow).toHaveBeenCalledWith(
-      { ids: ['case-1'] },
-      clientArgs
-    );
+    expect(mockEnsureAuthorizedToRunWorkflow).toHaveBeenCalledWith({ ids: ['case-1'] }, clientArgs);
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
     expect(
       (mockEnsureAuthorizedToRunWorkflow as jest.Mock).mock.invocationCallOrder[0]
