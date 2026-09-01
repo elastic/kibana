@@ -26,8 +26,6 @@ import {
   identifyFeatures,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
-  type SearchSimilarFeaturesArguments,
-  type SimilarFeatureHit,
 } from '@kbn/streams-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -49,6 +47,12 @@ import {
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
+import {
+  createFeatureSimilaritySearch,
+  type FeatureSimilaritySearch,
+} from './agent_builder_feature_similarity_search';
+
+export { findSimilarFeatures } from './feature_similarity_search';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 const MAX_FEATURE_ALIASES = 10;
@@ -251,36 +255,6 @@ export const applySemanticFeatureAliases = (
   return { features: featuresWithAliases, reuseCount };
 };
 
-export const findSimilarFeatures = async ({
-  kiClient,
-  streamName,
-  args,
-}: {
-  kiClient: Pick<KnowledgeIndicatorClient, 'findFeatures'>;
-  streamName: string;
-  args: SearchSimilarFeaturesArguments;
-}): Promise<SimilarFeatureHit[]> => {
-  // Fetch wide then filter: a 5-hit window shared across types can crowd out same-type hits.
-  const { hits } = await kiClient.findFeatures(
-    streamName,
-    `${args.title} ${args.description}`.trim(),
-    {
-      searchMode: 'semantic',
-      limit: 20,
-    }
-  );
-
-  return hits
-    .filter((feature) => feature.type === args.type)
-    .slice(0, 5)
-    .map((feature) => ({
-      id: feature.id,
-      title: feature.title ?? feature.id,
-      description: feature.description,
-      confidence: feature.confidence,
-    }));
-};
-
 // ---------------------------------------------------------------------------
 // Tuning params type (subset of SignificantEventsTuningConfig)
 // ---------------------------------------------------------------------------
@@ -445,7 +419,7 @@ async function tryIdentifyFeatures(
 // ---------------------------------------------------------------------------
 
 interface RunInferredIterationOptions {
-  esClient: ElasticsearchClient;
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
   samplingSource: string;
@@ -460,13 +434,14 @@ interface RunInferredIterationOptions {
   logger: Logger;
   signal: AbortSignal;
   tuning: IterationTuningParams;
-  diverseOffset: number;
+  iteration: number;
+  featureSimilaritySearch: FeatureSimilaritySearch;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 type InferredIterationResult =
-  | { hasDocuments: false; nextDiverseOffset: number }
+  | { hasDocuments: false }
   | {
       hasDocuments: true;
       docsCount: number;
@@ -474,7 +449,6 @@ type InferredIterationResult =
       totalFilters: number;
       filtersCapped: boolean;
       hasFilteredDocuments: boolean;
-      nextDiverseOffset: number;
       outcome:
         | { state: 'failure' }
         | {
@@ -491,7 +465,7 @@ type InferredIterationResult =
     };
 
 async function runInferredIteration({
-  esClient,
+  samplingEsClient,
   kiClient,
   streamName,
   samplingSource,
@@ -506,7 +480,8 @@ async function runInferredIteration({
   logger,
   signal,
   tuning,
-  diverseOffset,
+  iteration,
+  featureSimilaritySearch,
   additionalTools,
   additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
@@ -525,7 +500,7 @@ async function runInferredIteration({
   } = tuning;
 
   const batchResult = await fetchSampleDocuments({
-    esClient,
+    esClient: samplingEsClient,
     index: samplingSource,
     start,
     end,
@@ -535,12 +510,12 @@ async function runInferredIteration({
     entityFilteredRatio,
     diverseRatio,
     maxEntityFilters,
-    diverseOffset,
+    iteration,
     samplingTimeoutMs,
   });
 
   if (batchResult.documents.length === 0) {
-    return { hasDocuments: false, nextDiverseOffset: batchResult.nextOffset };
+    return { hasDocuments: false };
   }
 
   const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
@@ -583,7 +558,7 @@ async function runInferredIteration({
     knownFeatureIds,
     searchSimilarFeatures: async (args) => {
       semanticVerifyCalls++;
-      const hits = await findSimilarFeatures({ kiClient, streamName, args });
+      const hits = await featureSimilaritySearch(args);
       const recordKey = getTypedFeatureId(args.type, args.candidate_id);
       const searchRecord = searchRecordsByCandidate.get(recordKey) ?? {
         candidateId: args.candidate_id,
@@ -608,7 +583,6 @@ async function runInferredIteration({
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
-      nextDiverseOffset: batchResult.nextOffset,
       outcome: { state: 'failure' },
     };
   }
@@ -637,7 +611,6 @@ async function runInferredIteration({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    nextDiverseOffset: batchResult.nextOffset,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -658,6 +631,12 @@ async function runInferredIteration({
 
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
+  /**
+   * Client used to sample documents from `samplingSource`. Separate from `esClient` because the
+   * sampling source can live on a remote CPS-connected project, while `esClient` reads the
+   * plugin's own (origin-only) indices.
+   */
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
@@ -672,7 +651,6 @@ export interface IdentifyInferredFeaturesOptions {
   runId: string;
   iteration?: number;
   tuning?: IterationTuningParams;
-  diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
   agentBuilderTools?: ToolsStart;
   request?: KibanaRequest;
@@ -684,11 +662,11 @@ export interface IdentifyInferredFeaturesResult {
   docIds: string[];
   discoveredFeatures: FeatureUpsert[];
   iterationResult: IterationResult;
-  nextDiverseOffset: number;
 }
 
 export async function identifyInferredFeatures({
   esClient,
+  samplingEsClient,
   kiClient,
   soClient,
   inferenceClient,
@@ -703,7 +681,6 @@ export async function identifyInferredFeatures({
   runId,
   iteration = 1,
   tuning = {},
-  diverseOffset = 0,
   trackFeaturesIdentified,
   agentBuilderTools,
   request,
@@ -756,9 +733,16 @@ export async function identifyInferredFeatures({
   );
 
   const startedAt = Date.now();
+  const featureSimilaritySearch = createFeatureSimilaritySearch({
+    agentBuilderTools,
+    request,
+    kiClient,
+    streamName,
+    logger,
+  });
 
   const iterationResult = await runInferredIteration({
-    esClient,
+    samplingEsClient,
     kiClient,
     streamName,
     samplingSource,
@@ -773,7 +757,8 @@ export async function identifyInferredFeatures({
     logger,
     signal,
     tuning,
-    diverseOffset,
+    iteration,
+    featureSimilaritySearch,
     additionalTools,
     additionalToolCallbacks,
   });
@@ -793,7 +778,6 @@ export async function identifyInferredFeatures({
         newFeatures: [],
         updatedFeatures: [],
       },
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -834,7 +818,6 @@ export async function identifyInferredFeatures({
       docIds,
       discoveredFeatures,
       iterationResult: failedEntry,
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -897,6 +880,5 @@ export async function identifyInferredFeatures({
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),
     iterationResult: iterationEntry,
-    nextDiverseOffset: iterationResult.nextDiverseOffset,
   };
 }

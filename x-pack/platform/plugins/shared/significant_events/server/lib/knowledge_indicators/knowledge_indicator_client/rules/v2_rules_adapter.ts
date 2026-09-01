@@ -6,8 +6,9 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
+import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
   METRIC_SERIES_RULE_TAG,
@@ -23,6 +24,20 @@ import {
 
 const FIND_PAGE_SIZE = 500;
 
+export interface RulesAdapterV2Params {
+  rulesClient: Pick<
+    RulesClientApi,
+    'createRule' | 'updateRule' | 'bulkDeleteRules' | 'findRules' | 'getTags'
+  >;
+  isServerless: boolean;
+}
+
+/**
+ * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
+ * capped at 20 for typeahead; server-side consumers may request up to 10000.
+ */
+const OWNED_STREAM_TAGS_SIZE = 10000;
+
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
  *
@@ -33,11 +48,20 @@ const FIND_PAGE_SIZE = 500;
  * (SigEvents uses default space), matching the former HTTP client behavior.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
-  constructor(private readonly rulesClient: RulesClientApi) {}
+  private readonly rulesClient: RulesAdapterV2Params['rulesClient'];
+  private readonly isServerless: boolean;
+
+  constructor({ rulesClient, isServerless }: RulesAdapterV2Params) {
+    this.rulesClient = rulesClient;
+    this.isServerless = isServerless;
+  }
 
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition), options: { id } })
+      .createRule({
+        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
+        options: { id },
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return this.updateRule(id, definition);
@@ -47,18 +71,20 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
-    await this.rulesClient.updateRule({ id, data: toV2UpdateBody(definition) }).catch((error) => {
-      if (isBoom(error) && error.output.statusCode === 404) {
-        return this.createRuleWithoutFallback(id, definition);
-      }
-      throw error;
-    });
+    await this.rulesClient
+      .updateRule({ id, data: toV2UpdateBody({ definition, isServerless: this.isServerless }) })
+      .catch((error) => {
+        if (isBoom(error) && error.output.statusCode === 404) {
+          return this.createRuleWithoutFallback(id, definition);
+        }
+        throw error;
+      });
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND);
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
@@ -84,9 +110,13 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async findStreamNamesWithOwnedRules(): Promise<string[]> {
-    // Filters rules, not tags: matched rules return all their tags, so drop non-ownership ones below.
-    const escapedPrefix = STREAMS_RULE_STREAM_TAG_PREFIX.replace(/[\\:]/g, '\\$&');
-    const tags = await this.rulesClient.getTags({ filter: `metadata.tags: ${escapedPrefix}*` });
+    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
+    // tags are still filtered client-side in case the include pattern is broadened.
+    const tags = await this.rulesClient.getTags({
+      search: STREAMS_RULE_STREAM_TAG_PREFIX,
+      kind: 'signal',
+      size: OWNED_STREAM_TAGS_SIZE,
+    });
     const streamNames = new Set<string>();
     for (const tag of tags) {
       const streamName = streamNameFromTag(tag);
@@ -108,7 +138,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     definition: SignificantEventsRuleDefinition
   ): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition), options: { id } })
+      .createRule({
+        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
+        options: { id },
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return;
@@ -118,11 +151,25 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 }
 
-function toV2BreachQuery(esqlQuery: string, timestampField: string): string {
-  return compileMatchCountBreachQuery(esqlQuery, timestampField);
+interface ToV2BodyParams {
+  definition: SignificantEventsRuleDefinition;
+  isServerless: boolean;
 }
 
-function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
+function toV2BreachQuery({
+  esqlQuery,
+  timestampField,
+  isServerless,
+}: {
+  esqlQuery: string;
+  timestampField: string;
+  isServerless: boolean;
+}): string {
+  const compiled = compileMatchCountBreachQuery(esqlQuery, timestampField);
+  return isServerless ? withAllProjectsRouting(compiled) : compiled;
+}
+
+function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
   const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
@@ -137,15 +184,21 @@ function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
-      breach: { query: toV2BreachQuery(definition.esqlQuery, definition.timestampField) },
+      breach: {
+        query: toV2BreachQuery({
+          esqlQuery: definition.esqlQuery,
+          timestampField: definition.timestampField,
+          isServerless,
+        }),
+      },
     },
   };
 }
 
-function toV2CreateBody(definition: SignificantEventsRuleDefinition) {
+function toV2CreateBody({ definition, isServerless }: ToV2BodyParams) {
   return {
     kind: 'signal' as const,
-    ...toV2CommonBody(definition),
+    ...toV2CommonBody({ definition, isServerless }),
   };
 }
 

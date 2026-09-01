@@ -24,6 +24,7 @@ import {
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
+  BEATS_OUTPUT_TYPES,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
@@ -87,7 +88,7 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
     return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
 
-  return Object.values(outputType);
+  return BEATS_OUTPUT_TYPES;
 }
 
 /**
@@ -106,7 +107,7 @@ export function getAllowedOutputTypesForPackagePolicy(
     return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
 
-  return Object.values(outputType);
+  return BEATS_OUTPUT_TYPES;
 }
 
 export function getAllowedOutputTypesForIntegration(packageName?: string): string[] {
@@ -118,7 +119,7 @@ export function getAllowedOutputTypesForIntegration(packageName?: string): strin
     }
   }
 
-  return Object.values(outputType);
+  return BEATS_OUTPUT_TYPES;
 }
 
 export function outputYmlIncludesReservedPerformanceKey(

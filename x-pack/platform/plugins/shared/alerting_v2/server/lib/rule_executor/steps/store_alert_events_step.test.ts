@@ -6,14 +6,13 @@
  */
 
 import { StoreAlertEventsStep } from './store_alert_events';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   collectStreamResults,
   createPipelineStream,
   createRulePipelineState,
   createAlertEvent,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createStorageService } from '../../services/storage_service/storage_service.mock';
 
 describe('StoreAlertEventsStep', () => {
@@ -21,10 +20,9 @@ describe('StoreAlertEventsStep', () => {
   let mockEsClient: ReturnType<typeof createStorageService>['mockEsClient'];
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
     const { storageService, mockEsClient: esClient } = createStorageService();
     mockEsClient = esClient;
-    step = new StoreAlertEventsStep(loggerService, storageService);
+    step = new StoreAlertEventsStep(storageService);
   });
 
   afterEach(() => {

@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
+  UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
@@ -44,18 +45,23 @@ export interface WatchWorkflowsManagementClient {
     spaceId: string
   ): Promise<WorkflowExecutionDto | null>;
 
-  createWorkflow(
-    workflow: { yaml: string },
+  cancelAllActiveWorkflowExecutions(
+    workflowId: string,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<WorkflowDetailDto>;
+  ): Promise<void>;
 
-  deleteWorkflows(
-    workflowIds: string[],
+  /**
+   * Only `{ enabled }` is safe to send for a managed watch — the Workflows API treats an
+   * enablement-only update as permitted and throws `ManagedWorkflowUpdateForbiddenError` for
+   * anything else unless `allowManagedWorkflowMutation` is set.
+   */
+  updateWorkflow(
+    id: string,
+    workflow: { enabled: boolean },
     spaceId: string,
-    request: KibanaRequest,
-    options?: { force?: boolean }
-  ): Promise<{ successfulIds?: string[] }>;
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto>;
 }
 
 export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagementClient {
@@ -102,20 +108,20 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     return this.management.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
-  createWorkflow(
-    workflow: { yaml: string },
+  cancelAllActiveWorkflowExecutions(
+    workflowId: string,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<WorkflowDetailDto> {
-    return this.management.createWorkflow(workflow, spaceId, request);
+  ): Promise<void> {
+    return this.management.cancelAllActiveWorkflowExecutions(workflowId, spaceId, request);
   }
 
-  deleteWorkflows(
-    workflowIds: string[],
+  updateWorkflow(
+    id: string,
+    workflow: { enabled: boolean },
     spaceId: string,
-    request: KibanaRequest,
-    options?: { force?: boolean }
-  ): Promise<{ successfulIds?: string[] }> {
-    return this.management.deleteWorkflows(workflowIds, spaceId, request, options);
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto> {
+    return this.management.updateWorkflow(id, workflow, spaceId, request);
   }
 }

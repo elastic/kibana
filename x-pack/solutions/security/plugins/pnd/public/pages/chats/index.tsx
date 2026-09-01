@@ -29,7 +29,7 @@ export const ChatsPage: React.FC = () => {
   if (!agentBuilder) {
     return (
       <EuiEmptyPrompt
-        iconType="discuss"
+        iconType="comment"
         title={<h2>{i18n.PAGE_TITLE}</h2>}
         body={<p>{i18n.AGENT_BUILDER_UNAVAILABLE}</p>}
       />

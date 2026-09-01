@@ -1,10 +1,10 @@
 name: Stale auto-close
 
 # Adding the `stale:auto-close` label to an issue or PR posts a warning comment
-# and starts a 30 day countdown. Any activity that updates the item (a comment,
+# and starts a 21 day countdown. Any activity that updates the item (a comment,
 # a pushed commit, an edit, a review) restarts the countdown; removing the
 # label cancels it. A daily sweep closes anything with the label that has not
-# been updated in 30 days.
+# been updated in 21 days.
 #
 # This workflow uses `pull_request_target`, which grants a write token on fork
 # PRs. It must never check out or execute code from the PR.
@@ -47,16 +47,16 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
               body: [
-                `This ${isPr ? 'pull request' : 'issue'} has been marked to auto-close in 30 days unless there is new activity.`,
+                `This ${isPr ? 'pull request' : 'issue'} has been marked to auto-close in 21 days unless there is new activity.`,
                 '',
-                'Any new activity restarts the 30 day countdown; removing the `stale:auto-close` label cancels it.',
+                'Any new activity restarts the 21 day countdown; removing the `stale:auto-close` label cancels it.',
                 '',
                 '<!-- stale-auto-close-warning -->',
               ].join('\n'),
             });
 
   sweep:
-    name: Close after 30 days without updates
+    name: Close after 21 days without updates
     runs-on: ubuntu-latest
     if: |
       github.repository == 'elastic/kibana'
@@ -72,12 +72,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const LABEL = 'stale:auto-close';
-            const DAYS_UNTIL_CLOSE = 30;
+            const DAYS_UNTIL_CLOSE = 21;
             const dryRun = process.env.DRY_RUN === 'true';
             const cutoff = Date.now() - DAYS_UNTIL_CLOSE * 24 * 60 * 60 * 1000;
 
             // Adding the label bumps `updated_at`, so every item gets at least
-            // 30 days from the moment it is labeled, and any later activity
+            // 21 days from the moment it is labeled, and any later activity
             // (which also bumps `updated_at`) restarts the countdown.
             const items = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,

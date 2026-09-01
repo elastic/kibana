@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
+import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
@@ -34,6 +35,7 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
+
 import {
   dataTypes,
   kafkaCompressionType,
@@ -41,12 +43,14 @@ import {
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
+import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import {
+  collectCompiledSecretRefIds,
   getFleetServerHostsSecretReferences,
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
@@ -233,9 +237,50 @@ export async function getFullAgentPolicy(
   const downloadSourceSecretReferences = downloadSource
     ? getDownloadSourceSecretReferences(downloadSource)
     : [];
-  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+  // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
+  // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
+  // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.
+  //
+  // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
+  // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
+  //
+  // Fail open: if the scan cannot serialize, keep every reference rather than dropping valid ones.
+  const rawPackagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
+  const compiledSecretIds =
+    rawPackagePolicySecretReferences.length > 0
+      ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
+      : new Set<string>();
+  let packagePolicySecretReferences = compiledSecretIds
+    ? rawPackagePolicySecretReferences.filter(({ id: refId }) => compiledSecretIds.has(refId))
+    : rawPackagePolicySecretReferences;
+
+  if (
+    compiledSecretIds &&
+    packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
+  ) {
+    const droppedIds = rawPackagePolicySecretReferences
+      .filter(({ id: refId }) => !compiledSecretIds.has(refId))
+      .map(({ id: refId }) => refId);
+    appContextService
+      .getLogger()
+      .info(
+        `Pruned ${
+          droppedIds.length
+        } package policy secret reference(s) not present in the compiled agent policy (agent policy: ${
+          agentPolicy.id
+        }): ${droppedIds.join(', ')}`
+      );
+  }
+
+  // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
+  const seenSecretIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id: refId }) => {
+    if (seenSecretIds.has(refId)) return false;
+    seenSecretIds.add(refId);
+    return true;
+  });
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
@@ -340,6 +385,8 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
+  const isManagedBulkOutput = createManagedBulkOutputMatcher(appContextService.getConfig());
+
   // Only add permissions if output.type is "elasticsearch"
   fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
     NonNullable<FullAgentPolicy['output_permissions']>
@@ -349,6 +396,19 @@ export async function getFullAgentPolicy(
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
+      if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
+        outputPermissions[outputId] = {
+          _managed_bulk_apm: {
+            applications: [
+              { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+            ],
+          },
+        };
+        return outputPermissions;
+      }
+
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -362,7 +422,6 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
       if (originalOutput?.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
@@ -676,7 +735,7 @@ export function transformOutputToFullPolicyOutput(
     };
   }
 
-  if (proxy) {
+  if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
     if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;

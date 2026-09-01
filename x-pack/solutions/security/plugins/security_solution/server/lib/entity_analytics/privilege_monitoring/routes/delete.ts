@@ -25,7 +25,9 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .delete({
@@ -51,6 +53,17 @@ export const deletePrivilegeMonitoringEngineRoute = (
             query: buildRouteValidationWithZod(DeleteMonitoringEngineRequestQuery),
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(
         async (

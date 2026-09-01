@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/analytics'
   - '@kbn/content-management-utils'
-  - '@kbn/config-schema'
   - '@kbn/std'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
@@ -49,6 +48,8 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/config-schema'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

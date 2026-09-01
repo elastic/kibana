@@ -344,6 +344,7 @@ export const MondayCom: ConnectorSpec = {
     // ── Updates (comments) ────────────────────────────────────────────────────
     createUpdate: {
       isTool: true,
+      scope: 'write',
       description:
         'Post an update (comment) on a Monday.com item. Use this to add progress notes, ' +
         'status commentary, or any text message to an item thread. Returns the created update ' +
@@ -375,6 +376,7 @@ export const MondayCom: ConnectorSpec = {
 
     editUpdate: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Edit the body of an existing update (comment) on a Monday.com item. Use getUpdates to ' +
         'retrieve the update ID. Replaces the full body text; returns the updated update.',
@@ -391,6 +393,7 @@ export const MondayCom: ConnectorSpec = {
 
     createNotification: {
       isTool: true,
+      scope: 'write',
       description:
         'Send an in-app notification to a Monday.com user. Set targetType to "Project" to link ' +
         'to an item, or "Post" to link to an update (comment). Use whoAmI to look up user IDs.',
@@ -423,6 +426,7 @@ export const MondayCom: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Monday.com MCP server directly by name. Use this as an escape hatch ' +
         'for operations not yet exposed as named actions — for example, creating workspaces, managing ' +
@@ -441,14 +445,12 @@ export const MondayCom: ConnectorSpec = {
         'Verifies connection to the Monday.com MCP server by listing available tools.',
     }),
     handler: async (ctx) => {
-      return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Monday.com MCP server. ${tools.length} tools available.`,
-        };
+      await withMcpClient(ctx, async (mcp) => {
+        await mcp.listTools();
       });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

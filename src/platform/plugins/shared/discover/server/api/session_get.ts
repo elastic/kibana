@@ -15,13 +15,13 @@ import {
 } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiResponse } from './schema';
+import type { DiscoverSessionGetResponse } from './schema';
 import { transformDiscoverSessionOut } from './transforms';
 
 export const getDiscoverSession = async (
   requestContext: RequestHandlerContext,
   id: string
-): Promise<DiscoverSessionApiResponse> => {
+): Promise<DiscoverSessionGetResponse> => {
   const { core } = await requestContext.resolve(['core']);
   const result = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(
     SavedSearchType,
@@ -38,9 +38,15 @@ export const getDiscoverSession = async (
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(SavedSearchType, id);
   }
 
+  const { sessionState, warnings } = transformDiscoverSessionOut(
+    savedObject.attributes,
+    savedObject.references
+  );
+
   return {
     id: savedObject.id,
-    data: transformDiscoverSessionOut(savedObject.attributes, savedObject.references),
+    data: sessionState,
     meta: getMeta(savedObject),
+    ...(warnings.length > 0 && { warnings }),
   };
 };

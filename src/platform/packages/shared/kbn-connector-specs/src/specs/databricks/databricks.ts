@@ -474,11 +474,11 @@ export const Databricks: ConnectorSpec = {
       return withMcpClient(ctx, async (mcp) => {
         const { tools } = await mcp.listTools();
         return {
-          ok: true,
           message: `Connected to Databricks MCP server. ${tools.length} tools available.`,
         };
       });
     },
+    enabled: true,
   },
 
   skill: [

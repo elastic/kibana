@@ -10,8 +10,8 @@ import {
   QueryType,
   Action,
   type ParseFailureQuery,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
+  type IndexQuery,
+  type ApiQuery,
 } from './health_diagnostic_service.types';
 
 const V1_NO_VERSION_YAML = `---
@@ -62,9 +62,8 @@ describe('parseHealthDiagnosticQueries', () => {
       ['explicit version: 1', V1_EXPLICIT_YAML],
     ])('parses as v1 — %s', (_label, yaml) => {
       const queries = parseHealthDiagnosticQueries(yaml);
-      const q = queries[0] as unknown as HealthDiagnosticQueryV1;
-      expect(q.version).toBe(1);
-      if (q.version !== 1) throw new Error('type guard');
+      const q = queries[0] as IndexQuery;
+      expect(q.kind).toBe('index');
       expect(q.index).toBe('logs-endpoint.*');
       expect(q.id).toBe('q1');
       expect(q.type).toBe(QueryType.DSL);
@@ -83,6 +82,39 @@ filterlist:
       const [q] = parseHealthDiagnosticQueries(yaml);
       expect((q as ParseFailureQuery)._raw).toBeDefined();
       expect((q as ParseFailureQuery).id).toBe('bad');
+    });
+
+    it('strips integrations from a v1 descriptor — index-only result', () => {
+      const yaml = `---
+id: q1
+name: my-v1-query
+index: logs-endpoint.*
+integrations: endpoint
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml) as IndexQuery[];
+      expect(q.kind).toBe('index');
+      expect(q.index).toBe('logs-endpoint.*');
+      expect(q.integrations).toBeUndefined();
+    });
+
+    it('returns ParseFailureQuery for v1 descriptor with integrations but no index', () => {
+      const yaml = `---
+id: q-bad
+name: bad
+integrations: endpoint
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
     });
 
     it('returns ParseFailureQuery when v1 descriptor is missing the enabled field', () => {
@@ -104,9 +136,8 @@ filterlist:
   describe('v2 parsing', () => {
     it('parses a descriptor with version: 2 as v2', () => {
       const queries = parseHealthDiagnosticQueries(V2_YAML);
-      const q = queries[0] as unknown as HealthDiagnosticQueryV2;
-      expect(q.version).toBe(2);
-      if (q.version !== 2) throw new Error('type guard');
+      const q = queries[0] as IndexQuery;
+      expect(q.kind).toBe('index');
       expect(q.integrations).toEqual(['endpoint.*', 'fleet_server']);
       expect(q.id).toBe('q2');
     });
@@ -141,8 +172,8 @@ filterlist:
   user.name: keep
 enabled: true`;
       const [q] = parseHealthDiagnosticQueries(yaml);
-      const v2 = q as unknown as HealthDiagnosticQueryV2;
-      expect(v2.version).toBe(2);
+      const v2 = q as IndexQuery;
+      expect(v2.kind).toBe('index');
       expect(v2.index).toBe('logs-test-*');
       expect(v2.integrations).toBeUndefined();
       expect(v2.datastreamTypes).toBeUndefined();
@@ -198,14 +229,14 @@ filterlist:
   user.name: keep
 enabled: true`;
       const [q] = parseHealthDiagnosticQueries(yaml);
-      const v2 = q as unknown as HealthDiagnosticQueryV2;
-      expect(v2.version).toBe(2);
+      const v2 = q as IndexQuery;
+      expect(v2.kind).toBe('index');
       expect(v2.datastreamTypes).toEqual(['logs', 'metrics.*']);
     });
 
     it('leaves types undefined when the field is absent', () => {
       const [q] = parseHealthDiagnosticQueries(V2_YAML);
-      const v2 = q as unknown as HealthDiagnosticQueryV2;
+      const v2 = q as IndexQuery;
       expect(v2.datastreamTypes).toBeUndefined();
     });
 
@@ -275,7 +306,7 @@ filterlist:
 enabled: true
 index: logs-test-*
 datastreamTypes: logs`;
-      const [q] = parseHealthDiagnosticQueries(yaml) as HealthDiagnosticQueryV2[];
+      const [q] = parseHealthDiagnosticQueries(yaml) as IndexQuery[];
       expect('datastreamTypes' in q).toBe(false);
     });
   });
@@ -358,11 +389,259 @@ enabled: true`;
     });
   });
 
+  describe('parseHealthDiagnosticQueries — v3', () => {
+    const validApiYaml = `
+id: transform-stats
+name: transform_stats
+version: 3
+type: API
+api: _transform/{transform_id}/_stats
+pathParams:
+  transform_id: "*"
+responsePath: transforms
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+
+    it('parses a valid v3 API query', () => {
+      const result = parseHealthDiagnosticQueries(validApiYaml);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        kind: 'api',
+        api: '_transform/{transform_id}/_stats',
+        responsePath: 'transforms',
+        enabled: true,
+      });
+      expect('_raw' in result[0]).toBe(false);
+    });
+
+    it('parses successfully when responsePath is absent (uses response root)', () => {
+      const yaml = validApiYaml.replace('responsePath: transforms\n', '');
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(false);
+      expect(result[0]).toMatchObject({ kind: 'api' });
+      expect((result[0] as { responsePath?: string }).responsePath).toBeUndefined();
+    });
+
+    it('returns ParseFailureQuery when a forbidden index field is present', () => {
+      const yaml = `${validApiYaml}index: .alerts-*\n`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('returns ParseFailureQuery when tiers is present on an API query', () => {
+      const yaml = `${validApiYaml}tiers:\n  - hot\n`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('returns ParseFailureQuery for unknown type value at version 3', () => {
+      const yaml = validApiYaml.replace('type: API', 'type: UNKNOWN');
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('parses v3 DSL query as HealthDiagnosticQueryV2-compatible', () => {
+      const yaml = `
+id: some-dsl
+name: some_dsl
+version: 3
+type: DSL
+query: '{"match_all": {}}'
+index: .alerts-*
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ type: 'DSL', index: '.alerts-*' });
+      expect('_raw' in result[0]).toBe(false);
+    });
+
+    it('returns ParseFailureQuery for v3 DSL with api field present', () => {
+      const yaml = `
+id: bad
+name: bad
+version: 3
+type: DSL
+query: '{"match_all": {}}'
+index: .alerts-*
+api: _transform/_stats
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('exposes pathParams on a v3 API query', () => {
+      const result = parseHealthDiagnosticQueries(validApiYaml);
+      const q = result[0] as ApiQuery;
+      expect(q.pathParams).toEqual({ transform_id: '*' });
+    });
+
+    it('returns ParseFailureQuery when api has a placeholder but pathParams is absent', () => {
+      const yaml = validApiYaml.replace('pathParams:\n  transform_id: "*"\n', '');
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('returns ParseFailureQuery when api placeholder has no matching pathParams key', () => {
+      const yaml = validApiYaml.replace(
+        'pathParams:\n  transform_id: "*"',
+        'pathParams:\n  transformId: "*"'
+      );
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('returns ParseFailureQuery when only some placeholders are covered', () => {
+      const yaml = `
+id: nodes-stats
+name: nodes_stats
+version: 3
+type: API
+api: _nodes/{node_id}/stats/{metric}
+pathParams:
+  node_id: "*"
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('parses successfully when api has no placeholders and pathParams is absent', () => {
+      const yaml = `
+id: cat-tasks
+name: cat_tasks
+version: 3
+type: API
+api: _cat/tasks
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(false);
+      expect(result[0]).toMatchObject({ kind: 'api', api: '_cat/tasks' });
+    });
+
+    it('parses successfully when all placeholders are covered by pathParams', () => {
+      const yaml = `
+id: nodes-stats
+name: nodes_stats
+version: 3
+type: API
+api: _nodes/{node_id}/stats/{metric}
+pathParams:
+  node_id: "*"
+  metric: "jvm"
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(false);
+      expect(result[0]).toMatchObject({
+        kind: 'api',
+        pathParams: { node_id: '*', metric: 'jvm' },
+      });
+    });
+
+    describe('integrations normalization on v3 API queries', () => {
+      const baseYaml = `
+id: transform-stats
+name: transform_stats
+version: 3
+type: API
+api: _cat/tasks
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+
+      it('parses integrations as an array when authored as a YAML sequence', () => {
+        const yaml = `${baseYaml}integrations:\n  - endpoint\n  - fleet_server\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect(q.integrations).toEqual(['endpoint', 'fleet_server']);
+      });
+
+      it('parses integrations as an array when authored as a comma-separated scalar', () => {
+        const yaml = `${baseYaml}integrations: endpoint,fleet_server\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect(q.integrations).toEqual(['endpoint', 'fleet_server']);
+      });
+
+      it('trims whitespace around comma-separated entries', () => {
+        const yaml = `${baseYaml}integrations: " endpoint , fleet_server "\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect(q.integrations).toEqual(['endpoint', 'fleet_server']);
+      });
+
+      it('leaves integrations undefined when the field is absent', () => {
+        const [q] = parseHealthDiagnosticQueries(baseYaml) as ApiQuery[];
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('treats empty integrations YAML sequence as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: []\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('treats empty integrations scalar string as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: ""\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('returns ParseFailureQuery when integrations is an invalid type', () => {
+        const yaml = `${baseYaml}integrations:\n  nested: value\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml);
+        expect('_raw' in q).toBe(true);
+      });
+    });
+  });
+
   describe('unknown version', () => {
     it('returns ParseFailureQuery for an unrecognised version', () => {
       const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);
       expect((q as ParseFailureQuery)._raw).toBeDefined();
       expect((q as ParseFailureQuery).id).toBe('q-future');
+    });
+
+    it('marks unrecognised version with failureReason unknown_version', () => {
+      const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);
+      expect((q as ParseFailureQuery).failureReason).toBe('unknown_version');
+    });
+
+    it('marks malformed known-version descriptor with failureReason invalid_descriptor', () => {
+      const yaml = `---
+id: bad
+name: bad
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
     });
   });
 
@@ -371,8 +650,8 @@ enabled: true`;
       const multiDoc = [V1_NO_VERSION_YAML, V2_YAML, UNKNOWN_VERSION_YAML].join('\n');
       const queries = parseHealthDiagnosticQueries(multiDoc);
       expect(queries).toHaveLength(3);
-      expect((queries[0] as HealthDiagnosticQueryV1).version).toBe(1);
-      expect((queries[1] as HealthDiagnosticQueryV2).version).toBe(2);
+      expect((queries[0] as IndexQuery).kind).toBe('index');
+      expect((queries[1] as IndexQuery).kind).toBe('index');
       expect((queries[2] as ParseFailureQuery)._raw).toBeDefined();
     });
 
@@ -398,7 +677,7 @@ filterlist:
   user.name: keep`;
       const queries = parseHealthDiagnosticQueries(`${goodDoc}\n${badDoc}`);
       expect(queries).toHaveLength(2);
-      expect((queries[0] as HealthDiagnosticQueryV1).version).toBe(1);
+      expect((queries[0] as IndexQuery).kind).toBe('index');
       expect((queries[1] as ParseFailureQuery)._raw).toBeDefined();
     });
   });

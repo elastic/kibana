@@ -6,7 +6,7 @@
  */
 
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getAlertEventNotFoundMessage } from '../../lib/errors/alert_error_messages';
 import { invalidResponseExample } from '../oas_utils';
 import type { OasExampleEntry } from '../oas_types';
@@ -26,7 +26,7 @@ export const ALERT_EVENT_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'alertEventNotFound',
   summary: 'No alert event exists for the given group_hash and episode_id',
   value: {
-    code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+    code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
     error: 'Not Found',
     message: getAlertEventNotFoundMessage(SAMPLE_GROUP_HASH, SAMPLE_EPISODE_ID),
     details: {

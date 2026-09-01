@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { AppHeaderTitle } from '@kbn/app-header';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isMap, parseDocument } from 'yaml';
@@ -80,7 +81,6 @@ interface TemplateConfigDraft {
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
-  title: string;
   initialMetadata: TemplateMetadata;
   isLoading?: boolean;
   isSaving?: boolean;
@@ -179,7 +179,6 @@ const updateYamlCaseDefault = (
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   form,
-  title,
   initialMetadata,
   isLoading,
   isSaving,
@@ -329,8 +328,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   ]);
 
   const yamlValidationResult = useMemo(
-    () => validateTemplateDefinitionYaml(normalizedYamlValue),
-    [normalizedYamlValue]
+    () =>
+      validateTemplateDefinitionYaml(
+        normalizedYamlValue,
+        isEdit ? initialDefinitionYaml : undefined
+      ),
+    [normalizedYamlValue, isEdit, initialDefinitionYaml]
   );
   const isYamlDefinitionValid = yamlValidationResult.success;
 
@@ -486,7 +489,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       { settings: settingsRef.current, connector: connectorRef.current }
     );
 
-    const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
+    const validationResult = validateTemplateDefinitionYaml(
+      mergedDefinition,
+      isEdit ? initialDefinitionYaml : undefined
+    );
     if (
       !validationResult.success ||
       hasTemplateMetadataErrors(validateTemplateMetadata(normalizedMetadata))
@@ -524,6 +530,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     onCreate,
     isEnabled,
     isEdit,
+    initialDefinitionYaml,
     clearDraft,
     setStoredMetadataState,
     setStoredConfigState,
@@ -566,6 +573,27 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     ]
   );
 
+  // The template name is the page title, edited in place. It used to live only on the Configuration
+  // tab, which the editor does not open on — so the one required field for a new template sat behind
+  // a tab the user had no reason to visit and only surfaced as a save failure. AppHeader's editable
+  // title carries this natively: a muted placeholder while unnamed, and an inline error when `onSave`
+  // returns a string, which keeps the message on the field being fixed.
+  const templateFormTitle = useMemo<AppHeaderTitle>(
+    () => ({
+      text: metadata.name,
+      placeholder: i18n.UNTITLED_TEMPLATE,
+      ariaLabel: i18n.EDIT_TEMPLATE_NAME,
+      onSave: (nextName: string) => {
+        const nameErrors = validateTemplateMetadata({ ...metadata, name: nextName });
+        if (nameErrors.name != null) {
+          return nameErrors.name;
+        }
+        handleMetadataChange({ ...metadata, name: nextName });
+      },
+    }),
+    [metadata, handleMetadataChange]
+  );
+
   const templateFormBadges = useMemo(() => getTemplateFormBadges(hasChanges), [hasChanges]);
 
   const templateFormBack = useMemo(
@@ -600,7 +628,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         <TemplateEditorTour enabled={!isLoading} />
         <EuiFlexItem grow={false}>
           <CasesAppHeader
-            title={title}
+            title={templateFormTitle}
             back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}

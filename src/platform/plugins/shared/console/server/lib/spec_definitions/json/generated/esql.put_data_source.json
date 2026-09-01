@@ -16,11 +16,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "type": "",
-      "description": "",
-      "settings": {}
-    },
     "methods": [
       "PUT"
     ],
@@ -30,8 +25,8 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-put-data-source",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-esql-put-data-source",
     "availability": {
-      "stack": true,
-      "serverless": true
+      "stack": false,
+      "serverless": false
     }
   }
 }

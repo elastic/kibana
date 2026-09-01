@@ -46,7 +46,7 @@ describe('getConfigurationForMetric', () => {
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(0);
+    expect(mockGetPalette).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if only series agg', () => {
@@ -59,7 +59,7 @@ describe('getConfigurationForMetric', () => {
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(0);
+    expect(mockGetPalette).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if multiple series aggs', () => {
@@ -76,7 +76,7 @@ describe('getConfigurationForMetric', () => {
     const config = getConfigurationForMetric(model, layer);
 
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(0);
+    expect(mockGetPalette).toHaveBeenCalledTimes(0);
   });
 
   test('should return config if only one series agg is specified', () => {
@@ -117,7 +117,7 @@ describe('getConfigurationForMetric', () => {
       palette: undefined,
       secondaryMetricAccessor: columnId2,
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 
   test('should return config for single metric', () => {
@@ -154,7 +154,7 @@ describe('getConfigurationForMetric', () => {
       palette: undefined,
       secondaryMetricAccessor: undefined,
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if palette is invalid', () => {
@@ -181,7 +181,7 @@ describe('getConfigurationForMetric', () => {
     });
     const config = getConfigurationForMetric(model, layer);
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -212,7 +212,7 @@ describe('getConfigurationForGauge', () => {
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
 
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(0);
+    expect(mockGetPalette).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if only series agg', () => {
@@ -225,7 +225,7 @@ describe('getConfigurationForGauge', () => {
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
 
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(0);
+    expect(mockGetPalette).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if palette is invalid', () => {
@@ -252,7 +252,7 @@ describe('getConfigurationForGauge', () => {
     });
     const config = getConfigurationForGauge(model, layer, undefined, gaugeMaxColumn);
     expect(config).toBeNull();
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 
   test('should return config with color if palette is not valid', () => {
@@ -274,7 +274,7 @@ describe('getConfigurationForGauge', () => {
       color: '#ffffff',
       showBar: true,
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 
   test('should return config with palette', () => {
@@ -315,6 +315,6 @@ describe('getConfigurationForGauge', () => {
       maxAccessor: maxColumnId,
       showBar: true,
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 });

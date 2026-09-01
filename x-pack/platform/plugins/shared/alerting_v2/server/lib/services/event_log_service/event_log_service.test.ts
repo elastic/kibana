@@ -89,7 +89,7 @@ describe('EventLogService', () => {
       expect(args.track_total_hits).toBe(true);
     });
 
-    it('matches both dispatched and throttled when outcome is omitted', async () => {
+    it('matches dispatched, throttled, and dispatch_failed when outcome is omitted', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
@@ -106,6 +106,7 @@ describe('EventLogService', () => {
               'event.action': [
                 ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
                 ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+                ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
               ],
             },
           },

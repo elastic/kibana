@@ -78,6 +78,11 @@ or more actions in one file it's easy to leave some untyped if you defer it.
 **Keep `test.enabled: true`.** The scaffold generates `test: { enabled: true, handler: ... }` — don't
 drop `enabled` when you flesh out the handler body.
 
+**Do not add `events`.** Optional inbound `ConnectorSpec.events` is gated by
+`SPECS_ALLOWED_EVENTS` in `src/specs_allowed_events.ts`. Omit `events` unless the
+connector id is in that allowlist (connectors may eventually declare both `actions` and
+`events`). 
+
 Replace the placeholder icon with a proper brand icon. Do NOT generate an icon, use the official brand icon or tell the
 user you could not find one. Search for existing SVG/PNG files in:
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/*/icon/`

@@ -24,7 +24,7 @@ const discoveryExecuteRoute = createServerRoute({
     access: 'internal',
     summary: 'Manually trigger the Significant Events pipeline',
     description:
-      'Executes the Significant Events orchestrator workflow for the current space. Runs detection, discovery, and triage in sequence.',
+      'Executes the Significant Events orchestrator workflow for the current space. Runs detection and discovery in sequence.',
   },
   security: {
     authz: {

@@ -16,7 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';
-import globby from 'globby';
+import { globby } from 'globby';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
@@ -123,7 +123,7 @@ describe('scripts/generate_plugin', () => {
       "optionalPlugins": Array [],
       "owner": Object {
         "githubTeam": "",
-        "name": "",
+        "name": "Plugin Author",
       },
       "requiredPlugins": Array [],
       "server": true,

@@ -12,6 +12,8 @@ import type { INpreClient } from './npre';
 
 export interface CPSServerSetup {
   getCpsEnabled(): boolean;
+  /** Resolves to true when the current pricing tier is eligible for cross-project search. */
+  isTierEligible(): Promise<boolean>;
 }
 
 export interface CPSServerStart {

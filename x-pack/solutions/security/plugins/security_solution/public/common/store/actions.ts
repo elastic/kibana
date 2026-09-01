@@ -11,7 +11,6 @@ import type { PolicyDetailsAction } from '../../management/pages/policy/store/po
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
 export { inputsActions } from './inputs';
-export { sourcererActions } from '../../sourcerer/store';
 import type { RoutingAction } from './routing';
 
 export type AppAction = EndpointAction | RoutingAction | PolicyDetailsAction;

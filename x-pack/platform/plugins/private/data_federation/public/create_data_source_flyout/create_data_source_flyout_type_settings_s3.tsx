@@ -285,7 +285,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isAdvancedOpen}
         aria-controls={advancedId}
         onClick={() => setIsAdvancedOpen((value) => !value)}

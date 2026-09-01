@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { TemplateMetadataForm } from './template_metadata_form';
@@ -33,15 +33,14 @@ describe('TemplateMetadataForm', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the name, description, and tags inputs with the current values', () => {
+  it('renders the description and tags inputs with the current values', () => {
     renderWithTestingProviders(<TemplateMetadataForm {...defaultProps} />);
 
     expect(screen.getByTestId('templateMetadataForm')).toBeInTheDocument();
-    expect(screen.getByTestId('templateMetadataNameInput')).toHaveValue('My template');
     expect(screen.getByTestId('templateMetadataDescriptionInput')).toHaveValue('A description');
   });
 
-  it('surfaces the name validation error', () => {
+  it('does not render a name input — the name is edited in the page title', () => {
     renderWithTestingProviders(
       <TemplateMetadataForm
         {...defaultProps}
@@ -50,17 +49,10 @@ describe('TemplateMetadataForm', () => {
       />
     );
 
-    expect(screen.getByText('Template name is required.')).toBeInTheDocument();
-  });
-
-  it('propagates a name edit immediately so the save action can update', () => {
-    const onChange = jest.fn();
-    renderWithTestingProviders(<TemplateMetadataForm {...defaultProps} onChange={onChange} />);
-
-    const input = screen.getByTestId('templateMetadataNameInput');
-    fireEvent.change(input, { target: { value: 'Renamed template' } });
-
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ name: 'Renamed template' }));
+    // The name and its error belong to the header's editable title now, so neither should be
+    // duplicated here — two places to fix one field is how the original tab-hidden problem started.
+    expect(screen.queryByTestId('templateMetadataNameInput')).not.toBeInTheDocument();
+    expect(screen.queryByText('Template name is required.')).not.toBeInTheDocument();
   });
 
   it('adds a newly created tag to the metadata', async () => {

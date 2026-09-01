@@ -9,21 +9,26 @@ import React, { createContext, useCallback, useContext, useMemo, useRef, useStat
 
 import { McpClientDetails } from '@kbn/agent-builder-browser';
 
+import { ApplicationConnectionsActionModal } from '../application_connections_action_modal';
 import type {
-  RevokeApplicationConnectionsModalConnection,
-  RevokedApplicationConnection,
+  ApplicationConnectionsActionMode,
+  ApplicationConnectionsModalConnection,
+  ApplicationConnectionTarget,
 } from '../constants/types';
-import { RevokeApplicationConnectionsModal } from '../revoke_application_connections_modal';
 import type { OAuthClient } from '../service/application_connections_api_client';
 
-export interface RevokeApplicationConnectionsOptions {
-  onRevoked?: (revokedConnections: RevokedApplicationConnection[]) => void;
+export interface ApplicationConnectionsActionOptions {
+  onSettled?: (affectedConnections: ApplicationConnectionTarget[]) => void;
 }
 
 export interface ApplicationConnectionsActionsContextType {
   revokeConnections: (
-    connections: RevokeApplicationConnectionsModalConnection[],
-    options?: RevokeApplicationConnectionsOptions
+    connections: ApplicationConnectionsModalConnection[],
+    options?: ApplicationConnectionsActionOptions
+  ) => void;
+  deleteConnections: (
+    connections: ApplicationConnectionsModalConnection[],
+    options?: ApplicationConnectionsActionOptions
   ) => void;
   viewClientDetails: (client: OAuthClient) => void;
 }
@@ -32,8 +37,9 @@ const ApplicationConnectionsActionsContext = createContext<
   ApplicationConnectionsActionsContextType | undefined
 >(undefined);
 
-interface RevokeState {
-  connections: RevokeApplicationConnectionsModalConnection[];
+interface ActionState {
+  mode: ApplicationConnectionsActionMode;
+  connections: ApplicationConnectionsModalConnection[];
 }
 
 interface ClientDetailsState {
@@ -41,53 +47,71 @@ interface ClientDetailsState {
 }
 
 export const ApplicationConnectionsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [revokeState, setRevokeState] = useState<RevokeState | null>(null);
+  const [actionState, setActionState] = useState<ActionState | null>(null);
   const [clientDetailsState, setClientDetailsState] = useState<ClientDetailsState | null>(null);
-  const onRevokedRef = useRef<RevokeApplicationConnectionsOptions['onRevoked'] | undefined>(
+  const onSettledRef = useRef<ApplicationConnectionsActionOptions['onSettled'] | undefined>(
     undefined
+  );
+
+  const startAction = useCallback(
+    (
+      mode: ApplicationConnectionsActionMode,
+      connections: ApplicationConnectionsModalConnection[],
+      options?: ApplicationConnectionsActionOptions
+    ) => {
+      onSettledRef.current = options?.onSettled;
+      setActionState({ mode, connections });
+    },
+    []
   );
 
   const revokeConnections = useCallback(
     (
-      connections: RevokeApplicationConnectionsModalConnection[],
-      options?: RevokeApplicationConnectionsOptions
-    ) => {
-      onRevokedRef.current = options?.onRevoked;
-      setRevokeState({ connections });
-    },
-    []
+      connections: ApplicationConnectionsModalConnection[],
+      options?: ApplicationConnectionsActionOptions
+    ) => startAction('revoke', connections, options),
+    [startAction]
+  );
+
+  const deleteConnections = useCallback(
+    (
+      connections: ApplicationConnectionsModalConnection[],
+      options?: ApplicationConnectionsActionOptions
+    ) => startAction('delete', connections, options),
+    [startAction]
   );
 
   const viewClientDetails = useCallback((client: OAuthClient) => {
     setClientDetailsState({ client });
   }, []);
 
-  const closeRevokeModal = useCallback(() => {
-    onRevokedRef.current = undefined;
-    setRevokeState(null);
+  const closeActionModal = useCallback(() => {
+    onSettledRef.current = undefined;
+    setActionState(null);
   }, []);
 
   const closeClientDetails = useCallback(() => {
     setClientDetailsState(null);
   }, []);
 
-  const handleRevoked = useCallback((revoked: RevokedApplicationConnection[]) => {
-    onRevokedRef.current?.(revoked);
+  const handleSettled = useCallback((affected: ApplicationConnectionTarget[]) => {
+    onSettledRef.current?.(affected);
   }, []);
 
   const actions = useMemo<ApplicationConnectionsActionsContextType>(
-    () => ({ revokeConnections, viewClientDetails }),
-    [revokeConnections, viewClientDetails]
+    () => ({ revokeConnections, deleteConnections, viewClientDetails }),
+    [revokeConnections, deleteConnections, viewClientDetails]
   );
 
   return (
     <ApplicationConnectionsActionsContext.Provider value={actions}>
       {children}
-      {revokeState && (
-        <RevokeApplicationConnectionsModal
-          connections={revokeState.connections}
-          onClose={closeRevokeModal}
-          onRevoked={handleRevoked}
+      {actionState && (
+        <ApplicationConnectionsActionModal
+          mode={actionState.mode}
+          connections={actionState.connections}
+          onClose={closeActionModal}
+          onSettled={handleSettled}
         />
       )}
       {clientDetailsState && (

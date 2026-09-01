@@ -28,18 +28,25 @@ export function getAffectedProjectsMoon(
   mergeBase: string,
   includeDownstream: boolean
 ): Set<string> {
+  const execOptions = {
+    cwd: REPO_ROOT,
+    encoding: 'utf8' as const,
+    maxBuffer: 30 * 1024 * 1024, // 30MB buffer
+  };
+
+  // Mirror the git strategy: recompute the actual merge base instead of trusting `mergeBase` as-is.
+  const actualBase = execSync(`git merge-base ${mergeBase} HEAD`, execOptions).trim();
+
   const downstreamFlag = includeDownstream ? '--downstream deep' : '';
   const command = `"${getMoonBinPath()}" query projects --affected ${downstreamFlag}`;
 
   const output = execSync(command, {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    maxBuffer: 30 * 1024 * 1024, // 30MB buffer
+    ...execOptions,
+    timeout: 30000, // 30 seconds
     env: {
       ...process.env,
-      MOON_BASE: mergeBase,
+      MOON_BASE: actualBase,
     },
-    timeout: 30000, // 30 seconds
   });
 
   const result = JSON.parse(output);

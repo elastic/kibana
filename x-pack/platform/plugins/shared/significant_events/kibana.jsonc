@@ -6,9 +6,10 @@
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "significant_events",
+    "id": "significantEvents",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "significantEvents"],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -24,6 +25,7 @@
       "agentBuilder",
       "agentBuilderSml",
       "cloud",
+      "nightshiftInvestigations",
       "serverless",
       "searchInferenceEndpoints",
       "spaces",

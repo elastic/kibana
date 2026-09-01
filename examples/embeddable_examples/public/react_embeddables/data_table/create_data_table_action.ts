@@ -22,7 +22,7 @@ import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './constants';
 export const createDataTableAction = {
   id: ADD_DATA_TABLE_ACTION_ID,
   grouping: [embeddableExamplesGrouping],
-  getIconType: () => 'tableDensityNormal',
+  getIconType: () => 'table',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return apiIsPresentationContainer(embeddable);
   },

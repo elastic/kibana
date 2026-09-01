@@ -25,11 +25,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useInferenceEndpointMutation } from '@kbn/inference-endpoint-ui-common';
+import { CHAT_COMPLETION_TASK_TYPE } from '../../../common/constants';
+import type { ReasoningEffortLevel } from '../../../common/types';
 import { useKibana } from '../../hooks/use_kibana';
+import { ReasoningEffortSection } from './reasoning_effort_section';
 
 export interface TaskTypeOption {
   value: string;
@@ -46,9 +51,15 @@ export interface AddEndpointModalProps {
   taskTypes: TaskTypeOption[];
   initialEndpointId?: string;
   initialTaskType?: string;
+  initialReasoningEffort?: ReasoningEffortLevel;
   onSave: () => void;
   onCancel: () => void;
 }
+
+const taskTypeDescriptionStyles = ({ euiTheme }: UseEuiTheme) => ({
+  marginTop: euiTheme.size.xs,
+  marginBottom: euiTheme.size.xs,
+});
 
 const ENDPOINT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*[a-z0-9]$/;
 
@@ -68,9 +79,11 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
   taskTypes,
   initialEndpointId,
   initialTaskType,
+  initialReasoningEffort,
   onSave,
   onCancel,
 }) => {
+  const euiThemeContext = useEuiTheme();
   const {
     services: { http, notifications },
   } = useKibana();
@@ -97,12 +110,23 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
     () => initialEndpointId ?? generateEndpointId(modelId, defaultTaskType)
   );
   const [endpointIdTouched, setEndpointIdTouched] = useState(isView);
+  const [reasoningAutoMode, setReasoningAutoMode] = useState(!initialReasoningEffort);
+  const [effortLevel, setEffortLevel] = useState<ReasoningEffortLevel>(
+    initialReasoningEffort ?? 'medium'
+  );
 
   useEffect(() => {
     if (!endpointIdTouched) {
       setEndpointId(generateEndpointId(modelId, selectedTaskType));
     }
   }, [modelId, selectedTaskType, endpointIdTouched]);
+
+  useEffect(() => {
+    if (selectedTaskType !== CHAT_COMPLETION_TASK_TYPE) {
+      setReasoningAutoMode(true);
+      setEffortLevel('medium');
+    }
+  }, [selectedTaskType]);
 
   const handleTaskTypeChange = useCallback((value: string) => {
     setSelectedTaskType(value);
@@ -122,6 +146,12 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
   }, [endpointId]);
 
   const handleSave = useCallback(() => {
+    const hasCustomReasoningEffort =
+      selectedTaskType === CHAT_COMPLETION_TASK_TYPE && !reasoningAutoMode;
+    const taskTypeConfig = hasCustomReasoningEffort
+      ? { reasoning: { effort: effortLevel } }
+      : undefined;
+
     saveEndpoint(
       {
         config: {
@@ -129,12 +159,13 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
           taskType: selectedTaskType,
           provider: 'elastic',
           providerConfig: { model_id: modelId },
+          ...(taskTypeConfig && { taskTypeConfig }),
         },
         secrets: { providerSecrets: {} },
       },
       false
     );
-  }, [saveEndpoint, endpointId, selectedTaskType, modelId]);
+  }, [saveEndpoint, endpointId, selectedTaskType, modelId, reasoningAutoMode, effortLevel]);
 
   const endpointIdError = useMemo(() => {
     if (isView) return undefined;
@@ -196,7 +227,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="searchInferenceEndpointsAddEndpointModalCopyModelIdButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(
@@ -219,38 +250,54 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
           fullWidth
         >
           <EuiFlexGroup direction="column" gutterSize="s" style={{ width: '100%' }}>
-            {taskTypes.map((taskType) => (
-              <EuiFlexItem key={taskType.value}>
-                <EuiCheckableCard
-                  id={taskType.value}
-                  name={radioGroupName}
-                  label={
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>{taskType.label}</EuiFlexItem>
-                      {taskType.recommended && (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge>
-                            {i18n.translate(
-                              'xpack.searchInferenceEndpoints.addEndpointModal.recommendedBadge',
-                              { defaultMessage: 'Recommended' }
-                            )}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  }
-                  checked={selectedTaskType === taskType.value}
-                  onChange={() => handleTaskTypeChange(taskType.value)}
-                  disabled={isView}
-                >
-                  <div style={{ marginTop: 4, marginBottom: 4 }}>
-                    <EuiText size="xs" color="subdued">
+            {taskTypes.map((taskType) => {
+              const isChecked = selectedTaskType === taskType.value;
+              const isChatCompletionSelected =
+                isChecked && taskType.value === CHAT_COMPLETION_TASK_TYPE;
+              return (
+                <EuiFlexItem key={taskType.value}>
+                  <EuiCheckableCard
+                    id={taskType.value}
+                    name={radioGroupName}
+                    label={
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem grow={false}>{taskType.label}</EuiFlexItem>
+                        {taskType.recommended && (
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge>
+                              {i18n.translate(
+                                'xpack.searchInferenceEndpoints.addEndpointModal.recommendedBadge',
+                                { defaultMessage: 'Recommended' }
+                              )}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    }
+                    checked={isChecked}
+                    onChange={() => handleTaskTypeChange(taskType.value)}
+                    disabled={isView}
+                  >
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      css={taskTypeDescriptionStyles(euiThemeContext)}
+                    >
                       {taskType.description}
                     </EuiText>
-                  </div>
-                </EuiCheckableCard>
-              </EuiFlexItem>
-            ))}
+                    {isChatCompletionSelected && (
+                      <ReasoningEffortSection
+                        reasoningAutoMode={reasoningAutoMode}
+                        onReasoningAutoModeChange={setReasoningAutoMode}
+                        effortLevel={effortLevel}
+                        onEffortLevelChange={setEffortLevel}
+                        isDisabled={isView}
+                      />
+                    )}
+                  </EuiCheckableCard>
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         </EuiFormRow>
 
@@ -299,7 +346,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="searchInferenceEndpointsAddEndpointModalCopyEndpointIdButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(

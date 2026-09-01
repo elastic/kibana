@@ -13,6 +13,7 @@ import {
   EuiListGroupItem,
   EuiPopover,
   EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -90,6 +91,7 @@ const OverflowPopover = ({
   canReadRules: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const total = hiddenRules.length + notShownCount;
 
   const getRuleClickHandler = useCallback(
@@ -105,6 +107,7 @@ const OverflowPopover = ({
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
@@ -125,7 +128,7 @@ const OverflowPopover = ({
         </EuiBadge>
       }
     >
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
         {i18n.translate('xpack.alertingV2.executionHistory.columns.rules.overflowTitle', {
           defaultMessage: 'More rules',
         })}

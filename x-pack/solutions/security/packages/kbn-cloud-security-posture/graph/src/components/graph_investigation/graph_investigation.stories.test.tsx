@@ -202,7 +202,7 @@ describe('GraphInvestigation Component', () => {
 
     // Act
     const queryInput = getByTestId('queryInput');
-    await userEvent.type(queryInput, '< > sdg $@#T');
+    fireEvent.change(queryInput, { target: { value: '< > sdg $@#T' } });
     const querySubmitBtn = getByTestId('querySubmitButton');
     querySubmitBtn.click();
 
@@ -362,7 +362,7 @@ describe('GraphInvestigation Component', () => {
       getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
 
       // Assert
-      expect(setSearchBarToggled).lastCalledWith(true);
+      expect(setSearchBarToggled).toHaveBeenLastCalledWith(true);
     });
 
     it('toggles searchBar off on click', async () => {
@@ -384,7 +384,7 @@ describe('GraphInvestigation Component', () => {
       getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
 
       // Assert
-      expect(setSearchBarToggled).lastCalledWith(false);
+      expect(setSearchBarToggled).toHaveBeenLastCalledWith(false);
     });
 
     it('shows filters counter when KQL filter is applied', async () => {
@@ -393,7 +393,7 @@ describe('GraphInvestigation Component', () => {
       });
 
       const queryInput = getByTestId('queryInput');
-      await userEvent.type(queryInput, 'host1');
+      fireEvent.change(queryInput, { target: { value: 'host1' } });
       const querySubmitBtn = getByTestId('querySubmitButton');
       querySubmitBtn.click();
 
@@ -565,7 +565,7 @@ describe('GraphInvestigation Component', () => {
         showInvestigateInTimeline: true,
       });
       const queryInput = getByTestId('queryInput');
-      await userEvent.type(queryInput, 'host1');
+      fireEvent.change(queryInput, { target: { value: 'host1' } });
       const querySubmitBtn = getByTestId('querySubmitButton');
       querySubmitBtn.click();
 
@@ -687,7 +687,7 @@ describe('GraphInvestigation Component', () => {
       // Act
       await showActionsByNode(container, entityIdFilter);
       const queryInput = getByTestId('queryInput');
-      await userEvent.type(queryInput, 'host1');
+      fireEvent.change(queryInput, { target: { value: 'host1' } });
       const querySubmitBtn = getByTestId('querySubmitButton');
       querySubmitBtn.click();
 
@@ -821,7 +821,7 @@ describe('GraphInvestigation Component', () => {
 
       // Act
       const queryInput = getByTestId('queryInput');
-      await userEvent.type(queryInput, 'host1');
+      fireEvent.change(queryInput, { target: { value: 'host1' } });
       const querySubmitBtn = getByTestId('querySubmitButton');
       querySubmitBtn.click();
 
@@ -940,7 +940,7 @@ describe('GraphInvestigation Component', () => {
       // Act
       await showActionsByNode(container, entityIdFilter);
       const queryInput = getByTestId('queryInput');
-      await userEvent.type(queryInput, 'host1');
+      fireEvent.change(queryInput, { target: { value: 'host1' } });
       const querySubmitBtn = getByTestId('querySubmitButton');
       querySubmitBtn.click();
       getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();

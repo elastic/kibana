@@ -103,7 +103,8 @@
     "@kbn/inspector-plugin",
     "@kbn/connector-specs",
     "@kbn/app-header",
-    "@kbn/core-chrome-app-menu-components"
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

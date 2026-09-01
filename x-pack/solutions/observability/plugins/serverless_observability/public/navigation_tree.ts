@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 export function filterForFeatureAvailability<
@@ -48,7 +49,7 @@ export const createNavigationTree = ({
     body: [
       ...filterForFeatureAvailability(
         {
-          link: 'observability-overview:nightshift' as const,
+          link: 'nightshift' as const,
           icon: NightshiftNavigationIcon,
         },
         significantEventsAvailable
@@ -80,6 +81,10 @@ export const createNavigationTree = ({
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
+      },
+      {
+        link: EVALS_APP_ID,
+        icon: 'flask',
       },
       ...getWorkflowsNavPanel(core),
       {
@@ -154,7 +159,12 @@ export const createNavigationTree = ({
                 sideNavStatus: 'hidden',
               },
               { link: 'apm:traces' },
-              { link: 'apm:dependencies' },
+              {
+                link: 'apm:dependencies',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                },
+              },
               { link: 'apm:settings', sideNavStatus: 'hidden' },
             ],
           },
@@ -268,6 +278,10 @@ export const createNavigationTree = ({
         },
         !showAiAssistant
       ),
+      {
+        icon: 'sparkles',
+        link: 'context_engine',
+      },
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',
@@ -590,10 +604,6 @@ export const createNavigationTree = ({
               children: [
                 {
                   link: 'management:genAiSettings' as const,
-                  breadcrumbStatus: 'hidden' as const,
-                },
-                {
-                  link: 'management:evals' as const,
                   breadcrumbStatus: 'hidden' as const,
                 },
                 ...(showAiAssistant

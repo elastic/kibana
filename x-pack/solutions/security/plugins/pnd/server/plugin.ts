@@ -15,7 +15,12 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { PND_API_PRIVILEGE_READ, PND_FEATURE_ID, PND_PLUGIN_NAME } from '../common/constants';
+import {
+  PND_API_PRIVILEGE_READ,
+  PND_API_PRIVILEGE_WRITE,
+  PND_FEATURE_ID,
+  PND_PLUGIN_NAME,
+} from '../common/constants';
 import type { PndConfig } from './config';
 import type {
   PndPluginSetup,
@@ -25,9 +30,8 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { installStatic } from './managed_workflows/install_static';
-import type { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
-import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
+import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
+import { WatchesService } from './services/watches/watches_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 
 export class PndPlugin
@@ -36,8 +40,10 @@ export class PndPlugin
   private readonly logger: Logger;
   private readonly config: PndConfig;
   private spaces?: PndStartDependencies['spaces'];
-  private watchProjection?: WatchWorkflowProjectionService;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
+
+  /** Created during `start`; routes resolve it lazily after managed-workflow initialization. */
+  private watchesService?: WatchesService;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -55,7 +61,7 @@ export class PndPlugin
 
     this.logger.info('Setting up PND plugin');
 
-    this.workflowsManagementApi = workflowsManagement?.management;
+    this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
 
@@ -68,9 +74,9 @@ export class PndPlugin
       privileges: {
         all: {
           app: ['kibana', PND_FEATURE_ID],
-          api: [PND_API_PRIVILEGE_READ],
+          api: [PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
-          ui: ['show'],
+          ui: ['show', 'write'],
         },
         read: {
           app: ['kibana', PND_FEATURE_ID],
@@ -88,7 +94,7 @@ export class PndPlugin
       logger: this.logger,
       config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
-      getWatchProjection: () => this.watchProjection,
+      getWatchesService: () => this.requireWatchesService(),
     });
 
     return {};
@@ -101,28 +107,37 @@ export class PndPlugin
       return {};
     }
 
-    const installationReady = installStatic({
-      enabled: this.config.enabled,
+    const management = this.workflowsManagementApi
+      ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+      : undefined;
+    const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
     }).catch((error) => {
       this.logger.error(
-        `PND managed watch installation failed: ${
+        `PND managed workflow initialization failed: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return undefined;
     });
 
-    if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
-      const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);
-      this.watchProjection = new WatchWorkflowProjectionServiceImpl(
-        managementClient,
-        this.logger,
-        installationReady
-      );
-    }
+    // Mock mode changes presentation data only; durable settings and enablement still use Workflows.
+    this.watchesService = new WatchesService(
+      management,
+      managedWorkflows,
+      this.logger,
+      this.config.ui.useMockData
+    );
 
     return {};
+  }
+
+  private requireWatchesService(): WatchesService {
+    if (!this.watchesService) {
+      throw new Error('Watches service is not available until the PND plugin has started');
+    }
+    return this.watchesService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

@@ -285,7 +285,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
       await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('untrackAlertsModal');
 
       await header.waitUntilLoadingHasFinished();
 

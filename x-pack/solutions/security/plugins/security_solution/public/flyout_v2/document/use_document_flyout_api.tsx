@@ -21,6 +21,7 @@ import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import type { OpenFlyoutLinkProps } from '../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../shared/components/open_flyout_link';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../shared/components/test_ids';
 import { getColumns } from './tools/prevalence/utils/get_columns';
 import {
   useDefaultDocumentFlyoutProperties,
@@ -111,9 +112,11 @@ export interface OpenDocumentFlyoutParams {
   origin?: FlyoutOrigin;
   /**
    * Flyout-history title to use for this open, when already known synchronously by the caller
-   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
-   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
-   * since the full document isn't loaded yet at open time.
+   * (e.g. `getDocumentHistoryTitle(hit)`).
+   * - `openDocumentFlyoutFromIndex` — omitted means no title.
+   * - `openDocumentFlyoutFromIndexAsChild` / `openDocumentFlyoutFromPattern` — omitted falls back
+   *   to the bare "Alert" label so EUI's managed flyout never shows "Unknown Flyout" in its
+   *   navigation history. Supply a richer title (e.g. `"Alert: <rule name>"`) when available.
    */
   title?: string;
 }
@@ -152,8 +155,6 @@ export interface OpenDocumentCorrelationsParams {
   hit: DataTableRecord;
   /** Scope id for the document. */
   scopeId: string;
-  /** Whether the document is being displayed in a rule preview. */
-  isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
@@ -254,10 +255,6 @@ export interface DocumentFlyoutApi {
  * properties so call sites don't have to repeat them. `useOpenFlyout` also reports open/close
  * telemetry for every method below.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
@@ -291,17 +288,21 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   // and child open methods. Only the `session` differs between them, so it is kept private here and
   // callers pick `openDocumentFlyoutFromIndex` (main) or `openDocumentFlyoutFromIndexAsChild` (child).
   const buildFromIndexContent = useCallback(
-    ({
-      documentId,
-      indexName,
-      renderCellActions = cellActionRenderer,
-      onAlertUpdated = noop,
-    }: OpenDocumentFlyoutParams) => (
+    (
+      {
+        documentId,
+        indexName,
+        renderCellActions = cellActionRenderer,
+        onAlertUpdated = noop,
+      }: OpenDocumentFlyoutParams,
+      dataTestSubj?: string
+    ) => (
       <DocumentFlyoutWrapper
         documentId={documentId}
         indexName={indexName}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        dataTestSubj={dataTestSubj}
       />
     ),
     []
@@ -358,7 +359,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
       const onClose = buildOnClose(parentDescriptor);
       open(
-        buildFromIndexContent(params),
+        buildFromIndexContent(params, CHILD_DOCUMENT_FLYOUT_TEST_ID),
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
@@ -393,6 +394,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
       origin,
+      title,
     }: OpenDocumentFlyoutParams) => {
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
@@ -407,7 +409,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, onClose },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          // Fall back to the bare "Alert" label so EUI's managed flyout never shows
+          // "Unknown Flyout" in its navigation history. Callers may supply a richer
+          // title (e.g. "Alert: <rule name>") if they know it at call time.
+          title: title ?? getAlertHistoryTitle(),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,
@@ -543,21 +554,13 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   );
 
   const openDocumentCorrelations = useCallback(
-    ({
-      hit,
-      scopeId,
-      isRulePreview,
-      onShowAlert,
-      onShowAttack,
-      origin,
-    }: OpenDocumentCorrelationsParams) => {
+    ({ hit, scopeId, onShowAlert, onShowAttack, origin }: OpenDocumentCorrelationsParams) => {
       const { documentId, indexName } = documentIdsFromHit(hit);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentCorrelations,
         documentId,
         indexName,
         scopeId,
-        isRulePreview,
       });
       // A tool flyout opens with session:'start' — it is a root, not a child of the document, and
       // the document is not persisted alongside it. Closing the tool therefore clears the param
@@ -567,7 +570,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         <CorrelationsDetails
           hit={hit}
           scopeId={scopeId}
-          isRulePreview={isRulePreview}
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,

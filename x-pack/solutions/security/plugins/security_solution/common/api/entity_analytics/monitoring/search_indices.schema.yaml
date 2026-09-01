@@ -10,7 +10,12 @@ paths:
       x-internal: true
       x-codegen-enabled: true
       operationId: SearchPrivilegesIndices
+      deprecated: true
       summary: Search Indices for Privileges Monitoring import
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+        Search Indices for Privileges Monitoring import.
       parameters:
         - name: searchQuery
           in: query

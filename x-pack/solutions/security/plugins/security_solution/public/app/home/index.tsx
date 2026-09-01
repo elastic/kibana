@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
-import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath } from '../../data_view_manager/utils/paths';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 import { useUrlState } from '../../common/hooks/use_url_state';
