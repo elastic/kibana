@@ -75,9 +75,9 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
   '6': {
     changes: [
       {
-        // Unlike `uiamApiKey`, the id is stored unencrypted and has to be searchable: the API
-        // key invalidation task's in-use guard aggregates on it to find ad hoc runs still
-        // holding the key.
+        // Unlike `uiamApiKey`, the id is stored unencrypted and has to be searchable so a
+        // follow-up can teach the API key invalidation task's in-use guard to find ad hoc
+        // runs still holding the key. This release only writes and maps the field.
         type: 'mappings_addition',
         addedMappings: {
           uiamApiKeyId: { type: 'keyword', ignore_above: 1024 },

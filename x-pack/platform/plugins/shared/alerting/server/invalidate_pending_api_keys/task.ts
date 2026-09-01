@@ -108,18 +108,11 @@ export function taskRunner(
                 type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
                 apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
               },
-              // `apiKeyId` only ever holds an Elasticsearch key id, so a queued UIAM key would
-              // look unused to the two queries above and be revoked while an ad hoc run or an
-              // enqueued connector task is still authenticating with it. The key material itself
-              // is encrypted and unsearchable, hence the dedicated id attributes.
-              {
-                type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-                apiKeyAttributePath: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
-              },
-              {
-                type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-                apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
-              },
+              // `uiamApiKeyId` is persisted and mapped on both types in this release, but not
+              // queried yet. In-flight objects and objects written by older nodes during a
+              // Serverless rolling upgrade lack the field, so a miss would look like "unused"
+              // and revoke a live UIAM key. A follow-up should add the two `uiamApiKeyId`
+              // query paths after those jobs have aged out.
             ],
           });
           totalInvalidated = result.totalInvalidated;
