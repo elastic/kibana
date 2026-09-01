@@ -515,6 +515,11 @@ const DEPRECATED_IMPORTS = [
  *
  * These must be the first overrides: later, path-specific overrides that configure one of
  * these rules differently (e.g. stricter options) still win and keep it in ESLint there.
+ *
+ * `eslint-comments/no-unused-disable` is turned off as well: oxlint honors `eslint-disable`
+ * directives, so directives suppressing oxlint-enforced rules are still needed even though ESLint
+ * no longer runs those rules. Left on, its autofix strips them repo-wide and breaks oxlint. Its
+ * oxlint counterpart (`reportUnusedDisableDirectives`) must stay off for the mirrored reason.
  */
 const oxlintConfigs = buildFromOxlintConfigFile(Path.resolve(REPO_ROOT, '.oxlintrc.json'));
 const oxlintIgnores = oxlintConfigs.find((config) => config.ignores)?.ignores ?? [];
@@ -523,7 +528,10 @@ const oxlintOverrides = oxlintConfigs
   .map((config) => ({
     files: config.files ?? ['**/*.{js,mjs,ts,tsx}'],
     excludedFiles: oxlintIgnores,
-    rules: config.rules,
+    rules: {
+      ...config.rules,
+      '@eslint-community/eslint-comments/no-unused-disable': 'off',
+    },
   }));
 
 module.exports = {
