@@ -1571,8 +1571,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
-      /** Internal only: allows the invalid-dataset remediation task to change a stream's dataset var. */
-      allowDatasetChange?: boolean;
     },
     context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
@@ -1692,7 +1690,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     _validateRestrictedFieldsNotModifiedOrThrow({
       oldPackagePolicy,
       packagePolicyUpdate,
-      allowDatasetChange: options?.allowDatasetChange,
     });
     validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
@@ -1860,31 +1857,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             force: true,
           });
         }
-      }
-    }
-
-    // When the dataset var is intentionally changed (remediation path), install index
-    // templates for the new dataset name. The version-change branch above does not cover
-    // this because the package version is unchanged.
-    if (options?.allowDatasetChange && pkgInfo?.type === 'input') {
-      const datasetChanged = newPolicy.inputs.some((input, iIdx) =>
-        (input.streams ?? []).some((stream, sIdx) => {
-          const oldVal =
-            oldPackagePolicy.inputs[iIdx]?.streams?.[sIdx]?.vars?.[DATASET_VAR_NAME]?.value;
-          const newVal = stream.vars?.[DATASET_VAR_NAME]?.value;
-          return typeof newVal === 'string' && oldVal !== newVal;
-        })
-      );
-
-      if (datasetChanged) {
-        await installAssetsForCustomDatasetPolicy({
-          soClient,
-          esClient,
-          pkgInfo,
-          packagePolicy: newPolicy,
-          force: false,
-          logger,
-        });
       }
     }
 
@@ -2084,7 +2056,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         _validateRestrictedFieldsNotModifiedOrThrow({
           oldPackagePolicy,
           packagePolicyUpdate: enrichedPackagePolicy,
-          allowDatasetChange: options?.allowDatasetChange,
         });
 
         // If the package version has increased, save the previous package policy revision.
@@ -4617,10 +4588,8 @@ export function preconfigurePackageInputs(
 export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;
-  /** Internal only: when true, skips the dataset-change guard to allow remediation of invalid datasets. */
-  allowDatasetChange?: boolean;
 }) {
-  const { oldPackagePolicy, packagePolicyUpdate, allowDatasetChange } = opts;
+  const { oldPackagePolicy, packagePolicyUpdate } = opts;
 
   if (
     packagePolicyUpdate.package?.name &&
@@ -4654,7 +4623,6 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             (s) => s.data_stream.dataset === stream.data_stream.dataset
           );
           if (
-            !allowDatasetChange &&
             oldStream &&
             oldStream?.vars?.[DATASET_VAR_NAME] &&
             oldStream?.vars[DATASET_VAR_NAME]?.value !== stream?.vars?.[DATASET_VAR_NAME]?.value

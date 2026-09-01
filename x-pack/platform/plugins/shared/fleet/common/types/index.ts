@@ -119,7 +119,6 @@ export interface FleetConfigType {
       searchAiLakePackageAllowlistEnabled?: boolean;
     };
     excludeDataStreamTypes?: string[];
-    invalidDatasetRemediation?: 'off' | 'report' | 'apply';
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {

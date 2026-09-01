@@ -29,7 +29,6 @@ export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export {
   isValidDataset,
-  sanitizeDataset,
   isValidDataStreamType,
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,

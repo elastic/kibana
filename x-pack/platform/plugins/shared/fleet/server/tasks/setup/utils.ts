@@ -14,6 +14,5 @@ export interface SetupTaskParams {
     | 'backportPackagePolicyInputId'
     | 'migrateComponentTemplateILMs'
     | 'upgradePackageInstallVersion'
-    | 'reinstallPackagesForGlobalAssetUpdate'
-    | 'remediateInvalidDatasets';
+    | 'reinstallPackagesForGlobalAssetUpdate';
 }

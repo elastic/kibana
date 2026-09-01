@@ -190,11 +190,6 @@ export interface PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
-      /**
-       * Internal only: allows the invalid-dataset remediation task to change a stream's
-       * `data_stream.dataset` var value. Never exposed over HTTP.
-       */
-      allowDatasetChange?: boolean;
     },
     /** Request context so update callbacks can use the caller's Elasticsearch client. */
     context?: RequestHandlerContext
@@ -376,11 +371,6 @@ export interface PackagePolicyClientBulkUpdateOptions {
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];
-  /**
-   * Internal only: allows the invalid-dataset remediation task to change a stream's
-   * `data_stream.dataset` var value. Never exposed over HTTP.
-   */
-  allowDatasetChange?: boolean;
 }
 
 export type PackagePolicyClientFindAllForAgentPolicyOptions = WithSpaceIdsOption;

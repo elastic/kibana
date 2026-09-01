@@ -393,18 +393,6 @@ export const config: PluginConfigDescriptor = {
         // Test/development escape hatch that skips all package upload validation, e.g. for
         // uploading packages whose names exist in EPR or as bundled packages.
         skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
-        /**
-         * Controls the one-time remediation task that scans for invalid `data_stream.dataset`
-         * values introduced before dataset validation was enforced for integration packages.
-         *
-         * - `off`    — task is never scheduled
-         * - `report` — scan and log a report; no data is modified (default)
-         * - `apply`  — scan, log, and sanitize eligible values; agents are re-deployed to the new dataset
-         */
-        invalidDatasetRemediation: schema.oneOf(
-          [schema.literal('off'), schema.literal('report'), schema.literal('apply')],
-          { defaultValue: 'report' }
-        ),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),
