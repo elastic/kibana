@@ -38,6 +38,7 @@ import { useAgentStats } from './hooks/use_agent_stats';
 import { LocationAgentDetails } from './location_agent_details';
 import { RelativeTimestamp } from './relative_timestamp';
 import { PolicyName } from './policy_name';
+import { LocationHealth } from './location_health';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -76,7 +77,11 @@ export const PrivateLocationsTable = ({
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
   const { locationMonitors, loading } = useLocationMonitors();
-  const { byLocation: agentStatsByLocation, loading: agentStatsLoading } = useAgentStats();
+  const {
+    byLocation: agentStatsByLocation,
+    loading: agentStatsLoading,
+    error: agentStatsError,
+  } = useAgentStats();
   const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
   // Expanded rows: per-agent health/capacity breakdown for a location's agents.
@@ -158,6 +163,17 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
+          isAgentSharding={item.isAgentSharding}
+        />
+      ),
+    },
+    {
+      name: HEALTH_LABEL,
+      render: (item: ListItem) => (
+        <LocationHealth
+          stats={agentStatsByLocation.get(item.id)}
+          loading={agentStatsLoading}
+          error={Boolean(agentStatsError)}
         />
       ),
     },
@@ -411,6 +427,10 @@ export const MONITORS = i18n.translate('xpack.synthetics.monitorManagement.monit
 
 export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentPolicy', {
   defaultMessage: 'Agent Policy',
+});
+
+const HEALTH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.locationHealthLabel', {
+  defaultMessage: 'Health',
 });
 
 const EXPAND_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.expandRow', {
