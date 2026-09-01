@@ -9,7 +9,7 @@ import { fetch as undiciFetch, Agent } from 'undici';
 
 import {
   IacProvisionerConfigError,
-  IacProvisionerRenderError,
+  IacProvisionerRequestError,
   IacProvisionerUnavailableError,
 } from '../errors';
 
@@ -38,8 +38,11 @@ jest.mock('@kbn/server-http-tools', () => ({
 const mockedFetch = jest.mocked(undiciFetch);
 const mockedAgent = jest.mocked(Agent);
 
+const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
+
 const RENDER_REQUEST = {
   provider: 'aws' as const,
+  blueprintId: 'federated-identity',
   integrations: [
     {
       name: 'cloud_security_posture',
@@ -49,7 +52,11 @@ const RENDER_REQUEST = {
   ],
 };
 
-const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
+const RENDER_RESPONSE = {
+  artifactUrl: ARTIFACT_URL,
+  expiresAt: '2026-07-28T12:00:00Z',
+  blueprint: { id: 'federated-identity', version: 'v1' },
+};
 
 const jsonResponse = (status: number, body: unknown) =>
   ({
@@ -116,13 +123,11 @@ describe('IacProvisionerService', () => {
   it('POSTs the render request with mTLS and returns the rendered artifact', async () => {
     mockConfig();
     mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
 
     const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
-    expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
+    expect(result).toEqual(RENDER_RESPONSE);
     expect(mockedFetch).toHaveBeenCalledWith(
       'https://iac-provisioner.example/api/v1/render',
       expect.objectContaining({
@@ -150,13 +155,11 @@ describe('IacProvisionerService', () => {
       api: { url: 'https://iac-provisioner.example', tls: { ca: '/path/ca.crt' } },
     });
     mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
 
     const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
-    expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
+    expect(result).toEqual(RENDER_RESPONSE);
     expect(mockedAgent).toHaveBeenCalledWith({
       connect: expect.objectContaining({
         cert: undefined,
@@ -171,9 +174,7 @@ describe('IacProvisionerService', () => {
   it('logs the request config at debug with TLS material redacted', async () => {
     mockConfig();
     const logger = mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
 
     await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
@@ -197,9 +198,7 @@ describe('IacProvisionerService', () => {
   it('never logs the artifactUrl', async () => {
     mockConfig();
     const logger = mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
 
     await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
@@ -216,18 +215,18 @@ describe('IacProvisionerService', () => {
     expect(allLogged).not.toContain('X-Amz-Signature');
   });
 
-  it('maps a 422 response to IacProvisionerRenderError with the provider error codes', async () => {
+  it('maps a 422 response to IacProvisionerRequestError with the provider error codes', async () => {
     mockConfig();
     mockLogger();
     mockedFetch.mockResolvedValueOnce(
-      jsonResponse(422, { code: 'render.blueprint_not_found', message: 'blueprint not found' })
+      jsonResponse(422, { code: 'render.unknown_blueprint', message: 'blueprint not found' })
     );
 
     const promise = iacProvisionerService.renderTemplate(RENDER_REQUEST);
-    await expect(promise).rejects.toThrow(IacProvisionerRenderError);
-    await promise.catch((error: IacProvisionerRenderError) => {
+    await expect(promise).rejects.toThrow(IacProvisionerRequestError);
+    await promise.catch((error: IacProvisionerRequestError) => {
       expect(error.statusCode).toBe(422);
-      expect(error.errorCodes).toEqual(['render.blueprint_not_found']);
+      expect(error.errorCodes).toEqual(['render.unknown_blueprint']);
     });
   });
 
@@ -281,9 +280,7 @@ describe('IacProvisionerService', () => {
       },
     });
     mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
 
     await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
@@ -377,9 +374,7 @@ describe('IacProvisionerService', () => {
       api: { url: 'https://iac-provisioner.example', tls: undefined },
     });
     mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, RENDER_RESPONSE));
 
     await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
@@ -390,6 +385,51 @@ describe('IacProvisionerService', () => {
         rejectUnauthorized: true,
         allowPartialTrustChain: true,
       }),
+    });
+  });
+
+  it('POSTs the resolve request and returns blueprint coverage', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    const resolveResponse = {
+      blueprints: [
+        {
+          id: 'federated-identity',
+          resolvedVersion: 'v1',
+          deployable: true,
+          notCovered: [],
+        },
+      ],
+    };
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, resolveResponse));
+
+    const result = await iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+
+    expect(result).toEqual(resolveResponse);
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://iac-provisioner.example/api/v1/resolve',
+      expect.objectContaining({ method: 'POST' })
+    );
+    const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
+    expect(debugLogged).toContain('federated-identity');
+    expect(debugLogged).not.toContain('X-Amz-Signature');
+  });
+
+  it('maps a 501 resolve response to IacProvisionerUnavailableError', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(jsonResponse(501, { code: 'resolve.not_implemented' }));
+
+    const promise = iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+    await expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
+    await promise.catch((error: IacProvisionerUnavailableError) => {
+      expect(error.statusCode).toBe(501);
     });
   });
 });

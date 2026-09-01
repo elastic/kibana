@@ -128,6 +128,7 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
 // IaC Provisioner API routes
 export const IAC_PROVISIONER_API_ROUTES = {
   RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
+  RESOLVE_BLUEPRINTS_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/resolve`,
 };
 
 // Kubernetes Manifest API routes
