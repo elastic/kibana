@@ -16,8 +16,12 @@ export const actionPolicySavedObjectAttributesSchemaV3 = schema.object({
   matcher: schema.maybe(
     schema.nullable(
       schema.object({
-        tags: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
-        expression: schema.maybe(schema.nullable(schema.string())),
+        tags: schema.maybe(
+          schema.nullable(
+            schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), { maxSize: 50 })
+          )
+        ),
+        expression: schema.maybe(schema.nullable(schema.string({ maxLength: 4096 }))),
       })
     )
   ),

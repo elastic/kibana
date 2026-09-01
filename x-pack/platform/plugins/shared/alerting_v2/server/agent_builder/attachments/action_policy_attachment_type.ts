@@ -27,10 +27,10 @@ interface CreateActionPolicyAttachmentTypeOptions {
 }
 
 const formatMatcher = (matcher: PolicyMatcher): string => {
-  if (matcher.expression?.trim()) return `expression: "${matcher.expression.trim()}"`;
   const parts: string[] = [];
   if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
-  return parts.join(' | ') || '{}';
+  if (matcher.expression?.trim()) parts.push(`expression: "${matcher.expression.trim()}"`);
+  return parts.join(' AND ') || '{}';
 };
 
 const formatActionPolicyDescription = (
