@@ -62,6 +62,47 @@ interface KevEnvelope {
   vulnerabilities: KevVulnerability[];
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const readOptionalStringArray = (value: unknown): string[] | undefined => {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) return undefined;
+  return value.every((entry) => typeof entry === 'string') ? value : undefined;
+};
+
+const parseKevVulnerability = (value: unknown): KevVulnerability | undefined => {
+  if (!isRecord(value)) return undefined;
+  const cwes = readOptionalStringArray(value.cwes);
+  if (value.cwes !== undefined && cwes === undefined) return undefined;
+  const vuln = {
+    cveID: value.cveID,
+    vendorProject: value.vendorProject,
+    product: value.product,
+    vulnerabilityName: value.vulnerabilityName,
+    dateAdded: value.dateAdded,
+    shortDescription: value.shortDescription,
+    requiredAction: value.requiredAction,
+    dueDate: value.dueDate,
+    knownRansomwareCampaignUse: value.knownRansomwareCampaignUse,
+    notes: value.notes,
+    cwes,
+  };
+  if (
+    typeof vuln.cveID !== 'string' ||
+    typeof vuln.vendorProject !== 'string' ||
+    typeof vuln.product !== 'string' ||
+    typeof vuln.vulnerabilityName !== 'string' ||
+    typeof vuln.dateAdded !== 'string' ||
+    typeof vuln.shortDescription !== 'string' ||
+    typeof vuln.requiredAction !== 'string' ||
+    typeof vuln.dueDate !== 'string'
+  ) {
+    return undefined;
+  }
+  return vuln as KevVulnerability;
+};
+
 const readFeedUrl = (source: SourceHit): string => {
   const url = source._source.config.url;
   return typeof url === 'string' && url.length > 0 ? url : KEV_FEED_URL;
@@ -159,7 +200,11 @@ export const kevAdapter: FetchAdapter = {
 
     let envelope: KevEnvelope;
     try {
-      envelope = JSON.parse(response.body) as KevEnvelope;
+      const parsed = JSON.parse(response.body) as unknown;
+      if (!isRecord(parsed) || !Array.isArray(parsed.vulnerabilities)) {
+        throw new Error('KEV feed missing vulnerabilities array');
+      }
+      envelope = parsed as unknown as KevEnvelope;
     } catch (err) {
       throw new Error(`KEV feed response is not valid JSON: ${(err as Error).message}`);
     }
@@ -172,13 +217,14 @@ export const kevAdapter: FetchAdapter = {
     }
 
     const reports: NormalizedReport[] = [];
-    for (const vuln of vulnerabilities) {
-      if (isCompleteKevEntry(vuln)) {
+    for (const rawEntry of vulnerabilities) {
+      const vuln = parseKevVulnerability(rawEntry);
+      if (vuln && isCompleteKevEntry(vuln)) {
         reports.push(buildKevReport(vuln, provenanceUrl, ingestedAt, spaceId, source._id));
       } else {
         log.warn(
           `kev-adapter: skipping malformed entry (missing required fields): ${JSON.stringify(
-            vuln
+            rawEntry
           ).slice(0, 200)}`
         );
       }
