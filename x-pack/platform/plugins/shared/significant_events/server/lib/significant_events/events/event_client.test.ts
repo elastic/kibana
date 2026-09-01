@@ -375,4 +375,116 @@ describe('EventClient', () => {
       );
     });
   });
+
+  describe('resolveInvestigatableEvent', () => {
+    const createReservationClient = ({
+      event = { ...createEvent(), severity: '60-high' as const },
+      priorInvestigations = 0,
+    }: {
+      event?: SignificantEvent;
+      priorInvestigations?: number;
+    } = {}) => {
+      const search = jest.fn().mockResolvedValue({
+        hits: { hits: [{ _source: storedEventSchema.parse(event) }] },
+      });
+      const count = jest.fn().mockResolvedValue({ count: priorInvestigations });
+      return {
+        client: new EventClient({
+          dataStreamClient: {} as never,
+          esClient: { search, count } as never,
+          space: 'space-a',
+        }),
+        search,
+        count,
+      };
+    };
+
+    it('requires event_id, event_uuid, and space on the same event document', async () => {
+      const { client, search } = createReservationClient();
+
+      await expect(client.resolveInvestigatableEvent('agent-event-1', 'event-1')).resolves.toEqual({
+        eligible: true,
+        severity: '60-high',
+      });
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { 'kibana.space_ids': 'space-a' } },
+                { term: { event_id: 'agent-event-1' } },
+                { term: { event_uuid: 'event-1' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('rejects an event that is no longer open and investigatable', async () => {
+      const { client } = createReservationClient({
+        event: { ...createEvent(), status: 'closed', severity: '80-critical' },
+      });
+
+      await expect(client.resolveInvestigatableEvent('agent-event-1', 'event-1')).resolves.toEqual({
+        eligible: false,
+      });
+    });
+
+    it('rejects an exact open document when a newer lineage version exists', async () => {
+      const { client, search } = createReservationClient();
+      search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: storedEventSchema.parse({
+                  ...createEvent(),
+                  severity: '80-critical',
+                }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: storedEventSchema.parse({
+                  ...createEvent(),
+                  event_uuid: 'newer-uuid',
+                  status: 'closed',
+                  severity: '80-critical',
+                }),
+              },
+            ],
+          },
+        });
+
+      await expect(client.resolveInvestigatableEvent('agent-event-1', 'event-1')).resolves.toEqual({
+        eligible: false,
+      });
+    });
+
+    it('rejects an event lineage that already has an investigation', async () => {
+      const { client, count } = createReservationClient({ priorInvestigations: 1 });
+
+      await expect(client.resolveInvestigatableEvent('agent-event-1', 'event-1')).resolves.toEqual({
+        eligible: false,
+      });
+      expect(count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { 'kibana.space_ids': 'space-a' } },
+                { term: { event_id: 'agent-event-1' } },
+                { exists: { field: 'investigations' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+  });
 });

@@ -21,6 +21,7 @@ import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
+import { getRunQuotaSavedObjectTypes } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -123,6 +124,7 @@ export class SignificantEventsPlugin
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    getRunQuotaSavedObjectTypes().forEach((type) => core.savedObjects.registerType(type));
 
     this.ebtTelemetryService.setup(core.analytics);
 
