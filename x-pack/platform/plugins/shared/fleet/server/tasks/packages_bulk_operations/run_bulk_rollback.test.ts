@@ -52,7 +52,7 @@ describe('Bulk rollback task', () => {
         },
       });
 
-      expect(rollbackInstallation).toBeCalled();
+      expect(rollbackInstallation).toHaveBeenCalled();
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
     });
@@ -73,7 +73,7 @@ describe('Bulk rollback task', () => {
         },
       });
 
-      expect(rollbackInstallation).toBeCalledTimes(4);
+      expect(rollbackInstallation).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -110,7 +110,7 @@ describe('Bulk rollback task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(rollbackInstallation).toBeCalledTimes(0);
+      expect(rollbackInstallation).toHaveBeenCalledTimes(0);
     });
   });
 });
