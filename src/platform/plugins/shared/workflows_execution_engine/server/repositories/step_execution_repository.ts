@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
-import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
+import type { StepExecutionsDataClient } from './data_access_layer';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from './data_access_layer/lib/get_step_executions_by_workflow_execution';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
@@ -24,9 +22,7 @@ export type StepExecutionField = keyof EsWorkflowStepExecution;
 const UPDATE_RETRY_ON_CONFLICT = 3;
 
 export class StepExecutionRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
-
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(private stepExecutionsDataClient: StepExecutionsDataClient) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -37,18 +33,13 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<EsWorkflowStepExecution>({
-          index: this.indexName,
-          query: {
-            match: { workflowRunId: executionId },
-          },
-          sort: 'startedAt:desc',
-          size: 10000, // TODO: without it, it returns up to 10 results by default. We should improve this.
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.stepExecutionsDataClient.search({
+      query: {
+        match: { workflowRunId: executionId },
+      },
+      sort: 'startedAt:desc',
+      size: 10000, // TODO: without it, it returns up to 10 results by default. We should improve this.
+    });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
   }
@@ -63,8 +54,7 @@ export class StepExecutionRepository {
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return getStepExecutionsByWorkflowExecutionShared({
-      esClient: this.esClient,
-      stepsExecutionIndex: this.indexName,
+      stepExecutionsDataClient: this.stepExecutionsDataClient,
       workflowExecutionId,
       stepExecutionIds,
     });
@@ -90,30 +80,17 @@ export class StepExecutionRepository {
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.mget<EsWorkflowStepExecution>({
-          index: this.indexName,
-          ids: stepExecutionIds,
-          ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
-          ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
-        }),
-      { logger: this.logger }
-    );
-
-    const outputExplicitlyRequested = !!sourceIncludes?.includes('output' as StepExecutionField);
-
-    const stepExecutions: EsWorkflowStepExecution[] = [];
-    for (const doc of response.docs) {
-      if ('found' in doc && doc.found && doc._source) {
-        const source = doc._source as EsWorkflowStepExecution;
-        if (outputExplicitlyRequested && source.output === undefined) {
-          source.output = null;
-        }
-        stepExecutions.push(source);
+    const { items } = await this.stepExecutionsDataClient.getByIds(stepExecutionIds, {
+      sourceIncludes,
+      sourceExcludes,
+    });
+    const shouldNormalizeOutput = sourceIncludes?.includes('output');
+    return items.map(({ document }) => {
+      if (shouldNormalizeOutput && document.output === undefined) {
+        return { ...document, output: null };
       }
-    }
-    return stepExecutions;
+      return document;
+    });
   }
 
   /**
@@ -152,32 +129,22 @@ export class StepExecutionRepository {
       }
     });
 
-    const bulkResponse = await retryTransientEsErrors(
-      () =>
-        this.esClient.bulk({
-          refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
-          index: this.indexName,
-          body: stepExecutions.flatMap((stepExecution) => [
-            { update: { _id: stepExecution.id, retry_on_conflict: UPDATE_RETRY_ON_CONFLICT } },
-            { doc: stepExecution, doc_as_upsert: true },
-          ]),
-        }),
-      { logger: this.logger }
-    );
+    const bulkResponse = await this.stepExecutionsDataClient.bulk({
+      items: stepExecutions.map((stepExecution) => ({
+        operation: 'upsert',
+        document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+      })),
+      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
+    });
 
     if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
+      const failed = bulkResponse.items
+        .filter((item) => item.error)
+        .map((item) => ({ id: item.id, error: item.error }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
+        `Failed to upsert ${failed.length} step executions: ${JSON.stringify(failed)}`
       );
     }
   }

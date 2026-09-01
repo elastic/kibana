@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { ActionExecutor } from './action_executor';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -196,6 +197,63 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
+  });
+
+  test('marks the fake request as carrying an external credential when uiamApiKeyExternal is persisted', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.request.headers).toEqual({
+      authorization: 'ApiKey essu_user_created_key',
+    });
+    expect(isExternalUiamCredential(executeParams.request)).toBe(true);
+  });
+
+  test('does not mark the fake request when uiamApiKeyExternal is absent', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: 'essu_framework_granted_key',
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.request.headers).toEqual({
+      authorization: 'ApiKey essu_framework_granted_key',
+    });
+    expect(isExternalUiamCredential(executeParams.request)).toBe(false);
   });
 
   test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
@@ -506,7 +564,15 @@ describe('Task Runner Factory', () => {
     expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
 
     expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
-      `Cancelling action task for action with id 2 - execution error due to timeout.`
+      `Cancelling action task for action with id 2 - execution error due to timeout.`,
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+      }
     );
   });
 
@@ -527,7 +593,8 @@ describe('Task Runner Factory', () => {
       { refresh: false }
     );
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      'Failed to cleanup action_task_params object [id="3"]: Fail'
+      'Failed to cleanup action_task_params object [id="3"]: Fail',
+      { labels: { actionExecutionId: 'test-execution-uuid' } }
     );
   });
 
@@ -898,7 +965,15 @@ describe('Task Runner Factory', () => {
     expect(isRetryableError(err)).toEqual(false);
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
@@ -945,7 +1020,15 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message: Service message`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
   });
 
@@ -1036,7 +1119,15 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Fail`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
     expect(thrownError).toEqual(err);
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
@@ -1151,7 +1242,12 @@ describe('Task Runner Factory', () => {
 
       expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
         `Failed to load action task params ${mockedTaskInstance.params.actionTaskParamsId}: test`,
-        { tags: ['connector-run-failed', 'framework-error'] }
+        {
+          labels: {
+            spaceId: 'test',
+          },
+          tags: ['connector-run-failed', 'framework-error'],
+        }
       );
     }
   });

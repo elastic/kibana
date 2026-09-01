@@ -21,9 +21,10 @@ import {
   FORMULA_ESCAPED_RUNTIME_FIELD,
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
-} from './constants';
+} from '../../fixtures/constants';
+import type { ImportedSavedObject } from './saved_object_helpers';
 
-type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
+export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
  * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.
@@ -309,10 +310,13 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   const skipEmptyLensOpen = options?.skipEmptyLensOpen ?? false;
   let storedDataViewId: string | undefined;
 
-  const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
-    if (loadLensArchives) {
-      await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC);
-    }
+  const beforeAll = async ({
+    scoutSpace,
+    apiServices,
+  }: LogstashSpaceSetupContext): Promise<ImportedSavedObject[]> => {
+    const importedSavedObjects = loadLensArchives
+      ? await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC)
+      : [];
 
     // Name matches title so Lens data-view switcher rows resolve as `dataView-logstash-*`.
     const { data: dataView } = await apiServices.dataViews.create({
@@ -341,6 +345,8 @@ export function createLogstashLensEditorSuiteSetup(options?: {
         to: timeRange.to,
       }),
     });
+
+    return importedSavedObjects;
   };
 
   const beforeEach = async ({
@@ -374,7 +380,20 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await openEmptyLensEditor(pageObjects, { timeRange });
   };
 
-  return { beforeAll, beforeEach, afterAll, openEmptyLensEditor: openEmptyLensEditorForSuite };
+  const getDataViewId = (): string => {
+    if (!storedDataViewId) {
+      throw new Error('Logstash data view has not been created');
+    }
+    return storedDataViewId;
+  };
+
+  return {
+    beforeAll,
+    beforeEach,
+    afterAll,
+    openEmptyLensEditor: openEmptyLensEditorForSuite,
+    getDataViewId,
+  };
 }
 
 /**
@@ -400,6 +419,19 @@ export async function openDimensionEditorAndWaitForFlyout(
   // Confirm that the secondary flyout is opened
   await expect(lens.workspace.secondaryFlyoutBackButton).toBeVisible();
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
+}
+
+/**
+ * Opens the Lens inline editor for a panel via its hover/context action and waits for the
+ * flyout. Complements {@link openInlineEditorAndWaitVisible} for panels without a known
+ * embeddable id (e.g. freshly created, unsaved panels).
+ */
+export async function openPanelInlineEditorAndWaitVisible(
+  { dashboard, lens }: DashboardAndLens,
+  panelTitle?: string
+) {
+  await dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
+  await expect(lens.workspace.inlineEditor).toBeVisible();
 }
 
 export async function openInlineEditorAndWaitVisible(
@@ -454,4 +486,19 @@ export async function convertToEsqlViaModal({
   await expect(lens.workspace.convertToEsqlButton).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
+}
+
+/**
+ * Builds a new legacy-metric Lens vis (average of bytes).
+ * Opens the Lens editor directly — the Visualize listing bootstrap is not under test.
+ */
+export async function createNewLens({ lens }: Pick<LensPageObjects, 'lens'>): Promise<void> {
+  await openEmptyLensEditor({ lens });
+  await lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'average',
+    field: 'bytes',
+  });
+  await lens.switchToVisualization('lnsLegacyMetric', { search: 'legacy' });
+  await lens.waitForVisualization('legacyMtrVis');
 }

@@ -20,11 +20,7 @@ export type {
   DiscoverSessionTab,
 } from './types';
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  PATTERN_LEVEL = 'patterns',
-}
+export { VIEW_MODE } from '@kbn/discover-utils';
 
 export {
   SavedSearchType,

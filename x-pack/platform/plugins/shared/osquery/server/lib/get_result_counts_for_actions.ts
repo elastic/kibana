@@ -15,6 +15,9 @@ import { prefixIndexPatternsWithCcs } from '../utils/ccs_utils';
 
 const MAX_ACTION_IDS_PER_BATCH = 1000;
 
+// The `*Agents` fields hold DOCUMENT counts. Correct only on live-query paths,
+// where an agent emits one response doc per `action_id`. Names kept: they are
+// part of the live-query response schema.
 export interface ResultCountsEntry {
   totalRows: number;
   respondedAgents: number;

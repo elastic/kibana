@@ -18,7 +18,7 @@ export const unsnoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
       200: actionPolicyResponseExample('unsnoozeActionPolicyResponse', 'Unsnoozed action policy', {
-        snoozedUntil: null,
+        snoozed_until: null,
       }),
       400: INVALID_QUERY_PARAMETERS_RESPONSE,
       404: ACTION_POLICY_NOT_FOUND_RESPONSE,

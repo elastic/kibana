@@ -12,19 +12,18 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiIcon,
   EuiLink,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiToolTip,
   euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -207,7 +206,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             >
               {settings && settings.actionTypes[action.type].enabled === false ? (
                 <Fragment>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     title={i18n.translate(
                       'xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningTitleText',
@@ -215,10 +214,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                         defaultMessage: 'Account may not be configured',
                       }
                     )}
-                    color="warning"
-                    iconType="question"
-                  >
-                    <EuiText>
+                    text={
                       <p>
                         <FormattedMessage
                           id="xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningDescriptionText"
@@ -239,8 +235,8 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                           }}
                         />
                       </p>
-                    </EuiText>
-                  </EuiCallOut>
+                    }
+                  />
                   <EuiSpacer />
                 </Fragment>
               ) : null}

@@ -11,6 +11,7 @@ import type { EditorMarker } from '../utils/template_yaml_ast';
 import { parseTemplateDocument } from '../utils/template_yaml_ast';
 import { getMissingConditionFieldMarkers } from '../utils/validate_condition_field_references';
 import { getInapplicableValidationRuleMarkers } from '../utils/validate_field_validation_rules';
+import { getRequiredNoDefaultMarkers } from '../utils/validate_required_field_defaults';
 
 const SEMANTIC_VALIDATION_OWNER = 'template-semantic-validation';
 
@@ -19,8 +20,9 @@ const toMonacoSeverity = (severity: EditorMarker['severity']): monaco.MarkerSeve
 
 /**
  * Registers editor markers for the semantic checks that a JSON Schema cannot express: conditions
- * that reference a non-existent field, and validation rules applied to a control type they do not
- * affect. Both are documented gotchas that otherwise fail silently. Debounced like the sibling
+ * that reference a non-existent field, validation rules applied to a control type they do not
+ * affect, and required fields with no default value (which automated case creation can never
+ * fill). All are documented gotchas that otherwise fail silently. Debounced like the sibling
  * field-name/user-picker validators so it does not run on every keystroke, and scoped to its own
  * marker owner so it never clobbers monaco-yaml's diagnostics.
  */
@@ -55,6 +57,7 @@ export const useSemanticValidation = (
           ? [
               ...getMissingConditionFieldMarkers(value, doc),
               ...getInapplicableValidationRuleMarkers(value, doc),
+              ...getRequiredNoDefaultMarkers(value, doc),
             ]
           : [];
         monaco.editor.setModelMarkers(

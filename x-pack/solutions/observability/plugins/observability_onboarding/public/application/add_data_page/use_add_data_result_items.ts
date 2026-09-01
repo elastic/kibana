@@ -6,45 +6,36 @@
  */
 
 import { useMemo } from 'react';
-import type {
-  AvailablePackagesHookType,
-  IntegrationCardItem,
-  UseLocalSearchType,
-} from '@kbn/fleet-plugin/public';
-import { useIntegrationTiles } from './use_integration_tiles';
+import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/public';
 import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewrite';
 
 const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
 
 /**
- * The o11y item pipeline feeding AddDataSearchResults: category filter, curated
- * quickstart cards, text match (Fleet's own `useLocalSearch`, so results agree
- * with the Integrations app by construction), return-path URL rewrite. Both
- * Fleet hooks arrive as arguments because the caller loads the module async.
+ * The o11y item pipeline feeding AddDataSearchResults: category filter, text match
+ * (Fleet's own `useLocalSearch`, so results agree with the Integrations app by
+ * construction), return-path URL rewrite. `useLocalSearch` comes as an argument
+ * because the caller gates on Fleet's async-loaded module.
  */
 export function useAddDataResultItems({
   searchTerm,
-  useAvailablePackages,
+  allCards,
+  isLoading,
   useLocalSearch,
 }: {
   searchTerm: string;
-  useAvailablePackages: AvailablePackagesHookType;
+  allCards: IntegrationCardItem[];
+  isLoading: boolean;
   useLocalSearch: UseLocalSearchType;
-}): { items: IntegrationCardItem[]; isLoading: boolean; error?: Error } {
-  const customCards = useIntegrationTiles();
-  // `allCards`, not `filteredCards`: the latter is pre-filtered by Fleet's own
-  // router-derived category state, which is wrong outside the onboarding route.
-  const { allCards, isLoading, eprPackageLoadingError } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: true,
-  });
+}): { items: IntegrationCardItem[] } {
   const rewriteUrl = useCardUrlRewrite({ category: null, search: searchTerm });
 
   const categoryFiltered = useMemo(
     () =>
-      customCards
-        .concat(allCards)
-        .filter((card) => card.categories.some((category) => ALLOWED_CATEGORIES.has(category))),
-    [customCards, allCards]
+      allCards.filter((card) =>
+        card.categories.some((category) => ALLOWED_CATEGORIES.has(category))
+      ),
+    [allCards]
   );
 
   const localSearch = useLocalSearch(categoryFiltered, isLoading);
@@ -61,5 +52,5 @@ export function useAddDataResultItems({
     return results.map(rewriteUrl);
   }, [categoryFiltered, localSearch, searchTerm, rewriteUrl]);
 
-  return { items, isLoading, error: eprPackageLoadingError ?? undefined };
+  return { items };
 }

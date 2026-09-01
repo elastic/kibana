@@ -18,61 +18,32 @@ You can also run a specific test by passing the filepath as an argument, e.g.:
 yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
-### Deployment-agnostic API tests
+### API tests (Scout)
 
-The deployment-agnostic API tests are located in [`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality`](/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/).
+The API tests are located in [`test/scout/api`](./test/scout/api/).
 
-#### Start server and run test (stateful)
-
-```sh
-# start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
-
-# run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
-```
-
-#### Start server and run test (serverless)
+#### Start server and run tests (stateful)
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+node scripts/scout.js start-server --arch stateful --domain classic
 
 # run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
+node scripts/playwright test --config x-pack/platform/plugins/shared/dataset_quality/test/scout/api/playwright.config.ts --project local --grep "@local-stateful-classic"
 ```
 
-### API integration tests
-
-| Option       | Description                                     |
-| ------------ | ----------------------------------------------- |
-| --server     | Only start ES and Kibana                        |
-| --runner     | Only run tests                                  |
-| --grep       | Specify the specs to run                        |
-| --grep-files | Specify the files to run                        |
-| --inspect    | Add --inspect-brk flag to the ftr for debugging |
-| --times      | Repeat the test n number of times               |
-
-The API tests are located in [`x-pack/solutions/observability/test/dataset_quality_api_integration/`](/x-pack/solutions/observability/test/dataset_quality_api_integration/).
-
-#### Start server and run test (single process)
-
-```
-node x-pack/platform/plugins/shared/dataset_quality/scripts/api [--help]
-```
-
-The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
-Once the tests finish, the instances will be terminated.
-
-#### Start server and run test (separate processes)
+#### Start server and run tests (serverless)
 
 ```sh
 # start server
-node x-pack/platform/plugins/shared/dataset_quality/scripts/api --server
+node scripts/scout.js start-server --arch serverless --domain observability_complete
 
 # run tests
-node x-pack/platform/plugins/shared/dataset_quality/scripts/api --runner --grep-files=data_stream_settings.spec.ts
+node scripts/playwright test --config x-pack/platform/plugins/shared/dataset_quality/test/scout/api/playwright.config.ts --project local --grep "@local-serverless-observability_complete"
 ```
+
+Alternatively `node scripts/scout.js run-tests --arch <arch> --domain <domain> --config <playwright config>`
+starts the servers and runs the suite in one step, selecting the deployment tag for you.
 
 ### Using dockerized package registry
 

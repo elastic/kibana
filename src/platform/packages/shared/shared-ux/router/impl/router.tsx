@@ -22,28 +22,19 @@ import type {
   BrowserRouterProps,
   HashRouterProps,
 } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 
 export const HashRouter = ({ children, ...props }: HashRouterProps) => (
-  <ReactHashRouter {...props}>
-    <CompatRouter>{children}</CompatRouter>
-  </ReactHashRouter>
+  <ReactHashRouter {...props}>{children}</ReactHashRouter>
 );
 
 export const BrowserRouter = ({ children, ...props }: BrowserRouterProps) => (
-  <ReactBrowserRouter {...props}>
-    <CompatRouter>{children}</CompatRouter>
-  </ReactBrowserRouter>
+  <ReactBrowserRouter {...props}>{children}</ReactBrowserRouter>
 );
 
 export const MemoryRouter = ({ children, ...props }: MemoryRouterProps) => (
-  <ReactMemoryRouter {...props}>
-    <CompatRouter>{children}</CompatRouter>
-  </ReactMemoryRouter>
+  <ReactMemoryRouter {...props}>{children}</ReactMemoryRouter>
 );
 
 export const Router = ({ children, ...props }: RouterProps) => (
-  <ReactRouter {...props}>
-    <CompatRouter>{children}</CompatRouter>
-  </ReactRouter>
+  <ReactRouter {...props}>{children}</ReactRouter>
 );

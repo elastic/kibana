@@ -18,7 +18,7 @@ import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import type { ValueToStringConverter } from '../types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,
@@ -104,7 +104,8 @@ export const FilterOutBtn = ({
 export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
-  valueToStringConverter: ValueToStringConverter
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -137,6 +138,7 @@ export function buildCellActions(
   field: DataViewField,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode,
   onFilter?: DocViewFilterFn,
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
   hideFilteringOnComputedColumns?: boolean
@@ -168,7 +170,8 @@ export function buildCellActions(
       buildCopyValueButton(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
-        valueToStringConverter
+        valueToStringConverter,
+        documentsDisplayMode
       ),
   ];
 }

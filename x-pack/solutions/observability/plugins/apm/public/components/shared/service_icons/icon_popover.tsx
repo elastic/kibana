@@ -25,6 +25,7 @@ interface IconPopoverProps {
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
   icon: PopoverItem['icon'];
+  buttonSize?: 's' | 'm';
 }
 
 export function IconPopover({
@@ -35,6 +36,7 @@ export function IconPopover({
   onClose,
   detailsFetchStatus,
   isOpen,
+  buttonSize = 'm',
 }: IconPopoverProps) {
   const popoverTitleId = useGeneratedHtmlId();
 
@@ -58,7 +60,7 @@ export function IconPopover({
             iconSize={icon.size ?? 'l'}
             className="serviceIcon_button"
             data-test-subj={`popover_${title}`}
-            size="m"
+            size={buttonSize}
           />
         </EuiToolTip>
       }

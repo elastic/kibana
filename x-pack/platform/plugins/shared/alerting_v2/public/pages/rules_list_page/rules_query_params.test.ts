@@ -87,7 +87,7 @@ describe('toRulesQueryParams', () => {
     });
   });
 
-  it('ignores exclusions on the single-select status and mode dimensions', () => {
+  it('ignores exclusions on the single-select status and kind dimensions', () => {
     expect(
       toRulesQueryParams({
         [ENABLED_FILTER_ID]: { exclude: ['true'] },

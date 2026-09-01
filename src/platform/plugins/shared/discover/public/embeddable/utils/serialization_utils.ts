@@ -60,9 +60,21 @@ export const deserializeState = async ({
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
+    // Panel overrides replace the resolved tab's values wholesale, so an override can drop entries
+    // (e.g. a removed grid column or sort field). jsonModeSettings is the exception: it partial-
+    // merges with the source, so overriding only one of hide_nulls/wrap_lines keeps the other.
     const runtimeSavedSearchState = isSelectedTabDeleted
       ? {}
-      : { ...omit(resolvedTab, 'timeRange'), ...savedObjectOverride };
+      : {
+          ...omit(resolvedTab, 'timeRange'),
+          ...savedObjectOverride,
+          ...(savedObjectOverride.jsonModeSettings && {
+            jsonModeSettings: {
+              ...resolvedTab?.jsonModeSettings,
+              ...savedObjectOverride.jsonModeSettings,
+            },
+          }),
+        };
 
     return {
       ...runtimeSavedSearchState,
@@ -107,7 +119,6 @@ export const serializeState = ({
   serializeDynamicActions,
   savedObjectId,
   selectedTabId,
-  embeddableTransformsEnabled,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -117,7 +128,6 @@ export const serializeState = ({
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
-  embeddableTransformsEnabled: boolean;
 }): SearchEmbeddablePanelApiState => {
   const searchSource = savedSearch.searchSource;
   const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
@@ -155,7 +165,7 @@ export const serializeState = ({
       ...(selectedTabId !== undefined && { selectedTabId }),
       savedObjectId,
     };
-    return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByRef(stored) : stored;
+    return fromStoredSearchEmbeddableByRef(stored);
   }
 
   const { title, description, ...titleOptions } = serializeTitles() ?? {};
@@ -176,5 +186,5 @@ export const serializeState = ({
       ...(serializedTitles.description && { description: serializedTitles.description }),
     },
   };
-  return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByValue(stored, []) : stored;
+  return fromStoredSearchEmbeddableByValue(stored, []);
 };
