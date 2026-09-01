@@ -128,7 +128,8 @@ describe('WorkflowsManagementApi', () => {
           yaml: expect.stringContaining('name: Original Workflow Copy'),
         }),
         'default',
-        mockRequest
+        mockRequest,
+        { nameFallback: 'Original Workflow Copy' }
       );
       expect(result.name).toBe('Original Workflow Copy');
       expect(result.id).toBe('workflow-clone-456');
@@ -246,6 +247,37 @@ enabled: true`;
       expect(clonedYaml).toContain('description: Missing required fields');
     });
 
+    it('passes an explicit name override so a clone of non-mapping YAML keeps the "Copy" name', async () => {
+      // A scalar YAML root cannot receive a `name` key, so updateWorkflowYamlFields returns it
+      // unchanged. Without the explicit override the clone would collapse to "Untitled workflow"
+      // instead of "<name> Copy".
+      const originalWorkflow = createMockWorkflow({
+        name: 'Original',
+        yaml: 'not-a-workflow',
+        valid: false,
+      });
+
+      mockWorkflowsService.createWorkflow.mockImplementation((command) =>
+        Promise.resolve({
+          ...originalWorkflow,
+          id: 'workflow-clone-scalar',
+          name: 'Original Copy',
+          yaml: command.yaml,
+          valid: false,
+        })
+      );
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
+        // YAML is unchanged because it has no mapping root to receive `name`.
+        { yaml: 'not-a-workflow' },
+        'default',
+        mockRequest,
+        { nameFallback: 'Original Copy' }
+      );
+    });
+
     it('should not call getWorkflowZodSchema when cloning', async () => {
       const originalWorkflow = createMockWorkflow();
       mockWorkflowsService.createWorkflow.mockResolvedValue(originalWorkflow);
@@ -283,7 +315,8 @@ enabled: true`;
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
         expect.any(Object),
         spaceId,
-        mockRequest
+        mockRequest,
+        { nameFallback: 'Original Workflow Copy' }
       );
     });
   });
@@ -392,7 +425,14 @@ steps:
       it('should throw error when YAML validation fails', async () => {
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -533,7 +573,14 @@ steps:
         });
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -877,7 +924,13 @@ steps:
       const expectedResult = {
         valid: false,
         diagnostics: [
-          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+          {
+            severity: 'error' as const,
+            message: 'Required',
+            source: 'schema',
+            path: ['name'],
+            ruleId: 'schemaViolation' as const,
+          },
         ],
       };
       mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);

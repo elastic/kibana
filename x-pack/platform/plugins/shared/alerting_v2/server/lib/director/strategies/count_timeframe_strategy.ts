@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { noDataStrategy } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import { parseDurationToMs } from '../../duration';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import { BasicTransitionStrategy } from './basic_strategy';
 import type { StateTransitionContext, StateTransitionResult } from './types';
 import type { LatestAlertEventState } from '../queries';
@@ -105,6 +110,13 @@ const isThresholdMet = (
 export class CountTimeframeStrategy extends BasicTransitionStrategy {
   override readonly name = 'count_timeframe';
 
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    super();
+    this.logger = loggerService.forSubsystem('director');
+  }
+
   override canHandle(rule: RuleResponse): boolean {
     return rule.state_transition != null && Object.keys(rule.state_transition).length > 0;
   }
@@ -150,7 +162,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
         elapsedMs,
         operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
         count: stateTransition.pending_count,
-        timeframeMs: this.safeParseDurationToMs(stateTransition.pending_timeframe),
+        timeframeMs: this.safeParseDurationToMs(
+          stateTransition.pending_timeframe,
+          rule.id,
+          'pending_timeframe'
+        ),
         successStatus: alertEpisodeStatus.active,
         stayStatus: alertEpisodeStatus.pending,
       });
@@ -163,7 +179,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
         elapsedMs,
         operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
         count: stateTransition.recovering_count,
-        timeframeMs: this.safeParseDurationToMs(stateTransition.recovering_timeframe),
+        timeframeMs: this.safeParseDurationToMs(
+          stateTransition.recovering_timeframe,
+          rule.id,
+          'recovering_timeframe'
+        ),
         successStatus: alertEpisodeStatus.inactive,
         stayStatus: alertEpisodeStatus.recovering,
       });
@@ -265,7 +285,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
    * the timeframe dimension is simply ignored instead of
    * blowing up the entire state transition evaluation.
    */
-  private safeParseDurationToMs(value?: string): number | undefined {
+  private safeParseDurationToMs(
+    value: string | undefined,
+    ruleId: string,
+    resource: 'pending_timeframe' | 'recovering_timeframe'
+  ): number | undefined {
     if (!value) {
       return undefined;
     }
@@ -273,6 +297,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     try {
       return parseDurationToMs(value);
     } catch {
+      this.logger.warn({
+        message: 'Rule state transition timeframe is invalid',
+        code: ALERTING_LOG_CODES.DIRECTOR_TIMEFRAME_INVALID,
+        labels: { rule_id: ruleId, resource },
+      });
       return undefined;
     }
   }

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CPSManager } from './cps_manager';
+import { CPSManager, getManageCrossProjectSearchUrl } from './cps_manager';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_NPRE_VALUE = '_alias:*';
@@ -402,6 +404,103 @@ describe('CPSManager', () => {
 
       expect(cpsManager.getDefaultProjectRouting()).toBe('_alias:_origin');
       expect(cpsManager.getProjectRouting()).toBeUndefined();
+    });
+  });
+
+  describe('#getConfigurationLinks', () => {
+    const createManager = (cloud?: CloudStart, spaceId = 'default') => {
+      const application = {
+        ...mockApplication,
+        getUrlForApp: jest.fn().mockReturnValue(`/app/management/kibana/spaces/edit/${spaceId}`),
+      } as unknown as ApplicationStart;
+
+      const http = {
+        ...mockHttp,
+        spaceId,
+      } as unknown as jest.Mocked<HttpSetup>;
+
+      return new CPSManager({
+        http,
+        logger: mockLogger,
+        application,
+        cloud,
+      });
+    };
+
+    describe('getManageCrossProjectSearchUrl()', () => {
+      it('builds the Cloud console URL when baseUrl, projectType, and projectId are present', () => {
+        const cloud = cloudMock.createStart();
+        cloud.baseUrl = 'https://cloud.elastic.co';
+        cloud.serverless = {
+          projectId: 'c40ee170061b48cd874e8ed896cdd48e',
+          projectType: 'security',
+        };
+
+        expect(getManageCrossProjectSearchUrl(cloud)).toBe(
+          'https://cloud.elastic.co/projects/security/c40ee170061b48cd874e8ed896cdd48e/cross-project-search'
+        );
+      });
+
+      it('handles a trailing slash on baseUrl', () => {
+        const cloud = cloudMock.createStart();
+        cloud.baseUrl = 'https://cloud.elastic.co/';
+        cloud.serverless = {
+          projectId: 'abc123',
+          projectType: 'observability',
+        };
+
+        expect(getManageCrossProjectSearchUrl(cloud)).toBe(
+          'https://cloud.elastic.co/projects/observability/abc123/cross-project-search'
+        );
+      });
+
+      it('returns undefined when any required piece is missing', () => {
+        expect(getManageCrossProjectSearchUrl(undefined)).toBeUndefined();
+        expect(getManageCrossProjectSearchUrl(cloudMock.createStart())).toBeUndefined();
+
+        const missingType = cloudMock.createStart();
+        missingType.baseUrl = 'https://cloud.elastic.co';
+        missingType.serverless = { projectId: 'abc123' };
+        expect(getManageCrossProjectSearchUrl(missingType)).toBeUndefined();
+      });
+    });
+
+    describe('getConfigurationLinks()', () => {
+      it('always includes currentSpace with the space edit URL', () => {
+        const manager = createManager();
+        const links = manager.getConfigurationLinks();
+
+        expect(links.currentSpace.href).toBe('/app/management/kibana/spaces/edit/default');
+        expect(links.currentSpace.testSubj).toBe('projectPickerAdjustSpaceDefaultsMenuItem');
+        expect(links.manageCrossProjectSearch).toBeUndefined();
+      });
+
+      it('includes manageCrossProjectSearch when the Cloud URL can be built', () => {
+        const cloud = cloudMock.createStart();
+        cloud.baseUrl = 'https://cloud.elastic.co';
+        cloud.serverless = {
+          projectId: 'c40ee170061b48cd874e8ed896cdd48e',
+          projectType: 'security',
+        };
+
+        const manager = createManager(cloud);
+        const links = manager.getConfigurationLinks();
+
+        expect(links.manageCrossProjectSearch?.href).toBe(
+          'https://cloud.elastic.co/projects/security/c40ee170061b48cd874e8ed896cdd48e/cross-project-search'
+        );
+        expect(links.manageCrossProjectSearch?.external).toBe(true);
+        expect(links.manageCrossProjectSearch?.testSubj).toBe(
+          'projectPickerManageCrossProjectSearchMenuItem'
+        );
+      });
+
+      it('omits manageCrossProjectSearch when the Cloud URL cannot be built', () => {
+        const manager = createManager(cloudMock.createStart());
+        const links = manager.getConfigurationLinks();
+
+        expect(links.manageCrossProjectSearch).toBeUndefined();
+      });
     });
   });
 });

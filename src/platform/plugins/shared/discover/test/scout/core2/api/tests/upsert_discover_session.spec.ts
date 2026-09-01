@@ -82,7 +82,6 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
             id: 'main',
             hide_chart: false,
             hide_table: false,
-            time_restore: false,
             data_source: {
               type: 'data_view_reference',
               ref_id: 'missing-data-view',
@@ -138,7 +137,6 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
           id: 'replacement',
           hide_chart: false,
           hide_table: false,
-          time_restore: false,
           data_source: {
             type: 'data_view_reference',
             ref_id: 'replacement-data-view',

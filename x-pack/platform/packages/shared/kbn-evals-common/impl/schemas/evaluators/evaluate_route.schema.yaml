@@ -123,6 +123,16 @@ paths:
                               enum:
                                 - llm
                                 - code
+                            direction:
+                              type: string
+                              enum:
+                                - maximize
+                                - minimize
+                                - neutral
+                              description: >-
+                                Whether a higher score is an improvement (`maximize`),
+                                a lower score is an improvement (`minimize`), or the
+                                score cannot be compared across arms at all (`neutral`).
                             model:
                               $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                               description: >-

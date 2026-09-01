@@ -12,7 +12,7 @@ import { css } from '@emotion/css';
 import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 
 import { SideNavigation } from '../../..';
-import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '../../..';
+import type { MenuItem, SecondaryMenuItem } from '../../..';
 
 /** Returns a `className` that adds a divider after the Dashboard nav item. */
 const useNavDividerClass = () => {
@@ -97,14 +97,7 @@ const App = () => {
     ],
   };
 
-  const logo: SideNavLogo = {
-    id: 'home',
-    label: 'Example',
-    iconType: 'logoElastic',
-    href: '#/',
-  };
-
-  const handleItemClick = (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem) => {
     // eslint-disable-next-line no-console
     console.log('Navigation item clicked:', item);
     setActiveItemId(item.id);
@@ -120,7 +113,7 @@ const App = () => {
     <EuiProvider colorMode="light">
       <div className={navDividerClass} style={{ display: 'flex', minHeight: '100vh' }}>
         <SideNavigation
-          {...{ activeItemId, logo }}
+          activeItemId={activeItemId}
           items={navigationItems}
           isCollapsed={isCollapsed}
           onItemClick={handleItemClick}

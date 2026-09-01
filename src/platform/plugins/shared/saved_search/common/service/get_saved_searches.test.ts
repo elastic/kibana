@@ -87,6 +87,7 @@ describe('getSavedSearch', () => {
         "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
+        "documentsDisplayMode": undefined,
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
@@ -94,6 +95,7 @@ describe('getSavedSearch', () => {
         "hideTable": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": undefined,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
@@ -240,6 +242,7 @@ describe('getSavedSearch', () => {
         "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
+        "documentsDisplayMode": undefined,
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
@@ -247,6 +250,7 @@ describe('getSavedSearch', () => {
         "hideTable": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": true,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
