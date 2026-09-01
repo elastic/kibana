@@ -83,7 +83,17 @@ import {
   type Document,
 } from './converters';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
-export type { ConversationMetadataPatchedPayload };
+
+// Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
+// This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
+function computeChangedFields(
+  updates: Record<string, SerializedMetadataValue>,
+  stored: Record<string, SerializedMetadataValue>
+): string[] {
+  return Object.keys(updates).filter(
+    (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
+  );
+}
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -656,7 +666,7 @@ class ConversationClientImpl implements ConversationClient {
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
-        changedFields = ConversationClientImpl.computeChangedFields(serialized, storedMetadata);
+        changedFields = computeChangedFields(serialized, storedMetadata);
 
         return { metadata: { ...storedMetadata, ...serialized } };
       },
@@ -800,17 +810,6 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return document;
-  }
-
-  // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
-  // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
-  private static computeChangedFields(
-    updates: Record<string, SerializedMetadataValue>,
-    stored: Record<string, SerializedMetadataValue>
-  ): string[] {
-    return Object.keys(updates).filter(
-      (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
-    );
   }
 
   /**
