@@ -62,7 +62,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
           800 μs
         </text>
         <text
-          fill="#1D2A3E"
+          fill="#384861"
           text-anchor="middle"
           x="-50"
           y="0"

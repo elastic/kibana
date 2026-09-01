@@ -37,7 +37,7 @@ describe('<ToolbarPopover />', () => {
     const button = component.find('EuiButton');
     expect(button).toHaveStyleRule('background-color', '#FFFFFF');
     expect(button).toHaveStyleRule('border', '1px solid #CAD3E2');
-    expect(button).toHaveStyleRule('color', '#1D2A3E');
+    expect(button).toHaveStyleRule('color', '#384861');
   });
 
   test('accepts a button type', () => {
