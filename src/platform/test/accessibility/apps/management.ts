@@ -16,7 +16,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 //
 // The management landing page and the advanced settings page moved to Scout as
 // part of https://github.com/elastic/kibana/issues/281240:
-//   src/platform/plugins/shared/management/test/scout/ui/tests/management_a11y.spec.ts
+//   src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts (landing-page scan)
 //   src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_a11y.spec.ts
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([

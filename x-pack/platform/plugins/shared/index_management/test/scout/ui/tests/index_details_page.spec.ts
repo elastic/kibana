@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { NOT_SVL_SEARCH } from '../tags';
 
-const testIndexName = `index-details-page-test-${Math.random()}`;
+const testIndexName = `index-details-page-test-${randomUUID()}`;
+
+// The a11y scans below are folded in as test.steps rather than a standalone
+// a11y spec. They never open a modal/flyout/menu, so the app wrapper is the
+// whole surface. (Migrated from x-pack accessibility/apps/group1/management.ts.)
+const A11Y_SELECTORS = ['.kbnAppWrapper'];
 
 // Excludes Search serverless: it has its own `search_indices` app for managing indices.
 test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
@@ -18,13 +24,8 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
     await pageObjects.indexManagement.goto();
   });
 
-  test.afterEach(async ({ esClient, log }) => {
-    try {
-      await esClient.indices.delete({ index: testIndexName }, { ignore: [404] });
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : String(e);
-      log.debug(`Index cleanup failed for ${testIndexName}: ${message}`);
-    }
+  test.afterEach(async ({ esClient }) => {
+    await esClient.indices.delete({ index: testIndexName }, { ignore: [404] });
   });
 
   test('Navigates to the index details page from the home page', async ({ pageObjects, log }) => {
@@ -45,12 +46,20 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
     esClient,
     page,
   }) => {
+    const { indexManagement } = pageObjects;
+
     await esClient.indices.create({ index: testIndexName });
-    await pageObjects.indexManagement.navigateToIndexManagementTab('indices');
-    await expect(pageObjects.indexManagement.indexLink(testIndexName)).toBeVisible({
+    await indexManagement.navigateToIndexManagementTab('indices');
+    await expect(indexManagement.indexLink(testIndexName)).toBeVisible({
       timeout: 30000,
     });
-    await pageObjects.indexManagement.indexLink(testIndexName).click();
+
+    await test.step('indices list has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await indexManagement.indexLink(testIndexName).click();
     await expect(page.testSubj.locator('indexDetailsContent')).toBeVisible();
 
     await test.step('overview, mappings, and settings tabs exist', async () => {
@@ -59,16 +68,41 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
       await expect(page.testSubj.locator('indexDetailsTab-settings')).toBeVisible();
     });
 
+    await test.step('overview tab has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
     await test.step('mappings "Add field" button is enabled', async () => {
-      await pageObjects.indexManagement.indexDetailsPage.changeTab('mappings');
-      await expect(
-        pageObjects.indexManagement.indexDetailsPage.mappingsAddFieldButton()
-      ).toBeEnabled();
+      await indexManagement.indexDetailsPage.changeTab('mappings');
+      await expect(indexManagement.indexDetailsPage.mappingsAddFieldButton()).toBeEnabled();
+    });
+
+    await test.step('mappings tab has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
     });
 
     await test.step('settings "Edit settings" switch is enabled', async () => {
-      await pageObjects.indexManagement.indexDetailsPage.changeTab('settings');
-      await expect(pageObjects.indexManagement.indexDetailsPage.editSettingsSwitch()).toBeEnabled();
+      await indexManagement.indexDetailsPage.changeTab('settings');
+      await expect(indexManagement.indexDetailsPage.editSettingsSwitch()).toBeEnabled();
+    });
+
+    await test.step('settings tab has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('settings tab in edit mode has no a11y violations', async () => {
+      await indexManagement.indexDetailsPage.enableSettingsEditMode();
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('stats tab has no a11y violations', async () => {
+      await indexManagement.indexDetailsPage.changeTab('stats');
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
     });
   });
 });
