@@ -160,15 +160,15 @@ steps:
                 [
                 {%- for node in items -%}
                   {
-                    "id": "${{ node.id }}",
+                    "id": "{{ node.id }}",
                     "@timestamp": "{{ execution.startedAt }}",
                     "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
-                    "entity": {"type": "project_item", "id": "${{ node.id }}", "subtype": "${{ node.content.__typename }}", "number": "${{ node.content.number }}", "url": "${{ node.content.url }}"},
+                    "entity": {"type": "project_item", "id": "{{ node.id }}", "subtype": "{{ node.content.__typename }}", "number": "{{ node.content.number }}", "url": "{{ node.content.url }}"},
                     "org": {"login": "{{ consts.orgLogin }}"},
-                    "project": {"id": "${{ variables.projectId }}", "number": "${{ variables.projectNumber }}", "title": "${{ variables.projectTitle }}"},
-                    "repository": {"name": "${{ node.content.repository.name }}", "full_name": "${{ node.content.repository.nameWithOwner }}"},
-                    "github": {"created_at": "${{ node.createdAt }}", "updated_at": "${{ node.updatedAt }}", "state": "${{ node.content.state }}"},
-                    "content_ref": {"type": "${{ node.content.__typename }}", "id": "${{ node.content.id }}", "repo": "${{ node.content.repository.nameWithOwner }}", "number": "${{ node.content.number }}", "url": "${{ node.content.url }}"},
+                    "project": {"id": "{{ variables.projectId }}", "number": "{{ variables.projectNumber }}", "title": "{{ variables.projectTitle }}"},
+                    "repository": {"name": "{{ node.content.repository.name }}", "full_name": "{{ node.content.repository.nameWithOwner }}"},
+                    "github": {"created_at": "{{ node.createdAt }}", "updated_at": "{{ node.updatedAt }}", "state": "{{ node.content.state }}"},
+                    "content_ref": {"type": "{{ node.content.__typename }}", "id": "{{ node.content.id }}", "repo": "{{ node.content.repository.nameWithOwner }}", "number": "{{ node.content.number }}", "url": "{{ node.content.url }}"},
                     "payload": {{ node | json }}
                   }  {% unless forloop.last %},{% endunless %}
                 {%- endfor -%}

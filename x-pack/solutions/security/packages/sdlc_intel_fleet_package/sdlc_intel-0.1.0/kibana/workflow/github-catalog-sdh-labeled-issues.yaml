@@ -108,15 +108,15 @@ steps:
             [
             {%- for node in items -%}
               {
-                "id": "${{ node.id }}",
+                "id": "{{ node.id }}",
                 "@timestamp": "{{ execution.startedAt }}",
                 "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
-                "entity": {"type": "sdh_issue", "id": "${{ node.id }}", "url": "${{ node.url }}", "number": "${{ node.number }}"},
+                "entity": {"type": "sdh_issue", "id": "{{ node.id }}", "url": "{{ node.url }}", "number": "{{ node.number }}"},
                 "org": {"login": "{{ consts.orgLogin }}"},
-                "repository": {"name": "${{ node.repository.name }}", "full_name": "${{ node.repository.nameWithOwner }}"},
-                "github": {"created_at": "${{ node.createdAt }}", "updated_at": "${{ node.updatedAt }}", "closed_at": "${{ node.closedAt }}", "state": "${{ node.state }}"},
-                "people": {"author": "${{ node.author.login }}"},
-                "content": {"title": "${{ node.title }}", "body": "${{ node.body }}", "searchable": "{{ node.title }} {{ node.body }}"},
+                "repository": {"name": "{{ node.repository.name }}", "full_name": "{{ node.repository.nameWithOwner }}"},
+                "github": {"created_at": "{{ node.createdAt }}", "updated_at": "{{ node.updatedAt }}", "closed_at": "{{ node.closedAt }}", "state": "{{ node.state }}"},
+                "people": {"author": "{{ node.author.login }}"},
+                "content": {"title": "{{ node.title }}", "body": "{{ node.body }}", "searchable": "{{ node.title }} {{ node.body }}"},
                 "feedback": {"is_sdh": true, "sdh_catalog_source": "sdh_label", "linked_salesforce_case_id": "", "linked_salesforce_case_number": "", "link_source": ""},
                 "payload": {{ node | json }}
               }  {% unless forloop.last %},{% endunless %}
