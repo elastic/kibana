@@ -205,6 +205,7 @@ safe-outputs:
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
 strict: false
 timeout-minutes: 90
+max-ai-credits: 1200
 ---
 
 # Flaky Test Fixer
