@@ -179,7 +179,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     await waitFor(() => {
       expect(fetchProjects).toHaveBeenCalled();
     });
-    expect(screen.queryByText('Project routing')).not.toBeInTheDocument();
+    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
     expect(screen.queryByText('_alias:*')).not.toBeInTheDocument();
   });
 
@@ -215,7 +215,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     await waitFor(() => {
       expect(fetchProjects).toHaveBeenCalled();
     });
-    expect(screen.getByText('Project routing')).toBeInTheDocument();
+    expect(screen.getByText('project_routing')).toBeInTheDocument();
     expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 
