@@ -30,6 +30,8 @@ import { annotationXY, byRefAnnotationXY, runtimeByRefAnnotationXY } from './ann
 import {
   esqlChart,
   esqlChartWithBreakdownColorMapping,
+  esqlChartWithManualAnnotationLayer,
+  esqlChartWithReferenceLineLayer,
   esqlXYWithCollapseByBreakdown,
 } from './esqlXY.mock';
 import {
@@ -477,6 +479,14 @@ describe('XY', () => {
           validator.xy.fromState(setSeriesType(esqlChartWithBreakdownColorMapping, type));
         });
       }
+
+      it('should convert an ES|QL chart with a manual by-value annotation layer', () => {
+        validator.xy.fromState(esqlChartWithManualAnnotationLayer);
+      });
+
+      it('should convert an ES|QL chart with a form-based reference line layer', () => {
+        validator.xy.fromState(esqlChartWithReferenceLineLayer);
+      });
 
       describe('X-axis scale detection', () => {
         it('should detect temporal scale for ES|QL chart with date column', () => {
