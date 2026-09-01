@@ -108,7 +108,13 @@ GRANT SELECT ON my_database.* TO 'kibana_reader'@'%';
 FLUSH PRIVILEGES;
 ```
 
-The `query` action enforces read-only access at the application level by accepting only `SELECT` and `WITH` statements and by blocking multi-statement input. Use **List Tables** and **Describe Table** for schema discovery. Using a least-privilege database user adds a second, independent layer of enforcement. Note: the `executeSql` action bypasses these restrictions and can run any statement — do not grant write privileges unless your use case requires them.
+The `query` action enforces read-only access at the application level by accepting only `SELECT` and `WITH` statements and by blocking multi-statement input. Use **List Tables** and **Describe Table** for schema discovery.
+
+::::{note}
+The application-level read-only check is not a security guarantee. Prompt injection and other techniques may craft inputs that bypass it. The only reliable protection is granting the database user read-only permissions. Application-level enforcement is a defense-in-depth measure, not a substitute for least-privilege credentials.
+::::
+
+Using a least-privilege database user adds a second, independent layer of enforcement. Note: the `executeSql` action bypasses these restrictions and can run any statement — do not grant write privileges unless your use case requires them.
 
 You can further restrict the user to connections from your Kibana host's IP address:
 

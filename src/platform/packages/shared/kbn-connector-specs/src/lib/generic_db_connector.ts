@@ -17,6 +17,10 @@
  *
  * The `;` check is conservative: a semicolon inside a string literal is treated
  * as a second statement. Agents can rewrite such queries.
+ *
+ * MySQL executable comments (/*!...* /) are rejected outright: MySQL parses their
+ * contents as code while the guard would otherwise strip them as inert text, allowing
+ * a write/DDL to be smuggled past both the prefix check and WRITE_PATTERN.
  */
 
 export const READ_ONLY_STATEMENT_PREFIXES = /^(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i;
@@ -26,6 +30,11 @@ export const BIGQUERY_READ_ONLY_PREFIXES = /^(SELECT|WITH|EXPLAIN)\b/i;
 // Write / DDL that can hide after a read-only prefix (WITH CTE, SELECT INTO, EXPLAIN UPDATE).
 const WRITE_PATTERN =
   /\b(INSERT\s+INTO|REPLACE\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|MERGE\s+INTO|CREATE\s+|DROP\s+|ALTER\s+|TRUNCATE\s+|GRANT\s+|REVOKE\s+|CALL\s+|LOAD\s+DATA|INTO\s+(OUTFILE|DUMPFILE))\b/i;
+
+// MySQL executable comments (/*!...*/): MySQL server parses their contents as code,
+// but stripLeadingCommentsAndWhitespace would strip them as inert text first, letting
+// a write/DDL slip past both the prefix check and WRITE_PATTERN. Reject outright.
+const MYSQL_EXECUTABLE_COMMENT = /\/\*!/;
 
 export const stripLeadingCommentsAndWhitespace = (sql: string): string => {
   let remaining = sql;
@@ -54,9 +63,8 @@ export const isReadOnlySql = (
   sql: string,
   allowedPrefixes: RegExp = READ_ONLY_STATEMENT_PREFIXES
 ): boolean => {
-  if (hasTrailingStatement(sql)) {
-    return false;
-  }
+  if (MYSQL_EXECUTABLE_COMMENT.test(sql)) return false;
+  if (hasTrailingStatement(sql)) return false;
   const head = stripLeadingCommentsAndWhitespace(sql);
   return allowedPrefixes.test(head) && !WRITE_PATTERN.test(head);
 };
@@ -65,6 +73,9 @@ export const assertReadOnly = (
   sql: string,
   allowedPrefixes: RegExp = SELECT_OR_WITH_PREFIX
 ): void => {
+  if (MYSQL_EXECUTABLE_COMMENT.test(sql)) {
+    throw new Error('MySQL executable comments (/*! ... */) are not permitted');
+  }
   if (hasTrailingStatement(sql)) {
     throw new Error('Multi-statement SQL is not permitted');
   }

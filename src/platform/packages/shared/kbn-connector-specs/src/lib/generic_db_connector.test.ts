@@ -62,6 +62,8 @@ describe('isReadOnlySql', () => {
       ['WITH + DROP', 'WITH t AS (SELECT 1) DROP TABLE users'],
       ['SELECT INTO OUTFILE', "SELECT * FROM users INTO OUTFILE '/tmp/x'"],
       ['multi-statement', 'SELECT 1; DROP TABLE users'],
+      ['executable comment bypass', '/*!11111 DELETE FROM users -- */ SELECT 1'],
+      ['executable comment no version', '/*! DROP TABLE users */ SELECT 1'],
     ];
 
     it.each(rejected)('rejects %s', (_label, sql) => {
@@ -113,6 +115,13 @@ describe('assertReadOnly', () => {
 
   it('rejects a write hidden behind leading comments', () => {
     expect(() => assertReadOnly('-- looks fine\nDROP TABLE users')).toThrow(/read-only/i);
+  });
+
+  it('rejects MySQL executable comments that would smuggle a write past the guard', () => {
+    expect(() => assertReadOnly('/*!11111 DELETE FROM users -- */ SELECT 1')).toThrow(
+      /executable comment/i
+    );
+    expect(() => assertReadOnly('/*! DROP TABLE users */ SELECT 1')).toThrow(/executable comment/i);
   });
 
   it('can use the broader discovery prefix set', () => {
