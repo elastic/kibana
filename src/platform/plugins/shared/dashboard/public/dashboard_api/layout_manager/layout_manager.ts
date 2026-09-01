@@ -168,32 +168,40 @@ export function initializeLayoutManager(
     );
 
     if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
-      layout$.next({ ...layoutToApply });
+      layout$.next({ ...layoutToApply }); // triggers removeOrphanedChildrenSubscription to purge orphaned children
     }
     currentChildState = cloneDeep(childStateToApply);
 
-    let childrenModified = false;
-    const currentChildren = { ...children$.value };
     const setStatePromises: MaybePromise<void>[] = [];
-    for (const uuid of Object.keys(currentChildren)) {
-      if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
-        const child = currentChildren[uuid];
-        const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
-        if (apiHasSerializableState(child)) {
-          setStatePromises.push(child.applySerializedState(nextChildState));
-        }
-      } else {
-        // if reset resulted in panel removal, we need to update the list of children
-        delete currentChildren[uuid];
-        delete currentChildState[uuid];
-        childrenModified = true;
+    for (const [uuid, child] of Object.entries(children$.value))  {
+      const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
+      if (nextChildState && apiHasSerializableState(child)) {
+        setStatePromises.push(child.applySerializedState(nextChildState));
       }
     }
     await Promise.all(setStatePromises);
-    if (childrenModified) children$.next(currentChildren);
 
     childrenStateLoading$.next(false);
   };
+
+  /**
+   * When panels are removed from the layout (e.g. a section with panels is deleted, layout is reset),
+   * remove their APIs from children$.
+   */
+  const removeOrphanedChildrenSubscription = layout$.subscribe((layout) => {
+    const currentChildren = children$.value;
+    const removedUuids = Object.keys(currentChildren).filter(
+      (uuid) => !layout.panels[uuid] && !layout.pinnedPanels[uuid]
+    );
+    if (removedUuids.length === 0) return;
+
+    const updatedChildren = { ...currentChildren };
+    for (const uuid of removedUuids) {
+      delete updatedChildren[uuid];
+      delete currentChildState[uuid];
+    }
+    children$.next(updatedChildren);
+  });
 
   // --------------------------------------------------------------------------------------
   // Panel placement functions
@@ -709,6 +717,7 @@ export function initializeLayoutManager(
     cleanup: () => {
       stateChangedSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
+      removeOrphanedChildrenSubscription.unsubscribe();
     },
   };
 }

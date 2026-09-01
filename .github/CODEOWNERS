@@ -1130,6 +1130,7 @@ x-pack/platform/packages/shared/ml/common-types @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/data-visualizer-server-schemas @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/error_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/ml-cps @elastic/search-ml-ux
+x-pack/platform/packages/shared/ml/ml-cps-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/response_stream @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/search-ml-ux

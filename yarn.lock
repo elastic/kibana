@@ -7779,6 +7779,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-cps-common@link:x-pack/platform/packages/shared/ml/ml-cps-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-cps@link:x-pack/platform/packages/shared/ml/ml-cps":
   version "0.0.0"
   uid ""
