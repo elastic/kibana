@@ -336,7 +336,30 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(getCasesClient).toHaveBeenCalled();
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'rule', id: rule.id, name: rule.name },
+    });
+  });
+
+  it('creates the cases client with an attack source for internally managed alerts', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts: true,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'attack', id: rule.id, name: rule.name },
+    });
   });
 
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {

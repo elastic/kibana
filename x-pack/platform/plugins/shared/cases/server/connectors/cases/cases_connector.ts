@@ -16,7 +16,8 @@ import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecre
 import { ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
-import type { CasesClient } from '../../client';
+import type { GetCasesClientFn } from '../../client/types';
+import { ActionSourceTypes, toActionSource } from '../../../common/types/domain';
 import {
   CasesConnectorError,
   createTaskUserError,
@@ -37,7 +38,7 @@ import { getSavedObjectsTypes } from '../../../common';
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
   casesParams: {
-    getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+    getCasesClient: GetCasesClientFn;
     getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
     getSpaceId: (request?: KibanaRequest) => string;
     getUnsecuredSavedObjectsClient: (
@@ -120,7 +121,15 @@ export class CasesConnector extends SubActionConnector<
       const kibanaRequest = this.kibanaRequest as KibanaRequest;
       const uiSettingsClient = await this.casesParams.getUiSettingsClient(kibanaRequest);
       const validatedParams = await this.getValidatedRunParams(params, uiSettingsClient);
-      const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
+      const actionSource = toActionSource({
+        type:
+          validatedParams.internallyManagedAlerts === true
+            ? ActionSourceTypes.attack
+            : ActionSourceTypes.rule,
+        id: validatedParams.rule.id,
+        name: validatedParams.rule.name,
+      });
+      const casesClient = await this.casesParams.getCasesClient(kibanaRequest, { actionSource });
       const actionsClient = await this.casesParams.getActionsClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,

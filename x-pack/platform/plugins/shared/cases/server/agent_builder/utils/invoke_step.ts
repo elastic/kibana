@@ -6,16 +6,18 @@
  */
 
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type {
   ServerHandlerStepDefinition,
   StepHandlerContext,
 } from '@kbn/workflows-extensions/server';
+import { ActionSourceTypes, toActionSource } from '../../../common/types/domain';
+import { ACTION_SOURCE_STEP_CONFIG_KEY } from '../../common/constants';
 
 /**
  * Invokes a Cases workflow step handler from an agent builder tool context.
  *
- * Builds a minimal StepHandlerContext stub — Cases step handlers only access
- * `contextManager.getFakeRequest()`, `context.input`, `context.config`, and `context.logger`.
+ * Builds a minimal StepHandlerContext stub and stamps `actionSource` from the agent run.
  */
 export async function invokeStepHandler(
   stepDef: ServerHandlerStepDefinition,
@@ -37,9 +39,25 @@ export async function invokeStepHandler(
     },
   };
 
+  const agentEntry =
+    toolContext.runContext != null ? getAgentFromRunContext(toolContext.runContext) : undefined;
+  const actionSource =
+    agentEntry != null
+      ? toActionSource({
+          type: ActionSourceTypes.agent,
+          id: agentEntry.agentId,
+          name: agentEntry.agentName,
+          runId: agentEntry.conversationId,
+        })
+      : undefined;
+
   const fakeStepCtx = {
     input,
-    config: { 'push-case': false, ...extraConfig },
+    config: {
+      'push-case': false,
+      ...extraConfig,
+      ...(actionSource != null ? { [ACTION_SOURCE_STEP_CONFIG_KEY]: actionSource } : {}),
+    },
     rawInput: input,
     contextManager: fakeContextManager,
     logger: toolContext.logger,
