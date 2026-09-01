@@ -291,7 +291,39 @@ describe('useSetInitialValue', () => {
       await new Promise((resolve) => setTimeout(resolve, 250));
     });
 
-    expect(removeLoadFromParameter).toHaveBeenCalled();
+    expect(removeLoadFromParameter).toHaveBeenCalledWith({ replace: true });
+  });
+
+  it('should keep the load_from param when loading the remote data fails', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '?load_from=https://www.elastic.co/docs/some-data',
+      },
+    });
+
+    global.fetch = jest.fn(() => Promise.reject(new Error('Network error'))) as jest.Mock;
+
+    await act(async () => {
+      renderHook(() =>
+        useSetInitialValue({
+          localStorageValue: 'initial value',
+          setValue: setValueMock,
+          toasts: toastsMock,
+        })
+      );
+    });
+
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
+    expect(editorDispatchMock).not.toHaveBeenCalled();
+    expect(removeLoadFromParameter).not.toHaveBeenCalled();
   });
 
   it('should leave the URL alone when there is no load_from param', async () => {
