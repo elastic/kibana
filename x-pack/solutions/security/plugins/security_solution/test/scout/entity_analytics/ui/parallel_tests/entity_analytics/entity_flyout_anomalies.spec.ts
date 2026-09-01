@@ -29,7 +29,7 @@ spaceTest.describe(
   'Entity flyout anomalies',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace, log }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
       // host_details / securitySolutionFlyoutAnomaliesTab). Disable the new flyout so those legacy
       // panels render instead of being consumed by the flyout v2 legacy-URL interop, which drops
@@ -40,7 +40,6 @@ spaceTest.describe(
         HOST_FLYOUT_ENTITY_ID,
         HOST_FLYOUT_HOST_NAME
       );
-      log.info('Testing');
     });
 
     spaceTest.beforeEach(async ({ browserAuth, page }) => {
