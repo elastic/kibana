@@ -58,6 +58,15 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
+elif [[ "$(pwd)" == "/dev/shm"* ]]; then
+  yarn config set cache-folder /dev/shm/yarn-cache > /dev/null
+  if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
+    echo "Extracting ~/.kibana/node_modules.tar.zst"
+    tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+  fi
+  if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
+    ln -s ~/.kibana/.yarn-local-mirror ./.yarn-local-mirror
+  fi
 fi
 
 if ! ("${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}"); then

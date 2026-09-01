@@ -26,6 +26,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getServices } from '../services';
 import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
@@ -36,6 +37,7 @@ interface EsqlPreviewSectionProps {
   esqlData: EsqlDataResult | null;
   esqlDataError: string | null;
   onFetchData: () => void;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 const MAX_PREVIEW_ROWS = 5;
@@ -71,6 +73,7 @@ export const EsqlPreviewSection = ({
   esqlData,
   esqlDataError,
   onFetchData,
+  esqlVariables,
 }: EsqlPreviewSectionProps) => {
   const previewRows = esqlData?.values?.slice(0, MAX_PREVIEW_ROWS) ?? [];
   const columns = esqlData?.columns ?? [];
@@ -132,6 +135,7 @@ export const EsqlPreviewSection = ({
         disableAutoFocus
         initialState={{ editorHeight: 120 }}
         errors={[]}
+        esqlVariables={esqlVariables}
       />
       {esqlQuery.trim() && !timeFieldDetection.isPending && !timeFieldDetection.field && (
         <>

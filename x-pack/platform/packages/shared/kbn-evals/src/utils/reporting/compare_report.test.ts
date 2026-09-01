@@ -16,6 +16,7 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   meanA: 0.8,
   meanB: 0.7,
   pValue: 0.03,
+  direction: 'maximize',
   ...overrides,
 });
 
@@ -28,8 +29,8 @@ describe('formatPairedTTestReport', () => {
     });
 
     expect(header).toEqual([
-      'Experiment A: experiment-1',
-      'Experiment B: experiment-2',
+      'Target: experiment-1',
+      'Baseline: experiment-2',
       'Significance threshold: p < 0.05',
     ]);
     expect(summary).toBe('Significant differences: 1/1');

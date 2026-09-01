@@ -16,13 +16,13 @@ import { ComposeDiscoverFooter, type ComposeDiscoverFooterProps } from './compos
 
 const ALERT_CONDITION_STEP: StepDefinition = {
   id: 'alertCondition',
-  title: 'Alert Condition',
+  title: 'Condition',
   render: () => null,
 };
 
 const BUILDER_CONDITION_STEP: StepDefinition = {
   id: 'builderCondition',
-  title: 'Alert Condition',
+  title: 'Condition',
   render: () => null,
 };
 
