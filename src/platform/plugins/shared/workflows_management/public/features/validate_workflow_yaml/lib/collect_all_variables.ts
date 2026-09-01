@@ -12,7 +12,7 @@ import { visit } from 'yaml';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { matchAllVariables } from '@kbn/workflows-yaml';
-import type { VariableItem } from '../model/types';
+import type { VariableItem } from '@kbn/workflows-yaml';
 
 interface ScalarEntry {
   start: number;

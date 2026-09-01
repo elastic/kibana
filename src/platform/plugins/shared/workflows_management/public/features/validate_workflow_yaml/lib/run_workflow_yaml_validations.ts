@@ -11,6 +11,7 @@ import type { Document, LineCounter } from 'yaml';
 import type { monaco } from '@kbn/code-editor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllVariables } from './collect_all_variables';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
@@ -23,7 +24,6 @@ import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 export interface RunWorkflowYamlValidationsParams {
   yamlString: string;

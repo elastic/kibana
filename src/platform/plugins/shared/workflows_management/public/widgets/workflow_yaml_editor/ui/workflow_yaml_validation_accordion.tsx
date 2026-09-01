@@ -29,8 +29,8 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
-import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { FIX_WITH_AI_LABEL } from '../lib/fix_with_ai_label';
 
