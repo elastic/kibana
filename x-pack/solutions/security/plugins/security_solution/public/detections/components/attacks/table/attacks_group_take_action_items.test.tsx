@@ -357,9 +357,9 @@ describe('AttacksGroupTakeActionItems', () => {
         expect(await findByText('View in AI Assistant')).toBeInTheDocument();
       });
 
-      it('keeps the navigation item for a remote document', async () => {
+      it('keeps the navigation-only menu for a remote document', async () => {
         mockUseIsInSecurityApp.mockReturnValue(true);
-        const { findByText } = render(
+        const { findByText, queryByText } = render(
           <TestProviders>
             <AttacksGroupTakeActionItems
               attack={mockAttack}
@@ -371,6 +371,13 @@ describe('AttacksGroupTakeActionItems', () => {
         );
 
         expect(await findByText('Investigate in Timeline')).toBeInTheDocument();
+        expect(queryByText('Add to existing case')).not.toBeInTheDocument();
+        expect(queryByText('Add to new case')).not.toBeInTheDocument();
+        expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+        expect(queryByText('Assign alert')).not.toBeInTheDocument();
+        expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+        expect(queryByText('Run workflow')).not.toBeInTheDocument();
+        expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
       });
     });
   });
