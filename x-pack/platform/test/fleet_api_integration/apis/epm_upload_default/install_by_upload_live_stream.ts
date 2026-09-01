@@ -64,12 +64,15 @@ export default function (providerContext: FtrProviderContext) {
       await expectStreamAssetsUnchanged(original);
     });
 
-    it('rejects a package policy when an uploaded package later targets an ownerless stream through a custom dataset', async () => {
+    // On 9.4 the custom-dataset template flow only exists for input packages
+    // (main additionally guards integration packages via create_dataset_templates),
+    // so this probe uploads an input package to exercise the corroboration guard.
+    it('rejects a package policy when an uploaded input package targets an ownerless stream through a custom dataset', async () => {
       const original = await createOwnerlessLiveStream();
       const buf = await buildUploadPackageZip({
         name: MUTATE_PACKAGE,
         dataset: `${MUTATE_PACKAGE}.safe`,
-        includeDatasetVar: true,
+        packageType: 'input',
       });
 
       await supertest
@@ -85,32 +88,28 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({
           force: true,
-          create_dataset_templates: true,
           policy_id: agentPolicyId,
           name: 'upload-mutate-probe-policy',
           description: '',
           namespace: 'default',
-          enabled: true,
           package: {
             name: MUTATE_PACKAGE,
             version: PACKAGE_VERSION,
           },
-          inputs: [
-            {
-              type: 'logfile',
+          inputs: {
+            'logs-logfile': {
               enabled: true,
-              streams: [
-                {
+              streams: {
+                [`${MUTATE_PACKAGE}.logs`]: {
                   enabled: true,
-                  data_stream: { type: 'logs', dataset: `${MUTATE_PACKAGE}.safe` },
                   vars: {
-                    'data_stream.dataset': { type: 'text', value: STREAM_DATASET },
-                    paths: { type: 'text', value: ['/tmp/upload-mutate-probe.log'] },
+                    'data_stream.dataset': STREAM_DATASET,
+                    paths: ['/tmp/upload-mutate-probe.log'],
                   },
                 },
-              ],
+              },
             },
-          ],
+          },
         })
         .expect(400);
 
@@ -189,15 +188,52 @@ export default function (providerContext: FtrProviderContext) {
 async function buildUploadPackageZip({
   name,
   dataset,
-  includeDatasetVar = false,
+  packageType = 'integration',
 }: {
   name: string;
   dataset: string;
-  includeDatasetVar?: boolean;
+  packageType?: 'integration' | 'input';
 }): Promise<Buffer> {
   const root = `${name}-${PACKAGE_VERSION}`;
-  const dataStreamDir = `${root}/data_stream/logs`;
   const zip = new JSZip();
+
+  if (packageType === 'input') {
+    zip.file(
+      `${root}/manifest.yml`,
+      [
+        `name: ${name}`,
+        `version: ${PACKAGE_VERSION}`,
+        `title: ${name}`,
+        'description: Upload live-stream probe package',
+        'type: input',
+        'owner:',
+        '  github: elastic/fleet',
+        'policy_templates:',
+        '  - name: logs',
+        '    type: logs',
+        '    title: Logs',
+        '    description: Collect log files',
+        '    input: logfile',
+        '    template_path: input.yml.hbs',
+        '    vars:',
+        '      - name: paths',
+        '        type: text',
+        '        title: Paths',
+        '        required: false',
+        '        multi: true',
+        '        show_user: true',
+        '',
+      ].join('\n')
+    );
+    zip.file(
+      `${root}/agent/input/input.yml.hbs`,
+      'paths:\n{{#each paths}}\n  - {{this}}\n{{/each}}\n'
+    );
+
+    return Buffer.from(await zip.generateAsync({ type: 'nodebuffer' }));
+  }
+
+  const dataStreamDir = `${root}/data_stream/logs`;
 
   zip.file(
     `${root}/manifest.yml`,
@@ -230,28 +266,12 @@ async function buildUploadPackageZip({
       '  - input: logfile',
       '    title: Probe logs',
       '    vars:',
-      includeDatasetVar
-        ? [
-            '      - name: data_stream.dataset',
-            '        type: text',
-            '        title: Dataset name',
-            '        required: false',
-            '        show_user: true',
-            '      - name: paths',
-            '        type: text',
-            '        title: Paths',
-            '        required: false',
-            '        multi: true',
-            '        show_user: true',
-          ].join('\n')
-        : [
-            '      - name: paths',
-            '        type: text',
-            '        title: Paths',
-            '        required: false',
-            '        multi: true',
-            '        show_user: true',
-          ].join('\n'),
+      '      - name: paths',
+      '        type: text',
+      '        title: Paths',
+      '        required: false',
+      '        multi: true',
+      '        show_user: true',
       '',
     ].join('\n')
   );
