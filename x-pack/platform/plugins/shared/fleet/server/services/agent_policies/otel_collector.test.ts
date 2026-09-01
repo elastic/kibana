@@ -3850,5 +3850,14 @@ describe('generateOtelcolConfig', () => {
       });
       expect(exporter).not.toHaveProperty('auth');
     });
+
+    it('should not throw when config_yaml is malformed YAML', () => {
+      // Malformed config_yaml reaches getDefaultPresetForEsOutput via getPresetConfig when no
+      // explicit preset is stored; the safe parse wrapper falls back to `balanced` rather than
+      // letting a YAMLParseError propagate out of policy generation.
+      expect(() =>
+        getExporter({ ...defaultOutput, preset: undefined, config_yaml: '{ unclosed' })
+      ).not.toThrow();
+    });
   });
 });

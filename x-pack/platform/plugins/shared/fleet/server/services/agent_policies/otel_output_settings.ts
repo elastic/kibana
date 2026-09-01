@@ -248,7 +248,16 @@ const getPresetConfig = (output: Output): EsOutputPresetConfig | undefined => {
   }
   // Mirrors transformOutputToFullPolicyOutput: an output with no explicit preset is sent to
   // agents as `balanced` unless its config_yaml sets a reserved performance key.
-  const preset = output.preset ?? getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
+  // Use a safe parse wrapper so malformed config_yaml falls back to `balanced` rather than
+  // throwing out of policy generation (consistent with parseYamlObject's own error policy).
+  const safeParse = (yaml: string) => {
+    try {
+      return parse(yaml);
+    } catch {
+      return null;
+    }
+  };
+  const preset = output.preset ?? getDefaultPresetForEsOutput(output.config_yaml ?? '', safeParse);
   return ES_OUTPUT_PRESETS[preset];
 };
 
