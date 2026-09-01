@@ -10,6 +10,7 @@ import {
   actionTaskParamsSchemaV1,
   actionTaskParamsSchemaV2,
   actionTaskParamsSchemaV3,
+  actionTaskParamsSchemaV4,
 } from '../schemas/action_task_params';
 
 export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
@@ -39,6 +40,22 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: actionTaskParamsSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: actionTaskParamsSchemaV3,
+    },
+  },
+  '4': {
+    changes: [
+      {
+        // Has to be searchable so the alerting API key invalidation task can see the key is
+        // still in use, exactly like `apiKeyId` in model version 2.
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKeyId: { type: 'keyword' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: actionTaskParamsSchemaV4,
     },
   },
 };

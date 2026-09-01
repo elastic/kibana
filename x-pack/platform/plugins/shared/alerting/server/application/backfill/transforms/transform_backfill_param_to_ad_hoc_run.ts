@@ -9,6 +9,7 @@ import { isString } from 'lodash';
 import type { DenormalizedAction } from '../../../rules_client';
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
+import { getUiamApiKeyId } from '../../../lib';
 import { adHocRunStatus } from '../../../../common/constants';
 import type { RuleDomain } from '../../rule/types';
 import type { ScheduleBackfillParam } from '../methods/schedule/types';
@@ -27,6 +28,7 @@ export const transformBackfillParamToAdHocRun = (
 ): TransformBackfillResult => {
   const { schedule, truncated } = calculateSchedule(rule.schedule.interval, param.ranges);
   const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
+  const uiamApiKeyId = getUiamApiKeyId(rule.uiamApiKey);
   const start = param.ranges[0].start;
   // Derive end from the actual schedule so it stays consistent when calculateSchedule truncates
   const end =
@@ -47,7 +49,10 @@ export const transformBackfillParamToAdHocRun = (
       // can authenticate the same way a regular rule run does in UIAM deployments.
       // `uiamApiKeyExternal` has to ride along: without it the backfill run would present a
       // user-created (external) Cloud key with the UIAM shared secret, which UIAM rejects.
+      // The id rides along unencrypted so the invalidation task's in-use guard can see this
+      // snapshot; without it a rule update would revoke the key this backfill still runs under.
       ...(rule.uiamApiKey ? { uiamApiKey: rule.uiamApiKey } : {}),
+      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
       ...(rule.uiamApiKey && rule.uiamApiKeyExternal === true ? { uiamApiKeyExternal: true } : {}),
       createdAt: new Date().toISOString(),
       duration: rule.schedule.interval,

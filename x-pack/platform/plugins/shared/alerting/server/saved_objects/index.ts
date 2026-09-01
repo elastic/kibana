@@ -219,6 +219,9 @@ export function setupSavedObjects(
         apiKeyId: {
           type: 'keyword',
         },
+        uiamApiKeyId: {
+          type: 'keyword',
+        },
         createdAt: {
           type: 'date',
         },

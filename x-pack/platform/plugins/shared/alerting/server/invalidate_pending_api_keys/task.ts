@@ -108,6 +108,18 @@ export function taskRunner(
                 type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
                 apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
               },
+              // `apiKeyId` only ever holds an Elasticsearch key id, so a queued UIAM key would
+              // look unused to the two queries above and be revoked while an ad hoc run or an
+              // enqueued connector task is still authenticating with it. The key material itself
+              // is encrypted and unsearchable, hence the dedicated id attributes.
+              {
+                type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
+              {
+                type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
             ],
           });
           totalInvalidated = result.totalInvalidated;

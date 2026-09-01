@@ -43,6 +43,9 @@ export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
     apiKeyId: {
       type: 'keyword',
     },
+    uiamApiKeyId: {
+      type: 'keyword',
+    },
     // NO NEED TO BE INDEXED
     // actionId: {
     //   type: 'keyword',

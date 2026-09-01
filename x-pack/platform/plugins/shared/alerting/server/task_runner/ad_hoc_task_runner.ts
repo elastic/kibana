@@ -198,7 +198,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule, apiKeyId } = adHocRunData;
+    const { rule, apiKeyId, uiamApiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
     // spaceId is persisted on the ad-hoc run saved object, written by validated
     // request handlers. Brand it once here at the SO load boundary.
@@ -319,6 +319,9 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
       apiKeyId,
+      // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
+      // task's in-use guard, which cannot see the encrypted key material itself.
+      uiamApiKeyId,
       // Mirror the backfill run's own credential treatment onto the connector tasks: the request
       // is marked by getFakeKibanaRequest from the ad hoc run's snapshotted `uiamApiKeyExternal`.
       uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
