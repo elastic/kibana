@@ -26,7 +26,6 @@ describe('ProcessResult', () => {
       entity_id: 'entity-a',
       process_name: 'malware.exe',
       command: 'malware.exe --run',
-      was_killed: true,
     };
 
     render = (props = {}) =>
@@ -59,7 +58,7 @@ describe('ProcessResult', () => {
   });
 
   it('should only render the fields that are present', () => {
-    processResult = { pid: 1234, was_killed: true };
+    processResult = { pid: 1234 };
 
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
@@ -88,16 +87,16 @@ describe('ProcessResult', () => {
     expect(getByTestId(testPrefix).textContent).toContain('Suspended');
   });
 
-  it('should render the not-killed failure message when was_killed is false', () => {
-    processResult = { pid: 1234, was_killed: false };
+  it('should render the not-killed failure message when an error is present', () => {
+    processResult = { pid: 1234, error: 'process failed to exit' };
 
     const { getByTestId } = render();
 
     expect(getByTestId(testPrefix).textContent).toContain('Not killed');
   });
 
-  it('should render the not-suspended failure message when was_killed is false', () => {
-    processResult = { pid: 1234, was_killed: false };
+  it('should render the not-suspended failure message an error is present', () => {
+    processResult = { pid: 1234, error: 'process failed to exit' };
 
     const { getByTestId } = render({ command: 'suspend-process' });
 
@@ -105,7 +104,7 @@ describe('ProcessResult', () => {
   });
 
   it('should render the failure message when an error is present', () => {
-    processResult = { pid: 1234, was_killed: true, error: 'process is protected' };
+    processResult = { pid: 1234, error: 'process is protected' };
 
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
