@@ -231,6 +231,40 @@ describe('score_base_entities', () => {
       expect(summary.scoresFailed).toBe(0);
     });
 
+    // Pins the root cause of https://github.com/elastic/kibana/issues/280414.
+    //
+    // After an asset criticality change the flyout asks the risk engine to score
+    // that one entity, which comes through here. If the entity has no alert in
+    // the engine's lookback, the composite agg finds nothing, so no score is
+    // written and the caller is told the run succeeded anyway. The old score
+    // stays in place with the old criticality level on it.
+    it('reports a successful run with nothing written when the entity has no alerts in range', async () => {
+      mockCompositeAggPage(esClient, []);
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        ...baseParams,
+      });
+
+      expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(summary).toEqual(
+        expect.objectContaining({
+          pagesProcessed: 0,
+          scoresCalculated: 0,
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+        })
+      );
+    });
+
     it('writes no scores when no entity on the page is in the entity store', async () => {
       mockCompositeAggPage(esClient, ['user:phantom-a@okta', 'user:phantom-b@okta']);
       (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
