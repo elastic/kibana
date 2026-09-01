@@ -84,20 +84,16 @@ describe('AlertAnalysisWorkflowPage', () => {
   });
 
   const renderComponent = ({
-    canUpdateManagedWorkflow = true,
+    canSaveAdvancedSettings = true,
     settingsRequest,
   }: {
-    canUpdateManagedWorkflow?: boolean;
+    canSaveAdvancedSettings?: boolean;
     settingsRequest?: jest.Mock;
   } = {}) => {
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
-      advancedSettings: { show: true, save: true },
+      advancedSettings: { show: true, save: canSaveAdvancedSettings },
       securitySolution: { show: true, crud: true },
-      workflowsManagement: {
-        updateWorkflow: true,
-        updateManagedWorkflow: canUpdateManagedWorkflow,
-      },
     };
     // The page reads rules privileges via useUserPrivileges (not raw capabilities).
     useUserPrivilegesMock.mockReturnValue({
@@ -157,8 +153,8 @@ describe('AlertAnalysisWorkflowPage', () => {
     ]);
   });
 
-  it('renders not found without loading data when managed workflow update is unauthorized', async () => {
-    renderComponent({ canUpdateManagedWorkflow: false });
+  it('renders not found without loading data when advanced settings save is unauthorized', async () => {
+    renderComponent({ canSaveAdvancedSettings: false });
 
     expect(await screen.findByTestId('notFoundPage')).toBeInTheDocument();
     expect(coreStart.http.fetch).not.toHaveBeenCalled();

@@ -16,7 +16,6 @@ import {
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
-import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 import {
   ALERT_ANALYSIS_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
@@ -44,8 +43,6 @@ import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
 
-const WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.update}`;
-const WORKFLOWS_MANAGEMENT_UPDATE_MANAGED_PRIVILEGE = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.updateManaged}`;
 const ADVANCED_SETTINGS_SAVE_PRIVILEGE = 'advancedSettings.save';
 
 export const links: LinkItem = {
@@ -128,13 +125,7 @@ export const links: LinkItem = {
         createElement(AiIcon, { iconType: 'sparkles', ...props }),
       path: ALERT_ANALYSIS_WORKFLOW_PATH,
       capabilities: [
-        [
-          RULES_UI_READ_PRIVILEGE,
-          RULES_UI_EDIT_PRIVILEGE,
-          ADVANCED_SETTINGS_SAVE_PRIVILEGE,
-          WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE,
-          WORKFLOWS_MANAGEMENT_UPDATE_MANAGED_PRIVILEGE,
-        ],
+        [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, ADVANCED_SETTINGS_SAVE_PRIVILEGE],
       ],
       // Enterprise-only feature. On lower licenses the link is marked unavailable (it stays in the
       // side nav and Rules landing page but is dropped from global search), and visiting the URL

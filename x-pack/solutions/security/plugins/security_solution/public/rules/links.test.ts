@@ -9,7 +9,6 @@ import {
   RULES_UI_EDIT_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
-import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 import { SecurityPageName } from '../app/types';
 import { links } from './links';
 
@@ -20,13 +19,7 @@ describe('rules links', () => {
     );
 
     expect(alertAnalysisWorkflowLink?.capabilities).toEqual([
-      [
-        RULES_UI_READ_PRIVILEGE,
-        RULES_UI_EDIT_PRIVILEGE,
-        'advancedSettings.save',
-        `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.update}`,
-        `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.updateManaged}`,
-      ],
+      [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, 'advancedSettings.save'],
     ]);
   });
 });

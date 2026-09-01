@@ -30,7 +30,6 @@ import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { TAG_PREFIX_PATTERN } from '../../../../../common/workflows/alert_analysis_workflow';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -63,18 +62,8 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   } = useKibana();
   const isEnterprise = useLicense().isEnterprise();
   const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
-  const workflowsCapabilities = application.capabilities.workflowsManagement;
-  const canUpdateWorkflow = workflowsCapabilities?.[WorkflowsManagementUiActions.update] === true;
-  const canUpdateManagedWorkflow =
-    workflowsCapabilities?.[WorkflowsManagementUiActions.updateManaged] === true;
   const canSaveAdvancedSettings = application.capabilities.advancedSettings?.save === true;
-  const canAccessPage =
-    isEnterprise &&
-    canReadRules &&
-    canEditRules &&
-    canSaveAdvancedSettings &&
-    canUpdateWorkflow &&
-    canUpdateManagedWorkflow;
+  const canAccessPage = isEnterprise && canReadRules && canEditRules && canSaveAdvancedSettings;
 
   if (!canAccessPage) {
     return <NotFoundPage />;
