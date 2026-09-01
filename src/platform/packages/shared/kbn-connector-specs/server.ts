@@ -20,3 +20,5 @@ export const authTypeSpecs = {
   KubernetesEksAuth,
   KubernetesGkeAuth,
 };
+
+export { clientTypes } from './src/lib/clients';
