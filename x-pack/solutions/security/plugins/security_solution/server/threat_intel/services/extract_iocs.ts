@@ -105,6 +105,9 @@ const trimUrlPunctuation = (url: string): string => {
  */
 const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
 
+/** RFC 1035 maximum length for a DNS name. Reject before suffix dedup to avoid quadratic work. */
+const MAX_DOMAIN_LENGTH = 253;
+
 /**
  * Most IOCs one report may carry.
  *
@@ -567,7 +570,8 @@ interface DomainCandidate {
  * (their presence is informational, not inferential).
  */
 const longestMatchDomainDedup = (candidates: DomainCandidate[]): DomainCandidate[] => {
-  const domains = Array.from(new Set(candidates.map((c) => c.domain)));
+  const bounded = candidates.filter((c) => c.domain.length <= MAX_DOMAIN_LENGTH);
+  const domains = Array.from(new Set(bounded.map((c) => c.domain)));
   const subsumed = new Set<string>();
   for (const domain of domains) {
     let dot = domain.indexOf('.');
@@ -577,7 +581,7 @@ const longestMatchDomainDedup = (candidates: DomainCandidate[]): DomainCandidate
     }
   }
 
-  return candidates.filter((c) => {
+  return bounded.filter((c) => {
     // Always keep reference/denied — they are observability entries, not anchors.
     if (c.tier === 'reference' || c.tier === 'denied') return true;
     return !subsumed.has(c.domain);
@@ -986,7 +990,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
       // Email tier: defanged-in-source → discriminating (like a defanged domain)
       // We check if the @ was in the original text or reconstructed by refang.
-      const wasDefanged = !text.toLowerCase().includes(raw);
+      const wasDefanged = !originalLower.includes(raw);
       const tier: IocTier = wasDefanged ? 'discriminating' : 'uncertain';
       const basis = wasDefanged ? 'defanged_source' : 'uncertain_default';
 
