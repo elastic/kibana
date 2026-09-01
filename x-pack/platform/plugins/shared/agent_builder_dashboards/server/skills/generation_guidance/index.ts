@@ -6,3 +6,4 @@
  */
 
 export { dashboardGeneration } from './generation_guidance';
+export { getDashboardPrettifyPromptContent } from './prettify_guidance';

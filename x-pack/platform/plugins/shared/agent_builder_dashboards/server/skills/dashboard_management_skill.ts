@@ -7,8 +7,18 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { generateDashboardTool } from '../tools';
+import { getDashboardPrettifyPromptContent } from './generation_guidance/prettify_guidance';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
+
+export const DASHBOARD_PRETTIFY_REFERENCE = {
+  name: 'dashboard-prettify',
+  relativePath: './prettify',
+  content: getDashboardPrettifyPromptContent(),
+} as const;
+
+export const DASHBOARD_PRETTIFY_FILE_PATH =
+  '/skills/platform/dashboard/dashboard-management/prettify/dashboard-prettify.md';
 
 export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
@@ -28,13 +38,14 @@ Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
-When the user asks to prettify or enhance the attached dashboard, read the dashboard attachment and improve its layout and presentation with \`generate_dashboard\`. The tool updates the attachment in place. Do not create a new dashboard.
+When the user asks to prettify or enhance the attached dashboard, read \`${DASHBOARD_PRETTIFY_FILE_PATH}\` with \`read_file\` and follow that file. The tool updates the attachment in place. Do not create a new dashboard.
 
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
 `,
   referencedContent: [
+    DASHBOARD_PRETTIFY_REFERENCE,
     ...(dashboardGeneration.referencedContent ?? []),
     ...(kibanaRendering.referencedContent ?? []),
   ],

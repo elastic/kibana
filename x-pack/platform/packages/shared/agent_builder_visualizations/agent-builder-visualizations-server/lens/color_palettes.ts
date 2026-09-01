@@ -56,12 +56,65 @@ const getCategoricalPalettePreviews = (): string[] =>
   );
 
 /**
- * Returns coloring guidance for the visualization config prompt: the general
- * coloring policy, the chart type's `coloringRules` from the registry, and —
- * when the chart supports dynamic/categorical coloring — the palette rules and
- * previews mirroring the Lens palette pickers.
+ * Shared across every chart type. Lens JSON schema still lists these ids for
+ * existing saved charts; new configs must not pick them.
  */
-export const getColorPalettesPromptContent = (chartType: SupportedChartType): string => {
+export const LEGACY_PALETTE_BAN =
+  'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).';
+
+export const INVENTED_COLOR_BAN =
+  'Drop invented static hex colors, per-value `color_code` mappings, and legacy palettes unless the user asked for those colors. Omit `color` so Lens uses its default.';
+
+const DEFAULT_POLICY_LINES = [
+  'DEFAULT POLICY:',
+  '- Prefer Lens defaults for unknown-scale data: use `color: { type: "auto" }` or omit `color` when Lens can calculate better thresholds at render time.',
+  '- Generate explicit numeric `steps` only when the chart-specific rules allow it, or when the user asks for a custom palette or exact thresholds.',
+  '- Do not color neutral data with no useful color meaning.',
+  '- Chart-specific coloring rules below override this policy where they differ.',
+];
+
+const SHARED_DYNAMIC_STEP_COUNT = 5;
+
+const getDynamicStepsLines = (stepCountLine: string): string[] => [
+  'DYNAMIC STEPS — mechanics for when the rules above call for explicit `steps`:',
+  '- Pick exactly ONE dynamic palette from the list below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, or "Cool"/"Warm"/"Gray" for neutral magnitude.',
+  stepCountLine,
+  '- Step thresholds are data values, not display labels; keep them in the same unit and scale as the metric column. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values.',
+  '- Keep palette order by default; to reverse, reverse the `steps` colors yourself. There is no `reverse` field.',
+  '',
+];
+
+/** Shared palette bans + default policy. Review also compiles mechanics once under `### shared`. */
+export const getSharedColorPalettesPromptContent = ({
+  includeMechanics = false,
+}: { includeMechanics?: boolean } = {}): string => {
+  const lines: string[] = [
+    'COLOR PALETTE RULES:',
+    '',
+    `- ${LEGACY_PALETTE_BAN}`,
+    `- ${INVENTED_COLOR_BAN}`,
+    '',
+    ...DEFAULT_POLICY_LINES,
+  ];
+
+  if (includeMechanics) {
+    lines.push(
+      '',
+      ...getDynamicStepsLines(
+        '- Step count by chart type: metric: 3, gauge: 4, heatmap and data_table: 5. Every `steps[*].color` hex MUST come from the 5-stop preview line below; for 3- and 4-step charts use the first 3 or 4 colors.'
+      ),
+      `Available dynamic palettes (canonical ${SHARED_DYNAMIC_STEP_COUNT}-stop previews from the Lens UI palette picker):`,
+      ...getDynamicPalettePreviews(SHARED_DYNAMIC_STEP_COUNT)
+    );
+  }
+
+  return lines.join('\n').trimEnd();
+};
+
+export const getColorPalettesPromptContent = (
+  chartType: SupportedChartType,
+  { includeShared = true }: { includeShared?: boolean } = {}
+): string => {
   const config = chartTypeRegistry[chartType].prompt.config;
   const coloringRules = config?.coloringRules ?? [];
   const coloringOptions = config?.options?.coloring;
@@ -69,24 +122,11 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
   const supportsDynamic = dynamicColoringOptions !== undefined;
   const supportsCategorical = coloringOptions?.categorical ?? false;
 
-  if (!coloringRules.length && !supportsDynamic && !supportsCategorical) {
-    return '';
-  }
-
   const stepsCount = dynamicColoringOptions?.recommendedStepCount ?? 5;
-  const lines: string[] = ['COLOR PALETTE RULES:', ''];
+  const lines: string[] = includeShared ? [getSharedColorPalettesPromptContent(), ''] : [];
 
-  if (supportsDynamic || supportsCategorical) {
-    lines.push(
-      'DEFAULT POLICY:',
-      '- Prefer Lens defaults for unknown-scale data: use `color: { type: "auto" }` or omit `color` when Lens can calculate better thresholds at render time.',
-      '- Generate explicit numeric `steps` only when the chart-specific rules allow it, or when the user asks for a custom palette or exact thresholds.',
-      '- Do not color neutral data with no useful color meaning.',
-      ...(coloringRules.length
-        ? ['- The chart-specific coloring rules below override this policy where they differ.']
-        : []),
-      ''
-    );
+  if (!coloringRules.length && !supportsDynamic && !supportsCategorical) {
+    return lines.join('\n').trimEnd();
   }
 
   if (coloringRules.length) {
@@ -109,16 +149,13 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
     );
   }
 
-  if (supportsDynamic) {
+  if (includeShared && supportsDynamic) {
     lines.push(
-      'DYNAMIC STEPS — mechanics for when the rules above call for explicit `steps`:',
-      '- Pick exactly ONE dynamic palette from the list below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, or "Cool"/"Warm"/"Gray" for neutral magnitude.',
-      `- Use exactly ${stepsCount} step${
-        stepsCount === 1 ? '' : 's'
-      }; every \`steps[*].color\` hex MUST come from that one palette preview line exactly as written.`,
-      '- Step thresholds are data values, not display labels; keep them in the same unit and scale as the metric column. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values.',
-      '- Keep palette order by default; to reverse, reverse the `steps` colors yourself. There is no `reverse` field.',
-      ''
+      ...getDynamicStepsLines(
+        `- Use exactly ${stepsCount} step${
+          stepsCount === 1 ? '' : 's'
+        }; every \`steps[*].color\` hex MUST come from that one palette preview line exactly as written.`
+      )
     );
   }
 
@@ -133,7 +170,7 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
     );
   }
 
-  if (supportsDynamic) {
+  if (includeShared && supportsDynamic) {
     lines.push(
       `Available dynamic palettes (canonical ${stepsCount}-stop previews from the Lens UI palette picker, sized to match the ${stepsCount} \`steps\` a ${chartType} chart uses when explicit steps apply):`,
       ...getDynamicPalettePreviews(stepsCount),
