@@ -59,19 +59,19 @@ export interface TestRenderer {
   waitFor: typeof waitFor;
 }
 
-// disable retries to avoid test flakiness
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
-
 export const createFleetTestRendererMock = (): TestRenderer => {
+  // Create a fresh QueryClient per test renderer so React Query cache does not
+  // bleed between tests when multiple renderers are created in the same suite.
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);

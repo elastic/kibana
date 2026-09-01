@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import path from 'path';
 
@@ -46,6 +47,7 @@ export class IngestPipelinesPage {
   private readonly deletePipelineButton: Locator;
   private readonly manageProcessorsLink: Locator;
   private readonly manageProcessorsTitle: Locator;
+  private readonly appMenuOverflowButton: Locator;
   private readonly addGeoipDatabaseButton: Locator;
   private readonly databaseTypeSelect: Locator;
   private readonly databaseNameSelect: Locator;
@@ -56,7 +58,7 @@ export class IngestPipelinesPage {
   private readonly deleteGeoipDatabaseSubmitButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.appTitle = this.page.testSubj.locator('appTitle');
+    this.appTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.detailsFlyout = this.page.testSubj.locator('pipelineDetails');
     this.pipelineTreePanel = this.page.testSubj.locator('pipelineTreePanel');
     this.navigationBlockConfirmModal = this.page.testSubj.locator('navigationBlockConfirmModal');
@@ -86,7 +88,8 @@ export class IngestPipelinesPage {
     this.actionsPopoverButton = this.page.testSubj.locator('actionsPopoverButton');
     this.deletePipelineButton = this.page.testSubj.locator('deletePipelineButton');
     this.manageProcessorsLink = this.page.testSubj.locator('manageProcessorsLink');
-    this.manageProcessorsTitle = this.page.testSubj.locator('manageProcessorsTitle');
+    this.manageProcessorsTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
+    this.appMenuOverflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
     this.addGeoipDatabaseButton = this.page.testSubj.locator('addGeoipDatabaseButton');
     this.databaseTypeSelect = this.page.testSubj.locator('databaseTypeSelect');
     this.databaseNameSelect = this.page.testSubj.locator('databaseNameSelect');
@@ -206,8 +209,9 @@ export class IngestPipelinesPage {
   }
 
   async navigateToManageProcessorsPage() {
+    await this.appMenuOverflowButton.click();
     await this.manageProcessorsLink.click();
-    await this.manageProcessorsTitle.waitFor();
+    await this.manageProcessorsTitle.filter({ hasText: 'Manage Processors' }).waitFor();
   }
 
   async openCreateDatabaseModal() {

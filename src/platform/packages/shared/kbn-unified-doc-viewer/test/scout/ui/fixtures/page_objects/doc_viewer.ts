@@ -56,6 +56,25 @@ export class DocViewer {
     await this.waitForFlyoutOpen();
   }
 
+  async copyDirectLink(): Promise<string> {
+    await this.page.evaluate(() => navigator.clipboard.writeText(''));
+    await this.page.testSubj
+      .locator('discoverDocFlyoutShareDirectLink')
+      .getByRole('button')
+      .click();
+
+    const clipboardValue = await this.page.waitForFunction(async () => {
+      return (await navigator.clipboard.readText()) || undefined;
+    });
+    const sharedUrl = await clipboardValue.jsonValue();
+
+    if (typeof sharedUrl !== 'string') {
+      throw new Error('Direct document link was not copied to the clipboard');
+    }
+
+    return sharedUrl;
+  }
+
   async close() {
     await this.page.testSubj.click('euiFlyoutCloseButton');
     await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
