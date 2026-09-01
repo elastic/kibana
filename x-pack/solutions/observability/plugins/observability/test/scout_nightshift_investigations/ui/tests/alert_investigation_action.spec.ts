@@ -15,6 +15,7 @@ import { mockStartInvestigation } from '../fixtures/mocks';
 const suffix = randomUUID();
 const alertId = `nightshift-investigation-alert-${suffix}`;
 const ruleId = `nightshift-investigation-rule-${suffix}`;
+const ruleName = `Nightshift investigation test rule ${suffix}`;
 const alertIndex = '.alerts-observability.apm.alerts-default';
 
 test.describe(
@@ -39,7 +40,7 @@ test.describe(
           'kibana.alert.workflow_status': 'open',
           'kibana.alert.rule.category': 'Failed transaction rate threshold',
           'kibana.alert.rule.consumer': 'alerts',
-          'kibana.alert.rule.name': `Nightshift investigation test rule ${suffix}`,
+          'kibana.alert.rule.name': ruleName,
           'kibana.alert.rule.producer': 'apm',
           'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
           'kibana.alert.rule.uuid': ruleId,
@@ -59,8 +60,8 @@ test.describe(
     });
 
     test('starts an investigation from an alert row action', async ({ page, pageObjects }) => {
-      await pageObjects.alertsTablePage.goto();
-      await pageObjects.alertsTablePage.waitForTableToLoad();
+      await pageObjects.alertsTablePage.goto({ withoutFilter: true });
+      await pageObjects.alertsTablePage.submitQuery(`kibana.alert.rule.name: "${ruleName}"`);
 
       const requestPromise = page.waitForRequest(
         (request) =>

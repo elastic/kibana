@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ComponentProps } from 'react';
+import type { Alert } from '@kbn/alerting-types';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -178,13 +179,19 @@ describe('ObservabilityActions component', () => {
     });
   });
 
+  interface SetupOptions {
+    withInvestigations?: boolean;
+    canWriteAgentBuilder?: boolean;
+    alert?: Alert;
+  }
+
   const setup = async (
     pageId: string,
     {
       withInvestigations = false,
       canWriteAgentBuilder = withInvestigations,
-      alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: false },
-    } = {}
+      alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] },
+    }: SetupOptions = {}
   ) => {
     const queryClient = new QueryClient({
       defaultOptions: {

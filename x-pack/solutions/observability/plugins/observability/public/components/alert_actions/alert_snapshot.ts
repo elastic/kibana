@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertSnapshot } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  alertSnapshotSchema,
+  type AlertSnapshot,
+} from '@kbn/nightshift-investigations-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -44,7 +47,7 @@ export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot 
     return;
   }
 
-  return {
+  const snapshot = {
     id: fields[ALERT_UUID],
     rule_id: fields[ALERT_RULE_UUID],
     rule_name: fields[ALERT_RULE_NAME],
@@ -71,4 +74,6 @@ export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot 
     ...(fields[ALERT_RULE_PARAMETERS] ? { rule_parameters: fields[ALERT_RULE_PARAMETERS] } : {}),
     ...(fields[ALERT_INDEX_PATTERN] ? { index_pattern: fields[ALERT_INDEX_PATTERN] } : {}),
   };
+  const parsed = alertSnapshotSchema.safeParse(snapshot);
+  return parsed.success ? parsed.data : undefined;
 };
