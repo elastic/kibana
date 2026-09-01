@@ -10,7 +10,6 @@
 import _ from 'lodash';
 import type { Document, Node, Pair, Scalar } from 'yaml';
 import { visit } from 'yaml';
-import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
@@ -48,7 +47,6 @@ interface CollectionDiagnostic {
 
 interface ForLoopValidationContext {
   readonly yamlString: string;
-  readonly model: monaco.editor.ITextModel;
   readonly workflowGraph: WorkflowGraph;
   readonly workflowDefinition: WorkflowYaml;
   readonly yamlDocument: Document;
@@ -63,16 +61,14 @@ interface ForLoopValidationContext {
 export function validateLiquidYamlScalars(
   yamlString: string,
   yamlDocument: Document,
-  model: monaco.editor.ITextModel | null,
   workflowGraph?: WorkflowGraph,
   workflowDefinition?: WorkflowYaml
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
   const forLoopContext: ForLoopValidationContext | null =
-    model != null && workflowGraph != null && workflowDefinition != null
+    workflowGraph != null && workflowDefinition != null
       ? {
           yamlString,
-          model,
           workflowGraph,
           workflowDefinition,
           yamlDocument,
@@ -246,8 +242,8 @@ function collectForLoopCollectionResults(
     const diagnostic = validateCollectionPath(resolvedCollectionPath, schemaAtCollection);
 
     if (diagnostic && absRange) {
-      const startPos = ctx.model.getPositionAt(absRange.start);
-      const endPos = ctx.model.getPositionAt(absRange.end);
+      const startPos = offsetToLineColumn(ctx.yamlString, absRange.start);
+      const endPos = offsetToLineColumn(ctx.yamlString, absRange.end);
 
       results.push({
         id: `for-collection-${nearestStep.name}-${scope.collectionPath}-${absRange.start}`,
@@ -255,9 +251,9 @@ function collectForLoopCollectionResults(
         ruleId: 'invalidCollectionPath',
         message: diagnostic.message,
         severity: diagnostic.severity,
-        startLineNumber: startPos.lineNumber,
+        startLineNumber: startPos.line,
         startColumn: startPos.column,
-        endLineNumber: endPos.lineNumber,
+        endLineNumber: endPos.line,
         endColumn: endPos.column,
         hoverMessage: null,
       });
