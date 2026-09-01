@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  DISPATCH_CHUNK_SIZE,
-  MAX_WINDOW_MINUTES,
-  OVERLAP_WINDOW_MINUTES,
-  TICK_DEADLINE_MS,
-} from './constants';
+import { MAX_WINDOW_MINUTES, OVERLAP_WINDOW_MINUTES, TICK_DEADLINE_MS } from './constants';
 import { EPISODE_QUERY_LIMIT } from './queries';
 
 /** Parses a TM timeout string like '1m' or '30s' to milliseconds. */
@@ -30,10 +25,6 @@ describe('dispatcher constants invariants', () => {
     const { DISPATCHER_TASK_TIMEOUT } = await import('./constants');
     const taskTimeoutMs = parseTimeoutMs(DISPATCHER_TASK_TIMEOUT);
     expect(TICK_DEADLINE_MS).toBeLessThan(taskTimeoutMs);
-  });
-
-  it('DISPATCH_CHUNK_SIZE is 250', () => {
-    expect(DISPATCH_CHUNK_SIZE).toBe(250);
   });
 
   it('EPISODE_QUERY_LIMIT matches the LIMIT literal in getDispatchableAlertEventsQuery', async () => {

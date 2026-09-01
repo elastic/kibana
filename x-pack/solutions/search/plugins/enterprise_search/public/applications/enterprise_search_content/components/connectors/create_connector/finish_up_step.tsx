@@ -135,9 +135,10 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           onClick={() => {
                             discover.locator?.navigate({
                               dataViewSpec: {
-                                name: connector?.name,
-                                ...(connector?.index_name && { title: connector?.index_name }),
+                                title: connector?.name,
                               },
+                              indexPattern: connector?.index_name,
+                              title: connector?.name,
                             });
                           }}
                         >

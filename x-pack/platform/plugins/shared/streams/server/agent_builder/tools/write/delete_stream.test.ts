@@ -25,12 +25,11 @@ describe('createDeleteStreamTool', () => {
   });
 
   it('uses confirmation_body as confirmation message when provided', async () => {
-    const { tool, context } = setup();
+    const { tool } = setup();
     const description = '**Stream**: logs.nginx\n~1,200,000 docs will be deleted.';
 
     const confirmation = await tool.confirmation!.getConfirmation!({
       toolParams: { name: 'logs.nginx', confirmation_body: description },
-      context,
     });
 
     expect(confirmation.title).toBe('Permanently delete stream "logs.nginx"');
@@ -40,11 +39,10 @@ describe('createDeleteStreamTool', () => {
   });
 
   it('falls back to JSON params when confirmation_body is omitted', async () => {
-    const { tool, context } = setup();
+    const { tool } = setup();
 
     const confirmation = await tool.confirmation!.getConfirmation!({
       toolParams: { name: 'logs.nginx' },
-      context,
     });
 
     expect(confirmation.message).toContain('**name:** logs.nginx');

@@ -22,7 +22,6 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type {
-  AgentBuilderIntegration,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -51,19 +50,12 @@ export class ContextEnginePlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
     Promise.resolve(undefined);
 
-  /** Registered suggest-automation hooks from context_engine_agent_builder. */
-  private agentBuilderIntegration?: AgentBuilderIntegration;
-
   constructor(_context: PluginInitializerContext) {}
 
-  setup(
-    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
-  ): ContextEnginePluginSetup {
+  setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
     this.setupAgentBuilderStart(core);
     const startServices = core.getStartServices();
     const getAgentBuilder = () => this.agentBuilderPromise;
-    const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
-      this.agentBuilderIntegration;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -105,7 +97,6 @@ export class ContextEnginePlugin
           element: params.element,
           history: params.history,
           getChatOpener: () => chatOpener,
-          getAgentBuilderIntegration,
         });
       },
     });
@@ -125,11 +116,7 @@ export class ContextEnginePlugin
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {
-      registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => {
-        this.agentBuilderIntegration = integration;
-      },
-    };
+    return {};
   }
 
   stop() {}

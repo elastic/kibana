@@ -12,8 +12,6 @@ import {
   buildExperimentFilterQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
-  buildEvaluatorModelsAggregation,
-  parseEvaluatorModelsAggregation,
   buildModelDisplayId,
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
@@ -26,6 +24,7 @@ import type { RouteDependencies } from '../register_routes';
 interface EvalDocSource {
   experiment_name?: string;
   task?: { model?: { id?: string; family?: string; provider?: string } };
+  evaluator?: { model?: { id?: string; family?: string; provider?: string } };
   metadata?: {
     execution_id?: string;
     suite_id?: string;
@@ -99,18 +98,12 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
           const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
             query,
-            aggs: {
-              ...buildStatsAggregation(),
-              evaluator_models: buildEvaluatorModelsAggregation(),
-            },
+            aggs: buildStatsAggregation(),
           });
 
-          const aggregations = aggResponse.aggregations as Record<string, unknown> | undefined;
-          const stats = parseStatsAggregationResponse(aggregations);
-          // Every distinct judge, most scores first; empty when only code evaluators ran. Derived
-          // from the same aggregation as the listing so both agree on the predominant judge,
-          // unlike `firstDoc`, which reflects whichever judge the unsorted search happens to hit.
-          const evaluatorModels = parseEvaluatorModelsAggregation(aggregations);
+          const stats = parseStatsAggregationResponse(
+            aggResponse.aggregations as Record<string, unknown> | undefined
+          );
 
           const toModelDisplay = (model?: { id?: string; family?: string; provider?: string }) => {
             if (!model) return undefined;
@@ -129,8 +122,7 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               suite_id: firstDoc.metadata?.suite_id ?? null,
               timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
-              evaluator_model: evaluatorModels[0],
-              evaluator_models: evaluatorModels,
+              evaluator_model: toModelDisplay(firstDoc.evaluator?.model),
               git_branch: firstDoc.metadata?.git?.branch ?? null,
               git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
               ci: firstDoc.metadata?.ci,

@@ -219,13 +219,15 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreatorTitle = getJobCreatorTitle(jobCreator);
 
   return (
-    <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
-      <MlAppHeader
-        title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
-          defaultMessage: 'Create job',
-        })}: ${jobCreatorTitle}`}
-        back={anomalyDetectionJobsBack}
-      />
+    <>
+      <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+        <MlAppHeader
+          title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
+            defaultMessage: 'Create job',
+          })}: ${jobCreatorTitle}`}
+          back={anomalyDetectionJobsBack}
+        />
+      </div>
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
@@ -262,6 +264,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
           firstWizardStep={firstWizardStep}
         />
       </div>
-    </div>
+    </>
   );
 };

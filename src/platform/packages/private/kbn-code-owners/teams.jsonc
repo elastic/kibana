@@ -83,14 +83,14 @@
     ]
   },
   {
-    "id": "siem-conduit",
-    "name": "SIEM Conduit",
+    "id": "cloud-services",
+    "name": "Cloud Services",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/siem-conduit",
-      "label": "Team:security-siem-conduit"
+      "team": "elastic/cloud-services",
+      "label": "Team:Security-Cloud Services"
     }
   },
   {

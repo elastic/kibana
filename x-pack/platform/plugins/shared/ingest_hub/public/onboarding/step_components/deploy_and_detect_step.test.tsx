@@ -42,10 +42,7 @@ function setupMocks({
     },
     retryDeploy,
   });
-  mockUseSessionStorage.mockReturnValue([
-    { instances, serviceVars: {}, globalRegion: '' },
-    jest.fn(),
-  ]);
+  mockUseSessionStorage.mockReturnValue([{ instances }, jest.fn()]);
   return { retryDeploy };
 }
 
@@ -62,22 +59,20 @@ describe('DeployAndDetectStep', () => {
 
   describe('chip labels', () => {
     it('shows instance name from session storage when instanceId matches', () => {
-      // Use an agentless service (ec2_metrics) — cloudtrail is an ECF service and is filtered
-      // out of the agentless chip row, so it would not appear here.
       setupMocks({
-        serviceStatuses: { 'ec2_metrics__dup-1': 'instantiating' },
+        serviceStatuses: { 'cloudtrail__dup-1': 'instantiating' },
         instances: [
           {
-            instanceId: 'ec2_metrics__dup-1',
-            serviceId: 'ec2_metrics',
-            name: 'AWS EC2 [Duplicate]',
+            instanceId: 'cloudtrail__dup-1',
+            serviceId: 'cloudtrail',
+            name: 'AWS CloudTrail [Duplicate]',
             isDuplicate: true,
           },
         ],
       });
 
       renderStep();
-      expect(screen.getByText('AWS EC2 [Duplicate]')).toBeInTheDocument();
+      expect(screen.getByText('AWS CloudTrail [Duplicate]')).toBeInTheDocument();
     });
 
     it('falls back to AWS_SERVICES_MAP name when instanceId is a known serviceId (original instance)', () => {

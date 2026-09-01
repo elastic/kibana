@@ -117,7 +117,6 @@ const resolveTokenFromConnector = async (
     encryptedSavedObjectsClient,
     unsecuredSavedObjectsClient,
     logger,
-    configurationUtilities: actionsSetup.getActionsConfigurationUtilities(),
   });
 
   const axiosInstance = await actionsSetup.getAxiosInstanceWithAuth({

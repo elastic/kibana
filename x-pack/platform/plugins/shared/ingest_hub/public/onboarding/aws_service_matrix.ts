@@ -18,21 +18,6 @@ export type SignalType = 'logs' | 'metrics';
 
 export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
 
-/**
- * Log type identifiers used by the ECF CloudFormation templates.
- * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
- * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
- */
-export type EcfLogType = 'vpcflow' | 'cloudtrail' | 'waf';
-
-/**
- * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
- * unified ECS template.
- *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml), uses S3SourceBuckets
- *   - `'crowdstrike_fdr'`— CrowdStrike FDR dedicated template
- */
-export type EcfDedicatedTemplate = 'otel' | 'crowdstrike_fdr';
-
 export type AuthType = 'identity_federation' | 'api_key';
 
 export type Badge = 'technical_preview' | 'beta';
@@ -89,17 +74,6 @@ export interface AwsServiceMatrixEntry {
   /** Hardcoded AWS IAM permissions required to ingest this data stream.
    *  Temporary until packages expose provider_permissions in the manifest. */
   providerPermissions?: ProviderPermissions;
-  /**
-   * ECF log type identifier passed as the `LogTypes` parameter in the CloudFormation template.
-   * Present only for services deployable via the Elastic Cloud Forwarder (ECF).
-   * Applies to both the unified ECS template and the OTel template.
-   */
-  ecfLogType?: EcfLogType;
-  /**
-   * When set, this service uses a dedicated ECF CloudFormation template instead of the unified one.
-   * The value identifies which dedicated template to use.
-   */
-  ecfDedicatedTemplate?: EcfDedicatedTemplate;
 }
 
 function hasAgentlessDelivery(entry: AwsServiceMatrixEntry): boolean {
@@ -124,7 +98,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -165,7 +139,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Lambda',
     category: 'Compute',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -181,7 +155,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EC2',
     category: 'Compute',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -221,7 +195,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EMR',
     category: 'Compute',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -263,7 +237,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudWatch',
     category: 'Management and Governance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -329,7 +303,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     policyTemplate: 'cloudtrail',
     defaultEnabled: true,
     showInUI: true,
-    ecfLogType: 'cloudtrail',
   },
   {
     id: 'config',
@@ -383,7 +356,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -460,7 +433,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     policyTemplate: 'waf',
     defaultEnabled: true,
     showInUI: true,
-    ecfLogType: 'waf',
   },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
@@ -469,7 +441,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudFront',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn', 'region'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -523,7 +495,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Route 53 Public DNS',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -537,7 +509,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Route 53 Resolver',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -572,7 +544,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     policyTemplate: 'vpcflow',
     defaultEnabled: true,
     showInUI: true,
-    ecfLogType: 'vpcflow',
   },
   {
     id: 'vpn',
@@ -770,7 +741,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Bedrock (Invocation)',
     category: 'Machine Learning',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_bedrock',
@@ -845,14 +816,12 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     category: 'Management and Governance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn'],
+    inputs: [],
+    requiredConfig: [],
     packageName: 'aws_cloudtrail_otel',
     defaultEnabled: false,
     showInUI: true,
     badge: 'technical_preview',
-    ecfLogType: 'cloudtrail',
-    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'vpcflow_otel',
@@ -860,14 +829,12 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn'],
+    inputs: [],
+    requiredConfig: [],
     packageName: 'aws_vpcflow_otel',
     defaultEnabled: false,
     showInUI: true,
     badge: 'technical_preview',
-    ecfLogType: 'vpcflow',
-    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'waf_otel',
@@ -875,14 +842,12 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn'],
+    inputs: [],
+    requiredConfig: [],
     packageName: 'aws_waf_otel',
     defaultEnabled: false,
     showInUI: true,
     badge: 'technical_preview',
-    ecfLogType: 'waf',
-    ecfDedicatedTemplate: 'otel',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
@@ -891,7 +856,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Logs (Generic)',
     category: 'Management and Governance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_logs',

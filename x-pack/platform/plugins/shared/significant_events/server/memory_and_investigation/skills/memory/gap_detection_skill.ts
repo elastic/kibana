@@ -31,7 +31,7 @@ export const createGapDetectionSkill = (options: MemoryToolsOptions) =>
         'platform_sig_events_memory_write',
       ];
       const memoryTools = createMemoryTools(options)
-        .map(({ id, ...rest }) => ({
+        .map(({ tags, id, ...rest }) => ({
           ...rest,
           id: id.replaceAll('.', '_'),
         }))

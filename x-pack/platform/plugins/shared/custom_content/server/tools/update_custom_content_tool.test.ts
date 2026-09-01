@@ -10,11 +10,6 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 import { createUpdateCustomContentTool } from './update_custom_content_tool';
 
-const mockResolver = jest.fn();
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(() => mockResolver),
-}));
-
 const makeAttachment = (data: Record<string, unknown>) => ({
   id: 'att-1',
   type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -30,16 +25,14 @@ const makeContext = (attachmentData?: Record<string, unknown>) => {
       getAll: jest.fn().mockReturnValue(attachment ? [attachment] : []),
       update,
     },
-    logger: { warn: jest.fn(), error: jest.fn() },
-    esClient: {},
-    modelProvider: {},
+    logger: { warn: jest.fn() },
     update,
     attachment,
   };
 };
 
 const callHandler = async (
-  params: { prompt?: string; esqlQuery?: string | null },
+  params: { template?: string; esqlQuery?: string | null },
   attachmentData?: Record<string, unknown>
 ) => {
   const tool = createUpdateCustomContentTool();
@@ -50,20 +43,41 @@ const callHandler = async (
 };
 
 describe('createUpdateCustomContentTool handler', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockResolver.mockResolvedValue('<div>generated</div>');
+  describe('script tag rejection', () => {
+    it('rejects a template containing <script>', async () => {
+      const { results } = await callHandler({ template: '<script>alert(1)</script>' });
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect((results[0] as any).data.message).toMatch(/script/i);
+    });
+
+    it('rejects <script> with attributes', async () => {
+      const { results } = await callHandler({ template: '<script src="x.js"></script>' });
+      expect(results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('rejects self-closing <script/>', async () => {
+      const { results } = await callHandler({ template: '<script/>' });
+      expect(results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('allows a template with no script tags', async () => {
+      const { results } = await callHandler(
+        { template: '<div>{{ value }}</div>' },
+        { panel_template: '', embeddable_id: 'p1' }
+      );
+      expect(results[0].type).toBe(ToolResultType.other);
+    });
   });
 
   describe('missing attachment', () => {
     it('returns an error when no context attachment exists', async () => {
-      const { results, ctx } = await callHandler({ prompt: 'Show KPIs' });
+      const { results, ctx } = await callHandler({ template: '<div/>' });
       expect(results[0].type).toBe(ToolResultType.error);
       expect(ctx.update).not.toHaveBeenCalled();
     });
   });
 
-  describe('prompt path', () => {
+  describe('data merging', () => {
     const existing = {
       panel_template: '<p>old</p>',
       esql_query: 'FROM logs',
@@ -71,56 +85,22 @@ describe('createUpdateCustomContentTool handler', () => {
       embeddable_id: 'p1',
     };
 
-    it('calls resolver and stores generated template', async () => {
-      const { ctx } = await callHandler({ prompt: 'Show KPIs' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(expect.objectContaining({ prompt: 'Show KPIs' }));
+    it('updates only template when esqlQuery is omitted', async () => {
+      const { ctx } = await callHandler({ template: '<p>new</p>' }, existing);
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
-          data: expect.objectContaining({ panel_template: '<div>generated</div>' }),
+          data: expect.objectContaining({
+            panel_template: '<p>new</p>',
+            esql_query: 'FROM logs',
+          }),
         }),
         ATTACHMENT_REF_ACTOR.agent
       );
     });
 
-    it('does not sample esqlQuery when only prompt is provided (style change)', async () => {
-      await callHandler({ prompt: 'Make colors more vivid' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(expect.objectContaining({ esqlQuery: undefined }));
-    });
-
-    it('passes existing template as context to the resolver', async () => {
-      await callHandler({ prompt: 'Make colors more vivid' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(
-        expect.objectContaining({ existingTemplate: '<p>old</p>' })
-      );
-    });
-
-    it('samples esqlQuery when query is also changing', async () => {
-      await callHandler({ prompt: 'Show revenue by region', esqlQuery: 'FROM metrics' }, existing);
-      expect(mockResolver).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM metrics' })
-      );
-    });
-
-    it('returns error when resolver throws', async () => {
-      mockResolver.mockRejectedValue(new Error('LLM failure'));
-      const { results } = await callHandler({ prompt: 'Show KPIs' }, existing);
-      expect(results[0].type).toBe(ToolResultType.error);
-      expect((results[0] as any).data.message).toMatch(/LLM failure/);
-    });
-  });
-
-  describe('query-only path', () => {
-    const existing = {
-      panel_template: '<p>old</p>',
-      esql_query: 'FROM logs',
-      panel_title: 'My Panel',
-      embeddable_id: 'p1',
-    };
-
-    it('updates esqlQuery and preserves existing template when no prompt', async () => {
+    it('updates only esqlQuery when template is omitted', async () => {
       const { ctx } = await callHandler({ esqlQuery: 'FROM metrics' }, existing);
-      expect(mockResolver).not.toHaveBeenCalled();
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
@@ -143,18 +123,26 @@ describe('createUpdateCustomContentTool handler', () => {
         ATTACHMENT_REF_ACTOR.agent
       );
     });
-  });
 
-  describe('metadata preservation', () => {
-    const existing = {
-      panel_template: '<p>old</p>',
-      esql_query: 'FROM logs',
-      panel_title: 'My Panel',
-      embeddable_id: 'p1',
-    };
+    it('updates both template and esqlQuery together', async () => {
+      const { ctx } = await callHandler(
+        { template: '<p>new</p>', esqlQuery: 'FROM metrics' },
+        existing
+      );
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            panel_template: '<p>new</p>',
+            esql_query: 'FROM metrics',
+          }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
 
     it('preserves panel_title and embeddable_id', async () => {
-      const { ctx } = await callHandler({ prompt: 'Show KPIs' }, existing);
+      const { ctx } = await callHandler({ template: '<p>x</p>' }, existing);
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
@@ -168,7 +156,7 @@ describe('createUpdateCustomContentTool handler', () => {
     });
 
     it('returns success on valid update', async () => {
-      const { results } = await callHandler({ prompt: 'Show KPIs' }, existing);
+      const { results } = await callHandler({ template: '<p>x</p>' }, existing);
       expect(results[0].type).toBe(ToolResultType.other);
     });
   });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsSerializableRecord, SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
@@ -21,7 +21,7 @@ import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
-export type DiscoverAppLocatorParams = AsSerializableRecord<{
+export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set saved search ID.
    */
@@ -156,7 +156,7 @@ export type DiscoverAppLocatorParams = AsSerializableRecord<{
    * are carried in the navigation state.
    */
   profileState?: ProfileStateMap;
-}>;
+}
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 

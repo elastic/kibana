@@ -41,7 +41,7 @@ const createService = ({ agents = {} }: { agents?: object } = {}) => {
 describe('ConversationServiceImpl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin: false });
+    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane' });
     isAdminFromRequestMock.mockResolvedValue(false);
   });
 
@@ -49,22 +49,19 @@ describe('ConversationServiceImpl', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
-      const user = { id: 'profile-1', username: 'jane', isAdmin };
-      getUserFromRequestMock.mockResolvedValue(user);
+      isAdminFromRequestMock.mockResolvedValue(isAdmin);
 
       await createService({ agents }).getScopedClient({ request });
 
-      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user }));
+      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ isAdmin }));
     });
 
-    it('uses the internal client for conversation storage', async () => {
+    it('resolves the admin privilege against the caller-scoped client, not the internal one', async () => {
       await createService({ agents }).getScopedClient({ request });
 
+      expect(isAdminFromRequestMock).toHaveBeenCalledWith({ esClient: asCurrentUser });
       expect(createClientMock).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: asInternalUser })
-      );
-      expect(getUserFromRequestMock).toHaveBeenCalledWith(
-        expect.objectContaining({ esClient: asCurrentUser })
       );
     });
   });
@@ -111,7 +108,7 @@ describe('ConversationServiceImpl', () => {
 
     it('does not assign an author when the user has no profile id', async () => {
       const service = createService();
-      getUserFromRequestMock.mockResolvedValue({ username: 'jane', isAdmin: false });
+      getUserFromRequestMock.mockResolvedValue({ username: 'jane' });
 
       const author = await service.getConversationRoundAuthor({ request });
 

@@ -50,6 +50,7 @@ export const createConversation$ = ({
         read_only: conversation.read_only,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
+        read: false,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }

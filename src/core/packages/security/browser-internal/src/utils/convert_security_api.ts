@@ -13,6 +13,6 @@ import type { InternalSecurityServiceStart } from '../internal_contracts';
 export const convertSecurityApi = (
   privateApi: CoreSecurityDelegateContract
 ): InternalSecurityServiceStart => {
-  // shapes are the same for now, so the delegate can be re-exposed as-is.
+  // shapes are the same for now given we only have one API exposed.
   return privateApi;
 };

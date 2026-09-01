@@ -157,13 +157,6 @@ Do NOT use this for generic entity profiles, risk history, or profile trends —
 First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with maxResults 1. Resolves subject and optional target names to canonical EUIDs via the entity store (same as get_entity / get_entity_graph); when multiple candidates match, ask the user to pick an exact EUID.`,
     schema,
     tags: ['security', 'entity-analytics', 'entity-relationships'],
-    annotations: {
-      title: 'Get Entity Relationship History',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {

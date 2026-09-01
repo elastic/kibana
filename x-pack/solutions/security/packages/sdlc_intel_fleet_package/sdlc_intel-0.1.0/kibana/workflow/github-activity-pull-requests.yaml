@@ -112,7 +112,7 @@ steps:
                 "repository": {"name": "{{ node.repository.name }}", "full_name": "{{ node.repository.nameWithOwner }}"},
                 "github": {"created_at": "{{ node.createdAt }}", "updated_at": "{{ node.updatedAt }}", "state": "{{ node.state }}"},
                 "people": {"author": "{{ node.author.login }}"},
-                "pull_request": {"title": "{{ node.title }}", "draft": "{{ node.isDraft }}", "merged_at": "{{ node.mergedAt }}"},
+                "pull_request": {"title": {{ node.title | json }}, "draft": "{{ node.isDraft }}", "merged_at": "{{ node.mergedAt }}"},
                 "payload": {{ node | json }}
               }  {% unless forloop.last %},{% endunless %}
             {%- endfor -%}

@@ -72,10 +72,7 @@ const filterEpicsBySubteamScope = (
     return [];
   }
 
-  const subteamEpics = groupEpicsBySubteam(
-    epics.map((epic) => ({ ...epic, ...toEpicOrgTeamInput(epic) })),
-    teamRecord
-  );
+  const subteamEpics = groupEpicsBySubteam(epics, teamRecord, orgTeamKey);
 
   if (subteamKey === 'unassigned') {
     const assignedIds = new Set(

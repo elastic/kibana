@@ -167,15 +167,7 @@ export class DatePicker {
       ).toHaveText(to);
     }
 
-    // A standalone EuiSuperDatePicker (e.g. APM) commits the staged range through
-    // its own Update button; a query-bar-embedded picker commits through the
-    // shared submit button. Mirrors FTR's time_picker.ts.
-    const applyTimeButton = getTestSubjLocator('superDatePickerApplyTimeButton');
-    if ((await applyTimeButton.count()) > 0) {
-      await applyTimeButton.click();
-    } else {
-      await getTestSubjLocator('querySubmitButton').click();
-    }
+    await getTestSubjLocator('querySubmitButton').click();
   }
 
   // ---------------------------------------------------------------------------

@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
 
@@ -30,7 +30,7 @@ const memoryListSchema = z.object({
 
 export const createMemoryListTool = ({
   getMemoryService,
-}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryListSchema> => ({
+}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryListSchema> => ({
   id: platformStreamsMemoryTools.memoryList,
   type: ToolType.builtin,
   description:
@@ -38,6 +38,7 @@ export const createMemoryListTool = ({
     'use memory_read to get content of specific pages. ' +
     'Shows names, titles, categories, and whether pages have references.',
   schema: memoryListSchema,
+  tags: ['memory'],
   handler: async ({ category, show_category_tree: showCategoryTree }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
 

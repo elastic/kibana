@@ -12,21 +12,14 @@ import type {
   UserProfileAPIClient,
 } from '@kbn/security-plugin-types-public';
 
-import type { ConfigType } from './config';
-
 export const buildSecurityApi = ({
   authc,
-  config,
 }: {
   authc: AuthenticationServiceSetup;
-  config: Pick<ConfigType, 'serviceAccounts'>;
 }): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: () => authc.getCurrentUser(),
-    },
-    serviceAccounts: {
-      isEnabled: () => config.serviceAccounts?.enabled === true,
     },
   };
 };

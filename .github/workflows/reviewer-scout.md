@@ -36,7 +36,6 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - reviewer:skip-ai and reviewer:libra suppress PR event activations.
 # - Reviewer label events activate, including labels added while creating a PR.
 # - Synchronize/reopened PR events activate when the reviewer label is already present.
 # - Synchronize events for merge commits are ignored; only code pushes activate a new review.
@@ -48,7 +47,6 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      !contains(github.event.pull_request.labels.*.name, 'reviewer:libra') &&
       github.event_name == 'pull_request_target' &&
       (
         (

@@ -16,14 +16,12 @@ import type { Services } from '..';
 import { allowedExperimentalValues as genericAllowedExperimentalValues } from '@kbn/security-solution-plugin/common';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
-const mockCore = coreMock.createStart();
-
 export const mockServices: Services = {
-  ...mockCore,
+  ...coreMock.createStart(),
   experimentalFeatures: { ...allowedExperimentalValues, ...genericAllowedExperimentalValues },
   serverless: serverlessMock.createStart(),
   navigation: navigationPluginMock.createStartContract(),
-  security: { ...mockCore.security, ...securityMock.createStart() },
+  security: securityMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),
   management: managementPluginMock.createStartContract(),
   cloud: cloudMock.createStart(),

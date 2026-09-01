@@ -30,9 +30,8 @@ import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
   back?: AppHeaderBack | AppHeaderBack[];
   /**
-   * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
-   * `true`; set `false` only when the surrounding layout already pins the header in the correct
-   * scroll container. A header-height wrapper prevents CSS sticky.
+   * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
+   * sticky-header mechanism for the correct scrolling container.
    */
   sticky?: boolean;
   /**

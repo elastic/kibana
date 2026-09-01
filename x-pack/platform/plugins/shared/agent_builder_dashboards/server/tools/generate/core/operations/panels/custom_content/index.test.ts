@@ -93,7 +93,7 @@ describe('customContentPanelDefinition', () => {
       ).toBe(true);
     });
 
-    it('rejects empty config (a no-op update would silently change nothing)', () => {
+    it('accepts empty config (server regenerates template from existing merged values)', () => {
       expect(
         editCustomContentPanelConfigInputSchema.safeParse({
           source: 'config',
@@ -101,7 +101,7 @@ describe('customContentPanelDefinition', () => {
           panelId: 'cc-1',
           config: {},
         }).success
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it('rejects when panelId is missing', () => {

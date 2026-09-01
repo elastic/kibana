@@ -8,17 +8,12 @@
 import {
   eventsWriteBulkHandler,
   eventsWriteHandler,
-  makeIdentity,
+  makeFingerprint,
   mergeSignalsLatestPerRule,
   mergeEpisodeContext,
   type EventsWriteInput,
 } from './handler';
-import type {
-  SignificantEvent,
-  SignalEntry,
-  BlastRadiusEntry,
-  CausalFeature,
-} from '@kbn/significant-events-schema';
+import type { SignalEntry, BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
 import {
   MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
@@ -26,7 +21,14 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
 import { eventsWriteItemSchema } from './tool';
-import type { EventClient } from '../../../lib/significant_events/events';
+
+const successfulBulkCreate = async (documents: object[]) => ({
+  errors: false,
+  items: documents.map(() => ({ create: { status: 201, result: 'created' } })),
+});
+
+const noopFindByEventId = jest.fn().mockResolvedValue({ hits: [] });
+const noopFindLatestActive = jest.fn().mockResolvedValue({ hits: [] });
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
@@ -46,53 +48,17 @@ const baseInput: EventsWriteInput = {
   blast_radius: [],
 };
 
-const successfulBulkCreate = async (documents: object[]) => ({
-  errors: false,
-  items: documents.map(() => ({ create: { status: 201, result: 'created' } })),
-});
-
-/** Returns a minimal stored SignificantEvent with sensible defaults. */
-const makeStoredEvent = (
-  eventId: string,
-  overrides: Partial<SignificantEvent> = {}
-): SignificantEvent =>
-  ({
-    '@timestamp': TS_EARLIER,
-    event_uuid: `${eventId}-uuid`,
-    event_id: eventId,
-    status: 'open',
-    severity: '60-high',
-    stream_names: ['logs.checkout'],
-    signals: [],
-    title: 'Test event',
-    symptom_hypothesis: 'Test hypothesis',
-    summary: 'Test summary',
-    confidence: 0.8,
-    ...overrides,
-  } as SignificantEvent);
-
-/**
- * Returns a typed eventClient mock with default no-op implementations.
- * Override individual methods by passing a partial mock.
- */
-const makeEventClient = (
-  overrides: Partial<jest.Mocked<EventClient>> = {}
-): jest.Mocked<EventClient> =>
-  ({
-    findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
-    findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
-    emitTrigger: jest.fn(),
-    ...overrides,
-  } as jest.Mocked<EventClient>);
-
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {
-    const eventClient = makeEventClient();
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const result = await eventsWriteHandler({
-      eventClient,
+      eventClient: eventClient as never,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
@@ -101,76 +67,79 @@ describe('eventsWriteHandler', () => {
       baseInput.symptom_hypothesis
     );
     expect(result.written).toBe(true);
-    if (result.written) {
-      expect(result.event_id).toBe('checkout__latency-abc12345');
-      expect(result.status).toBe('open');
-      expect(typeof result.event_uuid).toBe('string');
-    }
+    expect(result.event_id).toBe('checkout__latency-abc12345');
+    expect(result.status).toBe('open');
+    expect(typeof result.event_uuid).toBe('string');
   });
 
   it('skips latest-version lookup when event_id is absent', async () => {
-    const findLatestByEventIds = jest.fn();
-    const findByEventId = jest.fn();
-    const eventClient = makeEventClient({
-      findLatestByEventIds,
-      findByEventId,
-    });
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn(),
+      findByEventId: jest.fn(),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const result = await eventsWriteHandler({
-      eventClient,
+      eventClient: eventClient as never,
       input: { ...baseInput },
     });
 
-    expect(findLatestByEventIds).not.toHaveBeenCalled();
-    expect(findByEventId).not.toHaveBeenCalled();
+    expect(eventClient.findLatestByEventIds).not.toHaveBeenCalled();
+    expect(eventClient.findByEventId).not.toHaveBeenCalled();
     expect(result.written).toBe(true);
-    if (result.written) {
-      expect(result.event_id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      );
-    }
+    expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
   });
 
   it('treats an empty event_id as absent and generates a synthetic ID', async () => {
-    const findLatestByEventIds = jest.fn();
-    const bulkCreate = jest.fn().mockImplementation(successfulBulkCreate);
-    const eventClient = makeEventClient({ findLatestByEventIds, bulkCreate });
+    const eventClient = {
+      findLatestByEventIds: jest.fn(),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const result = await eventsWriteHandler({
-      eventClient,
+      eventClient: eventClient as never,
       input: { ...baseInput, event_id: '' },
     });
 
-    expect(findLatestByEventIds).not.toHaveBeenCalled();
-    if (result.written) {
-      expect(bulkCreate.mock.calls[0][0][0].event_id).toBe(result.event_id);
-    }
+    expect(eventClient.findLatestByEventIds).not.toHaveBeenCalled();
+    expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].event_id).toBe(result.event_id);
   });
 
-  it('sets previous_event_uuid from the latest event in the stored lineage', async () => {
-    const stored = makeStoredEvent('checkout__latency-abc12345', {
-      event_uuid: 'latest-id',
-      status: 'closed',
-    });
-    const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
+  it('sets previous_event_uuid from the latest event returned by findLatestByEventIds', async () => {
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(
+          new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id', status: 'closed' }]])
+        ),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const result = await eventsWriteHandler({
-      eventClient,
+      eventClient: eventClient as never,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345', status: 'open' },
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].previous_event_uuid).toBe('latest-id');
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.previous_event_uuid).toBe('latest-id');
     expect(result.written).toBe(true);
   });
 
   it('writes with refresh wait_for so an immediate discovery _count can see the event', async () => {
-    const eventClient = makeEventClient();
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     await eventsWriteHandler({
-      eventClient,
+      eventClient: eventClient as never,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
@@ -180,178 +149,68 @@ describe('eventsWriteHandler', () => {
     });
   });
 
-  // status: 'closed' on the stored event ensures severity+status differ from the input ('open'),
-  // so the no-op guard does not fire and a write reaches bulkCreate in both cases.
-  it.each([
-    [
-      'carries investigations lineage forward when present',
-      [
-        { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
-      ] as SignificantEvent['investigations'],
-    ],
-    ['leaves investigations undefined when absent', undefined],
-  ])('%s on re-open continuation', async (_, storedInvestigations) => {
-    const stored = makeStoredEvent('checkout__latency-abc12345', {
-      event_uuid: 'latest-id',
-      status: 'closed',
-      investigations: storedInvestigations,
-    });
-    const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
+  it('carries the investigations lineage forward from the latest event on re-open', async () => {
+    const investigations = [
+      { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
+    ];
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(
+          new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id', investigations }]])
+        ),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     await eventsWriteHandler({
-      eventClient,
+      eventClient: eventClient as never,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].investigations).toEqual(storedInvestigations);
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.investigations).toEqual(investigations);
   });
 
-  describe('unchanged_outcome (no-op guard)', () => {
-    it('returns EventsWriteNoOpResult when severity and status are unchanged for a snapshot candidate', async () => {
-      const stored = makeStoredEvent('checkout-stable');
-      const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
-        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-        bulkCreate: jest.fn(),
-      });
+  it('leaves investigations undefined when the latest event has none', async () => {
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id' }]])),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
-      const result = await eventsWriteHandler({
-        eventClient,
-        input: { ...baseInput, event_id: 'checkout-stable', status: 'open', severity: '60-high' },
-      });
-
-      expect(result.written).toBe(false);
-      if (!result.written) {
-        expect(result.reason).toBe('unchanged_outcome');
-        expect(result.event_id).toBe('checkout-stable');
-        expect(result.skipped).toBe(true);
-      }
-      expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-      expect(eventClient.findByEventId).toHaveBeenCalledWith('checkout-stable');
+    await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
-    it('writes when an unchanged snapshot adds a detection rule not present in its history', async () => {
-      const ruleOne: SignalEntry = {
-        type: 'detection',
-        stream_name: 'logs.checkout',
-        description: 'Rule one detected an issue',
-        verdict: 'confirms',
-        metadata: {
-          detection_id: 'det-rule-1',
-          rule_uuid: 'rule-1',
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      };
-      const ruleTwo: SignalEntry = {
-        type: 'detection',
-        stream_name: 'logs.checkout',
-        description: 'Rule two detected an issue',
-        verdict: 'confirms',
-        metadata: {
-          detection_id: 'det-rule-2',
-          rule_uuid: 'rule-2',
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      };
-      const stored = makeStoredEvent('checkout-stable', {
-        signals: [ruleOne],
-      });
-      const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
-        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-        bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
-      });
-
-      const result = await eventsWriteHandler({
-        eventClient,
-        input: {
-          ...baseInput,
-          event_id: 'checkout-stable',
-          status: 'open',
-          severity: '60-high',
-          signals: [ruleTwo],
-        },
-      });
-
-      expect(result.written).toBe(true);
-      expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-      expect(eventClient.bulkCreate.mock.calls[0][0][0].signals).toEqual(
-        expect.arrayContaining([ruleOne, ruleTwo])
-      );
-    });
-
-    it('skips when an unchanged snapshot resubmits a rule absent from the latest version', async () => {
-      const ruleOne: SignalEntry = {
-        type: 'detection',
-        stream_name: 'logs.checkout',
-        description: 'Rule one detected an issue',
-        verdict: 'confirms',
-        metadata: {
-          detection_id: 'det-rule-1',
-          rule_uuid: 'rule-1',
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      };
-      const latest = makeStoredEvent('checkout-stable');
-      const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', latest]])),
-        findByEventId: jest.fn().mockResolvedValue({
-          hits: [makeStoredEvent('checkout-stable', { signals: [ruleOne] }), latest],
-        }),
-        bulkCreate: jest.fn(),
-      });
-
-      const result = await eventsWriteHandler({
-        eventClient,
-        input: {
-          ...baseInput,
-          event_id: 'checkout-stable',
-          status: 'open',
-          severity: '60-high',
-          signals: [ruleOne],
-        },
-      });
-
-      expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
-      expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-    });
-
-    it('throws when the bulk result is existing_active_event (wrapper does not swallow skips)', async () => {
-      const eventClient = makeEventClient({
-        findLatestActive: jest.fn().mockResolvedValue({
-          hits: [makeStoredEvent('existing-event-id')],
-        }),
-      });
-
-      // No event_id → find-or-create; the active event match returns existing_active_event,
-      // which the single-item wrapper must throw rather than silently return.
-      await expect(
-        eventsWriteHandler({ eventClient, input: { ...baseInput } })
-      ).rejects.toMatchObject({ code: 'outcome_unknown' });
-    });
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.investigations).toBeUndefined();
   });
 });
 
 describe('eventsWriteBulkHandler', () => {
-  it('writes unique event ids with one lineage lookup per event and one bulk request', async () => {
-    const eventClient = makeEventClient();
+  it('writes unique event ids with one lookup and one bulk request', async () => {
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [
         { ...baseInput, event_id: 'event-1' },
         { ...baseInput, event_id: 'event-2', status: 'closed' },
       ],
     });
 
-    expect(eventClient.findByEventId).toHaveBeenCalledTimes(2);
-    expect(eventClient.findByEventId).toHaveBeenCalledWith('event-1');
-    expect(eventClient.findByEventId).toHaveBeenCalledWith('event-2');
+    expect(eventClient.findLatestByEventIds).toHaveBeenCalledWith(['event-1', 'event-2']);
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
     expect(results).toEqual([
@@ -361,7 +220,10 @@ describe('eventsWriteBulkHandler', () => {
   });
 
   it('returns aligned per-item bulk failures', async () => {
-    const eventClient = makeEventClient({
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({
         errors: true,
         items: [
@@ -374,10 +236,10 @@ describe('eventsWriteBulkHandler', () => {
           },
         ],
       }),
-    });
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [
         { ...baseInput, event_id: 'event-1' },
         { ...baseInput, event_id: 'event-2' },
@@ -396,15 +258,18 @@ describe('eventsWriteBulkHandler', () => {
   });
 
   it('returns per-item errors for duplicate event_ids without throwing', async () => {
-    const eventClient = makeEventClient({
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({
         errors: false,
         items: [{ create: { result: 'created', _id: 'doc-1', status: 201 } }],
       }),
-    });
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [
         { ...baseInput, event_id: 'duplicate' },
         { ...baseInput, event_id: 'duplicate' },
@@ -413,118 +278,122 @@ describe('eventsWriteBulkHandler', () => {
 
     expect(results[0]).toEqual(expect.objectContaining({ index: 0, written: true }));
     expect(results[1]).toEqual(
-      expect.objectContaining({ index: 1, written: false, reason: 'duplicate_in_batch' })
+      expect.objectContaining({ index: 1, written: false, reason: 'duplicate_key' })
     );
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('routes to find-or-create (dedup scan) when event_id is absent', async () => {
-    const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
-    const findLatestByEventIds = jest.fn();
-    const eventClient = makeEventClient({ findLatestActive, findLatestByEventIds });
-
-    const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [{ ...baseInput }],
-    });
-
-    // find-or-create: dedup scan runs, no snapshot lineage lookup needed.
-    expect(findLatestActive).toHaveBeenCalledTimes(1);
-    expect(findLatestByEventIds).not.toHaveBeenCalled();
-    expect(results[0]).toMatchObject({ index: 0, written: true });
-  });
-
-  it.each([
-    ['cardinality mismatch (empty items)', { errors: false, items: [] }],
-    ['missing create result (item has no .create)', { errors: false, items: [{}] }],
-  ])('classifies a %s bulk response as outcome unknown', async (_, response) => {
-    const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockResolvedValue(response),
-    });
+  it('rejects an item with both event_id and dedup_window as a validation error', async () => {
+    const eventClient = {
+      findLatestActive: jest.fn(),
+      findLatestByEventIds: jest.fn(),
+      findByEventId: jest.fn(),
+      bulkCreate: jest.fn(),
+    };
 
     await expect(
       eventsWriteBulkHandler({
-        eventClient,
+        eventClient: eventClient as never,
+        inputs: [{ ...baseInput, event_id: 'event-1', dedup_window: 'now-24h' }],
+      })
+    ).rejects.toMatchObject({ code: 'validation_error' });
+    expect(eventClient.findLatestActive).not.toHaveBeenCalled();
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('classifies a response cardinality mismatch as outcome unknown', async () => {
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    };
+
+    await expect(
+      eventsWriteBulkHandler({
+        eventClient: eventClient as never,
+        inputs: [{ ...baseInput, event_id: 'event-1' }],
+      })
+    ).rejects.toMatchObject({ code: 'outcome_unknown' });
+  });
+
+  it('classifies a response without a create result as outcome unknown', async () => {
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockResolvedValue({ errors: false, items: [{}] }),
+    };
+
+    await expect(
+      eventsWriteBulkHandler({
+        eventClient: eventClient as never,
         inputs: [{ ...baseInput, event_id: 'event-1' }],
       })
     ).rejects.toMatchObject({ code: 'outcome_unknown' });
   });
 
   it('classifies a rejected bulk request as outcome unknown', async () => {
-    const eventClient = makeEventClient({
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockRejectedValue(new Error('connection reset')),
-    });
+    };
 
     await expect(
       eventsWriteBulkHandler({
-        eventClient,
+        eventClient: eventClient as never,
         inputs: [{ ...baseInput, event_id: 'event-1' }],
       })
     ).rejects.toMatchObject({ code: 'outcome_unknown' });
   });
 
   it('keeps the single-item wrapper throwing on an item failure', async () => {
-    const eventClient = makeEventClient({
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({
         errors: true,
         items: [
           { create: { status: 400, error: { type: 'mapper_parsing_exception', reason: 'bad' } } },
         ],
       }),
-    });
+    };
 
     await expect(
       eventsWriteHandler({
-        eventClient,
+        eventClient: eventClient as never,
         input: { ...baseInput, event_id: 'event-1' },
       })
     ).rejects.toThrow('mapper_parsing_exception: bad');
   });
 });
 
-describe('makeIdentity', () => {
+describe('makeFingerprint', () => {
   it('is stable regardless of stream and rule ordering', () => {
-    const a = makeIdentity({ streamNames: ['logs.b', 'logs.a'], ruleUuids: ['rule-2', 'rule-1'] });
-    const b = makeIdentity({ streamNames: ['logs.a', 'logs.b'], ruleUuids: ['rule-1', 'rule-2'] });
+    const a = makeFingerprint(['logs.b', 'logs.a'], ['rule-2', 'rule-1']);
+    const b = makeFingerprint(['logs.a', 'logs.b'], ['rule-1', 'rule-2']);
     expect(a).toBe(b);
   });
 
-  it('produces different identities for different stream sets (exact-set matching)', () => {
-    const single = makeIdentity({ streamNames: ['logs.a'], ruleUuids: ['rule-1'] });
-    const withExtra = makeIdentity({ streamNames: ['logs.a', 'logs.z'], ruleUuids: ['rule-1'] });
-    expect(single).not.toBe(withExtra);
+  it('uses only the lexicographically first stream (primary)', () => {
+    const onePrimary = makeFingerprint(['logs.a'], ['rule-1']);
+    const withExtra = makeFingerprint(['logs.a', 'logs.z'], ['rule-1']);
+    expect(onePrimary).toBe(withExtra);
   });
 
-  it('produces different identities for different rule sets', () => {
-    const a = makeIdentity({ streamNames: ['logs.app'], ruleUuids: ['rule-1'] });
-    const b = makeIdentity({ streamNames: ['logs.app'], ruleUuids: ['rule-2'] });
+  it('produces different fingerprints for different rule sets', () => {
+    const a = makeFingerprint(['logs.app'], ['rule-1']);
+    const b = makeFingerprint(['logs.app'], ['rule-2']);
     expect(a).not.toBe(b);
   });
 
-  it('produces a consistent key for empty stream_names', () => {
-    const a = makeIdentity({ streamNames: [], ruleUuids: ['rule-1'] });
-    const b = makeIdentity({ streamNames: [], ruleUuids: ['rule-1'] });
-    const withStream = makeIdentity({ streamNames: ['logs.app'], ruleUuids: ['rule-1'] });
-    expect(a).toBe(b);
-    expect(a).not.toBe(withStream);
-  });
-
-  it('produces distinct keys for zero-rule-uuid events on different streams (zero-rule)', () => {
-    const streamA = makeIdentity({ streamNames: ['stream-a'], ruleUuids: [] });
-    const streamB = makeIdentity({ streamNames: ['stream-b'], ruleUuids: [] });
-    expect(streamA).not.toBe(streamB);
-  });
-
-  it("produces distinct keys for ['A'] vs ['A','B'] (widened-episode regression guard)", () => {
-    const single = makeIdentity({ streamNames: ['A'], ruleUuids: ['rule-1'] });
-    const widened = makeIdentity({ streamNames: ['A', 'B'], ruleUuids: ['rule-1'] });
-    expect(single).not.toBe(widened);
-  });
-
-  it('prevents pipe-join collision between ["a|b"] and ["a", "b"]', () => {
-    const joined = makeIdentity({ streamNames: ['a|b'], ruleUuids: [] });
-    const split = makeIdentity({ streamNames: ['a', 'b'], ruleUuids: [] });
-    expect(joined).not.toBe(split);
+  it('falls back to "unknown" primary stream when stream_names is empty', () => {
+    expect(() => makeFingerprint([], ['rule-1'])).not.toThrow();
+    const fp = makeFingerprint([], ['rule-1']);
+    expect(fp).toContain('unknown');
   });
 });
 
@@ -544,19 +413,18 @@ describe('mergeSignalsLatestPerRule', () => {
 
   it('keeps the submitted signal when no prior docs exist', () => {
     const signal = makeSignal('rule-1');
-    expect(mergeSignalsLatestPerRule([], [signal], TS_SUBMITTED)).toEqual([signal]);
+    const result = mergeSignalsLatestPerRule([], [signal], TS_SUBMITTED);
+    expect(result).toEqual([signal]);
   });
 
   it('uses the most recent version of a signal per rule_uuid — submitted wins when newer', () => {
     const priorSignal = makeSignal('rule-1');
     const submittedSignal = makeSignal('rule-1');
-    const result = mergeSignalsLatestPerRule(
-      [{ '@timestamp': TS_EARLIER, signals: [priorSignal] }],
-      [submittedSignal],
-      TS_SUBMITTED
-    );
+    const priorDocs = [{ '@timestamp': TS_EARLIER, signals: [priorSignal] }];
+    const result = mergeSignalsLatestPerRule(priorDocs, [submittedSignal], TS_SUBMITTED);
     expect(result).toHaveLength(1);
-    expect((result[0] as Extract<SignalEntry, { type: 'detection' }>).metadata.detection_id).toBe(
+    // submitted wins — its detection_id matches the submitted signal
+    expect((result[0] as SignalEntry & { type: 'detection' }).metadata.detection_id).toBe(
       submittedSignal.metadata.detection_id
     );
   });
@@ -564,11 +432,8 @@ describe('mergeSignalsLatestPerRule', () => {
   it('carries forward prior rules that are absent in the submitted batch', () => {
     const rule1 = makeSignal('rule-1');
     const rule2 = makeSignal('rule-2');
-    const result = mergeSignalsLatestPerRule(
-      [{ '@timestamp': TS_EARLIER, signals: [rule1] }],
-      [rule2],
-      TS_SUBMITTED
-    );
+    const priorDocs = [{ '@timestamp': TS_EARLIER, signals: [rule1] }];
+    const result = mergeSignalsLatestPerRule(priorDocs, [rule2], TS_SUBMITTED);
     expect(result).toHaveLength(2);
     const ruleUuids = result.map(
       (s) => (s as Extract<SignalEntry, { type: 'detection' }>).metadata.rule_uuid
@@ -590,11 +455,9 @@ describe('mergeSignalsLatestPerRule', () => {
 
   it('prefers prior doc when its timestamp is newer than submitted', () => {
     const priorSignal = makeSignal('rule-1');
-    const result = mergeSignalsLatestPerRule(
-      [{ '@timestamp': TS_LATER, signals: [priorSignal] }],
-      [makeSignal('rule-1')],
-      TS_EARLIER
-    );
+    const submittedSignal = makeSignal('rule-1');
+    const priorDocs = [{ '@timestamp': TS_LATER, signals: [priorSignal] }];
+    const result = mergeSignalsLatestPerRule(priorDocs, [submittedSignal], TS_EARLIER);
     expect((result[0] as Extract<SignalEntry, { type: 'detection' }>).metadata.detection_id).toBe(
       priorSignal.metadata.detection_id
     );
@@ -628,8 +491,9 @@ describe('mergeEpisodeContext', () => {
   });
 
   it('unions stream_names across all docs and sorts them', () => {
+    const priorDocs = [{ '@timestamp': TS_EARLIER, stream_names: ['logs.b'] }];
     const { streamNames } = mergeEpisodeContext(
-      [{ '@timestamp': TS_EARLIER, stream_names: ['logs.b'] }],
+      priorDocs,
       { stream_names: ['logs.a'], causal_features: [], blast_radius: [] },
       TS_SUBMITTED
     );
@@ -637,16 +501,21 @@ describe('mergeEpisodeContext', () => {
   });
 
   it('causal classification beats blast for the same feature_id', () => {
+    const priorDocs = [
+      {
+        '@timestamp': TS_EARLIER,
+        stream_names: ['logs.app'],
+        blast_radius: [makeBlast('feat-1')],
+        causal_features: [] as CausalFeature[],
+      },
+    ];
     const { causalFeatures, blastRadius } = mergeEpisodeContext(
-      [
-        {
-          '@timestamp': TS_EARLIER,
-          stream_names: ['logs.app'],
-          blast_radius: [makeBlast('feat-1')],
-          causal_features: [] as CausalFeature[],
-        },
-      ],
-      { stream_names: ['logs.app'], causal_features: [makeCausal('feat-1')], blast_radius: [] },
+      priorDocs,
+      {
+        stream_names: ['logs.app'],
+        causal_features: [makeCausal('feat-1')],
+        blast_radius: [],
+      },
       TS_SUBMITTED
     );
     expect(causalFeatures.map((f) => f.feature_id)).toContain('feat-1');
@@ -654,16 +523,19 @@ describe('mergeEpisodeContext', () => {
   });
 
   it('keeps the most recent version of a blast_radius entry per feature_id', () => {
+    const older = makeBlast('feat-1');
+    const newer = makeBlast('feat-1');
+    const priorDocs = [
+      {
+        '@timestamp': TS_EARLIER,
+        stream_names: ['logs.app'],
+        blast_radius: [older],
+        causal_features: [] as CausalFeature[],
+      },
+    ];
     const { blastRadius } = mergeEpisodeContext(
-      [
-        {
-          '@timestamp': TS_EARLIER,
-          stream_names: ['logs.app'],
-          blast_radius: [makeBlast('feat-1')],
-          causal_features: [] as CausalFeature[],
-        },
-      ],
-      { stream_names: ['logs.app'], causal_features: [], blast_radius: [makeBlast('feat-1')] },
+      priorDocs,
+      { stream_names: ['logs.app'], causal_features: [], blast_radius: [newer] },
       TS_SUBMITTED
     );
     expect(blastRadius).toHaveLength(1);
@@ -672,65 +544,56 @@ describe('mergeEpisodeContext', () => {
 });
 
 describe('eventsWriteBulkHandler — dedup mode', () => {
-  type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
-  type ChangePointType = DetectionSignal['metadata']['change_point_type'];
-
-  const makeDetectionSignal = (
-    metadata: Partial<DetectionSignal['metadata']> = {}
-  ): DetectionSignal => ({
-    type: 'detection',
-    stream_name: 'logs.checkout',
-    description: 'High Latency',
-    verdict: 'confirms',
-    metadata: {
-      detection_id: 'det-rule-abc',
-      rule_uuid: 'rule-abc',
-      rule_name: 'High Latency',
-      change_point_type: 'spike',
-      p_value: 0.01,
-      ...metadata,
-    },
-  });
-
-  const makeDedupInput = (overrides: Partial<EventsWriteInput> = {}): EventsWriteInput => ({
+  const dedupInput: EventsWriteInput = {
     ...baseInput,
-    status: 'open',
+    status: 'open' as const,
     stream_names: ['logs.checkout'],
-    signals: [makeDetectionSignal()],
-    ...overrides,
-  });
-
-  const makeDedupInputWithChangePointType = (
-    changePointType: ChangePointType | undefined
-  ): EventsWriteInput => {
-    if (changePointType === undefined) {
-      const { change_point_type: _, ...metadata } = makeDetectionSignal().metadata;
-      return makeDedupInput({
-        signals: [{ ...makeDetectionSignal(), metadata: metadata as DetectionSignal['metadata'] }],
-      });
-    }
-    return makeDedupInput({
-      signals: [makeDetectionSignal({ change_point_type: changePointType })],
-    });
+    signals: [
+      {
+        type: 'detection',
+        metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency' },
+        verdict: 'confirms',
+      } as never,
+    ],
+    dedup_window: 'now-24h',
   };
 
-  const dedupInput = makeDedupInput();
+  const makeDedupInputWithChangePointType = (
+    changePointType: string | undefined
+  ): EventsWriteInput => ({
+    ...dedupInput,
+    signals: [
+      {
+        type: 'detection',
+        metadata: {
+          rule_uuid: 'rule-abc',
+          rule_name: 'High Latency',
+          ...(changePointType !== undefined ? { change_point_type: changePointType } : {}),
+        },
+        verdict: 'confirms',
+      } as never,
+    ],
+  });
 
-  const makeActiveDedupEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
-    makeStoredEvent('existing-event-id', {
+  it('skips write and returns existing event_id when an active duplicate is found in window', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
       '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
       signals: dedupInput.signals,
-      ...overrides,
-    });
+    };
 
-  it('skips write and returns existing event_id when an active duplicate is found', async () => {
-    const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [makeActiveDedupEvent()] }),
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn(),
-    });
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [dedupInput],
     });
 
@@ -738,81 +601,119 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       index: 0,
       written: false,
       skipped: true,
-      reason: 'existing_active_event',
+      reason: 'duplicate_within_window',
       event_id: 'existing-event-id',
       existing_event_id: 'existing-event-id',
     });
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 
-  it('deduplicates when the candidate has the same identity regardless of change_point_type', async () => {
-    const existingEvent = makeActiveDedupEvent({
-      signals: [makeDetectionSignal({ change_point_type: 'spike' })],
-    });
-    const eventClient = makeEventClient({
+  it('does not skip when the candidate has a different change_point_type for the same rule', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
+      signals: [
+        {
+          type: 'detection',
+          metadata: {
+            rule_uuid: 'rule-abc',
+            rule_name: 'High Latency',
+            change_point_type: 'spike',
+          },
+          verdict: 'confirms',
+        } as never,
+      ],
+    };
+
+    const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
-      bulkCreate: jest.fn(),
-    });
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
+    // Submitted with a dip for the same rule — different change_point_type → bypass dedup
     const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [makeDedupInputWithChangePointType('dip')],
+      eventClient: eventClient as never,
+      inputs: [
+        {
+          ...dedupInput,
+          signals: [
+            {
+              type: 'detection',
+              metadata: {
+                rule_uuid: 'rule-abc',
+                rule_name: 'High Latency',
+                change_point_type: 'dip',
+              },
+              verdict: 'confirms',
+            } as never,
+          ],
+        },
+      ],
     });
 
-    expect(results[0]).toMatchObject({
-      index: 0,
-      written: false,
-      skipped: true,
-      reason: 'existing_active_event',
-    });
-    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('deduplicates against a stale-timestamped active event (no time bound on dedup)', async () => {
-    // Previously this would write through because the event predated the dedup_window.
-    // Now dedup is time-unbounded: any active event with the same identity is a duplicate.
-    const oldActiveEvent = makeActiveDedupEvent({ '@timestamp': '2000-01-01T00:00:00.000Z' });
-    const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [oldActiveEvent] }),
-      bulkCreate: jest.fn(),
-    });
+  it('does not skip when the matching event is older than the dedup window', async () => {
+    const oldEvent = {
+      event_id: 'old-event-id',
+      status: 'open',
+      '@timestamp': '2000-01-01T00:00:00.000Z',
+      stream_names: ['logs.checkout'],
+      signals: dedupInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [oldEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [dedupInput],
     });
 
-    expect(results[0]).toMatchObject({
-      index: 0,
-      written: false,
-      skipped: true,
-      reason: 'existing_active_event',
-    });
-    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('returns duplicate_in_batch error for a second in-batch item with the same identity', async () => {
-    const eventClient = makeEventClient({
+  it('returns duplicate_key error for a second in-batch item with the same fingerprint', async () => {
+    const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    });
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [dedupInput, { ...dedupInput }],
     });
 
     expect(results[0]).toMatchObject({ index: 0, written: true });
-    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_in_batch' });
+    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_key' });
+    // Only one item should have been written.
     expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
   });
 
-  it('treats two in-batch dedup items with same streams+rules as duplicate_in_batch regardless of change_point_type', async () => {
-    const eventClient = makeEventClient({
+  it('writes both in-batch items when they share a fingerprint but differ in change_point_type', async () => {
+    const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    });
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [
         makeDedupInputWithChangePointType('spike'),
         makeDedupInputWithChangePointType('dip'),
@@ -820,33 +721,41 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     });
 
     expect(results[0]).toMatchObject({ index: 0, written: true });
-    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_in_batch' });
-    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
   });
 
   it('deduplicates a later in-batch item against an earlier one with the same change_point_type', async () => {
     const spikeInput = makeDedupInputWithChangePointType('spike');
-    const eventClient = makeEventClient({
+
+    const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    });
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [spikeInput, makeDedupInputWithChangePointType('dip'), { ...spikeInput }],
     });
 
     expect(results[0]).toMatchObject({ index: 0, written: true });
-    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_in_batch' });
-    expect(results[2]).toMatchObject({ index: 2, written: false, reason: 'duplicate_in_batch' });
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(results[2]).toMatchObject({ index: 2, written: false, reason: 'duplicate_key' });
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
   });
 
-  it('treats dedup items with same identity (change_point_type omitted vs explicit) as duplicate_in_batch', async () => {
-    const eventClient = makeEventClient({
+  it('writes both in-batch items when change_point_type is omitted on one and explicit on the other', async () => {
+    const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    });
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [
         makeDedupInputWithChangePointType(undefined),
         makeDedupInputWithChangePointType('spike'),
@@ -854,24 +763,35 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     });
 
     expect(results[0]).toMatchObject({ index: 0, written: true });
-    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_in_batch' });
-    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
   });
 
   it('uses only one findLatestActive scan for multiple dedup candidates', async () => {
-    const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
-    const eventClient = makeEventClient({ findLatestActive });
+    const dedupInput2: EventsWriteInput = {
+      ...dedupInput,
+      stream_names: ['logs.payments'],
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [dedupInput, { ...dedupInput, stream_names: ['logs.payments'] }],
+      eventClient: eventClient as never,
+      inputs: [dedupInput, dedupInput2],
     });
 
-    expect(findLatestActive).toHaveBeenCalledTimes(1);
-    expect(findLatestActive).toHaveBeenCalledWith({
-      streamNames: expect.arrayContaining(['logs.checkout', 'logs.payments']),
-      ruleUuids: ['rule-abc'],
-    });
+    expect(eventClient.findLatestActive).toHaveBeenCalledTimes(1);
+    expect(eventClient.findLatestActive).toHaveBeenCalledWith(
+      expect.objectContaining({
+        streamNames: ['logs.checkout', 'logs.payments'],
+        ruleUuids: ['rule-abc'],
+      })
+    );
   });
 
   it.each<{ field: 'ruleUuids' | 'streamNames'; override: Partial<EventsWriteInput> }>([
@@ -880,202 +800,161 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   ])(
     'omits $field from the scan when any candidate in the batch has none',
     async ({ field, override }) => {
-      const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
-      const eventClient = makeEventClient({ findLatestActive });
+      const partialInput: EventsWriteInput = { ...dedupInput, ...override };
+
+      const eventClient = {
+        findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+        findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+        findByEventId: noopFindByEventId,
+        bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+      };
 
       await eventsWriteBulkHandler({
-        eventClient,
-        inputs: [dedupInput, { ...dedupInput, ...override }],
+        eventClient: eventClient as never,
+        inputs: [dedupInput, partialInput],
       });
 
-      expect(findLatestActive).toHaveBeenCalledWith(
+      expect(eventClient.findLatestActive).toHaveBeenCalledWith(
         expect.objectContaining({ [field]: undefined })
       );
     }
   );
 
-  it('deduplicates when candidate rule set is a subset of an active event and streams overlap', async () => {
-    // Existing event covers rules [rule-abc, rule-xyz]; candidate carries only [rule-abc].
-    // Co-detection noise: rule-xyz was a co-fire last cycle but not this one.
-    // Candidate rules ⊆ event rules AND stream overlaps → existing_active_event, not a new event.
-    const widerRuleEvent = makeActiveDedupEvent({
-      signals: [
-        makeDetectionSignal(),
-        makeDetectionSignal({ rule_uuid: 'rule-xyz', detection_id: 'det-rule-xyz' }),
-      ],
-    });
-    const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [widerRuleEvent] }),
-      bulkCreate: jest.fn(),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [dedupInput], // carries only rule-abc
-    });
-
-    expect(results[0]).toMatchObject({
-      index: 0,
-      written: false,
-      skipped: true,
-      reason: 'existing_active_event',
-    });
-    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-  });
-
-  it('creates a new event when candidate carries a rule not present in any active event', async () => {
-    // Existing event covers [rule-abc]; candidate carries [rule-xyz] — genuinely new signal.
-    const existingEvent = makeActiveDedupEvent({ signals: [makeDetectionSignal()] });
-    const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [
-        makeDedupInput({
-          signals: [makeDetectionSignal({ rule_uuid: 'rule-xyz', detection_id: 'det-xyz' })],
-        }),
-      ],
-    });
-
-    expect(results[0]).toMatchObject({ index: 0, written: true });
-    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-  });
-
-  it('deduplicates when candidate stream set is a subset of an active event streams and rules match', async () => {
-    // Existing covers [checkout, payments]; candidate on [payments] only — stream overlap, same rules.
-    const widerStreamEvent = makeActiveDedupEvent({
+  it('deduplicates when the stored episode has a wider stream set than the candidate', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
       stream_names: ['logs.checkout', 'logs.payments'],
-    });
-    const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [widerStreamEvent] }),
+      signals: dedupInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn(),
-    });
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [{ ...dedupInput, stream_names: ['logs.payments'] }],
     });
 
     expect(results[0]).toMatchObject({
-      index: 0,
       written: false,
       skipped: true,
-      reason: 'existing_active_event',
+      reason: 'duplicate_within_window',
     });
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 
-  it('creates a new event when no stream overlap exists even if rule set matches', async () => {
-    // Existing on [checkout]; candidate on [payments] — no stream intersection, no match.
-    const checkoutEvent = makeActiveDedupEvent({ stream_names: ['logs.checkout'] });
-    const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [checkoutEvent] }),
-    });
+  it('treats omitted and empty change_point_type as equivalent for window dedup', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
+      signals: [
+        {
+          type: 'detection',
+          metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency', change_point_type: '' },
+          verdict: 'confirms',
+        } as never,
+      ],
+    };
 
-    const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [{ ...dedupInput, stream_names: ['logs.payments'] }],
-    });
-
-    expect(results[0]).toMatchObject({ index: 0, written: true });
-    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-  });
-
-  it('treats omitted and empty change_point_type as equivalent for window dedup (identity-based)', async () => {
-    const existingEvent = makeActiveDedupEvent({
-      signals: [makeDetectionSignal({ change_point_type: '' as ChangePointType })],
-    });
-
-    const eventClient = makeEventClient({
+    const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn(),
-    });
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
+      eventClient: eventClient as never,
       inputs: [makeDedupInputWithChangePointType(undefined)],
     });
 
     expect(results[0]).toMatchObject({
       written: false,
       skipped: true,
-      reason: 'existing_active_event',
+      reason: 'duplicate_within_window',
     });
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 });
 
 describe('eventsWriteBulkHandler — continuation status', () => {
-  it.each<[string, SignificantEvent['status']]>([
-    ['open', 'open'],
-    ['closed', 'closed'],
-  ])('persists %s status from discovery through to the bulk payload', async (_, status) => {
-    const eventId = `checkout-${status}`;
-    const stored = makeStoredEvent(eventId, { status, severity: undefined });
-    const eventClient = makeEventClient({
-      findLatestByEventIds: jest.fn().mockResolvedValue(new Map([[eventId, stored]])),
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
+  it('persists open status sent by discovery on an open continuation', async () => {
+    const priorOpen = {
+      '@timestamp': TS_EARLIER,
+      event_uuid: 'prior-uuid',
+      event_id: 'checkout-open',
+      status: 'open' as const,
+      stream_names: ['logs.checkout'],
+      signals: baseInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout-open', priorOpen as never]])),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [priorOpen] }),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [{ ...baseInput, event_id: eventId, status }],
+      eventClient: eventClient as never,
+      inputs: [
+        {
+          ...baseInput,
+          event_id: 'checkout-open',
+          status: 'open',
+        },
+      ],
     });
 
-    expect(results[0]).toMatchObject({ written: true, status });
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe(status);
+    expect(results[0]).toMatchObject({ written: true, status: 'open' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('open');
   });
 
-  it('no-op guard skips when both severity and status are identical to latest', async () => {
-    const stored = makeStoredEvent('checkout-stable');
-    const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-      bulkCreate: jest.fn(),
-    });
+  it('persists closed status sent by discovery on a closed continuation', async () => {
+    const priorClosed = {
+      '@timestamp': TS_EARLIER,
+      event_uuid: 'prior-uuid',
+      event_id: 'checkout-closed',
+      status: 'closed' as const,
+      stream_names: ['logs.checkout'],
+      signals: baseInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout-closed', priorClosed as never]])),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [priorClosed] }),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
 
     const results = await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'open', severity: '60-high' }],
+      eventClient: eventClient as never,
+      inputs: [
+        {
+          ...baseInput,
+          event_id: 'checkout-closed',
+          status: 'closed',
+        },
+      ],
     });
 
-    expect(results[0]).toMatchObject({
-      index: 0,
-      written: false,
-      skipped: true,
-      reason: 'unchanged_outcome',
-      event_id: 'checkout-stable',
-    });
-    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-    expect(eventClient.findByEventId).toHaveBeenCalledWith('checkout-stable');
+    expect(results[0]).toMatchObject({ written: true, status: 'closed' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('closed');
   });
-
-  it.each<[string, Partial<EventsWriteInput>, SignificantEvent['status']]>([
-    [
-      'severity escalates (60-high → 80-critical)',
-      { status: 'open', severity: '80-critical' },
-      'open',
-    ],
-    ['status transitions (open → closed)', { status: 'closed', severity: '60-high' }, 'closed'],
-  ])(
-    'write-through: writes when %s (no-op does not fire)',
-    async (_, inputOverrides, expectedStatus) => {
-      const stored = makeStoredEvent('checkout-changing');
-      const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-changing', stored]])),
-        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-      });
-
-      const results = await eventsWriteBulkHandler({
-        eventClient,
-        inputs: [{ ...baseInput, event_id: 'checkout-changing', ...inputOverrides }],
-      });
-
-      expect(results[0]).toMatchObject({ written: true, status: expectedStatus });
-      expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-    }
-  );
 });
 
 describe('eventsWriteItemSchema', () => {
@@ -1097,23 +976,47 @@ describe('eventsWriteItemSchema', () => {
     ],
   };
 
-  it('accepts a valid item at the field length boundaries', () => {
+  it('accepts signal descriptions at the 350-char limit', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
   });
 
-  it.each([
-    [
-      'signal description',
-      {
-        signals: [
-          { ...validItem.signals[0], description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1) },
-        ],
-      },
-    ],
-    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1) }],
-    ['summary', { summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1) }],
-    ['assessment_note', { assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1) }],
-  ])('rejects %s exceeding the length limit', (_, overrides) => {
-    expect(eventsWriteItemSchema.safeParse({ ...validItem, ...overrides }).success).toBe(false);
+  it('rejects signal descriptions exceeding the 350-char limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      signals: [
+        {
+          ...validItem.signals[0],
+          description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects symptom hypotheses exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects summaries exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects assessment notes exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
   });
 });

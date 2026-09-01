@@ -34,7 +34,7 @@ export interface ServiceInstance {
   isDuplicate: boolean;
 }
 
-export interface ServiceSettingsPersistedState {
+interface PersistedState {
   globalRegion: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
@@ -91,7 +91,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, removeDeployInstance } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
+  const [persisted, setPersisted] = useSessionStorage<PersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     {
       globalRegion: '',

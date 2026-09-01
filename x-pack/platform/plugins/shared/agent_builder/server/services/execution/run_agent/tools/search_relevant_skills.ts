@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { internalTools, ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { selectRelevantSkills } from '../utils/relevant_skills/select_relevant_skills';
@@ -33,7 +33,7 @@ export const createSearchRelevantSkillsTool = ({
   filteredSkills: InternalSkillDefinition[];
   logger: Logger;
   abortSignal?: AbortSignal;
-}): InternalBuiltinToolDefinition<typeof schema> => ({
+}): BuiltinToolDefinition<typeof schema> => ({
   id: internalTools.searchRelevantSkills,
   description: `Search for skills relevant to a sub-task.
 

@@ -38,17 +38,6 @@ export const CONFIG_EVALUATORS = i18n.translate('xpack.evals.experimentDetail.co
   defaultMessage: 'Evaluators',
 });
 
-export const CONFIG_JUDGE_MODEL = i18n.translate('xpack.evals.experimentDetail.config.judgeModel', {
-  defaultMessage: 'Judge connector',
-});
-
-export const CONFIG_JUDGE_MODELS = i18n.translate(
-  'xpack.evals.experimentDetail.config.judgeModels',
-  {
-    defaultMessage: 'Judge connectors',
-  }
-);
-
 export const CONFIG_REPETITIONS = i18n.translate(
   'xpack.evals.experimentDetail.config.repetitions',
   {
