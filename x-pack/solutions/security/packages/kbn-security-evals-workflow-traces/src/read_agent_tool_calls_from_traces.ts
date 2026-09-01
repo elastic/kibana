@@ -62,9 +62,7 @@ FROM ${indexPattern}
 | EVAL tool_id = COALESCE(attributes.gen_ai.tool.name, name)
 | WHERE tool_id IS NOT NULL
   ${excludeClause}
-| KEEP @timestamp, tool_id, attributes.gen_ai.tool.name, name${
-    includeFailures ? ', event.outcome' : ''
-  }
+| KEEP @timestamp, tool_id${includeFailures ? ', event.outcome' : ''}
 | LIMIT ${TOOL_SPAN_LIMIT}
 `.trim();
 };

@@ -243,4 +243,23 @@ describe('readAgentToolCallsFromTraces', () => {
     expect(result.failedToolCallIds).toEqual(['platform.core.esql']);
     expect(result.toolCallIds).toEqual(['platform.core.esql', 'security.create_detection_rule']);
   });
+
+  it('does not classify the ECS unknown outcome as a failed tool call', async () => {
+    const client = mockClient([
+      {
+        columns: [{ name: 'tool_id' }, { name: 'event.outcome' }],
+        values: [['platform.core.esql', 'unknown']],
+      },
+    ]);
+
+    const result = await readAgentToolCallsFromTraces({
+      traceEsClient: client,
+      conversationIds: 'conv-1',
+      log: silentLog,
+      includeFailures: true,
+    });
+
+    expect(result.toolCallIds).toEqual(['platform.core.esql']);
+    expect(result.failedToolCallIds).toEqual([]);
+  });
 });
