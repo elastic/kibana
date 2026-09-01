@@ -236,6 +236,145 @@
       "approvedBy": "@elastic/workchat-eng",
       "oasdiffId": "request-property-max-length-decreased",
       "prUrl": "https://github.com/elastic/kibana/pull/286654"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies",
+      "method": "post",
+      "reason": "Intentional: 'matcher' is now a strict object schema, so unknown keys inside 'matcher' are rejected with 400. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "kbn:request-additional-properties-tightened",
+      "source": "/components/schemas/Kibana_HTTP_APIs_alerting_new_action_policy/properties/matcher",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies",
+      "method": "get",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "get",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "put",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "put",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "put",
+      "reason": "Intentional: 'matcher' is now a strict object schema, so unknown keys inside 'matcher' are rejected with 400. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "kbn:request-additional-properties-tightened",
+      "source": "/components/schemas/Kibana_HTTP_APIs_alerting_new_action_policy/properties/matcher",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "patch",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "patch",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}",
+      "method": "patch",
+      "reason": "Intentional: 'matcher' is now a strict object schema, so unknown keys inside 'matcher' are rejected with 400. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "kbn:request-additional-properties-tightened",
+      "source": "/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy/properties/matcher",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_enable",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_disable",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_snooze",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/{id}/_unsnooze",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/_match_for_rule",
+      "method": "post",
+      "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/_match_for_rule",
+      "method": "post",
+      "reason": "Intentional: 'rule.id' and 'rule.name' removed from the request body. Matching no longer evaluates KQL over rule fields; it intersects the rule's tags with the structured matcher's tag clause. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"
     }
   ]
 }
