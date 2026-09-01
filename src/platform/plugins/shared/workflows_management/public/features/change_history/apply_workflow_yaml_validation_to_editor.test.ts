@@ -13,6 +13,8 @@ jest.mock('../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_
   validateEsqlSteps: jest.fn().mockResolvedValue([]),
 }));
 
+import { BATCHED_CUSTOM_MARKER_OWNER } from '@kbn/workflows-yaml';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationFromComputed,
@@ -25,8 +27,6 @@ import {
   clearWorkflowYamlComputationCache,
   getCachedWorkflowYamlComputationAsync,
 } from '../validate_workflow_yaml/lib/workflow_yaml_computation_cache';
-import { BATCHED_CUSTOM_MARKER_OWNER } from '../validate_workflow_yaml/model/types';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 const testValidationContext: WorkflowYamlValidationContext = {
   connectorTypes: { status: 'ready', value: {} },
