@@ -14,6 +14,14 @@ import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { GridSettingsFlyout } from './grid_settings_flyout';
 import type { MetricsGridSettings } from '@kbn/discover-utils';
 
+const mockTrackAggregationConfigChanged = jest.fn();
+
+jest.mock('../../../context/ebt_telemetry_context', () => ({
+  useTelemetry: () => ({
+    trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
+  }),
+}));
+
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
@@ -27,6 +35,10 @@ const histogramSelect = new EuiSuperSelectTestHarness(
 );
 
 describe('GridSettingsFlyout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the aggregation settings inside an accordion that is open by default', () => {
     render(
       <GridSettingsFlyout
@@ -78,8 +90,39 @@ describe('GridSettingsFlyout', () => {
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
+    expect(mockTrackAggregationConfigChanged).toHaveBeenCalledWith({
+      metricType: 'counter',
+      previousAggregation: 'sum',
+      newAggregation: 'max',
+    });
     expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('reports each changed metric type when multiple settings are applied', async () => {
+    render(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    await gaugeSelect.select('metricsExperienceGridSettingsGaugeOption-min');
+    await histogramSelect.select('metricsExperienceGridSettingsHistogramOption-p99');
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
+
+    expect(mockTrackAggregationConfigChanged).toHaveBeenCalledTimes(2);
+    expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(1, {
+      metricType: 'gauge',
+      previousAggregation: 'avg',
+      newAggregation: 'min',
+    });
+    expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
+      metricType: 'histogram',
+      previousAggregation: 'p95',
+      newAggregation: 'p99',
+    });
   });
 
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {
@@ -98,6 +141,7 @@ describe('GridSettingsFlyout', () => {
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsCancelButton'));
 
     expect(onGridSettingsChange).not.toHaveBeenCalled();
+    expect(mockTrackAggregationConfigChanged).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -117,6 +161,7 @@ describe('GridSettingsFlyout', () => {
     await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     expect(onGridSettingsChange).not.toHaveBeenCalled();
+    expect(mockTrackAggregationConfigChanged).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
 });

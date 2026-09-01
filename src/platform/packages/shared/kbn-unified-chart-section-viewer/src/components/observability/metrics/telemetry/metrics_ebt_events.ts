@@ -8,7 +8,11 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { MAX_DIMENSIONS_REACHED_EVENT_TYPE, METRICS_INFO_EVENT_TYPE } from './constants';
+import {
+  MAX_DIMENSIONS_REACHED_EVENT_TYPE,
+  METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
+  METRICS_INFO_EVENT_TYPE,
+} from './constants';
 
 export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
@@ -76,6 +80,30 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
               description: 'Count of METRICS_INFO rows where unit had more than one value',
             },
           },
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
+    schema: {
+      metricType: {
+        type: 'keyword',
+        _meta: {
+          description: 'Metric type whose aggregation configuration changed',
+        },
+      },
+      previousAggregation: {
+        type: 'keyword',
+        _meta: {
+          description: 'Aggregation configuration before the change',
+        },
+      },
+      newAggregation: {
+        type: 'keyword',
+        _meta: {
+          description: 'Aggregation configuration after the change',
         },
       },
     },
