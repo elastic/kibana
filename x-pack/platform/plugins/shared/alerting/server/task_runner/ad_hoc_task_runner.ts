@@ -159,6 +159,7 @@ export class AdHocTaskRunner implements CancellableTask {
       // of the run is complete. Swallowing the error because we still
       // want to move forward with the update post-run
       await this.taskRunning.waitFor();
+      // eslint-disable-next-line no-empty
     } catch {}
 
     try {

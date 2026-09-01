@@ -10,8 +10,9 @@
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StateDemoPublicPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StateDemoPublicPluginStart {}
 
 export interface AppPluginDependencies {

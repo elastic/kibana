@@ -250,6 +250,7 @@ export class TaskRunner<
       // with the update of our rule since we are putting back the running attribute
       // back to false
       await this.ruleRunning.waitFor();
+      // eslint-disable-next-line no-empty
     } catch {}
     try {
       await partiallyUpdateRuleWithEs(

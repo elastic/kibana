@@ -19,7 +19,7 @@ export type {
 
 // No client types are registered yet. `ClientTypeId` resolves to `never`
 // until a client type is added to `ClientRegistry`.
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ClientRegistry {}
 
 export type ClientTypeId = keyof ClientRegistry;

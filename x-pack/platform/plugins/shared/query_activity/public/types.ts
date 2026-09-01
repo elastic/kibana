@@ -18,6 +18,8 @@ export interface QueryActivityStartDependencies {
   share: SharePluginStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryActivityPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryActivityPluginStart {}

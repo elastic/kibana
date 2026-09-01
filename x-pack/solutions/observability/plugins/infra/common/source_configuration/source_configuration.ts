@@ -15,6 +15,8 @@
  *  -> Metrics Source Configuration
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import * as rt from 'io-ts';
 
 /**

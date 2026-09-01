@@ -17,6 +17,7 @@ import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimenta
 import type { Milestone } from '../../common/trial_companion/types';
 import { useProductFeatureKeys } from '../common/hooks/use_product_feature_keys';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
 
 export const TrialCompanion: React.FC<Props> = () => {

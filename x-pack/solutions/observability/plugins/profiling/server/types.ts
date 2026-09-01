@@ -45,8 +45,9 @@ export interface ProfilingPluginStartDeps {
   apmDataAccess?: ApmDataAccessPluginStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfilingPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfilingPluginStart {}
 
 export type ProfilingRequestHandlerContext = CustomRequestHandlerContext<{}>;

@@ -9,5 +9,5 @@
 
 /** @public */
 // keeping the empty service contract for now as we might re-use it very soon
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserSettingsServiceSetup {}

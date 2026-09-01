@@ -29,6 +29,7 @@ export type MicrosoftDefenderEndpointSecrets = z.infer<
   typeof MicrosoftDefenderEndpointSecretsSchema
 >;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MicrosoftDefenderEndpointBaseApiResponse {}
 // cannot directly infer type due to https://github.com/colinhacks/zod/issues/2938
 // export type MicrosoftDefenderEndpointBaseApiResponse = z.infer<

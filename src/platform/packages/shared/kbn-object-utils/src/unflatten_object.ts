@@ -14,6 +14,7 @@ export function unflattenObject<T extends Record<string, any>>(
   source: T,
   target: Record<string, any> = {}
 ): DedotObject<T> {
+  // eslint-disable-next-line guard-for-in
   for (const key in source) {
     const val = source[key as keyof typeof source];
     if (Array.isArray(val)) {

@@ -26,10 +26,12 @@ import { ExampleExternalService } from '../common/external_service/external_serv
 import { registerStepDefinitions } from './step_types';
 import { registerTriggerDefinitions } from './triggers';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePublicPluginSetup {
   // No public API needed
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePublicPluginStart {
   // No public API needed
 }
@@ -41,6 +43,7 @@ export interface WorkflowsExtensionsExamplePublicPluginSetupDeps {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePublicPluginStartDeps {
   // No dependencies needed
 }

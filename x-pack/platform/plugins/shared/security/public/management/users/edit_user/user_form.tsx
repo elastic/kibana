@@ -169,7 +169,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 }
               );
             }
-          } catch (error) {}
+          } catch (error) {} // eslint-disable-line no-empty
         }
 
         if (!values.password) {

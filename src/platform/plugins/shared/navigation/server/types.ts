@@ -10,8 +10,10 @@
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NavigationServerSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NavigationServerStart {}
 
 export interface NavigationServerSetupDependencies {

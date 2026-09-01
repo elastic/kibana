@@ -64,8 +64,10 @@ export type SharePublicStart = ShareMenuManagerStart & {
   availableIntegrations: ShareRegistry['availableIntegrations'];
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SharePublicSetupDependencies {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SharePublicStartDependencies {}
 
 export class SharePlugin

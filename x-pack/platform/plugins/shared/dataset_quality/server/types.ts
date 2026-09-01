@@ -25,8 +25,9 @@ export interface DatasetQualityPluginStartDependencies {
   share?: SharePluginStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginStart {}
 
 export type DatasetQualityRequestHandlerContext = CustomRequestHandlerContext<{}>;

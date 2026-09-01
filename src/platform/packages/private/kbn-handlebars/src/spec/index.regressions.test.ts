@@ -120,6 +120,7 @@ describe('Regressions', () => {
   });
 
   it('GH-534: Object prototype aliases', () => {
+    /* eslint-disable no-extend-native */
     // @ts-expect-error
     Object.prototype[0xd834] = true;
 
@@ -127,6 +128,7 @@ describe('Regressions', () => {
 
     // @ts-expect-error
     delete Object.prototype[0xd834];
+    /* eslint-enable no-extend-native */
   });
 
   it('GH-437: Matching escaping', () => {

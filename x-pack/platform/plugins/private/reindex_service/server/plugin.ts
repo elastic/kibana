@@ -28,6 +28,7 @@ import { credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 import type { ReindexConfig } from './config';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PluginsSetup {}
 
 interface PluginsStart {

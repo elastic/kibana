@@ -87,6 +87,7 @@ export interface PostAgentUnenrollRequest {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUnenrollResponse {}
 
 export interface PostBulkAgentUnenrollRequest {
@@ -115,6 +116,7 @@ export interface PostRemoveCollectorRequest {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostRemoveCollectorResponse {}
 
 export interface PostBulkRemoveCollectorsRequest {
@@ -153,6 +155,7 @@ export interface PostBulkAgentUpgradeRequest {
 
 export type PostBulkAgentUpgradeResponse = BulkAgentAction | BulkAgentActionDryRun;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
 export interface PostAgentRollbackRequest {
@@ -183,6 +186,7 @@ export interface PostAgentReassignRequest {
   body: { policy_id: string };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentReassignResponse {}
 
 export interface PostBulkAgentReassignRequest {

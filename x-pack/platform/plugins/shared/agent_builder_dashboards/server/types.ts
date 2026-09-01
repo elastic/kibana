@@ -18,6 +18,8 @@ export interface AgentBuilderDashboardsStartDependencies {
   dashboard: DashboardPluginStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginStart {}

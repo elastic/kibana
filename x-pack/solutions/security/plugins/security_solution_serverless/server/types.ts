@@ -30,8 +30,9 @@ import type { ProductTier } from '../common/product';
 import type { ServerlessSecurityConfig } from './config';
 import type { UsageReportingService } from './common/services/usage_reporting_service';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginStart {}
 
 export interface SecuritySolutionServerlessPluginSetupDeps {

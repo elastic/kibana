@@ -11,8 +11,10 @@ import type { $Values } from '@kbn/utility-types';
 import type { Range } from '@kbn/expressions-plugin/public';
 import type { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeGaugePluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeGaugePluginStart {}
 
 /**

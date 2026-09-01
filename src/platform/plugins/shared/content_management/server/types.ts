@@ -17,12 +17,14 @@ export interface ContentManagementServerSetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStartDependencies {}
 
 export interface ContentManagementServerSetup extends CoreApi {
   favorites: FavoritesSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStart {}
 
 export type GetTransformsFactoryFn = (

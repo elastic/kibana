@@ -45,7 +45,7 @@ export interface ElasticAssistantPluginSetup {
 }
 
 /** Minimal start contract — extend as capabilities are wired up. */
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ElasticAssistantPluginStart {}
 
 export interface DiscoveriesPluginSetupDeps {
@@ -79,6 +79,8 @@ export type DiscoveriesRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
 }>;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DiscoveriesPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DiscoveriesPluginStart {}

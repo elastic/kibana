@@ -12,10 +12,13 @@ import type {
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingServerSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingServerStart {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingServerSetupDependencies {}
 
 export interface CustomBrandingServerStartDependencies {

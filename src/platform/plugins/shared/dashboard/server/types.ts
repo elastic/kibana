@@ -22,7 +22,7 @@ export interface DashboardServerClient {
 }
 
 /** The setup contract for the Dashboard plugin on the server. */
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
 
 /**

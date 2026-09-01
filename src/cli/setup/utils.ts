@@ -88,7 +88,7 @@ export function decodeEnrollmentToken(enrollmentToken: string): EnrollmentToken 
       return;
     }
     return { ...json, adr: json.adr.map((adr) => `https://${adr}`), key: btoa(json.key) };
-  } catch (error) {}
+  } catch (error) {} // eslint-disable-line no-empty
 }
 
 function btoa(str: string) {

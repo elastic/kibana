@@ -25,6 +25,7 @@ import type { TemplateSettings } from '../../../../../common/types/domain/templa
 
 import * as i18n from '../../translations';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {

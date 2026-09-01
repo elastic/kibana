@@ -82,7 +82,7 @@ export interface UserProfileUserInfo {
  * console.log(userProfile.data.myService.myData);
  * ```
  */
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface -- See the comment above for an explanation.
 export interface UserProfileData {}
 
 /**

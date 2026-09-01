@@ -87,6 +87,7 @@ export interface DataViewEditorProps {
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
 
 export type { DataViewEditorService };
@@ -105,6 +106,7 @@ export interface PluginStart {
   dataViewEditorServiceFactory: () => Promise<typeof import('./data_view_editor_service_lazy')>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
 
 export interface StartPlugins {

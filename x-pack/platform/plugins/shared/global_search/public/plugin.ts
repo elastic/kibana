@@ -13,6 +13,7 @@ import type { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 import type { GlobalSearchClientConfigType } from './config';
 import { SearchService } from './services';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchPluginSetupDeps {}
 export interface GlobalSearchPluginStartDeps {
   licensing: LicensingPluginStart;

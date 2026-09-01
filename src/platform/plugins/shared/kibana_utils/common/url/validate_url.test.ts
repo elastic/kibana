@@ -12,8 +12,9 @@ import { validateUrl } from './validate_url';
 describe('validateUrl', () => {
   describe('unsafe urls', () => {
     const unsafeUrls = [
+      // eslint-disable-next-line no-script-url
       'javascript:evil()',
-
+      // eslint-disable-next-line no-script-url
       'JavaScript:abc',
       'evilNewProtocol:abc',
       ' \n Java\n Script:abc',

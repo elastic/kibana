@@ -37,6 +37,8 @@ import type {
 } from '@kbn/anonymization-plugin/server';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
   anonymization?: AnonymizationPluginSetup;

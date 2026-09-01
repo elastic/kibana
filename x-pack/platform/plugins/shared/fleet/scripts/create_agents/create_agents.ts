@@ -191,7 +191,7 @@ function createAgentsWithStatuses(
 ) {
   // loop over statuses and create agents with that status
   const agents = [];
-
+  // eslint-disable-next-line guard-for-in
   for (const currentStatus in statusMap) {
     const currentAgentStatus = currentStatus as AgentStatus;
     const statusCount = statusMap[currentAgentStatus] || 0;

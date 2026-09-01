@@ -18,6 +18,7 @@ export interface SearchExamplesPluginStartDeps {
   data: PluginStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchExamplesPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchExamplesPluginStart {}

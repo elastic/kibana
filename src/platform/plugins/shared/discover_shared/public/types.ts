@@ -21,8 +21,9 @@ export interface DiscoverSharedPublicStart {
   features: DiscoverFeaturesServiceStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DiscoverSharedPublicSetupDeps {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DiscoverSharedPublicStartDeps {}
 
 export type DiscoverSharedPublicPlugin = Plugin<

@@ -52,8 +52,10 @@ export interface IndexPatternManagementStartDependencies {
   uiSettings: IUiSettingsClient;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IndexPatternManagementSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IndexPatternManagementStart {}
 
 const sectionsHeader = i18n.translate('indexPatternManagement.dataView.sectionsHeader', {

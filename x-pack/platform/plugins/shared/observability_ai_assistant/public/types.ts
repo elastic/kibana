@@ -34,6 +34,8 @@ import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import type { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
 import type { createScreenContextAction } from './utils/create_screen_context_action';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export type { PendingMessage };
 
 export interface DiscoveredDataset {

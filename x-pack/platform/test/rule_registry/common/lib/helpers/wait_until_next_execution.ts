@@ -68,6 +68,7 @@ export async function waitUntilNextExecution(
       await es.indices.refresh({
         index: targetIndices[0],
       });
+      // eslint-disable-next-line no-empty
     } catch (exc) {}
     return nextAlert;
   }

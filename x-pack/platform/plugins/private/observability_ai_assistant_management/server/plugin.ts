@@ -10,8 +10,10 @@ import { uiSettings } from '../common/ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<AiAssistantManagementPlugin['setup']>;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PluginStart {}
 
 export class AiAssistantManagementPlugin implements Plugin<ObservabilityPluginSetup> {

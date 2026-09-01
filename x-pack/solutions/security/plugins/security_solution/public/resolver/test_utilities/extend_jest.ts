@@ -16,6 +16,7 @@ import type { MatcherHintOptions } from 'jest-matcher-utils';
 export {};
 
 declare global {
+  /* eslint-disable @typescript-eslint/no-namespace */
   namespace jest {
     interface Matchers<R, T> {
       toYieldEqualTo(expectedYield: T extends AsyncIterable<infer E> ? E : never): Promise<R>;

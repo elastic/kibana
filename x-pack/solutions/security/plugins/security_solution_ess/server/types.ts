@@ -10,8 +10,9 @@ import type {
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionEssPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionEssPluginStart {}
 
 export interface SecuritySolutionEssPluginSetupDeps {

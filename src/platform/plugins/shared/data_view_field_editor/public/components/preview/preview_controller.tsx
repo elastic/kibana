@@ -243,6 +243,7 @@ export class PreviewController {
     if (this.fieldTypeToProcess === 'runtime') {
       try {
         this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
+        // eslint-disable-next-line no-empty
       } catch {}
       // rename an existing runtime field
       if (nameHasChanged || hasChangeToOrFromComposite) {
@@ -263,6 +264,7 @@ export class PreviewController {
     } else {
       try {
         this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
+        // eslint-disable-next-line no-empty
       } catch {}
     }
 
@@ -277,6 +279,7 @@ export class PreviewController {
         METRIC_TYPE.COUNT,
         this.fieldTypeToProcess === 'runtime' ? 'save_runtime' : 'save_concrete'
       );
+      // eslint-disable-next-line no-empty
     } catch {}
 
     this.setIsSaving(true);

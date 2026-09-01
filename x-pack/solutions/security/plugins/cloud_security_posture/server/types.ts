@@ -39,8 +39,10 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginStart {}
 
 export interface CspServerPluginSetupDeps {

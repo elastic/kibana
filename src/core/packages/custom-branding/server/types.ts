@@ -12,7 +12,7 @@ import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { MaybePromise } from '@kbn/utility-types';
 
 /** @public */
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingStart {}
 
 export type CustomBrandingFetchFn = (

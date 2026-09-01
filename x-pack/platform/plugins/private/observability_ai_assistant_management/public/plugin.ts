@@ -23,8 +23,10 @@ import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginStart {}
 
 export interface SetupDependencies {

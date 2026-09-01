@@ -85,6 +85,7 @@ export const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
           };
           acc.push(formattedList);
         }
+        // eslint-disable-next-line no-empty
       } catch {}
 
       return acc;

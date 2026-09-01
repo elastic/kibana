@@ -23,7 +23,7 @@ export interface RendererRenderContext {
 /**
  * Context passed to a renderer's {@link RendererUIDefinition.renderCanvas} function.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RendererCanvasContext extends RendererRenderContext {}
 
 /**

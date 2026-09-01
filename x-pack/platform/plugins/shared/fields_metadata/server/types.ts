@@ -29,6 +29,8 @@ export interface FieldsMetadataServerStart {
   getClient: FieldsMetadataServiceStart['getClient'];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServerPluginSetupDeps {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServerPluginStartDeps {}

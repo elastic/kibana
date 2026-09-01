@@ -434,7 +434,7 @@ export class SearchSource {
     const trackRequestBody = () => {
       try {
         requestResponder?.json(this.getSearchRequestBody());
-      } catch (e) {}
+      } catch (e) {} // eslint-disable-line no-empty
     };
 
     // Track request stats on first emit, swallow errors

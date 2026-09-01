@@ -27,6 +27,7 @@ export function findAccessor(
   columns: DatatableColumn[]
 ): number | DatatableColumn | undefined;
 export function findAccessor(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
   accessor: string | number,
   columns: DatatableColumn[]
 ): number | DatatableColumn | undefined;
@@ -45,6 +46,7 @@ export function findAccessorOrFail(
   columns: DatatableColumn[]
 ): number | DatatableColumn;
 export function findAccessorOrFail(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
   accessor: string | number,
   columns: DatatableColumn[]
 ): number | DatatableColumn;

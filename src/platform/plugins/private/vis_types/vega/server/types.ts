@@ -29,6 +29,7 @@ export interface VisTypeVegaPluginSetupDependencies {
   home?: HomeServerPluginSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeVegaPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeVegaPluginStart {}

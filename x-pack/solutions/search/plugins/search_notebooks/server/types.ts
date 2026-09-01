@@ -12,8 +12,9 @@ import type { Logger } from '@kbn/logging';
 import type { SearchNotebooksConfig } from './config';
 import type { NotebookCatalog, NotebookInformation } from '../common/types';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginStart {}
 
 export interface RouteDependencies {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 // linear algebra
 type F64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type F = F64; // shorthand

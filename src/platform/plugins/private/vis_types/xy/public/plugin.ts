@@ -16,8 +16,9 @@ import { setUISettings, setPalettesService, setDataViewsStart } from './services
 
 import { visTypesDefinitions } from './vis_types';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginStart {}
 
 /** @internal */

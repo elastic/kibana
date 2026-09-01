@@ -1,4 +1,5 @@
 /* eslint-disable @kbn/eslint/require-license-header */
+/* eslint-disable @typescript-eslint/unified-signatures */
 
 /**
  * @notice

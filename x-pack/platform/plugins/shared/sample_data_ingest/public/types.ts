@@ -8,6 +8,7 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { InstallationAPI } from './services/installation';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface SampleDataIngestPluginSetup {}
 
 export interface SampleDataIngestPluginStart

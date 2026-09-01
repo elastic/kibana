@@ -12,8 +12,10 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessVectordbPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessVectordbPluginStart {}
 
 export interface ServerlessVectordbAppStartDependencies {

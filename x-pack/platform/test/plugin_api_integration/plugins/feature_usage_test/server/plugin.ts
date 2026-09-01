@@ -9,8 +9,9 @@ import type { Plugin, CoreSetup } from '@kbn/core/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { registerRoutes } from './routes';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FeatureUsageTestPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FeatureUsageTestPluginStart {}
 
 export interface FeatureUsageTestSetupDependencies {

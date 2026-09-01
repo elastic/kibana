@@ -10,6 +10,8 @@ import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/s
 import type { ResourceType } from '@kbn/product-doc-common';
 import type { RetrieveDocumentationAPI } from './tasks/retrieve_documentation';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export interface PluginSetupDependencies {}
 
 export interface PluginStartDependencies {

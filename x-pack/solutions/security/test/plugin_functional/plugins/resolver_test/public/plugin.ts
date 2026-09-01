@@ -14,7 +14,7 @@ export type ResolverTestPluginStart = void;
 export interface ResolverTestPluginSetupDependencies {
   securitySolution: SecuritySolutionPluginSetup;
 }
-export interface ResolverTestPluginStartDependencies {}
+export interface ResolverTestPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export class ResolverTestPlugin
   implements

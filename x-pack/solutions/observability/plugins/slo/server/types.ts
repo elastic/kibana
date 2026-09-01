@@ -31,6 +31,7 @@ import type { SloClient } from './client';
 
 export type { SLOConfig } from '../common/config';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SLOServerSetup {}
 
 export interface SLOServerStart {

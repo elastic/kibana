@@ -44,6 +44,7 @@ export interface AgentBuilderPlatformTracingFeaturesStart {
   setDashboard: (options: { enabled: boolean; spaceId: string }) => Promise<void>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderPlatformPluginSetup {}
 
 export interface AgentBuilderPlatformPluginStart {

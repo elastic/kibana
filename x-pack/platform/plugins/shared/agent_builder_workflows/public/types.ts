@@ -17,6 +17,8 @@ export interface PluginStartDependencies {
   workflowsManagement: WorkflowsPublicPluginStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginStart {}

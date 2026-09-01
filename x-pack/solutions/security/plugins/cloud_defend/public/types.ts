@@ -22,6 +22,7 @@ import type { SelectorType, SelectorCondition, Selector, Response } from '../com
  * cloud_defend plugin types
  */
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
 export interface CloudDefendPluginStart {
   /** Gets the cloud defend router component for embedding in the security solution. */

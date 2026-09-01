@@ -14,8 +14,10 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionEssPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionEssPluginStart {}
 
 export interface SecuritySolutionEssPluginSetupDeps {

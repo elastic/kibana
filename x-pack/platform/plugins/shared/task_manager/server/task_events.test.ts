@@ -31,6 +31,7 @@ async function blockingDelay(millis: number) {
 
   const end = Date.now() + millis;
 
+  // eslint-disable-next-line no-empty
   while (Date.now() <= end) {}
 }
 

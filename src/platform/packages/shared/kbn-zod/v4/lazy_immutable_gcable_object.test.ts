@@ -105,6 +105,7 @@ describe('lazyImmutableGCableObject', () => {
 
     const collected: string[] = [];
 
+    // eslint-disable-next-line guard-for-in
     for (const key in obj) {
       collected.push(key);
     }

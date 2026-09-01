@@ -25,6 +25,8 @@ export interface ScreenshotModePublicSetup {
 
 export type ScreenshotModePublicStart = ScreenshotModePublicSetup;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ScreenshotModePublicSetupDependencies {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ScreenshotModePublicStartDependencies {}

@@ -111,7 +111,7 @@ describe('TelemetryReceiver', () => {
       const queryArg = mockEsClient.search.mock.calls[0][0];
 
       expect(queryArg?.query?.bool?.filter).not.toBeFalsy();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion, @typescript-eslint/no-explicit-any
       const filter = queryArg?.query?.bool?.filter!! as any[];
       expect(filter).toHaveLength(3);
       expect(filter[2]).toEqual({
@@ -136,7 +136,7 @@ describe('TelemetryReceiver', () => {
       const queryArg = mockEsClient.search.mock.calls[0][0];
 
       expect(queryArg?.query?.bool?.filter).not.toBeFalsy();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion, @typescript-eslint/no-explicit-any
       const filter = queryArg?.query?.bool?.filter!! as any[];
       expect(filter).toHaveLength(2);
       expect(filter[0].terms['process.entity_id']).toEqual(['entity-id-1']);
@@ -178,7 +178,7 @@ describe('TelemetryReceiver', () => {
       await receiver.fetchTimelineEvents(['id1', 'id2']);
 
       const queryArg = mockEsClient.search.mock.calls[0][0];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion, @typescript-eslint/no-explicit-any
       const filters = queryArg?.query?.bool?.filter!! as any[];
 
       expect(filters[0]).toEqual({ terms: { 'process.entity_id': ['id1', 'id2'] } });
@@ -196,7 +196,7 @@ describe('TelemetryReceiver', () => {
 
       const queryArg = mockEsClient.search.mock.calls[0][0];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion, @typescript-eslint/no-explicit-any
       const filters = queryArg?.query?.bool?.filter!! as any[];
       expect(filters[0].terms['process.entity_id']).toEqual(nodeIds);
       expect(filters).toHaveLength(3);

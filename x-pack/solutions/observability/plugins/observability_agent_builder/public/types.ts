@@ -15,6 +15,7 @@ import type {
   ErrorSampleAiInsightProps,
 } from './components/insights';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginPublicSetup {}
 
 export interface ObservabilityAgentBuilderPluginPublicStart {
@@ -23,6 +24,7 @@ export interface ObservabilityAgentBuilderPluginPublicStart {
   getErrorSampleAIInsight: () => ComponentType<ErrorSampleAiInsightProps>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginSetupDependencies {}
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {

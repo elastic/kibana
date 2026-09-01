@@ -33,8 +33,10 @@ export interface ScreenshotModeServerSetup extends ScreenshotModeServerStart {
   setScreenshotModeEnabled(): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ScreenshotModeServerSetupDependencies {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ScreenshotModeServerStartDependencies {}
 
 export type ScreenshotModeRequestHandlerContext = CustomRequestHandlerContext<{

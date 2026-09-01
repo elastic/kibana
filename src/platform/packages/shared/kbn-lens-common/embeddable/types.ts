@@ -70,6 +70,7 @@ import type { LensTagCloudState } from '../visualizations/tagcloud/types';
 import type { LensTableRowContextMenuEvent } from '../visualizations/types';
 import type { XYPersistedState } from '../visualizations/xy/persistence';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;

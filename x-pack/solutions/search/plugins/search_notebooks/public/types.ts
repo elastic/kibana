@@ -8,6 +8,7 @@
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}
 
 export interface SearchNotebooksPluginStart {

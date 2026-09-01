@@ -7,6 +7,8 @@
 
 import type { ChatCompleteAPI, OutputAPI, InferenceConnector } from '@kbn/inference-common';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export interface ConfigSchema {}
 
 export interface InferenceSetupDependencies {}

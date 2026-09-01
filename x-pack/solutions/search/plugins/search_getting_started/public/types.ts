@@ -15,8 +15,9 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchGettingStartedPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchGettingStartedPluginStart {}
 
 export interface SearchGettingStartedAppPluginStartDependencies {

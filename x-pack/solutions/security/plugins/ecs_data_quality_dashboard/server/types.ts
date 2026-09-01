@@ -9,10 +9,10 @@ import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 /** The plugin setup interface */
-export interface EcsDataQualityDashboardPluginSetup {}
+export interface EcsDataQualityDashboardPluginSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /** The plugin start interface */
-export interface EcsDataQualityDashboardPluginStart {}
+export interface EcsDataQualityDashboardPluginStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export interface PluginSetupDependencies {
   spaces?: SpacesPluginSetup;

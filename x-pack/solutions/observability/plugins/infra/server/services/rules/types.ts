@@ -15,12 +15,14 @@ export interface RulesServiceSetupDeps {
   ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RulesServiceStartDeps {}
 
 export interface RulesServiceSetup {
   ruleDataClient: IRuleDataClient;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RulesServiceStart {}
 
 export type RuleRegistrationContext = 'observability.logs' | 'observability.metrics';

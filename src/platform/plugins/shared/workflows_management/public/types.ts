@@ -34,6 +34,7 @@ import type {
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {

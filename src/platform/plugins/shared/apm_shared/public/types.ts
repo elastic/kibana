@@ -13,6 +13,7 @@ import type { FocusedTraceWaterfallProps, FullTraceWaterfallProps } from '@kbn/a
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { TraceWaterfallProps } from '@kbn/apm-ui-shared';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApmSharedPluginSetup {}
 
 export interface ApmSharedPluginStart {

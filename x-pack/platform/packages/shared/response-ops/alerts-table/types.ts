@@ -491,7 +491,7 @@ export type AlertsTablePropsWithRef<AC extends AdditionalContext> = AlertsTableP
   RefAttributes<AlertsTableImperativeApi>;
 
 // Intentional empty interface since using `object` is too permissive
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AdditionalContext {}
 
 export type RenderContext<AC extends AdditionalContext> = {

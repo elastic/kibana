@@ -7,12 +7,14 @@
 
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessWorkplaceAIPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessWorkplaceAIPluginStart {}
 
 export interface SetupDependencies {
   serverless: ServerlessPluginSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}

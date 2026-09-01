@@ -11,8 +11,9 @@ const ERROR_MESSAGE = 'Code generation from strings disallowed for this context'
 
 describe('disallow_code_generation setup', () => {
   it('blocks eval()', () => {
+    // eslint-disable-next-line no-eval -- verifying that eval is blocked
     expect(() => eval('1+1')).toThrow(EvalError);
-
+    // eslint-disable-next-line no-eval -- verifying that eval is blocked
     expect(() => eval('1+1')).toThrow(ERROR_MESSAGE);
   });
 

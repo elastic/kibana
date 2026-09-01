@@ -46,6 +46,8 @@ export type {
   EmbeddableConversationInputRef,
 } from '@kbn/agent-builder-browser';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export interface ConfigSchema {}
 
 export interface AgentBuilderSetupDependencies {

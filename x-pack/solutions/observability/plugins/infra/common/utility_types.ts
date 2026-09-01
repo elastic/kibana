@@ -39,6 +39,7 @@ export type DeepPartial<T> = T extends any[]
   ? DeepPartialObject<T>
   : T;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 
 type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };

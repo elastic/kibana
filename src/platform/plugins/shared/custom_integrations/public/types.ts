@@ -20,4 +20,5 @@ export interface CustomIntegrationsStart {
   languageClientsUiComponents: Record<string, FC>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomIntegrationsStartDependencies {}

@@ -19,8 +19,10 @@ import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicStart {}
 
 export interface ServerlessObservabilityPublicSetupDependencies {

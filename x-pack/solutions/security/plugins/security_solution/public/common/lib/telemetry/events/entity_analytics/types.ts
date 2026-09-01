@@ -113,10 +113,11 @@ interface ReportMLJobUpdateParams {
   errorMessage?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ReportLeadGenerationGenerateClickedParams {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ReportLeadGenerationLeadClickedParams {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ReportLeadGenerationHuntWithAiClickedParams {}
 
 export interface EntityAnalyticsTelemetryEventsMap {

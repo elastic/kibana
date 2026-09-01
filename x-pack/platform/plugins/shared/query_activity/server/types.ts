@@ -11,6 +11,8 @@ export interface QueryActivityServerSetupDependencies {
   features: FeaturesPluginSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryActivityServerSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryActivityServerStart {}

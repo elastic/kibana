@@ -120,6 +120,7 @@ const languageThemeResolverDefinitions = new Map<
 >();
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   export namespace editor {
     // augment monaco editor types
     function registerLanguageThemeResolver(

@@ -14,8 +14,10 @@ import type { Document } from '@langchain/core/documents';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginStart {}
 
 export interface SearchPlaygroundPluginSetupDependencies {

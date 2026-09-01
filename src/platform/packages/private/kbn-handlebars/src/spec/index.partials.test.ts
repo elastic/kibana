@@ -287,7 +287,7 @@ describe('partials', () => {
     const handlebars = Handlebars.create();
     (handlebars.compile as any) = undefined;
     const template = handlebars.precompile('{{> dude}}');
-    const render = handlebars.template(eval('(' + template + ')'));
+    const render = handlebars.template(eval('(' + template + ')')); // eslint-disable-line no-eval
     expect(() => {
       render(
         {},

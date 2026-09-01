@@ -17,6 +17,7 @@ import type { CreateIntegrationSideCardButtonComponent } from './components/crea
 import type { DataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout/types';
 import type { AutomaticImportTelemetryService } from './services/telemetry';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AutomaticImportPluginSetup {}
 
 export interface AutomaticImportPluginStart {

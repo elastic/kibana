@@ -16,6 +16,8 @@ import type { ProductDocInstallClient } from './services/doc_install_status';
 import type { PackageInstaller } from './services/package_installer';
 import type { DocumentationManager, DocumentationManagerAPI } from './services/doc_manager';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export interface ProductDocBaseSetupDependencies {
   taskManager: TaskManagerSetupContract;
 }

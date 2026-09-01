@@ -9,8 +9,10 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataUsageConfigType } from '../server/config';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataUsagePublicSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataUsagePublicStart {}
 
 export interface DataUsageSetupDependencies {

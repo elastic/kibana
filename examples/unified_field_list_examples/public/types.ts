@@ -17,8 +17,9 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListExamplesPluginSetup {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListExamplesPluginStart {}
 
 export interface AppPluginSetupDependencies {

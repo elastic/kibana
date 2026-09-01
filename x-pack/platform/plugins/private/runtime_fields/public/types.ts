@@ -16,10 +16,13 @@ export interface PluginSetup {
   loadEditor(): Promise<LoadEditorResponse>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartPlugins {}
 
 export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];

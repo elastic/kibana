@@ -17,6 +17,7 @@ import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface NightshiftSetupDependencies {}
 
 export interface NightshiftStartDependencies {
@@ -33,6 +34,8 @@ export interface NightshiftStartDependencies {
   spaces?: SpacesPluginStart;
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface NightshiftPublicSetup {}
 
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface NightshiftPublicStart {}

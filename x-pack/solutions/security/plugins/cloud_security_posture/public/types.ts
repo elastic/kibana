@@ -38,7 +38,7 @@ export interface UseOnCloseParams {
 /**
  * The cloud security posture's public plugin setup interface.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspClientPluginSetup {}
 
 /**

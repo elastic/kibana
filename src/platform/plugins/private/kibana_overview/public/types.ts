@@ -15,8 +15,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginStart {}
 
 export interface AppPluginSetupDependencies {

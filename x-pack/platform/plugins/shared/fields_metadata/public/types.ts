@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/publ
 import type { UseFieldsMetadataHook } from './hooks/use_fields_metadata/use_fields_metadata';
 import type { FieldsMetadataServiceStart } from './services/fields_metadata';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataPublicSetup {}
 
 export interface FieldsMetadataPublicStart {
@@ -16,8 +17,10 @@ export interface FieldsMetadataPublicStart {
   useFieldsMetadata: UseFieldsMetadataHook;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataPublicSetupDeps {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataPublicStartDeps {}
 
 export type FieldsMetadataClientCoreSetup = CoreSetup<

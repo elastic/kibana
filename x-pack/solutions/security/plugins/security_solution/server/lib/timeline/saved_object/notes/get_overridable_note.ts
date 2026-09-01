@@ -23,6 +23,7 @@ export const getOverridableNote = async (
   let savedNote = note;
   try {
     savedNote = await getNote(frameworkRequest, note.noteId);
+    // eslint-disable-next-line no-empty
   } catch (e) {}
   return overrideOwner
     ? {

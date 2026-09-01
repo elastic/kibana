@@ -20,6 +20,7 @@ export interface AIAssistantManagementSelectionPluginServerDependenciesSetup {
   cloud?: CloudSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginServerStart {}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginServerSetup {}

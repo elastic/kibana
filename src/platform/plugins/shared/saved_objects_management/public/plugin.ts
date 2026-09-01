@@ -37,7 +37,7 @@ import {
 } from './lib';
 
 // keeping the interface to reduce work if we want to add back APIs later
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginSetup {}
 
 export interface SavedObjectsManagementPluginStart {

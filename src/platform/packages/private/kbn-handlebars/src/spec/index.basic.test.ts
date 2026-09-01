@@ -93,6 +93,7 @@ describe('basic context', () => {
   });
 
   it('false', () => {
+    /* eslint-disable no-new-wrappers */
     expectTemplate('val1: {{val1}}, val2: {{val2}}')
       .withInput({
         val1: false,
@@ -116,6 +117,7 @@ describe('basic context', () => {
     expectTemplate('val: {{{val1/val2}}}')
       .withInput({ val1: { val2: false } })
       .toCompileTo('val: false');
+    /* eslint-enable */
   });
 
   it('should handle undefined and null', () => {

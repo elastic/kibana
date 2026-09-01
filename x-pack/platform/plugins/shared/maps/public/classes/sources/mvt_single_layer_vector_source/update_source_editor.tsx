@@ -24,6 +24,7 @@ interface Props {
   source: MVTSingleLayerVectorSource;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {}
 
 export class UpdateSourceEditor extends Component<Props, State> {

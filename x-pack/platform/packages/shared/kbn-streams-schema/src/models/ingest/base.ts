@@ -98,6 +98,7 @@ const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
   'lookup',
 ]);
 
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {
   export interface Definition extends BaseStream.Definition {
     ingest: IngestBase;

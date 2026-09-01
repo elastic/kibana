@@ -6,6 +6,8 @@
  */
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/server';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
+
 export interface ConfigSchema {}
 
 export interface StreamsAppSetupDependencies {
