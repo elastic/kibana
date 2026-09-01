@@ -340,7 +340,7 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
@@ -354,6 +354,29 @@ export const WorkflowYAMLEditor = ({
     }
     navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
   }, []);
+
+  const handleFixWithAi = useCallback(
+    (error: YamlValidationResult) => {
+      handleErrorClick(error);
+      openAgentChat({
+        initialMessage: i18n.translate(
+          'workflowsManagement.workflowYAMLEditor.fixValidationErrorPrompt',
+          {
+            defaultMessage:
+              'Fix the validation error on line {lineNumber}, column {columnNumber}: {message}',
+            values: {
+              lineNumber: error.startLineNumber,
+              columnNumber: error.startColumn,
+              message: error.message ?? '',
+            },
+          }
+        ),
+        autoSendInitialMessage: true,
+        newConversation: true,
+      });
+    },
+    [handleErrorClick, openAgentChat]
+  );
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -911,6 +934,7 @@ export const WorkflowYAMLEditor = ({
             error={errorValidating}
             validationErrors={validationErrors}
             onErrorClick={handleErrorClick}
+            onFixWithAi={isAgentBuilderAvailable && !isReadOnlyYaml ? handleFixWithAi : undefined}
             extraAction={hideEditorTools ? undefined : extraActionElement}
           />
         </div>

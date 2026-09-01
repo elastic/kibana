@@ -28,6 +28,7 @@ import { useSelector } from 'react-redux-v7';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -48,6 +49,13 @@ const copiedErrorMessageLabel = i18n.translate(
   }
 );
 
+const fixWithAiLabel = i18n.translate(
+  'workflowsManagement.workflowYAMLValidationErrors.fixWithAi',
+  {
+    defaultMessage: 'Fix with AI',
+  }
+);
+
 const hasTextSelection = (): boolean => {
   const selectedText = window.getSelection()?.toString();
   return Boolean(selectedText && selectedText.length > 0);
@@ -59,6 +67,7 @@ interface WorkflowYamlValidationAccordionProps {
   error: Error | null;
   validationErrors: YamlValidationResult[] | null;
   onErrorClick?: (error: YamlValidationResult) => void;
+  onFixWithAi?: (error: YamlValidationResult) => void;
   extraAction?: React.ReactNode;
 }
 
@@ -114,11 +123,13 @@ function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
 interface ValidationErrorRowProps {
   error: YamlValidationResult;
   onErrorClick?: (error: YamlValidationResult) => void;
+  onFixWithAi?: (error: YamlValidationResult) => void;
 }
 
 const ValidationErrorRow = React.memo(function ValidationErrorRow({
   error,
   onErrorClick,
+  onFixWithAi,
 }: ValidationErrorRowProps) {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
@@ -144,6 +155,10 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
   const stopRowActivation = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
   }, []);
+
+  const handleFixWithAi = useCallback(() => {
+    onFixWithAi?.(error);
+  }, [error, onFixWithAi]);
 
   return (
     <div
@@ -199,30 +214,49 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
           ) : null}
         </p>
       </EuiFlexItem>
-      {message ? (
+      {onFixWithAi || message ? (
         <EuiFlexItem
           grow={false}
-          css={styles.copyButton}
+          css={styles.rowActions}
           onClick={stopRowActivation}
           onKeyDown={stopRowActivation}
           onMouseDown={stopRowActivation}
         >
-          <EuiCopy
-            textToCopy={message}
-            beforeMessage={copyErrorMessageLabel}
-            afterMessage={copiedErrorMessageLabel}
-          >
-            {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                aria-label={copyErrorMessageLabel}
-                size="xs"
-                color="text"
-                data-test-subj="workflowYamlValidationErrorCopyButton"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            {onFixWithAi ? (
+              <EuiFlexItem grow={false}>
+                <AiButtonIcon
+                  iconType="productAgent"
+                  aria-label={fixWithAiLabel}
+                  size="xs"
+                  variant="empty"
+                  withToolTip
+                  data-test-subj="workflowYamlValidationErrorFixWithAiButton"
+                  onClick={handleFixWithAi}
+                />
+              </EuiFlexItem>
+            ) : null}
+            {message ? (
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  textToCopy={message}
+                  beforeMessage={copyErrorMessageLabel}
+                  afterMessage={copiedErrorMessageLabel}
+                >
+                  {(copy) => (
+                    <EuiButtonIcon
+                      iconType="copy"
+                      aria-label={copyErrorMessageLabel}
+                      size="xs"
+                      color="text"
+                      data-test-subj="workflowYamlValidationErrorCopyButton"
+                      onClick={copy}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
       ) : null}
     </div>
@@ -235,6 +269,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   error: errorValidating,
   validationErrors,
   onErrorClick,
+  onFixWithAi,
   extraAction,
 }: WorkflowYamlValidationAccordionProps) {
   const styles = useMemoCss(componentStyles);
@@ -369,6 +404,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
               key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
               error={error}
               onErrorClick={onErrorClick}
+              onFixWithAi={onFixWithAi}
             />
           ))}
         </EuiFlexGroup>
@@ -454,7 +490,7 @@ const componentStyles = {
     marginTop: '0.125rem',
     flexShrink: 0,
   }),
-  copyButton: css({
+  rowActions: css({
     flexShrink: 0,
     userSelect: 'none',
   }),

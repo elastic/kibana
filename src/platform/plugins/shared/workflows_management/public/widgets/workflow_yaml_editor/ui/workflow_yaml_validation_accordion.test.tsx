@@ -67,6 +67,18 @@ describe('WorkflowYamlValidationAccordion', () => {
     expect(row).toHaveTextContent('Ln 12, Col 5');
     expect(row).toHaveTextContent('invalidVariableReference');
     expect(screen.getByTestId('workflowYamlValidationErrorCopyButton')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('workflowYamlValidationErrorFixWithAiButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders a Fix with AI button when onFixWithAi is provided', () => {
+    const onFixWithAi = jest.fn();
+    renderAccordion({ onFixWithAi });
+    expandAccordion();
+
+    expect(screen.getByTestId('workflowYamlValidationErrorFixWithAiButton')).toBeInTheDocument();
+    expect(screen.getByLabelText('Fix with AI')).toBeInTheDocument();
   });
 
   it('navigates to the error when the row is clicked without a text selection', () => {
@@ -102,6 +114,18 @@ describe('WorkflowYamlValidationAccordion', () => {
     fireEvent.click(screen.getByTestId('workflowYamlValidationErrorCopyButton'));
 
     expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(onErrorClick).not.toHaveBeenCalled();
+  });
+
+  it('calls onFixWithAi without navigating', () => {
+    const onErrorClick = jest.fn();
+    const onFixWithAi = jest.fn();
+    renderAccordion({ onErrorClick, onFixWithAi });
+    expandAccordion();
+
+    fireEvent.click(screen.getByTestId('workflowYamlValidationErrorFixWithAiButton'));
+
+    expect(onFixWithAi).toHaveBeenCalledWith(sampleError);
     expect(onErrorClick).not.toHaveBeenCalled();
   });
 

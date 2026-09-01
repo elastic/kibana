@@ -878,6 +878,7 @@ describe('useAgentBuilderIntegration', () => {
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: undefined,
         autoSendInitialMessage: undefined,
+        newConversation: undefined,
         attachments: [
           expectedAttachment(INITIAL_YAML, { workflowId: 'wf-456', name: 'Test Flow' }),
         ],
@@ -903,6 +904,7 @@ describe('useAgentBuilderIntegration', () => {
         result.current.openAgentChat({
           initialMessage: 'Fix this workflow',
           autoSendInitialMessage: true,
+          newConversation: true,
         });
       });
 
@@ -910,7 +912,98 @@ describe('useAgentBuilderIntegration', () => {
         expect.objectContaining({
           initialMessage: 'Fix this workflow',
           autoSendInitialMessage: true,
+          newConversation: true,
         })
+      );
+    });
+
+    it('attaches the current workflow YAML when auto-sending a new conversation', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      mockHasPersistedConversation.mockReturnValue(true);
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-456',
+          workflowName: 'Test Flow',
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      act(() => {
+        result.current.openAgentChat({
+          initialMessage: 'Fix this workflow',
+          autoSendInitialMessage: true,
+          newConversation: true,
+        });
+      });
+
+      expect(agentBuilder.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newConversation: true,
+          attachments: [
+            expectedAttachment(INITIAL_YAML, { workflowId: 'wf-456', name: 'Test Flow' }),
+          ],
+        })
+      );
+    });
+
+    it('keeps the workflow attachment in setChatConfig while an auto-send is in flight', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      act(() => {
+        result.current.openAgentChat({
+          initialMessage: 'Fix this workflow',
+          autoSendInitialMessage: true,
+          newConversation: true,
+        });
+      });
+
+      agentBuilder.setChatConfig.mockClear();
+      mockModel.simulateContentChange('name: while-autosend');
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          initialMessage: 'Fix this workflow',
+          autoSendInitialMessage: true,
+          newConversation: true,
+          attachments: [expectedAttachment('name: while-autosend')],
+        })
+      );
+
+      agentBuilder.setChatConfig.mockClear();
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({
+          id: 'conv-after-send',
+          conversation: { attachments: [] },
+        } as unknown as ActiveConversation);
+      });
+
+      mockModel.simulateContentChange('name: after-autosend');
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(agentBuilder.setChatConfig).not.toHaveBeenCalledWith(
+        expect.objectContaining({ newConversation: true })
       );
     });
 
