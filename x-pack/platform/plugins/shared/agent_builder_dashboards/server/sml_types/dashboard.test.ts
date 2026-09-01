@@ -141,6 +141,7 @@ describe('dashboardSmlType', () => {
       savedObjectsClient: savedObjectsClient as never,
       esClient: {} as never,
       logger: createLogger(),
+      spaces: [],
     })) {
       pages.push(page);
     }
