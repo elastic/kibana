@@ -87,42 +87,40 @@ export default function (providerContext: FtrProviderContext) {
       // applied removals in a separate SO write after the add, wiping the freshly-written refs
       // and leaving installed_es with zero transform entries while ES still had live transforms.
       // On the next upgrade nothing was deleted and duplicate transforms accumulated.
-      it('transform refs must survive a same-version force reinstall', async function () {
-        await installPackage(pkgName, pkgVersion);
+      it('transform refs and ES transforms must match expected ids after same-version force reinstall', async function () {
+        const expectedIds = transforms.map((t) => `${t.id}-${pkgVersion}`);
 
-        const res = await supertest
+        await supertest
+          .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        // SO refs must still list every expected transform id.
+        const pkgRes = await supertest
           .get(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
         const installedEs: Array<{ id: string; type: string }> =
-          res.body.item.installationInfo.installed_es;
+          pkgRes.body.item.installationInfo.installed_es;
+        const transformRefIds = installedEs
+          .filter((a) => a.type === 'transform')
+          .map((a) => a.id);
 
-        const transformRefs = installedEs.filter((a) => a.type === 'transform');
-        expect(transformRefs.length).to.be.greaterThan(0);
-
-        const expectedIds = transforms.map((t) => `${t.id}-${pkgVersion}`);
         for (const expectedId of expectedIds) {
-          expect(transformRefs.some((r) => r.id === expectedId)).to.be(true);
+          expect(transformRefIds).to.contain(expectedId);
         }
-      });
 
-      it('no duplicate transforms must exist in Elasticsearch after reinstall', async function () {
-        const res = (await es.transport.request(
-          {
-            method: 'GET',
-            path: `/_transform/endpoint.metadata_*`,
-          },
+        // ES must contain exactly the expected transform ids — no extras, no old versions.
+        const esRes = (await es.transport.request(
+          { method: 'GET', path: `/_transform/endpoint.metadata_*` },
           { meta: true, ignore: [404] }
         )) as { statusCode: number; body: { transforms: Array<{ id: string }> } };
-        expect(res.statusCode).equal(200);
-        const esTransforms = res.body.transforms ?? [];
-        const transformIds = esTransforms.map((t) => t.id);
+        expect(esRes.statusCode).equal(200);
+        const esIds = (esRes.body.transforms ?? []).map((t) => t.id).sort();
 
-        // Each id must appear at most once — duplicates indicate the ref-wipe bug.
-        const unique = [...new Set(transformIds)];
-        expect(unique.length).to.equal(transformIds.length);
-        expect(unique.length).to.equal(transforms.length);
+        expect(esIds).to.eql([...expectedIds].sort());
       });
     });
 
