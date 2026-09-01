@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { partition } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -243,6 +243,10 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   const workflowId = useSelector(selectWorkflowId);
   const telemetry = useTelemetry();
   const previousErrorsRef = useRef<string>('');
+  const [isOpen, setIsOpen] = useState(false);
+  const onToggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
 
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
@@ -256,6 +260,12 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
     [validationErrors]
   );
   const hasAccordionContent = allValidationErrors.length > 0;
+
+  useEffect(() => {
+    if (!hasAccordionContent && isMounted) {
+      setIsOpen(false);
+    }
+  }, [hasAccordionContent, isMounted]);
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
@@ -345,8 +355,9 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
         </EuiFlexGroup>
       }
       arrowDisplay={hasAccordionContent ? 'left' : 'none'}
-      initialIsOpen={false}
       isDisabled={!hasAccordionContent}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={onToggle}
       css={styles.accordion}
       extraAction={extraAction}
     >
@@ -378,12 +389,13 @@ const componentStyles = {
       },
 
       // apply underline only to the button content text, not the right side
-      '& .euiAccordion__button:hover, & .euiAccordion__button:focus': {
-        textDecoration: 'none !important',
-        '& .button-content-text': {
-          textDecoration: 'underline',
+      '& .euiAccordion__button:hover:not(:disabled), & .euiAccordion__button:focus:not(:disabled)':
+        {
+          textDecoration: 'none !important',
+          '& .button-content-text': {
+            textDecoration: 'underline',
+          },
         },
-      },
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
