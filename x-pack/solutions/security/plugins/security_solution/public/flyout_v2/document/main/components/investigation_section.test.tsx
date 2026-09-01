@@ -66,13 +66,18 @@ jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fall
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],
-  rawIndex?: string
+  rawIndex?: string,
+  source?: Record<string, unknown>
 ): DataTableRecord =>
   ({
     id: '1',
     // Only set raw._index when a test asks for it: the component prefers raw._index over the
     // flattened `_index` field, so a default here would shadow hits that rely on the fallback.
-    raw: rawIndex ? { _index: rawIndex } : {},
+    // `_source` carries the nested `ancestors` objects that the Source-event link resolves against.
+    raw: {
+      ...(rawIndex ? { _index: rawIndex } : {}),
+      ...(source ? { _source: source } : {}),
+    },
     flattened,
     isAnchor: false,
   } as DataTableRecord);
@@ -301,10 +306,18 @@ describe('InvestigationSection', () => {
 
   it('renders a Source event link that opens the ancestor document in a new flyout', () => {
     mockUseExpandSection.mockReturnValue(true);
-    const sourceEventHit = createMockHit({
-      'event.kind': 'signal',
-      'signal.ancestors.index': '.internal.alerts-security.alerts-default',
-    });
+    const sourceEventHit = createMockHit(
+      {
+        'event.kind': 'signal',
+        'signal.ancestors.index': '.internal.alerts-security.alerts-default',
+      },
+      undefined,
+      {
+        'signal.ancestors': [
+          { id: 'ancestor-id-1', index: '.internal.alerts-security.alerts-default' },
+        ],
+      }
+    );
 
     render(
       <IntlProvider locale="en">
@@ -494,7 +507,12 @@ describe('InvestigationSection Source event link under CPS', () => {
           'event.kind': 'signal',
           'signal.ancestors.index': 'logs-endpoint.alerts.caf6b705.2026.08.13',
         },
-        'linked_local_project:.ds-.alerts-security.alerts-default-2026.08.13-000001'
+        'linked_local_project:.ds-.alerts-security.alerts-default-2026.08.13-000001',
+        {
+          'signal.ancestors': [
+            { id: 'ancestor-id-1', index: 'logs-endpoint.alerts.caf6b705.2026.08.13' },
+          ],
+        }
       )
     );
 
@@ -513,7 +531,12 @@ describe('InvestigationSection Source event link under CPS', () => {
           'event.kind': 'signal',
           'signal.ancestors.index': 'logs-endpoint.alerts.caf6b705.2026.08.13',
         },
-        '.ds-.alerts-security.alerts-default-2026.08.13-000001'
+        '.ds-.alerts-security.alerts-default-2026.08.13-000001',
+        {
+          'signal.ancestors': [
+            { id: 'ancestor-id-1', index: 'logs-endpoint.alerts.caf6b705.2026.08.13' },
+          ],
+        }
       )
     );
 
