@@ -10,6 +10,7 @@ on:
         description: Issue number in this repository to fix
         required: true
         type: string
+  status-comment: true
 
 permissions:
   contents: read
@@ -119,8 +120,11 @@ sandbox:
   agent: awf
 
 safe-outputs:
-  activation-comments: false
+  activation-comments: true
   report-failure-as-issue: false
+  messages:
+    run-started: 'The flaky test fixer is investigating this issue. Follow progress in [{workflow_name}]({run_url}).'
+    run-failure: 'The flaky test fixer failed before it could report an outcome. Review [{workflow_name}]({run_url}), then remove and reapply `ai:fix-flaky` to retry.'
   mentions:
     allowed:
       - ${{ github.actor }}
