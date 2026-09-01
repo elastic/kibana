@@ -35,6 +35,7 @@ export interface RuleUpgradeTelemetry {
   ruleId: string;
   ruleName: string;
   hasBaseVersion: boolean;
+  hasRuleTypeChange: boolean;
   updatedFieldsSummary: {
     count: number;
     nonSolvableConflictsCount: number;
@@ -55,6 +56,7 @@ interface BulkUpgradeSummary {
   numOfNonSolvableConflicts: number;
   numOfSolvableConflicts: number;
   numOfNoConflicts: number;
+  numOfRulesWithRuleTypeChange: number;
 }
 export interface RuleBulkUpgradeTelemetry {
   successfulUpdates: BulkUpgradeSummary;
@@ -183,6 +185,7 @@ function calculateBulkUpdateSummary(
   let numOfNoConflicts = 0;
   let numOfCustomizedRules = 0;
   let numOfNonCustomizedRules = 0;
+  let numOfRulesWithRuleTypeChange = 0;
 
   ruleIds.forEach((ruleId) => {
     const ruleUpgradeContext = ruleUpgradeContextsMap.get(ruleId);
@@ -201,6 +204,10 @@ function calculateBulkUpdateSummary(
       numOfCustomizedRules++;
     } else {
       numOfNonCustomizedRules++;
+    }
+
+    if (hasRuleTypeChanged(fieldsDiff)) {
+      numOfRulesWithRuleTypeChange++;
     }
 
     if (diffs.some((d) => d.conflict === ThreeWayDiffConflict.NON_SOLVABLE)) {
@@ -223,6 +230,7 @@ function calculateBulkUpdateSummary(
     numOfNonSolvableConflicts,
     numOfSolvableConflicts,
     numOfNoConflicts,
+    numOfRulesWithRuleTypeChange,
   };
 }
 
@@ -281,6 +289,7 @@ function createRuleUpdateTelemetryEvent({
     ruleId,
     ruleName,
     hasBaseVersion,
+    hasRuleTypeChange: hasRuleTypeChanged(fieldsDiff),
     updatedFieldsSummary: {
       count: updatedFieldsTotal.length,
       nonSolvableConflictsCount: updatedFieldsWithNonSolvableConflicts.length,
@@ -293,4 +302,18 @@ function createRuleUpdateTelemetryEvent({
     updatedFieldsWithNoConflicts,
     finalResult,
   };
+}
+
+// The rule's `type` was force-set to the target version's value during this upgrade attempt.
+// Only the three outcomes `determineIfValueCanUpdate` treats as a real update count - unlike
+// `isUpdatableOutcome` above, `CustomizedValueSameUpdate` is deliberately excluded here because
+// current already equals target for that outcome, so nothing changes on upgrade.
+function hasRuleTypeChanged(fieldsDiff: BasicRuleFieldsDiff): boolean {
+  const diffOutcome = fieldsDiff.type?.diff_outcome;
+
+  return (
+    diffOutcome === ThreeWayDiffOutcome.StockValueCanUpdate ||
+    diffOutcome === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+    diffOutcome === ThreeWayDiffOutcome.MissingBaseCanUpdate
+  );
 }

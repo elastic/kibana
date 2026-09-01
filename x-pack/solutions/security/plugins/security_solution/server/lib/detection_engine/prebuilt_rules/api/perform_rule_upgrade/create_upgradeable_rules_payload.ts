@@ -63,11 +63,16 @@ export const createModifiedPrebuiltRuleAssets = ({
             }
 
             const { current, target } = upgradeableRule;
-            if (current.type !== target.type) {
+            const isCustomized = isRuleCustomized(current);
+
+            // For a non-customized rule, the merged value of every diffable field equals
+            // the target value, so `MERGED` and `TARGET` are equivalent and the assertion's
+            // premise - that merging field-by-field across two different rule schemas is
+            // ambiguous - does not hold. The ambiguity is real only for a customized rule,
+            // so only that case still requires 'pick_version' to be 'TARGET' everywhere.
+            if (current.type !== target.type && isCustomized) {
               assertPickVersionIsTarget({ ruleId, requestBody });
             }
-
-            const isCustomized = isRuleCustomized(current);
 
             const calculatedRuleDiff = calculateThreeWayRuleFieldsDiff(
               {
