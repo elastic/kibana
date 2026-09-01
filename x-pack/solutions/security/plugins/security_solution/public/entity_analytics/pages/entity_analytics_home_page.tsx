@@ -50,7 +50,9 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { NeedsAttentionTile } from '../components/home/needs_attention_tile';
+import { NeedsAttentionPanel } from '../components/home/facelift/v1/needs_attention_panel';
+import { useNeedsAttentionEntries } from '../components/home/use_needs_attention_entries';
+import type { ActiveFilter, FaceliftIdentity } from '../components/home/facelift/v1/data';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
@@ -192,6 +194,20 @@ const EntityAnalyticsHomePageContent = () => {
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
+
+  const { entries: attentionEntries, isLoading: attentionLoading } = useNeedsAttentionEntries({
+    spaceId: resolvedSpaceId,
+    watchlistId: selectedWatchlistId,
+  });
+
+  const handleSelectIdentity = useCallback((identity: FaceliftIdentity) => {
+    setActiveFilter((prev) =>
+      prev?.type === 'identity' && prev.identityId === identity.id
+        ? null
+        : { type: 'identity', identityId: identity.id, label: identity.name }
+    );
+  }, []);
 
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
@@ -337,9 +353,11 @@ const EntityAnalyticsHomePageContent = () => {
         )}
 
         <EuiFlexItem grow={false}>
-          <NeedsAttentionTile
-            spaceId={resolvedSpaceId}
-            watchlistId={selectedWatchlistId}
+          <NeedsAttentionPanel
+            activeFilter={activeFilter}
+            entries={attentionEntries}
+            isLoading={attentionLoading}
+            onSelectIdentity={handleSelectIdentity}
           />
         </EuiFlexItem>
 
@@ -448,3 +466,4 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
 
   return <EntitiesTableSection state={state} config={DEFAULT_ENTITIES_TABLE_CONFIG} />;
 };
+
