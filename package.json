@@ -915,6 +915,7 @@
     "@kbn/ml-chi2test": "link:x-pack/platform/packages/shared/ml/chi2test",
     "@kbn/ml-common-types": "link:x-pack/platform/packages/shared/ml/common-types",
     "@kbn/ml-cps": "link:x-pack/platform/packages/shared/ml/ml-cps",
+    "@kbn/ml-cps-common": "link:x-pack/platform/packages/shared/ml/ml-cps-common",
     "@kbn/ml-creation-wizard-utils": "link:x-pack/platform/packages/private/ml/creation_wizard_utils",
     "@kbn/ml-data-frame-analytics-utils": "link:x-pack/platform/packages/private/ml/data_frame_analytics_utils",
     "@kbn/ml-data-grid": "link:x-pack/platform/packages/private/ml/data_grid",
