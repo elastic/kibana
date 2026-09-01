@@ -332,9 +332,9 @@ function NodeStatusIcon({
       {isRunning ? (
         <EuiLoadingSpinner size="m" />
       ) : isSuccess ? (
-        <EuiIcon type="checkCircleFill" color={successColor} size="s" aria-hidden={true} />
+        <EuiIcon type="checkCircleFill" color={successColor} size="m" aria-hidden={true} />
       ) : (
-        <EuiIcon type="errorFill" color={failColor} size="s" aria-hidden={true} />
+        <EuiIcon type="errorFill" color={failColor} size="m" aria-hidden={true} />
       )}
     </div>
   );

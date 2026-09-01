@@ -119,20 +119,27 @@ describe('resolveNodeChipStyle', () => {
       expect(chip.iconColor).toBe('danger-color');
     });
 
-    it('recolors brand chips on success', () => {
+    it('recolors the brand tile on success but leaves the logo untinted', () => {
       const chip = resolveNodeChipStyle(theme, 'elasticsearch.search', false, success);
       expect(chip.background).toBe('success-bg');
       expect(chip.border).toBe('success-color');
-      expect(chip.iconColor).toBe('success-color');
+      expect(chip.iconColor).toBeUndefined();
       expect(chip.isBrand).toBe(true);
     });
 
-    it('recolors brand chips on failure', () => {
+    it('recolors the brand tile on failure but leaves the logo untinted', () => {
       const chip = resolveNodeChipStyle(theme, 'kibana.request', false, failed);
       expect(chip.background).toBe('danger-bg');
       expect(chip.border).toBe('danger-color');
-      expect(chip.iconColor).toBe('danger-color');
+      expect(chip.iconColor).toBeUndefined();
       expect(chip.isBrand).toBe(true);
+    });
+
+    it('recolors the connector tile on success but leaves the service logo untinted', () => {
+      const chip = resolveNodeChipStyle(theme, 'slack', false, success);
+      expect(chip.background).toBe('success-bg');
+      expect(chip.border).toBe('success-color');
+      expect(chip.iconColor).toBe('neutral-text');
     });
   });
 });

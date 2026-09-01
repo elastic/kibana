@@ -71,6 +71,16 @@ describe('buildMergeBusPath', () => {
       expect(r.path).toMatch(/^M 0 /);
       expect(r.path).toContain('L 100 402');
     });
+
+    it('uses a 16px quadratic corner at the source-side elbow', () => {
+      const r = buildMergeBusPath(
+        { sourceX: 0, sourceY: 100, targetX: 200, targetY: 250 },
+        false,
+        TRUNK
+      );
+      const busY = 250 - TRUNK;
+      expect(r.path).toContain(`Q 0 ${busY} ${CORNER_RADIUS} ${busY}`);
+    });
   });
 
   describe('LR (left-to-right)', () => {

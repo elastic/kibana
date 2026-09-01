@@ -119,9 +119,11 @@ function resolveChipKind(
 
 /**
  * Category → chip tokens for canvas nodes. Idle brand chips (Elasticsearch /
- * Kibana logos) stay on a neutral tile. On success or failure every chip uses
- * the success / danger color tokens for the tile border and icon, with a
- * tinted success / danger fill.
+ * Kibana logos) stay on a neutral tile with no icon tint. On success or
+ * failure the tile fill and border use success / danger tokens; logos
+ * (brand + external connectors) keep their idle icon color so they are
+ * not flattened to the status tint. Category glyphs (flow, code, data,
+ * trigger, AI) still recode with the status color.
  */
 export function resolveNodeChipStyle(
   euiTheme: EuiTheme,
@@ -133,6 +135,7 @@ export function resolveNodeChipStyle(
   const kind = resolveChipKind(stepType, isTrigger);
   const isBrand = kind === 'brand';
   const idle = categoryTokens(colors, kind);
+  const preserveLogoColor = isBrand || kind === 'external';
 
   if (!isSuccess && !isFailed) {
     return { ...idle, isBrand };
@@ -142,7 +145,7 @@ export function resolveNodeChipStyle(
     return {
       background: colors.backgroundBaseSuccess,
       border: colors.success,
-      iconColor: colors.success,
+      iconColor: preserveLogoColor ? idle.iconColor : colors.success,
       isBrand,
     };
   }
@@ -150,7 +153,7 @@ export function resolveNodeChipStyle(
   return {
     background: colors.backgroundBaseDanger,
     border: colors.danger,
-    iconColor: colors.danger,
+    iconColor: preserveLogoColor ? idle.iconColor : colors.danger,
     isBrand,
   };
 }

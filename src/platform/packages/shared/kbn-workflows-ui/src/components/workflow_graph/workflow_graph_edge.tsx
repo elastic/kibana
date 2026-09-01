@@ -22,9 +22,9 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   /** Switch bus routing marker — present on all case/default edges of a switch node. */
   readonly branchType?: EdgeBranchType;
   /**
-   * True when this edge participates in a fan-in that includes a synthetic
-   * placeholder (empty `if` branch lane). Routes the edge on the merge bus
-   * (symmetric inverted-bus fan-in matching the fork-bus fan-out).
+   * True when the target has more than one incoming edge (fan-in). Routes the
+   * edge on the merge bus (symmetric inverted-bus fan-in matching the
+   * fork-bus fan-out) so 16px corners apply instead of xyflow smooth-step.
    */
   readonly isMerge?: boolean;
   /**

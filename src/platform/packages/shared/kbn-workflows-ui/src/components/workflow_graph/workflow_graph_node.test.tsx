@@ -264,12 +264,12 @@ describe('resolveNodeColors', () => {
     expect(errored.chipIconColor).toBe('danger-color');
   });
 
-  it('recolors brand chips on execution outcome', () => {
+  it('recolors brand tiles on execution outcome but leaves the logo untinted', () => {
     const completed = resolveNodeColors(theme, 'elasticsearch.search', false, success);
     expect(completed.isBrandChip).toBe(true);
     expect(completed.chipBackground).toBe('success-bg');
     expect(completed.chipBorder).toBe('success-color');
-    expect(completed.chipIconColor).toBe('success-color');
+    expect(completed.chipIconColor).toBeUndefined();
   });
 
   it('uses trigger chip tokens when idle', () => {

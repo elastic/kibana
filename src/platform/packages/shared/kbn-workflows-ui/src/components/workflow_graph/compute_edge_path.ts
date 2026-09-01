@@ -287,11 +287,12 @@ export const computeEdgePath = ({
   const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;
 
-  // Single-bus routing for tagged merge (fan-in) edges: edges that participate
-  // in a fan-in that includes a synthetic placeholder lane. All such edges share
-  // the same targetX/targetY, so their buses and trunks overlap into one visible
-  // bus + one trunk — the symmetric inverse of the fork bus. Fork and merge are
-  // disjoint: fork edges carry a branchType, merge edges don't.
+  // Single-bus routing for tagged merge (fan-in) edges: any target with two
+  // or more incoming edges (two triggers joining the first step, if/else
+  // join, bypass-lane join). All such edges share the same targetX/targetY,
+  // so their buses and trunks overlap into one visible bus + one trunk — the
+  // symmetric inverse of the fork bus. Fork and merge are disjoint: fork
+  // edges carry a branchType, merge edges don't.
   const isMergeEdge = isMerge === true;
   const mergeGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useMerge = isMergeEdge && mergeGap > MERGE_BUS_TRUNK;

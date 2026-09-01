@@ -94,7 +94,7 @@ describe('useWorkflowLayout', () => {
       );
     });
 
-    it('does NOT tag fan-in edges isMerge when both if branches are present', () => {
+    it('tags ALL fan-in edges isMerge when both if branches are present', () => {
       const workflow = minimal({
         steps: [
           {
@@ -110,7 +110,25 @@ describe('useWorkflowLayout', () => {
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
       const fanInEdges = result.current.edges.filter((e) => e.target === 'after');
       expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => !(e.data as Record<string, unknown>)?.isMerge)).toBe(true);
+      expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
+    });
+
+    it('tags trigger edges isMerge when two triggers join the first step', () => {
+      const workflow = minimal({
+        triggers: [
+          { type: 'alert', enabled: true },
+          { type: 'manual', enabled: true },
+        ],
+        steps: [{ name: 'first', type: 'http' }] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const triggerEdges = result.current.edges.filter((e) => e.target === 'first');
+      expect(triggerEdges).toHaveLength(2);
+      expect(triggerEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
     });
 
     it('does NOT tag a plain sequential edge isMerge', () => {
