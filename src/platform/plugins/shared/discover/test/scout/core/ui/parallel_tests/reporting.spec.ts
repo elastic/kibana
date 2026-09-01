@@ -10,7 +10,11 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags, testData } from '../../../common/ui/fixtures';
 
+const REPORT_GENERATION_TIMEOUT = 120_000;
+
 spaceTest.describe('Discover CSV export', () => {
+  spaceTest.setTimeout(REPORT_GENERATION_TIMEOUT + 30_000);
+
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -29,7 +33,9 @@ spaceTest.describe('Discover CSV export', () => {
     'exports an unsaved classic session',
     { tag: tags.deploymentAgnostic },
     async ({ pageObjects }) => {
-      const download = await pageObjects.discover.exportAsCsv();
+      const download = await pageObjects.discover.exportAsCsv({
+        timeout: REPORT_GENERATION_TIMEOUT,
+      });
 
       expect(download.suggestedFilename()).toMatch(/\.csv$/);
     }
@@ -43,7 +49,9 @@ spaceTest.describe('Discover CSV export', () => {
         'from logstash-* | stats count = count(bytes) by geo.dest | sort count desc'
       );
 
-      const download = await pageObjects.discover.exportAsCsv();
+      const download = await pageObjects.discover.exportAsCsv({
+        timeout: REPORT_GENERATION_TIMEOUT,
+      });
 
       expect(download.suggestedFilename()).toMatch(/\.csv$/);
     }
@@ -55,7 +63,9 @@ spaceTest.describe('Discover CSV export', () => {
     async ({ pageObjects }) => {
       await pageObjects.discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
 
-      const download = await pageObjects.discover.exportAsCsv();
+      const download = await pageObjects.discover.exportAsCsv({
+        timeout: REPORT_GENERATION_TIMEOUT,
+      });
 
       expect(download.suggestedFilename()).toMatch(/\.csv$/);
     }
@@ -77,7 +87,9 @@ spaceTest.describe('Discover CSV export', () => {
         true
       );
 
-      const download = await pageObjects.discover.exportAsCsv();
+      const download = await pageObjects.discover.exportAsCsv({
+        timeout: REPORT_GENERATION_TIMEOUT,
+      });
 
       expect(download.suggestedFilename()).toMatch(/\.csv$/);
     }

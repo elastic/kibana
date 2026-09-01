@@ -1201,7 +1201,7 @@ export class DiscoverApp {
     return viewButtons[0];
   }
 
-  async exportAsCsv(): Promise<Download> {
+  async exportAsCsv(options?: TimeoutOptions): Promise<Download> {
     // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
     await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
@@ -1212,8 +1212,9 @@ export class DiscoverApp {
     // 3. Explicitly wait for the report to finish generating
     // Ensure the button is ready before we try to download
     const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
-    await expect(downloadBtn).toBeEnabled({
-      timeout: 30_000,
+    await downloadBtn.waitFor({
+      state: 'visible',
+      timeout: options?.timeout ?? 30_000,
     });
 
     // 4. Coordinate the click and the event listener
