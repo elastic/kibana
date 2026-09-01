@@ -10,6 +10,7 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   actionPolicySavedObjectAttributesSchemaV1,
   actionPolicySavedObjectAttributesSchemaV2,
+  actionPolicySavedObjectAttributesSchemaV3,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 
@@ -86,11 +87,48 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
+      /**
+       * After the v3 migration `matcher` is an object on every document. Accept both shapes here
+       * so that v3 docs can be down-converted to v2 during a rollback without a validation
+       * failure. The `create` schema stays strict (string only) because v2 writes always produce
+       * a KQL string.
+       */
       forwardCompatibility: actionPolicySavedObjectAttributesSchemaV2.extends(
-        {},
+        {
+          matcher: schema.maybe(
+            schema.nullable(
+              schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })])
+            )
+          ),
+        },
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV2,
+    },
+  },
+  /**
+   * v3 migrates `matcher` from a raw KQL string to a structured object
+   * `{ tags, expression }`. Existing string matchers are wrapped in
+   * `{ expression: oldMatcher }` so they continue to evaluate identically
+   * via `PolicyMatcher.toKql()`.
+   */
+  '3': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const matcher = (doc.attributes as { matcher?: unknown }).matcher;
+          if (typeof matcher !== 'string') return { attributes: {} };
+          return { attributes: { matcher: { expression: matcher } } };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV3.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV3,
     },
   },
 };
