@@ -52,6 +52,10 @@ Do NOT use this skill when the user:
 - Asks about threat hunting without any intent to create or edit a rule
 - Asks a general security question that doesn't imply building or changing a detection (e.g., "what is lateral movement?", "explain MITRE ATT&CK")
 - Asks to enable, disable, or delete an existing rule (no tool support for this yet)
+- Asks whether a rule exists, or to list or count rules ("do we have a rule for T1059?", "do we detect lateral movement over SMB?", "how many rules are disabled?") → use the find-security-rules skill. These are inventory questions; answering one does not change a rule.
+- Asks for a rule **"that covers" / "for" a behavior** without giving a query, field conditions, or rule parameters (e.g. "I want a rule that covers kubectl exec into production pods") → use the detection-coverage skill FIRST. An installed or prebuilt rule may already cover it, and creating a duplicate wastes analyst time. It checks installed rules, then the installable prebuilt catalogue, and often the gap is closed by enabling or installing a rule instead of authoring one.
+
+When the user supplies the rule's substance — a query, explicit field and value conditions, concrete parameters, or an explicit ask for a **new** rule — build it here. Do not route to detection-coverage first and do not ask whether it already exists: they have already decided, and second-guessing an explicit instruction wastes their turn.
 
 This skill only supports the **ES|QL** rule type. If the user asks to create a rule with any other rule type (e.g., KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT attempt to create it. Do NOT automatically offer or proceed to create an ES|QL alternative. Instead, stop and clearly tell the user:
 

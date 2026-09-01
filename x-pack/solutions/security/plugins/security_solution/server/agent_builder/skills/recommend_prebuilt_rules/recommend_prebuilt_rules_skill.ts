@@ -15,11 +15,13 @@ import { createFindPrebuiltRulesInlineTool } from './find_prebuilt_rules_tool';
 import { createGetUserDataInventoryTool } from './get_user_data_inventory_tool';
 import { createGetInstallableCatalogOverviewTool } from './get_installable_catalog_overview_tool';
 import { createGetInstalledRulesMitreCoverageTool } from './get_installed_rules_mitre_coverage_tool';
+import { createFindPrebuiltRulesSemanticTool } from '../../sml/find_prebuilt_rules_semantic_tool';
 
 interface RecommendPrebuiltRulesSkillDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
   logger: Logger;
   ml: EntityAnalyticsRoutesDeps['ml'];
+  semanticSearchEnabled: boolean;
 }
 
 const RECOMMEND_PREBUILT_RULES_CONTENT = `# Recommend Prebuilt Rules
@@ -248,6 +250,7 @@ export const createRecommendPrebuiltRulesSkill = ({
   getStartServices,
   logger,
   ml,
+  semanticSearchEnabled,
 }: RecommendPrebuiltRulesSkillDeps): SkillDefinition<
   'recommend-prebuilt-rules',
   'skills/security/rules'
@@ -266,5 +269,8 @@ export const createRecommendPrebuiltRulesSkill = ({
       createGetUserDataInventoryTool({ getStartServices, logger }),
       createGetInstallableCatalogOverviewTool({ getStartServices, logger, ml }),
       createGetInstalledRulesMitreCoverageTool({ getStartServices, logger }),
+      ...(semanticSearchEnabled
+        ? [createFindPrebuiltRulesSemanticTool({ getStartServices, logger })]
+        : []),
     ],
   });

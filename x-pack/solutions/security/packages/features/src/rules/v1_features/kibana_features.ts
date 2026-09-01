@@ -39,6 +39,7 @@ import {
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
   ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
   RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+  RULES_AI_INDEX_TYPES,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -82,6 +83,7 @@ export const getRulesBaseKibanaFeature = (
   },
   privileges: {
     all: {
+      aiIndex: { read: [...RULES_AI_INDEX_TYPES] },
       replacedBy: {
         default: [
           { feature: RULES_FEATURE_ID_V4, privileges: ['all'] },
@@ -138,6 +140,7 @@ export const getRulesBaseKibanaFeature = (
       ],
     },
     read: {
+      aiIndex: { read: [...RULES_AI_INDEX_TYPES] },
       replacedBy: {
         default: [
           { feature: RULES_FEATURE_ID_V4, privileges: ['read'] },

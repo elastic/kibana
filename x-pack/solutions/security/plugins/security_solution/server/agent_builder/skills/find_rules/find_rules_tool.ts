@@ -13,8 +13,9 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { prepareKQLStringParam } from '../../../../common/utils/kql';
+import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import {
+  convertRuleSearchTermToKQL,
   convertRulesFilterToKQL,
   convertRuleTagsToKQL,
 } from '../../../../common/detection_engine/rule_management/rule_filtering';
@@ -51,7 +52,8 @@ export const findRulesSchema = z
       .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
-        'Free-text search across rule name, index patterns, and MITRE tactic/technique fields. ' +
+        'Free-text search across rule name, rule description, index patterns, and MITRE ' +
+          'tactic/technique fields. Description matching is word-based: use distinctive words. ' +
           'For category-flavored words like "network", "endpoint", "windows", also call ' +
           '`security.discover_rule_tags` — a tag filter is usually more precise than free text.'
       ),
@@ -143,9 +145,51 @@ interface FilterInput {
   ruleId?: string;
 }
 
+// Rule params live in a flattened field, so description values index as exact keywords.
+// Wildcard matching on keywords is case-sensitive; emit a few case variants per token so
+// "powershell" still matches a description that says "PowerShell".
+const PARAMS_DESCRIPTION_FIELD = 'alert.attributes.params.description';
+const MIN_DESCRIPTION_TOKEN_LENGTH = 3;
+
+// Each token expands to up to 4 leading-wildcard clauses, and `searchTerm` accepts up to
+// MAX_STRING_LENGTH characters. Unbounded, a long phrase would emit thousands of clauses and
+// breach Elasticsearch's boolean-clause limit (or just be ruinously slow). Dedupe
+// case-insensitively and keep only the first few tokens: a description match needs
+// distinctive words, not every word.
+const MAX_DESCRIPTION_TOKENS = 6;
+
+export function buildDescriptionSearchClause(searchTerm: string): string | undefined {
+  const seen = new Set<string>();
+  const tokens = searchTerm
+    .trim()
+    .split(/\s+/)
+    .filter((token) => {
+      if (token.length < MIN_DESCRIPTION_TOKEN_LENGTH) return false;
+      const key = token.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, MAX_DESCRIPTION_TOKENS);
+  if (tokens.length === 0) {
+    return undefined;
+  }
+  const tokenClauses = tokens.map((token) => {
+    const variants = Array.from(
+      new Set([
+        token,
+        token.toLowerCase(),
+        token.toUpperCase(),
+        token.charAt(0).toUpperCase() + token.slice(1).toLowerCase(),
+      ])
+    ).map((variant) => `*${fullyEscapeKQLStringParam(variant)}*`);
+    return `${PARAMS_DESCRIPTION_FIELD}: (${variants.join(' OR ')})`;
+  });
+  return tokenClauses.length === 1 ? tokenClauses[0] : `(${tokenClauses.join(' AND ')})`;
+}
+
 export function buildToolFilter(params: FilterInput): string | undefined {
   const baseKql = convertRulesFilterToKQL({
-    filter: params.searchTerm,
     enabled: params.enabled,
     showCustomRules: params.ruleSource === 'custom',
     showElasticRules: params.ruleSource === 'prebuilt',
@@ -153,6 +197,16 @@ export function buildToolFilter(params: FilterInput): string | undefined {
   });
 
   const extra: string[] = [];
+
+  if (params.searchTerm?.trim()) {
+    // Same name/index/MITRE search the Rules page uses, plus a description clause the
+    // shared helper does not offer. OR-ed so either surface can match.
+    const nameAndFieldsKql = convertRuleSearchTermToKQL(params.searchTerm);
+    const descriptionKql = buildDescriptionSearchClause(params.searchTerm);
+    extra.push(
+      descriptionKql ? `(${nameAndFieldsKql} OR ${descriptionKql})` : `(${nameAndFieldsKql})`
+    );
+  }
 
   if (params.tags?.length) {
     const parts = params.tags.map((t) => `${TAGS_FIELD}: ${prepareKQLStringParam(t)}`);
@@ -205,10 +259,23 @@ type RuleFromFind = Awaited<ReturnType<typeof findRules>>['data'][number];
 function summarizeRule(rule: RuleFromFind) {
   const params = (rule.params ?? {}) as Record<string, unknown>;
 
+  // Description and query are what a match judgement runs on: a rule's name alone often hides
+  // the behavior it detects, and the query is the ground truth of it. Both truncated so list
+  // queries with a high perPage stay small.
+  const truncate = (value: unknown, max: number) =>
+    typeof value === 'string' && value.length > max ? `${value.slice(0, max)}…` : value;
+
   return {
     id: rule.id,
     ruleId: params.rule_id ?? params.ruleId,
     name: rule.name,
+    description: truncate(params.description, 500),
+    query: truncate(params.query, 600),
+    // The match rubric requires the same data source, so the index patterns are evidence,
+    // not decoration: without them a Windows-endpoint rule can be judged to cover a Linux
+    // or cloud behaviour that shares its technique.
+    index: params.index,
+    dataViewId: params.data_view_id,
     tags: rule.tags,
     enabled: rule.enabled,
     severity: params.severity,

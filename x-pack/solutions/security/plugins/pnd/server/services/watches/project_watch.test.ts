@@ -9,6 +9,7 @@ import { parse } from 'yaml';
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
+  PND_DETECTION_COVERAGE_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
@@ -137,13 +138,19 @@ describe('project watch', () => {
       with?: Record<string, unknown>;
       steps?: NestedStep[];
       else?: NestedStep[];
+      cases?: Array<{ match: string; steps: NestedStep[] }>;
+      default?: NestedStep[];
     }
 
+    // `switch` branches are step containers like `steps`/`else`. Skipping them would hide
+    // every condition inside a case from the runtime-trap guards below.
     const flattenSteps = (steps: NestedStep[]): NestedStep[] =>
       steps.flatMap((step) => [
         step,
         ...flattenSteps(step.steps ?? []),
         ...flattenSteps(step.else ?? []),
+        ...flattenSteps(step.default ?? []),
+        ...(step.cases ?? []).flatMap(({ steps: caseSteps }) => flattenSteps(caseSteps ?? [])),
       ]);
 
     const projected = projectWorkflowToWatch({
@@ -180,7 +187,9 @@ describe('project watch', () => {
       expect(dispatch?.type).toBe('if');
       expect(dispatch?.condition).toContain("worker == 'tuning'");
       expect(dispatch?.steps?.map(({ name }) => name)).toEqual(['run_rule_tuning']);
-      expect(dispatch?.else?.map(({ name }) => name)).toEqual(['run_rule_creation']);
+      // A reported gap goes to the coverage worker, which decides whether a rule is needed
+      // at all and dispatches rule creation itself when nothing covers the gap.
+      expect(dispatch?.else?.map(({ name }) => name)).toEqual(['run_coverage']);
     });
 
     it('calls each worker exactly once', () => {
@@ -188,13 +197,13 @@ describe('project watch', () => {
         ({ type }) => type === 'workflow.execute'
       );
 
-      expect(calls.map(({ name }) => name)).toEqual(['run_rule_tuning', 'run_rule_creation']);
+      expect(calls.map(({ name }) => name)).toEqual(['run_rule_tuning', 'run_coverage']);
     });
 
     it('projects the two workers it calls, and no skills of its own', () => {
       expect(projected.callables).toEqual([
         expect.objectContaining({ id: PND_RULE_TUNING_WORKFLOW_ID, kind: 'workflow' }),
-        expect.objectContaining({ id: PND_RULE_CREATION_WORKFLOW_ID, kind: 'workflow' }),
+        expect.objectContaining({ id: PND_DETECTION_COVERAGE_WORKFLOW_ID, kind: 'workflow' }),
       ]);
     });
 
@@ -206,6 +215,7 @@ describe('project watch', () => {
         PND_RULE_TUNING_WORKFLOW_ID,
         PND_RULE_CREATION_WORKFLOW_ID,
         PND_RULE_PREVIEW_WORKFLOW_ID,
+        PND_DETECTION_COVERAGE_WORKFLOW_ID,
       ];
 
       for (const id of ids) {
@@ -226,6 +236,7 @@ describe('project watch', () => {
         PND_RULE_TUNING_WORKFLOW_ID,
         PND_RULE_CREATION_WORKFLOW_ID,
         PND_RULE_PREVIEW_WORKFLOW_ID,
+        PND_DETECTION_COVERAGE_WORKFLOW_ID,
       ];
 
       for (const id of ids) {
@@ -250,6 +261,7 @@ describe('project watch', () => {
         PND_RULE_TUNING_WORKFLOW_ID,
         PND_RULE_CREATION_WORKFLOW_ID,
         PND_RULE_PREVIEW_WORKFLOW_ID,
+        PND_DETECTION_COVERAGE_WORKFLOW_ID,
       ];
 
       for (const id of ids) {

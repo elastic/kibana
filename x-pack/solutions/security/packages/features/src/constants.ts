@@ -58,6 +58,13 @@ export const RULES_FEATURE_ID_V3 = 'securitySolutionRulesV3' as const;
 export const RULES_FEATURE_ID_V4 = 'securitySolutionRulesV4' as const;
 export const RULES_FEATURE_LATEST = RULES_FEATURE_ID_V4;
 
+// Semantic Metadata Layer KI types owned by the Rules feature. Kibana derives
+// `ai_index:<kiType>/read` actions from these values, so the type registrations
+// and feature privileges must share the same constants.
+export const DETECTION_RULE_SML_TYPE = 'security_detection_rule' as const;
+export const PREBUILT_RULE_SML_TYPE = 'security_prebuilt_rule' as const;
+export const RULES_AI_INDEX_TYPES = [DETECTION_RULE_SML_TYPE, PREBUILT_RULE_SML_TYPE] as const;
+
 // Subfeature IDs
 export const EXCEPTIONS_SUBFEATURE_ALL_ID = 'security_solution_exceptions_all' as const;
 export const INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID =

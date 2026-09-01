@@ -13,6 +13,7 @@ import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { createFindRulesInlineTool } from './find_rules_tool';
 import { createDiscoverRuleTagsInlineTool } from './discover_rule_tags_tool';
+import { createFindRulesSemanticTool } from '../../sml/find_rules_semantic_tool';
 
 interface FindRulesSkillDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
@@ -50,12 +51,21 @@ This skill cannot enable, disable, delete, duplicate, or bulk-edit detection rul
 
 ## Tools
 
-This skill has two inline tools:
+This skill has three inline tools:
 
 | Tool | When to use | Returns |
 |---|---|---|
 | \`security.discover_rule_tags\` | **Always call this first** — gets available tag values for reasoning | Tag buckets + counts |
 | \`security.find_rules\` | Default to \`security.find_rules\` for rule queries — list, filter, sort, count | Rule names + metadata + total |
+| \`security.find_rules_semantic\` | Only for "is this behavior covered?" questions, where you have a description and not a filter | Ranked candidate rules |
+
+### Which search to use
+
+\`security.find_rules\` matches EXACT WORDS and supports structured filters. It is the default and the only option for anything countable or filterable: enabled state, severity, tags, MITRE id, rule type, sorting, totals.
+
+\`security.find_rules_semantic\` matches MEANING. Use it only when the question is whether some behavior is already detected and you have a plain description of that behavior. Pass a sentence, not keywords. It applies no filters, returns no totals, and its score is a ranking signal, never a match verdict.
+
+When a coverage question returns nothing from exact-word search, run the semantic search before you conclude that nothing covers the behavior. A rule that describes the same behavior in other words is invisible to exact-word search. If the semantic tool reports it is unavailable, say plainly that the search matched exact words only.
 
 **Every response that calls \`security.find_rules\` MUST also call \`security.discover_rule_tags\` in that same response, immediately before \`security.find_rules\`.** Do NOT call \`security.find_rules\` without first calling \`security.discover_rule_tags\` in the same turn — even if discovery was run in a previous turn. Use the freshly discovered tag list to decide which tag values (if any) belong in the filter.
 
@@ -168,5 +178,6 @@ This skill is read-only. Never suggest or offer to enable, disable, edit, delete
     getInlineTools: () => [
       createFindRulesInlineTool({ getStartServices, logger }),
       createDiscoverRuleTagsInlineTool({ getStartServices, logger }),
+      createFindRulesSemanticTool({ getStartServices, logger }),
     ],
   });

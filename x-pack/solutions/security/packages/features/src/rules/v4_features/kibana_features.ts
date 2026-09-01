@@ -29,6 +29,7 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
+  RULES_AI_INDEX_TYPES,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -60,6 +61,7 @@ export const getRulesV4BaseKibanaFeature = (
   },
   privileges: {
     all: {
+      aiIndex: { read: [...RULES_AI_INDEX_TYPES] },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
@@ -86,6 +88,7 @@ export const getRulesV4BaseKibanaFeature = (
       ],
     },
     read: {
+      aiIndex: { read: [...RULES_AI_INDEX_TYPES] },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
