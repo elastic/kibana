@@ -12,10 +12,15 @@ import { useSetInitialValue } from './use_set_initial_value';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
 jest.mock('lz-string', () => ({
   decompressFromEncodedURIComponent: jest.fn(),
+}));
+
+jest.mock('../../../lib/load_from', () => ({
+  removeLoadFromParameter: jest.fn(),
 }));
 
 jest.mock('./use_set_initial_value', () => ({
@@ -83,6 +88,32 @@ describe('useSetInitialValue', () => {
     );
 
     expect(setValueMock).toHaveBeenCalledWith(DEFAULT_INPUT_VALUE);
+  });
+
+  it('should set the provided default editor content if localStorage is undefined', () => {
+    renderHook(() =>
+      useSetInitialValue({
+        localStorageValue: undefined,
+        setValue: setValueMock,
+        toasts: toastsMock,
+        defaultEditorContent: 'solution specific content',
+      })
+    );
+
+    expect(setValueMock).toHaveBeenCalledWith('solution specific content');
+  });
+
+  it('should prefer the localStorage value over the provided default editor content', () => {
+    renderHook(() =>
+      useSetInitialValue({
+        localStorageValue: 'saved value',
+        setValue: setValueMock,
+        toasts: toastsMock,
+        defaultEditorContent: 'solution specific content',
+      })
+    );
+
+    expect(setValueMock).toHaveBeenCalledWith('saved value');
   });
 
   it('should load data from load_from param if it is a valid Elastic URL', async () => {
@@ -231,5 +262,56 @@ describe('useSetInitialValue', () => {
     expect(addWarningMock).toHaveBeenCalledWith(
       'Unable to load data from the load_from query parameter in the URL'
     );
+  });
+
+  it('should remove the load_from param once it has been consumed', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '?load_from=data:text/plain,compressed-data',
+      },
+    });
+    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue('decompressed data');
+
+    await act(async () => {
+      renderHook(() =>
+        useSetInitialValue({
+          localStorageValue: 'initial value',
+          setValue: setValueMock,
+          toasts: toastsMock,
+        })
+      );
+    });
+
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
+    expect(removeLoadFromParameter).toHaveBeenCalled();
+  });
+
+  it('should leave the URL alone when there is no load_from param', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '#/console/shell',
+      },
+    });
+
+    await act(async () => {
+      renderHook(() =>
+        useSetInitialValue({
+          localStorageValue: 'initial value',
+          setValue: setValueMock,
+          toasts: toastsMock,
+        })
+      );
+    });
+
+    expect(removeLoadFromParameter).not.toHaveBeenCalled();
   });
 });

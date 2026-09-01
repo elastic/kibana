@@ -14,6 +14,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
 const httpsProtocol = 'https:';
@@ -118,6 +119,9 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         return;
       }
       await loadBufferFromRemote(url);
+      // The parameter is a one-shot instruction. Leaving it in the URL would re-append the
+      // request on every later page load, resurrecting requests the user has since cleared.
+      removeLoadFromParameter();
     }, 200);
 
     window.addEventListener('hashchange', loadFromUrl);
