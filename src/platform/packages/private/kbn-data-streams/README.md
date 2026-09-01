@@ -153,6 +153,35 @@ Confirm `system: true` and `hidden: true` for privileged streams. There is no El
 
 When writing integration tests that touch system streams, use a client that sends `x-elastic-product-origin: kibana` (see [kibana#279803](https://github.com/elastic/kibana/pull/279803)).
 
+### Known Elasticsearch limitations
+
+The three issues below are partially or fully owned by Elasticsearch. They are documented here so Kibana developers understand the current security boundary and do not accidentally rely on protections that do not yet exist. Alignment with the ES team is tracked in [kibana-team#3902](https://github.com/elastic/kibana-team/issues/3902).
+
+#### 1. Backing indices do not inherit the `system` flag
+
+`GET _data_stream/<name>` reports `system: true` for a correctly registered system data stream, but the _backing indices_ (`.ds-<name>-*`) do **not** carry that flag. This means:
+
+- Requests that target a backing index directly (e.g. `GET .ds-<name>-000001/_search`) bypass system-data-stream restrictions and succeed without a product-origin header.
+- Any client with index-level read access can query backing indices even when the stream is system-protected.
+
+Until ES closes this gap, Kibana cannot rely on the `system` flag alone to prevent direct backing-index access. Teams holding sensitive data should apply additional index-level security rules.
+
+#### 2. The `.kibana_*` wildcard pattern creates ambiguous classification
+
+Elasticsearch has a `SystemIndexDescriptor` pattern that matches `.kibana_*`. When a data stream whose name matches that pattern is created _without_ a corresponding `SystemDataStreamDescriptor`, ES silently classifies it as a system index through the wildcard match rather than throwing an error.
+
+The expected — and safer — behavior would be: if a `SystemDataStreamDescriptor` exists for the pattern, apply it; if none exists, reject the stream creation rather than falling through to the wildcard index descriptor.
+
+Until this is corrected, a `.kibana_*` named data stream may appear protected when it is not actually registered as a system data stream, giving a false sense of security.
+
+#### 3. `SystemDataStreamDescriptor` requires index templates to be defined in Elasticsearch at startup
+
+`SystemDataStreamDescriptor` requires the matching index template to exist in Elasticsearch at the time the descriptor is instantiated. Kibana currently owns those templates (they are defined in `@kbn/data-streams` and applied at boot), but ES needs them present before it can register the descriptor — creating a cross-repo ordering dependency.
+
+This is especially painful on serverless, where deployment ordering between the Kibana and ES plugins is not always controllable. The upstream ES issue tracking this is [elastic/elasticsearch#149309](https://github.com/elastic/elasticsearch/issues/149309).
+
+Until resolved, the practical requirement is: ship the `SystemDataStreamDescriptor` in ES (with any required template stubs) **before or alongside** the Kibana code that first writes to the stream. See [Landing order](#landing-order) above for worked examples.
+
 ## Mapping Validation
 
 When registering a data stream, the following reserved keys are automatically validated and will cause an error if found in your mappings:
