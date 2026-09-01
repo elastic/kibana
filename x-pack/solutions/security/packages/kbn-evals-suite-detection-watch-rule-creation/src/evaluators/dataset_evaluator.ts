@@ -32,6 +32,7 @@ import {
   validateRiskScore,
   validateSeverity,
   ordinalMitreF1,
+  parentTechniqueId,
 } from '../helpers';
 
 export type RuleEvaluator = Evaluator<RuleCreationExample, RuleCreationResult>;
@@ -116,22 +117,26 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
       const optionalTechniques = new Set(expected.optionalMitreIds ?? []);
 
       // Optional techniques are credited, never required: including one must not be punished as a
-      // false positive, and omitting one must not be punished as a miss. Dropping them from the
-      // generated set before scoring achieves both — without this split, the F1 ceiling is
-      // structurally below 1.00 for any example where the prompt names a sub-technique but the
-      // dataset also lists its parent (e.g. T1078.001 asked, T1078 in mitreIds = ceiling 0.75).
+      // false positive, and omitting one must not be punished as a miss.
+      //
+      // Exception: an optional technique that is the *parent* of a required sub-technique (e.g.
+      // T1078 when T1078.001 is required) must be kept in the scored set so ordinalMitreF1 can
+      // award the 0.5 parent-credit tier. Stripping it from the precision set (so the agent isn't
+      // penalised for tagging only the sub) would leave generated empty, producing NaN precision
+      // and an F1 of 0 — the opposite of the intended near-miss credit.
+      const expectedParentsOfRequired = new Set(
+        [...expectedTechniques].map(parentTechniqueId).filter((p): p is string => p != null)
+      );
       const scoredTechniques = new Set(
-        [...generatedTechniques].filter((t) => !optionalTechniques.has(t))
+        [...generatedTechniques].filter(
+          (t) => !optionalTechniques.has(t) || expectedParentsOfRequired.has(t)
+        )
       );
 
       // Ordinal F1: exact sub-technique = 1, parent-without-sub = 0.5. An
       // exact-ID set score treats "right family, imprecise member" the same as
       // garbage, which is exactly where the hard-cases 0.6x was hiding structure.
-      // scoredTechniques controls the precision denominator (optionals stripped so
-      // they aren't penalised as FPs); generatedTechniques is passed for recall so
-      // an optional parent technique (e.g. T1078 for expected T1078.001) can still
-      // earn the 0.5 ordinal credit via tieredTechniqueCredit.
-      const metrics = ordinalMitreF1(scoredTechniques, expectedTechniques, generatedTechniques);
+      const metrics = ordinalMitreF1(scoredTechniques, expectedTechniques);
       const invalidFormat = [...generatedTechniques].filter((t) => !/^T\d{4}(\.\d{3})?$/.test(t));
       return {
         score: metrics.f1,

@@ -91,15 +91,10 @@ export const tieredTechniqueCredit = (
  * every scored generated id at its credit (a parent-only match contributes
  * 0.5, not a false positive). Generated ids outside the expected family stay
  * 0-credit false positives.
- *
- * `generatedForRecall` defaults to `generated`. Pass a broader set when the
- * caller strips some ids from `generated` for precision purposes (e.g. optional
- * parent techniques) but still wants those ids to contribute recall credit.
  */
 export const ordinalMitreF1 = (
   generated: Set<string>,
-  expected: Set<string>,
-  generatedForRecall: Set<string> = generated
+  expected: Set<string>
 ): {
   f1: number;
   precision: number;
@@ -109,13 +104,13 @@ export const ordinalMitreF1 = (
   if (expected.size === 0) {
     return { f1: 1, precision: 1, recall: 1, partials: [] };
   }
-  if (generated.size === 0 && generatedForRecall.size === 0) {
+  if (generated.size === 0) {
     return { f1: 0, precision: 0, recall: 0, partials: [] };
   }
   const partials: Array<{ expected: string; kind: 'exact' | 'parent' | 'miss' }> = [];
   let recallSum = 0;
   for (const id of expected) {
-    const { credit, kind } = tieredTechniqueCredit(id, generatedForRecall);
+    const { credit, kind } = tieredTechniqueCredit(id, generated);
     recallSum += credit;
     if (kind !== 'exact') partials.push({ expected: id, kind });
   }
