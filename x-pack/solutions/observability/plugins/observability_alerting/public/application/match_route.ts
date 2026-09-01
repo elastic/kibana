@@ -14,24 +14,24 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
-export type ObservabilityAlertingMountKey =
-  | 'mountEpisodesApp'
-  | 'mountRulesApp'
-  | 'mountRuleLibraryApp'
-  | 'mountActionPoliciesApp'
-  | 'mountExecutionHistoryApp';
+export type ObservabilityAlertingSurface =
+  | 'inbox'
+  | 'rules'
+  | 'ruleLibrary'
+  | 'actionPolicies'
+  | 'executionHistory';
 
 export type ObservabilityAlertingRouteMatch =
   | { type: 'redirect'; to: typeof OBSERVABILITY_ALERTING_INBOX_PATH }
   | { type: 'v1-rules' }
-  | { type: 'mount'; path: string; mountKey: ObservabilityAlertingMountKey };
+  | { type: 'surface'; path: string; surface: ObservabilityAlertingSurface };
 
-const MOUNT_ROUTES: Array<{ path: string; mountKey: ObservabilityAlertingMountKey }> = [
-  { path: OBSERVABILITY_ALERTING_INBOX_PATH, mountKey: 'mountEpisodesApp' },
-  { path: OBSERVABILITY_ALERTING_RULES_V2_PATH, mountKey: 'mountRulesApp' },
-  { path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, mountKey: 'mountRuleLibraryApp' },
-  { path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH, mountKey: 'mountActionPoliciesApp' },
-  { path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH, mountKey: 'mountExecutionHistoryApp' },
+const SURFACE_ROUTES: Array<{ path: string; surface: ObservabilityAlertingSurface }> = [
+  { path: OBSERVABILITY_ALERTING_INBOX_PATH, surface: 'inbox' },
+  { path: OBSERVABILITY_ALERTING_RULES_V2_PATH, surface: 'rules' },
+  { path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, surface: 'ruleLibrary' },
+  { path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH, surface: 'actionPolicies' },
+  { path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH, surface: 'executionHistory' },
 ];
 
 const pathMatches = (pathname: string, basePath: string): boolean =>
@@ -48,9 +48,9 @@ export const matchObservabilityAlertingRoute = (
     return { type: 'v1-rules' };
   }
 
-  const mountRoute = MOUNT_ROUTES.find(({ path }) => pathMatches(pathname, path));
-  if (mountRoute) {
-    return { type: 'mount', path: mountRoute.path, mountKey: mountRoute.mountKey };
+  const surfaceRoute = SURFACE_ROUTES.find(({ path }) => pathMatches(pathname, path));
+  if (surfaceRoute) {
+    return { type: 'surface', path: surfaceRoute.path, surface: surfaceRoute.surface };
   }
 
   return { type: 'redirect', to: OBSERVABILITY_ALERTING_INBOX_PATH };

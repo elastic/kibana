@@ -28,37 +28,37 @@ describe('matchObservabilityAlertingRoute', () => {
 
   it('matches nested inbox, rules v2, and action-policy paths', () => {
     expect(matchObservabilityAlertingRoute('/inbox/episode-1')).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_INBOX_PATH,
-      mountKey: 'mountEpisodesApp',
+      surface: 'inbox',
     });
     expect(matchObservabilityAlertingRoute('/rules/v2/rule-1')).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-      mountKey: 'mountRulesApp',
+      surface: 'rules',
     });
     expect(matchObservabilityAlertingRoute('/action-policies/create')).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-      mountKey: 'mountActionPoliciesApp',
+      surface: 'actionPolicies',
     });
     expect(matchObservabilityAlertingRoute('/action-policies/edit/policy-1')).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-      mountKey: 'mountActionPoliciesApp',
+      surface: 'actionPolicies',
     });
   });
 
   it('matches list paths for library and execution history', () => {
     expect(matchObservabilityAlertingRoute(OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH)).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-      mountKey: 'mountRuleLibraryApp',
+      surface: 'ruleLibrary',
     });
     expect(matchObservabilityAlertingRoute(OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH)).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-      mountKey: 'mountExecutionHistoryApp',
+      surface: 'executionHistory',
     });
   });
 
@@ -69,9 +69,9 @@ describe('matchObservabilityAlertingRoute', () => {
 
   it('does not treat /rules/v2 as v1', () => {
     expect(matchObservabilityAlertingRoute('/rules/v2')).toEqual({
-      type: 'mount',
+      type: 'surface',
       path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-      mountKey: 'mountRulesApp',
+      surface: 'rules',
     });
   });
 

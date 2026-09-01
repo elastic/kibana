@@ -52,10 +52,7 @@ export class ObservabilityAlertingPlugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
 
   public setup(
-    coreSetup: CoreSetup<
-      ObservabilityAlertingStartDependencies,
-      ObservabilityAlertingPublicStart
-    >
+    coreSetup: CoreSetup<ObservabilityAlertingStartDependencies, ObservabilityAlertingPublicStart>
   ): ObservabilityAlertingPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
@@ -118,7 +115,7 @@ export class ObservabilityAlertingPlugin
         },
       ],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart] = await startServicesPromise;
+        const [coreStart] = await startServicesPromise;
 
         if (!isAlertingV2Enabled(coreStart)) {
           await coreStart.application.navigateToApp(OBSERVABILITY_OVERVIEW_APP_ID, {
@@ -130,7 +127,6 @@ export class ObservabilityAlertingPlugin
 
         const { mountObservabilityAlertingApp } = await import('./application/mount');
         return mountObservabilityAlertingApp({
-          alertingVTwo: pluginsStart.alertingVTwo,
           coreStart,
           params,
         });

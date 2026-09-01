@@ -58,12 +58,7 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
-export type {
-  AlertingV2PublicStart,
-  AlertingV2AppMount,
-  AlertingV2AppMountParams,
-  CreateRuleOptionsFlyoutLegacyItem,
-} from './types';
+export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
 
@@ -79,46 +74,6 @@ const pluginModule = new ContainerModule(({ bind }) => {
     .inSingletonScope();
   bind(Start).toConstantValue({
     CreateRuleOptionsFlyout,
-    mountRulesApp: async ({ params, coreStart }) => {
-      const { mountAlertingV2App } = await import('./application/mount');
-      return mountAlertingV2App({
-        params,
-        container: coreStart.injection.getContainer(),
-        coreStart,
-      });
-    },
-    mountRuleLibraryApp: async ({ params, coreStart }) => {
-      const { mountRuleLibraryApp } = await import('./application/mount');
-      return mountRuleLibraryApp({
-        params,
-        container: coreStart.injection.getContainer(),
-        coreStart,
-      });
-    },
-    mountEpisodesApp: async ({ params, coreStart }) => {
-      const { mountEpisodesApp } = await import('./application/mount');
-      return mountEpisodesApp({
-        params,
-        container: coreStart.injection.getContainer(),
-        coreStart,
-      });
-    },
-    mountActionPoliciesApp: async ({ params, coreStart }) => {
-      const { mountActionPoliciesApp } = await import('./application/mount');
-      return mountActionPoliciesApp({
-        params,
-        container: coreStart.injection.getContainer(),
-        coreStart,
-      });
-    },
-    mountExecutionHistoryApp: async ({ params, coreStart }) => {
-      const { mountExecutionHistoryApp } = await import('./application/mount');
-      return mountExecutionHistoryApp({
-        params,
-        container: coreStart.injection.getContainer(),
-        coreStart,
-      });
-    },
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));

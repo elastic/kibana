@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -21,100 +20,55 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
-const createAlertingVTwo = (): AlertingV2PublicStart => ({
-  CreateRuleOptionsFlyout: () => null,
-  mountEpisodesApp: jest.fn(async ({ params }) => {
-    params.element.setAttribute('data-test-subj', 'mounted-episodes');
-    return () => undefined;
-  }),
-  mountRulesApp: jest.fn(async ({ params }) => {
-    params.element.setAttribute('data-test-subj', 'mounted-rules');
-    return () => undefined;
-  }),
-  mountRuleLibraryApp: jest.fn(async ({ params }) => {
-    params.element.setAttribute('data-test-subj', 'mounted-rule-library');
-    return () => undefined;
-  }),
-  mountActionPoliciesApp: jest.fn(async ({ params }) => {
-    params.element.setAttribute('data-test-subj', 'mounted-action-policies');
-    return () => undefined;
-  }),
-  mountExecutionHistoryApp: jest.fn(async ({ params }) => {
-    params.element.setAttribute('data-test-subj', 'mounted-execution-history');
-    return () => undefined;
-  }),
-});
-
-const createHistory = (pathname: string) => {
-  const history = createMemoryHistory({ initialEntries: [pathname] });
-  (
-    history as unknown as { createSubHistory: (basePath: string) => typeof history }
-  ).createSubHistory = (basePath: string) =>
-    createMemoryHistory({
-      initialEntries: [history.location.pathname.slice(basePath.length) || '/'],
-    });
-  return history;
-};
-
-const renderAt = (pathname: string, alertingVTwo = createAlertingVTwo()) => {
+const renderAt = (pathname: string) => {
   const coreStart = coreMock.createStart();
-  const history = createHistory(pathname);
+  const history = createMemoryHistory({ initialEntries: [pathname] });
 
   const result = render(
     <Router history={history}>
-      <ObservabilityAlertingApp alertingVTwo={alertingVTwo} coreStart={coreStart} />
+      <ObservabilityAlertingApp coreStart={coreStart} />
     </Router>
   );
 
-  return { ...result, alertingVTwo, coreStart, history };
+  return { ...result, coreStart, history };
 };
 
 describe('ObservabilityAlertingApp', () => {
-  it('redirects / to inbox and mounts episodes', async () => {
-    const { alertingVTwo } = renderAt('/');
+  it('redirects / to inbox', async () => {
+    const { getByTestId } = renderAt('/');
 
     await waitFor(() => {
-      expect(alertingVTwo.mountEpisodesApp).toHaveBeenCalled();
+      expect(getByTestId('observabilityAlertingInbox')).toBeInTheDocument();
     });
   });
 
   it.each([
-    [OBSERVABILITY_ALERTING_INBOX_PATH, 'mountEpisodesApp', 'mounted-episodes'],
-    [OBSERVABILITY_ALERTING_RULES_V2_PATH, 'mountRulesApp', 'mounted-rules'],
-    [OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, 'mountRuleLibraryApp', 'mounted-rule-library'],
-    [
-      OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-      'mountActionPoliciesApp',
-      'mounted-action-policies',
-    ],
-    [
-      OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-      'mountExecutionHistoryApp',
-      'mounted-execution-history',
-    ],
-  ] as const)('mounts %s via %s', async (path, mountKey, testSubj) => {
-    const { alertingVTwo, getByTestId } = renderAt(path);
+    [OBSERVABILITY_ALERTING_INBOX_PATH, 'observabilityAlertingInbox'],
+    [OBSERVABILITY_ALERTING_RULES_V2_PATH, 'observabilityAlertingRulesV2'],
+    [OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, 'observabilityAlertingRuleLibrary'],
+    [OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH, 'observabilityAlertingActionPolicies'],
+    [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH, 'observabilityAlertingExecutionHistory'],
+  ] as const)('renders a placeholder for %s', async (path, testSubj) => {
+    const { getByTestId } = renderAt(path);
 
     await waitFor(() => {
-      expect(alertingVTwo[mountKey]).toHaveBeenCalled();
       expect(getByTestId(testSubj)).toBeInTheDocument();
     });
   });
 
   it('navigates to the v1 rules app from /rules/v1', async () => {
-    const { coreStart, alertingVTwo } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+    const { coreStart } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
 
     await waitFor(() => {
       expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('rules', { replace: true });
     });
-    expect(alertingVTwo.mountRulesApp).not.toHaveBeenCalled();
   });
 
   it('redirects unknown paths to inbox', async () => {
-    const { alertingVTwo } = renderAt('/unknown');
+    const { getByTestId } = renderAt('/unknown');
 
     await waitFor(() => {
-      expect(alertingVTwo.mountEpisodesApp).toHaveBeenCalled();
+      expect(getByTestId('observabilityAlertingInbox')).toBeInTheDocument();
     });
   });
 });

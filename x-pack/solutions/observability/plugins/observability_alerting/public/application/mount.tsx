@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { AppMountParameters, AppUnmount, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import React from 'react';
@@ -14,11 +13,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 
 export const mountObservabilityAlertingApp = ({
-  alertingVTwo,
   coreStart,
   params,
 }: {
-  alertingVTwo: AlertingV2PublicStart;
   coreStart: CoreStart;
   params: AppMountParameters;
 }): AppUnmount => {
@@ -28,7 +25,7 @@ export const mountObservabilityAlertingApp = ({
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Router history={history}>
-        <ObservabilityAlertingApp alertingVTwo={alertingVTwo} coreStart={coreStart} />
+        <ObservabilityAlertingApp coreStart={coreStart} />
       </Router>
     ),
     element
