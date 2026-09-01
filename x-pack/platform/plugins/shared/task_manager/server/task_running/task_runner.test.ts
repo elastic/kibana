@@ -2182,7 +2182,7 @@ describe('TaskManagerRunner', () => {
           throw error;
         });
 
-        await expect(runner.run()).rejects.toThrowError('fail');
+        await expect(runner.run()).rejects.toThrow('fail');
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -2227,7 +2227,7 @@ describe('TaskManagerRunner', () => {
           throw error;
         });
 
-        await expect(runner.run()).rejects.toThrowError('fail');
+        await expect(runner.run()).rejects.toThrow('fail');
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -3558,8 +3558,8 @@ describe('TaskManagerRunner', () => {
         }),
         expect.anything()
       );
-      expect(logger.warn).toBeCalledTimes(1);
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
         'Disabling task bar:foo as it indicated it should disable itself',
         { tags: ['bar'] }
       );

@@ -6,23 +6,24 @@
  */
 
 import { get } from 'lodash';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type { EsClient } from '@kbn/scout-security';
 import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
 export const PUBLIC_HEADERS = {
   ...BASE_HEADERS,
-  'elastic-api-version': '2023-10-31',
+  ...PUBLIC_API_HEADERS,
 };
 
 export const INTERNAL_HEADERS = {
   ...BASE_HEADERS,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
   'elastic-api-version': '2',
 };
 
