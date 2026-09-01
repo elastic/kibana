@@ -30,7 +30,7 @@ export class KiVerificationService {
     }
 
     if (!verifiers || verifiers.length === 0) {
-      return { passed: true, results: [] };
+      throw new Error('verifiers must list at least one verifier id');
     }
 
     const results: KiVerifierResult[] = [];

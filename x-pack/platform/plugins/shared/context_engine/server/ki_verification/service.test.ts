@@ -34,12 +34,10 @@ describe('KiVerificationService', () => {
   const run = (...verifierIds: string[]) =>
     service.verifyKi({}, { ...context, verifiers: verifierIds });
 
-  it('runs no verification when verifiers is not specified', async () => {
-    registry.register(makeVerifier('a', { passed: false, reason: 'x' }));
-
-    const summary = await service.verifyKi({}, context);
-
-    expect(summary).toEqual({ passed: true, results: [] });
+  it('throws when verifiers is not specified', async () => {
+    await expect(service.verifyKi({}, context)).rejects.toThrow(
+      'verifiers must list at least one verifier id'
+    );
   });
 
   it('passes when every applicable verifier passes', async () => {
