@@ -27,9 +27,17 @@ import {
   type AsCodeSavedDataView,
   type AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
-import { snakeCase } from 'lodash';
+import { isEmpty, isNil, isPlainObject, omitBy, snakeCase } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { snakeCaseKeys } from './utils';
+import type { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
+import {
+  COLOR_FORMAT_DEFAULT_PARAMS,
+  DURATION_FORMAT_DEFAULT_PARAMS,
+  FORMATS_WITH_PATTERN,
+  FORMATS_WITHOUT_PARAMS,
+  HISTOGRAM_FORMAT_DEFAULT_FORMAT,
+  URL_DEFAULT_TYPE,
+} from './constants';
 
 /**
  * Convert stored field metadata maps from DataViewSpec to as-code field representations.
@@ -86,6 +94,12 @@ export function fromStoredFields<IncludePopularity extends boolean = false>(
   return Object.keys(fieldSettings).length > 0 ? fieldSettings : undefined;
 }
 
+function omitNilParams<T extends object>(value: T | undefined): T | undefined {
+  if (value == null) return undefined;
+  const cleaned = omitBy(value, isNil) as T;
+  return isEmpty(cleaned) ? undefined : cleaned;
+}
+
 function getCommonProperties(
   name: string,
   fieldAttrs: NonNullable<DataViewSpec['fieldAttrs']>,
@@ -94,12 +108,13 @@ function getCommonProperties(
 ): AsCodeFieldSettings | AsCodeSavedFieldSettings {
   const fieldAttr = fieldAttrs[name];
   const format = fieldFormats[name];
+  const params = omitNilParams(fromStoredFieldFormatParams(format));
 
   return {
     ...(fieldAttr && 'customLabel' in fieldAttr && { custom_label: fieldAttr.customLabel }),
     ...(fieldAttr &&
       'customDescription' in fieldAttr && { custom_description: fieldAttr.customDescription }),
-    ...(format?.id && { format: { type: format.id, params: fromStoredFieldFormatParams(format) } }),
+    ...(format?.id && { format: { type: format.id, ...(params && { params }) } }),
     ...(includePopularity &&
       fieldAttr &&
       'count' in fieldAttr &&
@@ -107,26 +122,152 @@ function getCommonProperties(
   };
 }
 
-function fromStoredFieldFormatParams(format: NonNullable<DataViewSpec['fieldFormats']>[string]) {
-  if (!format.params) return undefined;
+function parseBooleanValue(value: Serializable) {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return COLOR_FORMAT_DEFAULT_PARAMS.boolean;
+}
+
+function fromStoredFieldFormatParams(
+  format: NonNullable<DataViewSpec['fieldFormats']>[string] | undefined
+) {
+  if (!format?.id) return undefined;
+  if (FORMATS_WITHOUT_PARAMS.includes(format.id)) return undefined;
+
+  const params = format.params || {};
+
+  if (FORMATS_WITH_PATTERN.includes(format.id)) {
+    return {
+      pattern: params.pattern,
+    };
+  }
+
+  if (format.id === 'color') {
+    const colors = Array.isArray(params.colors) ? params.colors : [];
+    const fieldType = params.fieldType ?? COLOR_FORMAT_DEFAULT_PARAMS.fieldType;
+
+    return {
+      field_type: fieldType,
+      colors: colors
+        .filter((color) => color !== null && color !== undefined)
+        .map((color) => {
+          const colorObject = (isPlainObject(color) ? color : {}) as SerializableRecord;
+          const base = {
+            text: colorObject.text ?? COLOR_FORMAT_DEFAULT_PARAMS.text,
+            background: colorObject.background ?? COLOR_FORMAT_DEFAULT_PARAMS.background,
+          };
+
+          if (fieldType === 'number') {
+            return {
+              ...base,
+              range: colorObject.range ?? COLOR_FORMAT_DEFAULT_PARAMS.range,
+            };
+          }
+
+          if (fieldType === 'boolean') {
+            return {
+              ...base,
+              boolean: parseBooleanValue(colorObject.boolean),
+            };
+          }
+
+          return {
+            ...base,
+            regex: colorObject.regex ?? COLOR_FORMAT_DEFAULT_PARAMS.regex,
+          };
+        }),
+    };
+  }
 
   if (format.id === 'duration') {
-    const outputFormat = format.params.outputFormat
-      ? snakeCase(format.params.outputFormat.toString())
+    const outputFormat = params.outputFormat
+      ? snakeCase(params.outputFormat.toString())
       : undefined;
 
     return {
-      ...snakeCaseKeys(format.params),
-      ...(outputFormat ? { output_format: outputFormat } : {}),
+      input_format: params.inputFormat ?? DURATION_FORMAT_DEFAULT_PARAMS.inputFormat,
+      output_format: outputFormat ?? DURATION_FORMAT_DEFAULT_PARAMS.outputFormat,
+      output_precision: params.outputPrecision,
+      show_suffix: params.showSuffix,
+      use_short_suffix: params.useShortSuffix,
+      include_space_with_suffix: params.includeSpaceWithSuffix,
     };
+  }
+
+  if (format.id === 'geo_point') {
+    const skipParams = !params.transform || params.transform === 'none';
+
+    return skipParams
+      ? undefined
+      : {
+          transform: params.transform,
+        };
   }
 
   if (format.id === 'histogram') {
     return {
-      format: format.params.id,
-      pattern: (format.params.params as SerializableRecord)?.pattern,
+      format: params.id ?? HISTOGRAM_FORMAT_DEFAULT_FORMAT,
+      pattern: (params.params as SerializableRecord)?.pattern,
     };
   }
 
-  return snakeCaseKeys(format.params);
+  if (format.id === 'static_lookup') {
+    const lookupEntries = ((params.lookupEntries ?? []) as SerializableArray)
+      .filter((entry) => {
+        if (!isPlainObject(entry)) return false;
+        return !!(entry as SerializableRecord).key && !!(entry as SerializableRecord).value;
+      })
+      .map((entry) => ({
+        key: (entry as SerializableRecord).key?.toString(),
+        value: (entry as SerializableRecord).value?.toString(),
+      }));
+
+    return {
+      lookup_entries: lookupEntries,
+      unknown_key_value: params.unknownKeyValue,
+    };
+  }
+
+  if (format.id === 'string') {
+    const skipTransform = !params.transform || params.transform.toString() === 'false';
+
+    return {
+      transform: skipTransform ? undefined : params.transform,
+    };
+  }
+
+  if (format.id === 'truncate') {
+    return {
+      field_length: params.fieldLength,
+    };
+  }
+
+  if (format.id === 'url') {
+    const type = params.type ?? URL_DEFAULT_TYPE;
+    const base = {
+      type,
+      url_template: params.urlTemplate,
+      label_template: params.labelTemplate,
+    };
+
+    if (type === 'img') {
+      return {
+        ...base,
+        width: params.width != null ? Number(params.width) : undefined,
+        height: params.height != null ? Number(params.height) : undefined,
+      };
+    }
+
+    if (type === 'a') {
+      return {
+        ...base,
+        open_link_in_current_tab: params.openLinkInCurrentTab,
+      };
+    }
+
+    return base;
+  }
+
+  return params;
 }

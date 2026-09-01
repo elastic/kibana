@@ -38,3 +38,6 @@ export type {
   AsCodeSavedDataView,
   AsCodeSavedFieldSettings,
 } from './src/types';
+
+// Schemas that are needed individually
+export { colorFormatSchema } from './src/field_settings/formats/color';

@@ -452,7 +452,7 @@ describe('roundtrip: stored → AsCode → stored', () => {
         },
       };
       const fieldFormats = {
-        prim: { id: 'number', params: { decimals: 2 } },
+        prim: { id: 'number', params: { pattern: '0,0.[000]b' } },
         'comp.sub_y': { id: 'date', params: { pattern: 'MM/DD/YYYY' } },
       };
       const fieldAttrs = {

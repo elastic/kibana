@@ -194,6 +194,47 @@ describe('fromStoredRuntimeFields', () => {
           label_template: '{{value}}',
         });
       });
+
+      it('drops image params from the link subtype', () => {
+        const result = getParams('url', {
+          type: 'a',
+          urlTemplate: 'https://example.com/{{value}}',
+          width: 200,
+          height: 100,
+        });
+        expect(result).toEqual({
+          type: 'a',
+          url_template: 'https://example.com/{{value}}',
+        });
+      });
+
+      it('drops link params from the image subtype', () => {
+        const result = getParams('url', {
+          type: 'img',
+          urlTemplate: 'https://example.com/{{value}}.png',
+          openLinkInCurrentTab: true,
+          width: 200,
+        });
+        expect(result).toEqual({
+          type: 'img',
+          url_template: 'https://example.com/{{value}}.png',
+          width: 200,
+        });
+      });
+
+      it('drops link and image params from the audio subtype', () => {
+        const result = getParams('url', {
+          type: 'audio',
+          urlTemplate: 'https://example.com/{{value}}.mp3',
+          openLinkInCurrentTab: true,
+          width: 200,
+          height: 100,
+        });
+        expect(result).toEqual({
+          type: 'audio',
+          url_template: 'https://example.com/{{value}}.mp3',
+        });
+      });
     });
 
     describe('when the format is duration', () => {
