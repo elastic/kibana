@@ -28,7 +28,6 @@ const esqlTab = {
     query: 'FROM logs-* | WHERE status >= 500 | LIMIT 100',
   },
   hide_chart: true,
-  time_restore: true,
   time_range: { from: 'now-24h', to: 'now' },
   column_order: ['@timestamp', 'status', 'message'],
 };
@@ -101,7 +100,7 @@ describe('createDiscoverSessionAttachmentType', () => {
       expect(text).toContain('Tabs: 1');
       expect(text).toContain('Tab "Documents" (tab-1)');
       expect(text).toContain('ES|QL: FROM logs-* | WHERE status >= 500 | LIMIT 100');
-      expect(text).toContain('Time range: now-24h to now (time_restore: true)');
+      expect(text).toContain('Time range: now-24h to now');
       expect(text).toContain('Columns: @timestamp, status, message');
       expect(text).toContain('Chart hidden: true');
       expect(text).not.toContain('Sample Rows');
@@ -122,7 +121,6 @@ describe('createDiscoverSessionAttachmentType', () => {
             sort: [],
             hide_chart: false,
             hide_table: false,
-            time_restore: false,
           },
         ],
       });

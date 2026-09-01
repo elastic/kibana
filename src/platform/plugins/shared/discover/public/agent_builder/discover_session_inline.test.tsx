@@ -38,7 +38,6 @@ const sessionData: DiscoverSessionApiData = {
       },
       hide_chart: true,
       hide_table: false,
-      time_restore: true,
       time_range: { from: 'now-24h', to: 'now' },
       column_order: ['@timestamp', 'message'],
       sort: [],

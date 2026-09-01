@@ -25,7 +25,6 @@ const esqlTab: DiscoverSessionApiTab = {
   },
   hide_chart: true,
   hide_table: false,
-  time_restore: true,
   time_range: { from: 'now-24h', to: 'now' },
   column_order: ['@timestamp', 'status', 'message'],
   sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -43,7 +42,6 @@ const classicTab: DiscoverSessionApiTab = {
   view_mode: VIEW_MODE.DOCUMENT_LEVEL,
   hide_chart: false,
   hide_table: false,
-  time_restore: false,
 };
 
 const createSession = (
@@ -83,11 +81,11 @@ describe('toSearchEmbeddableByValueState', () => {
     expect(JSON.stringify(result)).not.toContain('vis_context');
   });
 
-  it('copies tab time_range even when time_restore is false', () => {
+  it('copies tab time_range onto the panel', () => {
     const result = toSearchEmbeddableByValueState(
       createSession({
         title: 'Timed session',
-        tabs: [{ ...esqlTab, time_restore: false }],
+        tabs: [esqlTab],
       })
     );
 
@@ -102,7 +100,7 @@ describe('toSearchEmbeddableByValueState', () => {
     const result = toSearchEmbeddableByValueState(
       createSession({
         title: 'ES|QL only',
-        tabs: [{ ...tabWithoutTime, time_restore: false }],
+        tabs: [tabWithoutTime],
       })
     );
 

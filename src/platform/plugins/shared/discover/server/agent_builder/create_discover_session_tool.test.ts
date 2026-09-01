@@ -34,7 +34,6 @@ const esqlSessionData = {
       },
       hide_chart: true,
       hide_table: false,
-      time_restore: true,
       time_range: { from: 'now-24h', to: 'now' },
       column_order: ['@timestamp', 'message'],
       breakdown_field: 'host.name',
@@ -57,7 +56,6 @@ const classicSessionData = {
       view_mode: 'documents',
       hide_chart: false,
       hide_table: false,
-      time_restore: false,
     },
   ],
 };
@@ -138,8 +136,23 @@ describe('createDiscoverSessionTool schema', () => {
   });
 
   it('treats a placeholder attachment_id as omitted', () => {
-    expect(schema.safeParse({ attachment_id: '.', esql: ESQL }).success).toBe(true);
-    expect(schema.safeParse({ attachment_id: '{attachment_id}', esql: ESQL }).success).toBe(true);
+    for (const attachmentId of ['.', '{attachment_id}', 'discover-session', 'discover.session']) {
+      const parsed = schema.safeParse({ attachment_id: attachmentId, esql: ESQL });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.attachment_id).toBeUndefined();
+      }
+    }
+  });
+
+  it('strips control characters from esql', () => {
+    const parsed = schema.safeParse({
+      esql: 'FROM logs-*\n| WHERE @timestamp \u0000>= "now-1h"',
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.esql).toBe('FROM logs-*\n| WHERE @timestamp >= "now-1h"');
+    }
   });
 
   it('rejects an over-long attachment_id', () => {
@@ -207,7 +220,6 @@ describe('createDiscoverSessionTool', () => {
             expect.objectContaining({
               id: 'main',
               hide_chart: true,
-              time_restore: true,
               time_range: { from: 'now-24h', to: 'now' },
               column_order: ['@timestamp', 'message'],
               data_source: {
@@ -316,14 +328,13 @@ describe('createDiscoverSessionTool updates', () => {
     expect(session.tabs[0].data_source.query).toBe(ESQL);
   });
 
-  it('updates time_range and sets time_restore', async () => {
+  it('updates time_range', async () => {
     const { attachments } = await runUpdate({
       time_range: { from: 'now-7d', to: 'now' },
     });
 
     const tab = updatedSession(attachments).tabs[0];
     expect(tab.time_range).toEqual({ from: 'now-7d', to: 'now' });
-    expect(tab.time_restore).toBe(true);
   });
 
   it('clears time_range when null is passed', async () => {
@@ -331,7 +342,6 @@ describe('createDiscoverSessionTool updates', () => {
 
     const tab = updatedSession(attachments).tabs[0];
     expect(tab.time_range).toBeUndefined();
-    expect(tab.time_restore).toBe(false);
   });
 
   it('replaces columns and clears them when null or empty', async () => {
@@ -446,6 +456,44 @@ describe('createDiscoverSessionTool updates', () => {
     expect(result.results[0].data.version).toBe(1);
   });
 
+  it('creates a session when a skill-name attachment_id is passed and none exists', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue(undefined);
+
+    const { result } = await runHandler(
+      { attachment_id: 'discover-session', esql: UPDATED_ESQL },
+      { attachments }
+    );
+
+    expect(attachments.update).not.toHaveBeenCalled();
+    expect(attachments.add).toHaveBeenCalled();
+    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(result.results[0].data.attachment_id).toBe('att-session');
+  });
+
+  it('updates the sole session when a skill-name attachment_id is passed', async () => {
+    const attachments = createAttachments();
+    attachments.getActive.mockReturnValue([
+      { id: 'att-session', type: DISCOVER_SESSION_ATTACHMENT_TYPE },
+    ]);
+    attachments.getAttachmentRecord.mockImplementation((id: string) =>
+      id === 'att-session' ? existingRecord() : undefined
+    );
+
+    const { result } = await runHandler(
+      { attachment_id: 'discover-session', esql: UPDATED_ESQL },
+      { attachments }
+    );
+
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'att-session',
+      expect.anything(),
+      ATTACHMENT_REF_ACTOR.agent
+    );
+    expect(result.results[0].data.attachment_id).toBe('att-session');
+  });
+
   it('returns an error when a supplied attachment_id is unknown and none exists', async () => {
     const attachments = createAttachments();
     attachments.getAttachmentRecord.mockReturnValue(undefined);
@@ -457,7 +505,6 @@ describe('createDiscoverSessionTool updates', () => {
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(result.results[0].data.message).toContain('invented-id');
-    expect(result.results[0].data.message).toContain('Omit attachment_id');
     expect(attachments.update).not.toHaveBeenCalled();
     expect(attachments.add).not.toHaveBeenCalled();
   });
@@ -571,15 +618,37 @@ describe('createDiscoverSessionTool updates', () => {
     expect(result.results[0].data.attachment_id).toBe('att-session');
   });
 
-  it('creates a session when attachment_id is a visualization attachment', async () => {
+  it('returns an error when attachment_id is a visualization attachment', async () => {
     const { result, attachments } = await runUpdate(
       { esql: UPDATED_ESQL },
       existingRecord({ type: 'visualization' })
     );
 
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toContain('att-session');
     expect(attachments.update).not.toHaveBeenCalled();
-    expect(attachments.add).toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+  });
+
+  it('updates a session whose stored tab still has time_restore', async () => {
+    const { result, attachments } = await runUpdate(
+      { esql: UPDATED_ESQL },
+      existingRecord({
+        versions: [
+          {
+            version: 1,
+            data: {
+              ...esqlSessionData,
+              tabs: [{ ...esqlSessionData.tabs[0], time_restore: true }],
+            },
+          },
+        ],
+      })
+    );
+
     expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(updatedSession(attachments).tabs[0].data_source.query).toBe(UPDATED_ESQL);
+    expect(updatedSession(attachments).tabs[0]).not.toHaveProperty('time_restore');
   });
 
   it('rejects classic Discover sessions', async () => {

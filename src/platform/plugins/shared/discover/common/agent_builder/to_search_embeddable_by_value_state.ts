@@ -35,7 +35,7 @@ export const toSearchEmbeddableByValueState = (
     state.description = data.description;
   }
 
-  // Chat has no global timefilter, so copy tab time even when time_restore is false.
+  // Chat has no global timefilter, so copy the tab time range onto the panel.
   if (tab.time_range) {
     state.time_range = tab.time_range;
   }

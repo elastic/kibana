@@ -80,8 +80,7 @@ const formatTab = (tab: DiscoverSessionApiTab): string[] => {
   }
 
   if (tab.time_range) {
-    const restore = tab.time_restore ? ' (time_restore: true)' : '';
-    lines.push(`  Time range: ${tab.time_range.from} to ${tab.time_range.to}${restore}`);
+    lines.push(`  Time range: ${tab.time_range.from} to ${tab.time_range.to}`);
   }
 
   lines.push(`  ${formatColumns(tab.column_order)}`);

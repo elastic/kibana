@@ -15,7 +15,10 @@ import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server'
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { getDateRange } from '@kbn/timerange';
-import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
+import {
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SKILL_ID,
+} from '../../common/agent_builder';
 import {
   discoverSessionApiDataSchema,
   MAX_SESSION_TITLE_LENGTH,
@@ -53,26 +56,38 @@ interface DiscoverSessionToolPatch {
   columns?: string[] | null;
 }
 
+const PLACEHOLDER_ATTACHMENT_IDS = new Set([
+  '.',
+  '..',
+  'id',
+  'attachment_id',
+  'undefined',
+  'null',
+  'none',
+  'n/a',
+  'screen-context',
+  'screen_context',
+  DISCOVER_SESSION_SKILL_ID,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  'discover_session',
+  'create_discover_session',
+  platformCoreTools.createDiscoverSession,
+]);
+
 const isPlaceholderAttachmentId = (id: string): boolean => {
   const trimmed = id.trim();
   if (!trimmed) {
     return true;
   }
   const lower = trimmed.toLowerCase();
-  if (
-    lower === '.' ||
-    lower === '..' ||
-    lower === 'id' ||
-    lower === 'attachment_id' ||
-    lower === 'undefined' ||
-    lower === 'null' ||
-    lower === 'none' ||
-    lower === 'n/a'
-  ) {
+  if (PLACEHOLDER_ATTACHMENT_IDS.has(lower)) {
     return true;
   }
   return /^\{[^}]*\}$/.test(trimmed) || /^<[^>]*>$/.test(trimmed);
 };
+
+const sanitizeEsql = (esql: string): string =>
+  esql.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
 
 const normalizeAttachmentId = (id: string | undefined): string | undefined => {
   if (typeof id !== 'string') {
@@ -95,7 +110,7 @@ const createDiscoverSessionSchema = z
         .max(256)
         .optional()
         .describe(
-          '(optional) ID of an existing Discover session attachment to update. Use only an id from a previous result of this tool. Never invent one. Never pass "screen-context", ".", placeholders, or ids of other attachment types. Omit this field to create, or to update the only Discover session in the conversation.'
+          '(optional) ID of an existing Discover session attachment to update. Use only an id from a previous result of this tool. Never invent one. Never pass the skill name, "discover.session", "screen-context", ".", or placeholders. Omit this field to create, or to update the only Discover session in the conversation.'
         )
     ),
     title: z
@@ -106,14 +121,17 @@ const createDiscoverSessionSchema = z
       .describe(
         'Title for the Discover session. Required on create unless you accept the default. On update, omit to keep the existing title.'
       ),
-    esql: z
-      .string()
-      .min(1)
-      .max(MAX_ESQL_LENGTH)
-      .optional()
-      .describe(
-        'An ES|QL query that returns documents (not aggregations). Only pass queries from generateEsql, executeEsql, or the user — never invent ES|QL.'
-      ),
+    esql: z.preprocess(
+      (value) => (typeof value === 'string' ? sanitizeEsql(value) : value),
+      z
+        .string()
+        .min(1)
+        .max(MAX_ESQL_LENGTH)
+        .optional()
+        .describe(
+          'An ES|QL query that returns documents (not aggregations). Only pass queries from generateEsql, executeEsql, or the user — never invent ES|QL.'
+        )
+    ),
     time_range: timeRangeSchema
       .nullable()
       .optional()
@@ -176,7 +194,6 @@ const buildDiscoverSessionToolData = ({
   };
 
   if (timeRange) {
-    tab.time_restore = true;
     tab.time_range = timeRange;
   }
 
@@ -213,6 +230,7 @@ const mergeDiscoverSessionToolData = (
     ...existingTab,
     data_source: { ...existingTab.data_source },
   };
+  delete nextTab.time_restore;
 
   if (patch.title !== undefined) {
     nextTab.label = truncateTabLabel(patch.title);
@@ -227,10 +245,8 @@ const mergeDiscoverSessionToolData = (
 
   if (patch.time_range === null) {
     delete nextTab.time_range;
-    delete nextTab.time_restore;
   } else if (patch.time_range) {
     nextTab.time_range = patch.time_range;
-    nextTab.time_restore = true;
   }
 
   if (patch.columns === null || (Array.isArray(patch.columns) && patch.columns.length === 0)) {
@@ -250,6 +266,29 @@ const mergeDiscoverSessionToolData = (
   }
 
   return parseResult.data;
+};
+
+const stripLegacyTimeRestore = (data: unknown): unknown => {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return data;
+  }
+
+  const session = data as Record<string, unknown>;
+  if (!Array.isArray(session.tabs)) {
+    return data;
+  }
+
+  return {
+    ...session,
+    tabs: session.tabs.map((tab) => {
+      if (!tab || typeof tab !== 'object' || Array.isArray(tab)) {
+        return tab;
+      }
+      const nextTab = { ...(tab as Record<string, unknown>) };
+      delete nextTab.time_restore;
+      return nextTab;
+    }),
+  };
 };
 
 const listDiscoverSessionIds = (attachments: Pick<AttachmentStateManager, 'getActive'>): string[] =>
@@ -273,12 +312,9 @@ const resolveDiscoverSessionTargetId = ({
     if (record?.type === DISCOVER_SESSION_ATTACHMENT_TYPE) {
       return { targetId: requestedId, existingIds };
     }
-    // screen-context and other non-session attachments are always present in app
-    // chat. Treat those ids as omitted so we create (or update the sole session)
-    // instead of looping on a read-only / wrong-type error.
-    if (!record) {
-      return { unknownId: requestedId, existingIds };
-    }
+    // Real unknown or wrong-type ids fail closed. Known placeholders are
+    // stripped in normalizeAttachmentId and fall through as omitted.
+    return { unknownId: requestedId, existingIds };
   }
 
   if (existingIds.length === 1) {
@@ -367,7 +403,9 @@ const updateDiscoverSessionAttachment = async ({
     };
   }
 
-  const existingParse = discoverSessionApiDataSchema.safeParse(latestVersion.data);
+  const existingParse = discoverSessionApiDataSchema.safeParse(
+    stripLegacyTimeRestore(latestVersion.data)
+  );
   if (!existingParse.success) {
     return {
       results: [
@@ -431,7 +469,7 @@ export const createDiscoverSessionTool = (): BuiltinToolDefinition<
 
 Pass an ES|QL query that returns documents (FROM or TS with WHERE/LIMIT as needed). Copy the "esql" string from generateEsql into the "esql" parameter — do not wrap it in an object and do not invent ES|QL. Do not use this for aggregations (STATS) or charts; use ${platformCoreTools.createVisualization} instead.
 
-Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Never pass "screen-context", ".", "{attachment_id}", or ids of other attachment types. Omit attachment_id to create when none exists, or to update the conversation's only Discover session. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
+Do not pass attachment_id unless a previous result of this same tool returned that exact id. Never invent an id. Never pass the skill name, "discover.session", "screen-context", ".", or "{attachment_id}". Omit attachment_id to create when none exists, or to update the conversation's only Discover session. On update, omit fields you want to keep; pass null for time_range or columns to clear them. esql is required only when creating.
 
 Call this tool once per user request. After a successful result, stop calling tools. Paste the returned "render" string into your reply verbatim — do not build the tag yourself. Do not create a second session unless the user asked for another table.
 
@@ -465,10 +503,8 @@ This tool does not execute the query. It stores a by-value Discover session (one
 
       if (unknownId) {
         const existingHint = existingIds.length
-          ? ` Existing Discover session ids: ${existingIds.join(
-              ', '
-            )}. Pass one of those, or omit attachment_id.`
-          : ' Omit attachment_id to create a session.';
+          ? ` Existing Discover session ids: ${existingIds.join(', ')}.`
+          : '';
         return {
           results: [
             createErrorResult(
