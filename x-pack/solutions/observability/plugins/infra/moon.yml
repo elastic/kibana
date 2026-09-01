@@ -155,6 +155,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/tooling-log'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

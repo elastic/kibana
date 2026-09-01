@@ -10,6 +10,7 @@ import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
@@ -31,6 +32,7 @@ import {
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ImprovementsServiceApi } from '../improvements/service';
 
 interface RegisteredRoute {
   config: {
@@ -92,6 +94,7 @@ describe('ai indices routes', () => {
   let aiIndexService: jest.Mocked<
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
+  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -99,6 +102,8 @@ describe('ai indices routes', () => {
   let auditLogger: { log: jest.Mock };
   let esSearch: jest.Mock;
   let esGet: jest.Mock;
+  let improvementsClients: unknown[];
+  const logger = loggerMock.create();
 
   const createContext = () =>
     ({
@@ -125,6 +130,7 @@ describe('ai indices routes', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     routes = {};
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
@@ -143,6 +149,8 @@ describe('ai indices routes', () => {
       delete: jest.fn(),
       setFeedbackAnalysis: jest.fn(),
     };
+    improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
+    improvementsClients = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -168,7 +176,12 @@ describe('ai indices routes', () => {
 
     registerAiIndexRoutes({
       router,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getImprovementsService: (esClient) => {
+        improvementsClients.push(esClient);
+        return improvementsService as unknown as ImprovementsServiceApi;
+      },
       getActions: async () => actions,
     });
   });
@@ -709,6 +722,51 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+    });
+
+    it('clears the improvements for the AI index, so they cannot resurface under a reused id', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
+    });
+
+    it('audits the deletion even when the improvements cleanup fails afterwards', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+      improvementsService.deleteByAiIndex.mockRejectedValue(new Error('security_exception'));
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      // The index is gone either way, so the audit record is owed and the caller is not sent to
+      // retry a delete that would now 404.
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
+    });
+
+    it("deletes the improvements as the request's user, since the store is a user index", async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(improvementsClients).toEqual([expect.objectContaining({ search: esSearch })]);
+    });
+
+    it('leaves the improvements alone when the AI index cannot be deleted', async () => {
+      aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'missing' } });
+
+      expect(improvementsService.deleteByAiIndex).not.toHaveBeenCalled();
     });
 
     it('returns 404 when the AI index does not exist', async () => {
