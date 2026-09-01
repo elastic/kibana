@@ -15,6 +15,7 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { guardedMapStep } from '../stream_utils';
+import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -31,9 +32,13 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
       });
 
+      const { deduplicationIds } = state;
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
+        ...(deduplicationIds
+          ? { getDocumentId: (doc) => deduplicationIds.get(doc as AlertEvent) }
+          : {}),
       });
 
       this.logger.debug({

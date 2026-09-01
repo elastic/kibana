@@ -20,6 +20,7 @@ import {
   DetectDataPresenceStep,
   CreateRecoveryEventsStep,
   CreateNoDataEventsStep,
+  FilterDuplicateEventsStep,
 } from '../lib/rule_executor/steps';
 import {
   CancellationBoundaryMiddleware,
@@ -79,6 +80,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(DetectDataPresenceStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateNoDataEventsStep).inRequestScope();
+  bind(RuleExecutionStepsToken).to(FilterDuplicateEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 

@@ -22,6 +22,9 @@ export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleD
   time_field: data.time_field ?? DEFAULT_TIME_FIELD,
   ...(data.recovery_strategy !== undefined ? { recovery_strategy: data.recovery_strategy } : {}),
   ...(data.no_data_strategy !== undefined ? { no_data_strategy: data.no_data_strategy } : {}),
+  ...(data.deduplication_strategy !== undefined
+    ? { deduplication_strategy: data.deduplication_strategy }
+    : {}),
   ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
   ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
 });

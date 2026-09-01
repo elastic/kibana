@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/alerting-v2-schemas';
-import { noDataStrategy as noDataStrategyEnum } from '@kbn/alerting-v2-schemas';
+import {
+  noDataStrategy as noDataStrategyEnum,
+  deduplicationStrategy as deduplicationStrategyEnum,
+} from '@kbn/alerting-v2-schemas';
 import { dump, load } from 'js-yaml';
 import type {
   FormValues,
@@ -15,6 +18,7 @@ import type {
   RuleQuery,
   RecoveryStrategy,
   NoDataStrategy,
+  DeduplicationStrategy,
 } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
@@ -60,6 +64,7 @@ interface YamlRuleObject {
   query: Query;
   recovery_strategy?: string;
   no_data_strategy?: string;
+  deduplication_strategy?: string;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
   artifacts?: Array<{ id: string; type: string; value: string }>;
@@ -105,6 +110,9 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(values.kind === 'alert' && values.noDataStrategy
       ? { no_data_strategy: values.noDataStrategy }
+      : {}),
+    ...(values.kind === 'alert' && values.deduplicationStrategy
+      ? { deduplication_strategy: values.deduplicationStrategy }
       : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
@@ -244,6 +252,14 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       : undefined;
   const noDataStrategy = parsedNoDataStrategy ?? (resolvedKind === 'alert' ? 'none' : undefined);
 
+  const rawDeduplicationStrategy = obj.deduplication_strategy;
+  const validDeduplicationStrategies = Object.values(deduplicationStrategyEnum) as string[];
+  const deduplicationStrategy =
+    typeof rawDeduplicationStrategy === 'string' &&
+    validDeduplicationStrategies.includes(rawDeduplicationStrategy)
+      ? (rawDeduplicationStrategy as DeduplicationStrategy)
+      : undefined;
+
   return {
     values: {
       kind: resolvedKind,
@@ -262,6 +278,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       query: parseQuery(queryObj),
       recoveryStrategy,
       noDataStrategy,
+      deduplicationStrategy,
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,

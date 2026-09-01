@@ -40,7 +40,18 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
 
   public record(collector: MetricCollectorWriter, { meta, state }: MetricRecorderContext): void {
     const bulkIndexResult = meta?.observations?.bulkIndexResult;
-    if (!bulkIndexResult || bulkIndexResult.docs.length === 0) {
+    if (!bulkIndexResult) {
+      return;
+    }
+
+    const conflictCount = bulkIndexResult.errors.filter(
+      (e) => (e.details?.statusCode as number | undefined) === 409
+    ).length;
+    if (conflictCount > 0) {
+      collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsDeduplicated, conflictCount);
+    }
+
+    if (bulkIndexResult.docs.length === 0) {
       return;
     }
 

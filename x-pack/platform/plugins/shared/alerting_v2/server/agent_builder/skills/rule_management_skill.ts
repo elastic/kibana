@@ -256,6 +256,17 @@ When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_
 Signal rules cannot set \`no_data_strategy\`.
 Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
 
+## Deduplication Strategy
+
+\`deduplication_strategy\` is a **top-level rule field** that controls how duplicate rule events are handled. Alert-only — has no effect on signal rules.
+
+| Value | Behaviour |
+|---|---|
+| \`'rule_event'\` | A byte-identical re-match of the same source row is dropped. Avoids growing the alert store with redundant data while keeping overlapping lookback windows (default). |
+| \`'episode'\` | Every matching row is written. A user-closed episode stays closed — duplicates join it and do not re-notify. Use when you need a full audit trail of every match. |
+
+Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
+
 ## Final Validation
 
 Always include \`{ operation: "validate" }\` as the **last operation** in the final ${alertingTools.manageRule} call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.

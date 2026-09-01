@@ -15,6 +15,7 @@ import { useRule } from '../rule_context';
 import {
   EMPTY_VALUE,
   formatAlertDelay,
+  formatDeduplicationStrategy,
   formatNoDataStrategy,
   formatRecoveryDelay,
   formatRecoveryStrategy,
@@ -140,6 +141,13 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             }),
             description: formatNoDataStrategy(rule.no_data_strategy ?? 'none'),
             'data-test-subj': 'alertingV2RuleDetailsNoDataStrategy',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.deduplicationStrategy', {
+              defaultMessage: 'Duplicate event handling',
+            }),
+            description: formatDeduplicationStrategy(rule.deduplication_strategy),
+            'data-test-subj': 'alertingV2RuleDetailsDeduplicationStrategy',
           },
         ]
       : []),

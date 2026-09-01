@@ -121,6 +121,11 @@ export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recove
 export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
+/** Deduplication strategy. */
+export const deduplicationStrategySchema = z.enum(['rule_event', 'episode']);
+export const deduplicationStrategy = deduplicationStrategySchema.enum;
+export type DeduplicationStrategy = z.infer<typeof deduplicationStrategySchema>;
+
 /**
  * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
  * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
@@ -387,6 +392,11 @@ export const createRuleDataBaseSchema = z
       .describe(
         'How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.'
       ),
+    deduplication_strategy: deduplicationStrategySchema
+      .optional()
+      .describe(
+        'How duplicate rule events are handled. "rule_event" drops byte-identical re-matches (default); "episode" writes every match and keeps manually closed episodes closed. Alert-only.'
+      ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
@@ -399,6 +409,11 @@ export const isStateTransitionAllowed = (data: {
   kind?: string;
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
+
+export const isDeduplicationStrategyAllowed = (data: {
+  kind?: string;
+  deduplication_strategy?: DeduplicationStrategy | null;
+}): boolean => data.kind === 'alert' || data.deduplication_strategy == null;
 
 export const isSignalUsingStandaloneFormat = (data: {
   kind?: string;
@@ -473,6 +488,10 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
+  .refine(isDeduplicationStrategyAllowed, {
+    message: 'deduplication_strategy is only allowed when kind is "alert".',
+    path: ['deduplication_strategy'],
+  })
   .refine(isSignalUsingStandaloneFormat, {
     message: 'kind "signal" requires query.format "standalone".',
     path: ['query', 'format'],
@@ -535,6 +554,7 @@ export const updateRuleDataSchema = z
     query: querySchema.optional(),
     recovery_strategy: recoveryStrategySchema.optional().nullable(),
     no_data_strategy: noDataStrategySchema.optional().nullable(),
+    deduplication_strategy: deduplicationStrategySchema.optional().nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),

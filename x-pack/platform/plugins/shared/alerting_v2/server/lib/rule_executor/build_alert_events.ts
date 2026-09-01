@@ -83,6 +83,51 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+/**
+ * Deterministic document id for a rule event under the `'rule_event'`
+ * deduplication strategy. Encodes the space, rule, group, and full row
+ * content so that byte-identical re-matches collide on `_id` and are
+ * dropped by Elasticsearch's `create` op, while distinct rows (same group,
+ * different data) each get their own document.
+ */
+export function buildRuleEventId({
+  spaceId,
+  ruleId,
+  groupHash,
+  rowDoc,
+}: {
+  spaceId: string;
+  ruleId: string;
+  groupHash: string;
+  rowDoc: Record<string, unknown>;
+}): string {
+  return sha256(`${spaceId}|${ruleId}|${groupHash}|${stableStringify(rowDoc)}`);
+}
+
+/**
+ * Builds a Map from each alert-type `AlertEvent` to its deterministic
+ * document id. Only `type === 'alert'` events are mapped — signal events
+ * don't use episode state and don't participate in the rule-event dedup path.
+ */
+export function buildDeduplicationIds(
+  events: readonly AlertEvent[]
+): ReadonlyMap<AlertEvent, string> {
+  const map = new Map<AlertEvent, string>();
+  for (const event of events) {
+    if (event.type !== 'alert') continue;
+    map.set(
+      event,
+      buildRuleEventId({
+        spaceId: event.space_id,
+        ruleId: event.rule.id,
+        groupHash: event.group_hash,
+        rowDoc: event.data,
+      })
+    );
+  }
+  return map;
+}
+
 export const buildExecutionUuid = ({
   ruleId,
   spaceId,

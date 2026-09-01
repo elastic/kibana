@@ -17,10 +17,12 @@ import {
   querySchema,
   recoveryStrategySchema,
   noDataStrategySchema,
+  deduplicationStrategySchema,
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
   isStateTransitionAllowed,
+  isDeduplicationStrategyAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
   isRecoveryQueryConsistentWithStrategy,
@@ -83,6 +85,11 @@ export const setStateTransitionOperationSchema = stateTransitionSchema
   .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') });
 
+export const setDeduplicationStrategyOperationSchema = z.object({
+  operation: z.literal('set_deduplication_strategy'),
+  value: deduplicationStrategySchema,
+});
+
 export const validateOperationSchema = z.object({
   operation: z.literal('validate'),
 });
@@ -96,6 +103,7 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setQueryOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
+  setDeduplicationStrategyOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -281,6 +289,10 @@ export const executeRuleOperations = async (
         };
         break;
 
+      case 'set_deduplication_strategy':
+        next = { ...next, deduplication_strategy: op.value };
+        break;
+
       case 'validate': {
         const payload = buildRulePayload(next);
         const result = createRuleDataSchema.safeParse(payload);
@@ -319,6 +331,12 @@ export const executeRuleOperations = async (
   if (!isStateTransitionAllowed(next)) {
     throw new RuleOperationValidationError(
       'state_transition is only allowed when kind is "alert".'
+    );
+  }
+
+  if (!isDeduplicationStrategyAllowed(next)) {
+    throw new RuleOperationValidationError(
+      'deduplication_strategy is only allowed when kind is "alert".'
     );
   }
 

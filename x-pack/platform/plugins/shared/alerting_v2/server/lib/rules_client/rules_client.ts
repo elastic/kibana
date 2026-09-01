@@ -378,6 +378,13 @@ export class RulesClient {
       });
     }
 
+    if (existingAttrs.kind !== 'alert' && parsed.deduplication_strategy != null) {
+      throw Boom.badRequest('deduplication_strategy is only allowed for rules of kind "alert".', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_STATE_TRANSITION,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
+    }
+
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,

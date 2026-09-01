@@ -6,7 +6,7 @@
  */
 
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
+import type { NoDataStrategy, DeduplicationStrategy } from '@kbn/alerting-v2-schemas';
 import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -170,4 +170,20 @@ const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
 export function formatRecoveryStrategy(strategy?: RecoveryStrategy | null): string {
   if (strategy == null) return EMPTY_VALUE;
   return RECOVERY_STRATEGY_LABELS[strategy];
+}
+
+const DEDUPLICATION_STRATEGY_LABELS: Record<DeduplicationStrategy, string> = {
+  rule_event: i18n.translate('xpack.alertingV2.ruleDetails.deduplicationStrategy.ruleEvent', {
+    defaultMessage: 'Drop duplicates',
+  }),
+  episode: i18n.translate('xpack.alertingV2.ruleDetails.deduplicationStrategy.episode', {
+    defaultMessage: 'Write all matches',
+  }),
+};
+
+export function formatDeduplicationStrategy(strategy?: DeduplicationStrategy | null): string {
+  if (strategy == null) {
+    return DEDUPLICATION_STRATEGY_LABELS.rule_event;
+  }
+  return DEDUPLICATION_STRATEGY_LABELS[strategy] ?? EMPTY_VALUE;
 }

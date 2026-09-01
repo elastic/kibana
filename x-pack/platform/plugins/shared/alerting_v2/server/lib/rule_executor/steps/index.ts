@@ -13,3 +13,4 @@ export { CreateAlertEventsStep } from './create_alert_events_step';
 export { DetectDataPresenceStep } from './detect_data_presence_step';
 export { CreateRecoveryEventsStep } from './create_recovery_events_step';
 export { CreateNoDataEventsStep } from './create_no_data_events_step';
+export { FilterDuplicateEventsStep } from './filter_duplicate_events_step';

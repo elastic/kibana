@@ -8,6 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
+  buildDeduplicationIds,
   createAlertEventsBatchBuilder,
   resolveAlertEventType,
   type AlertEventsBatchBuilder,
@@ -48,9 +49,14 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
       const alertEventsBatch = buildBatch([...state.esqlRowBatch]);
 
+      const isRuleEventDedup = (state.rule.deduplication_strategy ?? 'rule_event') === 'rule_event';
+      const deduplicationIds = isRuleEventDedup
+        ? buildDeduplicationIds(alertEventsBatch)
+        : undefined;
+
       yield {
         type: 'continue',
-        state: { ...state, alertEventsBatch },
+        state: { ...state, alertEventsBatch, deduplicationIds },
       };
     });
   }

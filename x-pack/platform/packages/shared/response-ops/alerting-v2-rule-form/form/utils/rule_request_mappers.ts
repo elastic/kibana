@@ -12,6 +12,7 @@ import type {
   UpdateRuleData,
   RecoveryStrategy,
   NoDataStrategy,
+  DeduplicationStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
@@ -123,6 +124,7 @@ export interface RuleRequestCommon {
   query: Query;
   recovery_strategy?: RecoveryStrategy;
   no_data_strategy?: NoDataStrategy;
+  deduplication_strategy?: DeduplicationStrategy;
   grouping?: { fields: string[] };
   state_transition?: {
     pending_count?: number;
@@ -142,6 +144,11 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
       ? formValues.noDataStrategy
       : undefined;
 
+  const deduplicationStrategy =
+    formValues.kind === 'alert' && formValues.deduplicationStrategy
+      ? formValues.deduplicationStrategy
+      : undefined;
+
   return {
     metadata: mapMetadata(metadata),
     time_field: timeField,
@@ -149,6 +156,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     query: ruleQueryToApiQuery(query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
+    ...(deduplicationStrategy ? { deduplication_strategy: deduplicationStrategy } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
@@ -161,13 +169,21 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
 });
 
 export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, recovery_strategy, no_data_strategy, ...rest } =
-    mapFormValuesToRuleRequest(formValues);
+  const {
+    grouping,
+    state_transition,
+    artifacts,
+    recovery_strategy,
+    no_data_strategy,
+    deduplication_strategy,
+    ...rest
+  } = mapFormValuesToRuleRequest(formValues);
 
   return {
     ...rest,
     recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,
+    deduplication_strategy: deduplication_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
@@ -203,6 +219,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
     noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
+    deduplicationStrategy: rule.deduplication_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

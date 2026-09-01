@@ -17,6 +17,12 @@ export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> 
   docs: readonly TDocument[];
   /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
   refresh?: boolean | 'wait_for';
+  /**
+   * Optional per-document id resolver. When provided, the returned string is
+   * used as the document's `_id` in the bulk `create` operation, enabling
+   * deterministic deduplication via version-conflict (409) suppression.
+   */
+  getDocumentId?: (doc: TDocument) => string | undefined;
 }
 
 /**
@@ -146,7 +152,11 @@ export class StorageService implements StorageServiceContract {
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>(
     params: BulkIndexDocsParams<TDocument>
   ): Promise<BulkIndexResult<TDocument>> {
-    const entries = params.docs.map((doc) => ({ index: params.index, doc }));
+    const entries = params.docs.map((doc) => ({
+      index: params.index,
+      doc,
+      id: params.getDocumentId?.(doc),
+    }));
     return this.writeBulk<TDocument>(entries, params.refresh ?? false);
   }
 
@@ -157,7 +167,7 @@ export class StorageService implements StorageServiceContract {
   }
 
   private async writeBulk<TDocument extends Record<string, unknown>>(
-    entries: ReadonlyArray<{ index: string; doc: TDocument }>,
+    entries: ReadonlyArray<{ index: string; doc: TDocument; id?: string }>,
     refresh: boolean | 'wait_for'
   ): Promise<BulkIndexResult<TDocument>> {
     if (entries.length === 0) {
@@ -165,7 +175,10 @@ export class StorageService implements StorageServiceContract {
     }
 
     const operations: NonNullable<BulkRequest<TDocument>['operations']> = entries.flatMap(
-      ({ index, doc }) => [{ create: { _index: index } }, doc]
+      ({ index, doc, id }) => [
+        { create: { _index: index, ...(id != null ? { _id: id } : {}) } },
+        doc,
+      ]
     );
 
     const indexLabel = Array.from(new Set(entries.map((entry) => entry.index))).join(', ');
@@ -250,7 +263,11 @@ export class StorageService implements StorageServiceContract {
       return;
     }
 
-    const firstErrorItem = response.items.find((item) => item.create?.error);
+    // Skip 409 version conflicts — these are expected when deterministic _id deduplication
+    // is active and the document was already written by a prior execution.
+    const firstErrorItem = response.items.find(
+      (item) => item.create?.error && item.create.status !== 409
+    );
     if (!firstErrorItem) {
       return;
     }
@@ -272,13 +289,20 @@ export class StorageService implements StorageServiceContract {
     docsCount: number;
     response: BulkResponse;
   }): string {
-    const failedItemCount = response.items.filter((item) => item.create?.error).length;
-
     if (!response.errors) {
       return `StorageService: Successfully bulk created ${docsCount} documents to index: ${index}`;
     }
 
-    const successItemCount = docsCount - failedItemCount;
-    return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
+    const conflictCount = response.items.filter((item) => item.create?.status === 409).length;
+    const otherFailCount = response.items.filter(
+      (item) => item.create?.error && item.create.status !== 409
+    ).length;
+    const successCount = docsCount - conflictCount - otherFailCount;
+
+    if (otherFailCount === 0) {
+      return `StorageService: Bulk create completed for index: ${index} (successful: ${successCount}, deduplicated: ${conflictCount}, total: ${docsCount})`;
+    }
+
+    return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successCount}, deduplicated: ${conflictCount}, failed: ${otherFailCount}, total: ${docsCount})`;
   }
 }
