@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './javascript';
+export const createAbortError = (): Error => new Error('Step execution was cancelled');
