@@ -78,7 +78,7 @@ describe('chart type guidance', () => {
 
       DYNAMIC STEPS — mechanics for when the rules above call for explicit \`steps\`:
       - Pick exactly ONE dynamic palette from the list below: \\"Status\\" for threshold bands, \\"Temperature\\" for intensity, \\"Complementary\\" for divergence, \\"Negative\\"/\\"Positive\\" for adverse/favorable values, or \\"Cool\\"/\\"Warm\\"/\\"Gray\\" for neutral magnitude.
-      - Step count by chart type: metric: 3, gauge: 4, heatmap and data_table: 5. Every \`steps[*].color\` hex MUST come from the 5-stop preview line below; for 3- and 4-step charts use the first 3 or 4 colors.
+      - Step count by chart type: metric: 3, gauge: 4, heatmap: 5, data_table: 5. Every \`steps[*].color\` hex MUST come from the 5-stop preview line below; for charts with fewer steps, use the first N colors.
       - Step thresholds are data values, not display labels; keep them in the same unit and scale as the metric column. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values.
       - Keep palette order by default; to reverse, reverse the \`steps\` colors yourself. There is no \`reverse\` field.
 

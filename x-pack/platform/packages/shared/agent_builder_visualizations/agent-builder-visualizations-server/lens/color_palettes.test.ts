@@ -69,4 +69,22 @@ describe('getColorPalettesPromptContent', () => {
     expect(content).toMatch(/gauge:\s*4/);
     expect(content).not.toContain('a metric chart uses');
   });
+
+  it('lists every registry recommendedStepCount in shared mechanics', () => {
+    const content = getSharedColorPalettesPromptContent({ includeMechanics: true });
+    const stepLine = content.split('\n').find((line) => line.includes('Step count by chart type'));
+
+    expect(stepLine).toBeDefined();
+
+    for (const [chartType, { prompt }] of Object.entries(chartTypeRegistry)) {
+      const count = prompt.config?.options?.coloring?.dynamic?.recommendedStepCount;
+
+      if (count === undefined) {
+        expect(stepLine).not.toContain(`${chartType}:`);
+        continue;
+      }
+
+      expect(stepLine).toContain(`${chartType}: ${count}`);
+    }
+  });
 });
