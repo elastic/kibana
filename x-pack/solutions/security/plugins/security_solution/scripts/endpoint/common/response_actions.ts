@@ -13,10 +13,7 @@ import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
-import {
-  isCancelAction,
-  isKillProcessAction,
-} from '../../../common/endpoint/service/response_actions/type_guards';
+import { isCancelAction } from '../../../common/endpoint/service/response_actions/type_guards';
 import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -35,10 +32,9 @@ import type {
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
   LogsEndpointAction,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithPid,
-  ResponseActionParametersWithEntityId,
   ResponseActionMemoryDumpParameters,
+  ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessData,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -109,9 +105,10 @@ export const sendEndpointActionResponse = async (
         data: {
           command: action.command as EndpointActionData['command'],
           comment: '',
-          ...getOutputDataIfNeeded(action),
+          ...getOutputDataIfNeeded(action, state),
         },
         started_at: action.startedAt,
+        ...(state === 'failure' ? { error: { message: 'Action failed' } } : {}),
       },
     });
 
@@ -170,22 +167,6 @@ export const sendEndpointActionResponse = async (
         (endpointResponse.EndpointActions.data.output.content as unknown as { code: string }).code =
           'ra_cancel_error';
       }
-    }
-
-    // `kill-process --kill-descendants`: add list of descendants killed
-    if (
-      isKillProcessAction(action) &&
-      (action.parameters as ResponseActionParametersWithEntityId | ResponseActionParametersWithPid)
-        ?.kill_descendants
-    ) {
-      const tree = endpointActionGenerator.createProcessDescendants(
-        action.parameters?.pid ?? endpointActionGenerator.randomN(50)
-      );
-
-      (
-        endpointResponse.EndpointActions.data.output!
-          .content as unknown as KillProcessActionOutputContent
-      ).descendants = tree;
     }
 
     await esClient
@@ -369,7 +350,10 @@ type ResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
-const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+const getOutputDataIfNeeded = (
+  action: ActionDetails,
+  state: 'success' | 'failure' = 'success'
+): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
 
   switch (action.command) {
@@ -472,6 +456,26 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         },
       } as unknown as ResponseOutput;
 
+    case 'kill-process':
+      return {
+        output: endpointActionGenerator.generateKillProcessOutputResponse(
+          state === 'success' &&
+            (action.parameters as ResponseActionParametersWithPid).kill_descendants
+            ? {
+                content: {
+                  descendants: endpointActionGenerator.createProcessDescendants(
+                    (action.parameters as ResponseActionParametersWithPid)?.pid ??
+                      endpointActionGenerator.randomN(50)
+                  ),
+                },
+              }
+            : {},
+          {
+            parameters: action.parameters as ResponseActionParametersWithProcessData,
+            atError: state === 'failure',
+          }
+        ),
+      } as unknown as ResponseOutput;
     default:
       return { output: undefined };
   }

@@ -7,48 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay, map, tap } from 'rxjs';
-import React from 'react';
+import { map } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { FetchResult } from './types';
-import { NewsfeedContainer } from './components/flyout_list';
 import type { NewsfeedApi } from './lib/api';
+import type { NewsfeedSidebarController } from './sidebar/controller';
 
 export const registerNewsfeedHandler = ({
   core,
   api,
-  isServerless,
+  sidebarController,
 }: {
   core: CoreStart;
   api: NewsfeedApi;
-  isServerless: boolean;
+  sidebarController: NewsfeedSidebarController;
 }) => {
-  let lastFetchResult: FetchResult | null | void = null;
-  const handlerResults$ = api.fetchResults$.pipe(
-    tap((result) => {
-      lastFetchResult = result;
-    }),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
-  const handlerApi: NewsfeedApi = { ...api, fetchResults$: handlerResults$ };
-
   return core.chrome.next.registerNewsfeedHandler({
-    open: () => {
-      if (lastFetchResult) {
-        handlerApi.markAsRead(lastFetchResult.feedItems.map((item) => item.hash));
-      }
-      const flyoutRef = core.overlays.openSystemFlyout(
-        <NewsfeedContainer
-          newsfeedApi={handlerApi}
-          onClose={() => flyoutRef.close()}
-          showPlainSpinner={false}
-          isServerless={isServerless}
-        />,
-        {
-          size: 's',
-        }
-      );
-    },
-    hasNew$: handlerResults$.pipe(map((result) => result?.hasNew ?? false)),
+    open: sidebarController.open,
+    hasNew$: api.fetchResults$.pipe(map((result) => result?.hasNew ?? false)),
   });
 };
