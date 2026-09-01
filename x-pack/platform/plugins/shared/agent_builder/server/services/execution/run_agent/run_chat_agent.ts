@@ -61,6 +61,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
@@ -150,7 +151,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
-  const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+  const resolvedConfiguration = await resolveConfiguration(agentConfiguration, {
+    aiIndicesEnabled: experimentalFeatures.aiIndices,
+    request,
+    resolver: context.aiIndexResolver,
+    logger,
+  });
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
@@ -346,6 +352,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   }
 
+  const imageResolver = createImageResolver({
+    attachmentStateManager: context.attachmentStateManager,
+    attachments,
+    request,
+    spaceId: context.spaceId,
+    logger,
+  });
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     spaceId: context.spaceId,
@@ -359,6 +373,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    imageResolver,
     conversationTemplates: context.conversationTemplates,
   });
 

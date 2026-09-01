@@ -30,6 +30,7 @@ import type {
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -149,6 +150,15 @@ export interface AddAttachmentsToLastRoundRequest {
 
 export interface ConversationListOptions {
   agentId?: string;
+  page?: number;
+  perPage?: number;
+  sortOrder?: 'asc' | 'desc';
+  pinned?: boolean;
+}
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
 }
 
 /**

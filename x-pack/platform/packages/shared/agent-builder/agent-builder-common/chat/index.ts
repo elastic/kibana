@@ -56,6 +56,7 @@ export {
   type ConversationPermissions,
   type ConversationWithPermissions,
   type ConversationWithoutRoundsWithPermissions,
+  type ConversationListResult,
   type ConversationRoundStepMixin,
   type ToolCallStep,
   type ConversationRoundStep,
