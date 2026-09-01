@@ -22,11 +22,10 @@ import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { MetricsExplorerYAxisMode } from '../hooks/use_metrics_explorer_options';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { ChartTitle } from './chart_title';
 import { MetricsExplorerEmptyChart } from './empty_chart';
-import { calculateDomain } from './helpers/calculate_domain';
+import { applyYAxisModeToDomain, calculateDomain } from './helpers/calculate_domain';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricsExplorerNoMetrics } from './no_metrics';
 import { MetricExplorerSeriesChart } from './series_chart';
@@ -86,10 +85,7 @@ export const MetricsExplorerChart = ({
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
   const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
-  const domain =
-    chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero
-      ? { ...dataDomain, min: 0 }
-      : dataDomain;
+  const domain = applyYAxisModeToDomain(dataDomain, chartOptions.yAxisMode);
 
   return (
     <div style={{ padding: 24 }} data-test-subj="metricsExplorer-chart">
