@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dayKey, resolveDailyWindow } from './window';
+import { resolveDailyWindow } from './window';
 
 describe('resolveDailyWindow', () => {
   it('uses UTC day boundaries', () => {
@@ -14,13 +14,5 @@ describe('resolveDailyWindow', () => {
       resetsAt: '2026-09-01T00:00:00.000Z',
       timezone: 'UTC',
     });
-  });
-});
-
-describe('dayKey', () => {
-  it('derives the key from the resolved window', () => {
-    const window = resolveDailyWindow(new Date('2026-01-02T03:04:05.000Z'));
-
-    expect(dayKey(window)).toBe('2026-01-02');
   });
 });

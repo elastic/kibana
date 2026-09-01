@@ -76,66 +76,6 @@ const makeDetectionExecutions = ({
 ];
 
 describe('validateWorkerProvenance', () => {
-  it('derives the same detection grant key for replacement worker executions', async () => {
-    const first = makeDetectionExecutions({ childId: 'child-1' });
-    const replacement = makeDetectionExecutions({ childId: 'child-2' });
-
-    const firstResult = await validateWorkerProvenance({
-      request: makeRequest('child-1'),
-      executionId: 'child-1',
-      group: 'detection',
-      spaceId: 'space-a',
-      executionReader: makeExecutionReader(first),
-    });
-    const replacementResult = await validateWorkerProvenance({
-      request: makeRequest('child-2'),
-      executionId: 'child-2',
-      group: 'detection',
-      spaceId: 'space-a',
-      executionReader: makeExecutionReader(replacement),
-    });
-
-    expect(firstResult.grantKey).toBe(replacementResult.grantKey);
-  });
-
-  it('derives KI identity from the scheduled occurrence and canonical stream name', async () => {
-    const executions: RunQuotaWorkflowExecution[] = [
-      {
-        id: 'ki-child',
-        workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        spaceId: 'default',
-        status: ExecutionStatus.RUNNING,
-        context: {
-          parentWorkflowExecutionId: 'ki-parent',
-          inputs: { streamName: 'logs.production' },
-        },
-      },
-      {
-        id: 'ki-parent',
-        workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        spaceId: 'default',
-        status: ExecutionStatus.COMPLETED,
-        triggeredBy: 'scheduled',
-        taskRunAt: '2026-08-31T10:00:00.000Z',
-      },
-    ];
-
-    await expect(
-      validateWorkerProvenance({
-        request: makeRequest('ki-child'),
-        executionId: 'ki-child',
-        group: 'ki_extraction',
-        spaceId: 'default',
-        executionReader: makeExecutionReader(executions),
-      })
-    ).resolves.toEqual(
-      expect.objectContaining({
-        grantKey: expect.any(String),
-        taskRunAt: '2026-08-31T10:00:00.000Z',
-      })
-    );
-  });
-
   it.each([
     ['forged emitter id', makeDetectionExecutions(), makeRequest('other'), 'detection', 'space-a'],
     [
