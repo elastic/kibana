@@ -167,19 +167,23 @@ interface EffectiveEsOutputSettings {
   presetQueueFloor?: number;
 }
 
-const parseYamlObject = (yaml: string | null | undefined): Record<string, unknown> => {
-  if (!yaml) {
-    return {};
-  }
+/**
+ * Parses a YAML string to a plain object. Returns `{}` when the input is absent, not an
+ * object, or malformed. The optional `onError` callback is called with the parse exception
+ * so callers can log or rethrow as needed.
+ */
+export const parseYamlRecord = (
+  yaml: string | null | undefined,
+  onError?: (e: unknown) => void
+): Record<string, unknown> => {
+  if (!yaml) return {};
   try {
     const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
-  } catch {
-    // Malformed YAML is reported elsewhere (the UI validates before saving, and
-    // buildBeatsauthConfig throws on it); fall back to defaults rather than crashing
-    // policy generation here.
+  } catch (e) {
+    onError?.(e);
   }
   return {};
 };
@@ -268,7 +272,7 @@ const getPresetConfig = (output: Output): EsOutputPresetConfig | undefined => {
  * rule `ApplyPreset` implements.
  */
 const resolveEffectiveEsOutputSettings = (output: Output): EffectiveEsOutputSettings => {
-  const configYaml = parseYamlObject(output.config_yaml);
+  const configYaml = parseYamlRecord(output.config_yaml);
   const preset = getPresetConfig(output);
 
   return {

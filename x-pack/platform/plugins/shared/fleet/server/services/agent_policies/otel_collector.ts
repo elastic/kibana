@@ -32,7 +32,7 @@ import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpe
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../../../common/services';
 
-import { buildOtelEsExporterConfig } from './otel_output_settings';
+import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
 
 /**
  * Builds OpenTelemetry Collector fragments merged into the full agent policy.
@@ -742,29 +742,19 @@ function attachOtelcolExporter(
   return config;
 }
 
-function parseOtelExporterConfigYaml(
+const parseOtelExporterConfigYaml = (
   yaml: string | null | undefined,
   logger?: Logger
-): Record<string, unknown> {
-  if (!yaml) return {};
-  try {
-    const parsed = parse(yaml);
-    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-    logger?.warn(
-      'otel_exporter_config_yaml did not parse to an object, skipping extra exporter config'
-    );
-    return {};
-  } catch (e) {
+): Record<string, unknown> =>
+  parseYamlRecord(yaml, (e) =>
     // Malformed YAML — skip extra config rather than crashing policy generation.
     // The UI validates YAML before saving; this path is only reachable via direct API writes.
     logger?.warn(
-      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${e.message}`
-    );
-    return {};
-  }
-}
+      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    )
+  );
 
 function generateOtelcolExporter(
   dataOutput: Output,
