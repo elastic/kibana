@@ -754,4 +754,41 @@ describe('KibanaEvalsClient', () => {
       expect(exp.evaluationRuns).toHaveLength(4);
     });
   });
+
+  it('passes example identity to evaluators so per-example readouts can key on it', async () => {
+    const client = createClient();
+
+    const dataset: EvaluationDataset = {
+      name: 'identity-ds',
+      description: 'desc',
+      examples: [
+        { id: 'ex-a', input: { q: 'a' }, output: { ok: true } },
+        { id: 'ex-b', input: { q: 'b' }, output: { ok: true } },
+      ],
+    };
+
+    const seen: Array<{ exampleId?: string; exampleIndex: number; repetition: number }> = [];
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'Identity',
+        kind: 'CODE',
+        direction: 'maximize',
+        evaluate: async ({ exampleId, exampleIndex, repetition }) => {
+          seen.push({ exampleId, exampleIndex, repetition });
+          return { score: 1 };
+        },
+      },
+    ];
+
+    await client.runExperiment(
+      { datasets: [dataset], task: async () => ({ value: 1 }) },
+      evaluators
+    );
+
+    // Without this an evaluator can only re-derive identity by hashing `input`,
+    // which breaks whenever a dataset edits an input string (#288243).
+    expect(seen.map((entry) => entry.exampleId).sort()).toEqual(['ex-a', 'ex-b']);
+    expect(seen.every((entry) => typeof entry.exampleIndex === 'number')).toBe(true);
+    expect(seen.every((entry) => typeof entry.repetition === 'number')).toBe(true);
+  });
 });
