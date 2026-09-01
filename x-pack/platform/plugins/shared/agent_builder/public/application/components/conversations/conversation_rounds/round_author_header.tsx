@@ -11,10 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import moment from 'moment';
-import { useRoundAuthorProfile } from '../../../hooks/use_round_author_profile';
-import { getRoundAuthorHeaderName, type RoundAuthor } from './round_author_helpers';
 
 const labels = {
   agentBadge: i18n.translate('xpack.agentBuilder.roundAuthor.agentBadge', {
@@ -89,23 +86,20 @@ const RoundTime: React.FC<{ time: string }> = ({ time }) => {
 };
 
 interface RoundAuthorHeaderProps {
-  author?: RoundAuthor;
+  name?: string;
+  showAgentBadge?: boolean;
   origin?: ConversationRoundOrigin;
   startedAt: string;
-  agent?: AgentDefinition;
 }
 
 export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
-  author,
+  name,
+  showAgentBadge = false,
   origin,
   startedAt,
-  agent,
 }) => {
   const { euiTheme } = useEuiTheme();
   const time = moment(startedAt).format('LT');
-  const isAgent = Boolean(agent);
-  const authorProfile = useRoundAuthorProfile({ agent, author, origin });
-  const name = getRoundAuthorHeaderName({ agent, author, authorProfile });
 
   return (
     <EuiText
@@ -125,19 +119,12 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
           flex-wrap: wrap;
         `}
       >
-        {isAgent ? (
+        {name && (
           <>
-            {name && <RoundAuthorName name={name} />}
-            <RoundAgentBadge />
+            <RoundAuthorName name={name} />
+            {showAgentBadge && <RoundAgentBadge />}
             <RoundAuthorSeparator />
           </>
-        ) : (
-          name && (
-            <>
-              <RoundAuthorName name={name} />
-              <RoundAuthorSeparator />
-            </>
-          )
         )}
         {origin && (
           <>

@@ -21,14 +21,14 @@ import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
-import { RoundAuthorAvatar } from './round_author_avatar';
+import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
 import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
-import { isPendingCurrentRound } from './round_author_helpers';
+import { isPendingCurrentRound } from '../../../utils/new_conversation';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentId, useConversationReadOnly } from '../../../hooks/use_conversation';
 
@@ -351,14 +351,19 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
             {isLoadingCurrentRound ? (
               <EuiLoadingElastic size="l" aria-label={labels.streamingResponse} />
             ) : (
-              agent && <RoundAuthorAvatar agent={agent} />
+              agent && <AgentAvatar agent={agent} size="s" iconSize="l" iconPaddingSize="none" />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={true} data-test-subj="agentBuilderRoundAgentContent">
             <EuiFlexGroup direction="column" gutterSize="s">
               {agent && (
                 <EuiFlexItem grow={false}>
-                  <RoundAuthorHeader agent={agent} origin={origin} startedAt={startedAt} />
+                  <RoundAuthorHeader
+                    name={agent.name}
+                    showAgentBadge
+                    origin={origin}
+                    startedAt={startedAt}
+                  />
                 </EuiFlexItem>
               )}
               {agentOutputContent}

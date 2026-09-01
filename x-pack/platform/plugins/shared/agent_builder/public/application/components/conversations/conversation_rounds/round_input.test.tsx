@@ -53,7 +53,7 @@ describe('RoundInput', () => {
       error: null,
     } as ReturnType<typeof useCurrentUser>);
     mockUseUserProfiles.mockReturnValue({
-      data: [],
+      data: [currentUser],
     } as unknown as ReturnType<typeof useUserProfiles>);
   });
 
@@ -61,7 +61,7 @@ describe('RoundInput', () => {
     render(
       <RoundInput
         input="Show me the preview"
-        author={currentUser}
+        author={{ id: 'current-user', username: 'alice', full_name: 'Alice Maria' }}
         isPendingCurrentRound={false}
         startedAt="2026-01-01T00:00:00.000Z"
         attachmentRefs={[{ attachment_id: 'attachment-1', version: 1 }]}

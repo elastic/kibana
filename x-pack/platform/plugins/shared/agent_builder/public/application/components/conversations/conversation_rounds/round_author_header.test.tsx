@@ -8,55 +8,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
-import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { RoundAuthorHeader } from './round_author_header';
-
-jest.mock('../../../hooks/use_user_profiles', () => ({
-  useUserProfiles: jest.fn(),
-}));
-
-const mockUseUserProfiles = jest.mocked(useUserProfiles);
 
 describe('RoundAuthorHeader', () => {
   const startedAt = '2026-01-01T13:00:00.000Z';
-  const authorProfile: UserProfileWithAvatar = {
-    uid: 'user-1',
-    enabled: true,
-    user: {
-      username: 'alice',
-      full_name: 'Alice Example',
-    },
-    data: {
-      avatar: {
-        initials: 'AE',
-        color: '#f4d9ff',
-      },
-    },
-  };
-  const agent: AgentDefinition = {
-    id: 'agent-1',
-    type: 'chat',
-    name: 'Custom Agent',
-    description: '',
-    readonly: false,
-    configuration: {
-      tools: [],
-    },
-  };
 
-  beforeEach(() => {
-    mockUseUserProfiles.mockReturnValue({ data: [] } as unknown as ReturnType<
-      typeof useUserProfiles
-    >);
-  });
-
-  it('renders the user author and Slack origin', () => {
+  it('renders the author name and Slack origin', () => {
     const { container } = render(
       <RoundAuthorHeader
         startedAt={startedAt}
-        author={{ id: 'user-1', full_name: 'Jane Doe', username: 'jdoe' }}
+        name="Jane Doe"
         origin={{ type: ConversationOriginType.Slack }}
       />
     );
@@ -66,34 +27,9 @@ describe('RoundAuthorHeader', () => {
     expect(container).toHaveTextContent('·');
   });
 
-  it('uses the user profile display name without rendering the avatar', () => {
-    render(<RoundAuthorHeader startedAt={startedAt} author={authorProfile} />);
-
-    expect(screen.getByText('Alice Example')).toBeInTheDocument();
-    expect(screen.queryByText('AE')).not.toBeInTheDocument();
-  });
-
-  it('resolves a Kibana author profile when only the round author is available', () => {
-    mockUseUserProfiles.mockReturnValue({
-      data: [authorProfile],
-    } as unknown as ReturnType<typeof useUserProfiles>);
-
-    render(
-      <RoundAuthorHeader startedAt={startedAt} author={{ id: 'user-1', username: 'alice' }} />
-    );
-
-    expect(mockUseUserProfiles).toHaveBeenCalledWith({
-      uids: ['user-1'],
-      enabled: true,
-    });
-    expect(screen.getByText('Alice Example')).toBeInTheDocument();
-    expect(screen.queryByText('AE')).not.toBeInTheDocument();
-  });
-
-  it('does not render user attribution when no user name is available', () => {
+  it('does not render author attribution when no name is available', () => {
     const { container } = render(<RoundAuthorHeader startedAt={startedAt} />);
 
-    expect(screen.queryByText('Me')).not.toBeInTheDocument();
     expect(container.querySelector('strong')).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent('·');
   });
@@ -108,11 +44,10 @@ describe('RoundAuthorHeader', () => {
     expect(container).toHaveTextContent('·');
   });
 
-  it('renders the agent name', () => {
-    render(<RoundAuthorHeader startedAt={startedAt} agent={agent} />);
+  it('renders the agent badge alongside the agent name', () => {
+    render(<RoundAuthorHeader startedAt={startedAt} name="Custom Agent" showAgentBadge />);
 
     expect(screen.getByText('Custom Agent')).toBeInTheDocument();
-    expect(screen.queryByText('Elastic AI Agent')).not.toBeInTheDocument();
     expect(screen.getByText('Agent')).toBeInTheDocument();
   });
 
@@ -120,7 +55,8 @@ describe('RoundAuthorHeader', () => {
     render(
       <RoundAuthorHeader
         startedAt={startedAt}
-        agent={agent}
+        name="Custom Agent"
+        showAgentBadge
         origin={{ type: ConversationOriginType.Slack }}
       />
     );
@@ -128,5 +64,11 @@ describe('RoundAuthorHeader', () => {
     expect(screen.getByText('Custom Agent')).toBeInTheDocument();
     expect(screen.getByText('Agent')).toBeInTheDocument();
     expect(screen.getByText('via Slack')).toBeInTheDocument();
+  });
+
+  it('does not render the agent badge for user authors', () => {
+    render(<RoundAuthorHeader startedAt={startedAt} name="Jane Doe" />);
+
+    expect(screen.queryByText('Agent')).not.toBeInTheDocument();
   });
 });

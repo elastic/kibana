@@ -16,20 +16,19 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { ConversationRoundOrigin } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor, ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useRoundInputAuthor } from '../../../hooks/use_round_input_author';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
-import { RoundAuthorAvatar } from './round_author_avatar';
+import { RoundInputAvatar } from './round_input_avatar';
 import { RoundAuthorHeader } from './round_author_header';
-import { getInputAuthor, isCurrentUserAuthor, type RoundAuthor } from './round_author_helpers';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -39,7 +38,7 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
-  author?: RoundAuthor;
+  author?: ConversationRoundAuthor;
   isPendingCurrentRound: boolean;
   origin?: ConversationRoundOrigin;
   startedAt: string;
@@ -59,10 +58,12 @@ export const RoundInput = ({
   fallbackAttachments,
 }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
-  const { currentUser } = useCurrentUser();
   const [isHovering, setIsHovering] = useState(false);
-  const inputAuthor = getInputAuthor({ author, currentUser, isPendingCurrentRound });
-  const isCurrentUser = isCurrentUserAuthor({ author: inputAuthor, currentUser });
+  const {
+    profile: authorProfile,
+    name: authorName,
+    isCurrentUser,
+  } = useRoundInputAuthor({ author, origin, isPendingCurrentRound });
   const hasAttachmentReferences = Boolean(attachmentRefs?.length || fallbackAttachments?.length);
 
   const inputContainerStyles = css`
@@ -91,7 +92,7 @@ export const RoundInput = ({
       data-test-subj="agentBuilderRoundInputLayout"
     >
       <EuiFlexItem grow={false} data-test-subj="agentBuilderRoundInputAvatar">
-        <RoundAuthorAvatar author={inputAuthor} origin={origin} />
+        <RoundInputAvatar profile={authorProfile} name={authorName} />
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
@@ -100,7 +101,7 @@ export const RoundInput = ({
       >
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <RoundAuthorHeader author={inputAuthor} origin={origin} startedAt={startedAt} />
+            <RoundAuthorHeader name={authorName} origin={origin} startedAt={startedAt} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPanel

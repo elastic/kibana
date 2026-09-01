@@ -18,7 +18,7 @@ import { RoundLayout } from './round_layout';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
-import { RoundAuthorAvatar } from './round_author_avatar';
+import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentId, useConversationReadOnly } from '../../../hooks/use_conversation';
@@ -40,15 +40,15 @@ jest.mock('./round_events/round_events', () => ({
   RoundEvents: jest.fn(() => <div data-test-subj="agentBuilderThinkingPanel">Reasoning</div>),
 }));
 
-jest.mock('./round_author_avatar', () => ({
-  RoundAuthorAvatar: jest.fn(({ agent }) => (
+jest.mock('../../common/agent_avatar', () => ({
+  AgentAvatar: jest.fn(({ agent }) => (
     <div data-test-subj="agentBuilderAssistantAvatar">{agent.name} avatar</div>
   )),
 }));
 
 jest.mock('./round_author_header', () => ({
-  RoundAuthorHeader: jest.fn(({ agent }) => (
-    <div data-test-subj="agentBuilderAssistantAttribution">{agent.name}</div>
+  RoundAuthorHeader: jest.fn(({ name }) => (
+    <div data-test-subj="agentBuilderAssistantAttribution">{name}</div>
   )),
 }));
 
@@ -88,7 +88,7 @@ const useAgentBuilderAgentByIdMock = jest.mocked(useAgentBuilderAgentById);
 const roundInputMock = RoundInput as jest.MockedFunction<typeof RoundInput>;
 const roundEventsMock = RoundEvents as jest.MockedFunction<typeof RoundEvents>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
-const roundAuthorAvatarMock = jest.mocked(RoundAuthorAvatar);
+const agentAvatarMock = jest.mocked(AgentAvatar);
 const roundAuthorHeaderMock = jest.mocked(RoundAuthorHeader);
 const confirmationPromptMock = jest.mocked(ConfirmationPrompt);
 const agent: AgentDefinition = {
@@ -255,7 +255,8 @@ describe('RoundLayout', () => {
     expect(roundInputProps).not.toHaveProperty('isCurrentUser');
     expect(roundAuthorHeaderMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        agent,
+        name: agent.name,
+        showAgentBadge: true,
         origin: round.origin,
         startedAt: round.started_at,
       })
@@ -286,7 +287,8 @@ describe('RoundLayout', () => {
 
     expect(roundAuthorHeaderMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        agent,
+        name: agent.name,
+        showAgentBadge: true,
         startedAt: round.started_at,
       }),
       expect.anything()
@@ -319,7 +321,7 @@ describe('RoundLayout', () => {
     const avatar = screen.getByTestId('agentBuilderRoundAgentAvatar');
     const content = screen.getByTestId('agentBuilderRoundAgentContent');
 
-    expect(roundAuthorAvatarMock).toHaveBeenCalledWith(
+    expect(agentAvatarMock).toHaveBeenCalledWith(
       expect.objectContaining({
         agent,
       }),
@@ -359,7 +361,7 @@ describe('RoundLayout', () => {
     const avatar = screen.getByTestId('agentBuilderRoundAgentAvatar');
     const content = screen.getByTestId('agentBuilderRoundAgentContent');
 
-    expect(roundAuthorAvatarMock).not.toHaveBeenCalled();
+    expect(agentAvatarMock).not.toHaveBeenCalled();
     expect(avatar).toBeEmptyDOMElement();
     expect(content).toContainElement(screen.getByTestId('agentBuilderThinkingPanel'));
     expect(content).toContainElement(screen.getByTestId('agentBuilderRoundResponse'));
@@ -402,7 +404,7 @@ describe('RoundLayout', () => {
     const loader = screen.getByLabelText('Streaming response');
 
     expect(avatar).toContainElement(loader);
-    expect(roundAuthorAvatarMock).not.toHaveBeenCalled();
+    expect(agentAvatarMock).not.toHaveBeenCalled();
   });
 
   it('passes pending round context to the input renderer', () => {
