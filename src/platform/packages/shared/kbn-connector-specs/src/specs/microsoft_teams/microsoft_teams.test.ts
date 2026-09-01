@@ -1025,14 +1025,15 @@ describe('MicrosoftTeams', () => {
       );
     });
 
-    it('should default to text contentType when not provided', async () => {
+    it('should include contentType in body (schema default: text)', async () => {
       mockClient.post.mockResolvedValue({ data: { id: 'msg-4' } });
 
       await MicrosoftTeams.actions.sendChannelMessage.handler(mockContext, {
         teamId: 'team-123',
         channelId: 'channel-456',
         content: 'No contentType field',
-      } as Parameters<typeof MicrosoftTeams.actions.sendChannelMessage.handler>[1]);
+        contentType: 'text',
+      });
 
       const callArgs = mockClient.post.mock.calls[0];
       expect(callArgs[1].body.contentType).toBe('text');
@@ -1112,13 +1113,14 @@ describe('MicrosoftTeams', () => {
       );
     });
 
-    it('should default to text contentType when not provided', async () => {
+    it('should include contentType in body (schema default: text)', async () => {
       mockClient.post.mockResolvedValue({ data: { id: 'chat-msg-3' } });
 
       await MicrosoftTeams.actions.sendChatMessage.handler(mockContext, {
         chatId: 'chat-789',
         content: 'Hello',
-      } as Parameters<typeof MicrosoftTeams.actions.sendChatMessage.handler>[1]);
+        contentType: 'text',
+      });
 
       const callArgs = mockClient.post.mock.calls[0];
       expect(callArgs[1].body.contentType).toBe('text');

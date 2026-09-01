@@ -39,7 +39,8 @@ import type {
 const userPath = (userId?: string): string =>
   userId ? `/users/${encodeURIComponent(userId)}` : '/me';
 
-const isAppOnlyAuth = (authType?: string): boolean =>
+type AppOnlyAuthType = 'oauth_client_credentials' | 'oauth_client_credentials_private_key_jwt';
+const isAppOnlyAuth = (authType?: unknown): authType is AppOnlyAuthType =>
   authType === 'oauth_client_credentials' ||
   authType === 'oauth_client_credentials_private_key_jwt';
 
@@ -384,7 +385,7 @@ export const MicrosoftTeams: ConnectorSpec = {
         );
         const requestBody: Record<string, unknown> = {
           body: {
-            contentType: input.contentType ?? 'text',
+            contentType: input.contentType,
             content: input.content,
           },
         };
@@ -426,7 +427,7 @@ export const MicrosoftTeams: ConnectorSpec = {
         ctx.log.debug(`Microsoft Teams sending message to chat ${input.chatId}`);
         const requestBody = {
           body: {
-            contentType: input.contentType ?? 'text',
+            contentType: input.contentType,
             content: input.content,
           },
         };
@@ -455,7 +456,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       handler: async (ctx, input: UpdateMessageInput) => {
         const requestBody = {
           body: {
-            contentType: input.contentType ?? 'text',
+            contentType: input.contentType,
             content: input.content,
           },
         };
@@ -518,7 +519,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        "Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide both your own user ID and the other person's user ID in memberIds (two total). For a group chat, include your own ID plus two or more other user IDs. Use getUser to resolve an email or UPN to a user ID before calling this action.",
+        "Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide both your own user ID and the other person's user ID in memberIds (two total). For a group chat, include your own ID plus two or more other user IDs. Use getUser to resolve an email or UPN to a user ID before calling this action. Note: guest accounts cannot create chats; all members must belong to the tenant.",
       input: CreateChatInputSchema,
       output: lazySchema(() =>
         z
