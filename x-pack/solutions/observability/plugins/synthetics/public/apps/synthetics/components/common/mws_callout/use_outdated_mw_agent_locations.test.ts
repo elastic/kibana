@@ -29,6 +29,7 @@ const mockAgent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   lastCheckinMessage: null,
   platform: null,
   tags: [],
+  monitorsAssigned: null,
   ...overrides,
 });
 
@@ -42,12 +43,17 @@ const mockLocationStats = (
     locationLabel: locationId,
     agentPolicyId: `policy-${locationId}`,
     agentPolicyName: `Policy ${locationId}`,
+    isAgentSharding: false,
     agents,
   },
 ];
 
 const setByLocation = (entries: Array<[string, LocationAgentStats]>) => {
-  mockUseAgentStats.mockReturnValue({ byLocation: new Map(entries), loading: false });
+  mockUseAgentStats.mockReturnValue({
+    byLocation: new Map(entries),
+    loading: false,
+    error: null,
+  });
 };
 
 describe('useOutdatedMwAgentLocationIds', () => {

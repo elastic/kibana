@@ -16,13 +16,13 @@ import { ComposeDiscoverFooter, type ComposeDiscoverFooterProps } from './compos
 
 const ALERT_CONDITION_STEP: StepDefinition = {
   id: 'alertCondition',
-  title: 'Alert Condition',
+  title: 'Condition',
   render: () => null,
 };
 
 const BUILDER_CONDITION_STEP: StepDefinition = {
   id: 'builderCondition',
-  title: 'Alert Condition',
+  title: 'Condition',
   render: () => null,
 };
 
@@ -196,7 +196,7 @@ describe('ComposeDiscoverFooter', () => {
 
     it('enables YAML save for a non-representable alert + standalone rule', () => {
       const { onYamlSave } = renderFooter({
-        stateOverrides: { yamlMode: true, queryCommitted: true, mode: 'edit' },
+        stateOverrides: { yamlMode: true, queryCommitted: true },
         propsOverrides: { isCreate: false },
         formValues: {
           kind: 'alert',
@@ -268,7 +268,7 @@ describe('ComposeDiscoverFooter', () => {
 
     it('disables Next for an empty standalone alert in edit mode', () => {
       renderFooter({
-        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
           query: { format: 'standalone', breach: { query: '' } },
@@ -279,7 +279,7 @@ describe('ComposeDiscoverFooter', () => {
 
     it('enables Next for a composed alert with base but no breach segment (conditionless rule)', () => {
       renderFooter({
-        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
           query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
@@ -444,7 +444,7 @@ describe('ComposeDiscoverFooter', () => {
     it('enables Submit for a composed alert with base but no breach segment (conditionless rule)', () => {
       renderFooter({
         propsOverrides: { isLastStep: true, isCreate: false },
-        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
           query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },

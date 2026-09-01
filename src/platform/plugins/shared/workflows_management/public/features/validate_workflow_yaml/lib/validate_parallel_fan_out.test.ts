@@ -75,6 +75,7 @@ describe('validateParallelFanOut', () => {
     expect(results).toEqual([
       expect.objectContaining({
         owner: 'parallel-fan-out-validation',
+        ruleId: 'unboundedParallelFanOut',
         severity: 'warning',
         hoverMessage: null,
         startLineNumber: 11,
@@ -138,6 +139,7 @@ describe('validateParallelFanOut', () => {
     expect(results[0]).toEqual(
       expect.objectContaining({
         owner: 'parallel-fan-out-validation',
+        ruleId: 'parallelFanOutExceedsLimit',
         severity: 'warning',
       })
     );

@@ -8,7 +8,9 @@
  */
 
 import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
+import { hasTextBasedLayers } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
   buildGauge,
@@ -55,7 +57,7 @@ import {
 } from './transforms/charts/datatable';
 import type { LensApiConfig, LensApiConfigChartType } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
-import { isLensLegacyFormat, isEsqlTableTypeDataSource } from './utils';
+import { isLensLegacyFormat } from './utils';
 
 const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsMetric: 'metric',
@@ -261,7 +263,12 @@ export class LensConfigBuilder {
       state: {
         ...chartConfig.state,
         filters: options.filters || [],
-        query: options.query || { language: 'kuery', query: '' },
+        // ES|QL lives exclusively on the text-based datasource layers; the
+        // top-level slot only carries a chart-scoped KQL/Lucene filter.
+        query:
+          options.query && !isOfAggregateQueryType(options.query)
+            ? options.query
+            : { language: 'kuery', query: '' },
       },
     };
 
@@ -291,6 +298,15 @@ export class LensConfigBuilder {
       attributes.references ?? []
     );
 
+    // ES|QL documents carry their queries on the text-based layers and
+    // get no top-level slot unless the API provides a KQL/Lucene filter.
+    let querySlot: { query?: LensAttributes['state']['query'] } = {};
+    if (query) {
+      querySlot = { query };
+    } else if (!hasTextBasedLayers(attributes)) {
+      querySlot = { query: { language: 'kuery', query: '' } };
+    }
+
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
@@ -298,8 +314,7 @@ export class LensConfigBuilder {
       references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
-        query: { language: 'kuery', query: '' },
-        ...(query ? { query } : {}),
+        ...querySlot,
         filters,
       },
     };
@@ -314,16 +329,10 @@ export class LensConfigBuilder {
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
     const chartConfig = converter.fromLensStateToAPI(config);
+    // Panel-level `query` is the chart-scoped KQL/Lucene filter; ES|QL
+    // queries live on `data_source` and are never emitted here (aggregate
+    // slot values are filtered out by `filtersAndQueryToApiFormat`).
     const panelFiltersAndQuery = filtersAndQueryToApiFormat(config);
-
-    // Omit panel-level query on ES|QL charts, query is on data_source
-    if ('data_source' in chartConfig && isEsqlTableTypeDataSource(chartConfig.data_source)) {
-      const { query: _, ...panelFiltersWithoutQuery } = panelFiltersAndQuery;
-      return {
-        ...chartConfig,
-        ...panelFiltersWithoutQuery,
-      };
-    }
 
     return {
       ...chartConfig,

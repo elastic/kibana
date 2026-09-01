@@ -429,6 +429,13 @@ export const CaseTitle = lazySchema(() => z.string().max(160));
 export type CaseTitle = z.infer<typeof CaseTitle>;
 
 /**
+  * Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+
+  */
+export const CaseExtendedFields = lazySchema(() => z.object({}).catchall(z.string().max(30000)));
+export type CaseExtendedFields = z.infer<typeof CaseExtendedFields>;
+
+/**
  * The create case API request body varies depending on the type of connector.
  */
 export const CreateCaseRequest = lazySchema(() =>
@@ -487,10 +494,8 @@ export const CreateCaseRequest = lazySchema(() =>
         })
       )
       .max(10)
-      .optional()
-      .describe(
-        'Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n'
-      ),
+      .optional(),
+    extended_fields: CaseExtendedFields.optional(),
     /**
       * A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
 
@@ -801,13 +806,12 @@ export const CaseResponseProperties = lazySchema(() =>
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
 
       */
-    duration: z
-      .number()
-      .int()
-      .nullable()
-      .describe(
-        'The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n'
-      ),
+    duration: z.number().int().nullable(),
+    /**
+      * The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+
+      */
+    extended_fields: z.object({}).catchall(z.string()).optional(),
     external_service: ExternalService,
     id: z.string(),
     /**
@@ -947,6 +951,7 @@ export const UpdateCaseRequest = lazySchema(() =>
               'Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n'
             ),
           description: CaseDescription.optional(),
+          extended_fields: CaseExtendedFields.optional(),
           /**
            * The identifier for the case.
            */

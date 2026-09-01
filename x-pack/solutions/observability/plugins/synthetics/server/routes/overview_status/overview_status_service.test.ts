@@ -1463,6 +1463,117 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
+    it('discovers CPS linked-project monitors that have no local saved object', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'linked-monitor-1',
+                locationId: 'us-west-1',
+              },
+              status: {
+                key: 'us-west-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'Linked HTTP check',
+                      'monitor.type': 'http',
+                      config_id: 'linked-config-1',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [
+                  { key: 'obs-prod:.ds-synthetics-http-default-2026.01.01-000001', doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const linked = result.upConfigs['obs-prod-linked-config-1-us-west-1'];
+      expect(linked).toBeDefined();
+      expect(linked.name).toBe('Linked HTTP check');
+      expect(linked.remote).toEqual({ remoteName: 'obs-prod' });
+      expect(result.up).toBe(1);
+    });
+
+    it('collects _index and applies remoteNames on serverless when CPS is on', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeDefined();
+      const filters = searchCall.query.bool.filter;
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeDefined();
+    });
+
+    it('does not collect _index or apply remoteNames on serverless when CPS is off', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
+      const filters = searchCall.query.bool.filter ?? [];
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeUndefined();
+    });
+
     it('keeps two remote monitors with the same configId+locationId from different clusters', async () => {
       // Regression: two remote clusters can host the same imported monitor in
       // the same locationId. Before keying the bucket by remoteName the second
@@ -2024,8 +2135,8 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Active-space filter is still applied (single-space view) and the request
-      // omits the CCS-only `index_name` sub-agg.
+      // Active-space filter is still applied (single-space view). `_index`
+      // collection is CPS-gated, so it stays off when `isCpsEnabled` is unset.
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
       const spaceFilter = filters.find((f: any) =>
