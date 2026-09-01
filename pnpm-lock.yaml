@@ -50,7 +50,7 @@ overrides:
   isomorphic-fetch>node-fetch: 2.7.0
   lodash: 4.18.1
   pixelmatch: 5.3.0
-  qs: 6.15.3
+  qs: 6.16.0
   remark-parse>trim: 1.0.1
   serialize-javascript: 7.0.5
   sharp: 0.35.2
@@ -169,8 +169,8 @@ importers:
         specifier: 8.7.0
         version: 8.7.0
       '@elastic/esql':
-        specifier: 4.21.1
-        version: 4.21.1
+        specifier: 4.22.0
+        version: 4.22.0
       '@elastic/eui':
         specifier: 119.1.0
         version: 119.1.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@8.1.1))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -190,8 +190,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.21.1
-        version: 4.21.1(monaco-editor@0.44.0)
+        specifier: 4.22.0
+        version: 4.22.0(monaco-editor@0.44.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -342,6 +342,9 @@ importers:
       '@kbn/agent-builder-sml-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agent_builder_sml
+      '@kbn/agent-builder-sml-test-types-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
@@ -4426,8 +4429,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0
       react-day-picker:
-        specifier: 9.14.0
-        version: 9.14.0(react@18.2.0)
+        specifier: 10.0.1
+        version: 10.0.1(@types/react@18.2.79)(react@18.2.0)
       react-diff-view:
         specifier: 3.3.1
         version: 3.3.1(react@18.2.0)
@@ -6392,8 +6395,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1(supports-color@8.1.1)
       qs:
-        specifier: 6.15.3
-        version: 6.15.3
+        specifier: 6.16.0
+        version: 6.16.0
       react-element-to-jsx-string:
         specifier: 15.0.0
         version: 15.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -9110,6 +9113,8 @@ importers:
 
   x-pack/platform/test: {}
 
+  x-pack/platform/test/agent_builder_sml/plugins/sml_test_types: {}
+
   x-pack/platform/test/alerting_api_integration/common/plugins/aad: {}
 
   x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators: {}
@@ -10607,26 +10612,32 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.21.1':
-    resolution: {integrity: sha512-nUQIesLLeM7t1iLl8W039YLbU7oDHW2soJ3fTI6QNZ5GRJzYb0z4MMepX4jQsrNRtlkhDVTsQsAQuIF6TfgrHw==}
+  '@elastic/esql-ast@4.22.0':
+    resolution: {integrity: sha512-lOORm+GHyR/kEhhYmzggtQi9f47y/ADPGok8TnithNawjPJ+rTyrU29xQN1BO3FOWQDQSwu3l0Zo4q4/eOQXag==}
 
   '@elastic/esql-definitions@4.21.1':
     resolution: {integrity: sha512-jlrR1mLO5NfJlNxeuf7/H1ragNC7yZhTBUcWPp+sjf3UgD6rvVn6AD8N4lnrLnor6RJp4v7XZB2t8XtImE1bcQ==}
 
+  '@elastic/esql-definitions@4.22.0':
+    resolution: {integrity: sha512-RwXgNKDH8T+2is5fR5KAKHbcyHIg6J1VFV4LNaYzS1IjgwsOTdo9H02JxQgpupxrd0wRwuuqDTq11u6ixzvwcQ==}
+
   '@elastic/esql-grammar@4.21.1':
     resolution: {integrity: sha512-MqbeD2G8DVxgsj2+8nWwcOSwqrWcqu7hywJ6KSsVI5LrIdC/uQG99x+RoxMTnIBwKrZDbeMlS1OhnDxdcp4j6w==}
+
+  '@elastic/esql-parser@4.22.0':
+    resolution: {integrity: sha512-UY29BFFzwOp5z6VDmlkkeOatPG4d4OMNrvsLiM06TskHpCVWL0vyjLNYUcPBHwvDPT67m3FSv+i6r3IA9fugRA==}
 
   '@elastic/esql-promql-grammar@4.21.1':
     resolution: {integrity: sha512-3ZXOh+FclCzSU13oo4w/L5VXLuji2HGzJtPu+MpY9NBaf/py5eXiy8d44vb9uwVZbJP+yXMVTP8Sv0Jz2Y76PQ==}
 
-  '@elastic/esql-traversal@4.21.1':
-    resolution: {integrity: sha512-glwLR+54Rg/Xi5z8Y/ipBqF3vB48JWNQAqmVnqeAOQsgmspNFc/FpRocEMdH7Pad/CNUR81TVTmKCOt20mHuSQ==}
+  '@elastic/esql-traversal@4.22.0':
+    resolution: {integrity: sha512-9ExuTakFcvZiJI1jz1nVaVFfwxWpXhYfdCRB6gsJeUOqke0JgV1Wt5Os4kVdMdrEJWUkNPtxW+6O78XRO6GObA==}
 
   '@elastic/esql-types@4.21.1':
     resolution: {integrity: sha512-eahE+yNMK/mDBIKP4Akt2ywQF+gbniAquFdAO2tDefk/psXaWadUnKy7MtmALA4kUYPJaCYk74xFdcgIbQ/mGQ==}
 
-  '@elastic/esql@4.21.1':
-    resolution: {integrity: sha512-lJj+l0y9cJcFbexqXELf9AkXVHoB+1iukW41TyHMeIJ829y1ojyKCkB7wtITsnQOrMjv8R2xEAQwPDT/OFDaoA==}
+  '@elastic/esql@4.22.0':
+    resolution: {integrity: sha512-zYMAvSB1zHjgm4BxUhHoaO5cEo4x08IT4KTCZN2Lf4iYUTWjvUZEm6G31tOnNb9qJuL3EK2uW//gCBzQQinStw==}
 
   '@elastic/eui-illustrations@1.0.1':
     resolution: {integrity: sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==}
@@ -10679,8 +10690,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.21.1':
-    resolution: {integrity: sha512-FiaSXuE1YcE9Hr331aCOsAWLpgOTBDPCnfefofz+fJEWbz99y+qCD8LabY4cL08TawQxUeINBY3sayx5iJcA+w==}
+  '@elastic/monaco-esql@4.22.0':
+    resolution: {integrity: sha512-OXdHhwD/BEeW4OzgbpVa0lrrC3K6XJJKuFQj3h36L5Pda3usvweqeWmTBl4QXCr490qkaVVecv6RYG7wQNFiTw==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -14402,10 +14413,6 @@ packages:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
 
-  '@tabby_ai/hijri-converter@1.0.5':
-    resolution: {integrity: sha512-r5bClKrcIusDoo049dSL8CawnHR6mRdDwhlQuIgZRNty68q0x8k3Lf1BtPAMxRf/GgnHBnIO4ujd3+GQdLWzxQ==}
-    engines: {node: '>=16.0.0'}
-
   '@tanstack/match-sorter-utils@8.19.4':
     resolution: {integrity: sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg==}
     engines: {node: '>=12'}
@@ -17565,9 +17572,6 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
-
-  date-fns-jalali@4.1.0-0:
-    resolution: {integrity: sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==}
 
   date-fns@1.30.1:
     resolution: {integrity: sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==}
@@ -22877,8 +22881,8 @@ packages:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
 
-  qs@6.15.3:
-    resolution: {integrity: sha512-O9gl3zCl5h5blw1KGUzQKhA5oUXSl8rwUIM5o0S3nCXMliSvy5Dzx7/DJcI+SwgICv+IneSZwhBh1oSyEHA71A==}
+  qs@6.16.0:
+    resolution: {integrity: sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==}
     engines: {node: '>=0.6'}
 
   query-string@6.13.2:
@@ -23008,11 +23012,15 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
-  react-day-picker@9.14.0:
-    resolution: {integrity: sha512-tBaoDWjPwe0M5pGrum4H0SR6Lyk+BO9oHnp9JbKpGKW2mlraNPgP9BMfsg5pWpwrssARmeqk7YBl2oXutZTaHA==}
+  react-day-picker@10.0.1:
+    resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
     engines: {node: '>=18'}
     peerDependencies:
+      '@types/react': 18.2.79
       react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   react-devtools-core@6.1.5:
     resolution: {integrity: sha512-ePrwPfxAnB+7hgnEr8vpKxL9cmnp7F322t8oqcPshbIQQhDKgFDW4tjhF2wjVbdXF9O/nyuy3sQWd9JGpiLPvA==}
@@ -27536,7 +27544,7 @@ snapshots:
       json-stringify-safe: 5.0.1
       mime-types: 2.1.35
       performance-now: 2.1.0
-      qs: 6.15.3
+      qs: 6.16.0
       safe-buffer: 5.2.1
       tough-cookie: 5.1.2
       tunnel-agent: 0.6.0
@@ -27731,9 +27739,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.21.1':
+  '@elastic/esql-ast@4.22.0':
     dependencies:
-      '@elastic/esql-definitions': 4.21.1
+      '@elastic/esql-definitions': 4.22.0
       '@elastic/esql-grammar': 4.21.1
       '@elastic/esql-promql-grammar': 4.21.1
       '@elastic/esql-types': 4.21.1
@@ -27741,8 +27749,20 @@ snapshots:
 
   '@elastic/esql-definitions@4.21.1': {}
 
+  '@elastic/esql-definitions@4.22.0': {}
+
   '@elastic/esql-grammar@4.21.1':
     dependencies:
+      antlr4: 4.13.2
+      tslib: 2.8.1
+
+  '@elastic/esql-parser@4.22.0':
+    dependencies:
+      '@elastic/esql-ast': 4.22.0
+      '@elastic/esql-definitions': 4.22.0
+      '@elastic/esql-promql-grammar': 4.21.1
+      '@elastic/esql-traversal': 4.22.0
+      '@elastic/esql-types': 4.21.1
       antlr4: 4.13.2
       tslib: 2.8.1
 
@@ -27751,21 +27771,23 @@ snapshots:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.21.1':
+  '@elastic/esql-traversal@4.22.0':
     dependencies:
-      '@elastic/esql-ast': 4.21.1
+      '@elastic/esql-ast': 4.22.0
       '@elastic/esql-types': 4.21.1
+      tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/esql-types@4.21.1': {}
 
-  '@elastic/esql@4.21.1':
+  '@elastic/esql@4.22.0':
     dependencies:
-      '@elastic/esql-ast': 4.21.1
-      '@elastic/esql-definitions': 4.21.1
+      '@elastic/esql-ast': 4.22.0
+      '@elastic/esql-definitions': 4.22.0
       '@elastic/esql-grammar': 4.21.1
+      '@elastic/esql-parser': 4.22.0
       '@elastic/esql-promql-grammar': 4.21.1
-      '@elastic/esql-traversal': 4.21.1
+      '@elastic/esql-traversal': 4.22.0
       '@elastic/esql-types': 4.21.1
       '@elastic/pretty-printer': 4.21.1
       antlr4: 4.13.2
@@ -27861,9 +27883,9 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.21.1(monaco-editor@0.44.0)':
+  '@elastic/monaco-esql@4.22.0(monaco-editor@0.44.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.21.1
+      '@elastic/esql-definitions': 4.22.0
       monaco-editor: 0.44.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -28012,14 +28034,14 @@ snapshots:
       date-fns: 1.30.1
       deep-equal: 1.1.2
       history: 4.9.0
-      qs: 6.15.3
+      qs: 6.16.0
 
   '@elastic/search-ui@1.24.2':
     dependencies:
       date-fns: 1.30.1
       deep-equal: 1.1.2
       history: 4.9.0
-      qs: 6.15.3
+      qs: 6.16.0
 
   '@elastic/transport@8.10.2(supports-color@8.1.1)':
     dependencies:
@@ -32128,8 +32150,6 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tabby_ai/hijri-converter@1.0.5': {}
-
   '@tanstack/match-sorter-utils@8.19.4':
     dependencies:
       remove-accents: 0.5.0
@@ -34336,7 +34356,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.15.3
+      qs: 6.16.0
       raw-body: 2.5.3
       type-is: 1.6.18
       unpipe: 1.0.0
@@ -34351,7 +34371,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.2
       on-finished: 2.4.1
-      qs: 6.15.3
+      qs: 6.16.0
       raw-body: 3.0.2
       type-is: 2.1.0
     transitivePeerDependencies:
@@ -35698,8 +35718,6 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
-  date-fns-jalali@4.1.0-0: {}
-
   date-fns@1.30.1: {}
 
   date-fns@4.4.0: {}
@@ -36951,7 +36969,7 @@ snapshots:
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
       proxy-addr: 2.0.7
-      qs: 6.15.3
+      qs: 6.16.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
       send: 0.19.2(supports-color@8.1.1)
@@ -36986,7 +37004,7 @@ snapshots:
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.7
-      qs: 6.15.3
+      qs: 6.16.0
       range-parser: 1.3.0
       router: 2.2.0(supports-color@8.1.1)
       send: 1.2.1(supports-color@8.1.1)
@@ -42345,7 +42363,7 @@ snapshots:
     dependencies:
       hookified: 2.2.0
 
-  qs@6.15.3:
+  qs@6.16.0:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
@@ -42483,13 +42501,13 @@ snapshots:
       '@babel/runtime': 7.29.7
       react: 18.2.0
 
-  react-day-picker@9.14.0(react@18.2.0):
+  react-day-picker@10.0.1(@types/react@18.2.79)(react@18.2.0):
     dependencies:
       '@date-fns/tz': 1.5.0
-      '@tabby_ai/hijri-converter': 1.0.5
       date-fns: 4.4.0
-      date-fns-jalali: 4.1.0-0
       react: 18.2.0
+    optionalDependencies:
+      '@types/react': 18.2.79
 
   react-devtools-core@6.1.5:
     dependencies:
@@ -44514,7 +44532,7 @@ snapshots:
       formidable: 3.5.4
       methods: 1.1.2
       mime: 2.6.0
-      qs: 6.15.3
+      qs: 6.16.0
     transitivePeerDependencies:
       - supports-color
 
@@ -45324,7 +45342,7 @@ snapshots:
   url@0.11.4:
     dependencies:
       punycode: 1.4.1
-      qs: 6.15.3
+      qs: 6.16.0
 
   use-callback-ref@1.3.3(@types/react@18.2.79)(react@18.2.0):
     dependencies:

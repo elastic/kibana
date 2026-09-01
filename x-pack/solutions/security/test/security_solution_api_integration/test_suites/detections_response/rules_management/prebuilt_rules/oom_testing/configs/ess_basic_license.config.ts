@@ -18,6 +18,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Rules Management - Prebuilt Rules OOM Testing - ESS Basic License',
     },
+    mochaOpts: {
+      ...functionalConfig.getAll().mochaOpts,
+      // These tests install the real prebuilt rules package from a testing EPR
+      // to reproduce OOM conditions, so the default mock package install must be skipped.
+      rootHooks: {},
+    },
   };
 
   return testConfig;
