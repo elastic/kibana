@@ -851,13 +851,18 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Drops every `${agent.id}` pin on private-location package policies so
-   * monitors run unfiltered (classic). Used when shard rebalancing is turned
-   * off. Dedupes by agent policy so a shared policy is listed once.
+   * Drops every `${agent.id}` pin on *scalable* private-location package
+   * policies so monitors run unfiltered (classic). Used when shard
+   * rebalancing is turned off. Classic locations never stamp pins, and
+   * disable-sharding already rewrites them before the SO flips, so listing
+   * those agent policies would only add Fleet load. Dedupes by agent policy
+   * so a shared policy is listed once.
    */
   async clearShardConditions(): Promise<{ cleared: number; failed: number }> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+    const locations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
+      isConditionShardedLocation
+    );
     const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
 
     let cleared = 0;

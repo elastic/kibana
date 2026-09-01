@@ -1105,11 +1105,11 @@ describe('SyntheticsPrivateLocation', () => {
       expect(listAgents).not.toHaveBeenCalled();
     });
 
-    it('clears agent pins on every private-location package policy that has a condition', async () => {
+    it('clears agent pins only on scalable private-location package policies', async () => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
-        { id: 'loc-1', agentPolicyId: 'ap-1' },
-        { id: 'loc-2', agentPolicyId: 'ap-1' },
-        { id: 'loc-3', agentPolicyId: 'ap-2' },
+        { id: 'loc-1', agentPolicyId: 'ap-1', isAgentSharding: true },
+        { id: 'loc-2', agentPolicyId: 'ap-1', isAgentSharding: true },
+        { id: 'loc-3', agentPolicyId: 'ap-2', isAgentSharding: true },
       ] as never);
       const listByAgentPolicy = jest
         .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
@@ -1132,6 +1132,25 @@ describe('SyntheticsPrivateLocation', () => {
         policiesToUpdate: [expect.objectContaining({ id: 'm1-loc-1', condition: null })],
       });
       expect(result.cleared).toBe(1);
+      expect(result.failed).toBe(0);
+    });
+
+    it('does not list Fleet policies for classic private locations', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        { id: 'classic', agentPolicyId: 'ap-classic' },
+        { id: 'sharded', agentPolicyId: 'ap-sharded', isAgentSharding: true },
+      ] as never);
+      const listByAgentPolicy = jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace').mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).clearShardConditions();
+
+      expect(listByAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(listByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'ap-sharded' });
+      expect(listByAgentPolicy).not.toHaveBeenCalledWith({ agentPolicyId: 'ap-classic' });
+      expect(result.cleared).toBe(0);
       expect(result.failed).toBe(0);
     });
   });
