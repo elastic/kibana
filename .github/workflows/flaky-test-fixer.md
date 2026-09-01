@@ -291,25 +291,39 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 
 ## Verifying a Jest fix
 
-Run this loop twice: once on the unpatched test, once with the fix applied.
+Use adaptive verification so an obviously broken patch fails fast and repeated runs are reserved for a flake that reproduces locally.
 
 ```bash
 export PATH="$KBN_NODE_BIN:$PATH"
-: > /tmp/gh-aw/agent/jest-durations
-fails=0
-for i in $(seq 1 25); do
-  node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
-  node -e 'const a = require("/tmp/gh-aw/agent/jest-run.json").testResults[0]?.assertionResults.find((t) => t.fullName.includes(process.argv[1])); console.log(a ? a.duration : 0)' '<distinctive substring of the test name>' >> /tmp/gh-aw/agent/jest-durations
-done
-echo "$fails/25 runs failed"
-awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
+run_jest() {
+  local phase="$1"
+  local run="$2"
+  JEST_RESULT="/tmp/gh-aw/agent/jest-${phase}-${run}.json"
+  JEST_LOG="/tmp/gh-aw/agent/jest-${phase}-${run}.log"
+  rm -f "$JEST_RESULT" "$JEST_LOG"
+  timeout --signal=TERM --kill-after=10s 120s \
+    node scripts/jest <path-to-test-file> --json --outputFile="$JEST_RESULT" >"$JEST_LOG" 2>&1
+}
+
+record_duration() {
+  node -e 'const [file, name] = process.argv.slice(1); const a = require(file).testResults[0]?.assertionResults.find((t) => t.fullName.includes(name)); if (!a) process.exit(1); console.log(a.duration)' \
+    "$JEST_RESULT" '<distinctive substring of the test name>' >> "$1"
+}
+
+run_and_record() {
+  run_jest "$1" "$2" && record_duration "$3"
+}
+
+summarize_durations() {
+  awk '{total += $1; if ($1 > max) max = $1} END {if (NR) printf "avg %dms, max %dms\n", total / NR, max; else print "no duration samples"}' "$1"
+}
 ```
 
-- **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
-- **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
-- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
-- **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
-- **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
+- **Smoke-test the patched test first.** Run `run_and_record patched-smoke 1 /tmp/gh-aw/agent/jest-patched-smoke-durations` once with the fix applied. If it fails, times out, produces no JSON result, or cannot find the target test, inspect `$JEST_LOG`, revise the patch, and stop this verification attempt.
+- **Probe the unpatched baseline for at most five runs.** Stash the patch, run the unpatched test until the first failure or five passes, then restore the patch. A timeout or any non-zero exit is a failure; stop the probe immediately and keep the log. If all five runs pass, the flake did not reproduce locally: do not spend another 25 runs on an unproven baseline, and say so under "Not verified locally".
+- **Only after the baseline reproduces, run up to 25 patched tests.** Stop on the first failure, timeout, missing result, or missing target duration. Any such failure means the fix did not hold: inspect the saved log, revise the patch, and restart this adaptive sequence. Twenty-five successful patched runs are sufficient; don't increase the loop to 50.
+- **Report only the evidence you collected.** When the baseline reproduces, report `<failures>/<completed runs> before the fix`, then the patched result, with average and max durations when available. When it does not reproduce, report the patched smoke as a basic check and put `0/5 baseline runs failed` under "Not verified locally". Never count the patched smoke in the 25-run result, and always note that the runs did not execute under CI's parallel load.
+- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. `record_duration` exits non-zero when the test name does not match, and a crashed run produces no duration, so keep exactly one sample per successful run.
 
 ## PR format
 
