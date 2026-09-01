@@ -25,7 +25,7 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { registerDashboardAttachmentUiDefinition } from '.';
+import { createIdGenerator, registerDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => null),
@@ -247,6 +247,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getChatEvents(conversationId).next(event);
       },
       currentAppId$,
+      draftAttachmentId: createIdGenerator(),
     };
   };
 
@@ -345,6 +346,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       unifiedSearch: {
         ui: { SearchBar: jest.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
+      draftAttachmentId: createIdGenerator(),
     };
 
     let cleanup: (() => void) | undefined;

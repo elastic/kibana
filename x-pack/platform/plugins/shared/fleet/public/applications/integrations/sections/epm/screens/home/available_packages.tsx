@@ -82,7 +82,7 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled, enableCollectionGrouping: true });
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
