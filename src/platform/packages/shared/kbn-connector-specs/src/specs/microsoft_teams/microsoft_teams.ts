@@ -546,9 +546,9 @@ export const MicrosoftTeams: ConnectorSpec = {
         }));
         const requestBody: Record<string, unknown> = {
           chatType: input.chatType,
+          members,
+        };
         if (input.topic !== undefined && input.chatType === 'group') {
-          requestBody.topic = input.topic;
-        }
           requestBody.topic = input.topic;
         }
         const response = await ctx.client.post(
