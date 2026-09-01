@@ -99,6 +99,54 @@ export const CONDITION_OPERATOR_OPTIONS = [
   },
 ];
 
+export const SEVERITY_LEVEL_OPTIONS = [
+  {
+    value: 'info',
+    text: i18n.translate('xpack.alertingV2.ruleBuilder.severity.level.info', {
+      defaultMessage: 'Info',
+    }),
+  },
+  {
+    value: 'low',
+    text: i18n.translate('xpack.alertingV2.ruleBuilder.severity.level.low', {
+      defaultMessage: 'Low',
+    }),
+  },
+  {
+    value: 'medium',
+    text: i18n.translate('xpack.alertingV2.ruleBuilder.severity.level.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    value: 'high',
+    text: i18n.translate('xpack.alertingV2.ruleBuilder.severity.level.high', {
+      defaultMessage: 'High',
+    }),
+  },
+  {
+    value: 'critical',
+    text: i18n.translate('xpack.alertingV2.ruleBuilder.severity.level.critical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+];
+
+export const SEVERITY_MODE_OPTIONS = [
+  {
+    id: 'single',
+    label: i18n.translate('xpack.alertingV2.ruleBuilder.severity.mode.single', {
+      defaultMessage: 'Single',
+    }),
+  },
+  {
+    id: 'multi',
+    label: i18n.translate('xpack.alertingV2.ruleBuilder.severity.mode.multi', {
+      defaultMessage: 'Multiple',
+    }),
+  },
+];
+
 export const THRESHOLD_STEP_TITLE = i18n.translate(
   'xpack.alertingV2.ruleBuilder.threshold.stepTitle',
   { defaultMessage: 'Alert Condition' }

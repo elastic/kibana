@@ -59,9 +59,11 @@ import {
   isStatFieldValid,
   generateId,
   getAvailableMetricLabels,
+  reconcileSeverity,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
+import { SeveritySection } from './severity_section';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
@@ -403,28 +405,46 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     (index: number, updates: Partial<AlertCondition>) => {
       const next = [...thresholdValues.alertConditions];
       next[index] = { ...next[index], ...updates };
-      onThresholdValuesChange({ ...thresholdValues, alertConditions: next });
+      // Severity inherits the condition's comparator/count, so re-check it stays applicable.
+      onThresholdValuesChange({
+        ...thresholdValues,
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
+      });
     },
     [thresholdValues, onThresholdValuesChange]
   );
 
   const addCondition = useCallback(() => {
+    const next = [
+      ...thresholdValues.alertConditions,
+      { id: generateId(), ...DEFAULT_ALERT_CONDITION },
+    ];
     onThresholdValuesChange({
       ...thresholdValues,
-      alertConditions: [
-        ...thresholdValues.alertConditions,
-        { id: generateId(), ...DEFAULT_ALERT_CONDITION },
-      ],
+      alertConditions: next,
+      severity: reconcileSeverity(thresholdValues.severity, next),
     });
   }, [thresholdValues, onThresholdValuesChange]);
 
   const removeCondition = useCallback(
     (index: number) => {
-      const next = thresholdValues.alertConditions.filter((_, i) => i !== index);
+      const filtered = thresholdValues.alertConditions.filter((_, i) => i !== index);
+      const next = filtered.length
+        ? filtered
+        : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }];
       onThresholdValuesChange({
         ...thresholdValues,
-        alertConditions: next.length ? next : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
       });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
+  const updateSeverity = useCallback(
+    (severity: ThresholdFormValues['severity']) => {
+      onThresholdValuesChange({ ...thresholdValues, severity });
     },
     [thresholdValues, onThresholdValuesChange]
   );
@@ -999,6 +1019,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
+
+      {/* ── Severity ── */}
+      <SeveritySection
+        severity={thresholdValues.severity}
+        alertConditions={thresholdValues.alertConditions}
+        onChange={updateSeverity}
+      />
     </>
   );
 };

@@ -251,6 +251,18 @@ export const createDefaultSeverityConfig = (): SeverityConfig => ({
 });
 
 /**
+ * Seed multi-severity levels from an alert condition: the least-severe level
+ * inherits the condition's threshold, plus one more severe level to start from.
+ */
+export const createDefaultSeverityLevels = (condition: AlertCondition): SeverityLevel[] => {
+  const [baseThreshold = 0] = condition.threshold;
+  return [
+    { id: generateId(), severity: 'low', threshold: baseThreshold },
+    { id: generateId(), severity: 'medium', threshold: baseThreshold },
+  ];
+};
+
+/**
  * Drop or downgrade severity config that is no longer applicable to the current
  * conditions: severity is cleared for multiple conditions, and multi mode falls
  * back to single mode when the comparator is range-based.
