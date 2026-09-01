@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ALERTING_V2_DEPRECATED_FEATURE_IDS,
+  ALERTING_V2_FEATURE_IDS,
+} from '@kbn/alerting-v2-constants';
 import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
 import { isEqual, isEqualWith } from 'lodash';
@@ -489,10 +493,24 @@ export default function ({ getService }: FtrProviderContext) {
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-      alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
-      alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-      alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
-      alerting_v2_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_FEATURE_IDS.rules]: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_FEATURE_IDS.alerts]: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_FEATURE_IDS.executionHistory]: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_DEPRECATED_FEATURE_IDS.rules]: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_DEPRECATED_FEATURE_IDS.alerts]: ['all', 'read', 'minimal_all', 'minimal_read'],
+      [ALERTING_V2_DEPRECATED_FEATURE_IDS.actionPolicies]: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+      ],
+      [ALERTING_V2_DEPRECATED_FEATURE_IDS.executionHistory]: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+      ],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };

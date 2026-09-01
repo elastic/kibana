@@ -24,6 +24,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { AppMenuExtension, AppMenuExtensionParams } from '../../../../context_awareness/types';
 import { useProfileAccessor } from '../../../../context_awareness/hooks/use_profile_accessor';
 import * as getAlerts from './app_menu_actions/get_alerts';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 
 jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
@@ -69,7 +70,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   services.settings.globalClient.get = <T,>(_key: string) => true as T;
   services.core.application.capabilities = {
     ...services.core.application.capabilities,
-    alerting_v2_rules: {
+    [ALERTING_V2_FEATURE_IDS.rules]: {
       all: true,
     },
   };
@@ -438,7 +439,7 @@ describe('useTopNavLinks', () => {
 
       v2Services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
       if (!alertingV2Enabled) {
-        const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+        const { [ALERTING_V2_FEATURE_IDS.rules]: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2Services.core.application.capabilities;
         v2Services.core.application.capabilities = capabilitiesWithoutRules;
       }
@@ -603,7 +604,7 @@ describe('useTopNavLinks', () => {
 
       v2OnlyServices.settings.globalClient.get = <T,>(_key: string) => alertingVTwoEnabled as T;
       if (!alertingVTwoEnabled) {
-        const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+        const { [ALERTING_V2_FEATURE_IDS.rules]: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2OnlyServices.core.application.capabilities;
         v2OnlyServices.core.application.capabilities = capabilitiesWithoutRules;
       }

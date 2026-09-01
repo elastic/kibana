@@ -165,7 +165,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
-    'authorization: 200 with alerting_v2_execution_history read privilege',
+    'authorization: 200 with alerting_execution_history read privilege',
     async ({ apiClient }) => {
       const response = await apiClient.get(listRuleExecutionsUrl(), { headers: readerHeaders });
       expect(response).toHaveStatusCode(200);
@@ -173,7 +173,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'authorization: 200 with alerting_v2_execution_history all privilege',
+    'authorization: 200 with alerting_execution_history all privilege',
     async ({ apiClient, requestAuth }) => {
       const writerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
