@@ -47,7 +47,7 @@ Task progress:
 - [ ] 5. Update host Markdown, toc.yml, or Cloud include only if needed
 - [ ] 6. Tag applies_to (stack history + deployments + serverless as required)
 - [ ] 7. Preview and check the Supported on line
-- [ ] 8. Note release notes, docker env list, and Cloud allowlist if they apply
+- [ ] 8. Check related work (release notes, docker env vars, Cloud support)
 ```
 
 ### 1. Classify
@@ -149,14 +149,25 @@ YAML that parses is not proof that badges render. Inspect the live DOM for the s
 - A rendered line is `dd > p.settings-supported-on` with `<applies-to-popover>` children.
 - If `stack` names an unreleased version, the docs can show Planned until that minor ships. Do not strip that version.
 
-### 8. Companion work
+### 8. Related work
 
-Do this when it applies. Skip it when it does not.
+This skill only edits the settings YAML. A settings change can still need other edits in the same Kibana PR. Skip any item that does not apply.
 
-- **Release notes:** user-facing new or changed settings often need `docs/release-notes/`.
-- **Docker env list:** new `kibana.yml` keys that operators set by environment variable may need `src/dev/build/tasks/os_packages/docker_generator/resources/base/bin/kibana-docker`. See the Kibana PR template.
-- **Cloud allowlist:** Cloud must support the setting in the product. Setting `ech: ga` in YAML does not enable it on Elastic Cloud Hosted.
-- **docs-content how-tos:** leave "how to edit settings" pages in `elastic/docs-content`. If a docs-content issue tracks this change, open this Kibana YAML PR as the companion. Do not stop at "out of scope."
+**Release notes**
+
+If the setting is user-facing and new, changed, deprecated, or removed, add an entry under `docs/release-notes/`. Skip this when you are only documenting a setting that already shipped.
+
+**Docker environment variables**
+
+This applies only to new `kibana.yml` keys, not Advanced Settings. If operators set the key with an environment variable in Docker, add it to `src/dev/build/tasks/os_packages/docker_generator/resources/base/bin/kibana-docker`. The Kibana PR template has this checklist item.
+
+**Elastic Cloud Hosted**
+
+`ech: ga` in the YAML documents that Cloud already supports the setting. It does not enable the setting on Cloud. If Cloud does not support the key yet, omit `ech`. Do not set `ech: ga` as a request to Cloud.
+
+**How-to pages**
+
+How to edit settings lives in `elastic/docs-content`. The setting reference lives in this repo. Do not copy the YAML entry into a docs-content page.
 
 ## Verification checklist
 
