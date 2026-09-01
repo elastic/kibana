@@ -176,7 +176,7 @@ export function initializeLayoutManager(
     currentChildState = cloneDeep(childStateToApply);
 
     const setStatePromises: MaybePromise<void>[] = [];
-    for (const [uuid, child] of Object.entries(children$.value))  {
+    for (const [uuid, child] of Object.entries(children$.value)) {
       const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
       if (nextChildState && apiHasSerializableState(child)) {
         setStatePromises.push(child.applySerializedState(nextChildState));
