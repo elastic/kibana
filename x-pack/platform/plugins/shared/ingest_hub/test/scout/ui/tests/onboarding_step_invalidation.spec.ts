@@ -85,7 +85,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
         services: 'complete',
         'service-settings': 'complete',
         'authenticate-and-deploy': 'incomplete',
-        'deploy-and-detect': 'incomplete',
+        'detect-and-review': 'incomplete',
       },
     });
     await page.gotoApp('onboarding/aws#services');

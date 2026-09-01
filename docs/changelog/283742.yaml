@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/283742
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-08-18
-- product: kibana
-title: Add entity relationship history to Agent Builder

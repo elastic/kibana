@@ -12,7 +12,6 @@ import {
   createAndSyncRuleAndAlertsFactory,
   readRiskScores,
   normalizeScores,
-  waitForRiskScoresToBePresent,
   waitForRiskScoreForId,
   EntityStoreUtils,
   entityMaintainerRouteHelpersFactory,
@@ -129,7 +128,14 @@ export default ({ getService }: FtrProviderContext): void => {
         // off the run, then waits for completion and settles.
         await waitForMaintainerRun({ retry, routes: maintainerRoutes });
 
-        await waitForRiskScoresToBePresent({ es, log, scoreCount: preRestartCount + 1 });
+        await retry.waitForWithTimeout(
+          `host ${host.expectedEuid} to have more than 1 score after restart`,
+          60_000,
+          async () => {
+            const scores = normalizeScores(await readRiskScores(es));
+            return scores.filter((s) => s.id_value === host.expectedEuid).length > 1;
+          }
+        );
         const postRestartScores = await readRiskScores(es);
         expect(postRestartScores.length).to.be.greaterThan(preRestartCount);
 

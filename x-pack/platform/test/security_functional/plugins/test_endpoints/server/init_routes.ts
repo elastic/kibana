@@ -18,10 +18,11 @@ import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
-import type {
-  BulkUpdateTaskResult,
-  ConcreteTaskInstance,
-  TaskManagerStartContract,
+import {
+  type BulkUpdateTaskResult,
+  type ConcreteTaskInstance,
+  getUiamApiKeySecret,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { PluginStartDependencies } from '.';
@@ -65,6 +66,9 @@ export function initRoutes(
     parked: boolean;
     continuedAfterHold: boolean;
     authCompleted: boolean;
+    // Sticky: set once the client cancels the request (HTTP/2 RST_STREAM). Unlike the socket
+    // snapshot this is not re-read per poll, so it survives the stream going away.
+    aborted: boolean;
     snapshotSocket: () => PreauthHoldSocketSnapshot;
     release: () => void;
   }
@@ -159,10 +163,19 @@ export function initRoutes(
         parked: true,
         continuedAfterHold: false,
         authCompleted: false,
+        aborted: false,
         snapshotSocket: () => snapshotSocket(request),
         release: () => deferred.resolve(),
       };
       preauthHolds.set(holdId, hold);
+
+      // Subscribe before parking: `getEvents` only builds the observable, and the underlying
+      // 'close' listener attaches on first subscribe. Under HTTP/2 this is how RST_STREAM
+      // becomes observable server-side — the session socket itself is unaffected by a single
+      // stream being destroyed, so it can no longer be used to detect the cancellation.
+      const abortSubscription = request.events.aborted$.subscribe(() => {
+        hold.aborted = true;
+      });
 
       let timeoutId: NodeJS.Timeout | undefined;
       try {
@@ -184,6 +197,7 @@ export function initRoutes(
       } finally {
         hold.authCompleted = true;
         hold.parked = false;
+        abortSubscription.unsubscribe();
         // Keep the completed hold around long enough for the test to observe `authCompleted`,
         // then evict so the map does not retain the request (and its socket) indefinitely.
         setTimeout(() => {
@@ -251,6 +265,7 @@ export function initRoutes(
           parked: hold?.parked ?? false,
           continuedAfterHold: hold?.continuedAfterHold ?? false,
           authCompleted: hold?.authCompleted ?? false,
+          aborted: hold?.aborted ?? false,
           authorized: socket?.authorized ?? null,
           peerCertificateNull: socket?.peerCertificateNull ?? false,
         },
@@ -943,8 +958,9 @@ export function initRoutes(
       validate: {
         body: schema.object({
           id: schema.string(),
-          authcScheme: schema.string(),
-          credential: schema.string(),
+          authcScheme: schema.string({ defaultValue: 'ApiKey' }),
+          credential: schema.maybe(schema.string()),
+          taskId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         }),
       },
       security: {
@@ -958,8 +974,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       try {
-        const { id, authcScheme, credential } = request.body;
-        const [{ security }] = await core.getStartServices();
+        const { id, authcScheme, credential, taskId } = request.body;
+        const [{ security }, { taskManager }] = await core.getStartServices();
 
         if (!security.authc.apiKeys.uiam) {
           return response.badRequest({
@@ -967,16 +983,29 @@ export function initRoutes(
           });
         }
 
-        // Create a new request with the provided authentication header
-        const requestHeaders: Headers = {
-          ...request.headers,
-          authorization: `${authcScheme} ${credential}`,
-        };
-        const fakeRawRequest: FakeRawRequest = {
-          headers: requestHeaders,
-          path: request.url.pathname,
-        };
-        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+        let credentialToUse = credential;
+        if (taskId) {
+          const task = await taskManager.get(taskId);
+          if (task.userScope?.uiamApiKeyId !== id || !task.uiamApiKey) {
+            return response.badRequest({
+              body: { message: 'Task does not contain the requested UIAM API key' },
+            });
+          }
+          credentialToUse = getUiamApiKeySecret(task.uiamApiKey);
+        }
+
+        let requestToUse = request;
+        if (credentialToUse) {
+          const requestHeaders: Headers = {
+            ...request.headers,
+            authorization: `${authcScheme} ${credentialToUse}`,
+          };
+          const fakeRawRequest: FakeRawRequest = {
+            headers: requestHeaders,
+            path: request.url.pathname,
+          };
+          requestToUse = kibanaRequestFactory(fakeRawRequest);
+        }
 
         const result = await security.authc.apiKeys.uiam.invalidate(requestToUse, { id });
 

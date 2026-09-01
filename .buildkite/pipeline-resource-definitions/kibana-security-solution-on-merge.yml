@@ -19,7 +19,7 @@ spec:
       description: 'Runs the Security Solution Cypress test suites after changes merge'
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#security-serverless-test-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
@@ -34,6 +34,7 @@ spec:
             paths:
               - .buildkite/pipelines/security_solution_on_merge.yml
             cleanup_sparse_state: true
+      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
