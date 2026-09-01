@@ -384,7 +384,6 @@ export class SignificantEventsPlugin
 
       this.server.relayClient = plugins.actions.getRelayClient();
     }
-
     // Availability is the same requirement registry that gates requests, so a deployment never gets
     // resources it cannot run. Only the flag and the license change at runtime, so only those feed
     // the stream.

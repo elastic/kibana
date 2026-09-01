@@ -599,6 +599,26 @@ describe('WorkflowTemplatingEngine', () => {
       expect(typeof rendered.isActive).toBe('boolean');
     });
 
+    it('should preserve workflow trigger strings and loop iteration numbers', () => {
+      const rendered = templatingEngine.render(
+        {
+          rootTriggeredBy: '${{ execution.triggeredBy }}',
+          quotaSlot: '${{ while.iteration }}',
+        },
+        {
+          execution: { triggeredBy: 'scheduled' },
+          while: { iteration: 4 },
+        }
+      );
+
+      expect(rendered).toEqual({
+        rootTriggeredBy: 'scheduled',
+        quotaSlot: 4,
+      });
+      expect(typeof rendered.rootTriggeredBy).toBe('string');
+      expect(typeof rendered.quotaSlot).toBe('number');
+    });
+
     it('should support both ${{ }} and {{ }} syntax in the same object', () => {
       const obj = {
         message: 'Hello {{ user.name }}!',

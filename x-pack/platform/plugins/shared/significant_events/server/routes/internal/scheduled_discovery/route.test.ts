@@ -84,7 +84,9 @@ const createHandlerParams = ({
       licensing: {},
       uiSettingsClient,
     }),
-    server: { agentBuilder },
+    server: {
+      agentBuilder,
+    },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
     maintenanceService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),

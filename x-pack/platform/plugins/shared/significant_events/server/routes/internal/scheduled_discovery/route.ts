@@ -289,9 +289,13 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
       const configChanged = Object.keys(spaceUpdates).some(
         (key) => key !== OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
       );
+      const spaceId =
+        enabledChanged || (nextEnabled && configChanged) ? await getSpaceId(request) : undefined;
 
       if (enabledChanged || (nextEnabled && configChanged)) {
-        const spaceId = await getSpaceId(request);
+        if (!spaceId) {
+          throw new Error('Unable to resolve space for scheduled discovery reconciliation');
+        }
         if (nextEnabled) {
           if (!server.agentBuilder) {
             throw new Error(

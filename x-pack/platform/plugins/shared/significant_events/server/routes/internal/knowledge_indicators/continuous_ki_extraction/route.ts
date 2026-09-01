@@ -10,6 +10,9 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
+import { DEFAULT_RUN_LIMITS } from '../../../../../common/run_quotas';
+import { createRunQuotaInternalRepository, readRunQuotaSettings } from '../../../../lib/run_quotas';
+import { assertCanManageRunQuotas } from '../../../../lib/run_quotas/privileges';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -84,6 +87,19 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     const previousValues: Record<string, boolean | number | string> = {};
     const keys = Object.keys(updates);
     const allSettings = await globalUiSettingsClient.getAll<boolean | number | string>();
+    const previousEnabled = allSettings[
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    ] as boolean;
+    let cappedContinuousKiEnablement = false;
+    if (continuousKiExtraction.enabled === true && !previousEnabled) {
+      const runQuotaSettings = await readRunQuotaSettings(createRunQuotaInternalRepository(server));
+      const kiLimit = runQuotaSettings.limits.ki_extraction ?? DEFAULT_RUN_LIMITS.ki_extraction;
+      cappedContinuousKiEnablement =
+        runQuotaSettings.enforcementEnabled === true && kiLimit.enabled;
+    }
+    if (cappedContinuousKiEnablement) {
+      await assertCanManageRunQuotas({ request, server });
+    }
     if (keys.length > 0) {
       for (const key of keys) {
         previousValues[key] = allSettings[key];
@@ -94,17 +110,20 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     // Only reconcile the workflow on an actual enabled-state transition so the
     // legacy and managed workflows never run at the same time. Interval changes are
     // picked up by the running workflow at execution time.
-    const previousEnabled = allSettings[
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-    ] as boolean;
     const nextEnabled = continuousKiExtraction.enabled;
 
     if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
       try {
-        await continuousKiOnboardingWorkflowService.ensureWorkflow({
-          enabled: nextEnabled,
-          request,
-        });
+        if (cappedContinuousKiEnablement) {
+          await continuousKiOnboardingWorkflowService.ensureCappedContinuousKiScheduled({
+            request,
+          });
+        } else {
+          await continuousKiOnboardingWorkflowService.ensureWorkflow({
+            enabled: nextEnabled,
+            request,
+          });
+        }
       } catch (err) {
         if (Object.keys(previousValues).length > 0) {
           await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
