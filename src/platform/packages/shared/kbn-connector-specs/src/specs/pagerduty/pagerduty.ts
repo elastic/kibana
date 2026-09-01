@@ -315,7 +315,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listSchedules: {
-      isTool: false,
+      isTool: true,
       description:
         'List PagerDuty on-call schedules. Supports free-text search across name and description fields (e.g., "primary" or "weekend"), filtering by team or user IDs, and including related resources such as schedule_layers, overrides_subschedule, or final_schedule.',
       input: ListSchedulesInputSchema,
@@ -325,7 +325,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listEscalationPolicies: {
-      isTool: false,
+      isTool: true,
       description:
         'List PagerDuty escalation policies. Supports free-text search across name and description fields (e.g., "production" or "on-call"), and filtering by user or team IDs. Returns each policy\'s escalation rules, targets, associated services, and teams.',
       input: ListEscalationPoliciesInputSchema,
@@ -335,7 +335,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listIncidents: {
-      isTool: false,
+      isTool: true,
       description:
         'List PagerDuty incidents. Supports filtering by status (triggered, acknowledged, resolved), service IDs, user IDs, urgency, and date range. Dates use ISO 8601 format. Results can be scoped to all incidents, team incidents, or those assigned to the current user. Supports sorting by incident_number, created_at, resolved_at, or urgency.',
       input: ListIncidentsInputSchema,
@@ -345,7 +345,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listOncalls: {
-      isTool: false,
+      isTool: true,
       description:
         'Get current on-call assignments in PagerDuty. Use this to find who is currently on call for specific schedules or escalation policies. Supports filtering by schedule IDs, user IDs, or escalation policy IDs, and time range queries using ISO 8601 dates. Set earliest=true to return only the first on-call entry per user+policy combination.',
       input: ListOncallsInputSchema,
@@ -355,7 +355,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listUsers: {
-      isTool: false,
+      isTool: true,
       description:
         "List PagerDuty users. Supports free-text search across name and email fields. Returns each user's id, name, email, summary, and role.",
       input: ListUsersInputSchema,
@@ -365,7 +365,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listTeams: {
-      isTool: false,
+      isTool: true,
       description:
         "List PagerDuty teams. Supports free-text search across name and description fields. Returns each team's id, name, description, and summary.",
       input: ListTeamsInputSchema,
