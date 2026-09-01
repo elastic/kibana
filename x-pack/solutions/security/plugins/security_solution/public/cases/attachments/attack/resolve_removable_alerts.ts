@@ -108,13 +108,11 @@ export const resolveRemovableAlertAttachments = ({
 
   for (const { id, alertIds: attachmentAlertIds } of alertAttachments) {
     // An empty attachment cannot be attributed to this attack, so leave it alone.
-    if (attachmentAlertIds.length === 0) {
-      continue;
-    }
-
-    const isRemovable = attachmentAlertIds.every(
-      (alertId) => attackAlertIdSet.has(alertId) && !claimedByOtherAttacks.has(alertId)
-    );
+    const isRemovable =
+      attachmentAlertIds.length > 0 &&
+      attachmentAlertIds.every(
+        (alertId) => attackAlertIdSet.has(alertId) && !claimedByOtherAttacks.has(alertId)
+      );
 
     if (isRemovable) {
       attachmentIds.push(id);

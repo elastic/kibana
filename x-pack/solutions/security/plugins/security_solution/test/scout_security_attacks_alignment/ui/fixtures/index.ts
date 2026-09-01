@@ -6,11 +6,7 @@
  */
 
 import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout-security';
-import type {
-  SecurityTestFixtures,
-  SecurityPageObjects,
-  ScoutPage,
-} from '@kbn/scout-security';
+import type { SecurityTestFixtures, SecurityPageObjects, ScoutPage } from '@kbn/scout-security';
 import { AttackCasesPage } from './page_objects/attack_cases_page';
 
 interface AttacksAlignmentTestFixtures extends SecurityTestFixtures {
