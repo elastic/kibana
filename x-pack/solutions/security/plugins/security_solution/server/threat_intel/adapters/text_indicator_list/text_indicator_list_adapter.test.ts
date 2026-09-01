@@ -315,40 +315,6 @@ describe('textIndicatorListAdapter', () => {
     expect(() => normalizedReportSchema.parse(oldReport)).not.toThrow();
   });
 
-  it('back-compat: normalizedReportSchema still parses a stix report', () => {
-    const stixReport = {
-      '@timestamp': '2024-01-01T00:00:00.000Z',
-      content_fingerprint: 'def456',
-      space_id: '*',
-      source: {
-        type: 'stix',
-        name: 'STIX Feed',
-        url: 'https://stix.example.com',
-        adapter_id: 'stix:2',
-      },
-      content: { title: 'Indicator SDO', body_text: 'body', language: 'en' },
-      severity: { level: 'medium', score: 40 },
-      lineage: {
-        ingested_at: '2024-01-01T00:00:00.000Z',
-        extraction_method: 'stix',
-        extracted_at: '2024-01-01T00:00:00.000Z',
-        source_doc_ref: { index: 'stix:bundle', id: 'indicator--abc' },
-      },
-      extracted: {
-        iocs: [
-          {
-            type: 'ipv4',
-            value: '1.2.3.4',
-            tier: 'discriminating',
-            tier_heuristic: 'h',
-            tier_basis: 'b',
-          },
-        ],
-      },
-    };
-    expect(() => normalizedReportSchema.parse(stixReport)).not.toThrow();
-  });
-
   // -------------------------------------------------------------------------
   // Chunking tests
   // -------------------------------------------------------------------------

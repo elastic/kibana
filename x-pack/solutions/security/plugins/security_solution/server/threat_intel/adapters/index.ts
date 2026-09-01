@@ -6,10 +6,4 @@
  */
 
 export { runAdapter, UnknownAdapterError } from './run_adapter';
-export type {
-  AdapterRunContext,
-  FetchAdapter,
-  NormalizedReport,
-  ScopedActionsClient,
-  SourceHit,
-} from './types';
+export type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from './types';

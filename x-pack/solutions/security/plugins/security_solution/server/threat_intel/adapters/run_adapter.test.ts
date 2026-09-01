@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { __getRegisteredAdapterTypesForTest, runAdapter, UnknownAdapterError } from './run_adapter';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { runAdapter, UnknownAdapterError } from './run_adapter';
 import type { AdapterRunContext, SourceHit } from './types';
 
 const buildContext = (): AdapterRunContext => ({
-  esClient: elasticsearchServiceMock.createElasticsearchClient(),
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,
   now: () => new Date('2026-05-16T12:00:00.000Z'),
@@ -18,24 +17,19 @@ const buildContext = (): AdapterRunContext => ({
 });
 
 describe('runAdapter', () => {
-  it('registers exactly the network-pulled adapter types', () => {
-    // `email`, `manual`, and `telemetry` are intentionally absent —
-    // they are handled by other code paths and registering them here
-    // would suggest the source-ingestion workflow could pull them.
-    expect(__getRegisteredAdapterTypesForTest().sort()).toEqual(
-      ['kev', 'rss', 'stix', 'taxii', 'text_indicator_list', 'vendor_api'].sort()
-    );
-  });
-
   it('throws UnknownAdapterError for unsupported adapter_type values', async () => {
-    const source: SourceHit = {
+    const source = {
       _id: 'manual:1',
       _source: {
         adapter_type: 'manual',
         name: 'Analyst paste',
         config: {},
       },
-    };
-    await expect(runAdapter(source, buildContext())).rejects.toBeInstanceOf(UnknownAdapterError);
+    } as unknown as SourceHit;
+
+    await expect(runAdapter(source, buildContext())).rejects.toMatchObject({
+      name: UnknownAdapterError.name,
+      message: expect.stringContaining('Known adapter types: rss, text_indicator_list, kev'),
+    });
   });
 });

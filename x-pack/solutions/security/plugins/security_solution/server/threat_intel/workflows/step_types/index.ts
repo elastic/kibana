@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { buildFetchSourceStepDefinition } from './fetch_source/fetch_source_step';
 
@@ -14,13 +13,9 @@ import { buildFetchSourceStepDefinition } from './fetch_source/fetch_source_step
 export const registerThreatIntelWorkflowSteps = ({
   workflowsExtensions,
   logger,
-  getActionsStart,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   logger: Logger;
-  getActionsStart?: () => Promise<ActionsPluginStartContract | undefined>;
 }): void => {
-  workflowsExtensions.registerStepDefinition(
-    buildFetchSourceStepDefinition({ logger, getActionsStart })
-  );
+  workflowsExtensions.registerStepDefinition(buildFetchSourceStepDefinition({ logger }));
 };

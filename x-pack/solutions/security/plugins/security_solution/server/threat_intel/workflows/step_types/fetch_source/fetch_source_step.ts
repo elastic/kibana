@@ -6,26 +6,13 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { fetchSourceStepCommonDefinition } from '../../../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
 import { runAdapter, UnknownAdapterError } from '../../../adapters';
-import type { AdapterRunContext, ScopedActionsClient, SourceHit } from '../../../adapters';
+import type { AdapterRunContext, SourceHit } from '../../../adapters';
 
 export interface BuildFetchSourceStepDeps {
   logger: Logger;
-  /**
-   * Lazy resolver for the actions plugin's start contract. Step
-   * registration runs at `setup()` time but execution runs after
-   * `start()`, so we accept a thunk that resolves on first call (the
-   * usual `core.getStartServices()` pattern).
-   *
-   * Optional so the step can register cleanly in environments where the
-   * actions plugin isn't installed (e.g. some FTR configurations).
-   * Adapters that require a connector throw a clear error when the
-   * factory is absent — see `fetchViaConnector` in the TAXII adapter.
-   */
-  getActionsStart?: () => Promise<ActionsPluginStartContract | undefined>;
 }
 
 /**
@@ -36,11 +23,6 @@ export interface BuildFetchSourceStepDeps {
  * `securitySolution.threatIntel.fetch_source.<adapter>` in the
  * Kibana logs — that path is what operators grep when a feed misbehaves.
  *
- * Also wires a request-scoped `ActionsClient` factory into the adapter
- * run context so adapters can invoke Connectors v2 connectors when a
- * source's `config.connector_id` is set. Currently only the TAXII
- * adapter consumes it; vendor_api will follow once vendor connectors
- * land.
  */
 export const buildFetchSourceStepDefinition = (deps: BuildFetchSourceStepDeps) =>
   createServerStepDefinition({
@@ -74,29 +56,10 @@ export const buildFetchSourceStepDefinition = (deps: BuildFetchSourceStepDeps) =
         source._source.adapter_type
       );
 
-      // Capture the resolver in a local so the closure below doesn't
-      // need a non-null assertion on `deps.getActionsStart` — keeps the
-      // arrow body within the rules' "no non-null assertion" policy.
-      const resolveActionsStart = deps.getActionsStart;
-      const getActionsClient = resolveActionsStart
-        ? async (): Promise<ScopedActionsClient | undefined> => {
-            const actionsStart = await resolveActionsStart();
-            if (!actionsStart) return undefined;
-            // The workflow engine surfaces a synthetic request via
-            // `getFakeRequest()`; that's the only request-shaped value
-            // available inside a step handler and matches what the
-            // actions plugin expects from background callers.
-            const fakeRequest = context.contextManager.getFakeRequest();
-            return actionsStart.getActionsClientWithRequest(fakeRequest);
-          }
-        : undefined;
-
       const runContext: AdapterRunContext = {
-        esClient: context.contextManager.getScopedEsClient(),
         logger: stepLogger,
         abortSignal: context.abortSignal,
         now: () => new Date(),
-        getActionsClient,
       };
 
       try {
