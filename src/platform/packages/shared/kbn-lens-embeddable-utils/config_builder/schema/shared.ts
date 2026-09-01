@@ -31,37 +31,35 @@ export const labelSharedSchema = lazySchema(() =>
     .strict()
 );
 
-export const sharedPanelInfoSchema = lazySchema(() =>
-  z
-    .object({
-      /**
-       * The title of the chart displayed in the panel.
-       *
-       * Optional. If not provided, the chart will not have a title.
-       *
-       * Possible values: Any string value, or undefined if omitted.
-       */
-      title: z.string().optional().meta({
-        description:
-          'The title of the chart displayed in the panel. Optional. Any string value or undefined.',
-      }),
-      /**
-       * The description of the chart, providing additional context or information.
-       *
-       * Optional. If not provided, the chart will not have a description.
-       *
-       * Possible values: Any string value, or undefined if omitted.
-       */
-      description: z.string().optional().meta({
-        description: 'The description of the chart. Optional. Any string value or undefined.',
-      }),
-      filters: z.array(asCodeFilterSchema).max(100).optional().meta({
-        id: 'lensPanelFilters',
-        description: 'Filters applied to the panel',
-      }),
-    })
-    .strict()
-);
+export const sharedPanelInfoSchema = z
+  .object({
+    /**
+     * The title of the chart displayed in the panel.
+     *
+     * Optional. If not provided, the chart will not have a title.
+     *
+     * Possible values: Any string value, or undefined if omitted.
+     */
+    title: z.string().optional().meta({
+      description:
+        'The title of the chart displayed in the panel. Optional. Any string value or undefined.',
+    }),
+    /**
+     * The description of the chart, providing additional context or information.
+     *
+     * Optional. If not provided, the chart will not have a description.
+     *
+     * Possible values: Any string value, or undefined if omitted.
+     */
+    description: z.string().optional().meta({
+      description: 'The description of the chart. Optional. Any string value or undefined.',
+    }),
+    filters: z.array(asCodeFilterSchema).max(100).optional().meta({
+      id: 'lensPanelFilters',
+      description: 'Filters applied to the panel',
+    }),
+  })
+  .strict();
 
 export const dslOnlyPanelInfoSchema = lazySchema(() =>
   z

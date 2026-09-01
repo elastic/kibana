@@ -27,49 +27,43 @@ const baseLinkSchemaShape = {
   label: z.string().optional().meta({ description: 'The label of the link displayed in the UI.' }),
 };
 
-export const dashboardLinkSchema = lazySchema(() =>
-  z
-    .object({
-      ...baseLinkSchemaShape,
-      type: z.literal(DASHBOARD_LINK_TYPE),
-      destination: z.string().meta({ description: 'Linked dashboard saved object ID.' }),
-      options: dashboardNavigationOptionsSchema,
-    })
-    .strict()
-    .meta({
-      description: 'Link type. Set to dashboardLink for a link to another dashboard.',
-      id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
-    })
-);
+export const dashboardLinkSchema = z
+  .object({
+    ...baseLinkSchemaShape,
+    type: z.literal(DASHBOARD_LINK_TYPE),
+    destination: z.string().meta({ description: 'Linked dashboard saved object ID.' }),
+    options: dashboardNavigationOptionsSchema,
+  })
+  .strict()
+  .meta({
+    description: 'Link type. Set to dashboardLink for a link to another dashboard.',
+    id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
+  });
 
-export const externalLinkOptionsSchema = lazySchema(() =>
-  z
-    .object({
-      open_in_new_tab: z.boolean().default(DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab).meta({
-        description: 'Whether to open this link in a new tab when clicked.',
-      }),
-      encode_url: z.boolean().default(DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url).meta({
-        description: 'Whether to escape the URL with percent encoding',
-      }),
-    })
-    .strict()
-    .default(DEFAULT_EXTERNAL_LINK_OPTIONS)
-);
+export const externalLinkOptionsSchema = z
+  .object({
+    open_in_new_tab: z.boolean().default(DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab).meta({
+      description: 'Whether to open this link in a new tab when clicked.',
+    }),
+    encode_url: z.boolean().default(DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url).meta({
+      description: 'Whether to escape the URL with percent encoding',
+    }),
+  })
+  .strict()
+  .default(DEFAULT_EXTERNAL_LINK_OPTIONS);
 
-export const externalLinkSchema = lazySchema(() =>
-  z
-    .object({
-      ...baseLinkSchemaShape,
-      type: z.literal(EXTERNAL_LINK_TYPE),
-      destination: z.string().meta({ description: 'The external URL to link to.' }),
-      options: externalLinkOptionsSchema,
-    })
-    .strict()
-    .meta({
-      id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
-      description: 'Link type. Set to externalLink for a URL outside Kibana.',
-    })
-);
+export const externalLinkSchema = z
+  .object({
+    ...baseLinkSchemaShape,
+    type: z.literal(EXTERNAL_LINK_TYPE),
+    destination: z.string().meta({ description: 'The external URL to link to.' }),
+    options: externalLinkOptionsSchema,
+  })
+  .strict()
+  .meta({
+    id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
+    description: 'Link type. Set to externalLink for a URL outside Kibana.',
+  });
 
 export const linksArraySchema = lazySchema(() =>
   z
