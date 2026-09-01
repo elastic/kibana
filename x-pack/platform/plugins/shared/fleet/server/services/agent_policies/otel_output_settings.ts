@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { parse } from 'yaml';
 
 import type { Output } from '../../types';
@@ -188,28 +189,14 @@ export const parseYamlRecord = (
   return {};
 };
 
-/**
- * Reads a setting from a parsed `config_yaml`. Users may write either a dotted key
- * (`queue.mem.events: 6400`) or nested maps, and Beats accepts both.
- */
-const readSetting = (config: Record<string, unknown>, path: string): unknown => {
-  if (path in config) {
-    return config[path];
-  }
-  return path.split('.').reduce<unknown>((acc, key) => {
-    if (acc !== null && typeof acc === 'object' && !Array.isArray(acc)) {
-      return (acc as Record<string, unknown>)[key];
-    }
-    return undefined;
-  }, config);
-};
-
 const readNumberSetting = (
   config: Record<string, unknown>,
   path: string,
   fallback: number
 ): number => {
-  const value = readSetting(config, path);
+  // lodash `get` checks for the literal dotted key first (e.g. "queue.mem.events"), then
+  // traverses nested maps — matching Beats' acceptance of both forms in config_yaml.
+  const value = get(config, path);
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 };
 
@@ -218,7 +205,7 @@ const readDurationSetting = (
   path: string,
   fallback: string
 ): string => {
-  const value = readSetting(config, path);
+  const value = get(config, path);
   // Beats accepts unit-less durations as seconds; the OTel exporterhelper does not, so
   // append the unit as the agent's translation does.
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -230,7 +217,7 @@ const readDurationSetting = (
 const readHeadersSetting = (
   config: Record<string, unknown>
 ): Record<string, string> | undefined => {
-  const value = readSetting(config, 'headers');
+  const value = get(config, 'headers');
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return undefined;
   }
