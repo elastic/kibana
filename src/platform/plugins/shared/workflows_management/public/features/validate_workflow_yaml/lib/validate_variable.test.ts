@@ -8,16 +8,18 @@
  */
 
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import type { VariableItem } from '@kbn/workflows-yaml';
+import { parseVariablePath, type VariableItem } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 
 // Mock the imports
-jest.mock('../../../../common/lib/parse_variable_path');
+jest.mock('@kbn/workflows-yaml', () => ({
+  ...jest.requireActual('@kbn/workflows-yaml'),
+  parseVariablePath: jest.fn(),
+}));
 jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path');
 jest.mock('../../workflow_context/lib/get_foreach_state_schema');
 
 import { validateVariable } from './validate_variable';
-import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
   InvalidForeachParameterError,
   InvalidForeachParameterErrorCodes,

@@ -16,12 +16,15 @@ jest.mock('../../workflow_context/lib/get_context_for_path');
 jest.mock('../../workflow_context/lib/get_workflow_context_schema');
 jest.mock('../../workflow_context/lib/extend_context_with_template_locals');
 jest.mock('./validate_variable');
-jest.mock('../../../../common/lib/yaml/get_scalar_value_at_offset');
+jest.mock('@kbn/workflows-yaml', () => ({
+  ...jest.requireActual('@kbn/workflows-yaml'),
+  getScalarValueAtOffset: jest.fn(),
+}));
 
 import type { VariableItem, YamlValidationResult } from '@kbn/workflows-yaml';
+import { getScalarValueAtOffset } from '@kbn/workflows-yaml';
 import { validateVariable } from './validate_variable';
 import { validateVariables } from './validate_variables';
-import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
 import {
   extendWithPathSpecificContext,
