@@ -30,12 +30,9 @@ const expressionTooltipTitle = i18n.translate(
   { defaultMessage: 'Matches query' }
 );
 
-/** The rule tags that satisfied a policy's tag clause; falls back to the clause when nothing intersects. */
 export const getMatchedTags = (matcherTags: string[], ruleTags: string[]): string[] => {
   const ruleTagSet = new Set(ruleTags);
   const matched = matcherTags.filter((tag) => ruleTagSet.has(tag));
-  // A `tags` policy must have matched at least one tag, but the form's tags can be a keystroke
-  // ahead of the fetched result — show the clause rather than an empty list.
   return matched.length > 0 ? matched : matcherTags;
 };
 
@@ -49,7 +46,6 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
   const trimmedExpression = matcher?.expression?.trim() || null;
   const matcherTags = matcher?.tags?.length ? matcher.tags : null;
 
-  // The `catch-all` category means the policy applies to every rule.
   const isCatchAll = category === 'catch-all';
 
   if (isCatchAll) {
