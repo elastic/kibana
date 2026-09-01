@@ -37233,6 +37233,7 @@ paths:
           name: kuery
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: When true, include agentless agents in the results
           in: query
