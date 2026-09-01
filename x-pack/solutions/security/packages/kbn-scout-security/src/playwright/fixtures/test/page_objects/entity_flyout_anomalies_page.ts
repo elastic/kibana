@@ -184,7 +184,9 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async selectMitreTactic(tactic: string) {
-    await this.getMitreTacticDot(tactic).click();
+    // force: the tactic dot sits inside a scrollable attack-chain container; after scroll
+    // the computed center is briefly covered by an adjacent element, timing out the click.
+    await this.getMitreTacticDot(tactic).click({ force: true });
   }
 
   async clearMitreTacticFilter() {
