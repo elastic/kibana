@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiStepNumber,
@@ -21,6 +22,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+const CODE_BLOCK_VISIBLE_LINES = 10;
+/** Row height EUI gives a small code block, which these steps use. */
+const CODE_BLOCK_LINE_HEIGHT = 18;
+
 export interface FederatedIdentityManualSetupStep {
   id: string;
   stepNumber: number;
@@ -28,7 +33,6 @@ export interface FederatedIdentityManualSetupStep {
   description?: React.ReactNode;
   command: string;
   language?: 'shell' | 'bash';
-  initialIsOpen?: boolean;
   lineNumbers?: {
     highlight: string;
     annotations: Record<number, string>;
@@ -51,7 +55,7 @@ export function FederatedIdentityManualSetup({
       </EuiText>
       <EuiSpacer size="m" />
       {steps.map((step, index) => (
-        <FederatedIdentityManualSetupStepAccordion
+        <FederatedIdentityManualSetupStepRow
           key={step.id}
           step={step}
           testSubjPrefix={testSubjPrefix}
@@ -62,7 +66,35 @@ export function FederatedIdentityManualSetup({
   );
 }
 
-function FederatedIdentityManualSetupStepAccordion({
+const showCommandLabel = () =>
+  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.showCommand', {
+    defaultMessage: 'Show command',
+  });
+
+const hideCommandLabel = () =>
+  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.hideCommand', {
+    defaultMessage: 'Hide command',
+  });
+
+const CommandToggleLabel = ({ isOpen }: { isOpen: boolean }) => (
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="primary">
+        {isOpen ? hideCommandLabel() : showCommandLabel()}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIcon
+        type={isOpen ? 'arrowUp' : 'arrowDown'}
+        size="s"
+        color="primary"
+        aria-hidden={true}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+function FederatedIdentityManualSetupStepRow({
   step,
   testSubjPrefix,
   isLastStep,
@@ -71,11 +103,25 @@ function FederatedIdentityManualSetupStepAccordion({
   testSubjPrefix: string;
   isLastStep: boolean;
 }) {
-  const accordionId = useGeneratedHtmlId({ prefix: `${testSubjPrefix}ManualStep-${step.id}` });
+  const commandAccordionId = useGeneratedHtmlId({
+    prefix: `${testSubjPrefix}ManualStepCommand-${step.id}`,
+  });
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
+  /**
+   * Long commands scroll instead of pushing the following steps out of view.
+   * Capping the block ourselves keeps EUI from offering a full screen view,
+   * which these commands do not need.
+   */
+  const codeBlockMaxHeight = CODE_BLOCK_VISIBLE_LINES * CODE_BLOCK_LINE_HEIGHT;
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="stretch" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="m"
+      alignItems="stretch"
+      responsive={false}
+      data-test-subj={`${testSubjPrefix}ManualStep-${step.id}`}
+    >
       <EuiFlexItem grow={false} aria-hidden={true}>
         <EuiFlexGroup
           direction="column"
@@ -98,54 +144,46 @@ function FederatedIdentityManualSetupStepAccordion({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiAccordion
-          id={accordionId}
-          buttonContent={
-            <EuiTitle size="xs">
-              <h4>
-                <EuiScreenReaderOnly>
-                  <span>
-                    {i18n.translate(
-                      'xpack.dataFederation.createFlyout.federated.manual.stepLabel',
-                      {
-                        defaultMessage: 'Step {stepNumber}:',
-                        values: { stepNumber: step.stepNumber },
-                      }
-                    )}{' '}
-                  </span>
-                </EuiScreenReaderOnly>
-                {step.title}
-              </h4>
-            </EuiTitle>
-          }
-          initialIsOpen={step.initialIsOpen ?? step.stepNumber === 1}
-          paddingSize="none"
-          data-test-subj={`${testSubjPrefix}ManualStep-${step.id}`}
-        >
-          {/* Clears the accordion arrow so the content lines up with the step title. */}
-          <div
-            css={{
-              paddingInlineStart: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
-            }}
-          >
+        <EuiTitle size="xs">
+          <h4>
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('xpack.dataFederation.createFlyout.federated.manual.stepLabel', {
+                  defaultMessage: 'Step {stepNumber}:',
+                  values: { stepNumber: step.stepNumber },
+                })}{' '}
+              </span>
+            </EuiScreenReaderOnly>
+            {step.title}
+          </h4>
+        </EuiTitle>
+        {step.description ? (
+          <>
             <EuiSpacer size="s" />
-            {step.description ? (
-              <>
-                <EuiText size="s" color="subdued">
-                  {step.description}
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            ) : null}
-            <EuiCodeBlock
-              language={step.language ?? 'shell'}
-              isCopyable
-              lineNumbers={step.lineNumbers}
-              data-test-subj={`${testSubjPrefix}ManualStepCommand-${step.id}`}
-            >
-              {step.command}
-            </EuiCodeBlock>
-          </div>
+            <EuiText size="s" color="subdued">
+              {step.description}
+            </EuiText>
+          </>
+        ) : null}
+        <EuiSpacer size="s" />
+        <EuiAccordion
+          id={commandAccordionId}
+          arrowDisplay="none"
+          buttonContent={<CommandToggleLabel isOpen={isCommandOpen} />}
+          onToggle={setIsCommandOpen}
+          paddingSize="none"
+          data-test-subj={`${testSubjPrefix}ManualStepCommandToggle-${step.id}`}
+        >
+          <EuiSpacer size="s" />
+          <EuiCodeBlock
+            language={step.language ?? 'shell'}
+            isCopyable
+            lineNumbers={step.lineNumbers ?? true}
+            css={{ '.euiCodeBlock__pre': { maxBlockSize: codeBlockMaxHeight } }}
+            data-test-subj={`${testSubjPrefix}ManualStepCommand-${step.id}`}
+          >
+            {step.command}
+          </EuiCodeBlock>
         </EuiAccordion>
         {!isLastStep ? <EuiSpacer size="m" /> : null}
       </EuiFlexItem>

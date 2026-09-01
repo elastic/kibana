@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
@@ -16,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -25,7 +27,6 @@ export function FederatedIdentityDeployPanel({
   description,
   launchUrl,
   launchButtonLabel,
-  launchHint,
   createsTitle,
   createsItems,
   testSubjPrefix,
@@ -35,72 +36,98 @@ export function FederatedIdentityDeployPanel({
   description: string;
   launchUrl: string;
   launchButtonLabel: string;
-  launchHint: string;
   createsTitle: string;
   createsItems: string[];
   testSubjPrefix: string;
 }) {
   const createsAccordionId = useGeneratedHtmlId({ prefix: 'federatedIdentityDeployCreates' });
+  const { euiTheme } = useEuiTheme();
+  /** Each resource is its own thing to take in, so they do not run together. */
+  const createsListCss = css`
+    li + li {
+      margin-block-start: ${euiTheme.size.s};
+    }
+  `;
+  /** Without a border to set it apart, the section needs room of its own. */
+  const deployPanelCss = css`
+    padding-block: ${euiTheme.size.base};
+  `;
+  /** Lines up with the description, past the provider icon beside it. */
+  const createsSectionCss = css`
+    padding-inline-start: calc(${euiTheme.size.xl} + ${euiTheme.size.m});
+  `;
+  /** A footnote, so it sits below the surrounding headings in weight. */
+  const createsTitleCss = css`
+    font-weight: ${euiTheme.font.weight.medium};
+  `;
 
   return (
-    <>
-      <EuiPanel hasBorder paddingSize="m" data-test-subj={`${testSubjPrefix}DeployPanel`}>
-        <EuiFlexGroup responsive={false} gutterSize="m" alignItems="flexStart">
-          <EuiFlexItem>
-            <EuiFlexGroup responsive={false} gutterSize="m" alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={cloudProviderIcon} size="xl" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>{title}</h4>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p>{description}</p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              iconType="popout"
-              iconSide="right"
-              href={launchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-test-subj={`${testSubjPrefix}DeployLaunchButton`}
-            >
-              {launchButtonLabel}
-            </EuiButton>
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              {launchHint}
+    <EuiPanel
+      color="transparent"
+      hasShadow={false}
+      paddingSize="none"
+      css={deployPanelCss}
+      data-test-subj={`${testSubjPrefix}DeployPanel`}
+    >
+      <EuiFlexGroup responsive={false} gutterSize="xl" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={cloudProviderIcon} size="xl" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h4>{title}</h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p>{description}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            iconType="popout"
+            iconSide="right"
+            href={launchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-test-subj={`${testSubjPrefix}DeployLaunchButton`}
+          >
+            {launchButtonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {/*
+        The resource list is a footnote to the description, so it keeps that
+        text's indent, but it reads better across the whole panel than squeezed
+        into the column beside the button.
+      */}
+      <div css={createsSectionCss}>
+        <EuiAccordion
+          id={createsAccordionId}
+          buttonContent={
+            <EuiText size="s" css={createsTitleCss}>
+              {createsTitle}
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="l" />
-      <EuiAccordion
-        id={createsAccordionId}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h4>{createsTitle}</h4>
-          </EuiTitle>
-        }
-        initialIsOpen={false}
-        paddingSize="m"
-        data-test-subj={`${testSubjPrefix}DeployCreatesPanel`}
-      >
-        <EuiText size="s" color="subdued" as="div">
-          <ol>
-            {createsItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-        </EuiText>
-      </EuiAccordion>
-    </>
+          }
+          initialIsOpen={false}
+          paddingSize="s"
+          arrowProps={{ iconSize: 's' }}
+          data-test-subj={`${testSubjPrefix}DeployCreatesPanel`}
+        >
+          <EuiText size="xs" color="subdued" component="div" css={createsListCss}>
+            <ol>
+              {createsItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </EuiText>
+        </EuiAccordion>
+      </div>
+    </EuiPanel>
   );
 }

@@ -27,7 +27,7 @@ export const getS3FederatedIdentityDescription = () =>
 export const getS3FederatedIdentityManualIntro = () =>
   i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.intro', {
     defaultMessage:
-      'Run the commands below in order in AWS CloudShell, or any shell with the AWS CLI configured and permissions to create IAM resources. Copy each step, paste it into the shell, wait for it to finish, then open the next step.',
+      'Run the commands below in order in AWS CloudShell, or any shell with the AWS CLI configured and permissions to create IAM resources.',
   });
 
 export const getS3FederatedIdentityManualSteps = (
@@ -43,10 +43,9 @@ export const getS3FederatedIdentityManualSteps = (
       'xpack.dataFederation.createFlyout.s3.federated.manual.step1.description',
       {
         defaultMessage:
-          'Creates an IAM provider that trusts the tokens Elastic issues, with sts.amazonaws.com as the token audience. Skip this step if you already have an AWS identity provider configured for Elastic. Set IDP_ARN to that provider ARN and ISSUER_HOST to the issuer host without the https:// prefix.',
+          'Skip this step if you already have an AWS identity provider configured for Elastic. Set IDP_ARN to that provider ARN and ISSUER_HOST to the issuer host without the https:// prefix.',
       }
     ),
-    initialIsOpen: true,
     command: `export JWT_ISSUER="${values.jwtIssuer}"
 export SUBJECT="${values.subject}"
 
@@ -70,7 +69,7 @@ ISSUER_HOST="\${JWT_ISSUER#https://}"`,
       'xpack.dataFederation.createFlyout.s3.federated.manual.step2.description',
       {
         defaultMessage:
-          'Grants s3:GetObject to read your objects, plus s3:ListBucket and s3:GetBucketLocation so prefix and glob queries resolve. The policy covers the whole bucket — narrow the object resource to a prefix for a tighter scope.',
+          'ListBucket and GetBucketLocation are needed so prefix and glob queries resolve, not just object reads. The policy covers the whole bucket — narrow the object resource to a prefix for a tighter scope.',
       }
     ),
     command: `export BUCKET_NAME="<your-bucket-name>"
@@ -110,7 +109,7 @@ EOF
       'xpack.dataFederation.createFlyout.s3.federated.manual.step3.description',
       {
         defaultMessage:
-          'The trust policy lets only your identity provider assume the role, and only when the token audience and subject match your values. The command prints the role ARN you need below.',
+          'Only your identity provider can assume the role, and only for your token audience and subject. The command prints the role ARN you need below.',
       }
     ),
     command: `export ROLE_NAME="elastic-data-federation"
@@ -152,8 +151,7 @@ export const getS3FederatedIdentityDeployConfig = () => ({
     defaultMessage: 'Deploy with AWS CloudFormation',
   }),
   description: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.description', {
-    defaultMessage:
-      'The template creates an OIDC identity provider, IAM role, and S3 read policy in your AWS account.',
+    defaultMessage: 'Runs a stack in the AWS console and returns a role ARN to paste below.',
   }),
   launchUrl: AWS_CLOUDFORMATION_LAUNCH_URL,
   launchButtonLabel: i18n.translate(
@@ -162,9 +160,6 @@ export const getS3FederatedIdentityDeployConfig = () => ({
       defaultMessage: 'Launch CloudFormation template',
     }
   ),
-  launchHint: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.launchHint', {
-    defaultMessage: 'Opens in AWS Console → CloudFormation',
-  }),
   createsTitle: i18n.translate(
     'xpack.dataFederation.createFlyout.s3.federated.deploy.createsTitle',
     {

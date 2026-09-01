@@ -28,7 +28,7 @@ export const getGcsFederatedIdentityDescription = () =>
 export const getGcsFederatedIdentityManualIntro = () =>
   i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.manual.intro', {
     defaultMessage:
-      'Run the commands below in order in Google Cloud Shell or any shell with gcloud configured. Copy each step, paste it into the shell, wait for it to finish, then open the next step.',
+      'Run the commands below in order in Google Cloud Shell or any shell with gcloud configured.',
   });
 
 export const getGcsFederatedIdentityManualSteps = (
@@ -40,7 +40,6 @@ export const getGcsFederatedIdentityManualSteps = (
     title: i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.manual.step1.title', {
       defaultMessage: 'Create the workload identity pool',
     }),
-    initialIsOpen: true,
     command: `export PROJECT_ID="<your-gcp-project-id>"
 export POOL_ID="elastic-data-federation"
 export PROVIDER_ID="elastic-issuer"
@@ -109,7 +108,7 @@ export const getGcsFederatedIdentityDeployConfig = () => ({
     'xpack.dataFederation.createFlyout.gcs.federated.deploy.description',
     {
       defaultMessage:
-        'The deployment creates a workload identity pool, OIDC provider, and service account binding for GCS read access.',
+        'Sets up workload identity federation in the Google Cloud console and returns the provider name to use below.',
     }
   ),
   launchUrl: GCP_DEPLOY_LAUNCH_URL,
@@ -119,9 +118,6 @@ export const getGcsFederatedIdentityDeployConfig = () => ({
       defaultMessage: 'Open workload identity setup',
     }
   ),
-  launchHint: i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.launchHint', {
-    defaultMessage: 'Opens in Google Cloud Console → IAM → Workload Identity Federation',
-  }),
   createsTitle: i18n.translate(
     'xpack.dataFederation.createFlyout.gcs.federated.deploy.createsTitle',
     {

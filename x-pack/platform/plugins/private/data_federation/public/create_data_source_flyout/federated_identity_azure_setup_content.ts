@@ -28,7 +28,7 @@ export const getAzureFederatedIdentityDescription = () =>
 export const getAzureFederatedIdentityManualIntro = () =>
   i18n.translate('xpack.dataFederation.createFlyout.azure.federated.manual.intro', {
     defaultMessage:
-      'Run the commands below in order in Azure Cloud Shell or any shell with the Azure CLI configured. Copy each step, paste it into the shell, wait for it to finish, then open the next step.',
+      'Run the commands below in order in Azure Cloud Shell or any shell with the Azure CLI configured.',
   });
 
 export const getAzureFederatedIdentityManualSteps = (
@@ -40,7 +40,6 @@ export const getAzureFederatedIdentityManualSteps = (
     title: i18n.translate('xpack.dataFederation.createFlyout.azure.federated.manual.step1.title', {
       defaultMessage: 'Create the app registration',
     }),
-    initialIsOpen: true,
     command: `export APP_NAME="elastic-data-federation"
 
 APP_ID=$(az ad app create \\
@@ -102,7 +101,7 @@ export const getAzureFederatedIdentityDeployConfig = () => ({
     'xpack.dataFederation.createFlyout.azure.federated.deploy.description',
     {
       defaultMessage:
-        'The template creates an app registration, federated credential, and storage blob data reader role assignment.',
+        'Runs a custom deployment in the Azure portal and returns the tenant and client IDs to paste below.',
     }
   ),
   launchUrl: AZURE_DEPLOY_LAUNCH_URL,
@@ -110,12 +109,6 @@ export const getAzureFederatedIdentityDeployConfig = () => ({
     'xpack.dataFederation.createFlyout.azure.federated.deploy.launchButton',
     {
       defaultMessage: 'Launch ARM template',
-    }
-  ),
-  launchHint: i18n.translate(
-    'xpack.dataFederation.createFlyout.azure.federated.deploy.launchHint',
-    {
-      defaultMessage: 'Opens in Azure Portal → Custom deployment',
     }
   ),
   createsTitle: i18n.translate(
