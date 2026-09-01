@@ -21,7 +21,14 @@ export function optimizeTaskStateForFlapping<
 ): Record<string, Alert<State, Context, RecoveryActionGroupId>> {
   // this is a space saving effort that will remove the oldest recovered alerts
   // tracked in the task state if the number of alerts we plan to track is over the max alert limit
-  const alertIdsOverMaxLimit = getAlertIdsOverMaxLimit(logger, recoveredAlerts, maxAlerts);
+  const alertIdsOverMaxLimit = getAlertIdsOverMaxLimit(recoveredAlerts, maxAlerts);
+  if (alertIdsOverMaxLimit.length > 0) {
+    logger.warn(
+      `Recovered alerts have exceeded the max alert limit of ${maxAlerts} : dropping ${
+        alertIdsOverMaxLimit.length
+      } ${alertIdsOverMaxLimit.length > 1 ? 'alerts' : 'alert'}.`
+    );
+  }
   for (const id of alertIdsOverMaxLimit) {
     delete recoveredAlerts[id];
   }
@@ -40,15 +47,10 @@ export function optimizeTaskStateForFlapping<
   return recoveredAlerts;
 }
 
-export function getAlertIdsOverMaxLimit<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
->(
-  logger: Logger,
-  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>,
+export function getAlertIdsOverMaxLimit(
+  trackedRecoveredAlerts: Record<string, { getFlappingHistory: () => boolean[] | undefined }>,
   maxAlerts: number
-) {
+): string[] {
   const alerts = map(trackedRecoveredAlerts, (alert, id) => {
     return {
       id,
@@ -56,19 +58,14 @@ export function getAlertIdsOverMaxLimit<
     };
   });
 
-  let earlyRecoveredAlertIds: string[] = [];
-  if (alerts.length > maxAlerts) {
-    // alerts are sorted by age using the length of the flapping array
-    alerts.sort((a, b) => {
-      return a.flappingHistory.length - b.flappingHistory.length;
-    });
-
-    earlyRecoveredAlertIds = alerts.slice(maxAlerts).map((alert) => alert.id);
-    logger.warn(
-      `Recovered alerts have exceeded the max alert limit of ${maxAlerts} : dropping ${
-        earlyRecoveredAlertIds.length
-      } ${earlyRecoveredAlertIds.length > 1 ? 'alerts' : 'alert'}.`
-    );
+  if (alerts.length <= maxAlerts) {
+    return [];
   }
-  return earlyRecoveredAlertIds;
+
+  // alerts are sorted by age using the length of the flapping array
+  alerts.sort((a, b) => {
+    return a.flappingHistory.length - b.flappingHistory.length;
+  });
+
+  return alerts.slice(maxAlerts).map((alert) => alert.id);
 }

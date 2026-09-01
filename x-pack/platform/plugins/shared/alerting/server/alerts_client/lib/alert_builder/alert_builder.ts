@@ -14,6 +14,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
   ALERT_STATUS_RECOVERED,
+  ALERT_TRACKED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -32,6 +33,7 @@ import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
 import type { LegacyAlertsClient } from '../../legacy_alerts_client';
+import { getAlertIdsOverMaxLimit } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
 interface AlertBuilderOpts<
   State extends AlertInstanceState,
@@ -258,6 +260,14 @@ export class AlertBuilder<
   private buildRecoveredAlerts(): Array<Alert & AlertData> {
     const { rawRecoveredAlerts } = this.legacyAlertsClient.getRawAlertInstancesForState();
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
+    const trackedRecoveredAlerts =
+      this.legacyAlertsClient.getProcessedAlerts('trackedRecoveredAlerts');
+    // Recovered alerts dropped from task state by the max-alerts cap still need
+    // tracked: false in AAD. They can retain true values in flapping_history and
+    // would otherwise match the tracked query forever.
+    const droppedByMaxAlertLimit = new Set(
+      getAlertIdsOverMaxLimit(trackedRecoveredAlerts, this.legacyAlertsClient.getMaxAlertLimit())
+    );
 
     const recoveredAlertsToIndex = [];
     for (const id of keys(rawRecoveredAlerts)) {
@@ -265,29 +275,28 @@ export class AlertBuilder<
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
+        const alertDoc = recoveredAlerts[id]
+          ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
+              alert: trackedAlert,
+              legacyAlert: recoveredAlerts[id],
+              rule: this.rule,
+              ruleData: this.alertRuleData,
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+            })
+          : buildUpdatedRecoveredAlert<AlertData>({
+              alert: trackedAlert,
+              legacyRawAlert: rawRecoveredAlerts[id],
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              rule: this.rule,
+            });
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
-            ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>(
-                {
-                  alert: trackedAlert,
-                  legacyAlert: recoveredAlerts[id],
-                  rule: this.rule,
-                  ruleData: this.alertRuleData,
-                  runTimestamp: this.runTimestampString,
-                  timestamp: this.currentTime,
-                  payload: this.reportedAlerts[id],
-                  recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
-                  kibanaVersion: this.kibanaVersion,
-                  dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
-                }
-              )
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: trackedAlert,
-                legacyRawAlert: rawRecoveredAlerts[id],
-                runTimestamp: this.runTimestampString,
-                timestamp: this.currentTime,
-                rule: this.rule,
-              })
+          droppedByMaxAlertLimit.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
         );
       }
     }

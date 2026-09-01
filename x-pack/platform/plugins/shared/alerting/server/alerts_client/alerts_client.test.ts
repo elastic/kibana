@@ -1006,11 +1006,12 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(4);
+          expect(spy).toHaveBeenCalledTimes(5);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'delayed');
           expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
-          expect(spy).toHaveBeenNthCalledWith(4, 'delayed');
+          expect(spy).toHaveBeenNthCalledWith(4, 'trackedRecoveredAlerts');
+          expect(spy).toHaveBeenNthCalledWith(5, 'delayed');
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,
@@ -1324,6 +1325,151 @@ describe('Alerts Client', () => {
             request: fakeRequest,
             ruleTypeCategory: 'test',
             spaceId: 'space1',
+          });
+        });
+
+        test('should set tracked to false on newly recovered alerts dropped by the max-alerts cap', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            maxAlerts: 1,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+              '2': trackedAlert2Raw,
+            },
+          });
+
+          // Do not report either alert so both recover. Alert 2 has the longer
+          // flapping history and is dropped from task state by the max-alerts cap.
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          const recoveredDocs = bulkBody.filter((item) => item[ALERT_STATUS] === 'recovered');
+          const trackedByInstanceId = Object.fromEntries(
+            recoveredDocs.map((doc) => [doc[ALERT_INSTANCE_ID], doc[ALERT_TRACKED]])
+          );
+
+          expect(trackedByInstanceId).toEqual({
+            '1': true,
+            '2': false,
+          });
+        });
+
+        test('should set tracked to false on ongoing recovered alerts dropped by the max-alerts cap', async () => {
+          const recoveredAlert1 = {
+            ...fetchedAlert1,
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_FLAPPING_HISTORY]: [true, true],
+          };
+          const recoveredAlert2 = {
+            ...fetchedAlert2,
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_FLAPPING_HISTORY]: new Array(20).fill(true),
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: recoveredAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: recoveredAlert2,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            maxAlerts: 1,
+            recoveredAlertsFromState: {
+              '1': {
+                meta: {
+                  uuid: 'abc',
+                  flapping: false,
+                  flappingHistory: [true, true],
+                },
+              },
+              '2': {
+                meta: {
+                  uuid: 'def',
+                  flapping: false,
+                  flappingHistory: new Array(20).fill(true),
+                },
+              },
+            },
+          });
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          const recoveredDocs = bulkBody.filter((item) => item[ALERT_STATUS] === 'recovered');
+          const trackedByInstanceId = Object.fromEntries(
+            recoveredDocs.map((doc) => [doc[ALERT_INSTANCE_ID], doc[ALERT_TRACKED]])
+          );
+
+          expect(trackedByInstanceId).toEqual({
+            '1': true,
+            '2': false,
           });
         });
 

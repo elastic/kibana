@@ -35,6 +35,9 @@ describe('optimizeTaskStateForFlapping', () => {
     );
 
     expect(Object.keys(recoveredAlerts)).toEqual(['1', '3']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Recovered alerts have exceeded the max alert limit of 2 : dropping 1 alert.'
+    );
   });
 
   test('should not remove alerts if the number of recovered alerts is not over the limit', () => {
@@ -65,7 +68,6 @@ describe('optimizeTaskStateForFlapping', () => {
   describe('getAlertIdsOverMaxLimit', () => {
     test('getAlertIdsOverMaxLimit should return longest recovered alerts', () => {
       const alertIds = getAlertIdsOverMaxLimit(
-        logger,
         {
           '1': alert1,
           '2': alert2,
@@ -74,15 +76,10 @@ describe('optimizeTaskStateForFlapping', () => {
         2
       );
       expect(alertIds).toEqual(['2']);
-
-      expect(logger.warn).toBeCalledWith(
-        'Recovered alerts have exceeded the max alert limit of 2 : dropping 1 alert.'
-      );
     });
 
     test('getAlertIdsOverMaxLimit should not return alerts if the num of recovered alerts is not at the limit', () => {
       const trimmedAlerts = getAlertIdsOverMaxLimit(
-        logger,
         {
           '1': alert1,
           '2': alert2,
