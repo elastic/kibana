@@ -145,6 +145,11 @@ const withBadgesNodeMetadata: ServiceMapAttachmentData['nodeMetadata'] = {
   checkout: { alertsCount: 1, sloStatus: 'degrading', sloCount: 1 },
 };
 
+const withAnomaliesNodeMetadata: ServiceMapAttachmentData['nodeMetadata'] = {
+  payment: { alertsCount: 2, anomalySeverity: 'critical', anomalyScore: 92.5 },
+  checkout: { anomalySeverity: 'minor', anomalyScore: 32 },
+};
+
 export const Basic: Story = {
   args: { connections: basicConnections },
 };
@@ -172,4 +177,9 @@ export const SingleServiceWithExternalDependency: Story = {
 /** Nodes with alert count and SLO violation/degrading badges (via nodeMetadata). */
 export const WithAlertAndSloBadges: Story = {
   args: { connections: withBadgesConnections, nodeMetadata: withBadgesNodeMetadata },
+};
+
+/** Nodes with ML anomaly severity (border color + health badge via anomalyScore). */
+export const WithAnomalyBadges: Story = {
+  args: { connections: withBadgesConnections, nodeMetadata: withAnomaliesNodeMetadata },
 };

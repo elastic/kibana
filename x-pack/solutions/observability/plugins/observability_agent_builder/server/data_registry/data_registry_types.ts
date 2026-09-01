@@ -211,10 +211,17 @@ export interface ApmMetricsResult {
   baseline?: ApmMetricSnapshot;
 }
 
-/** Per-service alert/SLO badge data, keyed by `service.name`. */
+/** Per-service alert/SLO/anomaly badge data, keyed by `service.name`. */
 export type ServiceNodeMetadataMap = Record<
   string,
-  { alertsCount?: number; sloStatus?: string; sloCount?: number }
+  {
+    alertsCount?: number;
+    sloStatus?: string;
+    sloCount?: number;
+    /** Max ML anomaly severity for the service (`warning` | `minor` | `major` | `critical`). */
+    anomalySeverity?: string;
+    anomalyScore?: number;
+  }
 >;
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {

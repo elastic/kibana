@@ -140,6 +140,28 @@ describe('transformTopologyToServiceMap', () => {
     });
   });
 
+  it('maps anomaly metadata into serviceAnomalyStats so the node badge renders', () => {
+    const { nodes } = transformTopologyToServiceMap({
+      connections: [
+        {
+          source: serviceNode('opbeans-java', 'java'),
+          target: serviceNode('opbeans-node', 'nodejs'),
+        },
+      ],
+      nodeMetadata: {
+        'opbeans-java': { anomalySeverity: 'critical', anomalyScore: 92.5 },
+      },
+    });
+
+    expect(nodes.find((node) => node.id === 'opbeans-java')?.data).toMatchObject({
+      serviceAnomalyStats: { anomalyScore: 92.5 },
+    });
+    expect(
+      (nodes.find((node) => node.id === 'opbeans-node')?.data as { serviceAnomalyStats?: unknown })
+        .serviceAnomalyStats
+    ).toBeUndefined();
+  });
+
   it('collapses A→B and B→A into a single bidirectional edge and dedupes repeats', () => {
     const { edges } = transformTopologyToServiceMap({
       connections: [

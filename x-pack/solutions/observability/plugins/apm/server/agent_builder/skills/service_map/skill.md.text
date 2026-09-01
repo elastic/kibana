@@ -56,7 +56,7 @@ Pass the topology data directly to `attachments.add`:
 }
 ```
 
-The `data.connections` field should contain the exact connections array returned by `get_service_topology`. The `data.nodeMetadata` field should contain the exact `nodeMetadata` object returned alongside it — it carries per-service `alertsCount`, `sloStatus`, and `sloCount`, which render as alert and SLO badges on the service nodes. Pass both through verbatim; do NOT transform, restructure, or compute positions — the renderer handles layout and styling automatically. If `get_service_topology` did not return `nodeMetadata`, omit the field.
+The `data.connections` field should contain the exact connections array returned by `get_service_topology`. The `data.nodeMetadata` field should contain the exact `nodeMetadata` object returned alongside it — it carries per-service `alertsCount`, `sloStatus`, `sloCount`, and ML anomaly fields (`anomalySeverity`, `anomalyScore`), which render as alert, SLO, and anomaly badges on the service nodes. Pass both through verbatim; do NOT transform, restructure, or compute positions — the renderer handles layout and styling automatically. If `get_service_topology` did not return `nodeMetadata`, omit the field.
 
 The `data.timeRange` field should repeat the `start` and `end` you passed to `get_service_topology` — it scopes the map's drill-down views (service details, dependency metrics) and its link to the full Service Map. If the investigation is scoped to a specific environment (for example from the alert's `service.environment`), set `data.environment` to that value — it scopes the same drill-down views and link (the topology tool itself has no environment parameter).
 

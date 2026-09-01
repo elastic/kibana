@@ -107,6 +107,12 @@ function toReactFlowNode(
         alertsCount: metadata?.alertsCount,
         sloStatus: metadata?.sloStatus,
         sloCount: metadata?.sloCount,
+        // The node's anomaly badge derives severity from the score, the same
+        // way the full service map does.
+        serviceAnomalyStats:
+          metadata?.anomalyScore !== undefined
+            ? { anomalyScore: metadata.anomalyScore }
+            : undefined,
       },
     };
   }

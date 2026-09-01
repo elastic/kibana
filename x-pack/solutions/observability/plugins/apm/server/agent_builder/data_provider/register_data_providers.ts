@@ -29,6 +29,8 @@ import {
   getApmMetricsForAttachment,
 } from './get_apm_attachment_data';
 import { getServiceMapServiceBadges } from '../../routes/service_map/get_service_map_service_badges';
+import { getServiceAnomalies } from '../../routes/service_map/get_service_anomalies';
+import { getSeverity, isNoAnomalyScore } from '../../../common/anomaly_detection';
 import { getRelatedAlertsForAttachment } from './get_related_alerts_for_attachment';
 
 export function registerDataProviders({
@@ -368,27 +370,50 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'servicesAlertsAndSlo',
     async ({ request, serviceNames, environment, kuery, start, end }) => {
-      const { apmAlertsClient, sloClient } = await buildApmToolResources({
+      const { apmAlertsClient, sloClient, mlClient } = await buildApmToolResources({
         core,
         plugins,
         request,
       });
 
-      const { alerts, slos } = await getServiceMapServiceBadges({
-        serviceNames,
-        environment: environment ?? ENVIRONMENT_ALL.value,
-        start: parseDatemath(start),
-        end: parseDatemath(end),
-        kuery,
-        apmAlertsClient,
-        sloClient,
-      });
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end);
 
-      // Merge the alert + SLO arrays into a single map keyed by service name,
-      // shaped to drop straight into the service-map attachment's `nodeMetadata`.
+      const [{ alerts, slos }, anomalies] = await Promise.all([
+        getServiceMapServiceBadges({
+          serviceNames,
+          environment: environment ?? ENVIRONMENT_ALL.value,
+          start: startMs,
+          end: endMs,
+          kuery,
+          apmAlertsClient,
+          sloClient,
+        }),
+        // Best-effort: environments without ML (or without APM anomaly
+        // detection jobs) still get alert/SLO badges.
+        getServiceAnomalies({
+          mlClient,
+          environment: environment ?? ENVIRONMENT_ALL.value,
+          start: startMs,
+          end: endMs,
+        }).catch((error) => {
+          logger.debug(`Skipping anomaly badges for service topology: ${error.message}`);
+          return undefined;
+        }),
+      ]);
+
+      // Merge the alert + SLO + anomaly data into a single map keyed by service
+      // name, shaped to drop straight into the service-map attachment's
+      // `nodeMetadata`.
       const nodeMetadata: Record<
         string,
-        { alertsCount?: number; sloStatus?: string; sloCount?: number }
+        {
+          alertsCount?: number;
+          sloStatus?: string;
+          sloCount?: number;
+          anomalySeverity?: string;
+          anomalyScore?: number;
+        }
       > = {};
       for (const alert of alerts) {
         nodeMetadata[alert.serviceName] = {
@@ -401,6 +426,20 @@ export function registerDataProviders({
           ...nodeMetadata[slo.serviceName],
           sloStatus: slo.sloStatus,
           sloCount: slo.sloCount,
+        };
+      }
+      const requestedServiceNames = new Set(serviceNames);
+      for (const anomaly of anomalies?.serviceAnomalies ?? []) {
+        if (!requestedServiceNames.has(anomaly.serviceName)) {
+          continue;
+        }
+        if (isNoAnomalyScore(anomaly.anomalyScore)) {
+          continue;
+        }
+        nodeMetadata[anomaly.serviceName] = {
+          ...nodeMetadata[anomaly.serviceName],
+          anomalySeverity: getSeverity(anomaly.anomalyScore),
+          anomalyScore: anomaly.anomalyScore,
         };
       }
       return nodeMetadata;

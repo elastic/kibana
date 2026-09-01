@@ -57,6 +57,12 @@ const serviceNodeMetadataSchema = z.object({
    */
   sloStatus: z.enum(['violated', 'degrading', 'noData', 'healthy', 'noSLOs']).optional(),
   sloCount: z.number().optional(),
+  /**
+   * Max ML anomaly severity for the service, mirroring `ML_ANOMALY_SEVERITY`.
+   * `anomalyScore` (0–100) drives the anomaly badge on the rendered node.
+   */
+  anomalySeverity: z.enum(['critical', 'major', 'minor', 'warning', 'low', 'unknown']).optional(),
+  anomalyScore: z.number().optional(),
 });
 
 export const serviceMapAttachmentDataSchema = z.object({
