@@ -256,9 +256,9 @@ const isIocType = (value: unknown): value is IocType =>
  * by a consumer, which is incoherent under a contract that says filter on
  * `ioc_tier`. Nothing in the pipeline emits an untiered IOC today.
  *
- * Read-time enforcement is the other half of this and is NOT in place yet. Until
- * the per-space, tier-filtered alias lands, a consumer pointed at the raw index
- * sees every space's intel at every confidence level. See the follow-up.
+ * The per-space, tier-filtered alias is the read-side enforcement. Consumers must
+ * use that alias rather than the raw backing index, which contains every space and
+ * every candidate tier.
  */
 const PROMOTABLE_TIERS: ReadonlySet<string> = new Set([
   'discriminating',
@@ -337,8 +337,8 @@ const isWellFormedForType = (type: IocType, value: string): boolean =>
  */
 const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, unknown> => {
   if (type === 'ip') {
-    // The STIX parser emits IPv6 under the same `ip` type, and filing those as
-    // `ipv4-addr` breaks consumers that map or filter by address family.
+    // The extractor emits both address families under the same `ip` type. Filing
+    // IPv6 as `ipv4-addr` breaks consumers that filter by address family.
     return { type: net.isIPv6(rawValue) ? 'ipv6-addr' : 'ipv4-addr', ip: rawValue };
   }
   if (type === 'url') {
@@ -365,8 +365,8 @@ const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, un
   if (type === 'wallet') {
     return { type: 'cryptocurrency-addr', cryptocurrency: { address: rawValue } };
   }
-  // hash — split by length: 32=md5, 40=sha1, 64=sha256, 128=sha512. STIX feeds
-  // can carry sha512, and filing it under `sha256` would make it unmatchable.
+  // Hashes are split by length: 32=md5, 40=sha1, 64=sha256, 128=sha512.
+  // Filing sha512 under `sha256` would make it unmatchable.
   const len = rawValue.length;
   const hashField = len === 32 ? 'md5' : len === 40 ? 'sha1' : len === 128 ? 'sha512' : 'sha256';
   return { type: 'file', file: { hash: { [hashField]: rawValue.toLowerCase() } } };
@@ -401,8 +401,8 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
-      // Per-IOC reference: use the Maltrail nearest-ref URL when present,
-      // fall back to the report's source.url, absent otherwise.
+      // Prefer a per-IOC reference when present, then fall back to the report's
+      // provenance URL. Both pass through the same sanitizer.
       const reference = normalizeProvenanceUrl(ioc.reference) ?? reportUrl ?? null;
 
       const sourceEntry: SourceEntry = {

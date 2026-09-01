@@ -152,8 +152,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
   describe('malformed values', () => {
     // `threat.indicator.ip` is an `ip` field, so a non-address is a mapping
-    // error, and a mapping error is permanent. One bad STIX pattern must not be
-    // able to cost the index its writes.
+    // error, and a mapping error is permanent. One malformed extracted IOC must
+    // not be able to cost the index its writes.
     it('drops an ip IOC whose value is not an address', () => {
       const ops = buildBulkOpsForTest(
         [
