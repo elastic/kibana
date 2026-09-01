@@ -47,7 +47,6 @@ describe('validateLiquidForLoopCollections', () => {
     results = validateLiquidForLoopCollections(
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
-      model,
       workflowGraph,
       forLoopValidationWorkflowDefinition
     );
@@ -84,7 +83,6 @@ steps:
     const plainResults = validateLiquidForLoopCollections(
       plainYaml,
       parseDocument(plainYaml),
-      createFakeMonacoModel(plainYaml),
       workflowGraph,
       forLoopValidationWorkflowDefinition
     );
@@ -102,7 +100,6 @@ steps:
     const foldedResults = validateLiquidForLoopCollections(
       FOR_LOOP_FOLDED_ONLY_YAML,
       foldedDoc,
-      foldedModel,
       foldedGraph,
       forLoopFoldedOnlyWorkflowDefinition
     );
@@ -116,13 +113,11 @@ steps:
 
   it('reports nested inner collection error without error on valid outer collection', () => {
     const nestedDoc = parseDocument(FOR_LOOP_NESTED_YAML);
-    const nestedModel = createFakeMonacoModel(FOR_LOOP_NESTED_YAML);
     const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
 
     const nestedResults = validateLiquidForLoopCollections(
       FOR_LOOP_NESTED_YAML,
       nestedDoc,
-      nestedModel,
       nestedGraph,
       forLoopNestedWorkflowDefinition
     );
@@ -150,7 +145,6 @@ steps:
     });
 
     const runtimeDoc = parseDocument(FOR_LOOP_RUNTIME_JSON_YAML);
-    const runtimeModel = createFakeMonacoModel(FOR_LOOP_RUNTIME_JSON_YAML);
     const runtimeGraph = WorkflowGraph.fromWorkflowDefinition(forLoopRuntimeJsonWorkflowDefinition);
     const baseSchema = DynamicStepContextSchema.merge(
       getWorkflowContextSchema(forLoopRuntimeJsonWorkflowDefinition, runtimeDoc)
@@ -164,7 +158,6 @@ steps:
     const runtimeResults = validateLiquidForLoopCollections(
       FOR_LOOP_RUNTIME_JSON_YAML,
       runtimeDoc,
-      runtimeModel,
       runtimeGraph,
       forLoopRuntimeJsonWorkflowDefinition
     );
@@ -177,13 +170,11 @@ steps:
 
   it('maps ES|QL result cell collections to warning diagnostics', () => {
     const esqlDoc = parseDocument(FOR_LOOP_ESQL_CELL_YAML);
-    const esqlModel = createFakeMonacoModel(FOR_LOOP_ESQL_CELL_YAML);
     const esqlGraph = WorkflowGraph.fromWorkflowDefinition(forLoopEsqlCellWorkflowDefinition);
 
     const esqlResults = validateLiquidForLoopCollections(
       FOR_LOOP_ESQL_CELL_YAML,
       esqlDoc,
-      esqlModel,
       esqlGraph,
       forLoopEsqlCellWorkflowDefinition
     );
@@ -198,7 +189,6 @@ steps:
 
   it('does not error when the collection resolves to a string literal via assign filters', () => {
     const idiomDoc = parseDocument(FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML);
-    const idiomModel = createFakeMonacoModel(FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML);
     const idiomGraph = WorkflowGraph.fromWorkflowDefinition(
       forLoopEmptyArrayIdiomWorkflowDefinition
     );
@@ -206,7 +196,6 @@ steps:
     const idiomResults = validateLiquidForLoopCollections(
       FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
       idiomDoc,
-      idiomModel,
       idiomGraph,
       forLoopEmptyArrayIdiomWorkflowDefinition
     );
