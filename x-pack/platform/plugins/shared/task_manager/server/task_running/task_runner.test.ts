@@ -37,6 +37,7 @@ import { schema } from '@kbn/config-schema';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -414,7 +415,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
           },
         },
@@ -440,7 +441,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -472,7 +473,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -502,7 +503,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
           },
         },
@@ -531,7 +532,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -566,7 +567,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
@@ -596,7 +597,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: true,
             userProfileId: 'u_profile_123',
           },
@@ -637,7 +638,7 @@ describe('TaskManagerRunner', () => {
           apiKey: 'aw4badfg333',
           userScope: {
             apiKeyId: 'abcdefg',
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             apiKeyCreatedByUser: false,
             userProfileId: 'u_profile_123',
           },
