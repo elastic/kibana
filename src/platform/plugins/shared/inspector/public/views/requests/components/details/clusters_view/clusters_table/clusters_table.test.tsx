@@ -18,15 +18,15 @@ describe('ClustersTable', () => {
       remote1: {
         status: 'successful',
         took: 50,
-      } as unknown as estypes.ClusterDetails,
+      } as estypes.ClusterDetails,
       remote2: {
         status: 'skipped',
         took: 1000,
-      } as unknown as estypes.ClusterDetails,
+      } as estypes.ClusterDetails,
       remote3: {
         status: 'failed',
         took: 90,
-      } as unknown as estypes.ClusterDetails,
+      } as estypes.ClusterDetails,
     };
 
     test('should render rows in native order', () => {

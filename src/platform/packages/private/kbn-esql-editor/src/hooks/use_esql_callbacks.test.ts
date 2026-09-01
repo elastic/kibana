@@ -33,6 +33,7 @@ const createDefaultParams = () => {
   const esqlFieldsCache = createMapCache();
   const dataSourcesCache = createMapCache();
   const historyStarredItemsCache = createMapCache();
+  const timeseriesIndicesCache = createMapCache();
 
   // memoizedFieldsFromESQL never resolves so getColumnsFor stays pending,
   // letting us assert on the AbortSignal that was passed in.
@@ -80,6 +81,11 @@ const createDefaultParams = () => {
     memoizedFieldsFromESQL,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices: jest.fn().mockReturnValue({
+      timestamp: Date.now(),
+      result: Promise.resolve({ indices: [] }),
+    }) as unknown as Parameters<typeof useEsqlCallbacks>[0]['memoizedTimeseriesIndices'],
     favoritesClient: {} as FavoritesClient<StarredQueryMetadata>,
     getJoinIndicesCallback: jest.fn(),
     enableResourceBrowser: false,
