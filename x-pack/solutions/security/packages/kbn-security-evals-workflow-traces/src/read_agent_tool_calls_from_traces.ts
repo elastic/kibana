@@ -150,7 +150,7 @@ export interface ReadAgentToolCallsFromTracesParams {
   indexPattern?: string;
   /** Tool names to drop from the ordered sequence (default: filestore.read). */
   excludeToolIds?: string[];
-  /** When true, also return tools whose `gen_ai.tool.call.failed` flag is set. */
+  /** When true, also return tools whose ECS `event.outcome` is `failure`. */
   includeFailures?: boolean;
 }
 
