@@ -44,7 +44,10 @@
     "oxlint",
     // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
     // knip can't trace dynamic require.resolve() calls.
-    "typescript-7"
+    "typescript-7",
+    // @rsdoctor/rspack-plugin is loaded lazily via nativeRequire() in the
+    // @kbn/rspack-optimizer rspack_runtime shim; knip can't trace dynamic require.
+    "@rsdoctor/rspack-plugin"
   ],
   "workspaces": {
     ".": {

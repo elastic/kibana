@@ -8,7 +8,21 @@
 import { useCallback } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
+import {
+  formatRelatedEntity,
+  formatOmittedRelatedEntityCounts,
+} from '../../../../../common/entity_analytics/lead_generation/format_related_entity';
 import type { HuntingLead } from './types';
+
+export const formatRelatedEntities = (lead: HuntingLead): string => {
+  if (lead.topRelatedEntities.length === 0) return 'None';
+  const lines = lead.topRelatedEntities.map((r) => `- ${formatRelatedEntity(r)}`).join('\n');
+  const omitted = formatOmittedRelatedEntityCounts(
+    lead.topRelatedEntities,
+    lead.relatedEntityCounts
+  );
+  return `${lines}${omitted ? `\n\n_${omitted} not shown._` : ''}`;
+};
 
 // This markdown is sent as an AI agent prompt and must remain in English
 // regardless of user locale — intentionally not using i18n here.
@@ -34,6 +48,9 @@ ${observationList}
 
 ## Tags
 ${lead.tags.join(', ')}
+
+## Related Entities
+${formatRelatedEntities(lead)}
 
 ## Recommended Investigation Prompts
 ${recommendations}`;

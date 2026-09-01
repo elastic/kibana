@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/258036
+test.describe.skip(
   'Creates a custom TLS alert rule',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

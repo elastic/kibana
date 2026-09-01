@@ -9,8 +9,10 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
+import { maybeRedirectForInitialSolutionSetup } from './maybe_redirect_for_initial_solution_setup';
 import type { Space } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
+import type { InitialSolutionSetupService } from '../../initial_solution_setup/initial_solution_setup_service';
 import type { SpacesServiceStart } from '../../spaces_service';
 import type { SpacesPluginStartDeps } from '../../types';
 import { wrapError } from '../errors';
@@ -21,12 +23,14 @@ export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
   getCoreStartServices: CoreSetup<SpacesPluginStartDeps>['getStartServices'];
   getSpacesService: () => SpacesServiceStart;
+  initialSolutionSetup: InitialSolutionSetupService;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
   getCoreStartServices,
   getSpacesService,
+  initialSolutionSetup,
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
@@ -50,6 +54,30 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingApplication = path.startsWith('/app');
     const isEnteringSpace = path === '/spaces/enter';
 
+    const shouldCheckInitialSolutionSetup =
+      initialSolutionSetup.isEligible() &&
+      request.auth.isAuthenticated &&
+      spaceId === DEFAULT_SPACE_ID &&
+      (isRequestingKibanaRoot || isRequestingApplication || isEnteringSpace);
+
+    if (shouldCheckInitialSolutionSetup) {
+      const next = isRequestingApplication
+        ? `${request.url.pathname}${request.url.search}`
+        : request.url.searchParams.get('next') ?? undefined;
+      const setupRedirect = await maybeRedirectForInitialSolutionSetup({
+        request,
+        response,
+        spacesService,
+        initialSolutionSetup,
+        serverBasePath,
+        log,
+        next,
+      });
+      if (setupRedirect) {
+        return setupRedirect;
+      }
+    }
+
     // When the user deliberately selects a space from any entry point, they all navigate to /spaces/enter within
     // the chosen space. Persist that choice fire-and-forget so it never blocks the response,
     // but only when the user has opted in to remembering their selected space.
@@ -65,14 +93,19 @@ export function initSpacesOnPostAuthRequestInterceptor({
           dataPath: 'userSettings',
         })
         .then((profile) => {
-          if (profile?.uid && profile?.data?.userSettings?.rememberSelectedSpace) {
+          const profileSettings = profile?.data?.userSettings ?? {};
+
+          if (profile?.uid && profileSettings?.rememberSelectedSpace !== false) {
             return userProfileService.update(profile.uid, {
-              userSettings: { lastSelectedSpaceId: spaceId },
+              userSettings: {
+                lastSelectedSpaceId: spaceId,
+                ...(!profileSettings?.rememberSelectedSpace ? { rememberSelectedSpace: true } : {}),
+              },
             });
           } else if (
             profile?.uid &&
-            profile?.data?.userSettings?.rememberSelectedSpace === false &&
-            profile?.data?.userSettings?.lastSelectedSpaceId !== null
+            profileSettings?.rememberSelectedSpace === false &&
+            profileSettings?.lastSelectedSpaceId !== null
           ) {
             return userProfileService.update(profile.uid, {
               userSettings: { lastSelectedSpaceId: null },

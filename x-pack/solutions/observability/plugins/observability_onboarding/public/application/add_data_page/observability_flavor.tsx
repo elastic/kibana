@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { useHistory } from 'react-router-dom';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import type { CuratedCategory, MiniTile } from '../add_data_grid';
@@ -42,7 +41,6 @@ export const useObservabilityCuratedCategories = ({
     services: {
       application,
       featureFlags,
-      share,
       context: { isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -60,7 +58,8 @@ export const useObservabilityCuratedCategories = ({
     };
 
     const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
-    const syntheticsLocator = share?.url.locators.get(syntheticsAddMonitorLocatorID);
+    const apmHref = isServerless ? apmUrl : addPathParamToUrl(apmUrl, {});
+    const syntheticsUrl = getUrlForApp?.('synthetics', { path: '/add-monitor' });
     const dynamicNavigation: Record<string, { href?: string; onClick?: React.MouseEventHandler }> =
       {
         // ingest_hub's guided AWS flow wins over the CloudWatch quickstart
@@ -70,9 +69,11 @@ export const useObservabilityCuratedCategories = ({
           : reactRouterNavigate(history, '/aws'),
         opentelemetry: isManagedOtlpServiceAvailable
           ? reactRouterNavigate(history, '/otel-apm')
-          : { href: apmUrl },
-        apm: { href: apmUrl },
-        synthetic_monitor: { href: syntheticsLocator?.getRedirectUrl({ scope: 'create' }) },
+          : { href: apmHref },
+        apm: { href: apmHref },
+        synthetic_monitor: {
+          href: syntheticsUrl ? addPathParamToUrl(syntheticsUrl, {}) : undefined,
+        },
       };
 
     // A grouped tile opens the chooser like a collection search result. Without a
@@ -115,7 +116,6 @@ export const useObservabilityCuratedCategories = ({
     euiTheme,
     application,
     featureFlags,
-    share,
     isServerless,
     isManagedOtlpServiceAvailable,
     collections,
@@ -137,9 +137,14 @@ export const useObservabilityMiniTiles = ({
 
   return useMemo(() => {
     const getUrlForApp = application?.getUrlForApp;
+    const createUrl = getUrlForApp?.('integrations', { path: '/create' });
     const dynamicNavigation: Record<string, { href?: string }> = {
-      auto_import: { href: getUrlForApp?.('integrations', { path: '/create' }) },
-      upload_file: { href: `${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz` },
+      auto_import: {
+        href: createUrl ? addPathParamToUrl(createUrl, {}) : undefined,
+      },
+      upload_file: {
+        href: addPathParamToUrl(`${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`, {}),
+      },
     };
 
     return INTEGRATION_MINI_TILES.map((tile) => {
