@@ -40,4 +40,4 @@ export type {
 } from './src/types';
 
 // Schemas that are needed individually
-export { colorFormatSchema } from './src/field_settings/formats/color';
+export { formatSchema } from './src/field_settings/formats/format_schema';
