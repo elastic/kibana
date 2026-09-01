@@ -13,7 +13,8 @@
  *
  * A `remove_*` action records only the intent to remove. How a removal is
  * carried out — a soft flag, a hard delete, a sibling index — is owned by the
- * KI lifecycle and settled by the apply step.
+ * KI lifecycle and settled by the apply step; nothing here depends on the
+ * answer.
  */
 export const IMPROVEMENT_ACTIONS = [
   'add_ki',
