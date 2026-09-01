@@ -22,6 +22,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { APP_TITLE } from './translations';
 import { ExperimentsListPage } from './pages/experiments_list';
 import { DatasetsListPage } from './pages/datasets_list';
+import { CREATE_DATASET_PATH } from './pages/dataset_create/constants';
 
 const ExperimentDetailPage = React.lazy(async () => {
   const mod = await import('./pages/experiment_detail');
@@ -31,6 +32,11 @@ const ExperimentDetailPage = React.lazy(async () => {
 const DatasetDetailPage = React.lazy(async () => {
   const mod = await import('./pages/dataset_detail');
   return { default: mod.DatasetDetailPage };
+});
+
+const DatasetCreatePage = React.lazy(async () => {
+  const mod = await import('./pages/dataset_create');
+  return { default: mod.DatasetCreatePage };
 });
 
 const RemotesListPage = React.lazy(async () => {
@@ -99,6 +105,10 @@ const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.dat
   defaultMessage: 'Dataset details',
 });
 
+const datasetCreateBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetCreate', {
+  defaultMessage: 'Create dataset',
+});
+
 const EvalsHeader: React.FC = () => {
   return (
     <>
@@ -140,6 +150,10 @@ const getBreadcrumbs = ({
 
   if (pathname === TRACING_PATH) {
     return [{ text: tracingTabLabel }];
+  }
+
+  if (pathname === CREATE_DATASET_PATH) {
+    return [{ text: datasetsTabLabel, href: datasetsHref }, { text: datasetCreateBreadcrumbLabel }];
   }
 
   if (pathname.startsWith(`${DATASETS_PATH}/`)) {
@@ -242,6 +256,7 @@ export const EvalsApp: React.FC<{
             <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
             <Route exact path={RUNS_PATH} component={RunOverviewPage} />
             <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+            <Route exact path={CREATE_DATASET_PATH} component={DatasetCreatePage} />
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
             <Route exact path={REMOTES_PATH} component={RemotesListPage} />
             <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />

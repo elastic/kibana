@@ -27,7 +27,10 @@ jest.mock('./datasets_table', () => ({
         <div data-test-subj="mockFilterValue">{String(props.dataSourceFilter ?? '')}</div>
         <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
-        <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
+        <button
+          data-test-subj="mockEditFirst"
+          onClick={() => (props.onEdit as any)(filteredItems[0])}
+        />
         <button
           data-test-subj="mockSelectFirst"
           onClick={() => (props.onSelectionChange as any)([filteredItems[0]])}
@@ -212,12 +215,12 @@ describe('DatasetsTabContent', () => {
 
     await renderComponent({
       dataSources: [createDataSource('ds1')],
-      dataSets: [],
+      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
       datasetsClient: { add: addMock, delete: jest.fn() },
       loadDataSets,
     });
 
-    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
+    fireEvent.click(document.querySelector('[data-test-subj="mockEditFirst"]') as Element);
     expect(document.querySelector('[data-test-subj="mockCreateDatasetFlyout"]')).not.toBeNull();
 
     fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
@@ -235,12 +238,12 @@ describe('DatasetsTabContent', () => {
 
     await renderComponent({
       dataSources: [createDataSource('ds1')],
-      dataSets: [],
+      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
       datasetsClient: { add: addMock, delete: deleteMock },
       loadDataSets,
     });
 
-    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
+    fireEvent.click(document.querySelector('[data-test-subj="mockEditFirst"]') as Element);
     fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSaveRename"]') as Element);
 
     await waitFor(() => {

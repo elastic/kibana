@@ -62,24 +62,17 @@ const renderSettings = () => {
 const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
   JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
 
-const openAdvanced = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
-  fireEvent.click(getByTestId('createDatasetFlyoutAdvancedSettingsToggle'));
-
 describe('CreateDatasetFlyoutSettings', () => {
-  it('shows the format select at the top level without opening anything', () => {
+  it('shows the format select', () => {
     const { getByTestId } = renderSettings();
     expect(getByTestId('createDatasetFlyoutSettingsFormat')).toBeVisible();
   });
 
-  it('hides the advanced section by default and shows it when toggled', () => {
-    const { getByTestId } = renderSettings();
+  it('shows advanced settings without a hide/show toggle', () => {
+    const { getByTestId, queryByTestId } = renderSettings();
 
-    const toggle = getByTestId('createDatasetFlyoutAdvancedSettingsToggle');
-    const partitionDetection = getByTestId('createDatasetFlyoutSettingsPartitionDetection');
-
-    expect(partitionDetection).not.toBeVisible();
-    fireEvent.click(toggle);
-    expect(partitionDetection).toBeVisible();
+    expect(queryByTestId('createDatasetFlyoutAdvancedSettingsToggle')).toBeNull();
+    expect(getByTestId('createDatasetFlyoutSettingsPartitionDetection')).toBeVisible();
   });
 
   it('updates format in form state', () => {
@@ -95,7 +88,6 @@ describe('CreateDatasetFlyoutSettings', () => {
   it('updates partition_detection in form state', () => {
     const { getByTestId } = renderSettings();
 
-    openAdvanced(getByTestId);
     fireEvent.change(getByTestId('createDatasetFlyoutSettingsPartitionDetection'), {
       target: { value: 'hive' },
     });
@@ -103,9 +95,8 @@ describe('CreateDatasetFlyoutSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
-  it('shows schema_resolution and hive_partitioning in the advanced section', () => {
+  it('shows schema_resolution and hive_partitioning', () => {
     const { getByTestId } = renderSettings();
-    openAdvanced(getByTestId);
 
     expect(getByTestId('createDatasetFlyoutSettingsSchemaResolution')).toBeVisible();
     expect(getByTestId('createDatasetFlyoutSettingsHivePartitioning')).toBeVisible();
@@ -128,19 +119,17 @@ describe('CreateDatasetFlyoutSettings', () => {
         target: { value: 'csv' },
       });
 
-      // Core fields visible without opening the expander
       expect(getByTestId('createDatasetFlyoutSettingsDelimiter')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsMode')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsHeaderRow')).toBeVisible();
     });
 
-    it('shows CSV advanced fields inside the advanced section', () => {
+    it('shows CSV advanced fields when CSV is selected', () => {
       const { getByTestId } = renderSettings();
 
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'csv' },
       });
-      openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeVisible();
@@ -162,13 +151,12 @@ describe('CreateDatasetFlyoutSettings', () => {
   });
 
   describe('NDJSON format', () => {
-    it('shows schema_sample_size and datetime_format inside the advanced section', () => {
+    it('shows schema_sample_size and datetime_format when NDJSON is selected', () => {
       const { getByTestId } = renderSettings();
 
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'ndjson' },
       });
-      openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsDatetimeFormat')).toBeVisible();

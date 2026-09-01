@@ -17,9 +17,11 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
+import { CREATE_DATASET_PATH } from './app_paths';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
@@ -35,7 +37,6 @@ export interface DatasetsTableProps {
   isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
   onDataSourceFilterChange: (next: string) => void;
-  onCreate: () => void;
   onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
@@ -49,7 +50,6 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   isCreateDisabled,
   onSelectionChange,
   onDataSourceFilterChange,
-  onCreate,
   onEdit,
   onDelete,
   onDeleteSelected,
@@ -57,6 +57,8 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   const {
     services: { docLinks },
   } = useKibana<DataFederationKibanaServices>();
+  const history = useHistory();
+  const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
 
   const emptyMessage = useMemo(
     () => (
@@ -192,8 +194,8 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                   fill
                   color="primary"
                   data-test-subj="dataSetsSetsCreateButton"
-                  onClick={onCreate}
                   disabled={isCreateDisabled}
+                  {...(isCreateDisabled ? {} : createDatasetNav)}
                 >
                   {mainTranslations.columns.dataSets.addButtonLabel}
                 </EuiButton>

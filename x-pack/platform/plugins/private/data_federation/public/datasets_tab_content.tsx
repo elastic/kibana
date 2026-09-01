@@ -19,10 +19,7 @@ import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
-type DataSetFlyoutState =
-  | { mode: 'closed' }
-  | { mode: 'create' }
-  | { mode: 'edit'; dataSet: DataSetWithName };
+type DataSetFlyoutState = { mode: 'closed' } | { mode: 'edit'; dataSet: DataSetWithName };
 
 export interface DatasetsTabContentProps {
   dataSources: DataSource[];
@@ -210,15 +207,14 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
         isCreateDisabled={dataSources.length === 0}
         onSelectionChange={setSelectedDataSets}
         onDataSourceFilterChange={setDataSourceFilter}
-        onCreate={() => setFlyout({ mode: 'create' })}
         onEdit={handleEdit}
         onDelete={handleDeleteDataSet}
         onDeleteSelected={handleDeleteSelectedDataSets}
       />
       {flyout.mode !== 'closed' ? (
         <CreateDatasetFlyout
-          key={flyout.mode === 'edit' ? flyout.dataSet.name : 'create'}
-          initialDataSet={flyout.mode === 'edit' ? flyout.dataSet : undefined}
+          key={flyout.dataSet.name}
+          initialDataSet={flyout.dataSet}
           existingDataSetNames={existingDataSetNames}
           dataSources={dataSources}
           onClose={() => handleFlyoutClose()}

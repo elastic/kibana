@@ -11,6 +11,7 @@ export {
   SPACE_SEARCH_COUNT_THRESHOLD,
   ENTER_SPACE_PATH,
   API_VERSIONS,
+  UNKNOWN_SPACE,
 } from './constants';
 export { getRouteUrlForSpace } from './get_spaced_route_url';
 export type {

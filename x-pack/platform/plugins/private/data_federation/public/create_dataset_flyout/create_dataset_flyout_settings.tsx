@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButtonEmpty,
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
@@ -15,7 +14,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
@@ -114,9 +112,6 @@ export function CreateDatasetFlyoutSettings({
   } = useKibana<DataFederationKibanaServices>();
   const dataFederationLinks = docLinks.links.dataFederation;
 
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutAdvancedSettings' });
-
   const { field: formatField, fieldState: formatFieldState } = useController({
     name: 'settings.format',
     control,
@@ -150,42 +145,23 @@ export function CreateDatasetFlyoutSettings({
         />
       </EuiFormRow>
 
-      {/* Core format settings — shown by default without the expander */}
       <CoreFormatSettings control={control} format={format} />
 
       <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
-        aria-expanded={isAdvancedOpen}
-        aria-controls={advancedId}
-        onClick={() => setIsAdvancedOpen((v) => !v)}
-        data-test-subj="createDatasetFlyoutAdvancedSettingsToggle"
-      >
-        {isAdvancedOpen
-          ? createDatasetFlyoutStrings.advancedSettingsHide()
-          : createDatasetFlyoutStrings.advancedSettingsShow()}
-      </EuiButtonEmpty>
-      <div id={advancedId} hidden={!isAdvancedOpen}>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          <EuiLink href={dataFederationLinks.datasetSettings} target="_blank">
-            {createDatasetFlyoutStrings.settingsLearnMore()}
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer size="s" />
-        {/* Format-independent advanced settings */}
-        <UniversalAdvancedSettings control={control} />
-        {/* Per-format advanced settings */}
-        <FormatAdvancedSettings control={control} format={format} />
-      </div>
+      <EuiText size="xs" color="subdued">
+        <EuiLink href={dataFederationLinks.datasetSettings} target="_blank">
+          {createDatasetFlyoutStrings.settingsLearnMore()}
+        </EuiLink>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <UniversalAdvancedSettings control={control} />
+      <FormatAdvancedSettings control={control} format={format} />
     </>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Core format settings — shown by default (outside the advanced expander)
+// Core format settings — shown when CSV/TSV is selected
 // ---------------------------------------------------------------------------
 
 function CoreFormatSettings({
@@ -367,7 +343,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
 }
 
 // ---------------------------------------------------------------------------
-// CSV / TSV — advanced fields (inside the expander)
+// CSV / TSV — remaining format fields
 // ---------------------------------------------------------------------------
 
 function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -613,7 +589,7 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
 }
 
 // ---------------------------------------------------------------------------
-// NDJSON — advanced fields (inside the expander)
+// NDJSON — remaining format fields
 // ---------------------------------------------------------------------------
 
 function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {

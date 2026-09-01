@@ -9,55 +9,33 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFieldSearch,
-  EuiFieldText,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiLink,
   EuiPageSection,
   EuiSpacer,
-  EuiTextArea,
-  EuiTitle,
   EuiToolTip,
   useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import {
-  MAX_DATASET_DESCRIPTION_LENGTH,
-  MAX_DATASET_NAME_LENGTH,
-  type DatasetMaturity,
-  type DatasetSummary,
-} from '@kbn/evals-common';
-import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import type { NotificationsStart } from '@kbn/core/public';
-import { KbnDangerCallout } from '@kbn/ui-callout';
-import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
+import { type DatasetMaturity, type DatasetSummary } from '@kbn/evals-common';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import {
   DatasetMaturityBadge,
   DatasetTagBadges,
   DatasetTagFilters,
-  DatasetTagsFields,
 } from '../../components/dataset_tags';
-import {
-  DatasetSpacesBadge,
-  DatasetSpacesPicker,
-  useDatasetSharing,
-} from '../../components/dataset_spaces';
+import { DatasetSpacesBadge } from '../../components/dataset_spaces';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
-import { getErrorMessage } from '../../utils/get_error_message';
+import { CREATE_DATASET_PATH } from '../dataset_create/constants';
 import * as i18n from './translations';
 
 type SortableField = Extract<
@@ -78,21 +56,8 @@ export const DatasetsListPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedMaturity, setSelectedMaturity] = useState<DatasetMaturity[]>([]);
   const [datasetPendingDelete, setDatasetPendingDelete] = useState<DatasetSummary | null>(null);
-  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [maturity, setMaturity] = useState<DatasetMaturity | null>(null);
-  const [spaceIds, setSpaceIds] = useState<string[]>([]);
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [spacesError, setSpacesError] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
 
-  const createDataset = useCreateDataset();
-  const { isEnabled: spacesEnabled, activeSpaceId } = useAccessibleSpaces();
-  const { spaceNamesFor } = useDatasetSharing(spaceIds);
-  const { services } = useKibana<{ notifications?: NotificationsStart }>();
-  const { notifications } = services;
+  const { isEnabled: spacesEnabled } = useAccessibleSpaces();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
@@ -231,25 +196,8 @@ export const DatasetsListPage: React.FC = () => {
     }
   };
 
-  const clearCreateErrors = () => {
-    setNameError(null);
-    setSpacesError(null);
-    setCreateError(null);
-  };
-
-  const openCreateFlyout = () => {
-    setName('');
-    setDescription('');
-    setTags([]);
-    setMaturity(null);
-    setSpaceIds(activeSpaceId ? [activeSpaceId] : []);
-    clearCreateErrors();
-    setIsCreateFlyoutOpen(true);
-  };
-
-  const closeCreateFlyout = () => {
-    setIsCreateFlyoutOpen(false);
-    clearCreateErrors();
+  const openCreatePage = () => {
+    history.push(CREATE_DATASET_PATH);
   };
 
   const clearFilters = () => {
@@ -259,58 +207,6 @@ export const DatasetsListPage: React.FC = () => {
     setSelectedMaturity([]);
     setPageIndex(0);
   };
-
-  const onCreateDataset = async () => {
-    clearCreateErrors();
-
-    if (!name.trim()) {
-      setNameError(i18n.CREATE_DATASET_NAME_REQUIRED_ERROR);
-      return;
-    }
-
-    if (spacesEnabled && spaceIds.length === 0) {
-      setSpacesError(i18n.CREATE_DATASET_SPACES_REQUIRED_ERROR);
-      return;
-    }
-
-    // The picker starts on the active space, which is also what the server
-    // stamps when the assignment is omitted, so only a real change is sent.
-    const isDefaultSpaceSelection =
-      !spacesEnabled || (spaceIds.length === 1 && spaceIds[0] === activeSpaceId);
-
-    const isVisibleHere =
-      isDefaultSpaceSelection || (activeSpaceId != null && spaceIds.includes(activeSpaceId));
-
-    try {
-      const datasetName = name.trim();
-      const { dataset_id: datasetId } = await createDataset.mutateAsync({
-        name: datasetName,
-        description: description.trim(),
-        ...(tags.length > 0 ? { tags } : {}),
-        ...(maturity ? { maturity } : {}),
-        ...(isDefaultSpaceSelection ? {} : { space_ids: spaceIds }),
-      });
-      closeCreateFlyout();
-
-      // The detail page reads through the active space, so a dataset created
-      // only for other spaces would open on a not-found.
-      if (!isVisibleHere) {
-        notifications?.toasts.addSuccess(
-          i18n.getCreatedInOtherSpacesMessage(datasetName, spaceNamesFor(spaceIds))
-        );
-        return;
-      }
-
-      history.push(`/datasets/${datasetId}`);
-    } catch (err) {
-      setCreateError(getErrorMessage(err));
-    }
-  };
-
-  // Deliberately not the facets from the list query above: those follow the search
-  // term, and the tags offered while creating a dataset shouldn't depend on what
-  // happens to be typed in the search box.
-  const suggestedTags = useDatasetTagSuggestions({ enabled: isCreateFlyoutOpen });
 
   const datasets = data?.datasets ?? [];
   const hasActiveSearch = debouncedSearch.trim().length > 0;
@@ -370,7 +266,12 @@ export const DatasetsListPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
+                  <EuiButton
+                    onClick={openCreatePage}
+                    fill
+                    iconType="plusCircle"
+                    data-test-subj="createDatasetButton"
+                  >
                     {i18n.CREATE_DATASET_BUTTON}
                   </EuiButton>
                 </EuiFlexItem>
@@ -399,7 +300,12 @@ export const DatasetsListPage: React.FC = () => {
             actions={
               canManage
                 ? [
-                    <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
+                    <EuiButton
+                      onClick={openCreatePage}
+                      fill
+                      iconType="plusCircle"
+                      data-test-subj="createDatasetButton"
+                    >
                       {i18n.CREATE_DATASET_BUTTON}
                     </EuiButton>,
                   ]
@@ -447,84 +353,6 @@ export const DatasetsListPage: React.FC = () => {
           spaceIds={datasetPendingDelete.space_ids}
           onClose={() => setDatasetPendingDelete(null)}
         />
-      ) : null}
-      {isCreateFlyoutOpen ? (
-        <EuiFlyout onClose={closeCreateFlyout} size="s" aria-labelledby="createDatasetFlyoutTitle">
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2 id="createDatasetFlyoutTitle">{i18n.CREATE_DATASET_FLYOUT_TITLE}</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {createError ? (
-              <>
-                <KbnDangerCallout
-                  announceOnMount
-                  size="s"
-                  title={i18n.CREATE_DATASET_FAILED_TITLE}
-                  text={<p>{createError}</p>}
-                />
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
-            <EuiForm component="form">
-              <EuiFormRow
-                label={i18n.CREATE_DATASET_NAME_LABEL}
-                isInvalid={Boolean(nameError)}
-                error={nameError ?? undefined}
-                fullWidth
-              >
-                <EuiFieldText
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  isInvalid={Boolean(nameError)}
-                  maxLength={MAX_DATASET_NAME_LENGTH}
-                  fullWidth
-                />
-              </EuiFormRow>
-              <EuiFormRow label={i18n.CREATE_DATASET_DESCRIPTION_LABEL} fullWidth>
-                <EuiTextArea
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  rows={3}
-                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
-                  fullWidth
-                />
-              </EuiFormRow>
-              <DatasetTagsFields
-                tags={tags}
-                maturity={maturity}
-                onTagsChange={setTags}
-                onMaturityChange={setMaturity}
-                suggestedTags={suggestedTags}
-              />
-              <DatasetSpacesPicker
-                value={spaceIds}
-                onChange={setSpaceIds}
-                error={spacesError ?? undefined}
-              />
-            </EuiForm>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={closeCreateFlyout}>
-                  {i18n.CREATE_DATASET_CANCEL_BUTTON}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={onCreateDataset}
-                  fill
-                  isLoading={createDataset.isLoading}
-                  disabled={createDataset.isLoading}
-                >
-                  {i18n.CREATE_DATASET_SUBMIT_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
       ) : null}
     </>
   );
