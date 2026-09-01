@@ -8,6 +8,7 @@
  */
 
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import type { VariableItem } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 
 // Mock the imports
@@ -22,7 +23,6 @@ import {
   InvalidForeachParameterErrorCodes,
 } from '../../workflow_context/lib/errors';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
-import type { VariableItem } from '../model/types';
 
 const mockParseVariablePath = parseVariablePath as jest.MockedFunction<typeof parseVariablePath>;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
