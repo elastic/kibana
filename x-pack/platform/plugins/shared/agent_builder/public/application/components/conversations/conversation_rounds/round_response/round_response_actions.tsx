@@ -149,8 +149,10 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
-  const showFeedback = Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed;
-  const showRegenerateButton = isLastRound && !isReadOnly && !isConversationReadOnlyLoading;
+  const isEditable = !isReadOnly && !isConversationReadOnlyLoading;
+  const showFeedback =
+    Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed && isEditable;
+  const showRegenerateButton = isLastRound && isEditable;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>

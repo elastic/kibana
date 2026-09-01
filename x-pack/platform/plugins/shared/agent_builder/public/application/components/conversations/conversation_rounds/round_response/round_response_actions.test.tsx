@@ -9,6 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
+import type { ConversationRound } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { RoundResponseActions } from './round_response_actions';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationReadOnly } from '../../../../hooks/use_conversation';
@@ -69,6 +71,15 @@ const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
 const useConversationReadOnlyMock = jest.mocked(useConversationReadOnly);
 const addSuccessToast = jest.fn();
 
+const createCompletedRound = (): ConversationRound =>
+  ({
+    id: 'round-1',
+    status: ConversationRoundStatus.completed,
+    input: { message: 'hello' },
+    steps: [],
+    response: { message: 'hi' },
+  } as unknown as ConversationRound);
+
 describe('RoundResponseActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -112,5 +123,36 @@ describe('RoundResponseActions', () => {
     render(<RoundResponseActions content="the answer" isVisible isLastRound />);
 
     expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();
+  });
+
+  it('renders the feedback actions for a completed round', () => {
+    render(
+      <RoundResponseActions content="the answer" isVisible rawRound={createCompletedRound()} />
+    );
+
+    expect(screen.getByRole('button', { name: 'Good response' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Bad response' })).toBeInTheDocument();
+  });
+
+  it('hides the feedback actions for read-only conversations', () => {
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: true, isLoading: false });
+
+    render(
+      <RoundResponseActions content="the answer" isVisible rawRound={createCompletedRound()} />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Good response' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Bad response' })).not.toBeInTheDocument();
+  });
+
+  it('hides the feedback actions while read-only state is loading', () => {
+    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: true });
+
+    render(
+      <RoundResponseActions content="the answer" isVisible rawRound={createCompletedRound()} />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Good response' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Bad response' })).not.toBeInTheDocument();
   });
 });
