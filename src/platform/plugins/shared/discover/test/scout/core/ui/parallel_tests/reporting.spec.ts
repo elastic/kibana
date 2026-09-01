@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags, testData } from '../fixtures';
+import { spaceTest, tags, testData } from '../../../common/ui/fixtures';
 
 spaceTest.describe('Discover CSV export', () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {

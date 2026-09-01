@@ -10,7 +10,7 @@
 import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
-import { spaceTest, testData } from '../fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 const ESQL_SESSION_TITLE = 'Reporting ES|QL session';
 
