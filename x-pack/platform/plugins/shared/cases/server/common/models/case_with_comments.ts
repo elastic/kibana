@@ -17,7 +17,6 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
-  isUnifiedCommentAttachment,
   isAlertAttachmentType,
   isEventAttachmentType,
 } from '../../../common/utils/attachments';
@@ -56,7 +55,11 @@ import {
   isCommentRequestTypeEvent,
   countEventsForID,
 } from '../utils';
-import { extractCommentContent } from '../attachments/comment';
+import {
+  extractCommentContent,
+  isLegacyPayloadCommentAttachment,
+  isUnifiedPayloadCommentAttachment,
+} from '../attachments/comment';
 import type {
   AttachmentRequest,
   AttachmentPatchRequestV2,
@@ -70,11 +73,16 @@ import type {
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & (AttachmentRequest | UnifiedAttachmentPayload)>;
 
+/**
+ * Only comment attachments (legacy `user` / unified `comment`) are Lens-reference-eligible.
+ * A generic `'comment' in payload` check would also match legacy `actions`, which has its
+ * own unrelated `comment` field.
+ */
 const getCommentTextFromPayload = (payload: AttachmentRequestV2): string | undefined => {
-  if ('comment' in payload && typeof payload.comment === 'string') {
+  if (isLegacyPayloadCommentAttachment(payload)) {
     return payload.comment;
   }
-  if (isUnifiedCommentAttachment(payload)) {
+  if (isUnifiedPayloadCommentAttachment(payload)) {
     return payload.data.content;
   }
   return undefined;
@@ -389,9 +397,19 @@ export class CaseCommentModel {
       });
 
       const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
-      const newMetadataIndex = Array.isArray(rawMetadataIndex)
-        ? removeItemsByPosition(rawMetadataIndex, idPositionsThatAlreadyExistInCase)
-        : rawMetadataIndex;
+
+      // A scalar metadata.index broadcasts across every id (see doc comment above).
+      // Expand it to a 1-to-1 array before filtering, so the output stays array-shaped
+      // like the legacy alertId/index branch instead of leaving a lone scalar behind.
+      const broadcastMetadataIndex = Array.isArray(rawMetadataIndex)
+        ? rawMetadataIndex
+        : rawMetadataIndex != null
+        ? ids.map(() => rawMetadataIndex)
+        : undefined;
+      const newMetadataIndex =
+        broadcastMetadataIndex != null
+          ? removeItemsByPosition(broadcastMetadataIndex, idPositionsThatAlreadyExistInCase)
+          : broadcastMetadataIndex;
 
       if (newIds.length === 0) {
         return undefined;

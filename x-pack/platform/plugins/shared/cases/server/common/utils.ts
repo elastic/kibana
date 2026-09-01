@@ -26,8 +26,10 @@ import type {
   AttachmentAttributesV2,
   Case,
   EventAttachmentPayload,
+  FileAttachmentMetadata,
   User,
   UserCommentAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
 } from '../../common/types/domain';
 import {
   AttachmentType,
@@ -42,8 +44,11 @@ import {
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
+  FILE_ATTACHMENT_TYPE,
   GENERAL_CASES_OWNER,
   OWNER_INFO,
+  PERSISTABLE_ATTACHMENT_TYPES,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
@@ -65,6 +70,8 @@ import type {
 import {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isCommentAttachmentType,
+  isUnifiedReferenceAttachmentRequest,
   getIndexFromMetadata,
   toStringArray,
 } from '../../common/utils/attachments';
@@ -386,6 +393,35 @@ export const isFileAttachmentRequest = (
 };
 
 /**
+ * A type narrowing function for unified file attachments (`type: 'file'`), the
+ * counterpart of {@link isFileAttachmentRequest} for the legacy `.files` shape.
+ */
+export const isUnifiedFileAttachmentRequest = (
+  context: AttachmentRequestV2
+): context is UnifiedReferenceAttachmentPayload & { metadata: FileAttachmentMetadata } => {
+  return (
+    isUnifiedReferenceAttachmentRequest(context) &&
+    context.type === FILE_ATTACHMENT_TYPE &&
+    FileAttachmentMetadataRt.is(context.metadata)
+  );
+};
+
+/**
+ * True for a unified request whose type is a migrated persistable-state (e.g. `lens`) or
+ * externalReference (e.g. `security.endpoint`) type, excluding `file` — the unified
+ * counterpart of {@link isPersistableStateOrExternalReference} for legacy requests.
+ */
+export const isUnifiedPersistableStateOrExternalReference = (
+  context: AttachmentRequestV2
+): boolean => {
+  return (
+    context.type !== FILE_ATTACHMENT_TYPE &&
+    (PERSISTABLE_ATTACHMENT_TYPES.has(context.type) ||
+      context.type === SECURITY_ENDPOINT_ATTACHMENT_TYPE)
+  );
+};
+
+/**
  * Adds the ids and indices to a map of statuses
  */
 export function createAlertUpdateStatusRequest({
@@ -616,7 +652,7 @@ export const countUserAttachments = (
   let total = 0;
 
   for (const attachment of attachments) {
-    if (attachment.attributes.type === AttachmentType.user) {
+    if (isCommentAttachmentType(attachment.attributes.type)) {
       total += 1;
     }
   }
