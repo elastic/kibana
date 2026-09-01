@@ -25,9 +25,13 @@ export class OtelHostFlowPage {
       'observabilityOnboardingDataIngestStatusActionLink-metrics'
     );
     this.installCodeBlock = this.page.getByTestId('observabilityOnboardingOtelLogsPanelCodeBlock');
-    this.startCodeBlock = this.page.getByTestId(
-      'observabilityOnboardingOtelLogsStartPanelCodeBlock'
-    );
+    this.startCodeBlock = this.page
+      .getByTestId('observabilityOnboardingOtelLogsStartPanelCodeBlock')
+      // Fallback for Kibana builds that predate the start-step test id: both the
+      // v1 OTel flow and the v2 host page render exactly two code blocks — the
+      // install snippet first, then the start snippet. On builds that have the
+      // test id, both sides of the or() resolve to the same element.
+      .or(this.page.locator('code.euiCodeBlock__code').nth(1));
   }
 
   public async selectPlatform(osName: string) {
