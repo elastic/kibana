@@ -88,8 +88,10 @@ const checkDiamondSummaryEmbeddingEndpoint = async (
 /**
  * Seeds the default feed catalog into `.kibana-threat-intel-sources`.
  *
- * Separated from template installation so seeding can be catalog-gated while
- * templates run on every boot. Called only when the catalog is empty.
+ * Runs on every boot, not only when the catalog is empty: `seedDefaultSources`
+ * creates by stable id and treats a 409 as already-present, so re-seeding is
+ * idempotent and preserves operator enable/disable edits. Separated from
+ * template installation so a partial seed can retry independently.
  */
 const seedThreatIntelCatalog = async ({
   esClient,
@@ -164,8 +166,10 @@ const seedThreatIntelCatalog = async ({
  * that caused ALL schema migrations (v14–v19) to silently miss any cluster
  * that had already been seeded.
  *
- * Source catalog seeding is still catalog-gated: it only runs when the sources
- * index is missing or empty (fresh install, or ES data wiped while Kibana ran).
+ * Source catalog seeding also runs on every boot, but is create-only: it
+ * recreates missing defaults by stable id while leaving operator enable/disable
+ * edits (and any operator-added sources) intact. See the call site below for the
+ * trade-off that deleting a seeded default does not stick.
  */
 export const ensureThreatIntelBootstrap = async ({
   esClient,
