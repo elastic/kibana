@@ -13,13 +13,13 @@
 # Values below (timeouts, intervals, defaults) must stay in sync with the
 # constants in streams/common/constants.ts — see continuous_onboarding_workflow.test.ts.
 #
-# This is a managed workflow installed by the streams (and later significant_events) plugin. It is created
+# This is a managed workflow installed by the significant_events plugin. It is created
 # disabled and enabled/disabled via the continuous KI extraction setting.
 
 version: '1'
 name: 'Continuous KI Onboarding'
 enabled: false
-description: 'This workflow is used by the system and should not be modified.'
+description: 'Scheduled system workflow that onboards eligible streams through KI feature identification and query generation. Do not modify.'
 tags:
   - observability
   - streams

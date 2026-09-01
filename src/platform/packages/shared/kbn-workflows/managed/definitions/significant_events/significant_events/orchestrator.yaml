@@ -1,6 +1,6 @@
 version: "1"
 name: "Significant Events Orchestrator"
-description: "Sequences detection and discovery. Each workflow handles its own idle-skip logic."
+description: "Sequences detection and discovery (Nightshift Triager). Each workflow handles its own idle-skip logic."
 enabled: true
 tags:
   - observability

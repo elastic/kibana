@@ -1,12 +1,13 @@
 version: "1"
-name: "Significant Events Scheduled Review"
-description: "Runs bounded Significant Events discovery passes on a schedule for the current space."
+name: "Significant Events Scheduled Triage"
+description: "Runs bounded Nightshift Triager (discovery) passes on a schedule for the current space."
 enabled: false
 tags:
   - observability
   - streams
   - significant-events
   - scheduled
+  - triage
   - review
 settings:
   concurrency:

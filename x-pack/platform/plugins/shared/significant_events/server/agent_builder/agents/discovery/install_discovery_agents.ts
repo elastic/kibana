@@ -15,7 +15,7 @@ import {
 } from './discovery';
 
 /**
- * Installs the system-owned, user-editable discovery agent profile in the target
+ * Installs the system-owned, user-editable Nightshift Triager profile in the target
  * space. Idempotent — does not overwrite existing agents or later user edits.
  */
 export const installDiscoveryAgents = async ({
