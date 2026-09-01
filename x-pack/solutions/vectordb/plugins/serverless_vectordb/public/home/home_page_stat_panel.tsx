@@ -22,12 +22,9 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  euiShadow,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 export interface HomePageStatPanelMetric {
   key: string;
@@ -158,11 +155,7 @@ export const HomePageStatPanel = ({
       <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
         {metrics.map(({ key, label, value, isLoading }) => (
           <EuiFlexItem key={key} grow>
-            <EuiPanel
-              color="plain"
-              paddingSize="m"
-              hasBorder={true}
-            >
+            <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
               <EuiStat
                 data-test-subj={`${testSubj}-${key}`}
                 title={
