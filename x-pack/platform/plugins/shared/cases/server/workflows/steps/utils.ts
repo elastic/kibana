@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { ActionSource } from '../../../common/types/domain';
+import { ActionSourceTypes, isActionSource, toActionSource } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
+import type { GetCasesClientFn } from '../../client/types';
+import { ACTION_SOURCE_STEP_CONFIG_KEY } from '../../common/constants';
 import type { CreateCaseStepOutput } from '../../../common/workflows/steps/create_case';
 import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update_case';
 
@@ -33,12 +36,47 @@ export const normalizeCaseStepUpdatesForBulkPatch = (updates: WorkflowUpdatePayl
 
 export async function getCasesClientFromStepsContext(
   context: StepHandlerContext,
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
+  getCasesClient: GetCasesClientFn
 ): Promise<CasesClient> {
-  // Get the fake request from the workflow context
   const request = context.contextManager.getFakeRequest();
-  return getCasesClient(request);
+  const actionSource = resolveActionSourceFromStepContext(context);
+
+  if (actionSource == null) {
+    return getCasesClient(request);
+  }
+
+  return getCasesClient(request, { actionSource });
 }
+
+export const resolveActionSourceFromStepContext = (
+  context: StepHandlerContext
+): ActionSource | undefined => {
+  const fromConfig = (context.config as Record<string, unknown> | undefined)?.[
+    ACTION_SOURCE_STEP_CONFIG_KEY
+  ];
+  if (isActionSource(fromConfig)) {
+    return fromConfig;
+  }
+
+  try {
+    const wfCtx = context.contextManager.getContext() as {
+      workflow?: { id?: string; name?: string };
+      execution?: { id?: string };
+    };
+    if (typeof wfCtx.workflow?.id === 'string' && wfCtx.workflow.id.length > 0) {
+      return toActionSource({
+        type: ActionSourceTypes.workflow,
+        id: wfCtx.workflow.id,
+        name: wfCtx.workflow.name,
+        runId: wfCtx.execution?.id,
+      });
+    }
+  } catch {
+    // Agent-builder stubs throw from getContext().
+  }
+
+  return undefined;
+};
 
 export const withCaseOwner = async <T>(
   client: CasesClient,
@@ -92,7 +130,7 @@ export function createCasesStepHandler<
   TConfig = unknown,
   TOutputCase extends WorkflowStepCaseResult = WorkflowStepCaseResult
 >(
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
+  getCasesClient: GetCasesClientFn,
   operation: (client: CasesClient, input: TInput, config: TConfig) => Promise<TOutputCase>,
   options?: {
     onError?: (error: unknown, input: TInput, config: TConfig) => Error;

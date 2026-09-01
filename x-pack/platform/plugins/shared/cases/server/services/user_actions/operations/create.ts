@@ -589,7 +589,7 @@ export class UserActionPersister {
         await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
           actions.map((action) => {
             const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
-              action.parameters.attributes
+              this.withActionSource(action.parameters.attributes)
             );
 
             return {
@@ -733,7 +733,9 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to POST a new case user action`);
 
-      const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+        this.withActionSource(attributes)
+      );
 
       const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,
@@ -772,5 +774,13 @@ export class UserActionPersister {
         savedObjectType: CASE_SAVED_OBJECT,
       });
     }
+  }
+
+  private withActionSource(attributes: unknown): unknown {
+    if (this.context.actionSource == null || attributes == null || typeof attributes !== 'object') {
+      return attributes;
+    }
+
+    return { ...attributes, source: this.context.actionSource };
   }
 }
