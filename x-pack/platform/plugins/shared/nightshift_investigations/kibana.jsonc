@@ -11,12 +11,8 @@
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
     "requiredPlugins": [],
-    "optionalPlugins": [
-      "agentBuilder",
-      "spaces",
-      "workflowsExtensions",
-      "workflowsManagement"
-    ],
-    "requiredBundles": []
-  }
+    "optionalPlugins": ["agentBuilder", "spaces", "workflowsExtensions", "workflowsManagement"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"],
+  },
 }
