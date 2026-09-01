@@ -218,18 +218,21 @@ export class CasesWorkflowRunService {
     // Record the case activity immediately after the execution starts.
     // A failure to record must NOT be reported as an execution failure — the run did succeed.
     try {
-      await recordWorkflowExecution({
-        caseIds,
-        workflow: {
-          id: workflow.id,
-          name: workflow.name,
-          executionId: workflowExecutionId,
+      await recordWorkflowExecution(
+        {
+          caseIds,
+          workflow: {
+            id: workflow.id,
+            name: workflow.name,
+            executionId: workflowExecutionId,
+          },
+          origin: buildActivityOrigin({ origin: body.origin, theCase }),
+          // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
+          // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
+          entities: authorizedEntities,
         },
-        origin: buildActivityOrigin({ origin: body.origin, theCase }),
-        // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
-        // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
-        entities: authorizedEntities,
-      }, clientArgs);
+        clientArgs
+      );
       return { workflowExecutionId, activityStatus: 'succeeded' };
     } catch (error) {
       this.logger.error(
