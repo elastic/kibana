@@ -70,7 +70,7 @@ export const RoundInput = ({
     width: 100%;
     background: ${isCurrentUser
       ? euiTheme.colors.backgroundLightPrimary
-      : euiTheme.colors.backgroundBaseSubdued};
+      : euiTheme.colors.backgroundLightText};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: ${euiTheme.border.radius.small} ${euiTheme.size.base} ${euiTheme.size.base}
