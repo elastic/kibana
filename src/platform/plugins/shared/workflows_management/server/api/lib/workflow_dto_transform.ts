@@ -28,6 +28,7 @@ export const transformStorageDocumentToWorkflowDto = (
     id,
     name: source.name,
     description: source.description,
+    tags: source.tags,
     enabled: source.enabled,
     managed: source.managed,
     managedBy: source.managedBy,

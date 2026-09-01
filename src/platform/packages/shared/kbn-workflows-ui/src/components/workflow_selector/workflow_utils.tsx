@@ -138,7 +138,7 @@ export function processWorkflowsToOptions(
       id: workflow.id,
       name: workflow.name,
       description: workflow.description,
-      tags: workflow.definition?.tags || [],
+      tags: workflow.tags || [],
       label: workflow.id,
       searchableLabel: workflow.name,
       disabled: !workflow.enabled,
@@ -152,7 +152,7 @@ export function processWorkflowsToOptions(
               </EuiBadge>
             </EuiToolTip>
           ) : null}
-          <TagsBadge tags={workflow.definition?.tags || []} />
+          <TagsBadge tags={workflow.tags || []} />
         </>
       ),
       validationResult,

@@ -188,7 +188,7 @@ export const WorkflowListTable = ({
         }),
         width: '18%',
         render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowTagsCell tags={item.definition?.tags} isManaged={item.managed === true} />
+          <WorkflowTagsCell tags={item?.tags} isManaged={item.managed === true} />
         ),
       },
       {
