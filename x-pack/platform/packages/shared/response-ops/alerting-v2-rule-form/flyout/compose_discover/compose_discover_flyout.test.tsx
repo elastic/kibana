@@ -142,7 +142,6 @@ jest.mock('./query_sandbox_flyout', () => ({
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
         <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onTimeFieldChange ? (
-          // eslint-disable-next-line jsx-a11y/no-onchange
           <select
             data-test-subj="querySandboxTimeField"
             value={props.timeField}
