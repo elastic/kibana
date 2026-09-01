@@ -70,7 +70,18 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((tz) => ({
   value: tz,
 })) ?? [{ text: 'UTC', value: 'UTC' }];
 
-const stripSecondsFromDateFormat = (format: string): string => format.replace(/[:.,]?\s*s/gi, '');
+const stripSecondsFromDateFormat = (format: string): string =>
+  // Remove seconds components (s) and timezone (z)
+  format.replace(/[:.,]?\s*(s|z)/gi, '').trim();
+
+// Append a default time format to make the picked time visible if the dateFormat ui setting is date-only.
+const getParsedDateFormat = (format: string): string => {
+  // Hour tokens (H, h, k) and time-including localized tokens (LT, LLL, lll)
+  const hasTime = /[Hhk]|LT|LLL|lll/.test(format);
+  const formatWithTime = hasTime ? format : `${format} @ HH:mm`;
+
+  return stripSecondsFromDateFormat(formatWithTime);
+};
 
 export type FormData = Pick<
   ScheduledReport,
@@ -168,7 +179,7 @@ export const ScheduledReportForm = ({
   );
   const { defaultTimezone } = useDefaultTimezone();
   const rawDateFormat = useUiSetting<string>('dateFormat');
-  const dateFormat = useMemo(() => stripSecondsFromDateFormat(rawDateFormat), [rawDateFormat]);
+  const dateFormat = useMemo(() => getParsedDateFormat(rawDateFormat), [rawDateFormat]);
   const hasCcBcc =
     Boolean(scheduledReport.emailCcRecipients?.length) ||
     Boolean(scheduledReport.emailBccRecipients?.length);

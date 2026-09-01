@@ -94,7 +94,7 @@ describe('ScheduledReportForm', () => {
   beforeEach(() => {
     mockUiSettings({
       'dateFormat:tz': 'UTC',
-      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS zz',
     });
     (useKibana as jest.Mock).mockReturnValue({
       services: mockKibanaServices,
@@ -135,7 +135,26 @@ describe('ScheduledReportForm', () => {
     expect(screen.getByTestId('scheduleExportSubmitButton')).toBeInTheDocument();
   });
 
-  it('displays the start date using the dateFormat ui setting without seconds', async () => {
+  it('displays the start date using the dateFormat ui setting without seconds or timezone', async () => {
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        scheduledReport={{
+          ...defaultProps.scheduledReport,
+          startDate: '2025-11-10T12:00:00.000Z',
+        }}
+      />
+    );
+
+    expect(await screen.findByTestId('startDatePicker-input')).toHaveValue('Nov 10, 2025 @ 12:00');
+  });
+
+  it('appends a default time format when the dateFormat ui setting is date-only', async () => {
+    mockUiSettings({
+      'dateFormat:tz': 'UTC',
+      dateFormat: 'MMM D, YYYY',
+    });
+
     renderWithProviders(
       <ScheduledReportForm
         {...defaultProps}
