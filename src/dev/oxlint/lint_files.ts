@@ -43,6 +43,29 @@ interface OxlintJsonReport {
   number_of_files: number;
 }
 
+// ARG_MAX on macOS is 1MB; explicit path lists are batched to stay well under it.
+const MAX_PATHS_PER_RUN = 4000;
+
+interface OxlintRun {
+  report: OxlintJsonReport;
+  exitCode: number;
+  stderr: string;
+}
+
+async function runOxlint(args: string[]): Promise<OxlintRun> {
+  const { stdout, stderr, exitCode } = await execa(
+    oxlintBinPath,
+    ['--config', OXLINT_CONFIG_PATH, '--format', 'json', ...args],
+    { cwd: REPO_ROOT, reject: false, maxBuffer: 256 * 1024 * 1024 }
+  );
+
+  try {
+    return { report: JSON.parse(stdout), exitCode, stderr };
+  } catch {
+    throw createFailError(`${LINT_LOG_PREFIX} exited with ${exitCode}:\n${stderr || stdout}`);
+  }
+}
+
 /**
  * Lints files with oxlint. Reports are written to the log.
  * Returns a result with `failedFiles` populated when errors are found.
@@ -52,27 +75,21 @@ export async function lintFiles(
   files: File[],
   { fix, fullRepo }: LintFilesOptions = {}
 ): Promise<LintFilesResult> {
-  const { stdout, stderr, exitCode } = await execa(
-    oxlintBinPath,
-    [
-      '--config',
-      OXLINT_CONFIG_PATH,
-      '--format',
-      'json',
-      ...(fix ? ['--fix'] : []),
-      ...(fullRepo ? [] : files.map((file) => file.getRelativePath())),
-    ],
-    { cwd: REPO_ROOT, reject: false, maxBuffer: 256 * 1024 * 1024 }
-  );
-
-  let report: OxlintJsonReport;
-  try {
-    report = JSON.parse(stdout);
-  } catch {
-    throw createFailError(`${LINT_LOG_PREFIX} exited with ${exitCode}:\n${stderr || stdout}`);
+  const fixArgs = fix ? ['--fix'] : [];
+  const runs: OxlintRun[] = [];
+  if (fullRepo) {
+    runs.push(await runOxlint(fixArgs));
+  } else {
+    const paths = files.map((file) => file.getRelativePath());
+    for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
+      runs.push(await runOxlint([...fixArgs, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
+    }
   }
 
-  const { diagnostics } = report;
+  const diagnostics = runs.flatMap((run) => run.report.diagnostics);
+  const lintedFileCount = runs.reduce((sum, run) => sum + run.report.number_of_files, 0);
+  const exitCode = runs.find((run) => run.exitCode !== 0)?.exitCode ?? 0;
+  const stderr = runs.map((run) => run.stderr).join('');
   const failedFiles = [
     ...new Set(diagnostics.filter((d) => d.severity === 'error').map((d) => d.filename)),
   ].sort((left, right) => left.localeCompare(right));
@@ -97,12 +114,12 @@ export async function lintFiles(
   if (failedFiles.length > 0) {
     log.error(`${LINT_LOG_PREFIX} errors in ${failedFiles.length} file(s)`);
   } else {
-    log.success(`${LINT_LOG_PREFIX} %d files linted successfully`, report.number_of_files);
+    log.success(`${LINT_LOG_PREFIX} %d files linted successfully`, lintedFileCount);
   }
 
   return {
     failedFiles,
-    lintedFileCount: report.number_of_files,
+    lintedFileCount,
     warningCount,
   };
 }
