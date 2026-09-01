@@ -9,10 +9,8 @@ import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/publ
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataQualityPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataQualityPluginStart {}
 
 export interface AppPluginSetupDependencies {

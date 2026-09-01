@@ -15,7 +15,6 @@ import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNavigationPluginSetup {}
 
 export interface SearchNavigationPluginStart {

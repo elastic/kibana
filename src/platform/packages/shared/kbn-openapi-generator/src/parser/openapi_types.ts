@@ -27,7 +27,6 @@ export type OpenApiSchemasObject = Record<
 // Override the OpenAPI types to add the x-codegen-enabled property to the
 // components object.
 declare module 'openapi-types' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace OpenAPIV3 {
     interface ComponentsObject {
       'x-codegen-enabled'?: boolean;

@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/eslint/require-license-header,@typescript-eslint/unified-signatures */
+/* eslint-disable @kbn/eslint/require-license-header */
 
 /**
  * Type interfaces extracted from node_modules/@types/cheerio/index.d.ts

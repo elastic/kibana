@@ -14,13 +14,10 @@ export interface SetupDependencies {
   embeddable: EmbeddableSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
 export class UrlDrilldownPlugin

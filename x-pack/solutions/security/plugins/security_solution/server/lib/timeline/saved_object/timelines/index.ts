@@ -85,7 +85,6 @@ export const getTimelineOrNull = async (
   let timeline = null;
   try {
     timeline = await getTimeline(frameworkRequest, savedObjectId);
-    // eslint-disable-next-line no-empty
   } catch (e) {}
   if (
     timeline?.status === TimelineStatusEnum.draft &&

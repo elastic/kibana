@@ -131,7 +131,7 @@ export function SearchSessionsMgmtTable({
             sessionStatuses: statuses,
           })
         );
-      } catch (e) {} // eslint-disable-line no-empty
+      } catch (e) {}
 
       if (showLatestResultsHandler.current === renderResults) {
         renderResults(results);

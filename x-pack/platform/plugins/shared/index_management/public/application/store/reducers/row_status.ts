@@ -151,7 +151,7 @@ export const rowStatus = handleActions<RowStatusState, RowStatusPayload>(
       }, {});
 
       const newState = { ...state };
-      // eslint-disable-next-line guard-for-in
+
       for (const indexName in state) {
         const index = indicesByName[indexName];
         if (!index) {

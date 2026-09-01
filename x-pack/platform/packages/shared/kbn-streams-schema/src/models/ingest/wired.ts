@@ -38,8 +38,6 @@ import {
   streamlangIngestStreamProcessingUpsertSchema,
 } from './processing';
 
-/* eslint-disable @typescript-eslint/no-namespace */
-
 interface IngestWired {
   wired: {
     fields: FieldDefinition;

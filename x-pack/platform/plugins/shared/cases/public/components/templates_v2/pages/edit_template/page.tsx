@@ -19,7 +19,6 @@ import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
 import type { TemplateMetadata } from '../../utils/template_metadata';
 import * as i18n from '../../translations';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditTemplatePageProps {}
 
 export const EditTemplatePage: FC<EditTemplatePageProps> = () => {

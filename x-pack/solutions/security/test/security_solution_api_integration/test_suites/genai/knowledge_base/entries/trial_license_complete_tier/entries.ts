@@ -243,7 +243,6 @@ export default ({ getService }: FtrProviderContext) => {
             params: { id: createdEntries[0].id },
             log,
           });
-          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         expect(entry).toBeUndefined();

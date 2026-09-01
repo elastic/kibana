@@ -36,7 +36,6 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
 
 export interface StreamsApplicationProps {

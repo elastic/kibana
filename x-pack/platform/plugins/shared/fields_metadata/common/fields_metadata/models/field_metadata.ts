@@ -12,7 +12,7 @@ import type { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } fr
 import { getOtelFieldName } from '../../helpers/convert_ecs_fields_to_otel';
 
 // Use class/interface merging to define instance properties from FieldMetadataPlain.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface FieldMetadata extends FieldMetadataPlain {}
 export class FieldMetadata {
   private constructor(fieldMetadata: FieldMetadataPlain) {

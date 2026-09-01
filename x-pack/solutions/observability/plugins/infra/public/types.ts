@@ -59,7 +59,6 @@ import type { InventoryViewsServiceStart } from './services/inventory_views';
 import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import type { TelemetryServiceStart } from './services/telemetry';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InfraClientSetupExports {}
 
 export interface InfraClientStartExports {

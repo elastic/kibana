@@ -8,7 +8,6 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineAgentBuilderPublicSetupDependencies {}
 
 export interface ContextEngineAgentBuilderPublicStartDependencies {
@@ -16,8 +15,6 @@ export interface ContextEngineAgentBuilderPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineAgentBuilderPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineAgentBuilderPublicStart {}

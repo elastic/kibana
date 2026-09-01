@@ -46,9 +46,8 @@ export enum PlaygroundPageMode {
   search = 'search',
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface SearchPlaygroundPluginStart {}
 
 export interface AppPluginSetupDependencies {

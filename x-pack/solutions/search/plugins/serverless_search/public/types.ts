@@ -20,10 +20,8 @@ import type {
   SearchHomepagePluginStart,
 } from '@kbn/search-homepage/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginStart {}
 
 export interface ServerlessSearchPluginSetupDependencies {

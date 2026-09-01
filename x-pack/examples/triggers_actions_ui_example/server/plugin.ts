@@ -100,7 +100,6 @@ export class TriggersActionsUiExamplePlugin
 
         try {
           await taskManagerStart.remove(id);
-          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         return res.ok();
@@ -128,7 +127,6 @@ export class TriggersActionsUiExamplePlugin
 
         try {
           await taskManagerStart.bulkRemove(ids);
-          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         return res.ok();

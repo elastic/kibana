@@ -35,8 +35,6 @@ export interface SignificantEventsAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
-/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface SignificantEventsAppPublicSetup {}
 
-/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface SignificantEventsAppPublicStart {}

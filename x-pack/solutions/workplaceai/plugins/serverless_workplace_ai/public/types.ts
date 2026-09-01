@@ -8,10 +8,8 @@
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIServerlessPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIServerlessPluginStart {}
 
 export interface WorkplaceAIServerlessPluginSetupDeps {

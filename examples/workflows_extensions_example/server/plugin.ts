@@ -29,11 +29,10 @@ import {
   EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './managed_workflows';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePluginSetup {
   // No public API needed
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface WorkflowsExtensionsExamplePluginStart {
   // No public API needed
 }

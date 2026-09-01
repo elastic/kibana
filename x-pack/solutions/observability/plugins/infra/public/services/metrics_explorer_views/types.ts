@@ -14,7 +14,6 @@ import type {
 } from '../../../common/http_api';
 import type { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsExplorerViewsServiceSetup {}
 
 export interface MetricsExplorerViewsServiceStart {

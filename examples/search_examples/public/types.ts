@@ -13,9 +13,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchExamplesPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface SearchExamplesPluginStart {}
 
 export interface AppPluginSetupDependencies {

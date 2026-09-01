@@ -12,10 +12,8 @@ import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchAssistantPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchAssistantPluginStart {}
 
 export interface SearchAssistantPluginStartDependencies {

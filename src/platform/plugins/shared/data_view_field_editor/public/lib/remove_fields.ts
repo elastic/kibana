@@ -40,7 +40,6 @@ export async function removeFields(
 
   try {
     services.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'delete_runtime');
-    // eslint-disable-next-line no-empty
   } catch {}
 
   try {

@@ -19,7 +19,6 @@ interface Props {
   typicalActual: MlAnomalyLayersType;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {}
 
 export class LayerSelector extends Component<Props, State> {

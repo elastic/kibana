@@ -7,7 +7,6 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPageObjects extends PageObjects {
   // Add Search-specific page objects here
 }

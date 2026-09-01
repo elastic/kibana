@@ -83,7 +83,6 @@ export class License {
     return this.licenseStatus;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   get isEsSecurityEnabled() {
     return this._isEsSecurityEnabled;
   }

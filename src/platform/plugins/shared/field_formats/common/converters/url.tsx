@@ -166,7 +166,6 @@ export class UrlFormat extends FieldFormat {
 
     switch (this.param('type')) {
       case 'audio':
-        // eslint-disable-next-line jsx-a11y/media-has-caption
         return <audio controls preload="none" src={url} />;
 
       case 'img': {

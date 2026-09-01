@@ -102,7 +102,7 @@ describe('LinkToApp component', () => {
     const spyOnClickHandler = jest.fn().mockImplementation((_event) => {
       throw new Error('test');
     });
-    // eslint-disable-next-line no-empty
+
     try {
     } catch (e) {
       const renderResult = render(

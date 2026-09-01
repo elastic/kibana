@@ -23,7 +23,6 @@ export interface DataUsageSetupDependencies {
   cloud: CloudSetup;
 }
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface DataUsageStartDependencies {}
 
 export interface DataUsageServerSetup {}

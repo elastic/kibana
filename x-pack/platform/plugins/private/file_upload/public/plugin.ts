@@ -28,7 +28,6 @@ import {
   getMaxTikaBytesFormatted,
 } from './importer/get_max_bytes';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadPluginSetupDependencies {}
 export interface FileUploadPluginStartDependencies {
   data: DataPublicPluginStart;

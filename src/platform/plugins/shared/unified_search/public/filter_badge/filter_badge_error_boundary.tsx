@@ -10,7 +10,6 @@
 import React, { Component } from 'react';
 import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FilterBadgeErrorBoundaryProps {}
 
 interface FilterBadgeErrorBoundaryState {

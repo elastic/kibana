@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginStart {}
 
 export type {

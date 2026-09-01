@@ -10,9 +10,8 @@ import type { Plugin, CoreSetup } from '@kbn/core/public';
 import { ReindexService } from './src/reindex_service';
 import type { ReindexServicePublicSetup, ReindexServicePublicStart } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SetupDependencies {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 interface StartDependencies {}
 
 export class ReindexServerPublicPlugin

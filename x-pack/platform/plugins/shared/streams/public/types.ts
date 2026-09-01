@@ -29,7 +29,6 @@ export interface ClassicStreamsStatus {
   can_manage: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
 
 export interface StreamsPluginStart {

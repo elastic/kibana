@@ -34,7 +34,7 @@ describe('ML - URL utils', () => {
     });
 
     test('returns false for non web URLs', () => {
-      expect(isWebUrl('javascript:console.log(window)')).toBe(false); // eslint-disable-line no-script-url
+      expect(isWebUrl('javascript:console.log(window)')).toBe(false);
       expect(isWebUrl('ftp://admin@10.1.2.3/')).toBe(false);
       expect(isWebUrl('mailto:someone@example.com?Subject=Hello%20again')).toBe(false);
     });

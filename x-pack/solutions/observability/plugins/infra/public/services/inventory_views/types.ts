@@ -15,7 +15,6 @@ import type {
   UpdateInventoryViewResponsePayload,
 } from '../../../common/http_api/latest';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InventoryViewsServiceSetup {}
 
 export interface InventoryViewsServiceStart {

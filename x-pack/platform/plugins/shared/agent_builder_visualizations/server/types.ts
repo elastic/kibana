@@ -13,11 +13,8 @@ export interface AgentBuilderVisualizationsSetupDependencies {
   agentBuilderSml: AgentBuilderSmlPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsStartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginStart {}

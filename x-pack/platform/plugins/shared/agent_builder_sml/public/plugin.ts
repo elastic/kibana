@@ -7,16 +7,12 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderSmlPublicPluginSetupDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderSmlPublicPluginStartDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderSmlPublicPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderSmlPublicPluginStart {}
 
 export class AgentBuilderSmlPublicPlugin

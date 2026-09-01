@@ -16,13 +16,10 @@ export interface KQLServerPluginSetup {
   autocomplete: AutocompleteSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KQLServerPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KQLServerPluginSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KQLServerPluginStartDependencies {}
 
 export class KQLServerPlugin

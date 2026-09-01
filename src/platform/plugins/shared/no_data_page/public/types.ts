@@ -13,8 +13,6 @@ export interface NoDataPagePublicSetup {
 
 export type NoDataPagePublicStart = NoDataPagePublicSetup;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NoDataPagePublicSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NoDataPagePublicStartDependencies {}

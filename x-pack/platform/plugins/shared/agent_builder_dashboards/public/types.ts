@@ -12,13 +12,10 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginPublicStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginPublicSetupDependencies {}
 
 export interface AgentBuilderDashboardsPluginPublicStartDependencies {

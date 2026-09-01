@@ -44,7 +44,6 @@ export const QueryWithEsql: Validation<unknown, QueryWithEsql> = validation(
   })
 );
 
-/* eslint-disable @typescript-eslint/no-namespace */
 export namespace QueryStream {
   export interface Model {
     Definition: QueryStream.Definition;

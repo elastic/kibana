@@ -35,7 +35,6 @@ export interface Meta {
   page: MetaPage;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ClientConfigType {}
 
 export type { ConnectorStats } from './connector_stats';

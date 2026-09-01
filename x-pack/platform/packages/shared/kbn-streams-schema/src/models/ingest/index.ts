@@ -12,7 +12,6 @@ import { validation } from '../validation/validation';
 import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
 import { WiredIngest, WiredIngestUpsertRequest, WiredStream } from './wired';
 
-/* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestStream {
   export namespace all {
     export type UpsertRequest = WiredStream.UpsertRequest | ClassicStream.UpsertRequest;

@@ -76,11 +76,11 @@ export type WorkflowsExtensionsPublicPluginStart =
 /**
  * Dependencies for the public plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface WorkflowsExtensionsPublicPluginSetupDeps {}
 
 /**
  * Dependencies for the public plugin start phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface WorkflowsExtensionsPublicPluginStartDeps {}

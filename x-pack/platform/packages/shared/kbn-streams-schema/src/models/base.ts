@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import type { OmitUpsertProps } from './core';
 
-/* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
   export interface QueryStreamReference {
     name: string;

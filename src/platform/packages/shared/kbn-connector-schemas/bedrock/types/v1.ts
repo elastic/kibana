@@ -45,7 +45,7 @@ export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSche
 export type BedrockMessage = z.infer<typeof BedrockMessageSchema>;
 export type BedrockToolChoice = z.infer<typeof BedrockToolChoiceSchema>;
 export type ConverseActionParams = z.infer<typeof BedrockClientSendParamsSchema>;
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface ConverseActionResponse {}
 // cannot directly infer type due to https://github.com/colinhacks/zod/issues/2938
 // export type ConverseActionResponse = z.infer<typeof BedrockClientSendResponseSchema>;

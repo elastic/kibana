@@ -10,13 +10,10 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetupDeps {}
 
 export interface PresentationUtilPluginStartDeps {

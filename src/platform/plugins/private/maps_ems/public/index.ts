@@ -20,7 +20,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { MapConfig, TileMapConfig } from '../server/config';
 export type { EMSConfig } from '../common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsEmsPluginPublicSetup {}
 
 export interface MapsEmsPluginPublicStart {

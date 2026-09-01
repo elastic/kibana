@@ -10,10 +10,8 @@ import type { ServiceType } from '../types';
 // Note: Cluster ID and version are automatically sent with all telemetry events
 // by Kibana's analytics service, so we don't need to include them here.
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ClusterConnectedProps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ClusterDisconnectedProps {}
 
 export interface ServiceToggledProps {

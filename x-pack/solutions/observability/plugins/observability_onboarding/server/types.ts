@@ -40,9 +40,8 @@ export interface ObservabilityOnboardingPluginStartDependencies {
   apm?: APMPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityOnboardingPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface ObservabilityOnboardingPluginStart {}
 
 export type ObservabilityOnboardingRequestHandlerContext = CustomRequestHandlerContext<{}>;

@@ -20,7 +20,6 @@ import { internalKibanaHeaders } from '../shared/client_headers';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import type { KibanaClientFetchOptions } from '../shared/base_kibana_client';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StreamsDocument {}
 
 export interface StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument> {

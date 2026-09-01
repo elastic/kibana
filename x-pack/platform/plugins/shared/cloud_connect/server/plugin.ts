@@ -29,10 +29,8 @@ import {
 import type { CloudConnectConfig } from './config';
 import { registerCloudConnectLicenseSync } from './lib/register_license_sync';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginStart {}
 
 interface CloudConnectedSetupDeps {

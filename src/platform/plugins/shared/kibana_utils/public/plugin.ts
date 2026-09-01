@@ -13,10 +13,8 @@ export type KibanaUtilsPublicSetup = undefined;
 
 export type KibanaUtilsPublicStart = undefined;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaUtilsPublicSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaUtilsPublicStartDependencies {}
 
 export class KibanaUtilsPublicPlugin

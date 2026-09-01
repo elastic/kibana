@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SloSharedPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface SloSharedPluginStart {}

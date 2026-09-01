@@ -662,7 +662,7 @@ describe('#rawToSavedObject', () => {
         _id: 'foo:bar',
         _source: {
           // @ts-expect-error expects a string
-          // eslint-disable-next-line no-new-wrappers
+
           type: new String('foo'),
         },
       })
@@ -691,7 +691,7 @@ describe('#rawToSavedObject', () => {
     expect(() =>
       singleNamespaceSerializer.rawToSavedObject({
         // @ts-expect-error expects a string
-        // eslint-disable-next-line no-new-wrappers
+
         _id: new String('foo:bar'),
         _source: {
           type: 'foo',

@@ -104,7 +104,7 @@ export type { FleetConfigType } from '../common/types';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface FleetSetup {}
 
 /**

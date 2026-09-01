@@ -19,7 +19,6 @@ import type {
 
 export type * from './repositories/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServiceStartDeps {}
 
 export interface FieldsMetadataServiceSetup {

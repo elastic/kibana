@@ -29,7 +29,6 @@ import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
 
 export class ElasticAssistantPublicPlugin

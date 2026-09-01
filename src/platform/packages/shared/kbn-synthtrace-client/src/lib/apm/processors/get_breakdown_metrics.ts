@@ -78,7 +78,6 @@ export function getBreakdownMetrics(events: ApmFields[]): ApmFields[] {
     activityByParentId[parentId].push({ from, to });
   }
 
-  // eslint-disable-next-line guard-for-in
   for (const id in eventsById) {
     const event = eventsById[id];
     const activities = activityByParentId[id] || [];

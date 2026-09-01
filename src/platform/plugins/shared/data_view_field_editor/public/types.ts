@@ -61,7 +61,6 @@ export interface PluginStart {
   DeleteRuntimeFieldProvider: FunctionComponent<DeleteFieldProviderProps>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
 
 export interface StartPlugins {

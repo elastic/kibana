@@ -21,8 +21,6 @@ export interface DiscoveriesPublicPluginStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DiscoveriesPublicPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DiscoveriesPublicPluginStart {}

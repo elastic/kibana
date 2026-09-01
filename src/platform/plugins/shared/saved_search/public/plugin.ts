@@ -38,7 +38,7 @@ import type { DiscoverSessionAttributes } from '../server';
 /**
  * Saved search plugin public Setup contract
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface SavedSearchPublicPluginSetup {}
 
 /**

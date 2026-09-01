@@ -17,7 +17,6 @@ interface Props {
   typicalActual: MlAnomalyLayersType;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {}
 
 export class UpdateAnomalySourceEditor extends Component<Props, State> {

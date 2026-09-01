@@ -9,7 +9,6 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common'
 
 export type MetricsExplorerLocator = LocatorPublic<MetricsExplorerLocatorParams>;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsExplorerLocatorParams extends SerializableRecord {}
 
 export const METRICS_EXPLORER_LOCATOR_ID = 'METRICS_EXPLORER_LOCATOR';

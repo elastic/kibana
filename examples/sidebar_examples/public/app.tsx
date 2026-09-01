@@ -25,7 +25,6 @@ import { useCounterSidebarApp } from './counter_app';
 import { useTextInputSidebarApp } from './text_input_app';
 import { useTabSelectionSidebarApp } from './tab_selection_app';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
 export function App({}: Props) {

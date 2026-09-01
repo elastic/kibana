@@ -30,9 +30,8 @@ import type {
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface CloudDefendPluginStart {}
 
 export interface CloudDefendPluginSetupDeps {

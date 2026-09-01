@@ -49,7 +49,6 @@ export interface OsqueryPluginSetup {
   ) => Promise<void>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {

@@ -23,9 +23,8 @@ import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePublicSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface EmbeddableAlertsTablePublicStart {}
 
 export interface EmbeddableAlertsTablePublicSetupDependencies {

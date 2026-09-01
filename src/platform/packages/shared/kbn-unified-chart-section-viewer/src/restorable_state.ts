@@ -40,7 +40,6 @@ export interface MetricsExperienceRestorableState {
   flyoutState?: FlyoutState;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TracesRestorableState {}
 export type UnifiedMetricsGridRestorableState =
   | MetricsExperienceRestorableState

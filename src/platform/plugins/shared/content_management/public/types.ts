@@ -10,10 +10,8 @@
 import type { ContentClient } from './content_client';
 import type { ContentTypeRegistry } from './registry';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}
 
 export interface ContentManagementPublicSetup {

@@ -13,13 +13,10 @@ import type {
   QueryRulesQueryRuleset,
 } from '@elastic/elasticsearch/lib/api/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchQueryRulesPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchQueryRulesPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginSetupDependencies {}
 
 export interface SearchQueryRulesConfigType {

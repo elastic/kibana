@@ -32,7 +32,6 @@ import type {
 import { getObsAIAssistantConnectorType } from './rule_connector';
 import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
 
 export class ObservabilityAIAssistantAppPlugin

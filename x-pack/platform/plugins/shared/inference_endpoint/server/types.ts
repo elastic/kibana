@@ -6,9 +6,8 @@
  */
 import type { InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InferenceEndpointPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface InferenceEndpointPluginStart {}
 
 export interface InferenceServicesGetResponse {

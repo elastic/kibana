@@ -14,8 +14,6 @@ export type {
   FilesClientResponses,
 } from '../common/files_client';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FilesPublicSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FilesPublicStartDependencies {}

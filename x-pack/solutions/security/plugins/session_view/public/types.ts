@@ -10,10 +10,8 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { Process } from '../common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewPluginStart {}
 
 export interface SessionViewPluginStartDeps {

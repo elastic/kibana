@@ -10,5 +10,5 @@
 export interface VisualizationsServerSetup {
   registerReadOnlyVisType: (visType: string) => void;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface VisualizationsServerStart {}

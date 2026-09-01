@@ -7,7 +7,6 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsDataAccessPluginSetupDeps {}
 
 export interface LogsDataAccessPluginStartDeps {

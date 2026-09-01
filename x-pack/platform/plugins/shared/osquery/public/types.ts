@@ -53,7 +53,6 @@ export interface OsqueryDataProvider {
   and: Omit<OsqueryDataProvider, 'and'>[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 
 export interface OsqueryPluginStart {

@@ -29,7 +29,6 @@ export interface ApmDataAccessServerDependencies {
   security?: SecurityPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApmDataAccessPluginStart {}
 
 export type ApmDataAccessServices = ReturnType<typeof getServices>;

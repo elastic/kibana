@@ -18,10 +18,8 @@ export interface SetupDependencies {
   cloud?: CloudSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataFederationPluginStart {}
 
 export interface FederatedDataFeatureFlags {

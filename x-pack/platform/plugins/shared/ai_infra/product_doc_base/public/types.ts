@@ -7,8 +7,6 @@
 
 import type { InstallationAPI } from './services/installation';
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-
 export interface PublicPluginConfig {}
 
 export interface PluginSetupDependencies {}

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchSynonymsPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchSynonymsPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginSetupDependencies {}
 
 export interface SearchSynonymsConfigType {

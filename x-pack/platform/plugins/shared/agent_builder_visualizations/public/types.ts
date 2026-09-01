@@ -12,13 +12,10 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginPublicStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginPublicSetupDependencies {}
 
 export interface AgentBuilderVisualizationsPluginPublicStartDependencies {

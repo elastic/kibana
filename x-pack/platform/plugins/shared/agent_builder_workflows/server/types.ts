@@ -25,8 +25,6 @@ export interface PluginStartDependencies {
   security?: SecurityPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginStart {}

@@ -23,10 +23,8 @@ export type UiActionsPublicSetup = Pick<
 
 export type UiActionsPublicStart = PublicMethodsOf<UiActionsService>;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UiActionsPublicSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UiActionsPublicStartDependencies {}
 
 export class UiActionsPlugin

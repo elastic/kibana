@@ -41,7 +41,6 @@ export interface UnifiedSearchSetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedSearchPluginSetup {}
 
 export interface UnifiedSearchStartDependencies {

@@ -10,9 +10,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessVectordbPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface ServerlessVectordbPluginStart {}
 
 export interface SetupDependencies {

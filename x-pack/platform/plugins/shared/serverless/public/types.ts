@@ -10,7 +10,6 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
 
 export interface ServerlessPluginStart {

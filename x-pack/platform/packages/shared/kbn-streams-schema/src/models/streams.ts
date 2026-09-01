@@ -14,8 +14,6 @@ import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
 import { QueryStream as nQueryStream } from './query';
 
-/* eslint-disable @typescript-eslint/no-namespace */
-
 // Namespace aliases for the sub-streams. Babel elides this whole declaration
 // (every member is an import alias or type-only), emitting NO runtime code, so
 // these are type-only in the built CJS and the runtime values are assigned at

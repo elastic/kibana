@@ -19,7 +19,7 @@ export function tryCodeGeneration(): CodeGenerationResult {
   };
 
   try {
-    eval('1+1'); // eslint-disable-line no-eval
+    eval('1+1');
   } catch (e) {
     result.eval = { blocked: true, error: e.message };
   }

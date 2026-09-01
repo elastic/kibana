@@ -22,10 +22,8 @@ import {
   defineSimpleStringStreamRoute,
 } from './routes';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ResponseStreamSetupPlugins {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ResponseStreamStartPlugins {}
 
 export class ResponseStreamPlugin implements Plugin {

@@ -49,7 +49,7 @@ declare module 'handlebars' {
    *
    * When registering a helper function, it should be of this type.
    */
-  export interface HelperDelegate extends HelperDelegateFixed {} // eslint-disable-line @typescript-eslint/no-empty-interface
+  export interface HelperDelegate extends HelperDelegateFixed {}
 
   /**
    * A template-function type.
@@ -58,7 +58,7 @@ declare module 'handlebars' {
    * {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-compile-template-options Handlebars.compile},
    * Handlebars.compileAST and {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-precompile-template-options Handlebars.template}.
    */
-  export interface TemplateDelegate<T = any> extends TemplateDelegateFixed<T> {} // eslint-disable-line @typescript-eslint/no-empty-interface
+  export interface TemplateDelegate<T = any> extends TemplateDelegateFixed<T> {}
 
   /**
    * Register one or more {@link https://handlebarsjs.com/api-reference/runtime.html#handlebars-registerpartial-name-partial partials}.
@@ -120,7 +120,6 @@ export interface HelperOptions extends Omit<Handlebars.HelperOptions, 'fn' | 'in
  * When registering a helper function, it should be of this type.
  */
 interface HelperDelegateFixed {
-  // eslint-disable-next-line @typescript-eslint/prefer-function-type
   (...params: any[]): any;
 }
 export type { HelperDelegateFixed as HelperDelegate };

@@ -33,9 +33,9 @@ import type {
 } from '@kbn/ai-assistant-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface ObservabilityAIAssistantAppPublicStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface ObservabilityAIAssistantAppPublicSetup {}
 
 export interface ObservabilityAIAssistantAppPluginStartDependencies {

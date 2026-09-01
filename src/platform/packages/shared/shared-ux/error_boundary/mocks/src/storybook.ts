@@ -12,7 +12,6 @@ import { action } from '@storybook/addon-actions';
 import { KibanaErrorService } from '../../src/services/error_service';
 import type { KibanaErrorBoundaryServices } from '../../types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Params {}
 
 export class KibanaErrorBoundaryStorybookMock extends AbstractStorybookMock<

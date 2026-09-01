@@ -42,9 +42,8 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppServerStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface ObservabilityAIAssistantAppServerSetup {}
 
 export interface ObservabilityAIAssistantAppPluginStartDependencies {

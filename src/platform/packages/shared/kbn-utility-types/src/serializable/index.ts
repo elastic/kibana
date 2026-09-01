@@ -13,7 +13,6 @@ export interface JsonObject {
   [key: string]: JsonValue;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface JsonArray extends Array<JsonValue> {}
 
 export type Serializable =
@@ -26,7 +25,7 @@ export type Serializable =
   | SerializableRecord;
 
 // we need interfaces instead of types here to allow cyclic references
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface SerializableArray extends Array<Serializable> {}
 
 export type SerializableRecord<AllowedKeys extends string | number | symbol = string> = {

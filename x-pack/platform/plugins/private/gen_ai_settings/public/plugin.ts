@@ -29,10 +29,8 @@ export interface GenAiSettingsSetupDeps {
   management: ManagementSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GenAiSettingsPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GenAiSettingsPluginStart {}
 
 export class GenAiSettingsPlugin

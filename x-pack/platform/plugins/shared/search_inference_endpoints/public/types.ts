@@ -28,9 +28,8 @@ import type { EisModelStatus, CspRegion } from '../common/types';
 
 export * from '../common/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchInferenceEndpointsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface SearchInferenceEndpointsPluginStart {}
 
 export interface AppPluginStartDependencies {

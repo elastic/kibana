@@ -31,7 +31,6 @@ import {
 import { NavControlInitiator } from './components/navigation_control/lazy_nav_control';
 import type { AIExperienceSelection } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {

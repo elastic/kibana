@@ -52,7 +52,6 @@ export interface AutomaticImportPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AutomaticImportPluginStart {}
 
 export interface AutomaticImportPluginSetupDependencies {

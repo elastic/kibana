@@ -38,8 +38,6 @@ import { classicFieldDefinitionSchema } from '../../fields';
 import type { EffectiveFailureStore } from './failure_store';
 import { effectiveFailureStoreSchema } from './failure_store';
 
-/* eslint-disable @typescript-eslint/no-namespace */
-
 export interface IngestClassic {
   classic: {
     field_overrides?: ClassicFieldDefinition;

@@ -26,7 +26,6 @@ import type { DatasetQualityDetailsProps } from './components/dataset_quality_de
 import type { CreateDatasetQualityController } from './controller/dataset_quality';
 import type { CreateDatasetQualityDetailsController } from './controller/dataset_quality_details';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
 
 export interface DatasetQualityPluginStart {

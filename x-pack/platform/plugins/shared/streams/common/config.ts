@@ -39,5 +39,4 @@ export type PatternExtractionWorkerConfig = StreamsConfig['workers']['patternExt
  */
 export const exposeToBrowserConfig = {} as const;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPublicConfig {}

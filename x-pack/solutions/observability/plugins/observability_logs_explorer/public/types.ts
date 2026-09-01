@@ -6,18 +6,14 @@
  */
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerSetupDeps {}
 
 export interface ObservabilityLogsExplorerStartDeps {
   discover: DiscoverStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerStartServices {}
