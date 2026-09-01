@@ -227,14 +227,6 @@ steps:
             Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
             {% endif %}
 
-      # This step combines rule's ID and proposed query into an update to be applied to the rule.
-      - name: build_update
-        type: data.set
-        with:
-          update:
-            id: "{{ foreach.item.0 }}"
-            query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-
       - name: apply_query_tuning
         type: security.updateRule
         if: >-
@@ -244,7 +236,9 @@ steps:
             and steps.preview_proposed_query.output.succeeded == true
             and steps.preview_proposed_query.output.is_aborted == false }}
         with:
-          update: "${{ steps.build_update.output.update }}"
+          update:
+            id: "{{ foreach.item.0 }}"
+            query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
       # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
       # harvest's KEEP projects: the alert_ids multivalue.

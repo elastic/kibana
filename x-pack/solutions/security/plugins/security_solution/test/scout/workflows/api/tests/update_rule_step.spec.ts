@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout-security/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import {
@@ -22,7 +23,8 @@ const DETECTION_ENGINE_BULK_ACTION_URL = '/api/detection_engine/rules/_bulk_acti
 const RULE_API_VERSION = '2023-10-31';
 const UPDATE_RULE_STEP_ID = 'update_rule';
 
-const RULE_SIGNATURE_ID = `scout-update-rule-step-test`;
+// Randomized per run so leftover rules from a failed run can't cause a 409 in `beforeAll`.
+const RULE_SIGNATURE_ID = `scout-update-rule-step-test-${randomUUID()}`;
 const UPDATED_QUERY = 'host.name: * and not user.name: svc_backup';
 
 const updateRuleWorkflowYaml = `
