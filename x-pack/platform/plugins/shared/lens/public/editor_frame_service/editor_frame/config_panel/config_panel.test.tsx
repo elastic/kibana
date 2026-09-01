@@ -289,6 +289,7 @@ describe('ConfigPanel', () => {
         },
       ]);
       datasourceMap.textBased.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+      visualizationMap.testVis.cloneLayer = jest.fn();
 
       const props = getDefaultProps({
         datasourceMap,
