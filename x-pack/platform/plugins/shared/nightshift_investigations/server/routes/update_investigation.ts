@@ -24,8 +24,15 @@ import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
+/**
+ * Optional PATCH fields. Empty string is absent so quoted Liquid interpolations of missing
+ * values (`severity: "${{ ... }}"`) do not fail enum/string validation with `""`.
+ */
 const orAbsent = <T extends z.ZodType>(schema: T) =>
-  schema.nullish().transform((value): z.infer<T> | undefined => value ?? undefined);
+  z.preprocess(
+    (value: unknown) => (value === '' ? undefined : value),
+    schema.nullish().transform((value): z.infer<T> | undefined => value ?? undefined)
+  );
 
 const updateInvestigationBodySchema = z.object({
   status: z.enum(UPDATABLE_INVESTIGATION_STATUSES),

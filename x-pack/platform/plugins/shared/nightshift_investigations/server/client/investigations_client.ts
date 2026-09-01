@@ -225,6 +225,17 @@ interface ExecutionInvestigationMetadata {
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
+/**
+ * Context fields each subject type's id may arrive under, in precedence order. A significant event
+ * has two spellings because discovery's `workflow.executeAsync` sends `event_id` while `start()`
+ * sends `significant_event_id`; both must resolve to the same subject. The `satisfies` clause is
+ * what makes a newly added {@link InvestigationSubjectType} a compile error rather than a run that
+ * silently recovers no subject.
+ */
+const SUBJECT_ID_FIELDS = {
+  significant_event: ['event_id', 'significant_event_id'],
+  alert: ['alert_id'],
+} as const satisfies Record<InvestigationSubjectType, readonly string[]>;
 
 const toSubject = ({
   subjectType,
@@ -248,33 +259,14 @@ const parseExecutionInvestigationMetadata = (
     isPlainObject(executionContext) && isPlainObject(executionContext.inputs)
       ? executionContext.inputs
       : undefined;
-  const inputContext = inputs && isPlainObject(inputs.context) ? inputs.context : undefined;
-
-  const rawSource = inputContext?.source;
-  let subject: InvestigationSubject | undefined;
-  if (isSubjectType(rawSource)) {
-    const rawSubjectId = inputContext?.[`${rawSource}_id`];
-    if (typeof rawSubjectId === 'string' && rawSubjectId.length > 0) {
-      const rawSummary = inputContext?.summary;
-      const subjectSummary =
-        typeof rawSummary === 'string' && rawSummary.length > 0 ? rawSummary : undefined;
-      subject = toSubject({
-        subjectType: rawSource,
-        subjectId: rawSubjectId,
-        subjectSummary,
-      });
-    }
-  }
-
-  const rawTriggerType = inputContext?.trigger_type;
-  const triggerType = isTriggerType(rawTriggerType)
-    ? rawTriggerType
-    : DEFAULT_INVESTIGATION_TRIGGER_TYPE;
-
   const rawConcurrencyKey = inputs?.concurrency_key;
   const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
 
-  return { subject, triggerType, concurrencyKey };
+  return {
+    subject: recoverSubjectFromInput(inputs),
+    triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+    concurrencyKey,
+  };
 };
 
 const toSubjectFields = (
@@ -285,19 +277,27 @@ const toSubjectFields = (
   ...(subject.summary ? { subject_summary: subject.summary } : {}),
 });
 
+/**
+ * The investigation subject an execution's inputs describe, summary included, or undefined when
+ * they describe none. Shared by `get()` and `ensureOrCreate()` so the read and write paths cannot
+ * disagree about what a run is investigating.
+ */
 function recoverSubjectFromInput(
   input: Record<string, unknown> | undefined
 ): InvestigationSubject | undefined {
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
-  if (ctx.source === 'significant_event') {
-    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
-    return id ? { type: 'significant_event', id } : undefined;
+
+  const source = ctx.source;
+  if (!isSubjectType(source)) return undefined;
+
+  for (const field of SUBJECT_ID_FIELDS[source]) {
+    const subjectId = asString(ctx[field]);
+    if (subjectId) {
+      return toSubject({ subjectType: source, subjectId, subjectSummary: asString(ctx.summary) });
+    }
   }
-  if (ctx.source === 'alert') {
-    const id = asString(ctx.alert_id);
-    return id ? { type: 'alert', id } : undefined;
-  }
+
   return undefined;
 }
 
@@ -306,10 +306,7 @@ function recoverTriggerTypeFromInput(
 ): InvestigationTriggerType | undefined {
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
-  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
-  return valid.includes(String(ctx.trigger_type))
-    ? (ctx.trigger_type as InvestigationTriggerType)
-    : undefined;
+  return isTriggerType(ctx.trigger_type) ? ctx.trigger_type : undefined;
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -480,7 +477,7 @@ export class NightshiftInvestigationsClient {
     concurrencyKey?: string;
   }): Promise<void> {
     if (concurrencyKey) {
-      await this.cancelSupersededInvestigation({ concurrencyKey });
+      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
     }
 
     await this.createIgnoringConflict({
@@ -541,7 +538,7 @@ export class NightshiftInvestigationsClient {
     }
 
     if (concurrencyKey) {
-      await this.cancelSupersededInvestigation({ concurrencyKey });
+      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
     }
 
     const startedAt = execution.startedAt ?? new Date().toISOString();
@@ -576,19 +573,29 @@ export class NightshiftInvestigationsClient {
     }
   }
 
+  /**
+   * Cancels the in-flight investigation that `investigationId` supersedes, if there is one.
+   *
+   * `investigationId` is excluded rather than assumed absent: both callers run while the workflow's
+   * `_ensure` step may be creating the very same record, so without the guard the newest match can
+   * be the incoming investigation itself — cancelling a record whose execution is alive and which
+   * nothing superseded. Two results are fetched because the excluded record can occupy the first.
+   */
   private async cancelSupersededInvestigation({
     concurrencyKey,
+    investigationId,
   }: {
     concurrencyKey: string;
+    investigationId: string;
   }): Promise<void> {
     const { results } = await this.investigationRepository.find({
       concurrencyKey,
       statuses: [...SUPERSEDED_STATUSES],
       sortField: 'created_at',
       sortOrder: 'desc',
-      perPage: 1,
+      perPage: 2,
     });
-    const superseded = results[0];
+    const superseded = results.find(({ id }) => id !== investigationId);
 
     if (!superseded) {
       return;
@@ -686,8 +693,6 @@ export class NightshiftInvestigationsClient {
 
     const subject = recoverSubjectFromInput(rawInput);
     const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
-    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
-    const subjectSummary = asString(rawContext?.summary);
 
     let error: string | undefined;
     if (status === 'failed') {
@@ -699,7 +704,7 @@ export class NightshiftInvestigationsClient {
 
     return {
       investigation_id: investigationId,
-      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
+      subject,
       trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
