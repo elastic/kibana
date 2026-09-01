@@ -36,7 +36,7 @@ describe('getAllRuleMigrationStatsTool', () => {
   });
 
   it('should return the migrations array on a 200', async () => {
-    const migrations = [
+    const serverMigrations = [
       { migration_id: 'abc', status: 'running' },
       { migration_id: 'def', status: 'finished' },
     ];
@@ -44,7 +44,7 @@ describe('getAllRuleMigrationStatsTool', () => {
       fetchOptions: { path: SIEM_RULE_MIGRATIONS_ALL_STATS_PATH },
       request: new Request('http://localhost/x'),
       response: new Response(null, { status: 200 }),
-      body: migrations,
+      body: serverMigrations,
     });
 
     const result = (await tool.handler(
@@ -57,7 +57,11 @@ describe('getAllRuleMigrationStatsTool', () => {
       expect.objectContaining({ method: 'GET', access: 'internal', version: '1' })
     );
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toEqual({ total: 2, migrations });
+    // The implementation reverses the server order (asc → desc / newest-first)
+    expect(result.results[0].data).toEqual({
+      total: 2,
+      migrations: [...serverMigrations].reverse(),
+    });
   });
 
   it('should return an error result when the endpoint fails', async () => {
