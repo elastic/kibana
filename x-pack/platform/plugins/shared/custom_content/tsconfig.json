@@ -30,7 +30,8 @@
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/custom-content-server"
   ],
   "exclude": ["target/**/*"]
 }
