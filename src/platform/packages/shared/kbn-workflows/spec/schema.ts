@@ -300,9 +300,17 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
     .describe('Slack API connector saved object id or name'),
   channels: z
-    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH)
+        .describe('Slack channel ID (e.g. C0123456789) or channel name (e.g. #alerts)')
+    )
     .min(1)
-    .describe('Slack channel ids to post approval actions to'),
+    .describe(
+      'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
+    ),
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -314,8 +322,12 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
 
 export const WaitForApprovalChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional(),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+    slack: WaitForApprovalSlackChannelSchema.optional().describe(
+      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
+    ),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
+      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
+    ),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);

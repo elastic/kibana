@@ -447,8 +447,7 @@ describe('Slack API service', () => {
     const errorNoAllowedChannelsRes = {
       actionId: CONNECTOR_ID,
       message: 'error posting slack message',
-      serviceMessage:
-        'One or more provided channel names are not included in the allowed channels list',
+      serviceMessage: 'One or more provided channels are not included in the allowed channels list',
       status: 'error',
     };
 
@@ -519,7 +518,7 @@ describe('Slack API service', () => {
           config: { allowedChannels: [{ name: 'channel-name' }] },
         });
 
-        expect(await service[method]({ channelNames: ['not-in-list'], text })).toEqual(
+        expect(await service[method]({ channelNames: ['#not-in-list'], text })).toEqual(
           errorNoAllowedChannelsRes
         );
       });
@@ -539,17 +538,57 @@ describe('Slack API service', () => {
           config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
         });
 
-        expect(await service[method]({ channelNames: ['channel-1-id'], text })).toEqual(
+        expect(await service[method]({ channelNames: ['#not-the-allowed-name'], text })).toEqual(
           errorNoAllowedChannelsRes
         );
       });
 
-      it('should validate against allowedChannels.id for channelIds', async () => {
+      it('should allow an id-shaped value in channelNames when that id is allowlisted', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        await service[method]({ channelNames: ['channel-1-id'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-1-id' }),
+          })
+        );
+      });
+
+      it('should validate against allowedChannels.id for channelIds that are not names', async () => {
         service = createExternalServiceMock({
           config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
         });
 
         expect(await service[method]({ channelIds: ['my-channel-name'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should allow channelIds that look like names when the name is allowlisted', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        await service[method]({ channelIds: ['#my-channel-name'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: '#my-channel-name' }),
+          })
+        );
+      });
+
+      it('should reject channelIds that look like names when the name is not allowlisted', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ channelIds: ['#other-channel'], text })).toEqual(
           errorNoAllowedChannelsRes
         );
       });
