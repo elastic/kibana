@@ -36,7 +36,7 @@ describe('Elasticsearch connector', () => {
   describe('metadata', () => {
     it('has the expected id and display name', () => {
       expect(Elasticsearch.metadata.id).toBe('.elasticsearch');
-      expect(Elasticsearch.metadata.displayName).toBe('Elasticsearch');
+      expect(Elasticsearch.metadata.displayName).toBe('External Elasticsearch');
     });
 
     it('only declares agentBuilder support (new connector, pre Production-NonCanary)', () => {

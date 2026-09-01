@@ -1,15 +1,15 @@
 ---
-navigation_title: "Elasticsearch"
+navigation_title: "External Elasticsearch"
 type: reference
-description: "Use the Elasticsearch connector to search and explore data, retrieve mappings and aliases, and run ES|QL queries in Elasticsearch."
+description: "Use the External Elasticsearch connector to search and explore data on a remote cluster, retrieve mappings and aliases, and run ES|QL queries."
 applies_to:
   stack: preview 9.6
   serverless: preview
 ---
 
-# Elasticsearch connector [elasticsearch-action-type]
+# External Elasticsearch connector [elasticsearch-action-type]
 
-The Elasticsearch connector calls the [Elasticsearch REST API](https://www.elastic.co/docs/api/doc/elasticsearch) so a workflow or agent can search and explore data, inspect index mappings and aliases, run ES|QL analytics queries, and retrieve cluster information. It supports both [Elastic Cloud](https://www.elastic.co/cloud) deployments and self-managed Elasticsearch clusters.
+The External Elasticsearch connector calls the [Elasticsearch REST API](https://www.elastic.co/docs/api/doc/elasticsearch) on a remote cluster so a workflow or agent can search and explore data, inspect index mappings and aliases, run ES|QL analytics queries, and retrieve cluster information. Use this connector when you cannot connect via cross-cluster search (CCS) — for example, separate Cloud deployments, on-prem clusters behind a firewall, or multi-tenant Kibana. It supports both [Elastic Cloud](https://www.elastic.co/cloud) deployments and self-managed Elasticsearch clusters.
 
 ## Create connectors in {{kib}} [define-elasticsearch-ui]
 

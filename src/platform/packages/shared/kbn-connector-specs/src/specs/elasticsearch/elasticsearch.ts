@@ -29,10 +29,10 @@ import {
 export const Elasticsearch: ConnectorSpec = {
   metadata: {
     id: '.elasticsearch',
-    displayName: 'Elasticsearch',
+    displayName: 'External Elasticsearch',
     description: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.metadata.description', {
       defaultMessage:
-        'Search and explore data, retrieve mappings and aliases, and run ES|QL queries in Elasticsearch',
+        'Search and explore data on a remote Elasticsearch cluster, retrieve mappings and aliases, and run ES|QL queries',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -62,7 +62,7 @@ export const Elasticsearch: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.elasticsearch.auth.apiKey.helpText',
                 {
                   defaultMessage:
-                    'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search, and write on indices you index into.',
+                    'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
                 }
               ),
             },
@@ -82,7 +82,7 @@ export const Elasticsearch: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.elasticsearch.auth.basic.password.helpText',
                 {
                   defaultMessage:
-                    'The user must have at minimum: read privilege on the indices you search and write privilege on indices you index into.',
+                    'The user must have at minimum: read privilege on the indices you search.',
                 }
               ),
             },
@@ -201,9 +201,9 @@ export const Elasticsearch: ConnectorSpec = {
   },
 
   skill: [
-    '## Elasticsearch Connector',
+    '## External Elasticsearch Connector',
     '',
-    'Use this connector to query and explore data in an Elasticsearch cluster.',
+    'Use this connector to query and explore data on a remote Elasticsearch cluster.',
     '',
     '### Discovery workflow',
     '- Call `listIndices` (optionally with a pattern like "logs-*") to find available indices.',
