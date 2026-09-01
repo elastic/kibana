@@ -255,6 +255,7 @@
     "@kbn/alerting-v2-constants": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-constants",
     "@kbn/alerting-v2-episodes-ui": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui",
     "@kbn/alerting-v2-rule-builders": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-rule-builders",
+    "@kbn/alerting-v2-rule-builder-example-plugin": "link:x-pack/examples/alerting_v2_rule_builder_example",
     "@kbn/alerting-v2-plugin": "link:x-pack/platform/plugins/shared/alerting_v2",
     "@kbn/alerting-v2-rule-form": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form",
     "@kbn/alerting-v2-schemas": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-schemas",
