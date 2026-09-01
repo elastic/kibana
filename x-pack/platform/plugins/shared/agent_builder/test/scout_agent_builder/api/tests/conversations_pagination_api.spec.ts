@@ -21,6 +21,7 @@ import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
+  CHAT_AGENTS_INDEX,
   CHAT_CONVERSATIONS_INDEX,
   INTERNAL_AGENT_BUILDER,
 } from '../fixtures/constants';
@@ -42,31 +43,38 @@ apiTest.describe(
     let sysEsClient: Client;
 
     apiTest.beforeAll(async ({ kbnClient, asAdmin, esClient, config }) => {
-      sysEsClient = await createSystemIndicesEsClient(esClient, config);
-      // Create a dedicated agent so every list request can be filtered to only
-      // the conversations created by this suite, regardless of what other tests
-      // have left behind.
-      await createAgentViaKbn(kbnClient, {
-        id: agentId,
-        name: 'Pagination Test Agent',
-      });
+      // Independent setup, parallelized to stay well under the default beforeAll timeout —
+      // sequential round trips here can add up to tens of seconds against a slow ES/Kibana.
+      const [client] = await Promise.all([
+        createSystemIndicesEsClient(esClient, config),
+        // Create a dedicated agent so every list request can be filtered to only
+        // the conversations created by this suite, regardless of what other tests
+        // have left behind.
+        createAgentViaKbn(kbnClient, {
+          id: agentId,
+          name: 'Pagination Test Agent',
+        }),
+      ]);
+      sysEsClient = client;
+
+      // Conversation creation resolves agent_id against the agents index; without an explicit
+      // refresh here, creating a conversation immediately after the agent races the index refresh.
+      await esClient.indices.refresh({ index: CHAT_AGENTS_INDEX, ignore_unavailable: true });
 
       // Create 7 conversations → with per_page=5 this gives a full page 1 (5)
-      // and a partial page 2 (2), which is enough to exercise all page math.
-      const ids: string[] = [];
-      for (let i = 0; i < 7; i++) {
-        const res = await asAdmin.post(CONVERSATIONS_PATH, {
-          body: { agent_id: agentId, title: `Pagination test conversation ${i + 1}` },
-          responseType: 'json',
-        });
-        expect(res).toHaveStatusCode(200);
-        ids.push((res.body as CreateConversationResponse).id);
-      }
-
-      // The API returns results sorted by updated_at desc (newest first).
-      // Reverse so conversationIds[0] is the most-recently created (last in the
-      // loop → highest updated_at) and conversationIds[6] is the oldest.
-      conversationIds = ids.reverse();
+      // and a partial page 2 (2), which is enough to exercise all page math. Creation is
+      // parallelized, so no ordering among them (by created_at or array index) is guaranteed;
+      // none of the assertions below depend on one.
+      conversationIds = await Promise.all(
+        Array.from({ length: 7 }, async (_, i) => {
+          const res = await asAdmin.post(CONVERSATIONS_PATH, {
+            body: { agent_id: agentId, title: `Pagination test conversation ${i + 1}` },
+            responseType: 'json',
+          });
+          expect(res).toHaveStatusCode(200);
+          return (res.body as CreateConversationResponse).id;
+        })
+      );
     });
 
     apiTest.afterAll(async ({ kbnClient, esClient }) => {
