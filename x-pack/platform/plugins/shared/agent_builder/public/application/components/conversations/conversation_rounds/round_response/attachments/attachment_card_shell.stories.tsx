@@ -111,7 +111,7 @@ const defaultActions = [
   },
   {
     label: 'Open',
-    icon: 'expand',
+    icon: 'maximize',
     type: ActionButtonType.PRIMARY,
     handler: action('open'),
   },

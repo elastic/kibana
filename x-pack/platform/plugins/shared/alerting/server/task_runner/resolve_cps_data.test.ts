@@ -104,7 +104,7 @@ describe('resolveCpsData', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unexpected 403'));
   });
 
-  it('returns empty linkedProjects and logs warning on unexpected error', async () => {
+  it('returns unresolved CPS data and logs warning on unexpected error', async () => {
     internalUserEsClient.transport.request.mockRejectedValueOnce(new Error('connection refused'));
 
     const result = await resolveCpsData(
@@ -114,7 +114,7 @@ describe('resolveCpsData', () => {
       logger
     );
 
-    expect(result).toEqual({ linkedProjects: [] });
+    expect(result).toEqual({});
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to resolve CPS data'));
   });
 
@@ -168,7 +168,7 @@ describe('resolveCpsData', () => {
     });
   });
 
-  it('returns empty linkedProjects when the tags request fails', async () => {
+  it('leaves linkedProjects unresolved and logs a warning when the tags request fails unexpectedly', async () => {
     internalUserEsClient.transport.request.mockResolvedValueOnce({
       expression: '_alias:*',
     });
@@ -183,8 +183,62 @@ describe('resolveCpsData', () => {
 
     expect(result).toEqual({
       resolvedExpression: '_alias:*',
-      linkedProjects: [],
+      linkedProjects: undefined,
     });
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to resolve linked projects via /_project/tags')
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('tags failed'));
   });
+
+  it.each([401, 403])(
+    'leaves linkedProjects unresolved and logs an authorization warning when the tags request fails with %s',
+    async (statusCode) => {
+      internalUserEsClient.transport.request.mockResolvedValueOnce({
+        expression: '_alias:*',
+      });
+      currentUserEsClient.transport.request.mockRejectedValueOnce({ statusCode });
+
+      const result = await resolveCpsData(
+        internalUserEsClient,
+        currentUserEsClient,
+        'default',
+        logger
+      );
+
+      expect(result).toEqual({
+        resolvedExpression: '_alias:*',
+        linkedProjects: undefined,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('not authorized to resolve linked projects')
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`status ${statusCode}`));
+    }
+  );
+
+  it.each([400, 404])(
+    'leaves linkedProjects unresolved and logs a warning when the tags request fails with %s',
+    async (statusCode) => {
+      internalUserEsClient.transport.request.mockResolvedValueOnce({
+        expression: '_alias:*',
+      });
+      currentUserEsClient.transport.request.mockRejectedValueOnce({ statusCode });
+
+      const result = await resolveCpsData(
+        internalUserEsClient,
+        currentUserEsClient,
+        'default',
+        logger
+      );
+
+      expect(result).toEqual({
+        resolvedExpression: '_alias:*',
+        linkedProjects: undefined,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to resolve linked projects via /_project/tags')
+      );
+    }
+  );
 });

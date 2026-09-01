@@ -30,6 +30,7 @@ import type {
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -60,7 +61,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'template_id'
       | 'template_version'
     >
-  >;
+  > & { read_by?: ConversationReadByEntry[] };
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
@@ -113,6 +114,15 @@ export interface AddAttachmentsToLastRoundRequest {
 
 export interface ConversationListOptions {
   agentId?: string;
+  page?: number;
+  perPage?: number;
+  sortOrder?: 'asc' | 'desc';
+  pinned?: boolean;
+}
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
 }
 
 /**
@@ -169,3 +179,17 @@ export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
   LegacyRoundFields & {
     steps: PersistentConversationRoundStep[];
   };
+
+/**
+ * One user who has read a conversation. An entry object rather than a bare id string
+ * so fields such as `read_at` can be added later without another shape migration.
+ */
+export interface ConversationReadByEntry {
+  userId: string;
+}
+
+/**
+ * Server-internal persistence shape of a conversation, carrying the per-user
+ * `read_by` list that backs the public `Conversation.read` boolean.
+ */
+export type NormalizedConversation = Conversation & { read_by?: ConversationReadByEntry[] };

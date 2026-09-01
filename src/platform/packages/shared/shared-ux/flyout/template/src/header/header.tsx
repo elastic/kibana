@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { flyoutAssembly } from '../assembly';
-import { resolveZoneTestSubj, useFlyoutTemplateConfig } from '../context';
+import { resolveZoneTestSubj, useFlyoutHeaderCollapse, useFlyoutTemplateConfig } from '../context';
 import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
 
@@ -58,6 +59,48 @@ const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   `,
 });
 
+const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
+  const duration = euiTheme.animation.normal;
+  const easing = euiTheme.animation.resistance;
+  return {
+    collapsedRow: css`
+      /* Reserve space so the title does not run under EUI's absolutely-positioned close button. */
+      padding-inline-end: ${euiTheme.size.xxl};
+    `,
+    collapsedTitle: css`
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `,
+    wrapper: css`
+      display: grid;
+      overflow: hidden;
+    `,
+    wrapperExpanded: css`
+      grid-template-rows: 1fr;
+      opacity: 1;
+      visibility: visible;
+      @media (prefers-reduced-motion: no-preference) {
+        transition: grid-template-rows ${duration} ${easing}, opacity ${duration} ${easing},
+          visibility 0s;
+      }
+    `,
+    wrapperCollapsed: css`
+      grid-template-rows: 0fr;
+      opacity: 0;
+      visibility: hidden;
+      @media (prefers-reduced-motion: no-preference) {
+        transition: grid-template-rows ${duration} ${easing}, opacity ${duration} ${easing},
+          visibility 0s ${duration};
+      }
+    `,
+    inner: css`
+      overflow: hidden;
+      min-block-size: 0;
+    `,
+  };
+};
+
 /** Full-width divider: negative horizontal margins bleed it past the header padding to the flyout edges. */
 const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) => {
   const styles = useEuiMemoizedStyles(dividerStyles);
@@ -77,43 +120,95 @@ type HeaderZoneProps = FlyoutHeaderProps & {
   flyoutTitleId?: string;
 };
 
-/** Internal renderer for the header zone. */
+/** Internal renderer for the header zone; dividers are template-owned for full bleed. */
 export const HeaderZone = ({
   title,
   titleIcon,
   titleTooltip,
   description,
+  collapsed = false,
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
 }: HeaderZoneProps) => {
   const { euiTheme } = useEuiTheme();
+  const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
+  const {
+    isCollapsed: isScrollCollapsed,
+    collapsibleRef,
+    expandedTitleRef,
+    expandedSpacerRef,
+    headerRef,
+  } = useFlyoutHeaderCollapse();
+  const isCollapsed = collapsed || isScrollCollapsed;
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
 
   const hasDescription = Boolean(description);
 
   return (
-    <EuiFlyoutHeader
-      hasBorder={false}
-      data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
-    >
-      {renderTitleWithIcon(
-        <EuiTitle size="m">
-          <h3 id={flyoutTitleId}>{title}</h3>
-        </EuiTitle>,
-        renderTitleIcon(titleIcon, titleTooltip)
-      )}
-      {hasDescription && (
-        <>
-          <EuiSpacer size="xs" />
-          {/* No `<p>` wrapper: `description` accepts block content, which cannot nest in a paragraph. */}
-          <EuiText size="s" color="subdued">
-            {description}
-          </EuiText>
-        </>
-      )}
-      <EuiSpacer size="m" />
-      <FullBleedDivider horizontalPadding={horizontalPadding} />
-    </EuiFlyoutHeader>
+    <KibanaErrorBoundaryProvider>
+      <EuiFlyoutHeader
+        hasBorder={false}
+        data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
+      >
+        <KibanaErrorBoundary>
+          {/* Wraps the header content so the collapse hook can reach the header element for wheel forwarding. */}
+          <div ref={headerRef}>
+            {/* Always visible: title row. Switches between expanded and compact on collapse. */}
+            <div ref={!isCollapsed ? expandedTitleRef : undefined}>
+              {isCollapsed ? (
+                <div css={collapseStyles.collapsedRow}>
+                  <EuiTitle size="xs">
+                    <h3
+                      id={flyoutTitleId}
+                      css={collapseStyles.collapsedTitle}
+                      title={typeof title === 'string' ? title : undefined}
+                    >
+                      {title}
+                    </h3>
+                  </EuiTitle>
+                </div>
+              ) : (
+                renderTitleWithIcon(
+                  <EuiTitle size="m">
+                    <h3 id={flyoutTitleId}>{title}</h3>
+                  </EuiTitle>,
+                  renderTitleIcon(titleIcon, titleTooltip)
+                )
+              )}
+            </div>
+
+            {/* Collapsible region: currently the description; later header parts land here too. */}
+            <div
+              css={[
+                collapseStyles.wrapper,
+                isCollapsed ? collapseStyles.wrapperCollapsed : collapseStyles.wrapperExpanded,
+              ]}
+              aria-hidden={isCollapsed || undefined}
+              data-test-subj="flyoutHeaderCollapsibleRegion"
+            >
+              <div css={collapseStyles.inner} ref={!collapsed ? collapsibleRef : undefined}>
+                {hasDescription && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    {/* No `<p>` wrapper: `description` accepts block content, which cannot nest in a paragraph. */}
+                    <EuiText size="s" color="subdued">
+                      {description}
+                    </EuiText>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Always visible: spacing before the divider, which tightens when collapsed. */}
+            <div ref={!isCollapsed ? expandedSpacerRef : undefined}>
+              <EuiSpacer size={isCollapsed ? 'xs' : 'm'} />
+            </div>
+
+            <FullBleedDivider horizontalPadding={horizontalPadding} />
+          </div>
+        </KibanaErrorBoundary>
+      </EuiFlyoutHeader>
+    </KibanaErrorBoundaryProvider>
   );
 };

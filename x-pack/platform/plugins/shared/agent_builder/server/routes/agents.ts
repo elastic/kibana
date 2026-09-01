@@ -94,7 +94,7 @@ const AI_INDICES_NOT_ENABLED_MESSAGE =
  * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
  * registered by the `agentBuilderSml` plugin, a required dependency of `agentBuilder`.
  */
-const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
+export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
   const { uiSettings } = await ctx.core;
   return Boolean(await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID));
 };

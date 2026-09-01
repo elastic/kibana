@@ -24,7 +24,7 @@ import type { LeadSignal } from './lead_matching';
 import type { CursorPayload } from './change_cursor';
 import { encodeCursor, decodeCursor } from './change_cursor';
 import { createLeadIndexService } from './indices/lead_index_service';
-import type { Lead as SynthesizedLead } from './types';
+import type { Lead as SynthesizedLead, RelatedEntity } from './types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,7 +56,11 @@ interface PersistLeadsParams {
   readonly executionId: string;
   readonly sourceType: LeadGenerationMode;
   readonly timestamp: string;
-  readonly refreshes: ReadonlyArray<{ readonly existingId: string }>;
+  readonly refreshes: ReadonlyArray<{
+    readonly existingId: string;
+    readonly topRelatedEntities: RelatedEntity[];
+    readonly relatedEntityCounts: Record<string, number>;
+  }>;
   readonly creates: readonly SynthesizedLead[];
   readonly updates: ReadonlyArray<{
     readonly existingId: string;
@@ -153,6 +157,20 @@ interface EsObservationDoc {
   metadata: Record<string, unknown>;
 }
 
+interface EsRelatedEntityDoc {
+  id: string;
+  type: string;
+  name: string;
+  kinds: string[];
+  risk_level?: string;
+  criticality?: string;
+  interacted_with_at_least?: number;
+}
+interface EsRelatedEntityCountDoc {
+  kind: string;
+  count: number;
+}
+
 interface EsLeadDoc {
   id: string;
   title: string;
@@ -166,11 +184,39 @@ interface EsLeadDoc {
   staleness: string;
   status: string;
   observations: EsObservationDoc[];
+  top_related_entities: EsRelatedEntityDoc[];
+  related_entity_counts: EsRelatedEntityCountDoc[];
   execution_uuid: string;
   source_type: string;
   version: number;
   content_hash: string;
 }
+
+const toEsRelatedEntity = (entity: RelatedEntity): EsRelatedEntityDoc => ({
+  id: entity.id,
+  type: entity.type,
+  name: entity.name,
+  kinds: entity.kinds,
+  risk_level: entity.riskLevel,
+  criticality: entity.criticality,
+  interacted_with_at_least: entity.interactedWithAtLeast,
+});
+const fromEsRelatedEntity = (doc: EsRelatedEntityDoc): RelatedEntity => ({
+  id: doc.id,
+  type: doc.type,
+  name: doc.name,
+  kinds: doc.kinds ?? [],
+  riskLevel: doc.risk_level,
+  criticality: doc.criticality,
+  interactedWithAtLeast: doc.interacted_with_at_least,
+});
+
+const toEsRelatedEntityCounts = (counts: Record<string, number>): EsRelatedEntityCountDoc[] =>
+  Object.entries(counts).map(([kind, count]) => ({ kind, count }));
+const fromEsRelatedEntityCounts = (
+  docs: EsRelatedEntityCountDoc[] | undefined
+): Record<string, number> =>
+  Object.fromEntries((docs ?? []).map(({ kind, count }) => [kind, count]));
 
 interface ExistingLeadLookup {
   id: string;
@@ -215,6 +261,8 @@ const leadToEsDoc = (
       description: obs.description,
       metadata: obs.metadata,
     })),
+    top_related_entities: lead.topRelatedEntities.map(toEsRelatedEntity),
+    related_entity_counts: toEsRelatedEntityCounts(lead.relatedEntityCounts),
     execution_uuid: executionId,
     source_type: sourceType,
     version: 1,
@@ -248,6 +296,12 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
       description: obs.description,
       metadata: obs.metadata ?? {},
     })),
+    topRelatedEntities: ((doc.top_related_entities as EsRelatedEntityDoc[] | undefined) ?? []).map(
+      fromEsRelatedEntity
+    ),
+    relatedEntityCounts: fromEsRelatedEntityCounts(
+      doc.related_entity_counts as EsRelatedEntityCountDoc[] | undefined
+    ),
     executionUuid: (doc.execution_uuid as string) ?? '',
     sourceType: (doc.source_type as Lead['sourceType']) ?? 'adhoc',
     createdAt: (doc.created_at as string) ?? timestamp,
@@ -275,6 +329,8 @@ def now = ${PAINLESS_NOW_ISO};
 if (ctx.op == 'create') {
   ctx._source.id = params.id;
   ctx._source.observations = params.observations;
+  ctx._source.top_related_entities = params.top_related_entities;
+  ctx._source.related_entity_counts = params.related_entity_counts;
   ctx._source.title = params.title;
   ctx._source.byline = params.byline;
   ctx._source.description = params.description;
@@ -298,10 +354,14 @@ if (ctx.op == 'create') {
     ctx._source.timestamp = params.timestamp;
     ctx._source.execution_uuid = params.execution_uuid;
     ctx._source.source_type = params.source_type;
+    ctx._source.top_related_entities = params.top_related_entities;
+    ctx._source.related_entity_counts = params.related_entity_counts;
   }
 } else {
   ctx._source.id = params.id;
   ctx._source.observations = params.observations;
+  ctx._source.top_related_entities = params.top_related_entities;
+  ctx._source.related_entity_counts = params.related_entity_counts;
   ctx._source.title = params.title;
   ctx._source.byline = params.byline;
   ctx._source.description = params.description;
@@ -331,6 +391,8 @@ if (ctx._source.status == 'dismissed') {
   ctx._source.timestamp = params.timestamp;
   ctx._source.execution_uuid = params.execution_uuid;
   ctx._source.source_type = params.source_type;
+  ctx._source.top_related_entities = params.top_related_entities;
+  ctx._source.related_entity_counts = params.related_entity_counts;
 }
 `.trim();
 
@@ -478,7 +540,7 @@ export const createLeadDataClient = ({
 
       const bulkBody: object[] = [];
 
-      for (const { existingId } of refreshes) {
+      for (const { existingId, topRelatedEntities, relatedEntityCounts } of refreshes) {
         logger.debug(
           `[LeadGeneration] Refreshing lead ${existingId} (unchanged signal set, ` +
             `executionId=${executionId})`
@@ -499,6 +561,8 @@ export const createLeadDataClient = ({
                 timestamp,
                 execution_uuid: executionId,
                 source_type: sourceType,
+                top_related_entities: topRelatedEntities.map(toEsRelatedEntity),
+                related_entity_counts: toEsRelatedEntityCounts(relatedEntityCounts),
               },
             },
           }
