@@ -1051,6 +1051,7 @@ x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/sear
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
 x-pack/platform/packages/shared/custom-content/custom-content-common @elastic/kibana-presentation
+x-pack/platform/packages/shared/custom-content/custom-content-server @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/file-upload @elastic/search-ml-ux
 x-pack/platform/packages/shared/file-upload-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -1133,6 +1134,7 @@ x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/server-schemas @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-browser-shared @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
@@ -1225,6 +1227,7 @@ x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/connector_events_bridge @elastic/workflows-eng
 x-pack/platform/plugins/shared/content_connectors @elastic/search-ml-ux
 x-pack/platform/plugins/shared/context_engine @elastic/context-eng
+x-pack/platform/plugins/shared/context_engine_agent_builder @elastic/context-eng
 x-pack/platform/plugins/shared/custom_content @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
@@ -1344,6 +1347,7 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team
