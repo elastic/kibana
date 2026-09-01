@@ -55436,7 +55436,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
-            maxLength: 255
+            maxLength: 50
             type: string
       responses:
         '200':
