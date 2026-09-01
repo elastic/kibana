@@ -881,10 +881,19 @@ const xyLayerUnionNoESQL = z
     description: 'XY chart layer types for DSL queries',
   });
 
-const xyLayerUnionESQL = xyDataLayerSchemaESQL.meta({
-  id: 'xyLayersESQL',
-  description: 'XY chart layer types for ES|QL queries',
-});
+const xyLayerUnionESQL = z
+  .union([
+    xyDataLayerSchemaESQL,
+    referenceLineLayerSchemaESQL,
+    referenceLineLayerSchemaNoESQL,
+    annotationLayerByValueSchema,
+    annotationByRefLayerSchema,
+  ])
+  .meta({
+    id: 'xyLayersESQL',
+    description:
+      'XY chart layer types for ES|QL queries. Annotation layers may accompany ES|QL data layers: they never use the ES|QL datasource and resolve their own data view (query annotations) or none (manual annotations). Reference line layers may be ES|QL or data-view based.',
+  });
 
 /**
  * XY chart state for DSL layers
@@ -904,7 +913,9 @@ export const xyConfigSchemaNoESQL = z
   });
 
 /**
- * XY chart state for ES|QL layers only (reference lines are not supported)
+ * XY chart state for ES|QL data layers. Annotation and reference line layers may
+ * accompany ES|QL data layers; annotation layers never use the ES|QL datasource
+ * (query annotations resolve their own data view, manual annotations need none).
  */
 export const xyConfigSchemaESQL = z
   .object({
@@ -944,9 +955,11 @@ export type AnnotationLayerType = z.output<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = z.output<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = z.output<typeof annotationLayerByValueSchema>;
 /**
- * Reference line layers are not support but included to keep existing logic
+ * Layers whose data source is ES|QL. Annotation layers are intentionally excluded
+ * even though ES|QL charts may contain them: they never use the ES|QL datasource
+ * (query annotations carry their own data-view data source, manual annotations none).
  */
-export type LayerTypeESQL = z.output<typeof xyLayerUnionESQL> | ReferenceLineLayerTypeESQL;
+export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
