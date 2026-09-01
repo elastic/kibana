@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import type {
   TextBasedPersistedState,
@@ -1586,6 +1587,60 @@ describe('Textbased Data Source', () => {
         'reduced',
         'reduced',
       ]);
+    });
+
+    test('overlays the suggestion table dataType from activeData by columnId without mutating persisted meta', () => {
+      // After e.g. Datatable -> Bar, a timestamp can be persisted with a stale type `string` when new api is in use.
+      // The suggestion table must reflect the Query Result Type from `activeData` (`date`), while the persistable
+      // `layer.columns` stay untouched.
+      const state = {
+        layers: {
+          a: {
+            columns: [
+              {
+                columnId: 'metric',
+                fieldName: 'bytes',
+                meta: { type: 'number' },
+              },
+              {
+                columnId: 'bucket',
+                fieldName: '@timestamp',
+                meta: { type: 'string' },
+              },
+            ],
+            query: { esql: 'FROM activeData_overlay_test' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const activeData = {
+        a: {
+          type: 'datatable',
+          columns: [
+            { id: 'metric', name: 'bytes', meta: { type: 'number' } },
+            { id: 'bucket', name: '@timestamp', meta: { type: 'date' } },
+          ],
+          rows: [],
+        },
+      } as unknown as Record<string, Datatable>;
+
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsFromCurrentState(
+        state,
+        indexPatterns,
+        undefined,
+        activeData
+      );
+
+      const unchanged = suggestions.find((s) => s.table.changeType === 'unchanged');
+      const bucketColumn = unchanged?.table.columns.find((c) => c.columnId === 'bucket');
+      expect(bucketColumn?.operation.dataType).toEqual('date');
+      expect(bucketColumn?.operation.isBucketed).toBe(true);
+
+      const persistedBucket = unchanged?.state.layers.a.columns.find(
+        (c) => c.columnId === 'bucket'
+      );
+      expect(persistedBucket?.meta?.type).toEqual('string');
     });
   });
 
