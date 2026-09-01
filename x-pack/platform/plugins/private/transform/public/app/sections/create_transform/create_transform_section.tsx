@@ -43,6 +43,14 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
   const { esTransform } = useDocumentationLinks();
 
   const initialTransformFunction = getInitialTransformFunction(location.search);
+  const pageTitle =
+    initialTransformFunction === TRANSFORM_FUNCTION.LATEST
+      ? i18n.translate('xpack.transform.transformsWizard.createLatestTransformTitle', {
+          defaultMessage: 'Create latest transform',
+        })
+      : i18n.translate('xpack.transform.transformsWizard.createPivotTransformTitle', {
+          defaultMessage: 'Create pivot transform',
+        });
   const {
     error: searchItemsError,
     searchItems,
@@ -59,9 +67,7 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
       ]}
     >
       <AppHeader
-        title={i18n.translate('xpack.transform.transformsWizard.createTransformTitle', {
-          defaultMessage: 'Create transform',
-        })}
+        title={pageTitle}
         back={{
           href: history.createHref({ pathname: '/' }),
           label: i18n.translate('xpack.transform.transformList.transformTitle', {

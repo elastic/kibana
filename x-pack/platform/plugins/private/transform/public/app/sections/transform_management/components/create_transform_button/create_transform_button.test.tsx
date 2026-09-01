@@ -34,7 +34,7 @@ describe('Transform: Transform List <CreateTransformButton />', () => {
         <CreateTransformButton onClick={jest.fn()} transformNodes={1} />
       </QueryClientProvider>
     );
-    expect(container.textContent).toBe('Create a transform');
+    expect(container.textContent).toBe('Create transform');
   });
 
   test('opens transform function picker and calls onClick with selection', async () => {
@@ -72,16 +72,22 @@ describe('Transform: Transform List <CreateTransformButton />', () => {
       throw new Error('expected popover items');
     }
 
-    const latestItem = primaryActionItem.items[1];
-    if (latestItem === undefined) {
-      throw new Error('expected latest item');
+    const pivotItem = primaryActionItem.items.find(({ id }) => id === 'createPivot');
+    const latestItem = primaryActionItem.items.find(({ id }) => id === 'createLatest');
+    if (pivotItem === undefined || latestItem === undefined) {
+      throw new Error('expected pivot and latest items');
     }
 
+    pivotItem.run?.({
+      triggerElement: document.createElement('button'),
+      returnFocus: () => {},
+    });
     latestItem.run?.({
       triggerElement: document.createElement('button'),
       returnFocus: () => {},
     });
-    expect(onClick).toHaveBeenCalledWith(TRANSFORM_FUNCTION.LATEST);
+    expect(onClick).toHaveBeenNthCalledWith(1, TRANSFORM_FUNCTION.PIVOT);
+    expect(onClick).toHaveBeenNthCalledWith(2, TRANSFORM_FUNCTION.LATEST);
   });
 
   test('disables the AppHeader primary action when there are no transform nodes', () => {

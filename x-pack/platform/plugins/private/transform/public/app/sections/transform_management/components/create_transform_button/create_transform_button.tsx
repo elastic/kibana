@@ -32,7 +32,7 @@ import { useTransformCapabilities } from '../../../../hooks';
 const createTransformButtonLabel = i18n.translate(
   'xpack.transform.transformList.createTransformButton',
   {
-    defaultMessage: 'Create a transform',
+    defaultMessage: 'Create transform',
   }
 );
 
@@ -187,7 +187,8 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
       disabled={disabled}
       fill
       onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-      iconType="plusCircle"
+      iconSide="right"
+      iconType="chevronSingleDown"
       data-test-subj="transformButtonCreate"
     >
       {label ?? createTransformButtonLabel}
@@ -208,11 +209,11 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
   const getTransformTypeOptionName = (title: string, description: string, iconType: string) => (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="l" aria-hidden={true} />
+        <EuiIcon type={iconType} size="m" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText size="m">{title}</EuiText>
-        <EuiText color="subdued" size="s">
+        <EuiText size="s">{title}</EuiText>
+        <EuiText color="subdued" size="xs">
           {description}
         </EuiText>
       </EuiFlexItem>
