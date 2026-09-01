@@ -735,7 +735,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
           undefined,
           'some-index'
         )
-      ).rejects.toThrowError('Machine Learning is not enabled');
+      ).rejects.toThrow('Machine Learning is not enabled');
     });
   });
 
