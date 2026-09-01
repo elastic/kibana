@@ -7,7 +7,6 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { registerFeaturePrivileges } from './privileges';
@@ -22,11 +21,9 @@ import {
 } from '@kbn/alerting-v2-constants';
 
 describe('registerFeaturePrivileges', () => {
-  const docLinks = docLinksServiceMock.createSetupContract();
-
   const getRegisteredFeature = (id: string): KibanaFeatureConfig => {
     const features = featuresPluginMock.createSetup();
-    registerFeaturePrivileges(features, docLinks);
+    registerFeaturePrivileges(features);
 
     const registered = features.registerKibanaFeature.mock.calls
       .map(([feature]) => feature)
@@ -41,7 +38,7 @@ describe('registerFeaturePrivileges', () => {
 
   it('registers a Kibana feature for every alerting_v2 feature', () => {
     const features = featuresPluginMock.createSetup();
-    registerFeaturePrivileges(features, docLinks);
+    registerFeaturePrivileges(features);
 
     expect(features.registerKibanaFeature).toHaveBeenCalledTimes(
       Object.keys(ALERTING_V2_FEATURES).length
@@ -59,14 +56,11 @@ describe('registerFeaturePrivileges', () => {
     });
   });
 
-  it('marks every feature as experimental with a documentation tooltip', () => {
+  it('marks every feature as experimental', () => {
     for (const feature of Object.values(ALERTING_V2_FEATURES)) {
       const registered = getRegisteredFeature(feature.id);
       expect(registered.description).toBe('Experimental');
-      expect(registered.privilegesTooltip).toContain(
-        'This functionality is experimental and may be changed or removed completely in a future release.'
-      );
-      expect(registered.privilegesTooltip).toContain(docLinks.links.alerting.alertingV2Overview);
+      expect(registered.privilegesTooltip).toBeUndefined();
     }
   });
 

@@ -7,7 +7,7 @@
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import type { AppCategory, DocLinksServiceSetup } from '@kbn/core/server';
+import type { AppCategory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
@@ -36,17 +36,7 @@ const experimentalDescription = i18n.translate(
   }
 );
 
-const buildPrivilegesTooltip = (documentationUrl: string): string =>
-  i18n.translate('xpack.alertingV2.privileges.experimentalTooltip', {
-    defaultMessage:
-      'This functionality is experimental and may be changed or removed completely in a future release. Elastic will work to fix any issues, but experimental features are not subject to the support SLA of official GA features. {docsUrl}',
-    values: { docsUrl: documentationUrl },
-  });
-
-const buildKibanaFeature = (
-  feature: AlertingV2FeatureDefinition,
-  documentationUrl: string
-): KibanaFeatureConfig => {
+const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
   const managementApps = [...getFeatureManagementApps(feature)];
   const app = [APP_ID];
 
@@ -54,7 +44,6 @@ const buildKibanaFeature = (
     id: feature.id,
     name: feature.name,
     description: experimentalDescription,
-    privilegesTooltip: buildPrivilegesTooltip(documentationUrl),
     category,
     app,
     management: {
@@ -100,12 +89,8 @@ const buildKibanaFeature = (
   };
 };
 
-export const registerFeaturePrivileges = (
-  features: FeaturesPluginSetup,
-  docLinks: DocLinksServiceSetup
-) => {
-  const documentationUrl = docLinks.links.alerting.alertingV2Overview;
+export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
   Object.values(ALERTING_V2_FEATURES).forEach((feature) => {
-    features.registerKibanaFeature(buildKibanaFeature(feature, documentationUrl));
+    features.registerKibanaFeature(buildKibanaFeature(feature));
   });
 };

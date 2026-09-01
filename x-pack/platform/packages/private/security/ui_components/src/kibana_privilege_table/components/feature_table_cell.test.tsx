@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiIconTip, EuiLink, EuiPopover } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
 import { SecuredFeature } from '@kbn/security-role-management-model';
@@ -49,39 +49,5 @@ describe('FeatureTableCell', () => {
         </p>
       </EuiText>
     `);
-  });
-
-  it('renders an info button that opens a popover with a docs link when the tooltip includes a URL', () => {
-    const documentationUrl = 'https://www.elastic.co/docs/example';
-    const feature = createFeature({
-      id: 'test-feature',
-      name: 'Test Feature',
-      privilegesTooltip: `This functionality is in technical preview. ${documentationUrl}`,
-    });
-
-    const wrapper = mountWithIntl(
-      <FeatureTableCell feature={new SecuredFeature(feature.toRaw())} />
-    );
-
-    expect(wrapper.find(EuiIconTip)).toHaveLength(0);
-
-    const button = wrapper.find(EuiButtonIcon);
-    expect(button.props()['aria-label']).toBe('Test Feature information');
-    expect(button.props()['data-test-subj']).toBe('featurePrivilegeInformationButton');
-
-    button.simulate('click');
-    wrapper.update();
-
-    const popover = wrapper.find(EuiPopover);
-    expect(popover.props().isOpen).toBe(true);
-
-    const panel = mountWithIntl(popover.props().children as React.ReactElement);
-    expect(panel.text()).toContain('This functionality is in technical preview.');
-
-    const docsLink = panel.find(EuiLink);
-    expect(docsLink).toHaveLength(1);
-    expect(docsLink.props().href).toBe(documentationUrl);
-    expect(docsLink.props().target).toBe('_blank');
-    expect(docsLink.text()).toContain('Documentation');
   });
 });
