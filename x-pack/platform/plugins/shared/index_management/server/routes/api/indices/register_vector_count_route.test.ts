@@ -34,6 +34,7 @@ describe('[Index management API Routes] vector count', () => {
 
   it('sums the dense and sparse vector counts across shards', async () => {
     getIndicesStats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
       indices: {
         my_index: {
           shards: {
@@ -58,6 +59,7 @@ describe('[Index management API Routes] vector count', () => {
       level: 'shards',
       metric: ['dense_vector', 'sparse_vector'],
       filter_path: [
+        '_shards',
         'indices.*.shards.*.dense_vector.value_count',
         'indices.*.shards.*.sparse_vector.value_count',
       ],
@@ -66,6 +68,7 @@ describe('[Index management API Routes] vector count', () => {
 
   it('counts each logical shard once when multiple copies report vectors', async () => {
     getIndicesStats.mockResolvedValue({
+      _shards: { total: 2, successful: 2, failed: 0 },
       indices: {
         my_index: {
           shards: {
@@ -84,10 +87,27 @@ describe('[Index management API Routes] vector count', () => {
   });
 
   it('treats missing vector stats as zero', async () => {
-    getIndicesStats.mockResolvedValue({});
+    getIndicesStats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
+    });
 
     await expect(router.runRequest(mockRequest)).resolves.toEqual({
       body: { vectorCount: 0 },
+    });
+  });
+
+  it('reports the count as unavailable when not all shards responded', async () => {
+    getIndicesStats.mockResolvedValue({
+      _shards: { total: 3, successful: 2, failed: 0 },
+      indices: {
+        my_index: {
+          shards: { '0': [{ dense_vector: { value_count: 100 } }] },
+        },
+      },
+    });
+
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: { vectorCount: null },
     });
   });
 

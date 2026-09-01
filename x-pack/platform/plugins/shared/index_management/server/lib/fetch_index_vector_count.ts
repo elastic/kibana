@@ -28,26 +28,29 @@ const shardVectorCount = (shard: IndicesStatsShardStats): number =>
   (shard.dense_vector?.value_count ?? 0) + (shard.sparse_vector?.value_count ?? 0);
 
 /**
- * Counts indexed dense + sparse vectors, counting each logical shard exactly once. Neither of the
- * `_all` rollups is usable in stateless: `primaries` reports nothing for an index whose indexing
- * shard has been released as idle, and `total` counts every shard copy of an active index. The max
- * across a shard's copies tolerates refresh lag between them. Shards without vector stats are
- * removed by the `filter_path` and contribute nothing.
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once. 
+ * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
+ * Returns null when not all shards responded.
  */
 export const fetchIndexVectorCount = async (
   client: IScopedClusterClient,
   indexName: string
-): Promise<number> => {
-  const { indices } = await client.asInternalUser.indices.stats({
+): Promise<number | null> => {
+  const { _shards: shards, indices } = await client.asInternalUser.indices.stats({
     expand_wildcards: 'none',
     index: indexName,
     level: 'shards',
     metric: ['dense_vector', 'sparse_vector'],
     filter_path: [
+      '_shards',
       'indices.*.shards.*.dense_vector.value_count',
       'indices.*.shards.*.sparse_vector.value_count',
     ],
   });
+
+  if (!shards || shards.successful !== shards.total) {
+    return null;
+  }
 
   let count = 0;
   for (const index of Object.values(indices ?? {})) {

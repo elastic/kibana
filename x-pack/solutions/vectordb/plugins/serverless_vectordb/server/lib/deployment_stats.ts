@@ -88,26 +88,31 @@ const sumVectorCounts = (indices: Record<string, IndicesStatsIndicesStats> | und
 };
 
 /**
- * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), reported per
- * shard so `sumVectorCounts` can dedupe shard copies. Excluding dot indices keeps the total scoped
- * to the same indices as the metering-derived index and size counts. `open` is already the default
- * for `expand_wildcards`, but is pinned so hidden indices can't be pulled in by a later edit. The
- * `filter_path` keeps the per-shard response small; shards without vector stats are filtered out
- * entirely and contribute nothing.
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once. 
+ * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
+ * Returns null when not all shards responded.
  */
-const countVectors = async (client: IScopedClusterClient): Promise<number> => {
-  const stats = await client.asInternalUser.indices.stats({
+const countVectors = async (client: IScopedClusterClient, logger: Logger): Promise<number | null> => {
+  const { _shards: shards, indices } = await client.asInternalUser.indices.stats({
     index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
     level: 'shards',
     metric: ['dense_vector', 'sparse_vector'],
     filter_path: [
+      '_shards',
       'indices.*.shards.*.dense_vector.value_count',
       'indices.*.shards.*.sparse_vector.value_count',
     ],
   });
 
-  return sumVectorCounts(stats.indices);
+  if (!shards || shards.successful !== shards.total) {
+    logger.warn(
+      `Vector count covered only ${shards?.successful ?? 0} of ${shards?.total ?? 0} shards.`
+    );
+    return null;
+  }
+
+  return sumVectorCounts(indices);
 };
 
 /**
@@ -168,7 +173,7 @@ export const fetchIndexStats = async (
 
     if (indicesCount > 0) {
       [vectorCount, documentsCount] = await Promise.all([
-        countVectors(client).catch((error) => {
+        countVectors(client, logger).catch((error) => {
           logger.warn(
             `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
           );

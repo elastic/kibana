@@ -89,6 +89,7 @@ describe('fetchIndexStats', () => {
 
   const mockVectorStats = (denseCount: number, sparseCount = 0) => {
     client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
       indices: {
         vectordb: {
           shards: {
@@ -133,6 +134,7 @@ describe('fetchIndexStats', () => {
       level: 'shards',
       metric: ['dense_vector', 'sparse_vector'],
       filter_path: [
+        '_shards',
         'indices.*.shards.*.dense_vector.value_count',
         'indices.*.shards.*.sparse_vector.value_count',
       ],
@@ -143,6 +145,7 @@ describe('fetchIndexStats', () => {
   it('counts each logical shard once when multiple copies report vectors', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
     client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 2, successful: 2, failed: 0 },
       indices: {
         vectordb: {
           shards: {
@@ -162,11 +165,30 @@ describe('fetchIndexStats', () => {
 
   it('treats missing dense/sparse stats as zero', async () => {
     mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
-    client.asInternalUser.indices.stats.mockResolvedValue({} as any);
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
+    } as any);
 
     const result = await fetchIndexStats(client, logger);
 
     expect(result.vectorCount).toBe(0);
+  });
+
+  it('returns a null vectorCount when not all shards responded', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 3, successful: 2, failed: 0 },
+      indices: {
+        vectordb: {
+          shards: { '0': [{ dense_vector: { value_count: 100 } }] },
+        },
+      },
+    } as any);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(result.vectorCount).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 of 3 shards'));
   });
 
   it('returns a null vectorCount (not 0) when the vector stats call fails', async () => {
