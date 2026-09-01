@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -70,7 +71,13 @@ export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelect
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFormRow label={generalAccessLabel} fullWidth>
+    <EuiFormRow
+      label={generalAccessLabel}
+      fullWidth
+      css={css`
+        row-gap: ${euiTheme.size.s};
+      `}
+    >
       <EuiSuperSelect<ConversationAccessControlMode>
         fullWidth
         valueOfSelected={accessMode}

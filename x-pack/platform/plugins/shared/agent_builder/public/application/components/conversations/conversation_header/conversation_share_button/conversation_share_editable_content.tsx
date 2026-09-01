@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -15,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
@@ -88,6 +90,7 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
   members,
   userSearch,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
   const suggestedProfileByUid = new Map(
@@ -127,7 +130,13 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       {editableHeader}
 
       <EuiSpacer size="l" />
-      <EuiFormRow label={currentMembersLabel} fullWidth>
+      <EuiFormRow
+        label={currentMembersLabel}
+        fullWidth
+        css={css`
+          row-gap: ${euiTheme.size.s};
+        `}
+      >
         <EuiComboBox<string>
           compressed
           fullWidth
