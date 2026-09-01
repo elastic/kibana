@@ -6,7 +6,7 @@
  */
 
 import type { BuilderState, ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
-import { RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { RULE_BUILDER_REGISTRY, fromBuilderFields } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
@@ -25,6 +25,32 @@ const tryParseBuilderState = (
     return definition.parseState(query, recoveryQuery);
   }
   return null;
+};
+
+/**
+ * Recovers the builder form state for a saved rule.
+ *
+ * Rules written since `metadata.builder_fields` was introduced carry the
+ * parameters they were authored with, so they reopen exactly as configured.
+ * Older rules only have the compiled query, which the builder may be able to
+ * parse back — a best-effort path that fails for a query since hand-edited.
+ */
+const recoverBuilderState = (rule: RuleApiResponse, builderType: string): BuilderState | null => {
+  const fromFields = fromBuilderFields(builderType, rule.metadata.builder_fields);
+  if (fromFields !== undefined) {
+    return fromFields;
+  }
+
+  const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
+  if (!query) {
+    return null;
+  }
+
+  return tryParseBuilderState(
+    builderType,
+    query,
+    getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
+  );
 };
 
 interface UseBuilderToEsqlTransitionOptions {
@@ -52,13 +78,7 @@ export const useBuilderToEsqlTransition = ({
       if (!rule.metadata.builder_type) {
         return 'esql';
       }
-      const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
-      const recoveryQuery = rule.query
-        ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
-        : undefined;
-      const state = query
-        ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
-        : null;
+      const state = recoverBuilderState(rule, rule.metadata.builder_type);
       if (state && typeof state === 'object') {
         return {
           builderType: rule.metadata.builder_type,

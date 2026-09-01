@@ -25,20 +25,6 @@ export interface BuilderSubmission {
   fields: Record<string, unknown>;
 }
 
-/**
- * How a builder presents itself on the create-rule options panel. Supplying
- * this is what makes a builder reachable from the UI, so no shared component
- * needs editing to add one.
- */
-export interface RuleBuilderCreateOption {
-  title: string;
-  description: string;
-  /** EUI icon type. */
-  iconType: string;
-  /** Lower sorts earlier. Builders without one sort last, then by title. */
-  order?: number;
-}
-
 export interface RuleBuilderStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -47,7 +33,6 @@ export interface RuleBuilderStepProps {
 
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
-  createOption: RuleBuilderCreateOption;
   stepTitle: string;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
