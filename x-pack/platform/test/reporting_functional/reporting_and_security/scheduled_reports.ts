@@ -16,6 +16,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
   const dashboard = getPageObject('dashboard');
   const common = getPageObject('common');
+  const security = getPageObject('security');
   const retry = getService('retry');
   const reportingFunctional = getService('reportingFunctional');
   const reportingAPI = getService('reportingAPI');
@@ -51,12 +52,20 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       );
     };
 
-    const openFlyout = async () => {
+    const navigateToDashboard = async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Ecom Dashboard');
+    };
+
+    const openExportFlyout = async () => {
       await testSubjects.click('exportTopNavButton');
       await testSubjects.click('scheduleExport');
       await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
+    };
+
+    const openFlyout = async () => {
+      await navigateToDashboard();
+      await openExportFlyout();
     };
 
     const fillInSchedule = async () => {
@@ -232,8 +241,17 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     it('without reporting management privileges disables and hides the email recipient fields', async () => {
-      await retry.try(() => reportingFunctional.loginReportingUser());
-      await openFlyout();
+      // `common.navigateToApp` silently re-authenticates as the default super user (`test_user`,
+      // which holds manageReporting) if the reporting_user session is transiently prompted for
+      // login on navigation, rendering this non-manager flyout with manager privileges. Confirm
+      // we navigated as the reporting user before opening the flyout.
+      await retry.try(async () => {
+        await reportingFunctional.loginReportingUser();
+        await navigateToDashboard();
+        const currentUser = await security.getCurrentUser();
+        expect(currentUser?.username).to.equal('reporting_user');
+      });
+      await openExportFlyout();
 
       // Enable email
       await testSubjects.click('sendByEmailToggle');
