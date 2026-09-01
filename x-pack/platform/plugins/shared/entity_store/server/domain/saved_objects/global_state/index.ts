@@ -26,6 +26,22 @@ const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
     ? attrs.logsExtraction ?? {}
     : getLegacyLogExtractionOverrides(attrs.logsExtraction ?? {});
 
+const mergeOverrides = (
+  raw: EntityStoreGlobalStateOverrides,
+  overrides: EntityStoreGlobalStateOverrides
+): EntityStoreGlobalStateOverrides =>
+  EntityStoreGlobalStateOverrides.parse({
+    defaultsVersion: 'latest',
+    historySnapshot: {
+      ...HistorySnapshotState.parse(raw.historySnapshot ?? {}),
+      ...overrides.historySnapshot,
+    },
+    logsExtraction: {
+      ...getLogsExtractionOverrides(raw),
+      ...overrides.logsExtraction,
+    },
+  });
+
 // Read path: stored attributes in, full config out (missing fields get the current defaults).
 const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntityStoreGlobalState =>
   EntityStoreGlobalState.parse({
@@ -77,35 +93,18 @@ export class EntityStoreGlobalStateClient {
     return getWithLatestDefaults(attributes);
   }
 
-  async update(partial: EntityStoreGlobalStateOverrides): Promise<EntityStoreGlobalState> {
+  async update(overrides: EntityStoreGlobalStateOverrides): Promise<EntityStoreGlobalState> {
     // retries on version conflict, so concurrent writers
     // (e.g. the history snapshot task vs a config update) cannot overwrite each other
-    return retryOnConflict(
-      async () => {
-        const raw = await this.findRaw();
-        if (raw === undefined) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(
-            'No global state found for this namespace'
-          );
-        }
-
-        return this.replace(
-          EntityStoreGlobalStateOverrides.parse({
-            defaultsVersion: 'latest',
-            historySnapshot: {
-              ...HistorySnapshotState.parse(raw.attributes.historySnapshot ?? {}),
-              ...partial.historySnapshot,
-            },
-            logsExtraction: {
-              ...getLogsExtractionOverrides(raw.attributes),
-              ...partial.logsExtraction,
-            },
-          }),
-          raw.version
+    return retryOnConflict(async () => {
+      const raw = await this.findRaw();
+      if (raw === undefined) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'No global state found for this namespace'
         );
-      },
-      { logger: this.logger }
-    );
+      }
+      return this.replace(mergeOverrides(raw.attributes, overrides), raw.version);
+    });
   }
 
   private async replace(
