@@ -11,8 +11,6 @@ import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/s
 import type {
   Part,
   TextPart,
-  DataPart,
-  Message,
   TaskStatusUpdateEvent,
   TaskArtifactUpdateEvent,
   TaskState,
@@ -397,7 +395,7 @@ export const translateAgentBuilderEvent = (
         lastChunk: false,
         artifact: {
           artifactId,
-          parts: [{ kind: 'text', text: textChunk } as TextPart],
+          parts: [{ kind: 'text', text: textChunk }],
         },
       },
     ];
@@ -434,7 +432,7 @@ export const translateAgentBuilderEvent = (
         lastChunk: true,
         artifact: {
           artifactId,
-          parts: [{ kind: 'text', text: messageContent } as TextPart],
+          parts: [{ kind: 'text', text: messageContent }],
         },
       },
     ];
@@ -524,10 +522,10 @@ const buildStatusUpdate = ({
             kind: 'message',
             role: 'agent',
             messageId: generateMessageId(),
-            parts: parts ?? [{ kind: 'text', text: text ?? '' } as TextPart],
+            parts: parts ?? [{ kind: 'text', text: text ?? '' }],
             taskId,
             contextId,
-          } as Message,
+          },
           timestamp: new Date().toISOString(),
         }
       : { state, timestamp: new Date().toISOString() };
@@ -587,8 +585,8 @@ const buildInputRequiredFromPrompt = ({
   }
 
   const parts: Part[] = [
-    { kind: 'text', text } as TextPart,
-    { kind: 'data', data: dataPayload } as DataPart,
+    { kind: 'text', text },
+    { kind: 'data', data: dataPayload },
   ];
 
   return buildStatusUpdate({
