@@ -14,7 +14,7 @@
 // silently widen it.
 //
 // Still to be lifted by the commits that follow:
-//   - per-action request schemas (@kbn/config-schema and generated zod)
+//   - the 12 per-action request schemas (@kbn/config-schema and generated zod)
 
 export type { EndpointAuthz, EndpointAuthzKeyList, EndpointPrivileges } from './src/types/authz';
 
@@ -75,3 +75,15 @@ export {
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from './src/routes';
+
+export { SUPPORTED_HOST_OS_TYPE, type SupportedHostOsType } from './src/os_types';
+
+export {
+  AgentTypeSchemaLiteral,
+  agentTypesSchema,
+  BaseActionRequestSchema,
+  HostOsTypeSchemaLiteral,
+  MAX_RESPONSE_ACTION_COMMENT_LENGTH,
+  NoParametersRequestSchema,
+  type BaseActionRequestBody,
+} from './src/api/common/base';

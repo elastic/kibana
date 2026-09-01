@@ -145,9 +145,16 @@ export const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE = `${BASE_INTERNAL_ENDP
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
 
-/** The list of OS types that support. Value usually found in ECS `host.os.type` */
-export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
-export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];
+/**
+ * The list of OS types that support. Value usually found in ECS `host.os.type`
+ *
+ * Defined in @kbn/security-solution-endpoint-common and re-exported here so existing import
+ * paths keep working.
+ */
+export {
+  type SupportedHostOsType,
+  SUPPORTED_HOST_OS_TYPE,
+} from '@kbn/security-solution-endpoint-common';
 
 /**
  * Workflow Insights

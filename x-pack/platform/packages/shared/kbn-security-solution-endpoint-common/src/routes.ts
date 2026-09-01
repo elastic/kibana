@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-// Public endpoint route paths needed to dispatch and observe response actions.
+// Endpoint route paths needed to dispatch and observe response actions, plus the route
+// bases they are derived from.
 //
-// Internal (`/internal/...`) endpoint routes deliberately stay in security_solution:
-// they are not a contract platform consumers should bind to.
+// Every response action dispatch and read route here is a public (`/api/...`) route.
+// BASE_INTERNAL_ENDPOINT_ROUTE is exported only because several security_solution routes
+// derive from it; internal routes carry no compatibility guarantee, so consumers outside
+// security_solution should not build `/internal/...` paths from it. The internal action
+// routes themselves (BASE_INTERNAL_ENDPOINT_ACTION_ROUTE, CUSTOM_SCRIPTS_ROUTE,
+// ORPHAN_ACTIONS_SPACE_ROUTE) stay in security_solution.
 
 /** Location from where all Endpoint related APIs are mounted */
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';

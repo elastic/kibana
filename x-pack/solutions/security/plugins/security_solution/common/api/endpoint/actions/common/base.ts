@@ -5,78 +5,25 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { MAX_COMMENT_LENGTH } from '../../../../constants';
-import { SUPPORTED_HOST_OS_TYPE } from '../../../../endpoint/constants';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
+// The base response action request schema now lives in
+// @kbn/security-solution-endpoint-common so that platform-group modules — Agent Builder and
+// Workflows — can import it; a platform module cannot depend on this plugin, which is
+// group: "security", visibility: "private".
+//
+// This file re-exports it so existing import paths keep working. Exports are named rather
+// than `export *`, so the surface this module exposes stays explicit.
+//
+// Note the `comment` field is now bounded by the package's own
+// MAX_RESPONSE_ACTION_COMMENT_LENGTH rather than by this plugin's MAX_COMMENT_LENGTH. The
+// two share a value but bound unrelated things — MAX_COMMENT_LENGTH bounds the rule
+// exceptions and event filters UI.
 
-export const AgentTypeSchemaLiteral = RESPONSE_ACTION_AGENT_TYPE.map((agentType) =>
-  schema.literal(agentType)
-);
-
-export const agentTypesSchema = {
-  schema: schema.oneOf(
-    // @ts-expect-error TS2769: No overload matches this call
-    AgentTypeSchemaLiteral
-  ),
-  options: {
-    minSize: 1,
-    maxSize: RESPONSE_ACTION_AGENT_TYPE.length,
-  },
-};
-
-export const HostOsTypeSchemaLiteral = SUPPORTED_HOST_OS_TYPE.map((osType) =>
-  schema.literal(osType)
-);
-
-export const BaseActionRequestSchema = {
-  /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
-    minSize: 1,
-    maxSize: 250,
-    validate: (endpointIds) => {
-      if (endpointIds.map((v) => v.trim()).some((v) => !v.length)) {
-        return 'endpoint_ids cannot contain empty strings';
-      }
-    },
-  }),
-  /** If defined, any case associated with the given IDs will be updated */
-  alert_ids: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
-      minSize: 1,
-      maxSize: 50,
-      validate: (alertIds) => {
-        if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
-          return 'alert_ids cannot contain empty strings';
-        }
-      },
-    })
-  ),
-  /** Case IDs to be updated */
-  case_ids: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
-      minSize: 1,
-      maxSize: 50,
-      validate: (caseIds) => {
-        if (caseIds.map((v) => v.trim()).some((v) => !v.length)) {
-          return 'case_ids cannot contain empty strings';
-        }
-      },
-    })
-  ),
-  comment: schema.maybe(schema.string({ maxLength: MAX_COMMENT_LENGTH })),
-  parameters: schema.maybe(schema.object({})),
-  agent_type: schema.maybe(
-    schema.oneOf(
-      // @ts-expect-error TS2769: No overload matches this call
-      AgentTypeSchemaLiteral,
-      { defaultValue: 'endpoint' }
-    )
-  ),
-};
-
-export const NoParametersRequestSchema = {
-  body: schema.object({ ...BaseActionRequestSchema }),
-};
-export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+export {
+  AgentTypeSchemaLiteral,
+  agentTypesSchema,
+  BaseActionRequestSchema,
+  HostOsTypeSchemaLiteral,
+  MAX_RESPONSE_ACTION_COMMENT_LENGTH,
+  NoParametersRequestSchema,
+  type BaseActionRequestBody,
+} from '@kbn/security-solution-endpoint-common';
