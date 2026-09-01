@@ -2,7 +2,7 @@ version: "1"
 name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
-  and applies an approved query change.
+  and applies the approved tuning change: a rule exception or a narrowed query.
 enabled: true
 tags:
   - security
@@ -38,44 +38,25 @@ consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
-  # Written onto every alert that reached a decision, and filtered out by the harvest,
-  # so a later sweep cannot rediagnose the same alerts into the same proposal.
-  reviewed_tag: detection-watch:tuning-reviewed
-  dismissed_tag: detection-watch:tuning-dismissed
-  applied_tag: detection-watch:tuning-applied
-  dismissed_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-dismissed
-  applied_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-applied
 steps:
-  # Scoped to one space because the tag API writes to the space's own alerts index, so
-  # a cross-space harvest would keep rediagnosing alerts it can never mark.
-  # `allow_partial_results: false` because a partial aggregation would both undercount
-  # fp_count and return a short alert_ids list, leaving alerts that drove a decision
-  # untagged. The 1000-id slice keeps the bulk tag request inside Kibana's payload
-  # limit; a rule noisier than that surfaces again on the next sweep.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
-      allow_partial_results: false
       query: |-
-        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+        FROM .alerts-security.alerts-*
         | WHERE `kibana.alert.workflow_status` == "closed"
           AND `kibana.alert.workflow_reason` == "false_positive"
           AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
-          AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
-        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp), alert_ids = MV_SLICE(VALUES(_id), 0, 999) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
+        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count }}
-        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at
         | SORT fp_count DESC
-        | LIMIT 10
+        | LIMIT 25
     on-failure:
       continue: true
 
   # No iteration-timeout: an enclosing step-timeout zone would cut short the 72h
-  # approval gate below. Runaway work is bounded by the agent step's own timeout.
+  # approval gate below. Runaway work is bounded by the diagnose step's own timeout.
   - name: tune_each_rule
     type: foreach
     foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
@@ -103,33 +84,40 @@ steps:
             rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}).
 
             {{ foreach.item.2 }} alerts from this rule were closed as false positives
-            during the last {{ inputs.lookback_hours }} hours. Return one structured
-            tuning proposal.
+            during the last {{ inputs.lookback_hours }} hours. These are confirmed
+            analyst dispositions — not suspected noise.
 
-            This pipeline backtests and applies query changes directly, so prefer
-            change_type "query": narrow the KQL to exclude the confirmed benign
-            pattern while keeping detection coverage. Pick exception, suppression, or
-            threshold only when narrowing the query is genuinely unsafe for this rule,
-            since those stay manual analyst actions. This rule has type
-            "{{ steps.fetch_rule.output.type }}", so propose a query change only when
-            that type is "query".
+            Return one structured tuning proposal. For confirmed false positives,
+            prefer change_type "exception": identify the shared field values across
+            the closed alerts and propose the tightest condition that matches the
+            confirmed pattern. Use change_type "query" only when the query is
+            genuinely over-broad and this rule has type
+            "{{ steps.fetch_rule.output.type }}" — include the full replacement
+            query in proposed_query. Use "manual" when neither applies.
           schema:
             type: object
             properties:
               change_type:
                 type: string
-                enum: [exception, suppression, query, threshold]
+                enum: [exception, query, manual]
               summary:
-                type: string
-              current_query:
                 type: string
               proposed_query:
                 type: string
-              exception_condition:
-                type: string
-              rekey_required:
-                type: boolean
-            required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
+              exception_entries:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    operator:
+                      type: string
+                      enum: [is, is_not, is_one_of, is_not_one_of, matches, does_not_match]
+                    value:
+                      type: string
+                  required: [field, operator, value]
+            required: [change_type, summary]
 
       # Both previews end at the last false positive, not at now, so the rule's own
       # `from` lookback covers the events analysts judged. Anchoring at now would
@@ -137,8 +125,7 @@ steps:
       - name: preview_current_query
         type: workflow.execute
         if: >-
-          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+          ${{ steps.diagnose_rule.output.structured_output.proposed_query != ''
             and steps.fetch_rule.output.type == 'query' }}
         with:
           workflow-id: system-security-rule-preview
@@ -162,8 +149,7 @@ steps:
       - name: preview_proposed_query
         type: workflow.execute
         if: >-
-          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+          ${{ steps.diagnose_rule.output.structured_output.proposed_query != ''
             and steps.fetch_rule.output.type == 'query' }}
         with:
           workflow-id: system-security-rule-preview
@@ -193,13 +179,20 @@ steps:
           rejectLabel: Dismiss
           message: |-
             Rule tuning proposal for {{ foreach.item.1 }}
-            {{ foreach.item.2 }} alerts were closed as false positives.
+            {{ foreach.item.2 }} alerts were closed in the last {{ inputs.lookback_hours }} hours.
 
             {{ steps.diagnose_rule.output.structured_output.summary }}
 
+            {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+            Proposed exception:
+            {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
+            - {{ entry.field }} {{ entry.operator }} {{ entry.value }}
+            {% endfor %}
+            Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
             Current query:
-            {{ steps.diagnose_rule.output.structured_output.current_query }}
+            {{ steps.fetch_rule.output.query }}
 
             Proposed query:
             {{ steps.diagnose_rule.output.structured_output.proposed_query }}
@@ -207,34 +200,36 @@ steps:
             Backtest:
             current {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }}{% else %}inconclusive{% endif %},
             proposed {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }}{% else %}inconclusive{% endif %}.
-            {% if steps.preview_current_query.output.error_text != '' %}
-            Current query preview errors: {{ steps.preview_current_query.output.error_text }}
+
+            Approving replaces the rule query. It can be edited back in the Detection Rules UI.
             {% endif %}
-            {% if steps.preview_proposed_query.output.error_text != '' %}
-            Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
-            {% endif %}
-            {% else %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
-            Proposed exception:
-            {{ steps.diagnose_rule.output.structured_output.exception_condition }}
-            {% endif %}
-            Apply this {{ steps.diagnose_rule.output.structured_output.change_type }}
-            proposal manually in the Detection Rules UI. Approving records the handoff;
-            it does not change the rule.
+            {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
+            No automated change can be applied safely. Approving records the handoff;
+            apply the recommended change manually in the Detection Rules UI.
             {% endif %}
 
-            {% if steps.diagnose_rule.output.conversation_id %}
-            Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
-            {% endif %}
+      # Decided once so the apply and hand-off branches stay exact complements. Grouping
+      # an `or` chain with parentheses is a tokenization error in these expressions.
+      - name: classify_proposal
+        type: data.set
+        with:
+          can_apply_query: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+              and steps.diagnose_rule.output.structured_output.proposed_query != ''
+              and steps.fetch_rule.output.type == 'query'
+              and steps.preview_proposed_query.output.succeeded == true
+              and steps.preview_proposed_query.output.is_aborted == false }}
+          can_apply_exception: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and steps.diagnose_rule.output.structured_output.exception_entries != null }}
 
       - name: apply_query_tuning
         type: kibana.request
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query'
-            and steps.preview_proposed_query.output.succeeded == true
-            and steps.preview_proposed_query.output.is_aborted == false }}
+            and steps.classify_proposal.output.can_apply_query == true }}
+        on-failure:
+          continue: true
         with:
           method: PATCH
           path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -246,25 +241,44 @@ steps:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
-      # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
-      # harvest's KEEP projects: the alert_ids multivalue.
-      - name: mark_alerts_dismissed
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == false }}"
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.dismissed_tags }}"
+      # Stable item_id so a re-approved proposal for the same rule overwrites
+      # its exception item instead of stacking duplicates run after run.
+      - name: apply_exception_tuning
+        type: security.createRuleException
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_exception == true }}
         on-failure:
           continue: true
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          item_id: "tuning-{{ foreach.item.0 }}"
+          overwrite: true
+          name: "Tuning: {{ foreach.item.1 }}"
+          description: "Added by the rule tuning workflow."
+          entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
 
-      - name: mark_alerts_applied
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == true }}"
+      - name: record_manual_tuning
+        type: data.set
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_query == false
+            and steps.classify_proposal.output.can_apply_exception == false }}
         with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.applied_tags }}"
-        on-failure:
-          continue: true
+          rule_id: "{{ foreach.item.0 }}"
+          note: Apply the approved proposal in the Detection Rules UI.
+
+      # An approved proposal whose apply step errored must not vanish silently.
+      - name: record_failed_apply
+        type: data.set
+        if: >-
+          ${{ steps.apply_query_tuning.error != null
+            or steps.apply_exception_tuning.error != null }}
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          note: >-
+            The approved tuning change failed to apply automatically. Apply it in the
+            Detection Rules UI.
 
   # Size is computed on its own because comparison operators cannot follow a filter chain.
   - name: count_examined_rules
