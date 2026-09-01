@@ -34,6 +34,11 @@ import { expect } from '@kbn/scout/ui';
 import { tags, test } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 
+import {
+  mockPackagePoliciesEmpty,
+  mockCloudConnectorsEmpty,
+} from '../../../../scout/ui/fixtures/mocks';
+
 // ---------------------------------------------------------------------------
 // Selectors
 // ---------------------------------------------------------------------------
@@ -75,36 +80,6 @@ const SHARED_CREDENTIALS = 'shared_credentials';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Intercepts GET /api/fleet/package_policies and returns an empty list. */
-async function mockPackagePoliciesEmpty(page: ScoutPage) {
-  await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-    if (request.method() === 'GET') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ items: [], total: 0, page: 1, perPage: 1000 }),
-      });
-    } else {
-      await route.continue();
-    }
-  });
-}
-
-/** Intercepts GET /api/fleet/cloud_connectors and returns an empty list. */
-async function mockCloudConnectorsEmpty(page: ScoutPage) {
-  await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
-    if (request.method() === 'GET') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ items: [], total: 0 }),
-      });
-    } else {
-      await route.continue();
-    }
-  });
-}
 
 /**
  * Navigates to the add-integration page for a given AWS policy template.
