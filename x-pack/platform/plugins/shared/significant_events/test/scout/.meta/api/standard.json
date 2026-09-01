@@ -1,17 +1,9 @@
 {
   "sha1": "63a2c42548fe9edd4ce15a343b4b5dc46b9d9223",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "145dd70ebc9c35e-70ec3e6d9549722",
-      "title": "Teardown environment for Streams API tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
-        "line": 11,
-        "column": 19
-      }
-    },
     {
       "id": "aba317166d7aac7-81c41da1351e0a5",
       "title": "Setup environment for Significant Events API tests",
@@ -197,6 +189,17 @@
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
         "line": 40,
         "column": 14
+      }
+    },
+    {
+      "id": "145dd70ebc9c35e-70ec3e6d9549722",
+      "title": "Teardown environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
       }
     }
   ]

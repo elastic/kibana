@@ -1,20 +1,9 @@
 {
   "sha1": "f0067f37d06f24cde6ad2981b061c934789f0723",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
-      "title": "Reset profiling state after API tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
-        "line": 13,
-        "column": 1
-      }
-    },
     {
       "id": "1219f91050e9ce3-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -197,6 +186,20 @@
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
         "line": 104,
         "column": 10
+      }
+    },
+    {
+      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
+      "title": "Reset profiling state after API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
+        "line": 13,
+        "column": 1
       }
     }
   ]

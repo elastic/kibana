@@ -176,6 +176,14 @@
       "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
       "approvedBy": "@elastic/fleet",
       "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/detection_engine/rules/preview",
+      "method": "post",
+      "reason": "Security Solution sets max_signals default value in applyRuleDefaults and Zod schema. The latter started breaking rule PATCH API after Zod v4 migration by defaulting max_signals to 100 and overriding any existing value. Removing max_signals default value from the Zod schema to fix the issue,",
+      "approvedBy": "@elastic/security-detection-engineering",
+      "oasdiffId": "request-body-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/286518"
     }
   ]
 }

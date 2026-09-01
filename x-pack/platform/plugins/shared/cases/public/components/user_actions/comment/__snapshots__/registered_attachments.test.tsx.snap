@@ -7,7 +7,9 @@ Array [
       id="basic-comment-id"
     >
       <React.Fragment>
-        My button
+        <React.Fragment>
+          My button
+        </React.Fragment>
       </React.Fragment>
       <Memo(RegisteredAttachmentsPropertyActions)
         hideDefaultActions={false}
@@ -125,7 +127,9 @@ Array [
       id="basic-comment-id"
     >
       <React.Fragment>
-        My button
+        <React.Fragment>
+          My button
+        </React.Fragment>
       </React.Fragment>
       <Memo(RegisteredAttachmentsPropertyActions)
         hideDefaultActions={true}

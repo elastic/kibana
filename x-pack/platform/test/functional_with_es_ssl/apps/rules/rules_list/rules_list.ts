@@ -248,7 +248,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
+
       await testSubjects.click('untrackAlertsModalSwitch');
+      await retry.waitFor('untrack switch to be checked', () =>
+        testSubjects.isEuiSwitchChecked('untrackAlertsModalSwitch')
+      );
 
       await testSubjects.click('confirmModalConfirmButton');
 
