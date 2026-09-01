@@ -14,6 +14,12 @@ export {
 } from './service_map';
 
 export {
+  SERVICE_MAP_CONTEXT_ATTACHMENT_TYPE,
+  serviceMapContextAttachmentDataSchema,
+  type ServiceMapContextAttachmentData,
+} from './service_map_context';
+
+export {
   APM_METRICS_ATTACHMENT_TYPE,
   apmMetricsAttachmentDataSchema,
   type ApmMetricsAttachmentData,

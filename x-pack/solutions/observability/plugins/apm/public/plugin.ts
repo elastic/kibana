@@ -112,6 +112,7 @@ import { registerEmbeddables } from './embeddable/register_embeddables';
 import type { EmbeddableDeps } from './embeddable/types';
 import {
   registerServiceMapAttachment,
+  registerServiceMapContextAttachment,
   registerApmMetricsAttachment,
   registerApmTimeseriesAttachment,
   registerApmRelatedAlertsAttachment,
@@ -577,6 +578,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           pluginsStart: plugins,
         });
       }
+      registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
       registerApmMetricsAttachment(plugins.agentBuilder.attachments);
       registerApmTimeseriesAttachment(plugins.agentBuilder.attachments);
       registerApmRelatedAlertsAttachment(plugins.agentBuilder.attachments);

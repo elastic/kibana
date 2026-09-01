@@ -239,6 +239,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.service-map',
   'observability.investigate-apm-alert',
   'observability.investigate-apm-service',
+  'observability.investigate-service-map',
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,
@@ -353,6 +354,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+  'observability.service-map-context',
   'observability.apm-metrics',
   'observability.apm-timeseries',
   'observability.apm-related-alerts',

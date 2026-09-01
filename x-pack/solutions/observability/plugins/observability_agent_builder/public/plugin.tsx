@@ -18,6 +18,7 @@ import {
   createLogAIInsight,
   createLogsAIInsightRenderer,
   createServiceInvestigateButton,
+  createServiceMapInvestigateButton,
 } from './components/insights';
 import { registerAttachmentUiDefinitions } from './attachment_types';
 import { registerTelemetryEventTypes } from './analytics';
@@ -63,6 +64,7 @@ export class ObservabilityAgentBuilderPlugin
       getAlertAskAiAgentButton: () => createAlertAskAiAgentButton(core, plugins),
       getErrorSampleAIInsight: () => createErrorSampleAIInsight(core, plugins),
       getServiceInvestigateButton: () => createServiceInvestigateButton(core, plugins),
+      getServiceMapInvestigateButton: () => createServiceMapInvestigateButton(core, plugins),
     };
   }
 
