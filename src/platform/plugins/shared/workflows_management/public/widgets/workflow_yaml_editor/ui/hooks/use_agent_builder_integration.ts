@@ -44,7 +44,7 @@ interface PendingAutoSend {
   newConversation?: boolean;
 }
 
-interface OpenAgentChatOptions {
+export interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
   /**

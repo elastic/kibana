@@ -78,7 +78,7 @@ describe('WorkflowYamlValidationAccordion', () => {
     expandAccordion();
 
     expect(screen.getByTestId('workflowYamlValidationErrorFixWithAiButton')).toBeInTheDocument();
-    expect(screen.getByLabelText('Fix with AI')).toBeInTheDocument();
+    expect(screen.getByLabelText('Fix with AI Agent')).toBeInTheDocument();
   });
 
   it('navigates to the error when the row is clicked without a text selection', () => {

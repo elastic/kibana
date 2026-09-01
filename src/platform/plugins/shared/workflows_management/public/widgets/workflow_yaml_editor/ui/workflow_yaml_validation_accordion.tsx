@@ -32,6 +32,7 @@ import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
+import { FIX_WITH_AI_LABEL } from '../lib/fix_with_ai_label';
 
 const severityOrder = ['error', 'warning'];
 
@@ -46,13 +47,6 @@ const copiedErrorMessageLabel = i18n.translate(
   'workflowsManagement.workflowYAMLValidationErrors.copiedErrorMessage',
   {
     defaultMessage: 'Copied',
-  }
-);
-
-const fixWithAiLabel = i18n.translate(
-  'workflowsManagement.workflowYAMLValidationErrors.fixWithAi',
-  {
-    defaultMessage: 'Fix with AI',
   }
 );
 
@@ -227,7 +221,7 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
               <EuiFlexItem grow={false}>
                 <AiButtonIcon
                   iconType="productAgent"
-                  aria-label={fixWithAiLabel}
+                  aria-label={FIX_WITH_AI_LABEL}
                   size="xs"
                   variant="empty"
                   withToolTip
