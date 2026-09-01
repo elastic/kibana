@@ -74,6 +74,31 @@ steps:
         on-failure:
           continue: true
 
+      # Pre-aggregate the entity breakdown so the agent has data-driven context
+      # without needing to query alerts itself. Columns: fp_count, host.name,
+      # user.name, source.ip, process.name.
+      - name: fetch_fp_entities
+        type: elasticsearch.esql.query
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+        with:
+          query: |-
+            FROM .alerts-security.alerts-*
+            | WHERE `kibana.alert.workflow_status` == "closed"
+              AND `kibana.alert.workflow_reason` == "false_positive"
+              AND `kibana.alert.rule.uuid` == "{{ foreach.item.0 }}"
+              AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+            | STATS fp_count = COUNT(*) BY `host.name`, `user.name`, `source.ip`, `process.name`
+            | SORT fp_count DESC
+            | LIMIT 10
+        on-failure:
+          continue: true
+
+      # The investigate-rule skill is intentionally not used here. That skill is
+      # designed for interactive analyst sessions: it produces five-section prose
+      # output and explicitly never applies or offers to apply changes. The worker
+      # needs machine-actionable structured JSON from a schema fence, not prose.
+      # Entity context is pre-aggregated above and passed directly so the agent
+      # never needs to issue its own queries.
       - name: diagnose_rule
         type: ai.agent
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
@@ -81,39 +106,50 @@ steps:
         create-conversation: true
         with:
           message: |-
-            Use the [/investigate-rule](skill://investigate-rule) skill to investigate
-            rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}).
+            Diagnose why rule "{{ foreach.item.1 }}" (rule_id: {{ foreach.item.3 }})
+            is generating false positives and propose one structured tuning change.
+
+            Rule details:
+            - Type: {{ steps.fetch_rule.output.type }}
+            - Severity: {{ steps.fetch_rule.output.severity }}
+            - Risk score: {{ steps.fetch_rule.output.risk_score }}
+            {% if steps.fetch_rule.output.query %}- Query: {{ steps.fetch_rule.output.query }}{% endif %}
 
             {{ foreach.item.2 }} alerts from this rule were closed as false positives
             during the last {{ inputs.lookback_hours }} hours. These are confirmed
             analyst dispositions — not suspected noise.
 
-            Return one structured tuning proposal using the following strategies
-            in order of preference:
+            {% if steps.fetch_fp_entities.output.values %}
+            Top entity combinations driving false positives
+            (columns: fp_count, host.name, user.name, source.ip, process.name):
+            {% for row in steps.fetch_fp_entities.output.values %}
+            - {{ row }}
+            {% endfor %}
+            {% endif %}
 
-            1. "exception" — Best when the rule is correct but fires on a
-               known-good process, user, or host. Populate exception_entries
-               with the tightest field-value conditions that match the confirmed
-               pattern. Use this rule's type "{{ steps.fetch_rule.output.type }}".
+            Propose one tuning change using the following strategies in order of preference:
 
-            2. "query" — When false positives stem from the query being too
-               broad. Only valid when rule type is "query". Include the full
-               replacement query in proposed_query (same language as current).
+            1. "exception" — Best when the rule is correct but fires on a known-good
+               process, user, or host. Use the entity data above to pick the tightest
+               field-value conditions. Populate exception_entries accordingly.
 
-            3. "suppression" — When the same entity is generating duplicate
-               alerts repeatedly. Populate suppression_group_by with up to 3
-               field names to group by. For threshold-type rules prefer raising
-               the threshold manually instead; use suppression for other types.
+            2. "query" — When FPs stem from the query being too broad. Only valid for
+               rules of type "query". Include the full replacement query in proposed_query
+               (same language as the current query).
 
-            4. "risk_score" — When the rule still has detection value but
-               generates many low-priority alerts. Provide proposed_risk_score
-               (0–100) and proposed_severity (low/medium/high/critical).
+            3. "suppression" — When the same entity generates duplicate alerts repeatedly.
+               Populate suppression_group_by with up to 3 field names. For threshold-type
+               rules prefer raising the threshold manually; use suppression for other types.
 
-            5. "disable" — Last resort only. When the rule provides no
-               detection value or is completely redundant with another rule.
+            4. "risk_score" — When the rule still has detection value but generates many
+               low-priority alerts. Provide proposed_risk_score (0–100) and
+               proposed_severity (low/medium/high/critical).
 
-            Use "manual" only if none of the above applies and analyst
-            intervention is required before any automated change is safe.
+            5. "disable" — Last resort only. When the rule provides no detection value or
+               is completely redundant with another rule.
+
+            Use "manual" only if none of the above applies and analyst intervention is
+            required before any automated change is safe.
           schema:
             type: object
             properties:
