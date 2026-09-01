@@ -28,5 +28,23 @@ export type Serializable =
 // we need interfaces instead of types here to allow cyclic references
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SerializableArray extends Array<Serializable> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SerializableRecord extends Record<string, Serializable> {}
+
+export type SerializableRecord<AllowedKeys extends string | number | symbol = string> = {
+  [Key in AllowedKeys]?: Serializable;
+};
+
+/**
+ * Use AsSerializableRecord to avoid recursive references to base type
+ *
+ * // Invalid example - TypeScript error:
+ * // "Type 'MySerializableRecord' recursively references itself as a base type."
+ * interface MySerializableRecord extends SerializableRecord<keyof MySerializableRecord> {
+ *   foo: string;
+ * }
+ *
+ * // Example without recursive references
+ * type MySerializableRecord = AsSerializableRecord<{
+ *   foo: string;
+ * }>;
+ */
+export type AsSerializableRecord<T extends SerializableRecord<keyof T>> = T;

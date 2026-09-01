@@ -80,6 +80,7 @@
     "@kbn/streams-schema",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/app-header",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,6 +14,12 @@ import {
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import type { ActionScope } from '@kbn/connector-specs';
+
+function formatAnnotationHint(scope: ActionScope | undefined): string {
+  if (!scope || scope === 'read') return '';
+  return scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
+}
 
 /**
  * Creates the definition for the `connector` attachment type.
@@ -78,7 +84,8 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
               const paramsSummary = action.input
                 ? formatSchemaForLlm(action.input)
                 : 'No parameters';
-              parts.push(`  - ${actionName}: ${actionDesc}`);
+              const hint = formatAnnotationHint(action.scope);
+              parts.push(`  - ${actionName}${hint ? ` ${hint}` : ''}: ${actionDesc}`);
               parts.push(`    Parameters: ${paramsSummary}`);
             }
 

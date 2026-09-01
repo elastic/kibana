@@ -69,6 +69,7 @@ export const DownloadSourceSchema = schema.object({ ...DownloadSourceBaseSchema 
 
 export const DownloadSourceResponseSchema = DownloadSourceSchema.extends({
   id: schema.string(),
+  is_preconfigured: schema.maybe(schema.boolean()),
 });
 
 export const GetDownloadSourceResponseSchema = schema.object({

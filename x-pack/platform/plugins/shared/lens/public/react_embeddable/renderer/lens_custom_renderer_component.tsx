@@ -42,7 +42,6 @@ type PanelProps = Pick<
   | 'showBadges'
   | 'hideLoader'
   | 'hideHeader'
-  | 'hideInspector'
   | 'getActions'
   | 'titleHighlight'
 >;
@@ -57,7 +56,6 @@ export function LensRenderer({
   description,
   withDefaultActions,
   extraActions,
-  showInspector,
   syncColors,
   syncCursor,
   syncTooltips,
@@ -152,7 +150,6 @@ export function LensRenderer({
 
   const panelProps: PanelProps = useMemo(() => {
     return {
-      hideInspector: !showInspector,
       showShadow: false,
       showBadges: false,
       titleHighlight,
@@ -164,7 +161,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
+  }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>

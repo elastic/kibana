@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   CONNECTOR_LOAD_ERROR,
+  CROSS_PROJECT_GENERATION_DISCLOSURE,
   GENERATE_BUTTON_LABEL,
   GENERATE_FEATURES_BUTTON_LABEL,
   GENERATE_FEATURES_TOOLTIP,
@@ -56,6 +60,12 @@ export const GenerateSplitButton = ({
   isLoading,
   size,
 }: GenerateSplitButtonProps) => {
+  const {
+    dependencies: {
+      start: { cps },
+    },
+  } = useKibana();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const featuresConnector = useMemo(
     () => allConnectors.find((c) => c.connectorId === config.connectors.features),
     [allConnectors, config.connectors.features]
@@ -153,22 +163,38 @@ export const GenerateSplitButton = ({
   );
 
   return (
-    <ContextMenuSplitButton
-      size={size}
-      primaryLabel={GENERATE_BUTTON_LABEL}
-      primaryIconType="radar"
-      onPrimaryClick={onRun}
-      isPrimaryDisabled={isRunDisabled}
-      primaryDisabledTooltip={isRunDisabled ? runDisabledTooltip : undefined}
-      primaryDataTestSubj="significant_events_onboard_streams_button"
-      secondaryAriaLabel={GENERATE_CONFIG_ARIA_LABEL}
-      isSecondaryDisabled={isConfigDisabled}
-      secondaryDataTestSubj="significant_events_onboarding_config_trigger"
-      buildPanels={buildPanels}
-      error={connectorError}
-      errorTitle={CONNECTOR_LOAD_ERROR}
-      isLoading={isLoading}
-      data-test-subj="significant_events_generate_split_button"
-    />
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <ContextMenuSplitButton
+          size={size}
+          primaryLabel={GENERATE_BUTTON_LABEL}
+          primaryIconType="radar"
+          onPrimaryClick={onRun}
+          isPrimaryDisabled={isRunDisabled}
+          primaryDisabledTooltip={isRunDisabled ? runDisabledTooltip : undefined}
+          primaryDataTestSubj="significant_events_onboard_streams_button"
+          secondaryAriaLabel={GENERATE_CONFIG_ARIA_LABEL}
+          isSecondaryDisabled={isConfigDisabled}
+          secondaryDataTestSubj="significant_events_onboarding_config_trigger"
+          buildPanels={buildPanels}
+          error={connectorError}
+          errorTitle={CONNECTOR_LOAD_ERROR}
+          isLoading={isLoading}
+          data-test-subj="significant_events_generate_split_button"
+        />
+      </EuiFlexItem>
+      {isCpsMultiProject && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="info"
+            color="subdued"
+            content={CROSS_PROJECT_GENERATION_DISCLOSURE}
+            iconProps={{
+              'data-test-subj': 'significant_events_cross_project_generation_disclosure',
+            }}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

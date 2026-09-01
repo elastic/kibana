@@ -1,8 +1,7 @@
 {
-  "sha1": "55f069b230bb899cfa4ee2f3534193b7c471ac9b",
+  "sha1": "d62be05fce331f13497465d306bf6d23978fb9a8",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -64,8 +63,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching_from_scratch.spec.ts",
-        "line": 18,
-        "column": 13
+        "line": 17,
+        "column": 22
       }
     },
     {
@@ -77,7 +76,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching_from_scratch.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 16
       }
     },
@@ -91,7 +90,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
         "line": 36,
-        "column": 51
+        "column": 13
       }
     },
     {
@@ -116,7 +115,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 20
       }
     },
@@ -129,8 +128,60 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
-        "line": 95,
+        "line": 92,
+        "column": 20
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-f53e79983ac5ee3",
+      "title": "Lens layers transitions from a multi-layer stacked bar to a multi-layer line chart and removes all layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 14,
         "column": 22
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-7a3f4ecb8d989b8",
+      "title": "Lens layers transitions the selected layer in a multi-layer bar using layer chart switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 55,
+        "column": 29
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-3812e6c2faa9713",
+      "title": "Lens layers transitions from a multi-layer stacked bar to a treemap chart using suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 96,
+        "column": 58
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-7039e4f3be4ba3a",
+      "title": "Lens layers keeps suggestions up to date with the current configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 128,
+        "column": 13
       }
     }
   ]

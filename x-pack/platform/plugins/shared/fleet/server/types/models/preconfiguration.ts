@@ -256,6 +256,24 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   }
 );
 
+export const PreconfiguredDownloadSourcesSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    host: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    proxy_id: schema.maybe(schema.nullable(schema.string())),
+    ssl: schema.maybe(
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+      })
+    ),
+  }),
+  { defaultValue: [], maxSize: 100 }
+);
+
 export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
   schema.object({
     space_id: schema.string(),

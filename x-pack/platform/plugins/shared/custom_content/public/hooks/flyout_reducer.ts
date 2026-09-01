@@ -10,18 +10,21 @@ import type { EsqlDataResult } from '../utils/fetch_esql_data';
 interface FlyoutReducerState {
   draftEsqlQuery: string;
   draftTemplate: string;
-  isPreviewLoading: boolean;
-  previewData: EsqlDataResult | null;
-  previewError: string | null;
+  isDataLoading: boolean;
+  esqlData: EsqlDataResult | null;
+  esqlDataError: string | null;
+  isRenderLoading: boolean;
 }
 
 export type FlyoutAction =
   | { type: 'SET_ESQL_QUERY'; payload: string }
   | { type: 'SET_TEMPLATE'; payload: string }
-  | { type: 'PREVIEW_START' }
-  | { type: 'PREVIEW_SUCCESS'; payload: EsqlDataResult }
-  | { type: 'PREVIEW_ERROR'; payload: string }
-  | { type: 'PREVIEW_DONE' };
+  | { type: 'FETCH_DATA_START' }
+  | { type: 'FETCH_DATA_SUCCESS'; payload: EsqlDataResult }
+  | { type: 'FETCH_DATA_ERROR'; payload: string }
+  | { type: 'FETCH_DATA_DONE' }
+  | { type: 'RENDER_START' }
+  | { type: 'RENDER_DONE' };
 
 export const flyoutReducer = (
   state: FlyoutReducerState,
@@ -32,13 +35,17 @@ export const flyoutReducer = (
       return { ...state, draftEsqlQuery: action.payload };
     case 'SET_TEMPLATE':
       return { ...state, draftTemplate: action.payload };
-    case 'PREVIEW_START':
-      return { ...state, isPreviewLoading: true, previewError: null, previewData: null };
-    case 'PREVIEW_SUCCESS':
-      return { ...state, previewData: action.payload };
-    case 'PREVIEW_ERROR':
-      return { ...state, previewError: action.payload, previewData: null };
-    case 'PREVIEW_DONE':
-      return { ...state, isPreviewLoading: false };
+    case 'FETCH_DATA_START':
+      return { ...state, isDataLoading: true, esqlDataError: null, esqlData: null };
+    case 'FETCH_DATA_SUCCESS':
+      return { ...state, esqlData: action.payload };
+    case 'FETCH_DATA_ERROR':
+      return { ...state, esqlDataError: action.payload, esqlData: null };
+    case 'FETCH_DATA_DONE':
+      return { ...state, isDataLoading: false };
+    case 'RENDER_START':
+      return { ...state, isRenderLoading: true, esqlDataError: null };
+    case 'RENDER_DONE':
+      return { ...state, isRenderLoading: false };
   }
 };

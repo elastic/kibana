@@ -17,7 +17,8 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 export const initGetLogEntryExamplesRoute = ({
   framework,
   getStartServices,
-}: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  serverless,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices' | 'serverless'>) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -65,6 +66,7 @@ export const initGetLogEntryExamplesRoute = ({
             exampleCount,
             resolvedLogView,
             framework.callWithRequest,
+            serverless,
             categoryId
           );
 

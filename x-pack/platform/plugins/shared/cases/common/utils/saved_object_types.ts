@@ -33,13 +33,13 @@ export const getSavedObjectsTypes = (config?: Partial<CasesConfigType>): string[
     CASE_COMMENT_SAVED_OBJECT,
     CASE_CONFIGURE_SAVED_OBJECT,
     CASE_ATTACHMENT_SAVED_OBJECT,
+    CASE_FIELD_DEFINITION_SAVED_OBJECT,
   ];
 
   const experimentalSOs: string[] = [];
 
   if (config?.templates?.enabled) {
     experimentalSOs.push(CASE_TEMPLATE_SAVED_OBJECT);
-    experimentalSOs.push(CASE_FIELD_DEFINITION_SAVED_OBJECT);
   }
 
   return [...baseSavedObjects, ...experimentalSOs];

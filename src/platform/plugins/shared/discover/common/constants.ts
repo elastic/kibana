@@ -14,11 +14,7 @@ import { isObject } from 'lodash';
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  PATTERN_LEVEL = 'patterns',
-}
+export { VIEW_MODE } from '@kbn/discover-utils';
 
 export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {
   return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
@@ -74,14 +70,9 @@ export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';
 export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experience';
 
 /**
- * When enabled, Discover search embeddable uses transformIn/transformOut to convert between
- * API format (DiscoverSessionEmbeddableState) and stored format (StoredSearchEmbeddableState).
- * When disabled, panel state is stored and loaded as-is (pre-transform behavior).
- */
-export const EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY = 'discover.embeddableTransforms';
-
-/**
  * Discover session HTTP API
  */
 export const DISCOVER_SESSION_API_BASE_PATH = '/api/discover_sessions';
+export const DISCOVER_SESSION_INTERNAL_API_BASE_PATH = '/internal/discover_sessions';
+export const DISCOVER_SESSION_API_ACCESS = 'internal' as const;
 export const DISCOVER_SESSION_API_VERSION = '1';

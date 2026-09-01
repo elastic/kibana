@@ -12,6 +12,7 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/status \
   --include-path /api/alerting/rule/ \
   --include-path /api/alerting/rules \
+  --include-path /api/alerting/v2/ \
   --include-path /api/actions \
   --include-path /api/security/role \
   --include-path /api/spaces \

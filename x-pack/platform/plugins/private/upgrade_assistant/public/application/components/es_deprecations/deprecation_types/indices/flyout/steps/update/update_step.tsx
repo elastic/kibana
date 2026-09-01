@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiFlexGroup,
   EuiModalBody,
@@ -16,10 +15,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UpdateIndexState } from '../../../use_update_index';
@@ -35,11 +34,7 @@ interface UpdateIndexModalStepProps {
 }
 
 const ErrorCallout: React.FunctionComponent<{ reason: string }> = ({ reason }) => (
-  <EuiCallOut color="danger" title="There was an error">
-    <EuiText>
-      <p>{reason}</p>
-    </EuiText>
-  </EuiCallOut>
+  <KbnDangerCallout title="There was an error" text={reason} />
 );
 
 /**

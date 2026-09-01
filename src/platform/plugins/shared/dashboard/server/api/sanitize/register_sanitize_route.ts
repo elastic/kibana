@@ -15,7 +15,6 @@ import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
 import { getSanitizeResponseBodySchema } from './schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { sanitize } from './sanitize';
-import { getUseGASchemas } from '../get_use_ga_schemas';
 
 /**
  * Register the sanitize dashboard route.
@@ -61,9 +60,7 @@ export function registerSanitizeRoute(
     },
     async (ctx, req, res) => {
       try {
-        const { core } = await ctx.resolve(['core']);
-        const useGASchemas = await getUseGASchemas(core);
-        const result = await sanitize(getCachedDashboardStateSchema(), req.body, useGASchemas);
+        const result = await sanitize(getCachedDashboardStateSchema(), req.body);
         return res.ok({ body: result });
       } catch (e) {
         const message = e.stack ?? e.message;

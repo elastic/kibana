@@ -193,15 +193,15 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
   query.pipe(`WHERE ${parts.join(' OR ')}`);
 };
 
+/**
+ * Applies the filters that must run after the aggregations: they either read
+ * columns the aggregations compute (tags, severity, assignee) or must only
+ * narrow the aggregated rows (status). `ruleId`, `groupHash` and `queryString`
+ * are applied before the aggregations by `buildEpisodesBaseQuery` instead.
+ */
 export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
   if (filterState.status?.length) {
     addStatusFilter(query, filterState.status);
-  }
-  if (filterState.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
-  }
-  if (filterState.groupHash) {
-    query.where`group_hash == ${filterState.groupHash}`;
   }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
@@ -215,6 +215,16 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
 };
 
 /**
+ * Filters `buildEpisodesBaseQuery` can apply before the aggregations. A
+ * subset of {@link EpisodesFilterState} — the other filters need the columns
+ * the aggregations compute, so they run after via `applyFilterState`.
+ */
+export type EpisodesBaseFilterState = Pick<
+  EpisodesFilterState,
+  'queryString' | 'ruleId' | 'groupHash'
+>;
+
+/**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
  * `.alert-actions` (last tags per group_hash, last ack / assignee per
  * episode) and narrows to alert episode rows.
@@ -224,11 +234,26 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
  * doc, so the column is always current — callers do **not** derive an
  * `effective_status` by joining `.alert-actions` audit rows back in.
  */
-export const buildEpisodesBaseQuery = (spaceId: string, search?: string): ComposerQuery => {
+export const buildEpisodesBaseQuery = (
+  spaceId: string,
+  filterState?: EpisodesBaseFilterState
+): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`;
 
-  const trimmedSearch = search?.trim();
+  // Narrowing to a single rule or series before the INLINE STATS lets ES skip
+  // the space-wide aggregation: all the event and action docs of an episode
+  // carry its rule id and `group_hash`, so the aggregated rows are identical.
+  if (filterState?.ruleId) {
+    // `.rule-events` docs carry the nested `rule.id`, `.alert-actions` docs
+    // the flat `rule_id` — match both so action docs aren't dropped.
+    query.where`rule.id == ${filterState.ruleId} OR rule_id == ${filterState.ruleId}`;
+  }
+  if (filterState?.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
+  }
+
+  const trimmedSearch = filterState?.queryString?.trim();
   if (trimmedSearch) {
     query.pipe(
       `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
@@ -262,7 +287,7 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+  const query = buildEpisodesBaseQuery(spaceId, filterState);
 
   if (filterState) {
     applyFilterState(query, filterState);

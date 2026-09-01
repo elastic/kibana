@@ -49,7 +49,7 @@ describe('AlertEpisodeDetailsHeader', () => {
     expect(screen.getByRole('heading', { name: 'Rule 1' })).toBeInTheDocument();
   });
 
-  it('renders the loading title while episode or rule data is loading', () => {
+  it('renders a skeleton title while episode or rule data is loading', () => {
     render(
       <I18nProvider>
         <AlertEpisodeDetailsHeader
@@ -63,7 +63,8 @@ describe('AlertEpisodeDetailsHeader', () => {
         />
       </I18nProvider>
     );
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitleSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeDetailsHeaderTitle')).not.toBeInTheDocument();
   });
 
   it('renders the episode fallback title when the rule was not found', () => {

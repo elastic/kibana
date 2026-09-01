@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 export interface LifecycleFlyoutProps
   extends Pick<
@@ -45,11 +46,14 @@ export const LifecycleFlyout = ({
     padding: ${headerPadding};
   `;
   const { focusProps } = usePushFlyoutFocus({ enabled: (flyoutProps.type ?? 'push') === 'push' });
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   return (
     <EuiFlyout
       size={400}
-      type="push"
+      type={canvas.enabled ? 'overlay' : 'push'}
       ownFocus={ownFocus}
       paddingSize={paddingSize}
       aria-labelledby={titleId}

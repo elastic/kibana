@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -35,8 +35,10 @@ export type BaseChartProps = Pick<
   | 'overrides'
   | 'onBrushEnd'
   | 'onFilter'
-  | 'query'
   | 'title'
 > & {
   height?: number;
+  // narrowed from the embeddable's `Query | AggregateQuery`: infra charts are
+  // form-based and only inject chart-scoped KQL/Lucene filters into Lens state
+  query?: Query;
 };

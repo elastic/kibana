@@ -173,6 +173,7 @@ export class McpClient {
             description: tool.description,
             inputSchema: tool.inputSchema,
             name: tool.name,
+            annotations: tool.annotations,
           };
         }),
         ...(nextCursor ? await getNextPage(nextCursor) : []),
