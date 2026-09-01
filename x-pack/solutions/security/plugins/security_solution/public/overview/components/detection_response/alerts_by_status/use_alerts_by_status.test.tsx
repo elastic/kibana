@@ -112,7 +112,7 @@ describe('useAlertsByStatus', () => {
       isLoading: false,
       updatedAt: dateNow,
     });
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: false,
@@ -158,7 +158,7 @@ describe('useAlertsByStatus', () => {
   it('should skip the query', () => {
     const { result } = renderUseAlertsByStatus({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: true,
@@ -202,7 +202,7 @@ describe('useAlertsByStatus', () => {
     });
 
     expect(mockGetEuidFilterBasedOnDocument).not.toHaveBeenCalled();
-    expect(mockUseQueryAlerts).toBeCalledWith(
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           query: {
@@ -233,7 +233,7 @@ describe('useAlertsByStatus', () => {
     });
 
     expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('host', mockEntityRecord);
-    expect(mockUseQueryAlerts).toBeCalledWith(
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           query: {
@@ -255,7 +255,7 @@ describe('useAlertsByStatus', () => {
 
     renderUseAlertsByStatus({ runtimeMappings: customRuntimeMappings });
 
-    expect(mockUseQueryAlerts).toBeCalledWith(
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           ...alertsByStatusQuery,

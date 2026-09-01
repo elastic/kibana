@@ -15,6 +15,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { RelationshipsClient } from '@kbn/entity-store/server';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
+import type { LeadEntity } from '../types';
 import type { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from './risk_score_module';
 import { createTemporalStateModule } from './temporal_state_module';
@@ -41,6 +42,7 @@ export interface ObservationModuleDeps {
   readonly request?: KibanaRequest;
   readonly soClient?: SavedObjectsClientContract;
   readonly relationshipsClient: RelationshipsClient;
+  readonly entitiesMap: ReadonlyMap<string, LeadEntity>;
 }
 
 /**
@@ -60,6 +62,7 @@ export const registerObservationModules = (
     request,
     soClient,
     relationshipsClient,
+    entitiesMap,
   }: ObservationModuleDeps
 ): void => {
   engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
@@ -71,9 +74,7 @@ export const registerObservationModules = (
       alertsIndexPattern: getAlertsIndex(spaceId),
     })
   );
-  engine.registerModule(
-    createRelationshipModule({ esClient, logger, spaceId, relationshipsClient })
-  );
+  engine.registerModule(createRelationshipModule({ logger, relationshipsClient, entitiesMap }));
   engine.registerModule(createEntityAttributesModule({ logger }));
   engine.registerModule(createAnomalyDetectionModule({ logger, ml, request, soClient }));
 };

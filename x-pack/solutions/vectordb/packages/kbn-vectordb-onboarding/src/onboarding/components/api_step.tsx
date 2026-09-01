@@ -29,10 +29,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
-import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
-import { fillPlaceholders } from './console_snippets';
+import { DEFAULT_LANGUAGE, LANGUAGES } from '../constants/languages';
+import { fillPlaceholders } from '../utils/fill_placeholders';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
-import type { DocsPanelProps, OnboardingPill, VectorPath, WizardStep } from '../types';
+import type {
+  DocsPanelProps,
+  Language,
+  OnboardingPill,
+  SnippetSet,
+  VectorPath,
+  WizardStep,
+} from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';
 import { OnboardingPills } from './onboarding_pills';
 
@@ -207,6 +214,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
             fontSize="m"
             paddingSize="m"
             overflowHeight={SNIPPET_OVERFLOW_HEIGHT}
+            whiteSpace="pre-wrap"
             transparentBackground
             data-test-subj="vectordbWizardSnippet"
           >
