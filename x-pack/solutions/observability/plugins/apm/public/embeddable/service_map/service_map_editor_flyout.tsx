@@ -272,7 +272,17 @@ export function ServiceMapEditorFlyout({
   // Debounced KQL applied to the preview so the map doesn't refetch on every keystroke.
   const [previewKuery, setPreviewKuery] = useState(initialState?.kuery ?? '');
   useDebounce(() => setPreviewKuery(kuery), KUERY_PREVIEW_DEBOUNCE_MS, [kuery]);
-  const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
+  const [serviceName, setServiceName] = useState(() => {
+    // Prefer multi-highlight when both are present (mutually exclusive with service_name).
+    const highlights = initialState?.highlighted_service_names ?? [];
+    if (highlights.length > 0) {
+      return '';
+    }
+    return initialState?.service_name ?? '';
+  });
+  const [highlightedServiceNames, setHighlightedServiceNames] = useState<string[]>(
+    initialState?.highlighted_service_names ?? []
+  );
   const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
     initialState?.sync_with_dashboard_filters ?? false
   );
@@ -294,7 +304,14 @@ export function ServiceMapEditorFlyout({
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
-  >(serviceName ? [{ value: serviceName, label: serviceName }] : []);
+  >(() => {
+    const fromHighlight = initialState?.highlighted_service_names ?? [];
+    if (fromHighlight.length > 0) {
+      return fromHighlight.map((name) => ({ value: name, label: name }));
+    }
+    const single = initialState?.service_name;
+    return single ? [{ value: single, label: single }] : [];
+  });
   const [selectedEnvironmentOption, setSelectedEnvironmentOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([{ value: environment, label: getEnvironmentLabel(environment) }]);
@@ -383,12 +400,19 @@ export function ServiceMapEditorFlyout({
   );
 
   const onServiceNameSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    if (changedOptions.length === 0) {
+    const names = changedOptions
+      .map((opt) => opt.value)
+      .filter((value): value is string => Boolean(value));
+    setSelectedServiceOption(names.map((name) => ({ value: name, label: name })));
+    if (names.length === 1) {
+      setServiceName(names[0]);
+      setHighlightedServiceNames([]);
+    } else if (names.length > 1) {
       setServiceName('');
-      setSelectedServiceOption([]);
-    } else if (changedOptions.length === 1 && changedOptions[0].value) {
-      setServiceName(changedOptions[0].value);
-      setSelectedServiceOption(changedOptions);
+      setHighlightedServiceNames(names);
+    } else {
+      setServiceName('');
+      setHighlightedServiceNames([]);
     }
   };
 
@@ -397,8 +421,10 @@ export function ServiceMapEditorFlyout({
     if (!value) {
       return;
     }
-
-    onServiceNameSelect([{ value, label: value }]);
+    if (selectedServiceOption.some((opt) => opt.value === value)) {
+      return;
+    }
+    onServiceNameSelect([...selectedServiceOption, { value, label: value }]);
   };
 
   const onEnvironmentSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -413,6 +439,8 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kueryValue.trim() ? kueryValue : undefined,
       service_name: serviceName || undefined,
+      highlighted_service_names:
+        highlightedServiceNames.length > 1 ? highlightedServiceNames : undefined,
       sync_with_dashboard_filters: syncWithDashboardFilters,
       alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
@@ -423,6 +451,7 @@ export function ServiceMapEditorFlyout({
     [
       environment,
       serviceName,
+      highlightedServiceNames,
       syncWithDashboardFilters,
       alertStatusFilter,
       sloStatusFilter,
@@ -485,7 +514,7 @@ export function ServiceMapEditorFlyout({
             })}
             helpText={i18n.translate('xpack.apm.serviceMapEditor.serviceNameHelpText', {
               defaultMessage:
-                'Filter to show only a specific service and its connections. Leave blank to show all services.',
+                'Select one service to filter the map to that service and its connections. Select multiple to highlight those services on the full map.',
             })}
             fullWidth
           >
@@ -503,7 +532,6 @@ export function ServiceMapEditorFlyout({
               placeholder={i18n.translate('xpack.apm.serviceMapEditor.serviceNamePlaceholder', {
                 defaultMessage: 'Search for a service...',
               })}
-              singleSelection={{ asPlainText: true }}
               options={serviceNameOptions}
               selectedOptions={selectedServiceOption}
               onChange={onServiceNameSelect}
@@ -701,7 +729,7 @@ export function ServiceMapEditorFlyout({
                   label: i18n.translate('xpack.apm.serviceMapEditor.orientationHorizontal', {
                     defaultMessage: 'Horizontal',
                   }),
-                  iconType: 'arrowRight',
+                  iconType: 'chevronSingleRight',
                   'data-test-subj': 'apmServiceMapEditorOrientationHorizontal',
                 },
                 {
@@ -709,7 +737,7 @@ export function ServiceMapEditorFlyout({
                   label: i18n.translate('xpack.apm.serviceMapEditor.orientationVertical', {
                     defaultMessage: 'Vertical',
                   }),
-                  iconType: 'arrowDown',
+                  iconType: 'chevronSingleDown',
                   'data-test-subj': 'apmServiceMapEditorOrientationVertical',
                 },
               ]}

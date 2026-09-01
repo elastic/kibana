@@ -1,19 +1,67 @@
 [
   {
     "attributes": {
-      "elastic.inference.span.kind": "AGENT",
+      "elastic.cache_control.session_id": "[CONVERSATION_ID]",
+      "elastic.cache_control.ttl": "5m",
+      "elastic.cache_control.type": "ephemeral",
+      "elastic.inference.span.kind": "LLM",
+      "elastic.llm.toolChoice": "\"auto\"",
+      "gen_ai.conversation.id": "[CONVERSATION_ID]",
+      "gen_ai.input.messages": "[INPUT_MESSAGES]",
+      "gen_ai.operation.name": "chat",
+      "gen_ai.output.messages": "[OUTPUT_MESSAGES]",
+      "gen_ai.provider.name": "OpenAI",
+      "gen_ai.request.model": "gpt-4",
+      "gen_ai.response.model": "unknown",
+      "gen_ai.system_instructions": "[SYSTEM_INSTRUCTIONS]",
+      "gen_ai.tool.definitions": "[TOOL_DEFINITIONS]",
+      "gen_ai.usage.input_tokens": "[TOKENS]",
+      "gen_ai.usage.output_tokens": "[TOKENS]",
+      "openai.raw_request": "[RAW_REQUEST]"
+    },
+    "kind": "Client",
+    "name": "chat gpt-4"
+  },
+  {
+    "attributes": {
+      "elastic.cache_control.session_id": "[CONVERSATION_ID]",
+      "elastic.cache_control.ttl": "5m",
+      "elastic.cache_control.type": "ephemeral",
+      "elastic.inference.span.kind": "LLM",
+      "elastic.llm.toolChoice": "\"auto\"",
+      "gen_ai.conversation.id": "[CONVERSATION_ID]",
+      "gen_ai.input.messages": "[INPUT_MESSAGES]",
+      "gen_ai.operation.name": "chat",
+      "gen_ai.output.messages": "[OUTPUT_MESSAGES]",
+      "gen_ai.provider.name": "OpenAI",
+      "gen_ai.request.model": "gpt-4",
+      "gen_ai.response.model": "unknown",
+      "gen_ai.system_instructions": "[SYSTEM_INSTRUCTIONS]",
+      "gen_ai.tool.definitions": "[TOOL_DEFINITIONS]",
+      "gen_ai.usage.input_tokens": "[TOKENS]",
+      "gen_ai.usage.output_tokens": "[TOKENS]",
+      "openai.raw_request": "[RAW_REQUEST]"
+    },
+    "kind": "Client",
+    "name": "chat gpt-4"
+  },
+  {
+    "attributes": {
+      "elastic.conversation.title": "[CONVERSATION_TITLE]",
+      "elastic.inference.span.kind": "CHAIN",
       "gen_ai.agent.id": "[AGENT_ID]",
       "gen_ai.agent.name": "test_agent",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
       "gen_ai.operation.name": "invoke_agent",
-      "gen_ai.provider.name": "OpenAI"
+      "gen_ai.provider.name": "OpenAI",
+      "user.hash": "[USER_HASH]"
     },
     "kind": "Internal",
     "name": "invoke_agent test_agent"
   },
   {
     "attributes": {
-      "elastic.inference.span.kind": "CHAIN",
+      "elastic.inference.span.kind": "AGENT",
       "gen_ai.agent.id": "[AGENT_ID]",
       "gen_ai.agent.name": "test_agent",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
@@ -42,46 +90,6 @@
       "gen_ai.provider.name": "OpenAI",
       "gen_ai.request.model": "gpt-4",
       "gen_ai.response.model": "gpt-4o",
-      "gen_ai.system_instructions": "[SYSTEM_INSTRUCTIONS]",
-      "gen_ai.tool.definitions": "[TOOL_DEFINITIONS]",
-      "gen_ai.usage.input_tokens": "[TOKENS]",
-      "gen_ai.usage.output_tokens": "[TOKENS]",
-      "openai.raw_request": "[RAW_REQUEST]"
-    },
-    "kind": "Client",
-    "name": "chat gpt-4"
-  },
-  {
-    "attributes": {
-      "elastic.inference.span.kind": "LLM",
-      "elastic.llm.toolChoice": "\"auto\"",
-      "gen_ai.conversation.id": "[CONVERSATION_ID]",
-      "gen_ai.input.messages": "[INPUT_MESSAGES]",
-      "gen_ai.operation.name": "chat",
-      "gen_ai.output.messages": "[OUTPUT_MESSAGES]",
-      "gen_ai.provider.name": "OpenAI",
-      "gen_ai.request.model": "gpt-4",
-      "gen_ai.response.model": "unknown",
-      "gen_ai.system_instructions": "[SYSTEM_INSTRUCTIONS]",
-      "gen_ai.tool.definitions": "[TOOL_DEFINITIONS]",
-      "gen_ai.usage.input_tokens": "[TOKENS]",
-      "gen_ai.usage.output_tokens": "[TOKENS]",
-      "openai.raw_request": "[RAW_REQUEST]"
-    },
-    "kind": "Client",
-    "name": "chat gpt-4"
-  },
-  {
-    "attributes": {
-      "elastic.inference.span.kind": "LLM",
-      "elastic.llm.toolChoice": "\"auto\"",
-      "gen_ai.conversation.id": "[CONVERSATION_ID]",
-      "gen_ai.input.messages": "[INPUT_MESSAGES]",
-      "gen_ai.operation.name": "chat",
-      "gen_ai.output.messages": "[OUTPUT_MESSAGES]",
-      "gen_ai.provider.name": "OpenAI",
-      "gen_ai.request.model": "gpt-4",
-      "gen_ai.response.model": "unknown",
       "gen_ai.system_instructions": "[SYSTEM_INSTRUCTIONS]",
       "gen_ai.tool.definitions": "[TOOL_DEFINITIONS]",
       "gen_ai.usage.input_tokens": "[TOKENS]",

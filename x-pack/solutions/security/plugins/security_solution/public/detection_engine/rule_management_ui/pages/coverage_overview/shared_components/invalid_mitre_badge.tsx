@@ -37,7 +37,7 @@ export const InvalidMitreBadge = memo(({ id }: InvalidMitreBadgeProps) => {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        iconType="popout"
+        iconType="external"
         iconSide="right"
         data-test-subj={`coverageOverviewInvalidMitreBadge-${id}`}
       >

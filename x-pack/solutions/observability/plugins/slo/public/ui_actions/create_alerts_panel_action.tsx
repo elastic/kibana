@@ -30,7 +30,7 @@ export function createAddAlertsPanelAction(
   return {
     id: ADD_SLO_ALERTS_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
-    getIconType: () => 'alert',
+    getIconType: () => 'warning',
     order: 10,
     isCompatible: async ({ embeddable }) => {
       return (await isValidLicense(pluginsStart)) && apiIsPresentationContainer(embeddable);

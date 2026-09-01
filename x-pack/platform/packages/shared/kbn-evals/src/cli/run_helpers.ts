@@ -30,6 +30,7 @@ import {
   isExportProfileImplicitLocal,
 } from './profiles';
 import { readCachedEisConnectors } from './eis_connectors_cache';
+import { parseSpaceIds } from '../utils/space_ids';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -186,6 +187,18 @@ export const resolveEvalSuite = async (
   };
 };
 
+/**
+ * The spaces to run in, as `--space-ids` gave them. Validated here so a run
+ * that names an impossible space stops before booting a stack for it.
+ */
+export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined => {
+  try {
+    return parseSpaceIds(flagsReader.string('space-ids'));
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+};
+
 export interface ResolvedProfileEnv {
   datasetsProfile?: string;
   exportProfile?: string;
@@ -242,7 +255,7 @@ export const resolveEvaluationConnectorId = async (
   flagsReader: FlagsReader
 ): Promise<string> => {
   const evaluationConnectorId =
-    flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
+    flagsReader.string('evaluation-connector-id') ?? process.env.EVAL_CONNECTOR_ID;
 
   if (evaluationConnectorId) {
     return evaluationConnectorId;
@@ -252,9 +265,7 @@ export const resolveEvaluationConnectorId = async (
     return promptForConnector(repoRoot, log);
   }
 
-  throw createFlagError(
-    'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-  );
+  throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -346,7 +357,7 @@ export const buildEvalRunEnv = ({
   log: ToolingLog;
 }): Record<string, string> => {
   const envOverrides: Record<string, string> = {
-    EVALUATION_CONNECTOR_ID: evaluationConnectorId,
+    EVAL_CONNECTOR_ID: evaluationConnectorId,
   };
 
   if (requiresEisCcm && !skipServer) {
@@ -365,17 +376,22 @@ export const buildEvalRunEnv = ({
 
   const repetitions = flagsReader.string('repetitions');
   if (repetitions) {
-    envOverrides.EVALUATION_REPETITIONS = repetitions;
+    envOverrides.EVAL_REPETITIONS = repetitions;
+  }
+
+  const spaceIds = readSpaceIdsFlag(flagsReader);
+  if (spaceIds) {
+    envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
   }
 
   const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
   if (evaluationsKbnUrl) {
-    envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+    envOverrides.EVAL_KBN_URL = evaluationsKbnUrl;
   }
 
   const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
   if (evaluationsKbnApiKey) {
-    envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
+    envOverrides.EVAL_KBN_API_KEY = evaluationsKbnApiKey;
   }
 
   return envOverrides;
@@ -435,6 +451,11 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
+  const spaceIds = readSpaceIdsFlag(flagsReader);
+  if (spaceIds) {
+    runArgs.push('--space-ids', spaceIds.join(','));
+  }
+
   if (skipServer) {
     runArgs.push('--skip-server');
   }
@@ -449,6 +470,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
+    'space-ids',
     'grep',
     'profile',
     'datasets-profile',

@@ -101,6 +101,16 @@ export default function ({ getService }: FtrProviderContext) {
       return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
+    async function queryApiKeys(): Promise<Array<{ id: string }>> {
+      const response = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      return response.body.apiKeys;
+    }
+
     async function historyDocs(taskId?: string): Promise<RawDoc[]> {
       return es
         .search({
@@ -239,6 +249,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ task })
         .expect(200)
         .then((response: { body: ConcreteTaskInstance }) => response.body);
+    }
+
+    function ensureTaskScheduledWithApiKey(task: Partial<ConcreteTaskInstance>) {
+      return supertest
+        .post('/api/sample_tasks/ensure_scheduled_with_api_key')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
     }
 
     function releaseTasksWaitingForEventToComplete(event: string) {
@@ -712,6 +731,50 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('grants a single API key when ensureScheduled is called repeatedly for the same task', async () => {
+      const apiKeysBefore = await queryApiKeys();
+
+      const task = {
+        id: 'test-task-for-sample-task-plugin-to-test-ensure-scheduled-api-key',
+        taskType: 'sampleTask',
+        params: {},
+        schedule: { interval: '1m' },
+      };
+
+      await ensureTaskScheduledWithApiKey(task);
+
+      const scheduled = await currentTask(task.id);
+      const grantedApiKeyId = scheduled.userScope?.apiKeyId;
+
+      expect(scheduled.apiKey).not.empty();
+      expect(grantedApiKeyId).not.to.be(undefined);
+      expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+
+      // API keys are granted before the task document is written, so an ensureScheduled call for
+      // an existing task used to mint a key and then discard it on the version conflict.
+      await ensureTaskScheduledWithApiKey(task);
+      await ensureTaskScheduledWithApiKey(task);
+
+      expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+
+      // The stored task keeps running on the key it was scheduled with.
+      const unchanged = await currentTask(task.id);
+      expect(unchanged.userScope?.apiKeyId).to.eql(grantedApiKeyId);
+
+      // No key was granted and thrown away, so none should be queued for invalidation either.
+      const pendingInvalidation = await es.search({
+        index: '.kibana_task_manager',
+        size: 100,
+        query: { term: { type: 'api_key_to_invalidate' } },
+      });
+
+      expect(
+        pendingInvalidation.hits.hits.filter(
+          (hit) => (hit._source as any).api_key_to_invalidate?.apiKeyId === grantedApiKeyId
+        ).length
+      ).to.eql(0);
+    });
+
     it('captures the requesting user name on userScope when scheduling with an API key', async () => {
       const scheduled = await scheduleTaskWithApiKey({
         id: 'test-task-for-sample-task-plugin-to-capture-user-name',
@@ -816,7 +879,11 @@ export default function ({ getService }: FtrProviderContext) {
         }).length
       ).eql(1);
 
-      // api_key_to_invalidate saved object should be created for the cloned key
+      // api_key_to_invalidate saved object should be created for the cloned key.
+      // The same key can be marked more than once (the one-shot task's completion
+      // removal races the explicit DELETE above, and each removal path creates a
+      // fresh un-deduped SO), so assert it was queued at least once rather than
+      // exactly once. Invalidation itself is verified below.
       await retry.try(async () => {
         const response = await es.search({
           index: '.kibana_task_manager',
@@ -828,10 +895,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(response.hits.hits.length).to.eql(1);
-        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
-          result.userScope?.apiKeyId
-        );
+        expect(
+          response.hits?.hits?.filter((hit: any) => {
+            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
+          }).length
+        ).to.be.greaterThan(0);
       });
 
       // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)

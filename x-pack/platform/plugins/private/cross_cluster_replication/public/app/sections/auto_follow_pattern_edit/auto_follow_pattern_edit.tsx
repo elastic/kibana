@@ -28,6 +28,20 @@ import { getErrorBody, getErrorStatus } from '../../services/http_error';
 import { API_STATUS } from '../../constants';
 import { SectionLoading } from '../../../shared_imports';
 
+const editAutoFollowPatternTitle = i18n.translate(
+  'xpack.crossClusterReplication.autoFollowPattern.editTitle',
+  {
+    defaultMessage: 'Edit auto-follow pattern',
+  }
+);
+
+const ccrHomeTitle = i18n.translate(
+  'xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle',
+  {
+    defaultMessage: 'Cross-Cluster Replication',
+  }
+);
+
 export interface AutoFollowPatternEditProps extends RouteComponentProps<{ id: string }> {
   getAutoFollowPattern: (id: string) => void;
   selectAutoFollowPattern: (id: string | null) => void;
@@ -154,62 +168,66 @@ export class AutoFollowPatternEdit extends PureComponent<
       apiStatus,
       apiError,
       autoFollowPattern,
+      history,
       match: { url: currentUrl },
     } = this.props;
 
+    let body: ReactNode;
     if (apiStatus.get === API_STATUS.LOADING || !autoFollowPattern) {
-      return this.renderLoading(
+      body = this.renderLoading(
         i18n.translate('xpack.crossClusterReplication.autoFollowPatternEditForm.loadingTitle', {
           defaultMessage: 'Loading auto-follow pattern…',
         })
       );
-    }
+    } else if (apiError.get) {
+      body = this.renderGetAutoFollowPatternError(apiError.get);
+    } else {
+      body = (
+        <RemoteClustersProvider>
+          {({ isLoading, error, remoteClusters }) => {
+            if (isLoading) {
+              return this.renderLoading(
+                i18n.translate(
+                  'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClustersMessage',
+                  { defaultMessage: 'Loading remote clusters…' }
+                )
+              );
+            }
 
-    if (apiError.get) {
-      return this.renderGetAutoFollowPatternError(apiError.get);
+            return (
+              <EuiPageSection restrictWidth style={{ width: '100%' }}>
+                <AutoFollowPatternForm
+                  apiStatus={apiStatus.save}
+                  apiError={apiError.save}
+                  currentUrl={currentUrl}
+                  remoteClusters={error ? [] : remoteClusters}
+                  autoFollowPattern={autoFollowPattern}
+                  updateAutoFollowPattern={updateAutoFollowPattern}
+                  saveButtonLabel={
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternEditForm.saveButtonLabel"
+                      defaultMessage="Update"
+                    />
+                  }
+                />
+              </EuiPageSection>
+            );
+          }}
+        </RemoteClustersProvider>
+      );
     }
 
     return (
-      <RemoteClustersProvider>
-        {({ isLoading, error, remoteClusters }) => {
-          if (isLoading) {
-            return this.renderLoading(
-              i18n.translate(
-                'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClustersMessage',
-                { defaultMessage: 'Loading remote clusters…' }
-              )
-            );
-          }
-
-          return (
-            <EuiPageSection restrictWidth style={{ width: '100%' }}>
-              <AutoFollowPatternPageTitle
-                title={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
-                    defaultMessage="Edit auto-follow pattern"
-                  />
-                }
-              />
-
-              <AutoFollowPatternForm
-                apiStatus={apiStatus.save}
-                apiError={apiError.save}
-                currentUrl={currentUrl}
-                remoteClusters={error ? [] : remoteClusters}
-                autoFollowPattern={autoFollowPattern}
-                updateAutoFollowPattern={updateAutoFollowPattern}
-                saveButtonLabel={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternEditForm.saveButtonLabel"
-                    defaultMessage="Update"
-                  />
-                }
-              />
-            </EuiPageSection>
-          );
-        }}
-      </RemoteClustersProvider>
+      <>
+        <AutoFollowPatternPageTitle
+          title={editAutoFollowPatternTitle}
+          back={{
+            href: history.createHref({ pathname: '/auto_follow_patterns' }),
+            label: ccrHomeTitle,
+          }}
+        />
+        {body}
+      </>
     );
   }
 }

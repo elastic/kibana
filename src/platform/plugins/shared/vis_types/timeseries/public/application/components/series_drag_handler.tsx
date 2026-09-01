@@ -37,7 +37,7 @@ export class SeriesDragHandler extends PureComponent<SeriesDragHandlerProps> {
               aria-label={i18n.translate('visTypeTimeseries.sort.dragToSortAriaLabel', {
                 defaultMessage: 'Drag to sort',
               })}
-              type="grab"
+              type="dragVertical"
             />
           )}
         </div>

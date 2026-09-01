@@ -82,8 +82,12 @@ dependsOn:
   - '@kbn/deeplinks-search'
   - '@kbn/deeplinks-security'
   - '@kbn/deeplinks-shared'
+  - '@kbn/deeplinks-vectordb'
   - '@kbn/deeplinks-workplace-ai'
   - '@kbn/core-user-profile-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/core-user-profile-common'
 tags:
   - plugin
   - prod
@@ -96,6 +100,9 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_cps_local/**/*
+    - test/scout_initial_solution_setup/**/*
+    - test/scout_initial_solution_setup_api/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -986,7 +986,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['endpoint_id'],
           parameters: { path: ' ' },
         });
-      }).toThrowError('path cannot be an empty string');
+      }).toThrow('path cannot be an empty string');
     });
 
     it('should not accept when payload does not match', () => {
@@ -995,7 +995,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['endpoint_id'],
           path: 'some/path',
         });
-      }).toThrowError('[parameters.path]: expected value of type [string] but got [undefined]');
+      }).toThrow('[parameters.path]: expected value of type [string] but got [undefined]');
     });
 
     it('should accept path in payload if not empty', () => {
@@ -1441,10 +1441,14 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should only accept process or kernel as value for type', () => {
+    it('should only accept process, kernel or raw as value for type', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
       Object.assign(memDumpBody.parameters, { type: 'process', pid: 1 });
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+
+      memDumpBody.parameters = { type: 'raw' };
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
@@ -1459,6 +1463,20 @@ describe('actions schemas', () => {
 
       delete memDumpBody.parameters.pid;
       memDumpBody.parameters.entity_id = 'some-value';
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+
+    it('should accept type of raw without pid or entity id', () => {
+      memDumpBody.parameters = { type: 'raw' };
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+    });
+
+    it('should throw if pid or entity id is used with type = raw', () => {
+      memDumpBody.parameters = { type: 'raw', pid: 1 };
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+
+      memDumpBody.parameters = { type: 'raw', entity_id: 'some-value' };
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 

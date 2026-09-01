@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import {
-  stripMarkdownFences,
-  containsScript,
-  injectCsp,
-  sanitizeHtml,
-  isValidTemplate,
-} from './prepare_html';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
+
+describe('injectStyleTag', () => {
+  it('injects a <style> tag after <head>', () => {
+    const result = injectStyleTag('<html><head></head><body></body></html>', ':root{--x:red}');
+    expect(result).toContain('<head><style>:root{--x:red}</style>');
+  });
+
+  it('prepends when there is no <head>', () => {
+    const result = injectStyleTag('<p>hello</p>', ':root{--x:red}');
+    expect(result.startsWith('<style>:root{--x:red}</style>')).toBe(true);
+  });
+});
 
 describe('injectCsp', () => {
   it('injects CSP and color-scheme meta into an existing <head>', () => {
@@ -37,51 +44,38 @@ describe('injectCsp', () => {
   });
 });
 
-describe('stripMarkdownFences', () => {
-  it('strips leading ```html and trailing ```', () => {
-    expect(stripMarkdownFences('```html\n<p>hi</p>\n```')).toBe('<p>hi</p>');
+describe('applyHtmlTheme', () => {
+  const euiTheme = {
+    colors: {
+      textParagraph: '#111',
+      emptyShade: '#fff',
+      lightestShade: '#eee',
+      primary: '#06c',
+      accentSecondary: '#0a8',
+      accent: '#e6a',
+      warning: '#fc0',
+      danger: '#b00',
+      borderBasePlain: '#ccc',
+    },
+  } as unknown as EuiThemeComputed;
+
+  // A meta CSP only governs resources fetched after it is parsed, so it must precede the
+  // theme <style> tag — otherwise CSS injected ahead of it would be ungoverned.
+  it('places the CSP meta before the injected theme style tag', () => {
+    const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
+    expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
   });
 
-  it('strips fences embedded inside an HTML shell', () => {
-    const raw = '<html><body>```html\n<p>hi</p>\n```</body></html>';
-    expect(stripMarkdownFences(raw)).not.toContain('```');
+  it('places the CSP meta first when there is no <head>', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+    expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
+    expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
   });
 
-  it('leaves plain HTML unchanged', () => {
-    expect(stripMarkdownFences('<p>hello</p>')).toBe('<p>hello</p>');
-  });
-
-  it('leaves a fenced code example deep in the body untouched', () => {
-    const filler = '<p>content</p>'.repeat(30);
-    const raw = `<html><body>${filler}<pre>Use \`\`\`bash\necho hi\n\`\`\` in your terminal</pre>${filler}</body></html>`;
-    const result = stripMarkdownFences(raw);
-    expect(result).toContain('```bash');
-    expect(result).toContain('echo hi');
-  });
-});
-
-describe('containsScript', () => {
-  it('detects a script tag regardless of case or attributes', () => {
-    expect(containsScript('<div></div><script>doStuff()</script>')).toBe(true);
-    expect(containsScript('<SCRIPT type="application/json">{}</SCRIPT>')).toBe(true);
-  });
-
-  it('returns false for markup with no script tag', () => {
-    expect(containsScript('<div class="script-like">no actual script here</div>')).toBe(false);
-  });
-});
-
-describe('isValidTemplate', () => {
-  it('returns true for strings containing an HTML tag', () => {
-    expect(isValidTemplate('<div>hello</div>')).toBe(true);
-    expect(isValidTemplate('{% for row in rows %}<p>{{ row["x"].value }}</p>{% endfor %}')).toBe(
-      true
-    );
-  });
-
-  it('returns false for plain text with no HTML tag', () => {
-    expect(isValidTemplate('just some text')).toBe(false);
-    expect(isValidTemplate('')).toBe(false);
+  it('still injects the theme CSS custom properties', () => {
+    const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
+    expect(result).toContain('--cc-color-text:#111');
+    expect(result).toContain('--cc-color-border:#ccc');
   });
 });
 

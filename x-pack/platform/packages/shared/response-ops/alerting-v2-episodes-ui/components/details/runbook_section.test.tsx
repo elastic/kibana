@@ -30,8 +30,8 @@ const mockRuleWithRunbook = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
   artifacts: [
-    { id: 'a1', type: 'runbook', value: '# Runbook content' },
-    { id: 'a2', type: 'something', value: 'other' },
+    { id: 'a1', type: 'runbook', data: { content: '# Runbook content' } },
+    { id: 'a2', type: 'something', data: { value: 'other' } },
   ],
 } as unknown as RuleResponse;
 
@@ -108,7 +108,9 @@ describe('AlertEpisodeRunbookSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodeRunbookSectionLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeRunbookSectionLoading')).toHaveClass(
+      'euiSkeletonText'
+    );
 
     act(() => {
       resolveSearch(eventsResponse);

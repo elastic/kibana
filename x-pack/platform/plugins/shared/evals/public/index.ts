@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { EvalsPublicPlugin } from './plugin';
 import type {
   EvalsPublicSetup,
@@ -21,4 +21,4 @@ export const plugin: PluginInitializer<
   EvalsPublicStart,
   EvalsSetupDependencies,
   EvalsStartDependencies
-> = () => new EvalsPublicPlugin();
+> = (initializerContext: PluginInitializerContext) => new EvalsPublicPlugin(initializerContext);

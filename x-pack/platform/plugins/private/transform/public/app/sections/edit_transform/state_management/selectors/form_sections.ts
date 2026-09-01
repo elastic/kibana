@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux-v7';
+import { useSelector } from 'react-redux';
 
 import type { State } from '../edit_transform_flyout_state';
 

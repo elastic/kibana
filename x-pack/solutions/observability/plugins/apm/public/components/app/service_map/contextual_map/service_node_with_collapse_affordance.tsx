@@ -81,7 +81,7 @@ export const ServiceNodeWithCollapseAffordance = memo((props: NodeProps<ServiceN
                 >
                   <EuiButtonIcon
                     data-test-subj="serviceMapExpandHiddenButton"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     aria-label={i18n.translate('xpack.apm.serviceMap.contextual.expandHiddenAria', {
                       defaultMessage: 'Expand hidden dependencies',
                     })}
@@ -112,7 +112,7 @@ export const ServiceNodeWithCollapseAffordance = memo((props: NodeProps<ServiceN
                 >
                   <EuiButtonIcon
                     data-test-subj="serviceMapCollapseExpandedButton"
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     aria-label={i18n.translate(
                       'xpack.apm.serviceMap.contextual.collapseExpandedAria',
                       {

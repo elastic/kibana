@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  LensAttributes,
-  LensESQLDataset,
-  LensXYConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensAttributes, LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { useEuiTheme } from '@elastic/eui';
 import { useEffect, useRef, useState } from 'react';
@@ -146,9 +142,9 @@ export const useChangePointLensProps = ({
 
     // builder.build() compiles the high-level LensXYConfig into a full LensSavedObjectAttributes
     // document (visualizationType, datasourceStates, visualization, query, filters, references).
-    const result = (await new LensConfigBuilder(services.dataViews).build(lensParams, {
-      query: { esql: (lensParams.dataset as LensESQLDataset).esql },
-    })) as LensAttributes;
+    const result = (await new LensConfigBuilder(services.dataViews).build(
+      lensParams
+    )) as LensAttributes;
 
     // LensConfigBuilder does not expose a description field in its config; set it directly on
     // the built attributes so it is available as case-attachment metadata.

@@ -428,6 +428,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           >
             <EuiSpacer size="s" />
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.osquery.fleetIntegration.osqueryConfig.cautionCalloutTitle',
                 {

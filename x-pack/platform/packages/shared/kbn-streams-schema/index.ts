@@ -82,6 +82,8 @@ export {
   extractBucketTargetField,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,
@@ -91,7 +93,6 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
-  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';

@@ -12,6 +12,38 @@
       ],
       "wait_for_completion": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "expand_wildcards": {
+        "__one_of": [
+          "all",
+          "open",
+          "closed",
+          "hidden",
+          "none"
+        ]
+      },
+      "feature_states": [],
+      "ignore_unavailable": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "include_global_state": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "indices": "",
+      "metadata": {},
+      "partial": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
     "methods": [
       "PUT",
       "POST"

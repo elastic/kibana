@@ -92,6 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
 
   describe('Search sessions Accessibility', () => {
     before(async () => {
@@ -166,6 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await find.byCssSelector('[data-text="App"]')).click();
       await (await find.byCssSelector('[title="dashboards"]')).click();
       await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE); // Close the App filter popover
     });
 
     it('Session management more actions panel pop-over meets a111y requirements', async () => {

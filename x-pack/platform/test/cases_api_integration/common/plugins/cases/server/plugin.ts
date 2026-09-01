@@ -13,8 +13,6 @@ import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/serve
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { getPersistableStateAttachment } from './attachments/persistable_state';
-import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
 import { registerCaseFixtureFileKinds } from './files';
 
@@ -39,9 +37,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   }
 
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
-    deps.cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
-    deps.cases.attachmentFramework.registerPersistableState(getPersistableStateAttachment());
-
     registerRoutes(core, this.log);
     registerCaseFixtureFileKinds(deps.files);
 

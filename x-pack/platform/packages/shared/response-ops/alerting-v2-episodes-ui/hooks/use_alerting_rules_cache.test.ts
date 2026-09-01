@@ -36,7 +36,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 1,
+      per_page: 1,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(
@@ -66,7 +66,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 1,
+      per_page: 1,
     } as FindRulesResponse);
 
     const { result } = renderHook(() =>
@@ -115,7 +115,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 1000,
+      per_page: 1000,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(

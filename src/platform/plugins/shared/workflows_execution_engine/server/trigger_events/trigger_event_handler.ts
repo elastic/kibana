@@ -43,10 +43,8 @@ import {
   normalizeEventChainVisitedWorkflowIds,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { ScheduleWorkflow } from '../types';
-
-const SCHEDULE_CONCURRENCY = 20;
 
 export interface EmitEventParams {
   triggerId: string;
@@ -65,7 +63,10 @@ export interface TriggerEventHandlerDeps {
   config: EventTriggersConfig;
   logger: Logger;
   triggerEventsClientPromise?: Promise<TriggerEventsDataStreamClient | undefined>;
+  workflowExecutionRepository: WorkflowExecutionRepository;
 }
+
+const SCHEDULE_CONCURRENCY = 20;
 
 interface ScheduleEventParams {
   payload: Record<string, unknown>;
@@ -171,8 +172,7 @@ export class TriggerEventHandler {
     const coreStart = deps.coreStart;
     this.telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, deps.logger);
 
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient, this.logger);
+    this.workflowExecutionRepository = deps.workflowExecutionRepository;
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }

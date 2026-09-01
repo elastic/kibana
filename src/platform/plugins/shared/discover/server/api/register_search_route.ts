@@ -49,7 +49,7 @@ export const registerSearchRoute = (
         },
       },
       async (context, request, response) =>
-        telemetryHandler(request, usageCounter, async () => {
+        telemetryHandler(request, { usageCounter }, async () => {
           try {
             const body = await searchDiscoverSessions(context, request.query);
 

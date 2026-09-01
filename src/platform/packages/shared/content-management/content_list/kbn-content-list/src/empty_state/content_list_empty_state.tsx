@@ -67,7 +67,7 @@ export const ContentListEmptyState = ({
     <>
       <EuiButton
         fill
-        iconType={primaryAction.iconType ?? 'plusInCircle'}
+        iconType={primaryAction.iconType ?? 'plusCircle'}
         onClick={primaryAction.onClick}
         disabled={primaryAction.disabled}
         data-test-subj={primaryAction['data-test-subj'] ?? `${dataTestSubj}-primaryAction`}

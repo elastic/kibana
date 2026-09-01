@@ -8,13 +8,17 @@
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { DEFAULT_GROUPING_MODE } from '../constants';
+import { PolicyCatalog } from '../state';
 import type {
+  ActionPolicy,
+  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  ActionPolicy,
-  ActionPolicyId,
 } from '../types';
 
 @injectable()
@@ -26,7 +30,10 @@ export class FetchPoliciesStep implements DispatcherStep {
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
   ) {}
 
-  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    _state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
     });
@@ -35,6 +42,12 @@ export class FetchPoliciesStep implements DispatcherStep {
 
     for (const doc of result) {
       if ('error' in doc) {
+        logger.warn({
+          message: 'Action policy lookup failed',
+          error: doc.error,
+          code: ALERTING_LOG_CODES.DISPATCH_POLICY_LOOKUP_FAILED,
+          labels: { policy_id: doc.id },
+        });
         continue;
       }
 
@@ -47,13 +60,13 @@ export class FetchPoliciesStep implements DispatcherStep {
         matcher: doc.attributes.matcher ?? undefined,
         groupBy: doc.attributes.groupBy ?? [],
         tags: doc.attributes.tags ?? [],
-        groupingMode: doc.attributes.groupingMode ?? undefined,
+        groupingMode: doc.attributes.groupingMode ?? DEFAULT_GROUPING_MODE,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
-        apiKey: doc.attributes.auth.apiKey,
+        apiKey: doc.attributes.apiKey,
       });
     }
 
-    return { type: 'continue', data: { policies } };
+    return { type: 'continue', data: { policies: PolicyCatalog.of(policies) } };
   }
 }

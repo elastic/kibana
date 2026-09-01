@@ -24,6 +24,7 @@ import {
 } from './risk_scoring_task';
 import type { ConfigType } from '../../../../config';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { EntityType } from '../../../../../common/search_strategy';
 
@@ -132,7 +133,7 @@ describe('Risk Scoring Task', () => {
           taskManager: mockTaskManagerStart,
           riskEngineDataClient: mockRiskEngineDataClient,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
     });
   });
 
@@ -183,7 +184,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskManager: mockTaskManagerStart,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
 
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to remove risk scoring task: whoops');
     });
@@ -729,7 +730,24 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           namespace: 'default',
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
+    });
+
+    it('throws a 409 when the task is already running', async () => {
+      mockTaskManagerStart.runSoon.mockRejectedValueOnce(
+        new TaskAlreadyRunningError('risk_engine:risk_scoring:default:0.0.1')
+      );
+
+      await expect(
+        scheduleNow({
+          taskManager: mockTaskManagerStart,
+          logger: mockLogger,
+          namespace: 'default',
+        })
+      ).rejects.toMatchObject({
+        message: 'The risk engine is already running',
+        statusCode: 409,
+      });
     });
   });
 });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { platformStreamsMemoryTools } from './tool_ids';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createMemorySearchTool } from './memory_search';
 import { createMemoryReadTool } from './memory_read';
 import { createMemoryWriteTool } from './memory_write';
@@ -26,22 +25,9 @@ export { createMemoryDeleteTool } from './memory_delete';
 export { createMemoryRecentChangesTool } from './memory_recent_changes';
 
 /**
- * All memory tool IDs.
- */
-export const memoryToolIds = [
-  platformStreamsMemoryTools.memorySearch,
-  platformStreamsMemoryTools.memoryRead,
-  platformStreamsMemoryTools.memoryWrite,
-  platformStreamsMemoryTools.memoryPatch,
-  platformStreamsMemoryTools.memoryList,
-  platformStreamsMemoryTools.memoryDelete,
-  platformStreamsMemoryTools.memoryRecentChanges,
-] as const;
-
-/**
  * Creates all memory tools with the given options.
  */
-export const createMemoryTools = (options: MemoryToolsOptions): BuiltinToolDefinition[] => {
+export const createMemoryTools = (options: MemoryToolsOptions): BuiltinSkillBoundedTool[] => {
   return [
     createMemorySearchTool(options),
     createMemoryReadTool(options),

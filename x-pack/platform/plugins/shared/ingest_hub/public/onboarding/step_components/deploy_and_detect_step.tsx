@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import type { ServiceChipState } from '../onboarding_flow_context';
+import {
+  SERVICE_SETTINGS_SESSION_KEY,
+  type ServiceInstance,
+  type ServiceSettingsPersistedState,
+} from './service_settings_step/use_service_settings';
 
 const CHIP_COLORS: Record<ServiceChipState, string> = {
   instantiating: 'default',
@@ -31,128 +34,104 @@ const CHIP_COLORS: Record<ServiceChipState, string> = {
   timeout: 'warning',
 };
 
+const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
+  globalRegion: '',
+  serviceVars: {},
+};
+
 interface DeployAndDetectStepProps {
   onContinue: () => void;
   onBack?: () => void;
 }
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
-  const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
-  const { isDeploying, serviceStatuses, failedPackages, deployErrors } = deployAndDetectStep;
+  const { deployAndDetectStep } = useOnboardingFlow();
+  const { serviceStatuses } = deployAndDetectStep;
 
-  const hasStarted = Object.keys(serviceStatuses).length > 0;
-  const allSucceeded =
-    hasStarted &&
-    !isDeploying &&
-    failedPackages.length === 0 &&
-    Object.values(serviceStatuses).some((s) => s === 'receiving');
+  // Read instances from session storage for display-name resolution.
+  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
+    SERVICE_SETTINGS_SESSION_KEY,
+    DEFAULT_SERVICE_SETTINGS
+  );
+
+  const instances: ServiceInstance[] = useMemo(
+    () => serviceSettings?.instances ?? [],
+    [serviceSettings?.instances]
+  );
+
+  // Instance lookup map — used to resolve display names for deployment status chips.
+  const instancesById = useMemo(() => {
+    const map = new Map<string, ServiceInstance>();
+    for (const inst of instances) {
+      map.set(inst.instanceId, inst);
+    }
+    return map;
+  }, [instances]);
+
+  const getChipLabel = (instanceId: string): string => {
+    const inst = instancesById.get(instanceId);
+    if (inst) return inst.name;
+    return AWS_SERVICES_MAP.get(instanceId)?.name ?? instanceId;
+  };
+
+  // ECF services appear in serviceStatuses as perpetual 'instantiating' chips because
+  // use_deploy.ts includes them when Deploy is clicked, but they are deployed via CloudFormation
+  // in Step 3 — not through agentless. Filter them out of the Step 4 chip row.
+  const agentlessStatuses = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(serviceStatuses).filter(([instanceId]) => {
+          const entry = AWS_SERVICES_MAP.get(instanceId);
+          return entry?.ecfLogType == null && entry?.ecfDedicatedTemplate == null;
+        })
+      ),
+    [serviceStatuses]
+  );
+
+  const hasStarted = Object.keys(agentlessStatuses).length > 0;
+
+  // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <div data-test-subj="onboardingStep-deploy-and-detect">
-      {isDeploying && (
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="m"
-          data-test-subj="deployAndDetectStep-loading"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ingestHub.deployAndDetectStep.deployingTitle"
-                  defaultMessage="Deploying services…"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
+      {/* ── Agentless service status chips ──────────────────────────────────── */}
       {hasStarted && (
         <>
-          {isDeploying && <EuiSpacer size="m" />}
+          <EuiSpacer size="m" />
           <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
-            {Object.entries(serviceStatuses).map(([serviceId, state]) => (
-              <EuiFlexItem grow={false} key={serviceId}>
-                <EuiBadge color={CHIP_COLORS[state]}>
-                  {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                </EuiBadge>
+            {Object.entries(agentlessStatuses).map(([instanceId, state]) => (
+              <EuiFlexItem grow={false} key={instanceId}>
+                <EuiBadge color={CHIP_COLORS[state]}>{getChipLabel(instanceId)}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
+        </>
+      )}
 
-          {!isDeploying && failedPackages.length > 0 && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.errorCallout.title"
-                    defaultMessage="Deployment failed"
-                  />
-                }
-                color="danger"
-                iconType="error"
-                announceOnMount
-                data-test-subj="deployAndDetectStep-errorCallout"
-              >
-                {failedPackages.map((pkg) => (
-                  <EuiText key={pkg} size="s">
-                    {deployErrors[pkg] ?? pkg}
-                  </EuiText>
-                ))}
-                <EuiSpacer size="s" />
-                <EuiButton
-                  size="s"
-                  color="danger"
-                  onClick={() => retryDeploy(failedPackages)}
-                  data-test-subj="deployAndDetectStep-retryButton"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.retryButton"
-                    defaultMessage="Retry failed services"
-                  />
-                </EuiButton>
-              </EuiCallOut>
-            </>
+      {/* ── Navigation ──────────────────────────────────────────────────────── */}
+      <EuiSpacer size="l" />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {onBack && (
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+              <FormattedMessage
+                id="xpack.ingestHub.deployAndDetectStep.backButton"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
           )}
-        </>
-      )}
-
-      {(onBack || allSucceeded) && (
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {onBack && (
-                <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.backButton"
-                    defaultMessage="Back"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {allSucceeded && (
-                <EuiButton
-                  fill
-                  onClick={onContinue}
-                  data-test-subj="deployAndDetectStep-continueButton"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.continueButton"
-                    defaultMessage="AWS Overview"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* Always show — ECF-only users have no agentless chips but should still be able
+              to advance. Deployment completion is gated in Step 3. */}
+          <EuiButton fill onClick={onContinue} data-test-subj="deployAndDetectStep-continueButton">
+            <FormattedMessage
+              id="xpack.ingestHub.deployAndDetectStep.continueButton"
+              defaultMessage="AWS Overview"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }

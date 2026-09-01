@@ -217,46 +217,6 @@ describe('deleteBackfill()', () => {
       });
     });
 
-    test('should check for errors returned from saved objects client and throw', async () => {
-      // @ts-expect-error
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        error: {
-          error: 'my error',
-          message: 'Unable to get',
-          statusCode: 404,
-        },
-        attributes: { rule: { name: fakeRuleName } },
-      });
-
-      await expect(rulesClient.deleteBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to delete backfill by id: 1: Unable to get"`
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete backfill by id: 1 - Error: Unable to get`
-      );
-
-      expect(auditLogger.log).toHaveBeenCalledWith({
-        error: { code: 'Error', message: 'Unable to get' },
-        event: {
-          action: 'ad_hoc_run_delete',
-          category: ['database'],
-          outcome: 'failure',
-          type: ['deletion'],
-        },
-        kibana: {
-          saved_object: {
-            id: '1',
-            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            name: 'backfill for rule "fakeRuleName"',
-          },
-        },
-        message:
-          'Failed attempt to delete ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
-      });
-    });
-
     test('should throw error when deleting ad hoc run saved object throws error', async () => {
       unsecuredSavedObjectsClient.delete.mockImplementationOnce(() => {
         throw new Error('error deleting SO!');

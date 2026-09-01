@@ -10,15 +10,19 @@
 import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '@elastic/esql/types';
 import { isBinaryExpression, isIdentifier, isMap, isStringLiteral } from '@elastic/esql';
 import { withAutoSuggest } from '../../../..';
-import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
+import {
+  isUnmappedFieldsStrategy,
+  UnmappedFieldsStrategy,
+  type ISuggestionItem,
+} from '../../registry/types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { EsqlSettingNames, settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
   return (
     settings
-      // Filter out serverless-only settings if not in serverless mode, if not flavour is provided don't return serverlessOnly settings.
-      .filter((setting) => (isServerless ? setting.serverlessOnly : !setting.serverlessOnly))
+      // Filter out serverless-only settings if not in serverless mode.
+      .filter((setting) => isServerless || !setting.serverlessOnly)
       // Filter out settings we don't want as suggestions
       .filter((setting) => !setting.ignoreAsSuggestion)
       .map((setting) =>
@@ -74,13 +78,9 @@ export function getUnmappedFieldsStrategy(
     if (comand.name.toUpperCase() === 'SET') {
       const { settingName, settingValue } = getSettingData(comand as ESQLAstSetHeaderCommand);
       if (settingName?.toUpperCase() === EsqlSettingNames.UNMAPPED_FIELDS.toUpperCase()) {
-        switch (settingValue?.toUpperCase()) {
-          case UnmappedFieldsStrategy.NULLIFY:
-            unmappedFieldsStrategy = UnmappedFieldsStrategy.NULLIFY;
-            break;
-          case UnmappedFieldsStrategy.LOAD:
-            unmappedFieldsStrategy = UnmappedFieldsStrategy.LOAD;
-            break;
+        const normalized = settingValue?.toUpperCase();
+        if (normalized && isUnmappedFieldsStrategy(normalized)) {
+          unmappedFieldsStrategy = normalized;
         }
       }
     }
@@ -94,6 +94,7 @@ export function getUnmappedFieldsStrategy(
 export function getUnmappedFieldType(unmappedFieldsStrategy: UnmappedFieldsStrategy): string {
   switch (unmappedFieldsStrategy) {
     case UnmappedFieldsStrategy.LOAD:
+    case UnmappedFieldsStrategy.LOAD_ALL:
       return 'keyword';
     case UnmappedFieldsStrategy.NULLIFY:
       return 'null';

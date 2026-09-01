@@ -9,7 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
-import type { HttpStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import type {
+  HttpStart,
+  NotificationsStart,
+  ApplicationStart,
+  IUiSettingsClient,
+} from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -27,13 +32,15 @@ const RuleSidebarPreviewTabInner: React.FC = () => {
   const http = useService<HttpStart>(CoreStart('http'));
   const notifications = useService<NotificationsStart>(CoreStart('notifications'));
   const application = useService<ApplicationStart>(CoreStart('application'));
+  const uiSettings = useService<IUiSettingsClient>(CoreStart('uiSettings'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const data = useService<DataPublicPluginStart>(PluginStart('data'));
   const dataViews = useService<DataViewsPublicPluginStart>(PluginStart('dataViews'));
   const lens = useService<LensPublicStart>(PluginStart('lens'));
 
   const services = useMemo(
-    () => ({ http, notifications, application, data, dataViews, lens }),
-    [http, notifications, application, data, dataViews, lens]
+    () => ({ http, notifications, application, uiSettings, featureFlags, data, dataViews, lens }),
+    [http, notifications, application, uiSettings, featureFlags, data, dataViews, lens]
   );
 
   const [dateStart, setDateStart] = useState('now-15m');

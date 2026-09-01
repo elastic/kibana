@@ -15,7 +15,6 @@ import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_
 import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
 import type { CaseUI } from '../../../../../../../common';
-import type { CasesFeatures } from '../../../../../../../common/ui';
 
 jest.mock('../../../../../../containers/use_get_case_connectors');
 jest.mock('../../../../../../containers/use_delete_cases');
@@ -174,6 +173,38 @@ describe('useCaseViewHeader', () => {
     );
   });
 
+  it('falls back to the reporter email when the full name is missing', () => {
+    const caseWithoutFullName: CaseUI = {
+      ...basicCase,
+      createdBy: { username: 'lknope', fullName: null, email: 'leslie.knope@elastic.co' },
+    };
+    const { result } = renderHook(
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithoutFullName }),
+      { wrapper }
+    );
+
+    const reportedBy = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
+    );
+    expect(reportedBy?.label).toBe('Reported by: leslie.knope@elastic.co');
+  });
+
+  it('falls back to the reporter username when full name and email are missing', () => {
+    const caseWithUsernameOnly: CaseUI = {
+      ...basicCase,
+      createdBy: { username: 'lknope', fullName: null, email: null },
+    };
+    const { result } = renderHook(
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithUsernameOnly }),
+      { wrapper }
+    );
+
+    const reportedBy = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
+    );
+    expect(reportedBy?.label).toBe('Reported by: lknope');
+  });
+
   it('returns a backHref', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
@@ -271,16 +302,10 @@ describe('useCaseViewHeader', () => {
   });
 
   it('omits the settings menu item when the solution enables no case settings', () => {
-    // Mirrors Observability/Stack: sync alerts off, observables off, no metrics.
-    const noSettingsFeatures: CasesFeatures = {
-      alerts: { sync: false },
-      observables: { enabled: false },
-      metrics: [],
-    };
     const noSettingsWrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(
         TestProviders,
-        { features: noSettingsFeatures } as React.ComponentProps<typeof TestProviders>,
+        { owner: ['observability'] } as React.ComponentProps<typeof TestProviders>,
         children
       );
 

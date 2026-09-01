@@ -290,8 +290,7 @@ const isVarRequiredByVarGroup = (
   return false;
 };
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -863,7 +862,7 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (varName === DATASET_VAR_NAME && packageType === 'input' && parsedValue !== undefined) {
+  if (varName === DATASET_VAR_NAME && parsedValue !== undefined) {
     const { valid, error } = isValidDataset(
       parsedValue.dataset ? parsedValue.dataset : parsedValue,
       false

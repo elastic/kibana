@@ -18,7 +18,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -31,15 +30,18 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { computeCompareDiff, isImproved } from './compare_diff';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -86,42 +88,45 @@ const formatDiff = (value: number): string => {
   return `${prefix}${value.toFixed(3)}`;
 };
 
-const LOWER_IS_BETTER_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
-
-const isLowerBetter = (evaluatorName: string): boolean =>
-  LOWER_IS_BETTER_PATTERN.test(evaluatorName);
-
-const isImproved = (diff: number, evaluatorName: string): boolean =>
-  isLowerBetter(evaluatorName) ? diff < 0 : diff > 0;
-
 const SignificanceBadge: React.FC<{
   pValue: number | null;
   diff: number;
-  evaluatorName: string;
-}> = ({ pValue, diff, evaluatorName }) => {
+  direction: Direction;
+}> = ({ pValue, diff, direction }) => {
   if (pValue === null || !Number.isFinite(pValue)) {
     return <EuiBadge color="hollow">{i18n.BADGE_INSUFFICIENT_DATA}</EuiBadge>;
   }
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
     return <EuiBadge color="hollow">{i18n.BADGE_NOT_SIGNIFICANT}</EuiBadge>;
   }
-  const color = isImproved(diff, evaluatorName) ? 'success' : 'danger';
+  const color =
+    direction === 'neutral' ? 'hollow' : isImproved(diff, direction) ? 'success' : 'danger';
   return <EuiBadge color={color}>{i18n.BADGE_SIGNIFICANT}</EuiBadge>;
 };
 
-const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, evaluatorName }) => {
+const DIRECTION_HINTS: Record<Direction, string> = {
+  maximize: i18n.DIFF_HIGHER_IS_BETTER,
+  minimize: i18n.DIFF_LOWER_IS_BETTER,
+  neutral: i18n.DIFF_NEUTRAL_DIRECTION,
+};
+
+const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, direction }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
-  const lowerBetter = isLowerBetter(evaluatorName);
-  const improved = isImproved(diff, evaluatorName);
+  const improved = isImproved(diff, direction);
   let color: string | undefined;
-  if (diff !== 0) {
+  if (diff !== 0 && direction !== 'neutral') {
     color = improved ? euiTheme.colors.textSuccess : euiTheme.colors.textDanger;
   }
 
-  const directionHint = lowerBetter ? i18n.DIFF_LOWER_IS_BETTER : i18n.DIFF_HIGHER_IS_BETTER;
-  const verdictHint = diff === 0 ? null : improved ? i18n.DIFF_IMPROVED : i18n.DIFF_REGRESSED;
+  const directionHint = DIRECTION_HINTS[direction];
+  const verdictHint =
+    diff === 0 || direction === 'neutral'
+      ? null
+      : improved
+      ? i18n.DIFF_IMPROVED
+      : i18n.DIFF_REGRESSED;
   const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
 
   return (
@@ -145,7 +150,15 @@ const ExperimentHeader: React.FC<{
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
-  const evaluatorModel = experimentData?.evaluator_model?.id;
+  const evaluatorModels = experimentData?.evaluator_models ?? [];
+  const suiteId =
+    experimentData?.suite_id !== 'unknown-suite' ? experimentData?.suite_id : undefined;
+  const displayName = suiteId ?? experimentData?.experiment_name ?? experimentId;
+  const detailLocation = {
+    pathname: `/experiments/${encodeURIComponent(experimentId)}`,
+    search: executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '',
+  };
+  const detailHref = history.createHref(detailLocation);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
@@ -170,15 +183,26 @@ const ExperimentHeader: React.FC<{
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.VIEW_EXPERIMENT_DETAIL}>
+          <EuiToolTip
+            content={
+              <>
+                {i18n.VIEW_EXPERIMENT_DETAIL}
+                <br />
+                {experimentId}
+              </>
+            }
+          >
             <EuiLink
-              onClick={() => {
-                const path = `/experiments/${encodeURIComponent(experimentId)}`;
-                const query = executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '';
-                history.push(`${path}${query}`);
+              href={detailHref}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) {
+                  return;
+                }
+                event.preventDefault();
+                history.push(detailLocation);
               }}
             >
-              {experimentId}
+              {displayName}
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
@@ -220,18 +244,17 @@ const ExperimentHeader: React.FC<{
               </EuiFlexItem>
             </>
           )}
-          {evaluatorModel && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">{evaluatorModel}</EuiBadge>
-              </EuiFlexItem>
-            </>
-          )}
+          {/* Always shown, unlike the task model above: an experiment scored only by code
+              evaluators has no judge, and the badge says so rather than leaving the reader to
+              guess whether the field is missing or empty. */}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EvaluatorModelsBadge models={evaluatorModels} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>
@@ -244,6 +267,7 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
+  direction: Direction;
   executionIdA?: string;
   executionIdB?: string;
   onClose: () => void;
@@ -253,6 +277,7 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId,
   datasetName,
   evaluatorName,
+  direction,
   executionIdA,
   executionIdB,
   onClose,
@@ -397,8 +422,8 @@ const ExampleDrilldownFlyout: React.FC<{
           ) {
             return '-';
           }
-          const diff = item.scoreA - item.scoreB;
-          return <DiffValue diff={diff} evaluatorName={item.evaluatorName} />;
+          const diff = computeCompareDiff(item.scoreB, item.scoreA);
+          return <DiffValue diff={diff} direction={direction} />;
         },
       },
       {
@@ -412,7 +437,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_A} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="primary"
                     aria-label={i18n.FLYOUT_TRACE_A}
                     onClick={() => setSelectedTraceId(item.traceIdA)}
@@ -425,7 +450,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_B} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="accent"
                     aria-label={i18n.FLYOUT_TRACE_B}
                     onClick={() => setSelectedTraceId(item.traceIdB)}
@@ -437,7 +462,7 @@ const ExampleDrilldownFlyout: React.FC<{
         ),
       },
     ],
-    [hasRepetitions]
+    [hasRepetitions, direction]
   );
 
   return (
@@ -460,7 +485,7 @@ const ExampleDrilldownFlyout: React.FC<{
         <EuiFlyoutBody>
           {!isLoading && pairs.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.FLYOUT_NO_EXAMPLES_TITLE}</h3>}
               body={<p>{i18n.FLYOUT_NO_EXAMPLES_BODY}</p>}
             />
@@ -482,9 +507,9 @@ const ExampleDrilldownFlyout: React.FC<{
                   return { style: { opacity: 0.55 } };
                 }
 
-                const diff = item.scoreA! - item.scoreB!;
-                if (diff === 0) return {};
-                if (isImproved(diff, item.evaluatorName)) {
+                const diff = computeCompareDiff(item.scoreB!, item.scoreA!);
+                if (diff === 0 || direction === 'neutral') return {};
+                if (isImproved(diff, direction)) {
                   return {
                     style: {
                       backgroundColor: hexToRgba(
@@ -575,6 +600,7 @@ export const CompareExperimentsPage: React.FC = () => {
     datasetId: string;
     datasetName: string;
     evaluatorName: string;
+    direction: Direction;
   } | null>(null);
 
   const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
@@ -585,6 +611,7 @@ export const CompareExperimentsPage: React.FC = () => {
       datasetId: result.datasetId,
       datasetName: result.datasetName,
       evaluatorName: result.evaluatorName,
+      direction: result.direction,
     });
   }, []);
 
@@ -634,14 +661,14 @@ export const CompareExperimentsPage: React.FC = () => {
       'Dataset',
       'Evaluator',
       'N',
-      'Mean A',
-      'Mean B',
+      'Mean target',
+      'Mean baseline',
       'Diff',
       'p-value',
       'Significant',
     ];
     const rows = sortedResults.map((r) => {
-      const diff = r.meanA - r.meanB;
+      const diff = computeCompareDiff(r.meanA, r.meanB);
       return [
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
@@ -720,7 +747,7 @@ export const CompareExperimentsPage: React.FC = () => {
       {
         name: i18n.COLUMN_DIFF,
         render: (item: PairedTTestResult) => (
-          <DiffValue diff={item.meanA - item.meanB} evaluatorName={item.evaluatorName} />
+          <DiffValue diff={computeCompareDiff(item.meanA, item.meanB)} direction={item.direction} />
         ),
         align: 'right' as const,
       },
@@ -736,8 +763,8 @@ export const CompareExperimentsPage: React.FC = () => {
         render: (item: PairedTTestResult) => (
           <SignificanceBadge
             pValue={item.pValue}
-            diff={item.meanA - item.meanB}
-            evaluatorName={item.evaluatorName}
+            diff={computeCompareDiff(item.meanA, item.meanB)}
+            direction={item.direction}
           />
         ),
       },
@@ -778,7 +805,7 @@ export const CompareExperimentsPage: React.FC = () => {
                   ? 'check'
                   : csvCopyState === 'failed'
                   ? 'warning'
-                  : 'exportAction'
+                  : 'upload'
               }
               onClick={handleCsvExport}
               disabled={csvCopyState !== 'idle'}
@@ -851,15 +878,12 @@ export const CompareExperimentsPage: React.FC = () => {
         <>
           {(data.pairing.truncatedA || data.pairing.truncatedB) && (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={i18n.TRUNCATION_WARNING_TITLE}
-                color="warning"
-                iconType="warning"
+                text={i18n.TRUNCATION_WARNING_BODY}
                 size="s"
-              >
-                <p>{i18n.TRUNCATION_WARNING_BODY}</p>
-              </EuiCallOut>
+              />
               <EuiSpacer size="m" />
             </>
           )}
@@ -913,7 +937,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
           {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.NO_RESULTS_TITLE}</h3>}
               body={<p>{i18n.NO_RESULTS_BODY}</p>}
               actions={[
@@ -950,6 +974,7 @@ export const CompareExperimentsPage: React.FC = () => {
           datasetId={flyoutState.datasetId}
           datasetName={flyoutState.datasetName}
           evaluatorName={flyoutState.evaluatorName}
+          direction={flyoutState.direction}
           executionIdA={executionIdForDetail}
           executionIdB={executionIdForDetailB}
           onClose={() => setFlyoutState(null)}

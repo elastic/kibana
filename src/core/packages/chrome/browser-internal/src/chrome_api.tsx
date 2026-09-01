@@ -10,12 +10,10 @@
 import React, { type ReactNode } from 'react';
 import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
-import type { AppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
+import type { ChromeAppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
@@ -39,7 +37,6 @@ export interface ChromeApiDeps {
     projectNavigation: ProjectNavigationStart;
   };
   sidebar: SidebarStart;
-  featureFlags: FeatureFlagsStart;
   componentDeps: InternalChromeStart['componentDeps'];
 }
 
@@ -47,7 +44,6 @@ export function createChromeApi({
   state,
   services,
   sidebar,
-  featureFlags,
   componentDeps,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
@@ -188,9 +184,6 @@ export function createChromeApi({
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
     next: {
-      get isEnabled() {
-        return isNextChrome(featureFlags);
-      },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
         register: (button: GlobalHeaderAiButton) => {
@@ -222,7 +215,7 @@ export function createChromeApi({
       },
       appHeader: {
         get$: () => state.appHeader.$,
-        set: (config: AppHeaderConfig) => {
+        set: (config: ChromeAppHeaderConfig) => {
           const registrationId = ++appHeaderRegistrationId;
           state.appHeader.set(config);
           return () => {

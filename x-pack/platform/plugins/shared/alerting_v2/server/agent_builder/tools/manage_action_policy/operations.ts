@@ -42,51 +42,75 @@ const withAgentBuilderTag = (tags: string[] | undefined | null): string[] => {
 // Derived from shared alerting-v2-schemas so tool-level validation stays
 // in sync with the CRUD API constraints automatically.
 
-export const setMetadataOperationSchema = z.object({
-  operation: z.literal('set_metadata'),
-  name: z.string().min(1).max(256).optional().describe('The action policy name.'),
-  description: z.string().max(1024).optional().describe('A description of the action policy.'),
-  tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-});
+export const setMetadataOperationSchema = z
+  .object({
+    operation: z.literal('set_metadata'),
+    name: z.string().min(1).max(256).optional().describe('The action policy name.'),
+    description: z.string().max(1024).optional().describe('A description of the action policy.'),
+    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
+  })
+  .describe(
+    'Use `set_metadata` to name the action policy and add a description or tags so the user can filter by it later.'
+  );
 
-export const setDestinationsOperationSchema = z.object({
-  operation: z.literal('set_destinations'),
-  destinations: z
-    .array(actionPolicyDestinationSchema)
-    .min(1, 'At least one destination must be provided')
-    .max(10)
-    .describe('The list of workflow destinations.'),
-});
+export const setDestinationsOperationSchema = z
+  .object({
+    operation: z.literal('set_destinations'),
+    destinations: z
+      .array(actionPolicyDestinationSchema)
+      .min(1, 'At least one destination must be provided')
+      .max(10)
+      .describe('The list of workflow destinations.'),
+  })
+  .describe(
+    'Use `set_destinations` to choose which workflows receive notifications (email, Slack, PagerDuty, etc.).'
+  );
 
-export const setMatcherOperationSchema = z.object({
-  operation: z.literal('set_matcher'),
-  matcher: z
-    .string()
-    .max(4096)
-    .nullable()
-    .describe('A KQL query to match alert episodes, or null for a catch-all.'),
-});
+export const setMatcherOperationSchema = z
+  .object({
+    operation: z.literal('set_matcher'),
+    matcher: z
+      .string()
+      .max(4096)
+      .nullable()
+      .describe('A KQL query to match alert episodes, or null for a catch-all.'),
+  })
+  .describe(
+    'Use `set_matcher` to limit which alert episodes this policy notifies on. An empty or null matcher matches all episodes in the space.'
+  );
 
-export const setGroupingOperationSchema = z.object({
-  operation: z.literal('set_grouping'),
-  groupingMode: groupingModeSchema.optional().describe('The grouping mode.'),
-  groupBy: z
-    .array(z.string().min(1).max(256))
-    .max(10)
-    .optional()
-    .nullable()
-    .describe('Fields used to group alerts (required when groupingMode is per_field).'),
-});
+export const setGroupingOperationSchema = z
+  .object({
+    operation: z.literal('set_grouping'),
+    groupingMode: groupingModeSchema.optional().describe('The grouping mode.'),
+    groupBy: z
+      .array(z.string().min(1).max(256))
+      .max(10)
+      .optional()
+      .nullable()
+      .describe('Fields used to group alerts (required when groupingMode is per_field).'),
+  })
+  .describe(
+    'Use `set_grouping` to batch matched episodes into notifications — one per episode, one for all matching episodes, or grouped by field.'
+  );
 
-export const setThrottleOperationSchema = z.object({
-  operation: z.literal('set_throttle'),
-  strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-  interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
-});
+export const setThrottleOperationSchema = z
+  .object({
+    operation: z.literal('set_throttle'),
+    strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
+    interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
+  })
+  .describe(
+    'Use `set_throttle` to limit how often notifications fire so the user is not flooded by repeat alerts.'
+  );
 
-export const validateOperationSchema = z.object({
-  operation: z.literal('validate'),
-});
+export const validateOperationSchema = z
+  .object({
+    operation: z.literal('validate'),
+  })
+  .describe(
+    'Use `validate` as the last operation to confirm the action policy is complete and ready to save.'
+  );
 
 // ─── Discriminated union ──────────────────────────────────────────────────────
 
@@ -173,8 +197,8 @@ export const executeActionPolicyOperations = (
         }
         next = {
           ...next,
-          ...(op.groupingMode !== undefined ? { groupingMode: op.groupingMode } : {}),
-          ...(op.groupBy !== undefined ? { groupBy: op.groupBy } : {}),
+          ...(op.groupingMode !== undefined ? { grouping_mode: op.groupingMode } : {}),
+          ...(op.groupBy !== undefined ? { group_by: op.groupBy } : {}),
         };
         break;
       }
@@ -220,7 +244,7 @@ export const executeActionPolicyOperations = (
   }
 
   validateThrottleGroupingCompat(
-    next.groupingMode,
+    next.grouping_mode,
     next.throttle?.strategy,
     next.throttle?.interval
   );

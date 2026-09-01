@@ -37,6 +37,7 @@ describe('validateLiquidTemplate', () => {
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toMatchObject({
         owner: 'liquid-template-validation',
+        ruleId: 'liquidSyntaxError',
         severity: 'error',
         message: expect.stringContaining('unknownFilter'),
       });
@@ -53,6 +54,7 @@ describe('validateLiquidTemplate', () => {
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toMatchObject({
         owner: 'liquid-template-validation',
+        ruleId: 'liquidSyntaxError',
         severity: 'error',
         startLineNumber: expect.any(Number),
         startColumn: expect.any(Number),

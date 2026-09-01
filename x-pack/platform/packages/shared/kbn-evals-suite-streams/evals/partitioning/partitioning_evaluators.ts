@@ -30,6 +30,7 @@ const conditionUsesBodyText = (condition: Condition): boolean => {
 export const coverageEvaluator: Evaluator<Example, PartitionSuggestionResult> = {
   name: 'partition_coverage',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { metrics } = output.output;
     const exp = expected as PartitioningGroundTruth;
@@ -62,6 +63,7 @@ export const coverageEvaluator: Evaluator<Example, PartitionSuggestionResult> = 
 export const overlapEvaluator: Evaluator<Example, PartitionSuggestionResult> = {
   name: 'overlap_score',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { metrics } = output.output;
     const exp = expected as PartitioningGroundTruth;
@@ -92,6 +94,7 @@ export const createPartitionQualityLlmEvaluator = (
 ): Evaluator<Example, PartitionSuggestionResult> => ({
   name: 'llm_partition_quality',
   kind: 'LLM',
+  direction: 'maximize',
   evaluate: async ({ output, expected, input }) => {
     const { suggestedPartitions, reason, metrics } = output.output;
     const exp = expected as PartitioningGroundTruth;

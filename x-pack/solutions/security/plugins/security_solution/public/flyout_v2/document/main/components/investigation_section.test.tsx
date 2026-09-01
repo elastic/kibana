@@ -19,12 +19,16 @@ import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { HighlightedFields } from './highlighted_fields';
+import { HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID } from './test_ids';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../../common/components/event_details/translations';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import {
   HOST_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
+import * as useFlyoutApiModule from '../../../use_flyout_api';
 
 jest.mock('../../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -60,10 +64,15 @@ jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fall
   useRuleWithFallback: jest.fn().mockReturnValue({ rule: null, loading: false, error: null }),
 }));
 
-const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
+const createMockHit = (
+  flattened: DataTableRecord['flattened'],
+  rawIndex?: string
+): DataTableRecord =>
   ({
     id: '1',
-    raw: {},
+    // Only set raw._index when a test asks for it: the component prefers raw._index over the
+    // flattened `_index` field, so a default here would shadow hits that rely on the fallback.
+    raw: rawIndex ? { _index: rawIndex } : {},
     flattened,
     isAnchor: false,
   } as DataTableRecord);
@@ -290,6 +299,83 @@ describe('InvestigationSection', () => {
     expect(element.props.children).toBeDefined();
   });
 
+  it('renders a Source event link that opens the ancestor document in a new flyout', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const sourceEventHit = createMockHit({
+      'event.kind': 'signal',
+      'signal.ancestors.index': '.internal.alerts-security.alerts-default',
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={sourceEventHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: EVENT_SOURCE_FIELD_DESCRIPTOR,
+      value: 'ancestor-id-1',
+      children: <span data-test-subj="sourceEventChild" />,
+    }) as React.ReactElement;
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>{element}</Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    act(() => getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click());
+
+    // The Source event opens the ancestor document as a new top-level flyout (session start),
+    // consistent with the sibling host/user/rule links in the same table.
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ session: 'start' })
+    );
+  });
+
+  it('falls back to plain children for a Source event when the ancestors index is unavailable', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: EVENT_SOURCE_FIELD_DESCRIPTOR,
+      value: 'ancestor-id-1',
+      children: <span data-test-subj="sourceEventChild" />,
+    }) as React.ReactElement;
+
+    // mockHit has no signal.ancestors.index → passthrough children, no link.
+    expect(element.type).toBe(React.Fragment);
+
+    const { queryByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>{element}</Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId('sourceEventChild')).toBeInTheDocument();
+  });
+
   it('keeps non-rule entity fields (host) as direct flyout links', () => {
     mockUseExpandSection.mockReturnValue(true);
 
@@ -359,6 +445,82 @@ describe('InvestigationSection', () => {
       expect.objectContaining({
         historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
         session: 'start',
+      })
+    );
+  });
+});
+
+describe('InvestigationSection Source event link under CPS', () => {
+  const mockHighlightedFields = jest.mocked(HighlightedFields);
+  const flyoutApiMock = createFlyoutApiMock();
+  let useFlyoutApiSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useExpandSection).mockReturnValue(true);
+    // Stub the flyout API for this block only. The tests above intentionally exercise the real
+    // useFlyoutApi chain (down to overlays.openSystemFlyout), so a file-wide jest.mock is not an
+    // option; a scoped spy lets these tests assert on openDocumentFlyoutFromIndex directly.
+    useFlyoutApiSpy = jest.spyOn(useFlyoutApiModule, 'useFlyoutApi').mockReturnValue(flyoutApiMock);
+  });
+
+  afterEach(() => {
+    // Put the real implementation back so the spy cannot leak into other describe blocks.
+    useFlyoutApiSpy.mockRestore();
+  });
+
+  const clickSourceEventLink = (hit: DataTableRecord) => {
+    render(
+      <IntlProvider locale="en">
+        <InvestigationSection hit={hit} renderCellActions={mockRenderCellActions} />
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: EVENT_SOURCE_FIELD_DESCRIPTOR,
+      value: 'ancestor-id-1',
+      children: <span data-test-subj="sourceEventChild" />,
+    }) as React.ReactElement;
+
+    const { getByTestId } = render(<IntlProvider locale="en">{element}</IntlProvider>);
+    act(() => getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click());
+  };
+
+  it('qualifies the ancestor index with the alert project alias for a linked-project alert', () => {
+    clickSourceEventLink(
+      createMockHit(
+        {
+          'event.kind': 'signal',
+          'signal.ancestors.index': 'logs-endpoint.alerts.caf6b705.2026.08.13',
+        },
+        'linked_local_project:.ds-.alerts-security.alerts-default-2026.08.13-000001'
+      )
+    );
+
+    expect(flyoutApiMock.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: 'ancestor-id-1',
+        indexName: 'linked_local_project:logs-endpoint.alerts.caf6b705.2026.08.13',
+      })
+    );
+  });
+
+  it('leaves the ancestor index untouched for an origin alert', () => {
+    clickSourceEventLink(
+      createMockHit(
+        {
+          'event.kind': 'signal',
+          'signal.ancestors.index': 'logs-endpoint.alerts.caf6b705.2026.08.13',
+        },
+        '.ds-.alerts-security.alerts-default-2026.08.13-000001'
+      )
+    );
+
+    expect(flyoutApiMock.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: 'ancestor-id-1',
+        indexName: 'logs-endpoint.alerts.caf6b705.2026.08.13',
       })
     );
   });

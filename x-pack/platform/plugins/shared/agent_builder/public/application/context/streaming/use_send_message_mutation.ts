@@ -215,6 +215,7 @@ export const useSendMessageMutation = ({
       let succeeded = false;
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
+        const projectRouting = services.plugins.cps?.cpsManager?.getProjectRouting();
 
         const rawEvents$ = isRegenerate
           ? chatService.regenerate({
@@ -224,6 +225,7 @@ export const useSendMessageMutation = ({
               agentId: vars.agentId,
               connectorId: vars.connectorId,
               browserApiTools: browserApiToolsMetadata,
+              projectRouting,
             })
           : chatService.chat({
               signal: controller.signal,
@@ -240,6 +242,7 @@ export const useSendMessageMutation = ({
                 })),
               ],
               browserApiTools: browserApiToolsMetadata,
+              projectRouting,
             });
 
         const events$ = rawEvents$.pipe(
@@ -315,7 +318,7 @@ export const useSendMessageMutation = ({
           if (succeeded && !endedInAwaitingPrompt) {
             streamActions.invalidateConversation();
           }
-          if (!succeeded && hasInsertedOptimisticListRow) {
+          if (!succeeded && hasInsertedOptimisticListRow && !conversationPersisted) {
             removeSidebarConversationListRow({
               queryClient,
               agentId: vars.agentId,

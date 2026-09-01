@@ -41,6 +41,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SCREENSHOTS]: omitDefaultFormatter('on'),
   // ignore_https_errors (default false) is dropped by the template's {{#if}} guard.
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayToJsonFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
   [ConfigKey.PORT]: stringToJsonFormatter,

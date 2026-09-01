@@ -511,12 +511,13 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  AI_RULE_CREATION_MENU: 'securitySolution.rulesManagementPage.aiRuleCreationMenuTour.v9.4',
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
   ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
+  ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
+    'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
   // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
   // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
   MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
@@ -746,6 +747,8 @@ export enum SecurityAgentBuilderAttachments {
   alerts = 'security.alerts',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
+  entityGraph = 'security.entity_graph',
+  entityRiskScoreHistory = 'security.entity_risk_score_history',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
 }

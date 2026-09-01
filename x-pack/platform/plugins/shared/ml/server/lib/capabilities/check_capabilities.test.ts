@@ -6,7 +6,12 @@
  */
 
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
-import { capabilitiesProvider } from './check_capabilities';
+import {
+  areCapabilitiesAllowedByLicenseAndFeatures,
+  capabilitiesProvider,
+  hasMlCapabilitiesProvider,
+} from './check_capabilities';
+import { InsufficientMLCapabilities } from './errors';
 import type { MlLicense } from '../../../common/license';
 import { getDefaultMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlClient } from '../ml_client';
@@ -78,7 +83,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -105,6 +109,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
 
@@ -139,7 +144,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(true);
       expect(capabilities.canDeleteJob).toBe(true);
@@ -165,6 +169,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(true);
       expect(capabilities.canViewMlNodes).toBe(true);
       expect(capabilities.canCreateTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
       expect(capabilities.canCreateInferenceEndpoint).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
@@ -200,7 +205,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -226,6 +230,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -261,7 +266,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -287,6 +291,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -322,7 +327,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(false);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -348,6 +352,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -384,7 +389,6 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteAnnotation).toBe(false);
     expect(capabilities.canUseMlAlerts).toBe(false);
     expect(capabilities.canGetTrainedModels).toBe(false);
-    expect(capabilities.canTestTrainedModels).toBe(false);
 
     expect(capabilities.canCreateJob).toBe(false);
     expect(capabilities.canDeleteJob).toBe(false);
@@ -410,6 +414,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateMlAlerts).toBe(false);
     expect(capabilities.canViewMlNodes).toBe(false);
     expect(capabilities.canCreateTrainedModels).toBe(false);
+    expect(capabilities.canTestTrainedModels).toBe(false);
     expect(capabilities.canCreateInferenceEndpoint).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -417,5 +422,226 @@ describe('check_capabilities', () => {
     expect(capabilities.isADEnabled).toBe(true);
     expect(capabilities.isDFAEnabled).toBe(true);
     expect(capabilities.isNLPEnabled).toBe(true);
+  });
+});
+
+const createAuthorizationMock = (hasAllRequested: boolean) => ({
+  actions: {
+    ui: {
+      get: jest.fn((feature: string, cap: string) => `${feature}:${cap}`),
+    },
+  },
+  checkPrivilegesDynamicallyWithRequest: jest.fn(() =>
+    jest.fn().mockResolvedValue({ hasAllRequested })
+  ),
+});
+
+const fullMlLicense = {
+  isMlEnabled: () => true,
+  isFullLicense: () => true,
+} as MlLicense;
+
+const basicMlLicense = {
+  isMlEnabled: () => true,
+  isFullLicense: () => false,
+} as MlLicense;
+
+const mlDisabledLicense = {
+  isMlEnabled: () => false,
+  isFullLicense: () => false,
+} as MlLicense;
+
+const allFeaturesEnabled = { ad: true, dfa: true, nlp: true };
+const adDisabledFeatures = { ad: false, dfa: true, nlp: true };
+
+describe('areCapabilitiesAllowedByLicenseAndFeatures', () => {
+  test('allows full-license AD capabilities when AD is enabled', () => {
+    expect(
+      areCapabilitiesAllowedByLicenseAndFeatures(
+        allFeaturesEnabled,
+        ['canCreateJob'],
+        fullMlLicense
+      )
+    ).toBe(true);
+  });
+
+  test('blocks full-license AD capabilities on basic license', () => {
+    expect(
+      areCapabilitiesAllowedByLicenseAndFeatures(
+        allFeaturesEnabled,
+        ['canCreateJob'],
+        basicMlLicense
+      )
+    ).toBe(false);
+  });
+
+  test('allows basic-license capabilities on basic license', () => {
+    expect(
+      areCapabilitiesAllowedByLicenseAndFeatures(
+        allFeaturesEnabled,
+        ['canGetFieldInfo'],
+        basicMlLicense
+      )
+    ).toBe(true);
+  });
+
+  test('blocks AD capabilities when AD feature is disabled', () => {
+    expect(
+      areCapabilitiesAllowedByLicenseAndFeatures(
+        adDisabledFeatures,
+        ['canCreateJob'],
+        fullMlLicense
+      )
+    ).toBe(false);
+  });
+
+  test('blocks all capabilities when ML is disabled in license', () => {
+    expect(
+      areCapabilitiesAllowedByLicenseAndFeatures(
+        allFeaturesEnabled,
+        ['canGetFieldInfo'],
+        mlDisabledLicense
+      )
+    ).toBe(false);
+  });
+});
+
+describe('hasMlCapabilitiesProvider', () => {
+  const fakeRequest = { isFakeRequest: true } as any;
+  const realRequest = { isFakeRequest: false } as any;
+
+  test('passes when resolved capabilities include all requested capabilities', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, realRequest);
+
+    await expect(hasMlCapabilities(['canCreateJob'])).resolves.toBeUndefined();
+  });
+
+  test('throws for real requests when resolved capabilities are insufficient', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, realRequest);
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+  });
+
+  test('authorizes fake requests via privileges and plugin features, ignoring resolved caps', async () => {
+    // Fake requests resolve all-false UI caps (including isADEnabled). Privilege + features must win.
+    const resolveMlCapabilities = jest.fn().mockResolvedValue({
+      ...getUserCapabilities(),
+      canCreateJob: false,
+      isADEnabled: false,
+    });
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      fullMlLicense,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).resolves.toBeUndefined();
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(fakeRequest);
+    expect(resolveMlCapabilities).not.toHaveBeenCalled();
+  });
+
+  test('rejects fake requests on basic license for full-license capabilities', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      basicMlLicense,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalled();
+  });
+
+  test('rejects fake requests when AD feature is disabled in plugin config', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      fullMlLicense,
+      adDisabledFeatures
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalled();
+  });
+
+  test('rejects fake requests when authorization is missing', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      undefined,
+      fullMlLicense,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+  });
+
+  test('rejects fake requests when mlLicense is missing', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      undefined,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+  });
+
+  test('rejects fake requests when enabledFeatures is missing', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      fullMlLicense
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+  });
+
+  test('rejects fake requests when role privileges are insufficient', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(false);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      fullMlLicense,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
   });
 });

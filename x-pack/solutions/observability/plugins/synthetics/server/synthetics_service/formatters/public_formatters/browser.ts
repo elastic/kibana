@@ -47,6 +47,7 @@ export const browserFormatters: BrowserFormatMap = {
   // 'on' matches Heartbeat's default (elastic/kibana#241818).
   [ConfigKey.SCREENSHOTS]: omitDefaultFormatter('on'),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayFormatter,
   [ConfigKey.TEXT_ASSERTION]: null,
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,

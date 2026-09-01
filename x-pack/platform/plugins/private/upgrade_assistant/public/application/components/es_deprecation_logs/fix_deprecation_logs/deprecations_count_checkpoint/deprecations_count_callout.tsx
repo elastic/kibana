@@ -9,7 +9,8 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSkeletonText, EuiButton } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { useAppContext } from '../../../../app_context';
 
@@ -53,8 +54,6 @@ export const DeprecationsCountCallout: FunctionComponent<Props> = ({ checkpoint 
 
   const logsCount = data?.count || 0;
   const hasLogs = logsCount > 0;
-  const calloutTint = hasLogs ? 'warning' : 'success';
-  const calloutIcon = hasLogs ? 'warning' : 'check';
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   if (isInitialRequest && isLoading) {
@@ -63,28 +62,31 @@ export const DeprecationsCountCallout: FunctionComponent<Props> = ({ checkpoint 
 
   if (error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18nTexts.loadingError}
-        color="danger"
-        iconType="warning"
         data-test-subj="errorCallout"
-      >
-        <p>
-          {error.statusCode} - {error.message as string}
-        </p>
-        <EuiButton color="danger" onClick={resendRequest} data-test-subj="retryButton">
-          {i18nTexts.retryButton}
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {error.statusCode} - {error.message as string}
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: i18nTexts.retryButton,
+            onClick: resendRequest,
+            'data-test-subj': 'retryButton',
+          },
+        }}
+      />
     );
   }
 
+  const CalloutComponent = hasLogs ? KbnWarningCallout : KbnSuccessCallout;
+
   return (
-    <EuiCallOut
+    <CalloutComponent
       title={i18nTexts.calloutTitle(logsCount, checkpoint)}
-      color={calloutTint}
-      iconType={calloutIcon}
       data-test-subj={calloutTestId}
     />
   );

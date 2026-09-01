@@ -9,9 +9,8 @@
 
 import { isFunctionExpression, isOptionNode } from '@elastic/esql';
 import { within, Walker } from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
+import type { ESQLAstAllCommands, ESQLAstNode, ESQLSingleAstItem } from '@elastic/esql/types';
 import { Location } from './types';
-import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 
 const commandOptionNameToLocation: Record<string, Location> = {
   eval: Location.EVAL,
@@ -35,6 +34,8 @@ const commandOptionNameToLocation: Record<string, Location> = {
   'join:on': Location.JOIN,
   'mmr:on': Location.MMR,
   'rerank:on': Location.RERANK,
+  // HIGHLIGHT command: the query expression slot allows full-text functions
+  highlight: Location.HIGHLIGHT_QUERY,
 };
 
 /**
@@ -68,17 +69,21 @@ export const getLocationFromCommandOrOptionName = (name: string) =>
 export function getLocationInfo(
   position: ESQLSingleAstItem | number,
   parentCommand: ESQLAstAllCommands,
-  ast: ESQLAst,
+  isTimeseriesSource: boolean,
   withinAggFunction: boolean
 ): { id: Location; displayName: string } {
-  if (withinAggFunction && isTimeseriesSourceCommand(ast)) {
+  if (withinAggFunction && isTimeseriesSource) {
     return {
       id: Location.STATS_TIMESERIES,
       displayName: 'agg_function_in_timeseries_context',
     };
   }
 
-  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(position, node));
+  // Cast: WalkerProperNode now includes PromQL nodes; isOptionNode expects ESQLAstNode.
+  const option = Walker.find(
+    parentCommand,
+    (node) => isOptionNode(node as ESQLAstNode) && within(position, node)
+  );
 
   if (option) {
     const displayName = option.name;
