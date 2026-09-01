@@ -93,19 +93,16 @@ steps:
         on-failure:
           continue: true
 
-      # Pre-aggregate the entity breakdown so the agent has data-driven context
-      # without needing to query alerts itself. Columns: fp_count, host.name,
-      # user.name, source.ip, process.name.
+      # Aggregate entity breakdown from the alert IDs already collected by the harvest.
+      # Querying by _id avoids re-applying the workflow_status/reason/timestamp filters.
+      # Columns: fp_count, host.name, user.name, source.ip, process.name.
       - name: fetch_fp_entities
         type: elasticsearch.esql.query
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
         with:
           query: |-
-            FROM .alerts-security.alerts-{{ workflow.spaceId }}
-            | WHERE `kibana.alert.workflow_status` == "closed"
-              AND `kibana.alert.workflow_reason` == "false_positive"
-              AND `kibana.alert.rule.uuid` == "{{ foreach.item.0 }}"
-              AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+            FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+            | WHERE MV_CONTAINS("${{ foreach.item.5 }}", _id)
             | STATS fp_count = COUNT(*) BY `host.name`, `user.name`, `source.ip`, `process.name`
             | SORT fp_count DESC
             | LIMIT 10
@@ -146,29 +143,35 @@ steps:
             {% endfor %}
             {% endif %}
 
-            Propose one tuning change using the following strategies in order of preference:
+            Choose exactly one change_type in this order of preference:
 
-            1. "exception" — Best when the rule is correct but fires on a known-good
-               process, user, or host. Use the entity data above to pick the tightest
-               field-value conditions. Populate exception_entries accordingly.
+            exception  — The rule logic is correct but fires on a known-good entity.
+              Use the entity breakdown above to identify the tightest conditions.
+              Populate exception_entries; each entry is one field condition the step
+              will AND together. Supported operators:
+                is / is_not              → single value string
+                is_one_of / is_not_one_of → values array
+                matches / does_not_match  → glob pattern string (* and ?)
+                exists / does_not_exist   → no value needed
 
-            2. "query" — When FPs stem from the query being too broad. Only valid for
-               rules of type "query". Include the full replacement query in proposed_query
-               (same language as the current query).
+            query  — The query is too broad and FPs share a pattern not worth
+              excepting individually. Only valid for rule type "query". Populate
+              proposed_query with the full narrowed KQL in the same language.
 
-            3. "suppression" — When the same entity generates duplicate alerts repeatedly.
-               Populate suppression_group_by with up to 3 field names. For threshold-type
-               rules prefer raising the threshold manually; use suppression for other types.
+            suppression  — The same entity is generating repeated duplicate alerts.
+              Populate suppression_group_by with 1–3 field names to group by. Prefer
+              this over exception only when the entity itself is legitimately active
+              but the alert volume is the problem (e.g. a known scanner host).
 
-            4. "risk_score" — When the rule still has detection value but generates many
-               low-priority alerts. Provide proposed_risk_score (0–100) and
-               proposed_severity (low/medium/high/critical).
+            risk_score  — The rule has real detection value but the alerts are
+              low-priority noise. Populate proposed_risk_score (0–100) and
+              proposed_severity (low / medium / high / critical).
 
-            5. "disable" — Last resort only. When the rule provides no detection value or
-               is completely redundant with another rule.
+            disable  — Last resort. The rule has no detection value or is fully
+              redundant with another active rule.
 
-            Use "manual" only if none of the above applies and analyst intervention is
-            required before any automated change is safe.
+            manual  — None of the above is safe to apply automatically. Use summary
+              to describe the recommended manual change.
           schema:
             type: object
             properties:
@@ -176,8 +179,6 @@ steps:
                 type: string
                 enum: [exception, query, suppression, risk_score, disable, manual]
               summary:
-                type: string
-              proposed_query:
                 type: string
               exception_entries:
                 type: array
@@ -188,10 +189,16 @@ steps:
                       type: string
                     operator:
                       type: string
-                      enum: [is, is_not, is_one_of, is_not_one_of, matches, does_not_match]
+                      enum: [is, is_not, is_one_of, is_not_one_of, matches, does_not_match, exists, does_not_exist]
                     value:
                       type: string
-                  required: [field, operator, value]
+                    values:
+                      type: array
+                      items:
+                        type: string
+                  required: [field, operator]
+              proposed_query:
+                type: string
               suppression_group_by:
                 type: array
                 items:
@@ -199,7 +206,7 @@ steps:
                 minItems: 1
                 maxItems: 3
               proposed_risk_score:
-                type: number
+                type: integer
                 minimum: 0
                 maximum: 100
               proposed_severity:
