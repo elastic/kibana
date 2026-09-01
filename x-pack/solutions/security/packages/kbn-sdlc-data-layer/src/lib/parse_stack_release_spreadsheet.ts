@@ -88,12 +88,14 @@ const parseCsvLine = (line: string): string[] => {
       } else {
         inQuotes = !inQuotes;
       }
+      // eslint-disable-next-line no-continue -- char parser: next character
       continue;
     }
 
     if (char === ',' && !inQuotes) {
       values.push(current);
       current = '';
+      // eslint-disable-next-line no-continue -- char parser: next character
       continue;
     }
 
@@ -176,6 +178,7 @@ export const parseStackReleaseSpreadsheet = ({
     const columns = parseCsvLine(line);
     const version = columns[versionIndex]?.trim();
     if (!version || isSkippableVersion(version)) {
+      // eslint-disable-next-line no-continue -- guard clause: skip non-release rows
       continue;
     }
 
@@ -201,6 +204,7 @@ export const parseStackReleaseSpreadsheet = ({
     for (const { milestone, rawDate } of milestoneDates) {
       const targetDate = parseReleaseScheduleDate(rawDate);
       if (!targetDate) {
+        // eslint-disable-next-line no-continue -- guard clause: skip unparseable dates
         continue;
       }
 

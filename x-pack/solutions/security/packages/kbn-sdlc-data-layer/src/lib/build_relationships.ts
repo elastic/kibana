@@ -166,11 +166,10 @@ export const dedupeRelationshipEdges = (edges: readonly RelationshipEdge[]): Rel
 
   for (const edge of edges) {
     const key = buildRelationshipDocumentId(edge.from, edge.relation, edge.to);
-    if (seen.has(key)) {
-      continue;
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduped.push(edge);
     }
-    seen.add(key);
-    deduped.push(edge);
   }
 
   return deduped;

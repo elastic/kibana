@@ -218,6 +218,7 @@ export const fetchGitHubGraphQl = async <T>({
         if (isRetryableGitHubHttpStatus(response.status) && attempt < maxAttempts) {
           await sleep(retryDelayMs);
           retryDelayMs *= 2;
+          // eslint-disable-next-line no-continue -- retry loop: skip to next attempt
           continue;
         }
         throw new Error(`GitHub GraphQL request failed with status ${response.status}`);
@@ -264,13 +265,12 @@ export const fieldValuesToMap = (
   for (const node of nodes) {
     const field = node.field as { name?: string } | undefined;
     const name = field?.name;
-    if (!name) {
-      continue;
-    }
-    if (typeof node.name === 'string') {
-      map[name] = node.name;
-    } else if (typeof node.text === 'string') {
-      map[name] = node.text;
+    if (name) {
+      if (typeof node.name === 'string') {
+        map[name] = node.name;
+      } else if (typeof node.text === 'string') {
+        map[name] = node.text;
+      }
     }
   }
   return map;

@@ -11,6 +11,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
+// Type-only: describes the AxiosInstance returned by Kibana's own
+// actions getAxiosInstanceWithAuth. No runtime axios usage.
+// eslint-disable-next-line no-restricted-imports
 import type { AxiosInstance } from 'axios';
 import type { KibanaRequest } from '@kbn/core/server';
 import { resolveConnectorAxiosClient } from './resolve_connector_client';
