@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/282858
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Collect user data in Agent Builder Traces
-description: Agent Builder conversation traces now include OpenTelemetry user attributes (`user.id`, `user.name`, and `user.hash`). Real user IDs and names follow the new Gen AI tracing privacy settings for user data.

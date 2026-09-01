@@ -7,7 +7,12 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
-export type AlertingApp = 'rules' | 'alerts' | 'actionPolicies' | 'executionHistory';
+export type AlertingApp =
+  | 'rules'
+  | 'ruleLibrary'
+  | 'alerts'
+  | 'actionPolicies'
+  | 'executionHistory';
 
 interface AlertingAppMeta {
   /** Management deep-link path passed to `page.gotoApp`. */
@@ -23,6 +28,11 @@ export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
     path: 'management/alertingV2/rules',
     featureId: 'alerting_v2_rules',
     heading: /^Rules/i,
+  },
+  ruleLibrary: {
+    path: 'management/alertingV2/rule_library',
+    featureId: 'alerting_v2_rules',
+    heading: /rule library/i,
   },
   alerts: {
     path: 'management/alertingV2/episodes',
@@ -48,7 +58,7 @@ const MANAGEMENT_LANDING_SUBJECTS = [
 ] as const;
 
 /**
- * Drives navigation to the four alerting_v2 management apps and exposes the
+ * Drives navigation to the alerting_v2 management apps and exposes the
  * "Privileges required" interstitial locators plus the Stack Management
  * landing-page locator, so specs can assert which pages a given role can view.
  */

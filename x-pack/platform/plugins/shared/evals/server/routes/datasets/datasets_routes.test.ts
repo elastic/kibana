@@ -13,6 +13,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 jest.mock('../../remote_kibana/forward_to_remote_kibana', () => {
@@ -37,9 +38,9 @@ import {
   EVALS_DATASET_UPSERT_URL,
   GetEvaluationDatasetsRequestQuery,
 } from '@kbn/evals-common';
-import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
-import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
-import { ExampleNotFoundError } from '../../storage/example_not_found_error';
+import { DatasetAlreadyExistsError } from '../../storage/datasets/dataset_already_exists_error';
+import { ExampleAlreadyExistsError } from '../../storage/datasets/example_already_exists_error';
+import { ExampleNotFoundError } from '../../storage/datasets/example_not_found_error';
 import {
   RemoteDecryptionError,
   DESTINATION_QUERY_PARAM,
@@ -1230,7 +1231,7 @@ describe('dataset routes', () => {
         router,
         logger,
         canEncrypt,
-        evaluatorRegistry: { list: () => [], get: () => undefined },
+        evaluatorRegistry: createEvaluatorRegistryMock(),
         getInferenceStart: async () =>
           ({ getClient: jest.fn() } as unknown as InferenceServerStart),
         getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),

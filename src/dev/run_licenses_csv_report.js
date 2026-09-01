@@ -74,6 +74,13 @@ run(
         ],
         sourceURL:
           'https://oss-dependencies.elastic.co/red-hat-universal-base-image-minimal/8/ubi-minimal-8-source.tar.gz',
+      },
+      {
+        // See x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/README.md
+        name: 'yara',
+        version: '4.3.2',
+        repository: 'https://github.com/VirusTotal/yara',
+        licenses: ['BSD-3-Clause'],
       }
     );
 

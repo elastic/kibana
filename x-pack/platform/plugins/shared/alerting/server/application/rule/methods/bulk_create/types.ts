@@ -13,6 +13,7 @@ import type { CreateRuleData } from '../create/types';
 import type { CreateRuleOptions } from '../create/create_rule';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RawRule } from '../../../../types';
+import type { ApiKeyEntry } from '../common_utils/invalidate_keys';
 
 export interface PreparedRule {
   id: string;
@@ -23,12 +24,9 @@ export interface PreparedRule {
   schedule: IntervalSchedule;
   consumer: string;
   ruleTypeId: string;
-}
-
-export interface ApiKeyEntry {
-  apiKey: string | null;
-  uiamApiKey: string | null;
-  apiKeyCreatedByUser: boolean | null;
+  producer: string;
+  createdAt: number;
+  templateId?: string;
 }
 
 export interface PrepareRuleArgs<Params extends RuleParams> {
@@ -45,6 +43,7 @@ export interface BulkCreateRulesItem<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
+  templateId?: string;
 }
 
 export interface BulkCreateRulesParams<Params extends RuleParams = never> {

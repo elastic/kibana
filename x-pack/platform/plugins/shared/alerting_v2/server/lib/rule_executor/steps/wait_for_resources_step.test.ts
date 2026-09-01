@@ -8,16 +8,14 @@
 import { WaitForResourcesStep } from './wait_for_resources_step';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 import { createMockResourceManager } from '../../services/resource_service/resource_manager.mock';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('WaitForResourcesStep', () => {
   let step: WaitForResourcesStep;
   let resourceManager: ReturnType<typeof createMockResourceManager>;
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
     resourceManager = createMockResourceManager();
-    step = new WaitForResourcesStep(loggerService, resourceManager);
+    step = new WaitForResourcesStep(resourceManager);
   });
 
   it('waits for resources and continues execution', async () => {

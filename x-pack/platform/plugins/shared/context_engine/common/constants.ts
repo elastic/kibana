@@ -10,7 +10,16 @@ export const internalApiPath = '/internal/context_engine';
 
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
-export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
+export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
+export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+
+/** Default and maximum page size when listing Knowledge Indicators for an AI index. */
+export const DEFAULT_KI_PAGE_SIZE = 25;
+export const MAX_KI_PAGE_SIZE = 100;
+/** Page size for summary-only KI list requests, no rows. */
+export const KI_SUMMARY_PAGE_SIZE = 0;
+
+export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const signalGroupsPath = `${internalApiPath}/signals/groups`;
@@ -25,6 +34,17 @@ export const MAX_SIGNAL_GROUPS = 100;
 /** Default and maximum page size when fetching the individual signals in a group. */
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
+
+/** Default and maximum page size when listing improvements (one entry per improvement lineage). */
+export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
+export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see
+ * what was already rejected so it does not re-propose it, but the briefing shares the run's
+ * context window.
+ */
+export const MAX_IMPROVEMENTS_HISTORY_SIZE = 200;
 
 /**
  * Version of the public AI index API, shared between the server route
@@ -52,6 +72,7 @@ export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 export const MAX_AI_INDICES = 100;
 
 export const MAX_AI_INDEX_ID_LENGTH = 256;
+export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;

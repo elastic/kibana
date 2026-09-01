@@ -50,7 +50,9 @@ describe('useStepState', () => {
       const { result } = renderHook(() => useStepState(INTEGRATION_ID));
       const before = result.current.completedSteps;
 
-      act(() => result.current.markStepsIncomplete(['service-settings', 'deploy-settings']));
+      act(() =>
+        result.current.markStepsIncomplete(['service-settings', 'authenticate-and-deploy'])
+      );
 
       expect(result.current.completedSteps).toBe(before);
     });
@@ -60,12 +62,12 @@ describe('useStepState', () => {
 
       act(() => {
         result.current.markStepComplete('services');
-        result.current.markStepsIncomplete(['service-settings', 'deploy-settings']);
+        result.current.markStepsIncomplete(['service-settings', 'authenticate-and-deploy']);
       });
 
       expect(result.current.completedSteps.has('services')).toBe(true);
       expect(result.current.completedSteps.has('service-settings')).toBe(false);
-      expect(result.current.completedSteps.has('deploy-settings')).toBe(false);
+      expect(result.current.completedSteps.has('authenticate-and-deploy')).toBe(false);
     });
 
     it('firstIncompleteStepId recomputes after invalidation', () => {
@@ -76,7 +78,7 @@ describe('useStepState', () => {
       // batched React state).
       act(() => result.current.markStepComplete('services'));
       act(() => result.current.markStepComplete('service-settings'));
-      act(() => result.current.markStepComplete('deploy-settings'));
+      act(() => result.current.markStepComplete('authenticate-and-deploy'));
       act(() => result.current.markStepComplete('deploy-and-detect'));
 
       act(() => result.current.markStepsIncomplete(['service-settings']));

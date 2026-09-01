@@ -25,6 +25,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
@@ -44,14 +45,30 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getModelStatus,
+  getRegionPlaceName,
   getRegionZoneCounts,
 } from '../../utils/eis_utils';
-import { REGION_DISPLAY_NAMES } from '../../../common/constants';
-import type { EisInferenceEndpoint } from '../../../common/types';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import type { CspRegion, EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
 const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
+
+const getRegionBadgeTooltipContent = (modelRegions: CspRegion[]): string => {
+  const names = modelRegions.map(getRegionPlaceName);
+  const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
+  if (names.length > TOOLTIP_MAX_VISIBLE_REGIONS) {
+    return `${visible} ${i18n.translate(
+      'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
+      {
+        defaultMessage: 'and {count} more',
+        values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
+      }
+    )}`;
+  }
+  return visible;
+};
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -75,6 +92,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
+  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false);
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
@@ -147,6 +165,13 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
 
+  const handleDismissCallout = useCallback(() => {
+    setIsCalloutDismissed(true);
+  }, []);
+
+  const showUnavailableCallout =
+    !isCalloutDismissed && isModelUnavailableUnderRegionPolicy(allEndpoints, modelId);
+
   const initialReasoningEffort = useMemo(() => {
     const effort = editingEndpoint?.task_settings?.reasoning?.effort;
     return isReasoningEffortLevel(effort) ? effort : undefined;
@@ -198,6 +223,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   ) : (
                     <EuiToolTip
                       key={geo}
+                      data-test-subj={`flyoutRegionBadgeTooltip-${geo}`}
                       title={i18n.translate(
                         'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
                         {
@@ -205,21 +231,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                           values: { count: modelCount, total: totalCount },
                         }
                       )}
-                      content={(() => {
-                        const names = modelRegions.map(
-                          (r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region
-                        );
-                        const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
-                        return names.length > TOOLTIP_MAX_VISIBLE_REGIONS
-                          ? `${visible} ${i18n.translate(
-                              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
-                              {
-                                defaultMessage: 'and {count} more',
-                                values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
-                              }
-                            )}`
-                          : visible;
-                      })()}
+                      content={getRegionBadgeTooltipContent(modelRegions)}
                     >
                       <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
                         {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
@@ -273,6 +285,28 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {showUnavailableCallout && (
+          <KbnWarningCallout
+            title={i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionPreferencesUnavailableTitle',
+              { defaultMessage: 'Model not available based on region preferences' }
+            )}
+            announceOnMount={false}
+            onDismiss={handleDismissCallout}
+            dismissButtonProps={{
+              'data-test-subj': 'modelDetailFlyoutRegionUnavailableCalloutDismiss',
+            }}
+            data-test-subj="modelDetailFlyoutRegionUnavailableCallout"
+            text={i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionPreferencesUnavailableDescription',
+              {
+                defaultMessage:
+                  "This model isn't available in the locations allowed by your region preferences. To use it, update your region preferences to include a supported location.",
+              }
+            )}
+          />
+        )}
+        {showUnavailableCallout && <EuiSpacer size="m" />}
         <EuiDescriptionList
           type="column"
           compressed

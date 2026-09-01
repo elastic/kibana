@@ -7,7 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
@@ -16,22 +16,29 @@ import {
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
+  MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
   aiIndexByIdPath,
-  aiIndexKiSummaryPath,
+  aiIndexKiByIdPath,
+  aiIndexKiListPath,
   aiIndexPath,
+  DEFAULT_KI_PAGE_SIZE,
+  MAX_KI_PAGE_SIZE,
+  MAX_KI_TYPE_FILTER_LENGTH,
+  MAX_INDEX_NAME_BYTES,
 } from '../../common/constants';
 import type {
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
-  GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
+import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
 import { validateAiIndexId } from '../../common/validation';
 import {
@@ -41,9 +48,12 @@ import {
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
   InvalidConnectorSourceError,
+  KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import { getKiSummary } from '../ai_indices/ki_summary';
+import type { ImprovementsServiceApi } from '../improvements/service';
+import { getKi } from '../ai_indices/ki_get';
+import { getKis } from '../ai_indices/ki_list';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -67,11 +77,28 @@ const aiIndexIdParamsSchema = schema.object({
   aiIndexId: aiIndexIdSchema,
 });
 
+const kiIdParamsSchema = schema.object({
+  aiIndexId: aiIndexIdSchema,
+  kiId: schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_ID_LENGTH,
+    meta: { description: 'The document id of the Knowledge Indicator.' },
+  }),
+});
+
 const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
       meta: { description: 'Human-readable description of the AI index.' },
+    })
+  ),
+  feedback_agent_id: schema.maybe(
+    schema.string({
+      maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
+      meta: {
+        description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
+      },
     })
   ),
   dest: schema.object({
@@ -129,11 +156,34 @@ const aiIndexPropertiesSchema = {
 const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
 const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
+const listKisQuerySchema = schema.object({
+  size: schema.number({
+    min: 0,
+    max: MAX_KI_PAGE_SIZE,
+    defaultValue: DEFAULT_KI_PAGE_SIZE,
+  }),
+  type: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
+      meta: { description: 'When set, return only KIs of this type.' },
+    })
+  ),
+});
+
+const getKiQuerySchema = schema.object({
+  index: schema.string({
+    minLength: 1,
+    maxLength: MAX_INDEX_NAME_BYTES,
+    meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
+  }),
+});
+
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
   if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
     return response.badRequest({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexNotFoundError) {
+  if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
   if (
@@ -148,11 +198,15 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
 
 export const registerAiIndexRoutes = ({
   router,
+  logger,
   getAiIndexService,
+  getImprovementsService,
   getActions,
 }: {
   router: IRouter;
+  logger: Logger;
   getAiIndexService: () => AiIndexService;
+  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
   // Create an AI index
@@ -317,15 +371,15 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Get Knowledge Indicator summary for an AI index
+  // List Knowledge Indicators for an AI index
   router.versioned
     .get({
-      path: aiIndexKiSummaryPath,
+      path: aiIndexKiListPath,
       security: READ_SECURITY,
       access: 'internal',
-      summary: 'Get Knowledge Indicator summary',
+      summary: 'List Knowledge Indicators',
       description:
-        'Returns the number of Knowledge Indicators stored in the AI index destination backing store.',
+        'Returns a paginated list of Knowledge Indicators stored in the AI index destination backing store.',
     })
     .addVersion(
       {
@@ -333,21 +387,65 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: listKisQuerySchema,
           },
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const { size, type } = request.query;
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-          const kiSummary = await getKiSummary(esClient, aiIndex.dest.value);
-          const body: GetAiIndexKiSummaryResponse = {
-            count: kiSummary.count,
-            dest: aiIndex.dest,
-            counts_by_type: kiSummary.countsByType,
-          };
+          const body: ListKisResponse = await getKis(esClient, {
+            destValue: aiIndex.dest.value,
+            size,
+            ...(type !== undefined ? { type } : {}),
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: aiIndexKiByIdPath,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'Get a Knowledge Indicator',
+      description:
+        'Returns the stored Knowledge Indicator document from the Elasticsearch index that stores it.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: getKiQuerySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index } = request.query;
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: GetKiResponse = await getKi(esClient, {
+            aiIndexId,
+            destValue: aiIndex.dest.value,
+            index,
+            kiId,
+          });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
@@ -383,11 +481,30 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const core = await ctx.core;
+        const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
         try {
           await getAiIndexService().delete(aiIndexId);
+          // Audited here rather than after the cleanup below: the deletion is done and cannot be
+          // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+
+          // The improvements store is keyed by AI index id, so revisions left behind would
+          // resurface if an AI index were later recreated under the same id. Best-effort: the store
+          // is a user-owned index and the caller may well have no privileges on it, and reporting a
+          // failure for an index that is already gone would only send them to retry a delete that
+          // now 404s. What is left behind is inert until an id is reused.
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser)
+            .deleteByAiIndex(aiIndexId)
+            .catch((error) => {
+              logger.warn(
+                `Deleted AI index '${aiIndexId}', but failed to clear its improvements: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            });
+
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });
         } catch (error) {

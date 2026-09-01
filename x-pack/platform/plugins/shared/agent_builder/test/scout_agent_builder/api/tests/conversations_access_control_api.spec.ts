@@ -8,7 +8,9 @@
 import { randomUUID } from 'crypto';
 import {
   AgentAccessControlMode,
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   type Conversation,
   type ConversationWithoutRounds,
 } from '@kbn/agent-builder-common';
@@ -19,6 +21,8 @@ import type { ChatResponse } from '../../../../common/http_api/chat';
 import type {
   GetConversationResponse,
   ListConversationsResponse,
+  UpdateConversationAccessControlRequestBody,
+  UpdateConversationAccessControlResponse,
   RenameConversationResponse,
 } from '../../../../common/http_api/conversations';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
@@ -395,6 +399,50 @@ apiTest.describe(
       );
     };
 
+    const getConversationAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string
+    ) => {
+      return apiClient.get(
+        `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+        { headers: headersFor(user), responseType: 'json' }
+      );
+    };
+
+    const setAccessControlAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string,
+      body: UpdateConversationAccessControlRequestBody
+    ) => {
+      return apiClient.put(
+        `${accessControlApiBase}/conversations/${encodeURIComponent(
+          conversationId
+        )}/access_control`,
+        { headers: headersFor(user), body, responseType: 'json' }
+      );
+    };
+
+    /**
+     * Entries are keyed on the stable user id, which is only observable through the API as the
+     * owner id of a conversation the user created.
+     */
+    const resolveStableUserId = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string
+    ): Promise<string> => {
+      const response = await apiClient.get(
+        `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+        { headers: headersFor(user), responseType: 'json' }
+      );
+      expect(response).toHaveStatusCode(200);
+      const { id } = (response.body as GetConversationResponse).user;
+      expect(id).toBeDefined();
+      return id as string;
+    };
+
     const deleteAgentAs = async (
       apiClient: any,
       user: { username: string; password: string },
@@ -524,19 +572,54 @@ apiTest.describe(
           }
         );
 
-        await apiTest.step('Bob can mark a public conversation read', async () => {
-          const markReadResponse = await markConversationReadAs(
-            apiClient,
-            bob,
-            publicConversation.conversation_id,
-            true
-          );
-          expect(markReadResponse).toHaveStatusCode(200);
-          expect(markReadResponse.body).toMatchObject({
-            id: publicConversation.conversation_id,
-            read: true,
-          });
-        });
+        await apiTest.step(
+          'read status is tracked per user, not shared across readers',
+          async () => {
+            const getReadAs = async (user: { username: string; password: string }) => {
+              const response = await getConversationAs(
+                apiClient,
+                user,
+                publicConversation.conversation_id
+              );
+              expect(response).toHaveStatusCode(200);
+              return (response.body as Conversation).read;
+            };
+
+            const markReadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(markReadResponse).toHaveStatusCode(200);
+            expect(markReadResponse.body).toMatchObject({
+              id: publicConversation.conversation_id,
+              read: true,
+            });
+
+            expect(await getReadAs(alice)).toBe(false);
+            expect(await getReadAs(bob)).toBe(true);
+
+            const markAliceReadResponse = await markConversationReadAs(
+              apiClient,
+              alice,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(markAliceReadResponse).toHaveStatusCode(200);
+            expect(await getReadAs(alice)).toBe(true);
+
+            const markBobUnreadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              false
+            );
+            expect(markBobUnreadResponse).toHaveStatusCode(200);
+            expect(await getReadAs(bob)).toBe(false);
+            expect(await getReadAs(alice)).toBe(true);
+          }
+        );
 
         await apiTest.step(
           'permissions reflect what rename and delete allow, on both GET routes',
@@ -834,6 +917,195 @@ apiTest.describe(
           { headers: headersFor(bob), responseType: 'json' }
         );
         expect(bobView).toHaveStatusCode(404);
+      }
+    );
+
+    // ── access-control conversation GET/PUT routes ──────────────────────────
+
+    apiTest(
+      'the owner shares a private conversation through the access-control routes',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-sharing-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const aliceConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Sharing routes test',
+          title: 'Sharing Routes Test',
+        });
+        const conversationId = aliceConversation.conversation_id;
+
+        // Bob's stable id is only observable through a conversation he owns.
+        const bobConversation = await createConversationAs({
+          apiClient,
+          user: bob,
+          agentId,
+          input: 'Bob stable id probe',
+          title: 'Bob Stable Id Probe',
+        });
+        const aliceId = await resolveStableUserId(apiClient, alice, conversationId);
+        const bobId = await resolveStableUserId(apiClient, bob, bobConversation.conversation_id);
+
+        let sharedAt = '';
+
+        await apiTest.step('Bob cannot see the conversation before it is shared', async () => {
+          expect(await getConversationAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
+          expect(await listConversationIdsAs(apiClient, bob)).not.toContain(conversationId);
+        });
+
+        await apiTest.step('the owner adds Bob as a member', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [{ type: 'user', id: bobId, role: ConversationAccessControlRole.Member }],
+          });
+          expect(response).toHaveStatusCode(200);
+
+          const accessControl = response.body as UpdateConversationAccessControlResponse;
+          expect(accessControl.access_mode).toBe(ConversationAccessControlMode.Private);
+          expect(accessControl.entries).toHaveLength(1);
+          expect(accessControl.entries[0]).toMatchObject({
+            type: 'user',
+            id: bobId,
+            role: ConversationAccessControlRole.Member,
+          });
+          expect(typeof accessControl.entries[0].added_at).toBe('string');
+
+          sharedAt = accessControl.entries[0].added_at;
+        });
+
+        await apiTest.step('Bob can read, list, and continue the shared conversation', async () => {
+          const getResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+            { headers: headersFor(bob), responseType: 'json' }
+          );
+          expect(getResponse).toHaveStatusCode(200);
+          expect(await listConversationIdsAs(apiClient, bob)).toContain(conversationId);
+
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            response: 'Response to: Bob shared follow-up',
+            continueConversation: true,
+          });
+          const continueResponse = await apiClient.post(`${accessControlApiBase}/converse`, {
+            headers: headersFor(bob),
+            body: {
+              agent_id: agentId,
+              conversation_id: conversationId,
+              input: 'Bob shared follow-up',
+              connector_id: connectorId,
+              _execution_mode: 'local',
+            },
+            responseType: 'json',
+          });
+          expect(continueResponse).toHaveStatusCode(200);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        });
+
+        await apiTest.step('Bob sees the full member list but cannot manage it', async () => {
+          const response = await getConversationAs(apiClient, bob, conversationId);
+          expect(response).toHaveStatusCode(200);
+
+          const body = response.body as GetConversationResponse;
+          const { access_control: accessControl } = body;
+          if (!accessControl) {
+            throw new Error('Expected the conversation response to include access control');
+          }
+          expect(accessControl.entries).toHaveLength(1);
+          expect(accessControl.entries[0].id).toBe(bobId);
+          expect(body.permissions).toStrictEqual({
+            rename: false,
+            delete: false,
+            update_access_control: false,
+          });
+
+          expect(
+            await setAccessControlAs(apiClient, bob, conversationId, {
+              access_mode: ConversationAccessControlMode.Private,
+              entries: [],
+            })
+          ).toHaveStatusCode(404);
+        });
+
+        await apiTest.step('the owner entry is dropped and added_at survives', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [
+              { type: 'user', id: aliceId, role: ConversationAccessControlRole.Member },
+              { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
+            ],
+          });
+          expect(response).toHaveStatusCode(200);
+
+          const accessControl = response.body as UpdateConversationAccessControlResponse;
+          expect(accessControl.entries).toHaveLength(1);
+          expect(accessControl.entries[0].id).toBe(bobId);
+          expect(accessControl.entries[0].added_at).toBe(sharedAt);
+        });
+
+        await apiTest.step('duplicate entries are rejected', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [
+              { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
+              { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
+            ],
+          });
+          expect(response).toHaveStatusCode(400);
+        });
+
+        await apiTest.step('more entries than the maximum are rejected', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: Array.from(
+              { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+              (_, index) => ({
+                type: 'user' as const,
+                id: `member-${index}`,
+                role: ConversationAccessControlRole.Member,
+              })
+            ),
+          });
+          expect(response).toHaveStatusCode(400);
+        });
+
+        await apiTest.step('the owner unshares the conversation', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          });
+          expect(response).toHaveStatusCode(200);
+          expect((response.body as UpdateConversationAccessControlResponse).entries).toHaveLength(
+            0
+          );
+
+          expect(await getConversationAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
+          expect(await listConversationIdsAs(apiClient, bob)).not.toContain(conversationId);
+        });
+
+        await apiTest.step('entries are rejected alongside a public access mode', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Public,
+            entries: [{ type: 'user', id: bobId, role: ConversationAccessControlRole.Member }],
+          });
+          expect(response).toHaveStatusCode(400);
+        });
+
+        await apiTest.step('the owner can publish the conversation instead', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Public,
+            entries: [],
+          });
+          expect(response).toHaveStatusCode(200);
+
+          const bobView = await getConversationAs(apiClient, bob, conversationId);
+          expect(bobView).toHaveStatusCode(200);
+          expect((bobView.body as GetConversationResponse).access_control).toStrictEqual({
+            access_mode: ConversationAccessControlMode.Public,
+            entries: [],
+          });
+        });
       }
     );
 

@@ -67,7 +67,7 @@ describe('UsageCountersService', () => {
   it('registers savedObject types during setup', () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
     usageCountersService.setup(coreSetup);
-    expect(coreSetup.savedObjects.registerType).toBeCalledTimes(2);
+    expect(coreSetup.savedObjects.registerType).toHaveBeenCalledTimes(2);
   });
 
   it('triggers regular cleanup of old counters on start', () => {
@@ -145,7 +145,7 @@ describe('UsageCountersService', () => {
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterB' });
     jest.runOnlyPendingTimers();
-    expect(mockIncrementCounter).toBeCalledTimes(2);
+    expect(mockIncrementCounter).toHaveBeenCalledTimes(2);
     expect(mockIncrementCounter.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -228,7 +228,7 @@ describe('UsageCountersService', () => {
       // wait for retries to kick in on next scheduler call
       await tickWithDelay(5000);
       // number of incrementCounter calls + number of retries
-      expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
+      expect(mockIncrementCounter).toHaveBeenCalledTimes(2 + retryConst);
       // assert counterA increment error warning logs
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
@@ -277,7 +277,7 @@ describe('UsageCountersService', () => {
 
     // wait for debounce to kick in on next scheduler call
     await tickWithDelay();
-    expect(mockIncrementCounter).toBeCalledTimes(2);
+    expect(mockIncrementCounter).toHaveBeenCalledTimes(2);
     expect(mockIncrementCounter.mock.results.map(({ value }) => value)).toMatchInlineSnapshot(`
       Array [
         Object {

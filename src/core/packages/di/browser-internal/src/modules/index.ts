@@ -9,7 +9,11 @@
 
 import { ContainerModule } from 'inversify';
 import { loadApplication } from './application';
+import { loadSecurity } from './security';
+import { loadSettings } from './settings';
 
 export const core = new ContainerModule((options) => {
   loadApplication(options);
+  loadSecurity(options);
+  loadSettings(options);
 });

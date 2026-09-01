@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useNavigateToAgentBuilder } from './use_navigate_to_agent_builder';
 import {
+  CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
   CREATE_WITH_AGENT_INITIAL_PROMPT,
   AGENT_BUILDER_NEW_CONVERSATION_PATH,
 } from '../constants';
@@ -45,6 +46,21 @@ describe('useNavigateToAgentBuilder', () => {
     expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
       path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
       state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
+  });
+
+  it('navigates with a custom initial message when one is provided', () => {
+    const { result } = renderHook(() =>
+      useNavigateToAgentBuilder(CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT)
+    );
+
+    act(() => {
+      result.current();
+    });
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
+      state: { initialMessage: CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT },
     });
   });
 

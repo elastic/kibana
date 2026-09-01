@@ -25,7 +25,6 @@ import {
   EuiSteps,
   EuiText,
   EuiTitle,
-  EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
   useGeneratedHtmlId,
@@ -33,6 +32,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../common/types/api';
 import type { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
@@ -120,9 +121,8 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
         {createSearchApplicationStatus === Status.ERROR && createSearchApplicationError && (
           <>
             <EuiSpacer />
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
-              color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.createError.title',
                 { defaultMessage: 'Error creating search application' }
@@ -131,26 +131,25 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
               {getErrorsFromHttpResponse(createSearchApplicationError).map((errMessage, i) => (
                 <p id={`createErrorMsg.${i}`}>{errMessage}</p>
               ))}
-            </EuiCallOut>
+            </KbnDangerCallout>
           </>
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow>
-            <EuiCallOut
+            <KbnWarningCallout
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.title',
                 { defaultMessage: 'Beta feature' }
               )}
-              color="warning"
-              iconType="flask"
-            >
-              <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.description"
-                defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.description"
+                  defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features."
+                />
+              }
+            />
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiSteps

@@ -14,7 +14,7 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData } from '../schema';
+import type { DiscoverSessionApiData, DiscoverSessionApiEsqlTab } from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -44,7 +44,6 @@ describe('discover session API transforms', () => {
         hide_aggregated_preview: true,
         breakdown_field: 'host.name',
         chart_interval: 'h',
-        time_restore: true,
         time_range: { from: 'now-15m', to: 'now' },
         refresh_interval: { pause: true, value: 0 },
         vis_context: {
@@ -65,7 +64,6 @@ describe('discover session API transforms', () => {
         sort: [],
         hide_chart: false,
         hide_table: false,
-        time_restore: false,
         control_panels: [
           {
             id: 'control-1',
@@ -107,6 +105,51 @@ describe('discover session API transforms', () => {
       expect(transformed).toEqual(discoverSessionApiData);
     });
 
+    it('omits time_range but preserves refresh_interval when time restore is disabled', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: false,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
+    });
+
+    it('preserves refresh_interval when the stored time range is absent', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: true,
+              timeRange: undefined,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
+    });
+
     it('extracts tag IDs from saved object references', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
         { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
@@ -114,6 +157,30 @@ describe('discover session API transforms', () => {
       ]);
 
       expect(transformed.tags).toEqual(['tag-1']);
+    });
+
+    it('maps esqlApproximation to esql_approximation for ES|QL tabs', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...discoverSessionAttributes.tabs[1],
+            attributes: {
+              ...discoverSessionAttributes.tabs[1].attributes,
+              esqlApproximation: true,
+            },
+          },
+        ],
+      });
+      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
+    });
+
+    it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [discoverSessionAttributes.tabs[1]],
+      });
+      expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
     it('converts legacy flat tab sort to API sort objects', () => {
@@ -267,6 +334,56 @@ describe('discover session API transforms', () => {
         ],
       });
       expect(references).toEqual([]);
+    });
+
+    it('enables time restore when time_range is present', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [classicTab],
+      });
+
+      expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
+    });
+
+    it('persists refresh_interval independently when time_range is absent', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [
+          {
+            ...esqlTab,
+            refresh_interval: { pause: false, value: 5000 },
+          },
+        ],
+      });
+
+      expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
+      expect(attributes.tabs[0].attributes.refreshInterval).toEqual({
+        pause: false,
+        value: 5000,
+      });
+    });
+
+    it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [{ ...esqlTab, esql_approximation: true } as DiscoverSessionApiEsqlTab],
+      });
+      expect(attributes.tabs[0].attributes.esqlApproximation).toBe(true);
+    });
+
+    it('omits esqlApproximation when esql_approximation is absent from an ES|QL tab', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [esqlTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
+    });
+
+    it('does not set esqlApproximation for classic tabs', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [classicTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
     });
 
     it('creates unique saved object references for tags', () => {

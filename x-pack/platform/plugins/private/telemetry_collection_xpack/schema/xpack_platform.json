@@ -8157,56 +8157,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -8377,56 +8374,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -8541,56 +8535,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -8705,56 +8696,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
