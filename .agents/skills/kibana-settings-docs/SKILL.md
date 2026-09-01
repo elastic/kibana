@@ -123,7 +123,7 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
 - **`stack` accepts multiple values.** Append a new lifecycle. Do not replace the old one. Example: `stack: preview 9.0-9.2, ga 9.3+`.
 - **Do not delete a removed setting.** Keep the YAML entry so users on earlier versions can still find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`.
 - **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported:
-  - Write `key: ga` if that deployment supports it, even when `stack` is `preview` or `removed`.
+  - Write `<key>: ga` if that deployment supports it, even when `stack` is `preview` or `removed`.
   - For `ech`, check the Elastic Cloud Hosted user-settings allowlist first. That list lives in the `cloud` repository.
   - `packages/kbn-check-kibana-settings-cli` compares Kibana keys against it.
   - Write `ech: ga` if the key is on the list. Omit `ech` if it is not.
