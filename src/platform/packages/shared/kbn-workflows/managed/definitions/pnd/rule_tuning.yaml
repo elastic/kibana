@@ -2,7 +2,8 @@ version: "1"
 name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
-  and applies the approved tuning change: a rule exception or a narrowed query.
+  and applies the approved tuning change: a rule exception, a narrowed query,
+  alert suppression, a risk score adjustment, or a rule disable.
 enabled: true
 tags:
   - security
@@ -87,19 +88,38 @@ steps:
             during the last {{ inputs.lookback_hours }} hours. These are confirmed
             analyst dispositions — not suspected noise.
 
-            Return one structured tuning proposal. For confirmed false positives,
-            prefer change_type "exception": identify the shared field values across
-            the closed alerts and propose the tightest condition that matches the
-            confirmed pattern. Use change_type "query" only when the query is
-            genuinely over-broad and this rule has type
-            "{{ steps.fetch_rule.output.type }}" — include the full replacement
-            query in proposed_query. Use "manual" when neither applies.
+            Return one structured tuning proposal using the following strategies
+            in order of preference:
+
+            1. "exception" — Best when the rule is correct but fires on a
+               known-good process, user, or host. Populate exception_entries
+               with the tightest field-value conditions that match the confirmed
+               pattern. Use this rule's type "{{ steps.fetch_rule.output.type }}".
+
+            2. "query" — When false positives stem from the query being too
+               broad. Only valid when rule type is "query". Include the full
+               replacement query in proposed_query (same language as current).
+
+            3. "suppression" — When the same entity is generating duplicate
+               alerts repeatedly. Populate suppression_group_by with up to 3
+               field names to group by. For threshold-type rules prefer raising
+               the threshold manually instead; use suppression for other types.
+
+            4. "risk_score" — When the rule still has detection value but
+               generates many low-priority alerts. Provide proposed_risk_score
+               (0–100) and proposed_severity (low/medium/high/critical).
+
+            5. "disable" — Last resort only. When the rule provides no
+               detection value or is completely redundant with another rule.
+
+            Use "manual" only if none of the above applies and analyst
+            intervention is required before any automated change is safe.
           schema:
             type: object
             properties:
               change_type:
                 type: string
-                enum: [exception, query, manual]
+                enum: [exception, query, suppression, risk_score, disable, manual]
               summary:
                 type: string
               proposed_query:
@@ -117,6 +137,19 @@ steps:
                     value:
                       type: string
                   required: [field, operator, value]
+              suppression_group_by:
+                type: array
+                items:
+                  type: string
+                minItems: 1
+                maxItems: 3
+              proposed_risk_score:
+                type: number
+                minimum: 0
+                maximum: 100
+              proposed_severity:
+                type: string
+                enum: [low, medium, high, critical]
             required: [change_type, summary]
 
       # Both previews end at the last false positive, not at now, so the rule's own
@@ -125,7 +158,8 @@ steps:
       - name: preview_current_query
         type: workflow.execute
         if: >-
-          ${{ steps.diagnose_rule.output.structured_output.proposed_query != ''
+          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
             and steps.fetch_rule.output.type == 'query' }}
         with:
           workflow-id: system-security-rule-preview
@@ -149,7 +183,8 @@ steps:
       - name: preview_proposed_query
         type: workflow.execute
         if: >-
-          ${{ steps.diagnose_rule.output.structured_output.proposed_query != ''
+          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
             and steps.fetch_rule.output.type == 'query' }}
         with:
           workflow-id: system-security-rule-preview
@@ -203,6 +238,24 @@ steps:
 
             Approving replaces the rule query. It can be edited back in the Detection Rules UI.
             {% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "suppression" %}
+            Proposed alert suppression, grouped by:
+            {% for field in steps.diagnose_rule.output.structured_output.suppression_group_by %}
+            - {{ field }}
+            {% endfor %}
+            Approving enables alert suppression on the rule. Suppression cannot be removed
+            automatically; undo it manually in the Detection Rules UI.
+            {% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+            Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
+            Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+            Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+            {% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "disable" %}
+            This proposal disables the rule entirely. This is a last resort — only approve
+            if you are confident the rule provides no detection value or is fully redundant.
+            Approving disables the rule. It can be re-enabled in the Detection Rules UI.
+            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
             No automated change can be applied safely. Approving records the handoff;
             apply the recommended change manually in the Detection Rules UI.
@@ -222,6 +275,14 @@ steps:
           can_apply_exception: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and steps.diagnose_rule.output.structured_output.exception_entries != null }}
+          can_apply_suppression: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'suppression'
+              and steps.diagnose_rule.output.structured_output.suppression_group_by != null }}
+          can_apply_risk_score: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
+              and steps.diagnose_rule.output.structured_output.proposed_risk_score != null }}
+          can_apply_disable: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'disable' }}
 
       - name: apply_query_tuning
         type: kibana.request
@@ -258,12 +319,63 @@ steps:
           description: "Added by the rule tuning workflow."
           entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
 
+      - name: apply_suppression_tuning
+        type: kibana.request
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_suppression == true }}
+        on-failure:
+          continue: true
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ foreach.item.0 }}"
+            alert_suppression:
+              group_by: "${{ steps.diagnose_rule.output.structured_output.suppression_group_by }}"
+
+      - name: apply_risk_score_tuning
+        type: kibana.request
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_risk_score == true }}
+        on-failure:
+          continue: true
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ foreach.item.0 }}"
+            risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
+            severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+
+      - name: apply_disable_tuning
+        type: security.disableRule
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_disable == true }}
+        on-failure:
+          continue: true
+        with:
+          ids: ["{{ foreach.item.0 }}"]
+
       - name: record_manual_tuning
         type: data.set
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_query == false
-            and steps.classify_proposal.output.can_apply_exception == false }}
+            and steps.classify_proposal.output.can_apply_exception == false
+            and steps.classify_proposal.output.can_apply_suppression == false
+            and steps.classify_proposal.output.can_apply_risk_score == false
+            and steps.classify_proposal.output.can_apply_disable == false }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.
@@ -273,7 +385,10 @@ steps:
         type: data.set
         if: >-
           ${{ steps.apply_query_tuning.error != null
-            or steps.apply_exception_tuning.error != null }}
+            or steps.apply_exception_tuning.error != null
+            or steps.apply_suppression_tuning.error != null
+            or steps.apply_risk_score_tuning.error != null
+            or steps.apply_disable_tuning.error != null }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: >-
