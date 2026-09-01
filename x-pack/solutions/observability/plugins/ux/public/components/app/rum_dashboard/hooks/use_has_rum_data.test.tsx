@@ -214,6 +214,19 @@ describe('useHasRumData', () => {
     expect(window.localStorage.getItem('uxAppHasDataBoolean')).toBe('true');
   });
 
+  it('stops loading when both queries fail, and leaves the cache untouched', () => {
+    // Neither pass can answer, so there is nothing to wait for and nothing worth caching. Staying
+    // on the loading screen here would hang the app on a cluster that cannot serve the check.
+    responses[TIERED] = { data: undefined, loading: false, error: new Error('boom') };
+    responses[UNBOUNDED] = { data: undefined, loading: false, error: new Error('boom') };
+
+    const { result } = renderHook(() => useHasRumData());
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.hasData).toBe(false);
+    expect(window.localStorage.getItem('uxAppHasDataBoolean')).toBeNull();
+  });
+
   it('issues no request until the data view is known', () => {
     useDataViewMock.mockReturnValue({ dataViewTitle: '' });
 

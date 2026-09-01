@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { HAS_RUM_DATA_TIERS } from '../../../services/data/has_rum_data_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
@@ -131,5 +131,17 @@ describe('hasRumData', () => {
     });
 
     expect(search).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects when the tier restricted query fails, rather than falling back', async () => {
+    const search = jest.fn(() => throwError(() => new Error('search failed')));
+    const plugin = { search: { search } } as unknown as DataPublicPluginStart;
+
+    await expect(hasRumData({ dataStartPlugin: plugin, absoluteTime })).rejects.toThrow(
+      'search failed'
+    );
+    // Unlike the in-app hook, a failed cheap pass here surfaces to the caller instead of being
+    // retried without the tier filter.
+    expect(search).toHaveBeenCalledTimes(1);
   });
 });

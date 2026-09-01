@@ -7,9 +7,10 @@
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { hasRumDataQuery, HAS_RUM_DATA_TIERS } from '../../../../services/data/has_rum_data_query';
 import { useDataView } from '../local_uifilters/use_data_view';
+import { useFallbackLatch } from './use_fallback_latch';
 
 export function useHasRumData() {
   // No initial value, so `undefined` means no earlier visit answered this. That is different from
@@ -37,23 +38,12 @@ export function useHasRumData() {
   const tieredFailed = !loading && tieredError !== undefined;
   const tieredIsEmpty = !loading && tiered !== undefined && tiered.hits.total.value === 0;
 
-  // Latch the decision for as long as we are looking at the same data view. `tieredIsEmpty` drops
-  // back to false whenever the tier restricted query is re-issued, and it gates the fallback's
-  // `index`, so without the latch a re-issue disables the fallback mid-flight and the stale empty
-  // tiered result briefly becomes the answer — which renders the onboarding screen at a user who
-  // does have data.
-  //
-  // Clear when the data view changes or hot/warm later has hits, otherwise navigating away from an
-  // empty view and back re-enables the fallback before the cheap pass answers. A failed cheap pass
-  // is treated like empty so the unrestricted query still runs.
-  const latchedFor = useRef<string | undefined>(undefined);
-  if (latchedFor.current !== undefined && (latchedFor.current !== dataViewTitle || tieredHasData)) {
-    latchedFor.current = undefined;
-  }
-  if (tieredIsEmpty || tieredFailed) {
-    latchedFor.current = dataViewTitle;
-  }
-  const needsFallback = tieredIsEmpty || tieredFailed || latchedFor.current === dataViewTitle;
+  // Without the latch, re-issuing the tier restricted query disables the fallback mid-flight and
+  // the stale empty tiered result briefly becomes the answer — which renders the onboarding screen
+  // at a user who does have data, just on a colder tier. A failed cheap pass latches like an empty
+  // one so the unrestricted query still runs.
+  const isLatched = useFallbackLatch(dataViewTitle, tieredIsEmpty || tieredFailed, tieredHasData);
+  const needsFallback = tieredIsEmpty || tieredFailed || isLatched;
 
   const { data: fallback, error: fallbackError } = useEsSearch(
     {

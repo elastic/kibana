@@ -18,6 +18,10 @@ import { rangeQuery } from './range_query';
 
 export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
 
+/**
+ * Formats a response to `hasRumDataWithServiceNameQuery`. `serviceName` is read defensively because
+ * the aggregation is absent whenever Elasticsearch returns no buckets for the requested range.
+ */
 export function formatHasRumResult<T>(
   esResult: ESSearchResponse<
     T,

@@ -111,6 +111,9 @@ export async function hasRumData(
       dataViewResponse.apmDataViewIndexPattern
     );
 
+  // Return early only with both a hit and a service name. The service name comes from an
+  // aggregation scoped to the requested range, so hot/warm can hold matching documents while that
+  // range has none — the unrestricted query is what fills the name in for the overview card.
   const tieredResult = await runHasRumDataQuery(HAS_RUM_DATA_TIERS);
   if (tieredResult.hasData && tieredResult.serviceName !== undefined) {
     return tieredResult;
