@@ -12,26 +12,42 @@ interface SearchResult {
   label: string;
 }
 
+const SEARCH_BUTTON = 'chromeNextGlobalHeaderSearchButton';
+const SEARCH_MODAL = 'chromeNextSearchModal';
+
 export class NavigationalSearchPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly browser = this.ctx.getService('browser');
+
+  async ensureSearchOpen() {
+    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) {
+      return;
+    }
+    await this.testSubjects.click(SEARCH_BUTTON);
+    await this.testSubjects.existOrFail(SEARCH_MODAL);
+  }
 
   async focus() {
+    await this.ensureSearchOpen();
     const field = await this.testSubjects.find('nav-search-input');
     await field.click();
   }
 
   async blur() {
-    await this.testSubjects.click('helpMenuButton');
-    await this.testSubjects.click('helpMenuButton');
-    await this.find.waitForDeletedByCssSelector('.navSearch__panel');
+    if (!(await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 }))) {
+      return;
+    }
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.testSubjects.missingOrFail(SEARCH_MODAL);
   }
 
   async searchFor(
     term: string,
     { clear = true, wait = true }: { clear?: boolean; wait?: boolean } = {}
   ) {
+    await this.ensureSearchOpen();
     if (clear) {
       await this.clearField();
     }
@@ -53,7 +69,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async isPopoverDisplayed() {
-    return await this.find.existsByCssSelector('.navSearch__panel');
+    return await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 });
   }
 
   async clickOnOption(index: number) {

@@ -56,6 +56,7 @@ export const latencyEvaluatorDef: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'code',
   origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns total trace latency in seconds.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -90,6 +91,7 @@ export const inputTokensEvaluatorDef: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'code',
   origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns summed prompt/input token usage across the trace.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -123,6 +125,7 @@ export const outputTokensEvaluatorDef: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'code',
   origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns summed completion/output token usage across the trace.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -156,6 +159,7 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'code',
   origin: 'built_in',
+  direction: 'neutral',
   description: 'Returns count of TOOL spans associated with the trace.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
