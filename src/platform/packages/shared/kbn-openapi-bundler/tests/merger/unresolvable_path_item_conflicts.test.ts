@@ -64,7 +64,7 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError(/value .+ doesn't match to already encountered/);
+    ).rejects.toThrow(/value .+ doesn't match to already encountered/);
   });
 
   it("throws an error when path item's parameters do not match", async () => {
@@ -105,7 +105,7 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError('definition is duplicated and differs from previously encountered');
+    ).rejects.toThrow('definition is duplicated and differs from previously encountered');
   });
 
   it('throws an error when path item has a top level $ref', async () => {
@@ -136,6 +136,6 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError('Path item top level $ref is not supported');
+    ).rejects.toThrow('Path item top level $ref is not supported');
   });
 });
