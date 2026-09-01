@@ -137,11 +137,17 @@ export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
 export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-dark-continuous-threat-hunt' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
+  'system-security-detection-rule-tuning' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
+  'system-security-detection-rule-creation' as const;
 
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
 ] as const;
 
 /**
@@ -166,6 +172,18 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     name: 'Continuous Threat Hunt',
     watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
     watchTag: WATCH_DARK_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+    name: 'Rule Tuning',
+    watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+    watchTag: WATCH_DETECTION_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+    name: 'Rule Creation',
+    watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+    watchTag: WATCH_DETECTION_TAG,
   },
 ] as const;
 

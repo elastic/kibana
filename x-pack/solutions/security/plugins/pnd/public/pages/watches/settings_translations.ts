@@ -564,7 +564,7 @@ const WATCH_INTROS: Record<string, string> = {
     'xpack.pnd.watches.settings.intro.detection',
     {
       defaultMessage:
-        'Watch grouping for detection-engineering work. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
+        'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
     }
   ),
 };

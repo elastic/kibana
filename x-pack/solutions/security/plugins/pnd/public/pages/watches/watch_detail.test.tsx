@@ -10,9 +10,12 @@ import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   createCatalogWatchPlaceholder,
@@ -71,6 +74,19 @@ const darkWorker = createWorker({
   name: 'Continuous Threat Hunt',
   watchIds: [SYSTEM_SECURITY_WATCH_DARK_ID],
 });
+
+const detectionWorkers: Worker[] = [
+  createWorker({
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+    name: 'Rule Tuning',
+    watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+  }),
+  createWorker({
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+    name: 'Rule Creation',
+    watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+  }),
+];
 
 const renderWatch = (watchId: string, workers: Worker[]) => {
   mockUseWatch.mockReturnValue({
@@ -183,10 +199,34 @@ describe('WatchDetailPage', () => {
   });
 
   it('shows Officer as an empty grouping without a load error', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_OFFICER_ID, [...floorWorkers, darkWorker]);
+    renderWatch(SYSTEM_SECURITY_WATCH_OFFICER_ID, [
+      ...floorWorkers,
+      darkWorker,
+      ...detectionWorkers,
+    ]);
 
     expect(screen.getByTestId('pndWatchWorkersSection')).toBeInTheDocument();
     expect(screen.queryByTestId('pndWatchWorkersLoadError')).not.toBeInTheDocument();
     expect(screen.queryByTestId(/pndWatchWorkerSection-/)).not.toBeInTheDocument();
+  });
+
+  it('shows Detection Workers with per-Worker enablement and autonomy', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, [
+      ...floorWorkers,
+      darkWorker,
+      ...detectionWorkers,
+    ]);
+
+    for (const worker of detectionWorkers) {
+      const section = screen.getByTestId(`pndWatchWorkerSection-${worker.id}`);
+      expect(section).toBeInTheDocument();
+      expect(
+        within(section).getByTestId(`pndWorkerEnabledSwitch-${worker.id}`)
+      ).toBeInTheDocument();
+      expect(within(section).getByTestId('pndAutonomySlider')).toBeInTheDocument();
+    }
+    expect(
+      screen.queryByTestId(`pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`)
+    ).not.toBeInTheDocument();
   });
 });

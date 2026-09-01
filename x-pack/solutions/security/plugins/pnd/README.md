@@ -106,6 +106,8 @@ Managed Worker definitions:
 - `system-security-floor-alert-triage`
 - `system-security-floor-attack-discovery`
 - `system-security-dark-continuous-threat-hunt`
+- `system-security-detection-rule-tuning`
+- `system-security-detection-rule-creation`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/`. PND owns defaults, migrations, patches, and API projection under `server/managed_workflows/workers/`, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
@@ -113,8 +115,8 @@ Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on 
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
-- `system-security-rule-tuning` — called by Detection Watch on its scheduled sweep
-- `system-security-rule-creation` — called by Detection Watch when a caller supplies an ATT&CK technique
+- `system-security-rule-tuning` — implementation used by the Detection Rule Tuning Worker
+- `system-security-rule-creation` — implementation used by the Detection Rule Creation Worker
 - `system-security-rule-preview` — called by both of the above
 
 ### Managed definition `version` vs product “v1”

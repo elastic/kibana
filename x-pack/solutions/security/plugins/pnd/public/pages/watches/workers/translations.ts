@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
 } from '@kbn/pnd-common';
@@ -73,6 +75,18 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
       defaultMessage: 'Hunts continuously for threats and coverage gaps nobody has reported yet.',
     }
   ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleTuning.description',
+    {
+      defaultMessage: 'Diagnoses noisy rules and applies approved query changes.',
+    }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleCreation.description',
+    {
+      defaultMessage: 'Drafts an ES|QL rule for a detection gap and creates it on approval.',
+    }
+  ),
 };
 
 export const workerDescription = (workerId: string): string | undefined =>
@@ -90,6 +104,14 @@ export const WORKER_NAMES: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.pnd.watches.workers.darkContinuousThreatHunt.name',
     { defaultMessage: 'Continuous Threat Hunt' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleTuning.name',
+    { defaultMessage: 'Rule Tuning' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleCreation.name',
+    { defaultMessage: 'Rule Creation' }
   ),
 };
 

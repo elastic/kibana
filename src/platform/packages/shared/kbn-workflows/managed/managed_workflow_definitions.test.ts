@@ -14,6 +14,8 @@ import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
   PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -21,6 +23,8 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/dark_continuous_threat_hunt.yaml';
+import DETECTION_RULE_CREATION_YAML from './definitions/pnd/detection_rule_creation.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/pnd/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/pnd/floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/pnd/floor_attack_discovery.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
@@ -55,6 +59,14 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     autonomyLevel: 'manual',
   },
   [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -139,6 +151,8 @@ it.each([
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
     '2:de85a75a',
   ],
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID, DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
