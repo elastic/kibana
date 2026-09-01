@@ -1536,7 +1536,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         statuses: ['pending', 'running'],
         sortField: 'created_at',
         sortOrder: 'desc',
-        perPage: 1,
+        perPage: 2,
       })
     );
     expect(repository.update).toHaveBeenCalledWith({
@@ -1545,6 +1545,48 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       version: '1',
     });
     expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
+  });
+
+  it('cancels the older record rather than itself when a concurrent ensure already created it', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.find.mockResolvedValue(
+      findResult([
+        makeRecord(
+          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
+          { id: EXECUTION_ID }
+        ),
+        makeRecord(
+          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
+          { id: 'inv-old' }
+        ),
+      ])
+    );
+
+    await makeClient().ensureOrCreate(EXECUTION_ID);
+
+    expect(repository.update).toHaveBeenCalledTimes(1);
+    expect(repository.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'inv-old',
+        patch: expect.objectContaining({ status: 'cancelled' }),
+      })
+    );
+  });
+
+  it('cancels nothing when the only in-flight record sharing the key is itself', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.find.mockResolvedValue(
+      findResult([
+        makeRecord(
+          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
+          { id: EXECUTION_ID }
+        ),
+      ])
+    );
+
+    await makeClient().ensureOrCreate(EXECUTION_ID);
+
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('still creates the record when the superseded cancel loses a write race', async () => {
