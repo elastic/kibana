@@ -61,8 +61,6 @@ export type {
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeNavControl,
-  ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeDocTitle,

@@ -179,7 +179,7 @@ describe('Spaces plugin', () => {
   });
 
   describe('#start', () => {
-    it('should register the chrome space control instead of left navControls', () => {
+    it('should register the chrome space control', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
@@ -197,7 +197,6 @@ describe('Spaces plugin', () => {
       });
 
       expect(coreStart.chrome.next.contextSwitcher.set).toHaveBeenCalled();
-      expect(coreStart.chrome.navControls.registerLeft).not.toHaveBeenCalled();
     });
   });
 

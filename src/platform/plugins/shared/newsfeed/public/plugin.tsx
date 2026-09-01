@@ -14,7 +14,6 @@ import moment from 'moment';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import type { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
-import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import type { NewsfeedApi } from './lib/api';
 import { getApi, NewsfeedApiEndpoint } from './lib/api';
 import { registerNewsfeedHandler } from './register_newsfeed_handler';
@@ -83,8 +82,8 @@ export class NewsfeedPublicPlugin
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
 
     // The source fetches at most once per fetchInterval, so a second cold subscription would
-    // never emit. The nav button, help menu, and sidebar share one subscription instead, and
-    // late subscribers replay the last result.
+    // never emit. The help menu and sidebar share one subscription instead, and late
+    // subscribers replay the last result.
     const sharedApi: NewsfeedApi = {
       ...api,
       fetchResults$: api.fetchResults$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
@@ -97,17 +96,6 @@ export class NewsfeedPublicPlugin
     });
 
     registerNewsfeedHandler({ core, api: sharedApi, sidebarController });
-
-    core.chrome.navControls.registerRight({
-      order: 1000,
-      content: (
-        <NewsfeedNavButton
-          newsfeedApi={sharedApi}
-          isOpen$={sidebarController.isOpen$}
-          onToggle={sidebarController.toggle}
-        />
-      ),
-    });
 
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {

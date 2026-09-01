@@ -35,27 +35,7 @@ describe('GlobalSearchBarPlugin', () => {
       );
     };
 
-    it('registers nav controls', async () => {
-      const coreSetup = coreMock.createSetup();
-
-      const service = createPlugin();
-
-      service.setup(coreSetup);
-
-      const coreStart = coreMock.createStart();
-
-      const navControlsRegisterSpy = jest.spyOn(coreStart.chrome.navControls, 'registerCenter');
-
-      const start = service.start(coreStart, {
-        globalSearch: globalSearchPluginMock.createStartContract(),
-      });
-
-      expect(start).toEqual({});
-
-      expect(navControlsRegisterSpy).toHaveBeenCalled();
-    });
-
-    it('registers Chrome Next globalSearch', () => {
+    it('registers globalSearch', () => {
       const coreSetup = coreMock.createSetup();
 
       const service = createPlugin();
