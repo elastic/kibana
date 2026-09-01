@@ -200,4 +200,22 @@ describe('shouldSkipFtrTests', () => {
       ])
     ).toBe(false);
   });
+
+  it('returns true for a Jest-tests-only diff even when the owning module is not excluded', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/discover-plugin']), [
+        'src/platform/plugins/shared/discover/public/application/main.test.tsx',
+        'src/platform/plugins/shared/discover/public/__snapshots__/main.test.tsx.snap',
+      ])
+    ).toBe(true);
+  });
+
+  it('returns false when a Jest-test diff is mixed with source changes', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/discover-plugin']), [
+        'src/platform/plugins/shared/discover/public/application/main.test.tsx',
+        'src/platform/plugins/shared/discover/public/application/main.tsx',
+      ])
+    ).toBe(false);
+  });
 });
