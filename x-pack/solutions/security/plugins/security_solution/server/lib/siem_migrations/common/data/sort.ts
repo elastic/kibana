@@ -11,6 +11,30 @@ export type SiemMigrationSortHandler = (
   direction?: estypes.SortOrder
 ) => estypes.SortCombinations[];
 
+/** Returns a script sort that lowercases the first populated string field. */
+export const getCaseInsensitiveStringSort = (fields: string[]): SiemMigrationSortHandler => {
+  return (direction: estypes.SortOrder = 'asc') => [
+    {
+      _script: {
+        order: direction,
+        type: 'string',
+        script: {
+          source: `
+          for (String field : params.fields) {
+            if (doc.containsKey(field) && !doc[field].empty) {
+              return doc[field].value.toLowerCase();
+            }
+          }
+          return '';
+          `,
+          lang: 'painless',
+          params: { fields },
+        },
+      },
+    },
+  ];
+};
+
 export const commonSortingOptions = {
   translationResult(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
     const field = 'translation_result';

@@ -322,6 +322,42 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should sort mixed-case titles case-insensitively across pages', async () => {
+        const mixedCaseMigrationResponse = await dashboardMigrationRoutes.create({});
+        const mixedCaseMigrationId = mixedCaseMigrationResponse.body.migration_id;
+        const titles = ['Zulu', 'contents', 'Delta', 'jQuery Upgrade', 'Alpha'];
+        const ascendingTitles = ['Alpha', 'contents', 'Delta', 'jQuery Upgrade', 'Zulu'];
+        const dashboards = titles.map((title, index) =>
+          getDefaultDashboardMigrationDocumentWithOverrides({
+            migration_id: mixedCaseMigrationId,
+            original_dashboard: { id: `dashboard-${index}`, title },
+          })
+        );
+        await indexMigrationDashboards(es, dashboards);
+
+        const getSortedTitles = async (sortDirection: 'asc' | 'desc') => {
+          const responses = await Promise.all(
+            [0, 1, 2].map((page) =>
+              dashboardMigrationRoutes.getDashboards({
+                migrationId: mixedCaseMigrationId,
+                queryParams: {
+                  page,
+                  per_page: 2,
+                  sort_field: 'original_dashboard.title',
+                  sort_direction: sortDirection,
+                },
+              })
+            )
+          );
+          return responses.flatMap(({ body }) =>
+            body.data.map((dashboard) => dashboard.original_dashboard.title)
+          );
+        };
+
+        expect(await getSortedTitles('asc')).toEqual(ascendingTitles);
+        expect(await getSortedTitles('desc')).toEqual([...ascendingTitles].reverse());
+      });
+
       it('should sort by splunk app correctly', async () => {
         const response = await dashboardMigrationRoutes.getDashboards({
           migrationId,
