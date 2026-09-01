@@ -98,7 +98,8 @@ const fullyMigratedIndicatorMappings = () => ({
   properties: {
     space_id: {},
     ioc_tier: {},
-    sources: {},
+    // Leaves the sources migration writes, checked by the guard rather than the parent.
+    sources: { properties: { report_id: {}, first_seen: {} } },
     sources_truncated: {},
     source_report_url: { ignore_above: 2048 },
     threat: {
@@ -721,6 +722,19 @@ describe('index_templates — post-migration schema check', () => {
     expect(verificationError?.message).toMatch(/content\.body_is_title_fallback/);
   });
 
+  // v19 writes `reference` and `block_index` in one putMapping, but a failed v19 then a
+  // successful v26 keyword-bounds putMapping re-adds `reference` without `block_index`,
+  // so checking `reference` alone passed while strict rejected Maltrail reports.
+  it('fails when the v19 leaf extracted.iocs.block_index is missing', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>)
+      .block_index;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/extracted\.iocs\.block_index/);
+  });
+
   // The hidden-index migration catches its own failures too, and mappings-only
   // verification let a transient putSettings failure advertise readiness while the
   // indices stayed visible to ordinary wildcard searches.
@@ -759,6 +773,21 @@ describe('index_templates — post-migration schema check', () => {
 
     expect(verificationError?.message).toMatch(/space_id/);
   });
+
+  // The sources parent survives a keyword-bounds putMapping that recreates it with only
+  // provider/trail/reference, so a failed sources migration leaves these leaves unmapped
+  // while the parent check passes and strict rejects the scripted upserts that set them.
+  it.each(['report_id', 'first_seen'])(
+    'fails when the sources leaf %s is missing',
+    async (leaf) => {
+      const indicatorMappings = fullyMigratedIndicatorMappings();
+      delete (indicatorMappings.properties.sources.properties as Record<string, unknown>)[leaf];
+
+      const { verificationError } = await runMigrations({ indicatorMappings });
+
+      expect(verificationError?.message).toContain(`sources.${leaf}`);
+    }
+  );
 
   // Catches a migration that ran without error but took a wrong branch, which
   // per-migration error tracking would have reported as success.

@@ -1476,6 +1476,12 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'extracted.vulnerability' },
   { path: 'extracted.iocs.tier' },
   { path: 'extracted.iocs.port' },
+  // v19 writes `reference` and `block_index` (Maltrail chunking) in one putMapping, so
+  // this leaf is checked on its own: a failed v19 followed by a successful v26
+  // keyword-bounds putMapping re-adds `reference` but not `block_index`, so verifying
+  // `reference` alone would pass while `dynamic: strict` rejects Maltrail reports that
+  // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
+  { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
   // Child fields, not just the parent. The v19 migration adds these to an
   // already-existing `external_references`, and it catches its own errors, so
@@ -1499,6 +1505,13 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
 const REQUIRED_INDICATOR_FIELDS: readonly RequiredMapping[] = [
   { path: 'space_id' },
   { path: 'sources' },
+  // Leaves, not just the parent: `migrateExistingIndicatorSourcesMapping` writes
+  // these onto the nested `sources` object, but a failed run followed by a successful
+  // keyword-bounds putMapping recreates `sources` with only provider/trail/reference,
+  // so the parent exists while these stay unmapped and `dynamic: strict` rejects the
+  // scripted upserts that set `report_id`/`first_seen`.
+  { path: 'sources.report_id' },
+  { path: 'sources.first_seen' },
   { path: 'sources_truncated' },
   { path: 'ioc_tier' },
   { path: 'threat.indicator.email', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
