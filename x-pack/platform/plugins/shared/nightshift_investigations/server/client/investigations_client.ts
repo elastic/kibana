@@ -497,17 +497,15 @@ export class NightshiftInvestigationsClient {
    * persist_investigation_started step. If a pending record exists (created by start()), transitions
    * it to running. If no record exists (workflow triggered without start()), creates one as running
    * from the execution document. Already-running or terminal records are left untouched.
+   *
+   * Both write paths read the execution document, so `started_at` and `executed_by` mean the same
+   * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
+   * run's executor, and stamping the transition with the wall clock would date the record to when
+   * the persist step happened to run rather than to when the run began.
    */
   async ensureOrCreate(investigationId: string): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
-    if (existing) {
-      if (existing.status === 'pending') {
-        await this.investigationRepository.update({
-          id: investigationId,
-          patch: { status: 'running', started_at: new Date().toISOString() },
-          version: existing.version,
-        });
-      }
+    if (existing && existing.status !== 'pending') {
       return;
     }
 
@@ -529,6 +527,18 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
+    const startedAt = execution.startedAt ?? new Date().toISOString();
+
+    if (existing) {
+      await this.transitionPendingToRunning({
+        investigationId,
+        version: existing.version,
+        startedAt,
+        executedBy: execution.executedBy,
+      });
+      return;
+    }
+
     const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
@@ -541,7 +551,6 @@ export class NightshiftInvestigationsClient {
       await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
     }
 
-    const startedAt = execution.startedAt ?? new Date().toISOString();
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
@@ -554,6 +563,31 @@ export class NightshiftInvestigationsClient {
         started_at: startedAt,
       },
     });
+  }
+
+  private async transitionPendingToRunning({
+    investigationId,
+    version,
+    startedAt,
+    executedBy,
+  }: {
+    investigationId: string;
+    version?: string;
+    startedAt: string;
+    executedBy?: string;
+  }): Promise<void> {
+    try {
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch: { status: 'running', started_at: startedAt, executed_by: executedBy },
+        version,
+      });
+    } catch (error) {
+      if (error instanceof InvestigationStaleWriteError) {
+        return;
+      }
+      throw error;
+    }
   }
 
   private async createIgnoringConflict({

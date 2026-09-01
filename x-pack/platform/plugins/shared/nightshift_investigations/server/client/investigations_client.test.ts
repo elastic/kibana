@@ -1481,23 +1481,52 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.update).not.toHaveBeenCalled();
   });
 
-  it('transitions a pending record to running', async () => {
+  it('transitions a pending record to running, stamping it from the execution document', async () => {
     repository.get.mockResolvedValue(
       makeRecord(
         { status: 'pending', completed_at: undefined },
         { id: EXECUTION_ID, version: 'v1' }
       )
     );
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
 
     await makeClient().ensureOrCreate(EXECUTION_ID);
 
     expect(repository.update).toHaveBeenCalledWith({
       id: EXECUTION_ID,
-      patch: expect.objectContaining({ status: 'running', started_at: expect.any(String) }),
+      patch: {
+        status: 'running',
+        started_at: '2024-01-01T00:00:00Z',
+        executed_by: 'workflow-user',
+      },
       version: 'v1',
     });
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('treats a lost pending-to-running race as a no-op', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'pending', completed_at: undefined },
+        { id: EXECUTION_ID, version: 'v1' }
+      )
+    );
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+  });
+
+  it('throws InvestigationNotFoundError when a pending record has no readable execution', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'pending', completed_at: undefined }, { id: EXECUTION_ID })
+    );
+    mockManagement.getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('creates the record from the execution document', async () => {
