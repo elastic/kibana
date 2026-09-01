@@ -19,6 +19,7 @@ import {
   withActionIcons,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
+import { ALERT_STATUS_ACTION_IDS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import type { ReportActionClickedParams } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { ALERT_EXCEPTION_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -80,9 +81,9 @@ const FOOTER_ACTIONS_BY_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
 };
 
 const ALERT_STATUS_ICON_COLORS = {
-  'acknowledged-alert-status': 'primary',
-  'alert-close-context-menu-item': 'subdued',
-  'open-alert-status': 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  'close-alert-with-reason': 'subdued',
 } as const;
 
 const ACTION_ICONS_BY_ID = {
@@ -141,7 +142,7 @@ export const ActionMenu = ({
         ]
       : [];
     const actionGroups = [
-      !isRemoteDocument && isAlert ? statusItems : [],
+      !isRemoteDocument && isAlert ? withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS) : [],
       alertManagementItems,
       !isRemoteDocument && isAlert ? exceptionItems : [],
       responseActionItems,
@@ -157,10 +158,7 @@ export const ActionMenu = ({
         : []),
     ]);
 
-    const decoratedItems = withStatusDotIcons(
-      withActionIcons(orderedItems, ACTION_ICONS_BY_ID),
-      ALERT_STATUS_ICON_COLORS
-    );
+    const decoratedItems = withActionIcons(orderedItems, ACTION_ICONS_BY_ID);
 
     return wrapActionTelemetry(decoratedItems, FOOTER_ACTIONS_BY_TEST_SUBJ, reportActionClicked);
   }, [
