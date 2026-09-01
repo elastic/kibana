@@ -225,7 +225,9 @@ describe('FlyoutTemplate tabs', () => {
     expect(panels[1]).toHaveAttribute('aria-labelledby', tabs[1].id);
   });
 
-  it('falls back to the first tab when selectedTabId is invalid', () => {
+  it('falls back to the first tab and warns when selectedTabId is invalid', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="missing">
         <FlyoutTemplate.Header title="Alert" />
@@ -241,6 +243,8 @@ describe('FlyoutTemplate tabs', () => {
     );
 
     expect(screen.getByText('overview content')).toBeInTheDocument();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"missing"'));
+    warnSpy.mockRestore();
   });
 
   it('falls back to the first tab when defaultSelectedTabId is invalid', () => {

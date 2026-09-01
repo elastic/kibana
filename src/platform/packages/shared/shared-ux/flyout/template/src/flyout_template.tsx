@@ -154,6 +154,16 @@ const FlyoutTemplateRoot = ({
     }
   }, [defaultSelectedTabId, isControlled, tabs, uncontrolledTabId]);
 
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return;
+    if (isControlled && tabs.length > 0 && !tabs.some((tab) => tab.id === controlledSelectedTabId)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[FlyoutTemplate] selectedTabId "${controlledSelectedTabId}" does not match any tab. Falling back to the first tab.`
+      );
+    }
+  }, [isControlled, controlledSelectedTabId, tabs]);
+
   const requestedSelectedTabId = isControlled ? controlledSelectedTabId : uncontrolledTabId;
   const selectedTabId = tabs.some((tab) => tab.id === requestedSelectedTabId)
     ? requestedSelectedTabId
