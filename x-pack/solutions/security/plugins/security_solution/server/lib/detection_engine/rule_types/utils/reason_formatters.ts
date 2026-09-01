@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import type { SignalSourceHit } from '../types';
 
 export interface BuildReasonMessageArgs {
@@ -35,7 +35,9 @@ interface ReasonFields {
 }
 const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
   const reasonFields: ReasonFields = {};
-  const docToUse = mergedDoc?.fields || mergedDoc?._source;
+  // the merged `_source` already contains everything relevant the `fields` block had, while
+  // the `fields` block may be narrowed to an explicit request list missing the reason fields
+  const docToUse = isEmpty(mergedDoc?._source) ? mergedDoc?.fields : mergedDoc?._source;
 
   reasonFields.destinationAddress = getOr(null, 'destination.ip', docToUse);
   reasonFields.destinationPort = getOr(null, 'destination.port', docToUse);

@@ -574,6 +574,49 @@ describe('create_signals', () => {
     });
   });
 
+  test('it requests an explicit fields list instead of the wildcard when requestedFields is provided', () => {
+    const query = buildEventsSearchQuery({
+      aggregations: undefined,
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
+      runtimeMappings: undefined,
+      requestedFields: ['@timestamp', 'host.name', 'source.ip'],
+    });
+
+    expect(query.fields).toEqual([
+      { field: '@timestamp', include_unmapped: true },
+      { field: 'host.name', include_unmapped: true },
+      { field: 'source.ip', include_unmapped: true },
+      { field: '@timestamp', format: 'strict_date_optional_time' },
+    ]);
+  });
+
+  test('it requests the wildcard when requestedFields is undefined', () => {
+    const query = buildEventsSearchQuery({
+      aggregations: undefined,
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
+      runtimeMappings: undefined,
+    });
+
+    expect(query.fields).toEqual([
+      { field: '*', include_unmapped: true },
+      { field: '@timestamp', format: 'strict_date_optional_time' },
+    ]);
+  });
+
   describe('dateNanosTimestampFields', () => {
     test('it adds sort format and asc missing value to both sort clauses', () => {
       const query = buildEventsSearchQuery({

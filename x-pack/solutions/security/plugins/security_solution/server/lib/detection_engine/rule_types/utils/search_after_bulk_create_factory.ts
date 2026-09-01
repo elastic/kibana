@@ -8,9 +8,11 @@
 import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
+import { isMaxResponseSizeExceededError } from './is_max_response_size_exceeded_error';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import { buildEventsSearchQuery } from './build_events_query';
+import { getRequestedEventFields } from './get_requested_event_fields';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -99,7 +101,8 @@ export const searchAfterAndBulkCreateFactory = async ({
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
-    const searchSize = Math.ceil(Math.min(maxSignals, pageSize));
+    let searchSize = Math.ceil(Math.min(maxSignals, pageSize));
+    const requestedFields = getRequestedEventFields(sharedParams);
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -126,6 +129,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           additionalFilters,
           dateNanosTimestampFields,
           mixedTimestampFields,
+          requestedFields,
         });
         const {
           searchResult,
@@ -245,18 +249,32 @@ export const searchAfterAndBulkCreateFactory = async ({
           break;
         }
       } catch (exc: unknown) {
-        ruleExecutionLogger.error(
-          `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
-            exc
-          )}`
-        );
-        return mergeReturns([
-          toReturn,
-          createSearchAfterReturnType({
-            success: false,
-            errors: [`${exc}`],
-          }),
-        ]);
+        if (isMaxResponseSizeExceededError(exc) && searchSize > 1) {
+          // halve the page size and retry the same search_after window with the reduced size
+          const reducedSearchSize = Math.floor(searchSize / 2);
+          const warningMessage = `The search response exceeded the "elasticsearch.maxResponseSize" limit, reducing the number of events fetched per page from ${searchSize} to ${reducedSearchSize} and retrying. Error: ${exc.message}`;
+
+          ruleExecutionLogger.warn(`${cycleNum}: ${warningMessage}`);
+          toReturn.warningMessages.push(warningMessage);
+          searchSize = reducedSearchSize;
+        } else {
+          const errorMessage = isMaxResponseSizeExceededError(exc)
+            ? `A single event exceeded the "elasticsearch.maxResponseSize" limit, it is impossible to fetch events for this rule. Error: ${exc.message}`
+            : `${exc}`;
+
+          ruleExecutionLogger.error(
+            `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
+              exc
+            )}`
+          );
+          return mergeReturns([
+            toReturn,
+            createSearchAfterReturnType({
+              success: false,
+              errors: [errorMessage],
+            }),
+          ]);
+        }
       }
     }
     ruleExecutionLogger.debug(`Alerts created: ${toReturn.createdSignalsCount}`);
