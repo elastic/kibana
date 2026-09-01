@@ -35,6 +35,11 @@ export interface ChromeNextGlobalHeaderShellProps {
   userMenu?: ReactNode;
 }
 
+export type GlobalHeaderRightGroupProps = Pick<
+  ChromeNextGlobalHeaderShellProps,
+  'search' | 'help' | 'actions' | 'userMenu'
+>;
+
 const useGlobalHeaderStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -107,7 +112,7 @@ const useGlobalHeaderStyles = () => {
       width: 1px;
       height: 24px;
       flex-shrink: 0;
-      background: ${euiTheme.colors.borderBasePlain};
+      background: ${euiTheme.colors.borderBaseSubdued};
     `;
 
     return {
@@ -125,6 +130,39 @@ const useGlobalHeaderStyles = () => {
     };
   }, [euiTheme]);
 };
+
+export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
+  ({ search, help, actions, userMenu }) => {
+    const styles = useGlobalHeaderStyles();
+
+    return (
+      <div css={styles.rightGroup}>
+        {search && (
+          <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
+            {search}
+          </div>
+        )}
+        {help && (
+          <div css={styles.helpSlot} data-test-subj="chromeNextGlobalHeaderHelp">
+            {help}
+          </div>
+        )}
+        {actions && (
+          <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
+            {actions}
+          </div>
+        )}
+        {userMenu && (
+          <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
+            {userMenu}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+GlobalHeaderRightGroup.displayName = 'GlobalHeaderRightGroup';
 
 export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShellProps>(
   ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
@@ -154,28 +192,7 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
           </div>
         )}
         <div css={styles.spacer} />
-        <div css={styles.rightGroup}>
-          {search && (
-            <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
-              {search}
-            </div>
-          )}
-          {help && (
-            <div css={styles.helpSlot} data-test-subj="chromeNextGlobalHeaderHelp">
-              {help}
-            </div>
-          )}
-          {userMenu && (
-            <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
-              {userMenu}
-            </div>
-          )}
-          {actions && (
-            <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
-              {actions}
-            </div>
-          )}
-        </div>
+        <GlobalHeaderRightGroup search={search} help={help} actions={actions} userMenu={userMenu} />
       </header>
     );
   }

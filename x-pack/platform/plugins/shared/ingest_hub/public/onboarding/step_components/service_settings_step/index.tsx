@@ -355,7 +355,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   );
 
   return (
-    <div data-test-subj="onboardingStep-serviceSettings">
+    <div data-test-subj="onboardingStep-service-settings">
       <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">
