@@ -10,7 +10,9 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
-import { elasticsearchApiIds, kibanaApiIds } from '@kbn/agent-builder-common/apis/known_apis';
+import { capitalize } from 'lodash';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import { apiSelectorsByTarget } from '@kbn/agent-builder-common/apis/known_apis';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -22,6 +24,26 @@ import { normalizeOptionalStringParam } from '../normalize_optional_string_param
  * Step type ID for the agentBuilder run agent step.
  */
 export const RunAgentStepTypeId = 'ai.agent';
+
+// Enumerating every selector (rather than validating a pattern) is what lets monaco-yaml drive
+// both completion and diagnostics for this field off the generated JSON Schema.
+const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
+  const targetLabel = capitalize(target);
+  const exampleNamespace = exampleApi.split('.')[0];
+  return z
+    .array(
+      z.enum(apiSelectorsByTarget[target], {
+        error: (issue) => `Unknown ${targetLabel} API identifier "${issue.input}".`,
+      })
+    )
+    .max(100)
+    .optional()
+    .describe(
+      `${targetLabel} APIs pre-approved for this step. Each entry is an exact identifier formed from ` +
+        `the namespace and name (e.g. "${exampleApi}"), a namespace wildcard (e.g. ` +
+        `"${exampleNamespace}.*"), or "*" for every ${targetLabel} API.`
+    );
+};
 
 /**
  * Input schema for the run agent step.
@@ -98,34 +120,13 @@ export const InputSchema = z.object({
   approvals: z
     .object({
       auto_approved_apis: z
-        .array(
-          z.discriminatedUnion('target', [
-            z.object({
-              target: z.literal('elasticsearch'),
-              api: z
-                .enum(elasticsearchApiIds, {
-                  error: (issue) => `Unknown elasticsearch API identifier "${issue.input}".`,
-                })
-                .describe(
-                  'API identifier, formed from the namespace and name (e.g. "indices.create").'
-                ),
-            }),
-            z.object({
-              target: z.literal('kibana'),
-              api: z
-                .enum(kibanaApiIds, {
-                  error: (issue) => `Unknown kibana API identifier "${issue.input}".`,
-                })
-                .describe(
-                  'API identifier, formed from the namespace and name (e.g. "cases.create").'
-                ),
-            }),
-          ])
-        )
-        .max(100)
+        .strictObject({
+          elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
+          kibana: apiSelectorArraySchema('kibana', 'alerting.delete-alerting-rule-id'),
+        })
         .optional()
         .describe(
-          'Destructive APIs pre-approved for this step, which the agent may then call without a user confirmation.'
+          'Destructive APIs pre-approved for this step, keyed by backend, which the agent may then call without a user confirmation.'
         ),
     })
     .optional()
@@ -515,15 +516,30 @@ When a schema is provided, the agent's response will be available in \`output.st
     message: "Create the new index and point the alias at it."
     approvals:
       auto_approved_apis:
-        - target: elasticsearch
-          api: indices.create
-        - target: elasticsearch
-          api: indices.update_aliases
+        elasticsearch:
+          - indices.create
+          - indices.update_aliases
 \`\`\`
 
 A destructive API normally requires the user to confirm the call, which a workflow cannot do.
 Listing an API here pre-approves it for this step and for any sub-agents it spawns. Every other
-destructive API is still refused, and omitting the field keeps that stricter behavior for all of them.`,
+destructive API is still refused, and omitting the field keeps that stricter behavior for all of them.
+
+An entry can also be a namespace wildcard, or \`*\` for every API on that backend. Prefer the
+narrowest grant that works: \`indices.*\` includes \`indices.delete\`, and \`*\` lets the agent
+perform any destructive operation the workflow's credentials allow, unattended.
+
+\`\`\`yaml
+    approvals:
+      auto_approved_apis:
+        elasticsearch:
+          - indices.*
+        kibana:
+          - alerting.delete-alerting-rule-id
+\`\`\`
+
+Note that some Elasticsearch APIs have no namespace at all (\`bulk\`, \`delete_by_query\`), so no
+namespace wildcard reaches them. Grant those by their exact identifier, or with \`*\`.`,
 
       `## Follow the agent execution live while the step is still running
 \`\`\`yaml

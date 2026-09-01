@@ -6,11 +6,16 @@
  */
 
 jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
-  esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
+  esManifest: [
+    { id: 'indices.create' },
+    { id: 'indices.delete' },
+    { id: 'indices.update_aliases' },
+    { id: 'bulk' },
+  ],
 }));
 
 jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
-  kibanaManifest: [{ id: 'cases.create' }],
+  kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
 }));
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -432,17 +437,27 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       return execution;
     };
 
-    it('grants the listed APIs without ever enabling interactivity', async () => {
-      const autoApprovedApis = [{ target: 'elasticsearch', api: 'indices.create' }];
-
+    it('flattens the per-target map without ever enabling interactivity', async () => {
       const execution = await runStep({
         message: 'hello',
-        approvals: { auto_approved_apis: autoApprovedApis },
+        approvals: {
+          auto_approved_apis: {
+            elasticsearch: ['indices.create', 'indices.update_aliases'],
+            kibana: ['alerting.delete-alerting-rule-id'],
+          },
+        },
       });
 
       expect(execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
-          interactive: { enabled: false, auto_approved_apis: autoApprovedApis },
+          interactive: {
+            enabled: false,
+            auto_approved_apis: [
+              { target: 'elasticsearch', api: 'indices.create' },
+              { target: 'elasticsearch', api: 'indices.update_aliases' },
+              { target: 'kibana', api: 'alerting.delete-alerting-rule-id' },
+            ],
+          },
         })
       );
     });
@@ -451,8 +466,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       { description: 'omitted', input: { message: 'hello' } },
       { description: 'an empty object', input: { message: 'hello', approvals: {} } },
       {
-        description: 'an empty list',
-        input: { message: 'hello', approvals: { auto_approved_apis: [] } },
+        description: 'an empty map',
+        input: { message: 'hello', approvals: { auto_approved_apis: {} } },
+      },
+      {
+        description: 'an empty list for a target',
+        input: { message: 'hello', approvals: { auto_approved_apis: { elasticsearch: [] } } },
       },
     ])(
       'runs non-interactively with no grants when the field is $description',
@@ -463,33 +482,41 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       }
     );
 
-    it('emits a per-target identifier enum, which is what drives editor autocomplete', () => {
+    it('emits a per-target selector enum, which is what drives editor autocomplete', () => {
       const jsonSchema = z.toJSONSchema(InputSchema, {
         unrepresentable: 'any',
         io: 'input',
       }) as Record<string, any>;
 
-      const apis = jsonSchema.properties.approvals.properties.auto_approved_apis;
-      const branches = apis.items.anyOf ?? apis.items.oneOf;
+      const byTarget = jsonSchema.properties.approvals.properties.auto_approved_apis.properties;
 
-      const byTarget = Object.fromEntries(
-        branches.map((branch: any) => [branch.properties.target.const, branch.properties.api.enum])
-      );
-
-      expect(byTarget.elasticsearch).toContain('indices.create');
-      expect(byTarget.elasticsearch).not.toContain('cases.create');
-      expect(byTarget.kibana).toContain('cases.create');
-      expect(byTarget.kibana).not.toContain('indices.create');
+      expect(byTarget.elasticsearch.items.enum).toContain('indices.create');
+      expect(byTarget.elasticsearch.items.enum).not.toContain('alerting.delete-alerting-rule-id');
+      expect(byTarget.kibana.items.enum).toContain('alerting.delete-alerting-rule-id');
+      expect(byTarget.kibana.items.enum).not.toContain('indices.create');
     });
 
-    it('accepts a well-formed list', () => {
+    it('offers the wildcards through that same enum', () => {
+      const jsonSchema = z.toJSONSchema(InputSchema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as Record<string, any>;
+
+      const byTarget = jsonSchema.properties.approvals.properties.auto_approved_apis.properties;
+
+      expect(byTarget.elasticsearch.items.enum).toEqual(expect.arrayContaining(['*', 'indices.*']));
+      expect(byTarget.kibana.items.enum).toEqual(expect.arrayContaining(['*', 'alerting.*']));
+      expect(byTarget.kibana.items.enum).not.toContain('indices.*');
+    });
+
+    it('accepts a well-formed map, including wildcards', () => {
       const parsed = InputSchema.safeParse({
         message: 'hello',
         approvals: {
-          auto_approved_apis: [
-            { target: 'elasticsearch', api: 'indices.create' },
-            { target: 'kibana', api: 'cases.create' },
-          ],
+          auto_approved_apis: {
+            elasticsearch: ['indices.create', 'indices.*', 'bulk', '*'],
+            kibana: ['alerting.delete-alerting-rule-id', 'alerting.*'],
+          },
         },
       });
       expect(parsed.success).toBe(true);
@@ -498,26 +525,37 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     it.each<{ description: string; autoApprovedApis: unknown }>([
       {
         description: 'an identifier that names no real API',
-        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.crate' }],
+        autoApprovedApis: { elasticsearch: ['indices.crate'] },
       },
       {
         description: 'an identifier that only exists on the other target',
-        autoApprovedApis: [{ target: 'kibana', api: 'indices.create' }],
+        autoApprovedApis: { kibana: ['indices.create'] },
       },
       {
-        description: 'a bare namespace instead of a full identifier',
-        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices' }],
+        description: 'a namespace wildcard that only exists on the other target',
+        autoApprovedApis: { kibana: ['indices.*'] },
+      },
+      {
+        description: 'a bare namespace instead of a full identifier or wildcard',
+        autoApprovedApis: { elasticsearch: ['indices'] },
+      },
+      {
+        description: 'a wildcard on an identifier that has no namespace',
+        autoApprovedApis: { elasticsearch: ['bulk.*'] },
       },
       {
         description: 'an unknown target',
-        autoApprovedApis: [{ target: 'postgres', api: 'indices.create' }],
+        autoApprovedApis: { postgres: ['indices.create'] },
       },
       {
-        description: 'a list exceeding 100 entries',
-        autoApprovedApis: Array.from({ length: 101 }, () => ({
-          target: 'elasticsearch',
-          api: 'indices.create',
-        })),
+        description: 'a flat list, which was the previous shape',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+      },
+      {
+        description: 'a list exceeding 100 entries for one target',
+        autoApprovedApis: {
+          elasticsearch: Array.from({ length: 101 }, () => 'indices.create'),
+        },
       },
     ])('rejects $description', ({ autoApprovedApis }) => {
       const parsed = InputSchema.safeParse({

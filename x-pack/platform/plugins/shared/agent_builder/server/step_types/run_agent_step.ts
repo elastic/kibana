@@ -12,6 +12,7 @@ import {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
+  toAutoApprovedApis,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -137,7 +138,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           request,
           abortSignal: context.abortSignal,
           metadata,
-          interactive: createNonInteractiveConfig(approvals?.auto_approved_apis),
+          interactive: createNonInteractiveConfig(
+            approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
+          ),
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,

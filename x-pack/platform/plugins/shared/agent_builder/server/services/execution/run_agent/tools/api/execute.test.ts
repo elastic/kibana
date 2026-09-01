@@ -962,6 +962,61 @@ describe('createExecuteApiTool', () => {
         }
       );
 
+      it.each<{ description: string; autoApprovedApis: AutoApprovedApi[] }>([
+        {
+          description: 'a namespace wildcard',
+          autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.*' }],
+        },
+        {
+          description: 'the full wildcard',
+          autoApprovedApis: [{ target: 'elasticsearch', api: '*' }],
+        },
+      ])(
+        'runs a destructive API covered by $description, without prompting',
+        async ({ autoApprovedApis }) => {
+          esLoadApi.mockResolvedValue(deleteIndexApi());
+
+          const context = withInteractivity({
+            executionMode: AgentExecutionMode.conversation,
+            enabled: false,
+            autoApprovedApis,
+          });
+          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+          transportRequest.mockResolvedValue({ acknowledged: true });
+
+          const tool = createExecuteApiTool({ selfClient });
+          const result = (await tool.handler(
+            deleteIndexParams,
+            context
+          )) as ToolHandlerStandardReturn;
+
+          expect(transportRequest).toHaveBeenCalledWith({ method: 'DELETE', path: '/my-index' });
+          expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+          const data = result.results[0].data as ApiExecuteResultData;
+          expect(data.approval).toBe('pre_approved');
+        }
+      );
+
+      it('does not let a wildcard for one target cover the other', async () => {
+        esLoadApi.mockResolvedValue(deleteIndexApi());
+
+        const context = withInteractivity({
+          executionMode: AgentExecutionMode.conversation,
+          enabled: false,
+          autoApprovedApis: [{ target: 'kibana', api: '*' }],
+        });
+        const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+
+        const tool = createExecuteApiTool({ selfClient });
+        const result = (await tool.handler(
+          deleteIndexParams,
+          context
+        )) as ToolHandlerStandardReturn;
+
+        expect(transportRequest).not.toHaveBeenCalled();
+        expect(result.results[0].type).toBe(ToolResultType.error);
+      });
+
       it('still asks for confirmation in an interactive conversation the grant does not cover', async () => {
         esLoadApi.mockResolvedValue(deleteIndexApi());
 

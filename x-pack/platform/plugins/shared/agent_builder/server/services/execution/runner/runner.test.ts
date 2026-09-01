@@ -151,7 +151,11 @@ describe('AgentBuilder runner', () => {
       return { run: () => createRunner(runnerDeps).runTool(params), params };
     };
 
-    it.each<{ description: string; approvals?: RunApprovals; expected: InteractivityConfig }>([
+    it.each<{
+      description: string;
+      approvals?: RunApprovals;
+      expected: InteractivityConfig;
+    }>([
       {
         description:
           'carries the API pre-approvals of a runner-level call into the handler context',
@@ -159,6 +163,14 @@ describe('AgentBuilder runner', () => {
         expected: {
           enabled: false,
           auto_approved_apis: [{ target: 'elasticsearch', api: 'indices.create' }],
+        },
+      },
+      {
+        description: 'carries a wildcard grant through unexpanded',
+        approvals: { autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.*' }] },
+        expected: {
+          enabled: false,
+          auto_approved_apis: [{ target: 'elasticsearch', api: 'indices.*' }],
         },
       },
       {
@@ -187,6 +199,11 @@ describe('AgentBuilder runner', () => {
         description: 'only exists on the other target',
         autoApprovedApis: [{ target: 'kibana', api: 'indices.delete' }],
         expected: '"indices.delete" (kibana)',
+      },
+      {
+        description: 'wildcards a namespace the target does not ship',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'nonsense.*' }],
+        expected: '"nonsense.*" (elasticsearch)',
       },
     ])(
       'rejects a pre-approval that $description, without running the tool',

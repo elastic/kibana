@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { capitalize } from 'lodash';
 import path from 'node:path';
-import { editableToolTypes } from '@kbn/agent-builder-common';
+import { editableToolTypes, toAutoApprovedApis } from '@kbn/agent-builder-common';
 import type { ApiTarget } from '@kbn/agent-builder-common';
-import { isKnownApi } from '@kbn/agent-builder-common/apis/known_apis';
+import { isKnownApiSelector } from '@kbn/agent-builder-common/apis/known_apis';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
@@ -28,6 +28,31 @@ import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
+
+const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
+  const targetLabel = capitalize(target);
+  const exampleNamespace = exampleApi.split('.')[0];
+  return schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        maxLength: 256,
+        validate: (api) =>
+          isKnownApiSelector({ target, api })
+            ? undefined
+            : `Unknown api "${api}" for target "${target}".`,
+      }),
+      {
+        maxSize: 100,
+        meta: {
+          description:
+            `${targetLabel} APIs pre-approved for this run. Each entry is an exact identifier formed ` +
+            `from the namespace and name (for example \`${exampleApi}\`), a namespace wildcard ` +
+            `(for example \`${exampleNamespace}.*\`), or \`*\` for every ${targetLabel} API.`,
+        },
+      }
+    )
+  );
+};
 
 export function registerToolsRoutes({
   router,
@@ -465,33 +490,18 @@ export function registerToolsRoutes({
                 schema.object(
                   {
                     auto_approved_apis: schema.maybe(
-                      schema.arrayOf(
-                        schema.object(
-                          {
-                            target: schema.oneOf(
-                              [schema.literal('elasticsearch'), schema.literal('kibana')],
-                              { meta: { description: 'Backend the API belongs to.' } }
-                            ) satisfies Type<ApiTarget>,
-                            api: schema.string({
-                              maxLength: 256,
-                              meta: {
-                                description:
-                                  'API identifier, formed from the namespace and name (for example `indices.create`).',
-                              },
-                            }),
-                          },
-                          {
-                            validate: (entry) =>
-                              isKnownApi(entry)
-                                ? undefined
-                                : `Unknown api "${entry.api}" for target "${entry.target}".`,
-                          }
-                        ),
+                      schema.object(
                         {
-                          maxSize: 100,
+                          elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
+                          kibana: apiSelectorArraySchema(
+                            'kibana',
+                            'alerting.delete-alerting-rule-id'
+                          ),
+                        },
+                        {
                           meta: {
                             description:
-                              'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
+                              'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation, keyed by backend. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
                           },
                         }
                       )
@@ -537,7 +547,9 @@ export function registerToolsRoutes({
           toolParams,
           source: 'user',
           defaultConnectorId,
-          ...(approvals ? { approvals: { autoApprovedApis: approvals.auto_approved_apis } } : {}),
+          ...(approvals?.auto_approved_apis
+            ? { approvals: { autoApprovedApis: toAutoApprovedApis(approvals.auto_approved_apis) } }
+            : {}),
         });
 
         return response.ok({

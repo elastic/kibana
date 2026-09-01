@@ -122,9 +122,27 @@ const { result } = await agentBuilder.tools.execute({
 
 This covers the run and the sub-agents it spawns. Every destructive API outside the list is
 still refused, and omitting the field refuses all destructive APIs. An entry naming an API that
-does not exist on its target is rejected with a bad-request error. The same grant is available
-as the `approvals` body property of `POST /api/agent_builder/tools/_execute` and as the
-`approvals` input of the `ai.agent` workflow step.
+does not exist on its target is rejected with a bad-request error.
+
+An entry can also be a namespace wildcard such as `indices.*`, or `*` for every API on that
+target. Prefer the narrowest grant that works: `indices.*` includes `indices.delete`, and `*`
+lets the agent perform any destructive operation the run's credentials allow, with nobody to
+confirm it.
+
+The HTTP API and the `ai.agent` workflow step take the same grant keyed by target, as the
+`approvals` body property of `POST /api/agent_builder/tools/_execute` and as the `approvals`
+input of the step:
+
+```json
+{
+  "approvals": {
+    "auto_approved_apis": {
+      "elasticsearch": ["indices.create", "indices.update_aliases"],
+      "kibana": ["alerting.delete-alerting-rule-id"]
+    }
+  }
+}
+```
 
 ### Error handling
 
