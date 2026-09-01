@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ImprovementAction } from './improvement_actions';
 import type { KiFields, KiPartialFields } from '../step_types/ki';
 
 /**
@@ -27,28 +28,6 @@ export const IMPROVEMENTS_INDEX = 'context-engine-improvements';
  *   actionable for a retry once the cause is fixed, and `resolution.error` carries the reason.
  */
 export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
-
-/**
- * What the improvement does when applied. Verbs rather than kinds, because retiring a KI or
- * disabling a workflow is a first-class outcome of the analysis and `*_change` cannot express it.
- *
- * A `remove_*` action records only the intent to remove. How a removal is carried out — a soft
- * flag, a hard delete, a sibling index — is owned by the KI lifecycle and settled by the apply
- * step; nothing in this store depends on the answer.
- */
-export const IMPROVEMENT_ACTIONS = [
-  'add_ki',
-  'edit_ki',
-  'remove_ki',
-  'add_workflow',
-  'edit_workflow',
-  'remove_workflow',
-  'add_source',
-  'edit_source',
-  'remove_source',
-] as const;
-
-export type ImprovementAction = (typeof IMPROVEMENT_ACTIONS)[number];
 
 /** The `add_*` actions create their target, so they carry no {@link ImprovementTarget}. */
 export const isAddAction = (action: ImprovementAction): boolean => action.startsWith('add_');

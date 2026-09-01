@@ -6,7 +6,8 @@
  */
 
 import { createHash } from 'crypto';
-import type { ImprovementAction, ImprovementTarget } from '../../common/http_api/improvements';
+import type { ImprovementAction } from '../../common/http_api/improvement_actions';
+import type { ImprovementTarget } from '../../common/http_api/improvements';
 import { isAddAction } from '../../common/http_api/improvements';
 import { InvalidImprovementError } from './errors';
 
