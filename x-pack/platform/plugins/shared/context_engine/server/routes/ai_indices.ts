@@ -7,7 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, KibanaResponseFactory } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
@@ -204,7 +204,7 @@ export const registerAiIndexRoutes = ({
 }: {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: () => ImprovementsServiceApi;
+  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
   // Create an AI index
@@ -479,13 +479,16 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const core = await ctx.core;
+        const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
         try {
           await getAiIndexService().delete(aiIndexId);
           // The improvements store is keyed by AI index id, so revisions left behind would
           // resurface if an AI index were later recreated under the same id.
-          await getImprovementsService().deleteByAiIndex(aiIndexId);
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser).deleteByAiIndex(
+            aiIndexId
+          );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });

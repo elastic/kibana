@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import type {
+  BulkResponse,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IndexStorageSettings, IStorageClient, StorageSchema } from '@kbn/storage-adapter';
-import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { StorageSchema } from '@kbn/storage-adapter';
+import { BulkOperationError, types } from '@kbn/storage-adapter';
 import type { Improvement } from '../../common/http_api/improvements';
 import { IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
+
+/** The template that shapes the improvements index when the first write creates it. */
+export const IMPROVEMENTS_INDEX_TEMPLATE = `${IMPROVEMENTS_INDEX}-index-template`;
 
 /**
  * Mapping for the global improvements index.
@@ -66,27 +74,98 @@ export const improvementsSchema = {
   },
 } satisfies StorageSchema;
 
-const storageSettings = {
-  name: IMPROVEMENTS_INDEX,
-  schema: improvementsSchema,
-} satisfies IndexStorageSettings;
-
-export type ImprovementsStorageSettings = typeof storageSettings;
-
-export type ImprovementsStorageClient = IStorageClient<ImprovementsStorageSettings, Improvement>;
-
-/** Creates a storage client bound to the global improvements index. */
-export const createImprovementsStorageClient = ({
+/**
+ * Installs the index template that shapes the improvements index.
+ *
+ * Kibana does this once at start with its own credentials, which needs only the cluster-level
+ * `manage_index_templates`. The index itself is then created by Elasticsearch from this template on
+ * the first write, under whichever user made that write. That split is what keeps the store off the
+ * internal user: were the mappings applied lazily per operation instead, every caller — including
+ * anyone merely reading the review UI — would need `manage` on the index.
+ */
+export const installImprovementsIndexTemplate = async ({
   esClient,
   logger,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-}): ImprovementsStorageClient => {
-  const adapter = new StorageIndexAdapter<ImprovementsStorageSettings, Improvement>(
-    esClient,
-    logger,
-    storageSettings
-  );
-  return adapter.getClient();
+}): Promise<void> => {
+  await esClient.indices.putIndexTemplate({
+    name: IMPROVEMENTS_INDEX_TEMPLATE,
+    index_patterns: [IMPROVEMENTS_INDEX],
+    template: {
+      // Every field a revision carries is declared below, so an undeclared one means the writer and
+      // this mapping have diverged — better surfaced as a rejected write than silently indexed.
+      mappings: { dynamic: 'strict', ...improvementsSchema },
+    },
+  });
+  logger.debug(`Installed index template '${IMPROVEMENTS_INDEX_TEMPLATE}'`);
 };
+
+/** A bulk index operation, carrying the OCC guard when the caller is replacing a known revision. */
+export interface ImprovementsBulkOperation {
+  index: {
+    _id: string;
+    document: Improvement;
+    if_seq_no?: number;
+    if_primary_term?: number;
+  };
+}
+
+export interface ImprovementsBulkRequest {
+  operations: ImprovementsBulkOperation[];
+  refresh?: 'wait_for' | boolean;
+  /** When false, the caller inspects `items` itself — a per-item failure may be expected. */
+  throwOnFail?: boolean;
+}
+
+/** Reads and writes of the improvements index, bound to one caller's credentials. */
+export interface ImprovementsClient {
+  search(request: Omit<SearchRequest, 'index'>): Promise<SearchResponse<Improvement>>;
+  bulk(request: ImprovementsBulkRequest): Promise<BulkResponse>;
+}
+
+/**
+ * Binds the improvements index to an Elasticsearch client. Pass a request-scoped client: every
+ * caller of this store acts on behalf of a user, so authorization is Elasticsearch's to enforce.
+ */
+export const createImprovementsClient = (esClient: ElasticsearchClient): ImprovementsClient => ({
+  search: (request) =>
+    esClient.search<Improvement>({
+      index: IMPROVEMENTS_INDEX,
+      // The index does not exist until the first improvement is written, and an empty store is a
+      // normal state for the review UI to read rather than an error.
+      ignore_unavailable: true,
+      ...request,
+    }),
+
+  bulk: async ({ operations, refresh, throwOnFail = true }) => {
+    const response = await esClient.bulk({
+      index: IMPROVEMENTS_INDEX,
+      refresh,
+      operations: operations.flatMap(
+        ({ index: { _id, document, if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm } }) => [
+          {
+            index: {
+              _id,
+              ...(ifSeqNo !== undefined && { if_seq_no: ifSeqNo }),
+              ...(ifPrimaryTerm !== undefined && { if_primary_term: ifPrimaryTerm }),
+            },
+          },
+          document,
+        ]
+      ),
+    });
+
+    if (throwOnFail && response.errors) {
+      throw new BulkOperationError(
+        `Bulk operation on '${IMPROVEMENTS_INDEX}' failed: ${JSON.stringify(
+          response.items.filter((item) => Object.values(item).some((action) => action?.error))
+        )}`,
+        response
+      );
+    }
+
+    return response;
+  },
+});

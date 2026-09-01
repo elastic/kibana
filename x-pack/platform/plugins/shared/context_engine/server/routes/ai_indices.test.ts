@@ -99,6 +99,7 @@ describe('ai indices routes', () => {
   let auditLogger: { log: jest.Mock };
   let esSearch: jest.Mock;
   let esGet: jest.Mock;
+  let improvementsClients: unknown[];
 
   const createContext = () =>
     ({
@@ -143,6 +144,7 @@ describe('ai indices routes', () => {
       delete: jest.fn(),
     };
     improvementsService = { deleteByAiIndex: jest.fn() };
+    improvementsClients = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -169,7 +171,10 @@ describe('ai indices routes', () => {
     registerAiIndexRoutes({
       router,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-      getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
+      getImprovementsService: (esClient) => {
+        improvementsClients.push(esClient);
+        return improvementsService as unknown as ImprovementsServiceApi;
+      },
       getActions: async () => actions,
     });
   });
@@ -711,6 +716,16 @@ describe('ai indices routes', () => {
       });
 
       expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
+    });
+
+    it("deletes the improvements as the request's user, since the store is a user index", async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(improvementsClients).toEqual([expect.objectContaining({ search: esSearch })]);
     });
 
     it('leaves the improvements alone when the AI index cannot be deleted', async () => {

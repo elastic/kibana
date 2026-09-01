@@ -13,12 +13,12 @@ import type { Improvement, ImprovementRevisionInput } from '../../common/http_ap
 import { IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
 import { ImprovementConflictError, ImprovementNotFoundError } from './errors';
 import { ImprovementsService } from './service';
-import { createImprovementsStorageClient } from './storage';
+import { createImprovementsClient } from './storage';
 
 jest.mock('./storage');
 
-const createImprovementsStorageClientMock = createImprovementsStorageClient as jest.MockedFunction<
-  typeof createImprovementsStorageClient
+const createImprovementsClientMock = createImprovementsClient as jest.MockedFunction<
+  typeof createImprovementsClient
 >;
 
 const makeInput = (
@@ -64,15 +64,13 @@ const searchResponse = (hits: ReturnType<typeof hitOf>[], total = hits.length) =
 });
 
 describe('ImprovementsService', () => {
-  const storageClient = {
+  const client = {
     bulk: jest.fn(),
     search: jest.fn(),
-    reconcileMappings: jest.fn(),
-  } as unknown as ReturnType<typeof createImprovementsStorageClient>;
+  } as unknown as ReturnType<typeof createImprovementsClient>;
 
-  const bulk = storageClient.bulk as jest.Mock;
-  const search = storageClient.search as jest.Mock;
-  const reconcileMappings = storageClient.reconcileMappings as jest.Mock;
+  const bulk = client.bulk as jest.Mock;
+  const search = client.search as jest.Mock;
 
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
@@ -81,23 +79,14 @@ describe('ImprovementsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    createImprovementsStorageClientMock.mockReturnValue(storageClient);
-    reconcileMappings.mockResolvedValue(undefined);
+    createImprovementsClientMock.mockReturnValue(client);
     bulk.mockResolvedValue({ errors: false, items: [] });
     search.mockResolvedValue(searchResponse([]));
     service = new ImprovementsService({ esClient, logger });
   });
 
-  it('binds a single global storage client (no space dimension)', () => {
-    expect(createImprovementsStorageClientMock).toHaveBeenCalledWith({ esClient, logger });
-  });
-
-  describe('ensureIndex', () => {
-    it('reconciles mappings; the index itself is created lazily on first write', async () => {
-      await service.ensureIndex();
-      expect(reconcileMappings).toHaveBeenCalledTimes(1);
-      expect(bulk).not.toHaveBeenCalled();
-    });
+  it("binds the store to the caller's client, with no space dimension", () => {
+    expect(createImprovementsClientMock).toHaveBeenCalledWith(esClient);
   });
 
   describe('write', () => {

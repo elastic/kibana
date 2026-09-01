@@ -85,9 +85,9 @@ the AI index API (they return 404 while it is off).
 An **improvement** is a proposed change to one AI index's KI pipeline, derived
 from that index's signals. They live in the single global
 `context-engine-improvements` index, exposed to the server as
-`ContextEnginePluginStart.getImprovementsService()`. There is no HTTP surface
-yet: the analysis runner that produces improvements and the review UI that
-applies them come later.
+`ContextEnginePluginStart.getImprovementsService(esClient)`. There is no HTTP
+surface yet: the analysis runner that produces improvements and the review UI
+that applies them come later.
 
 Unlike signals, the store is **global rather than per-space**: an improvement
 targets an AI index's KI pipeline, and the AI index registry has no space
@@ -130,8 +130,21 @@ record of what the loop did to a user's index survives every transition:
 - A rejection keeps the reviewer's rationale on `resolution.reason`, so the next
   run knows a fix was considered and turned down rather than re-proposing it.
 
-**Prerequisite:** `context-engine-improvements*` must be granted to the built-in
-`kibana_system` role in Elasticsearch, the same way `context-engine-signals-*`
-is. Without it, Kibana's internal user cannot create the index and every write
-fails with a 403 `security_exception`.
+### Privileges
+
+`context-engine-improvements` is a **user-owned index**, and needs no grant on
+the `kibana_system` role. The work is split so that no single actor needs both
+halves:
+
+- **Kibana** installs the `context-engine-improvements` index template at start,
+  which needs only the cluster-level `manage_index_templates` it already holds.
+- **The caller** creates the index on the first write, and Elasticsearch applies
+  the template's mappings to it. Every subsequent read and write is authorized
+  against that caller too, so `getImprovementsService` takes the client to act
+  through and callers pass a request-scoped one.
+
+This is what keeps the store off the internal user. Applying mappings lazily per
+operation instead — the usual storage-adapter pattern — would need `manage` on
+the index from whoever performed it, including anyone merely reading the review
+UI. Writers need `create_index` plus `write`; readers need `read`.
 

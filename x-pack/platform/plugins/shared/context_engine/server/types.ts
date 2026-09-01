@@ -6,6 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -27,8 +28,11 @@ export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
-  /** The improvements store. */
-  getImprovementsService: () => ImprovementsServiceApi;
+  /**
+   * The improvements store, bound to the caller's Elasticsearch client. Pass a request-scoped one:
+   * the store is a user-owned index, so Elasticsearch authorizes each read and write.
+   */
+  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
 }
 
 export interface ContextEngineSetupDependencies {

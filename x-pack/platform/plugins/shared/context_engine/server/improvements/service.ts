@@ -25,8 +25,8 @@ import type {
 } from '../../common/http_api/improvements';
 import { IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
 import { ImprovementConflictError, ImprovementNotFoundError } from './errors';
-import type { ImprovementsStorageClient } from './storage';
-import { createImprovementsStorageClient } from './storage';
+import type { ImprovementsClient } from './storage';
+import { createImprovementsClient } from './storage';
 
 /** Only the newest revision of each lineage is a live improvement. */
 const LATEST_ONLY: QueryDslQueryContainer = { term: { latest: true } };
@@ -63,8 +63,6 @@ export interface ListImprovementsOptions {
  * registry it hangs off.
  */
 export interface ImprovementsServiceApi {
-  ensureIndex(): Promise<void>;
-
   /**
    * Appends a revision per improvement and clears `latest` on the prior one. Returns what was
    * written, which may be a subset: a lineage someone transitioned mid-batch keeps its head and is
@@ -102,21 +100,22 @@ export interface ImprovementsServiceApi {
  * `previous_revision_id`. `latest: true` marks the head of each lineage and `list`/`get` filter on
  * it, rather than using `collapse`, because `collapse` makes `track_total_hits` count hits instead
  * of groups and the review UI needs an exact total to paginate.
+ *
+ * Construct one per request with that request's client. Every entry point here has a user behind it
+ * — a run writes through the analysis route, a reviewer transitions from the UI, and a deletion
+ * follows an AI index being removed — so reads and writes are authorized by Elasticsearch against
+ * the caller rather than performed as Kibana. The index mappings arrive from a template installed
+ * at plugin start, which is the only part that needs Kibana's own credentials.
  */
 export class ImprovementsService implements ImprovementsServiceApi {
   private readonly esClient: ElasticsearchClient;
   private readonly logger: Logger;
-  private readonly storageClient: ImprovementsStorageClient;
+  private readonly client: ImprovementsClient;
 
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
     this.esClient = esClient;
     this.logger = logger;
-    this.storageClient = createImprovementsStorageClient({ esClient, logger });
-  }
-
-  /** Reconciles the index mappings if it exists; the index is created lazily on first write. */
-  async ensureIndex(): Promise<void> {
-    await this.storageClient.reconcileMappings();
+    this.client = createImprovementsClient(esClient);
   }
 
   async write(improvements: ImprovementRevisionInput[]): Promise<Improvement[]> {
@@ -190,7 +189,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
   }
 
   async get(improvementId: string): Promise<Improvement | undefined> {
-    const response = await this.storageClient.search({
+    const response = await this.client.search({
       size: 1,
       track_total_hits: false,
       query: {
@@ -278,7 +277,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     from: number;
     size: number;
   }) {
-    return this.storageClient.search({
+    return this.client.search({
       from,
       size,
       track_total_hits: true,
@@ -302,7 +301,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
       return new Map();
     }
 
-    const response = await this.storageClient.search({
+    const response = await this.client.search({
       size: Math.min(improvementIds.length * MAX_HEADS_PER_LINEAGE, MAX_HEAD_LOOKUP_SIZE),
       track_total_hits: false,
       seq_no_primary_term: true,
@@ -344,7 +343,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
       return new Set();
     }
 
-    const response = await this.storageClient.bulk({
+    const response = await this.client.bulk({
       operations: heads.map(({ document, seqNo, primaryTerm }) => ({
         index: {
           _id: document.revision_id,
@@ -399,7 +398,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
    */
   private async indexRevisions(revisions: Improvement[]): Promise<void> {
     try {
-      await this.storageClient.bulk({
+      await this.client.bulk({
         operations: revisions.map((revision) => ({
           index: { _id: revision.revision_id, document: revision },
         })),
