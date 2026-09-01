@@ -106,23 +106,39 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       summary: 'Check if data streams have data',
       description:
-        'Check whether one or more data stream index patterns contain documents within a given time window.',
+        'Check whether one or more data stream index patterns contain any documents indexed at or after the given start time.',
       options: {
+        availability: {
+          since: '9.6.0',
+          stability: 'stable',
+        },
         tags: ['oas-tag:Data streams'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_data_streams_has_data.yaml'),
+        },
         validate: {
           request: {
             query: schema.object({
-              // Comma-joined list of index patterns. Bounded to cap the fan-out of the
-              // msearch the handler builds from it (one sub-query per pattern).
-              dataStreams: schema.string({ maxLength: 4096 }),
-              // ISO8601 timestamp, passed to ES as the `@timestamp` range lower bound.
+              // maxLength caps the fan-out of the msearch built from this list (one sub-query
+              // per pattern).
+              dataStreams: schema.string({
+                maxLength: 4096,
+                meta: {
+                  description:
+                    'A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-*` or `metrics-<dataset>-*`.',
+                },
+              }),
               start: schema.string({
                 maxLength: 64,
+                meta: {
+                  description:
+                    'An ISO 8601 timestamp. Only documents with an `@timestamp` at or after this time are considered.',
+                },
                 validate: (value) =>
                   Number.isNaN(Date.parse(value))
                     ? `start must be a valid ISO8601 timestamp, got "${value}"`
@@ -132,10 +148,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
           response: {
             200: {
-              description: 'OK',
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
-                  results: schema.recordOf(schema.string(), schema.boolean()),
+                  results: schema.recordOf(schema.string(), schema.boolean(), {
+                    meta: {
+                      description:
+                        'One entry per requested index pattern. `true` when the pattern matched at least one document, `false` when it matched none or the pattern resolved to no index.',
+                    },
+                  }),
                 }),
             },
             400: {
