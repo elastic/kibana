@@ -114,8 +114,8 @@ export const useHelpMenuItems = ({
   );
 
   const items = useMemo(() => {
-    const mapItems = (items: HelpLinks['global']) =>
-      items.map((item) => {
+    const mapItems = (links: HelpLinks['global']) =>
+      links.map((item) => {
         const menuItem = toContextMenuItem(item, stableNavigate, closeMenu);
         if (item.isWhatsNew && hasUnreadNews) {
           menuItem.name = (
