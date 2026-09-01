@@ -12,6 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowRepository } from '@kbn/workflows/server';
 import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_event_handler';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 const mockClassifyWorkflowTriggerMatch = jest.fn().mockReturnValue('matched');
 
@@ -92,6 +93,9 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
   return {
     coreStart: coreMock.createStart(),
     workflowRepository: createWorkflowRepositoryMock(),
+    workflowExecutionRepository: {
+      getWorkflowExecutionById: (...args: unknown[]) => mockGetWorkflowExecutionById(...args),
+    } as unknown as WorkflowExecutionRepository,
     workflowsExtensions: {
       getTriggerDefinition: jest.fn().mockReturnValue({ id: 'cases.updated' }),
     } as any,
@@ -172,7 +176,15 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
       scheduleWorkflow,
-      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'wf-1' })]),
+      workflowRepository: createWorkflowRepositoryMock([
+        createMockWorkflow({
+          id: 'wf-1',
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        }),
+      ]),
     });
     const handler = new TriggerEventHandler(deps);
 
@@ -184,7 +196,13 @@ describe('TriggerEventHandler', () => {
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
     const [workflowArg, contextArg, requestArg] = scheduleWorkflow.mock.calls[0];
-    expect(workflowArg.id).toBe('wf-1');
+    expect(workflowArg).toMatchObject({
+      id: 'wf-1',
+      managed: true,
+      managedBy: 'workflowsExtensionsExample',
+      originManagedWorkflowId: 'system-example-greeting',
+      managedVersion: 3,
+    });
     expect(requestArg).toBe(mockRequest);
     expect(contextArg.triggeredBy).toBe('cases.updated');
     expect(contextArg.event.caseId).toBe('case-123');

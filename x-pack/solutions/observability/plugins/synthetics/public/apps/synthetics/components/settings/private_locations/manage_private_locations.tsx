@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { isEqual } from 'lodash';
@@ -69,10 +69,18 @@ export const ManagePrivateLocations = () => {
     if (privateLocationToEdit) {
       const isLabelChanged = formData.label !== privateLocationToEdit.label;
       const areTagsChanged = !isEqual(formData.tags, privateLocationToEdit.tags);
-      if (!isLabelChanged && !areTagsChanged) {
+      const isShardingChanged =
+        Boolean(formData.isAgentSharding) !== Boolean(privateLocationToEdit.isAgentSharding);
+      if (!isLabelChanged && !areTagsChanged && !isShardingChanged) {
         onCloseFlyout();
       } else {
-        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label, tags: formData.tags });
+        onEditLocationAPI(privateLocationToEdit.id, {
+          label: formData.label,
+          tags: formData.tags,
+          ...(typeof formData.isAgentSharding === 'boolean'
+            ? { isAgentSharding: formData.isAgentSharding }
+            : {}),
+        });
       }
     } else {
       onCreateLocationAPI(formData);

@@ -12,6 +12,7 @@ import {
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+  type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
@@ -32,10 +33,14 @@ import {
   switchMap,
   combineLatest,
   map,
+  catchError,
+  of,
+  tap,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { useReportChartSectionError } from './use_report_chart_section_error';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -44,6 +49,7 @@ export type LensProps = Pick<
   | 'timeRange'
   | 'attributes'
   | 'esqlVariables'
+  | 'isApproximate'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -63,6 +69,8 @@ export const useLensProps = ({
   chartRef,
   chartLayers,
   yBounds,
+  legend,
+  yAxisTitle,
   error,
   userMessages,
   profileId,
@@ -75,22 +83,46 @@ export const useLensProps = ({
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
+  yAxisTitle?: string;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
+  const reportError = useReportChartSectionError();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
+
+  // Builder errors are folded into `effectiveError` so the same "no datasource" fallback applies.
+  const [buildError, setBuildError] = useState<Error | undefined>();
+  const effectiveError = error ?? buildError;
+  // Read inside the rxjs subscription without rebuilding it on identifier changes.
+  const profileIdRef = useLatest(profileId);
+  const chartIdRef = useLatest(chartId);
+  // Dedup persistent failures by name+message so a fresh Error reference per retry
+  // doesn't loop through setBuildError -> effectiveError -> rebuild.
+  const lastBuildErrorKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, description, chartLayers, yBounds, error, userMessages, profileId]);
+  }, [
+    query,
+    title,
+    description,
+    chartLayers,
+    yBounds,
+    legend,
+    yAxisTitle,
+    effectiveError,
+    userMessages,
+    profileId,
+  ]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
     // keep Lens from building if there are no chart layers and no error
     // force Lens to build with no datasource on error to show the error message
-    if (!chartLayers.length && !error) return null;
+    if (!chartLayers.length && !effectiveError) return null;
 
     const lensParams = buildLensParams({
       query,
@@ -98,6 +130,8 @@ export const useLensProps = ({
       description,
       chartLayers,
       yBounds,
+      legend,
+      yAxisTitle,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -116,6 +150,7 @@ export const useLensProps = ({
         searchSessionId: fetchParams.searchSessionId,
         timeRange: fetchParams.relativeTimeRange, // same as in the time picker
         esqlVariables: fetchParams.esqlVariables,
+        isApproximate: fetchParams.isApproximate,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         description,
@@ -129,6 +164,7 @@ export const useLensProps = ({
       fetchParams.relativeTimeRange,
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
+      fetchParams.isApproximate,
       description,
       userMessages,
       profileId,
@@ -169,8 +205,38 @@ export const useLensProps = ({
       // discover state update
       discoverFetch$
     ).pipe(
-      // any new emission cancels previous load to avoid race conditions
-      switchMap(() => from(buildAttributesFn.current())),
+      // any new emission cancels previous load to avoid race conditions.
+      switchMap(() =>
+        from(buildAttributesFn.current()).pipe(
+          // Clear latched buildError and dedup key on successful rebuild.
+          tap((attributes) => {
+            if (attributes !== null) {
+              lastBuildErrorKeyRef.current = null;
+              setBuildError(undefined);
+            }
+          }),
+          catchError((buildErr: unknown) => {
+            const errorKey =
+              buildErr instanceof Error ? `${buildErr.name}:${buildErr.message}` : null;
+            if (errorKey !== null && errorKey === lastBuildErrorKeyRef.current) {
+              return of(null);
+            }
+            lastBuildErrorKeyRef.current = errorKey;
+            reportError({
+              error: buildErr,
+              source: 'useLensProps',
+              labels: {
+                profile_id: profileIdRef.current,
+                chart_id: chartIdRef.current,
+              },
+            });
+            if (buildErr instanceof Error) {
+              setBuildError(buildErr);
+            }
+            return of(null);
+          })
+        )
+      ),
       filter((attributes): attributes is LensAttributes => attributes !== null)
     );
 
@@ -188,7 +254,16 @@ export const useLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, euiTheme.size.base]);
+  }, [
+    discoverFetch$,
+    buildAttributesFn,
+    updateLensPropsContext,
+    chartRef,
+    euiTheme.size.base,
+    profileIdRef,
+    chartIdRef,
+    reportError,
+  ]);
 
   return lensPropsContext;
 };
@@ -199,12 +274,16 @@ const buildLensParams = ({
   description,
   chartLayers,
   yBounds,
+  legend,
+  yAxisTitle,
 }: {
   query: string;
   title: string;
   description?: string;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
+  yAxisTitle?: string;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -213,14 +292,13 @@ const buildLensParams = ({
       esql: query,
     },
     title,
-    legend: {
-      show: false,
-    },
+    legend: legend ?? { show: false },
     axisTitleVisibility: {
       showXAxisTitle: false,
-      showYAxisTitle: false,
+      showYAxisTitle: yAxisTitle !== undefined,
       showYRightAxisTitle: false,
     },
+    yTitle: yAxisTitle,
     layers: chartLayers,
     fittingFunction: 'Linear',
     yBounds,
@@ -234,6 +312,7 @@ const getLensProps = ({
   lastReloadRequestTime,
   description,
   esqlVariables,
+  isApproximate,
   userMessages,
   profileId,
   chartId,
@@ -241,6 +320,7 @@ const getLensProps = ({
   searchSessionId?: string;
   attributes: LensAttributes;
   esqlVariables: ESQLControlVariable[] | undefined;
+  isApproximate?: boolean;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   description?: string;
@@ -255,6 +335,7 @@ const getLensProps = ({
   noPadding: true,
   description,
   esqlVariables,
+  isApproximate,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',

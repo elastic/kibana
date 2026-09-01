@@ -9,7 +9,7 @@ import React, { type Dispatch, memo, type SetStateAction, useCallback, useMemo }
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { PageFilters } from './page_filters';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -31,7 +31,7 @@ export interface FiltersSectionProps {
   /**
    * Data view used for the alerts page
    */
-  dataView: DataView | DataViewSpec;
+  dataView: DataView;
   /**
    * Page filters for the alerts page
    */

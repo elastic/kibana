@@ -17,7 +17,7 @@ The context is available automatically when:
 ```tsx
 import React from 'react';
 import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 
 interface Props {
@@ -35,7 +35,7 @@ const Example = ({ config }: Props) => {
 ```tsx
 import React, { useEffect } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -54,7 +54,7 @@ const Example = ({ config, core }: Props) => {
 
 ```tsx
 import React, { useEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -85,6 +85,8 @@ const Example = ({ config, core }: Props) => {
 
 4. Action button - `AppMenu` introduces action button:
 
-    - `primaryActionButton` - this is meant to be used for primary actions (e.g saving), can be either an `EuiButton` or a split button, always placed as the rightmost item
+    - `primaryActionButton` - this is meant to be used for primary actions (e.g saving), can be an `EuiButton`, a button with a popover, or a split button, always placed as the rightmost item
 
-5. Removal of `TopNavMenuExtensionsRegistry` - registering global items is no longer possible, add items locally to your application.
+5. Switch - `AppMenu` supports an optional `AppMenuSwitch` that is rendered to the left of the menu items. Only one switch is available per app menu.
+
+6. Removal of `TopNavMenuExtensionsRegistry` - registering global items is no longer possible, add items locally to your application.

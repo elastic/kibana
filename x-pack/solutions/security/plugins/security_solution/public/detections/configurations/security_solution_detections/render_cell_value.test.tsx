@@ -23,15 +23,6 @@ import { AlertTableCellContextProvider } from './cell_value_context';
 import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    browserFields: {},
-    defaultIndex: 'defaultIndex',
-    loading: false,
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -112,5 +103,31 @@ describe('RenderCellValue', () => {
     const { getByText } = render(<RenderCellValueComponent {...defaultProps} />);
 
     expect(getByText('Nov 5, 2018 @ 19:03:25.937')).toBeInTheDocument();
+  });
+
+  it('renders flattened object fields as JSON strings instead of [object Object]', () => {
+    const FLATTENED_FIELD = 'kibana.cps_scope.linked_projects';
+    const linkedProjects = [
+      { id: 'p1', alias: '_alias:project-one', type: 'project', organization: 'org-1' },
+      { id: 'p2', alias: '_alias:project-two', type: 'project', organization: 'org-1' },
+    ];
+    const alertWithCps: Alert = {
+      ...(defaultProps.alert as Alert),
+      [FLATTENED_FIELD]: linkedProjects,
+    } as unknown as Alert;
+
+    const cpsHeader = { ...cloneDeep(defaultHeaders[0]), id: FLATTENED_FIELD };
+    const { queryByText, baseElement } = render(
+      <RenderCellValueComponent
+        {...defaultProps}
+        alert={alertWithCps}
+        columnId={FLATTENED_FIELD}
+        header={cpsHeader as ColumnHeaderOptions}
+      />
+    );
+
+    expect(queryByText(/\[object Object\]/)).not.toBeInTheDocument();
+    expect(baseElement.textContent).toContain('"alias":"_alias:project-one"');
+    expect(baseElement.textContent).toContain('"alias":"_alias:project-two"');
   });
 });

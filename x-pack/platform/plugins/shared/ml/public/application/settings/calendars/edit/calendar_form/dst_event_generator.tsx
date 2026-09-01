@@ -7,16 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createDstEvents, generateTimeZones } from '../../dst_utils';
 
@@ -57,6 +52,9 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
     <>
       <EuiFormRow
         fullWidth
+        label={i18n.translate('xpack.ml.calendarsEdit.calendarForm.dstEventsAriaLabel', {
+          defaultMessage: 'Time zone',
+        })}
         helpText={
           <FormattedMessage
             id="xpack.ml.calendarsEdit.calendarForm.dstEventsHelpText"
@@ -82,10 +80,8 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
         <>
           <EuiSpacer size="s" />
 
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
-            color="primary"
-            iconType="info"
             size="s"
             title={
               <FormattedMessage
@@ -93,14 +89,13 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
                 defaultMessage="No DST events available"
               />
             }
-          >
-            <div>
+            text={
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.calendarForm.dstEventGenerator.noTimeZonesAvailableDescription"
                 defaultMessage="Some time zones do not observe daylight saving time."
               />
-            </div>
-          </EuiCallOut>
+            }
+          />
         </>
       ) : null}
     </>

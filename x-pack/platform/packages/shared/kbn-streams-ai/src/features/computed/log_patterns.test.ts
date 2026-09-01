@@ -25,6 +25,7 @@ const createTracedEsClientMock = jest.mocked(createTracedEsClient);
 const stream = { name: 'logs.test-default' } as Streams.all.Definition;
 const esClient = {} as ElasticsearchClient;
 const logger = {} as Logger;
+const signal = new AbortController().signal;
 const tracedClient = { traced: true };
 
 describe('logPatternsGenerator', () => {
@@ -44,20 +45,21 @@ describe('logPatternsGenerator', () => {
       end: 200,
       esClient,
       logger,
+      signal,
     });
 
     expect(createTracedEsClientMock).toHaveBeenCalledWith({
       client: esClient,
       logger,
       plugin: 'streams',
+      abortSignal: signal,
     });
     expect(getSigEventsLogPatternsEsqlMock).toHaveBeenCalledWith({
       esClient: tracedClient,
-      index: stream.name,
+      samplingSource: stream.name,
       start: 100,
       end: 200,
       fields: ['message', 'body.text'],
-      logger,
     });
     expect(result).toEqual({
       patterns: [{ field: 'message', pattern: 'common', count: 10, sample: 'common sample' }],

@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import { fetchQueryAttacks } from '../../../../containers/detection_engine/alerts/api';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
+
+const ATTACK_TITLES_QUERY_ID = 'attacks-kpi-attack-titles';
 
 interface AttackDetails {
   _id: string;
-  _source: { 'kibana.alert.attack_discovery.title'?: string };
+  _source: {
+    'kibana.alert.attack_discovery.title'?: string;
+    'kibana.alert.attack_discovery.alert_ids'?: string[];
+  };
 }
 
 export interface UseAttackTitlesProps {
@@ -21,17 +28,19 @@ export interface UseAttackTitlesProps {
 }
 
 /**
- * Hook for fetching attack titles
+ * Hook for fetching attack titles and context counts
  * @param props - The props for the hook
- * @returns The attack titles
+ * @returns The attack titles and context counts
  */
 export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
+  const { deleteQuery, setQuery } = useGlobalTime();
+
   // Get the attack details query
   const attacksDetailsQuery = useMemo(() => {
     if (attackIds.length === 0) return {};
     return {
       size: attackIds.length,
-      _source: ['kibana.alert.attack_discovery.title'],
+      _source: ['kibana.alert.attack_discovery.title', 'kibana.alert.attack_discovery.alert_ids'],
       query: { ids: { values: attackIds } },
     };
   }, [attackIds]);
@@ -41,9 +50,11 @@ export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
     data: detailsData,
     loading: isDetailsLoading,
     refetch: refetchDetails,
+    request,
+    response,
     setQuery: setDetailsQuery,
   } = useQueryAlerts<AttackDetails, {}>({
-    fetchMethod: fetchQueryUnifiedAlerts,
+    fetchMethod: fetchQueryAttacks,
     query: attacksDetailsQuery,
     skip: attackIds.length === 0,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_DETAILS,
@@ -54,24 +65,42 @@ export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
     setDetailsQuery(attacksDetailsQuery);
   }, [attacksDetailsQuery, setDetailsQuery]);
 
-  // Extract the attack titles
-  const attackTitles = useMemo(() => {
-    const titles: Record<string, string> = {};
+  const refetch = useCallback(() => {
+    if (attackIds.length > 0 && refetchDetails) {
+      refetchDetails();
+    }
+  }, [attackIds.length, refetchDetails]);
+
+  useInspectButton({
+    deleteQuery,
+    loading: isDetailsLoading,
+    response,
+    setQuery,
+    refetch,
+    request,
+    uniqueQueryId: ATTACK_TITLES_QUERY_ID,
+  });
+
+  // Extract the attack titles and counts
+  const attackDetails = useMemo(() => {
+    const details: Record<string, { title: string; count: number }> = {};
     if (detailsData?.hits?.hits) {
       detailsData.hits.hits.forEach((hit) => {
         const source = hit._source;
         const title = source?.['kibana.alert.attack_discovery.title'];
+        const alertIds = source?.['kibana.alert.attack_discovery.alert_ids'];
+        const count = Array.isArray(alertIds) ? alertIds.length : 0;
         if (title) {
-          titles[hit._id] = title;
+          details[hit._id] = { title, count };
         }
       });
     }
-    return titles;
+    return details;
   }, [detailsData]);
 
   return {
-    attackTitles,
+    attackDetails,
     isLoading: isDetailsLoading,
-    refetch: refetchDetails,
+    refetch,
   };
 };

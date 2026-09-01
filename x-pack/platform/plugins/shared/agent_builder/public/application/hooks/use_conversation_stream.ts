@@ -7,18 +7,21 @@
 
 import { useCallback, useMemo } from 'react';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
+import { useNavigation } from './use_navigation';
+import { appPaths } from '../utils/app_paths';
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
  *
  * Use INSIDE a conversation tree — it reads `conversationId` and `agentId` from context.
- * Components asking "am I streaming?" / "what's my agent reasoning?" get an answer about
- * their own conversation, not the global app.
+ * Components asking "am I streaming?" get an answer about their own conversation, not
+ * the global app.
  *
  * Outside a conversation tree (e.g. the global sidebar), read `useStreamingContext()`
  * directly. This hook lives in `hooks/` rather than alongside the provider in
@@ -32,8 +35,24 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools } = useConversationContext();
+  const { attachments, resetAttachments, browserApiTools, isEmbeddedContext } =
+    useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
+  const { navigateToAgentBuilderUrl } = useNavigation();
+
+  const resetToNewConversation = useCallback(
+    (message: string) => {
+      if (isEmbeddedContext || !agentId) {
+        return;
+      }
+      navigateToAgentBuilderUrl(
+        appPaths.agent.conversations.new({ agentId }),
+        {},
+        { initialMessage: message, autoSendInitialMessage: false }
+      );
+    },
+    [isEmbeddedContext, agentId, navigateToAgentBuilderUrl]
+  );
 
   const {
     activeStreams,
@@ -74,9 +93,10 @@ export const useConversationStream = () => {
         connectorId,
         attachments,
         conversationAttachments: conversation?.attachments,
-        lastRoundSteps: lastRound?.steps,
         resetAttachments,
         browserApiTools,
+        onResetToNewConversation:
+          !isEmbeddedContext && agentId ? resetToNewConversation : undefined,
       });
     },
     [
@@ -85,9 +105,10 @@ export const useConversationStream = () => {
       connectorId,
       attachments,
       conversation?.attachments,
-      lastRound?.steps,
       resetAttachments,
       browserApiTools,
+      isEmbeddedContext,
+      resetToNewConversation,
     ]
   );
 
@@ -104,7 +125,6 @@ export const useConversationStream = () => {
       agentId,
       connectorId,
       conversationAttachments: conversation?.attachments,
-      lastRoundSteps: lastRound?.steps,
       browserApiTools,
     });
   }, [
@@ -113,12 +133,11 @@ export const useConversationStream = () => {
     agentId,
     connectorId,
     conversation?.attachments,
-    lastRound?.steps,
     browserApiTools,
   ]);
 
   const resumeRound = useCallback(
-    ({ prompts }: { prompts: Record<string, { allow: boolean }> }) => {
+    ({ prompts }: { prompts: Record<string, PromptResponse> }) => {
       if (!conversationId) {
         throw new Error('Cannot resume without a conversation id');
       }
@@ -130,11 +149,10 @@ export const useConversationStream = () => {
         conversationId,
         agentId,
         connectorId,
-        lastRoundSteps: lastRound?.steps,
         browserApiTools,
       });
     },
-    [mutateResumeRound, conversationId, agentId, connectorId, lastRound?.steps, browserApiTools]
+    [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]
   );
 
   const retry = useCallback(() => {
@@ -174,7 +192,6 @@ export const useConversationStream = () => {
       pendingMessage: record.pendingMessage,
       error: record.error,
       errorSteps: record.errorSteps,
-      agentReasoning: myStream?.agentReasoning ?? null,
       canCancel: isMyStreamActive,
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
@@ -195,7 +212,6 @@ export const useConversationStream = () => {
       record.error,
       record.errorSteps,
       isMyStreamActive,
-      myStream?.agentReasoning,
     ]
   );
 };

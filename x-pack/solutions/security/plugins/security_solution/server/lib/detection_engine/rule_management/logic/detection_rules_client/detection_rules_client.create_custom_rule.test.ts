@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -51,6 +53,7 @@ describe('DetectionRulesClient.createCustomRule', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,
@@ -72,6 +75,9 @@ describe('DetectionRulesClient.createCustomRule', () => {
             description: params.description,
             immutable: false,
           }),
+        }),
+        options: expect.not.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleInstall,
         }),
       })
     );

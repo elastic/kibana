@@ -33,6 +33,7 @@ const createDefaultParams = () => {
   const esqlFieldsCache = createMapCache();
   const dataSourcesCache = createMapCache();
   const historyStarredItemsCache = createMapCache();
+  const timeseriesIndicesCache = createMapCache();
 
   // memoizedFieldsFromESQL never resolves so getColumnsFor stays pending,
   // letting us assert on the AbortSignal that was passed in.
@@ -80,6 +81,11 @@ const createDefaultParams = () => {
     memoizedFieldsFromESQL,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices: jest.fn().mockReturnValue({
+      timestamp: Date.now(),
+      result: Promise.resolve({ indices: [] }),
+    }) as unknown as Parameters<typeof useEsqlCallbacks>[0]['memoizedTimeseriesIndices'],
     favoritesClient: {} as FavoritesClient<StarredQueryMetadata>,
     getJoinIndicesCallback: jest.fn(),
     enableResourceBrowser: false,
@@ -129,6 +135,29 @@ describe('useEsqlCallbacks', () => {
       expect(params.dataSourcesCache.delete).not.toHaveBeenCalled();
       expect(params.dataSourcesCache.has(DATA_SOURCES_CACHE_KEY)).toBe(true);
       expect(params.dataSourcesCache.get(DATA_SOURCES_CACHE_KEY)).toBe(cacheEntry);
+    });
+
+    it('aborts the in-flight sources request when the editor unmounts', async () => {
+      const params = createDefaultParams();
+
+      let capturedSignal: AbortSignal | undefined;
+      (params.memoizedSources as unknown as jest.Mock).mockImplementation(
+        (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
+          capturedSignal = signal;
+          return { timestamp: Date.now(), result: new Promise(() => {}) };
+        }
+      );
+
+      const { result, unmount } = renderHook(() => useEsqlCallbacks(params));
+
+      void result.current.getSources!();
+
+      expect(capturedSignal).toBeDefined();
+      expect(capturedSignal!.aborted).toBe(false);
+
+      unmount();
+
+      expect(capturedSignal!.aborted).toBe(true);
     });
   });
 

@@ -23,6 +23,7 @@ interface MutationArgs {
   getUpdateSuccessToast?: (args: { updateSummary?: UpdateSummary[] }) => {
     title: string;
     text?: ToastInputFields['text'];
+    actionProps?: ToastInputFields['actionProps'];
   };
 }
 
@@ -71,7 +72,7 @@ export const useUpdateCases = () => {
         });
 
         if (customToast) {
-          showSuccessToast(customToast.title, customToast.text);
+          showSuccessToast(customToast.title, customToast.text, customToast.actionProps);
         } else if (successToasterTitle) {
           showSuccessToast(successToasterTitle);
         }

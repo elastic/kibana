@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { difference, uniq } from 'lodash';
 import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
-  EuiIcon,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSelectable,
   EuiWrappingPopover,
 } from '@elastic/eui';
@@ -107,6 +108,7 @@ export const TagsAddRemove: React.FC<Props> = ({
   const updateTags = async (
     tagsToAdd: string[],
     tagsToRemove: string[],
+    onError?: () => void,
     successMessage?: string,
     errorMessage?: string
   ) => {
@@ -116,6 +118,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         agentId,
         newSelectedTags,
         () => onTagsUpdated(tagsToAdd),
+        onError,
         successMessage,
         errorMessage
       );
@@ -125,6 +128,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         tagsToAdd,
         tagsToRemove,
         (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
+        onError,
         successMessage,
         errorMessage
       );
@@ -134,21 +138,13 @@ export const TagsAddRemove: React.FC<Props> = ({
   const renderOption = (option: EuiSelectableOption<any>, search: string) => {
     return (
       <EuiFlexGroup
-        gutterSize={'s'}
+        alignItems="center"
+        gutterSize="s"
         onMouseEnter={() => setIsTagHovered({ ...isTagHovered, [option.label]: true })}
         onMouseLeave={() => setIsTagHovered({ ...isTagHovered, [option.label]: false })}
       >
         <EuiFlexItem>
-          <TruncatedEuiHighlight
-            search={search}
-            onClick={() => {
-              const tagsToAdd = option.checked === 'on' ? [] : [option.label];
-              const tagsToRemove = option.checked === 'on' ? [option.label] : [];
-              updateTags(tagsToAdd, tagsToRemove);
-            }}
-          >
-            {option.label}
-          </TruncatedEuiHighlight>
+          <TruncatedEuiHighlight search={search}>{option.label}</TruncatedEuiHighlight>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TagOptions
@@ -164,8 +160,10 @@ export const TagsAddRemove: React.FC<Props> = ({
   };
 
   const createTagButton = (
-    <EuiButtonEmpty
-      color="text"
+    <EuiButton
+      size="s"
+      fullWidth
+      iconType="plus"
       data-test-subj="createTagBtn"
       onClick={() => {
         if (!searchValue) {
@@ -174,6 +172,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         updateTags(
           [searchValue],
           [],
+          undefined,
           i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
             defaultMessage: 'Tag created',
           }),
@@ -183,31 +182,28 @@ export const TagsAddRemove: React.FC<Props> = ({
         );
       }}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="plus" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.fleet.tagsAddRemove.createText"
-            defaultMessage='Create a new tag "{name}"'
-            values={{
-              name: searchValue,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiButtonEmpty>
+      <FormattedMessage
+        id="xpack.fleet.tagsAddRemove.createText"
+        defaultMessage='Create a new tag "{name}"'
+        values={{
+          name: searchValue,
+        }}
+      />
+    </EuiButton>
   );
 
   return (
     <>
       <EuiWrappingPopover
+        aria-label={i18n.translate('xpack.fleet.tagsAddRemove.popoverAriaLabel', {
+          defaultMessage: 'Add / remove tags',
+        })}
         isOpen={isPopoverOpen}
         button={button!}
         closePopover={closePopover}
         anchorPosition="leftUp"
         hasArrow={true}
+        panelPaddingSize="s"
       >
         <EuiSelectable
           // workaround for auto-scroll to first element after clearing search
@@ -227,16 +223,31 @@ export const TagsAddRemove: React.FC<Props> = ({
             value: searchValue ?? '',
           }}
           options={labels}
+          onChange={(newOptions) => {
+            const changedIndex = newOptions.findIndex(
+              (opt, i) => opt.checked !== labels[i]?.checked
+            );
+            if (changedIndex === -1) return;
+            const option = newOptions[changedIndex];
+            const isNowChecked = option.checked === 'on';
+            const labelsSnapshot = labels;
+            setLabels(newOptions);
+            updateTags(isNowChecked ? [option.label] : [], isNowChecked ? [] : [option.label], () =>
+              setLabels(labelsSnapshot)
+            );
+          }}
           renderOption={renderOption}
         >
           {(list, search) => (
-            <Fragment>
-              {search}
+            <>
+              <EuiPopoverTitle>{search}</EuiPopoverTitle>
               {list}
-            </Fragment>
+              {(!isExactMatch || labels.length === 0) && searchValue !== '' ? (
+                <EuiPopoverFooter>{createTagButton}</EuiPopoverFooter>
+              ) : null}
+            </>
           )}
         </EuiSelectable>
-        {(!isExactMatch || labels.length === 0) && searchValue !== '' ? createTagButton : null}
       </EuiWrappingPopover>
     </>
   );

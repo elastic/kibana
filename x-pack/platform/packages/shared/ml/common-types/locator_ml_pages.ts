@@ -15,7 +15,6 @@ export const ML_PAGES = {
   DATA_FRAME_ANALYTICS_SOURCE_SELECTION: 'data_frame_analytics/source_selection',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
   TRAINED_MODELS_MANAGE: 'trained_models',
-  DATA_DRIFT_INDEX_SELECT: 'data_drift_index_select',
   DATA_DRIFT_CUSTOM: 'data_drift_custom',
   DATA_DRIFT: 'data_drift',
   NODES: 'nodes',
@@ -27,11 +26,6 @@ export const ML_PAGES = {
    * Page: Data Visualizer
    */
   DATA_VISUALIZER: 'datavisualizer',
-  /**
-   * Page: Data Visualizer
-   * Open data visualizer by selecting a Kibana data view or saved search
-   */
-  DATA_VISUALIZER_INDEX_SELECT: 'datavisualizer_index_select',
   /**
    * Page: Data Visualizer
    * Open data visualizer by importing data from a log file

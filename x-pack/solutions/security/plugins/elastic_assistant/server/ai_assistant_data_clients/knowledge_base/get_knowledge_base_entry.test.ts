@@ -16,6 +16,7 @@ import {
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 export const mockUser = {
   username: 'elastic',
+  profile_uid: 'my_profile_uid',
   authentication_realm: {
     type: 'my_realm_type',
     name: 'my_realm_name',
@@ -41,6 +42,10 @@ describe('getKnowledgeBaseEntry', () => {
     });
     const expected = getKnowledgeBaseEntryMock();
     expect(entry).toEqual(expected);
+    expect(JSON.stringify(esClient.search.mock.calls[0][0])).toContain(
+      '"users.id":"my_profile_uid"'
+    );
+    expect(JSON.stringify(esClient.search.mock.calls[0][0])).not.toContain('users.name');
   });
 
   test('it returns null if the search is empty', async () => {
@@ -58,6 +63,25 @@ describe('getKnowledgeBaseEntry', () => {
     expect(entry).toEqual(null);
   });
 
+  test('it only searches global entries when the user has no profile UID', async () => {
+    const data = getKnowledgeBaseEntrySearchEsMock();
+    data.hits.hits = [];
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockResponse(data);
+
+    await getKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: '.kibana-elastic-ai-assistant-knowledge-base',
+      id: '1',
+      logger: loggerMock,
+      user: { ...mockUser, profile_uid: undefined },
+    });
+
+    const serializedQuery = JSON.stringify(esClient.search.mock.calls[0][0]);
+    expect(serializedQuery).not.toContain('users.id');
+    expect(serializedQuery).not.toContain('users.name');
+  });
+
   test('it throws an error if the search fails', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockRejectedValue(new Error('search failed'));
@@ -69,6 +93,6 @@ describe('getKnowledgeBaseEntry', () => {
         logger: loggerMock,
         user: mockUser,
       })
-    ).rejects.toThrowError('search failed');
+    ).rejects.toThrow('search failed');
   });
 });

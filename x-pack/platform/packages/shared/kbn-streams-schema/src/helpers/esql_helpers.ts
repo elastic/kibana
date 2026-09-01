@@ -18,11 +18,12 @@ import type {
   ESQLAstQueryExpression,
   ESQLBinaryExpression,
   ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
+  ESQLStringLiteral,
 } from '@elastic/esql/types';
-import type { QueryType } from '../queries';
 
 // ---------------------------------------------------------------------------
 // Internal helpers — shared parsing, type-guarding, and printing logic
@@ -43,6 +44,12 @@ function isIndexSource(arg: ESQLCommand['args'][number]): arg is ESQLSource {
     arg.type === 'source' &&
     (arg as ESQLSource).sourceType === 'index'
   );
+}
+
+type MetadataOption = ESQLCommandOption & { name: 'metadata' };
+
+function isMetadataOption(arg: ESQLAstItem): arg is MetadataOption {
+  return !Array.isArray(arg) && arg.type === 'option' && arg.name === 'metadata';
 }
 
 function printWithUpdatedFrom(
@@ -171,16 +178,7 @@ export function ensureMetadata(esql: string): string {
   const { root, fromCmd } = parseFromCommand(esql);
   if (!fromCmd) return esql;
 
-  const hasMetadata = fromCmd.args.some(
-    (arg) =>
-      !Array.isArray(arg) &&
-      'type' in arg &&
-      arg.type === 'option' &&
-      'name' in arg &&
-      arg.name === 'metadata'
-  );
-
-  if (hasMetadata) return esql;
+  if (fromCmd.args.some(isMetadataOption)) return esql;
 
   return printWithUpdatedFrom(root, fromCmd, [...fromCmd.args, buildMetadataOption()]);
 }
@@ -374,22 +372,13 @@ export function hasStatsCommand(esql: string): boolean {
 }
 
 /**
- * Derives the canonical {@link QueryType} from an ES|QL query string
- * by checking whether it contains a STATS command.
+ * Derives the canonical significant-events query type (`'match' | 'stats'`,
+ * structurally equal to `QueryType` in `@kbn/significant-events-schema`) from an
+ * ES|QL query string by checking whether it contains a STATS command.
  */
-export function deriveQueryType(esql: string): QueryType {
+export function deriveQueryType(esql: string): 'match' | 'stats' {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
-
-const SAMPLE_FLOOR_AGG_NAMES = new Set([
-  'percentile',
-  'percentile_disc',
-  'percentile_cont',
-  'avg',
-  'median',
-]);
-
-const COMPARISON_OPERATORS = new Set(['>', '<', '>=', '<=']);
 
 function collectFunctionNames(nodes: WalkerAstNode): Set<string> {
   const names = new Set<string>();
@@ -406,42 +395,6 @@ function hasRateComputation(nodes: WalkerAstNode): boolean {
   return fns.has('*') && fns.has('/');
 }
 
-function needsSampleFloor(commandsFromStats: ESQLCommand[]): boolean {
-  const fns = collectFunctionNames(commandsFromStats);
-  const hasStatAgg = [...SAMPLE_FLOOR_AGG_NAMES].some((name) => fns.has(name));
-  return hasStatAgg || hasRateComputation(commandsFromStats);
-}
-
-function countComparisons(whereCommands: ESQLCommand[]): number {
-  let count = 0;
-  walk(
-    whereCommands.flatMap((cmd) => cmd.args),
-    {
-      visitFunction: (node) => {
-        if (COMPARISON_OPERATORS.has(node.name)) {
-          count++;
-        }
-      },
-    }
-  );
-  return count;
-}
-
-function checkSampleSizeFloor(
-  commandsFromStats: ESQLCommand[],
-  whereCommandsAfterStats: ESQLCommand[],
-  hints: string[]
-): void {
-  if (!needsSampleFloor(commandsFromStats)) return;
-  if (whereCommandsAfterStats.length === 0) return;
-
-  if (countComparisons(whereCommandsAfterStats) < 2) {
-    hints.push(
-      'Heuristic warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts. This check is approximate — compound predicates may not be detected.'
-    );
-  }
-}
-
 function containsFunction(node: WalkerAstNode, fnName: string): boolean {
   let found = false;
   walk(node, {
@@ -455,36 +408,46 @@ function containsFunction(node: WalkerAstNode, fnName: string): boolean {
   return found;
 }
 
-function checkIsNotNullDenominator(
+/**
+ * For rate STATS (`*` + `/`), every COUNT in the STATS clause should carry a
+ * per-aggregation WHERE. Accept any condition (`IS NOT NULL`, `IN (...)`,
+ * equality) — the system prompt uses all three. Warn only when at least one
+ * COUNT is bare (`total = COUNT(*)` with no WHERE).
+ */
+function checkFilteredDenominator(
   statsCmd: ESQLCommand,
   commandsFromStats: ESQLCommand[],
   hints: string[]
 ): void {
   if (!hasRateComputation(commandsFromStats)) return;
 
-  let hasFilteredDenominator = false;
-  walk(statsCmd.args, {
-    visitFunction: (node) => {
-      if (node.name !== 'where' || node.subtype !== 'binary-expression') return;
-      const [aggSide, conditionSide] = node.args;
-      if (!aggSide) return;
-      if (!containsFunction(aggSide, 'count')) return;
+  let hasCount = false;
+  let hasUnfilteredCount = false;
 
-      if (!conditionSide || Array.isArray(conditionSide)) return;
-      if (
-        'type' in conditionSide &&
-        conditionSide.type === 'function' &&
-        (conditionSide as ESQLFunction).name === 'is not null'
-      ) {
-        hasFilteredDenominator = true;
+  for (const arg of statsCmd.args) {
+    if (Array.isArray(arg) || arg.type === 'option') continue;
+    if (arg.type !== 'function') continue;
+
+    // `alias = COUNT(*) WHERE <condition>` — any condition counts as filtered.
+    if (arg.name === 'where' && arg.subtype === 'binary-expression') {
+      const [aggSide] = arg.args;
+      if (aggSide && !Array.isArray(aggSide) && containsFunction(aggSide, 'count')) {
+        hasCount = true;
       }
-    },
-  });
+      continue;
+    }
 
-  if (hasFilteredDenominator) return;
+    // Bare `alias = COUNT(*)` (or unaliased COUNT) — unfiltered denominator risk.
+    if ((arg.name === '=' || arg.name === 'count') && containsFunction(arg, 'count')) {
+      hasCount = true;
+      hasUnfilteredCount = true;
+    }
+  }
+
+  if (!hasCount || !hasUnfilteredCount) return;
 
   hints.push(
-    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
+    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, filter it with WHERE <field> IS NOT NULL, IN (...), or an equality so rows without the target field are excluded.'
   );
 }
 
@@ -535,18 +498,36 @@ export function getStatsQueryHints(esql: string): string[] {
 
   const commandsAfterStats = commands.slice(statsIdx + 1);
   const hasWhereAfterStats = commandsAfterStats.some((cmd) => cmd.name === 'where');
-  if (!hasWhereAfterStats) {
+
+  // Metric-series contract: continuous series ending in metric_value + bucket.
+  // Do not require breach-threshold WHERE after STATS (change_point replaces thresholds).
+  const bucketColumn = extractBucketColumnName(esql);
+  if (bucketColumn && bucketColumn !== 'bucket') {
     hints.push(
-      'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
+      'Warning: Temporal bucket column must be named exactly `bucket` (e.g. BY bucket = BUCKET(@timestamp, 1 minute)).'
+    );
+  }
+
+  const bucketIntervalMs = extractBucketIntervalMs(esql);
+  if (bucketIntervalMs != null && bucketIntervalMs !== MS_PER_UNIT.minute) {
+    hints.push(
+      'Warning: Use a 1-minute temporal bucket: BY bucket = BUCKET(@timestamp, 1 minute).'
+    );
+  }
+
+  if (!/\bmetric_value\b/.test(esql)) {
+    hints.push(
+      'Warning: STATS queries must emit a final column named exactly `metric_value` (use EVAL … AS metric_value or name the aggregate metric_value). End with | KEEP bucket, metric_value.'
     );
   }
 
   if (hasWhereAfterStats) {
-    const whereCommandsAfterStats = commandsAfterStats.filter((cmd) => cmd.name === 'where');
-    checkSampleSizeFloor(commandsFromStats, whereCommandsAfterStats, hints);
+    hints.push(
+      'Warning: Avoid WHERE after STATS that drops buckets (thresholds or sample-size floors). Emit a point for every bucket; use CASE for safe rates (e.g. CASE(total > 0, errors * 100.0 / total, 0)).'
+    );
   }
 
-  checkIsNotNullDenominator(statsCmd, commandsFromStats, hints);
+  checkFilteredDenominator(statsCmd, commandsFromStats, hints);
 
   const byArgs = findStatsByArgs(esql);
   if (byArgs) {
@@ -554,14 +535,14 @@ export function getStatsQueryHints(esql: string): string[] {
       const fnName = getAssignmentRhsFnName(arg);
       return fnName !== 'bucket' && fnName !== 'tbucket';
     });
-    if (nonBucketByColumns.length > 2) {
+    if (nonBucketByColumns.length > 0) {
       hints.push(
-        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimensions detected. High-cardinality combinations (>50 distinct groups per bucket) cause result explosion. Prefer at most 1–2 entity dimensions.`
+        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimension(s) detected. v0 metric series supports time bucket only — remove entity BY columns (e.g. service.name).`
       );
     }
   }
 
-  const disallowed = ['sort', 'limit', 'keep'];
+  const disallowed = ['sort', 'limit'];
   const found = commandsAfterStats
     .filter((cmd) => disallowed.includes(cmd.name))
     .map((cmd) => cmd.name.toUpperCase());
@@ -569,11 +550,87 @@ export function getStatsQueryHints(esql: string): string[] {
     hints.push(
       `Warning: ${found.join(
         ', '
-      )} after STATS should not be used. The system manages ordering and limits.`
+      )} after STATS should not be used. Prefer | KEEP bucket, metric_value as the final step.`
     );
   }
 
   return hints;
+}
+
+export interface OverBroadMatchPredicate {
+  field: string;
+  value: string;
+  operator: ':' | 'MATCH';
+}
+
+function isKeywordLiteral(node: ESQLAstItem | undefined): node is ESQLStringLiteral {
+  return (
+    !!node &&
+    !Array.isArray(node) &&
+    'type' in node &&
+    node.type === 'literal' &&
+    node.literalType === 'keyword'
+  );
+}
+
+function getUnquotedLiteral(node: ESQLAstItem | undefined): string | null {
+  return isKeywordLiteral(node) ? node.valueUnquoted : null;
+}
+
+function matchOptionsForceAndOperator(node: ESQLAstItem | undefined): boolean {
+  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'map') return false;
+  return node.entries.some(
+    (entry) =>
+      getUnquotedLiteral(entry.key)?.toLowerCase() === 'operator' &&
+      getUnquotedLiteral(entry.value)?.toLowerCase() === 'and'
+  );
+}
+
+function getColumnName(node: ESQLAstItem | undefined): string {
+  if (!node || Array.isArray(node)) return '<field>';
+  return BasicPrettyPrinter.expression(node as ESQLSingleAstItem);
+}
+
+/**
+ * Finds multi-word `:` / `MATCH` predicates - ORed term-by-term on text, an over-match.
+ * Mapping-blind on purpose: a field's type is ambiguous across backing indices, and the fix
+ * `MATCH_PHRASE` is safe either way.
+ */
+export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredicate[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const issues: OverBroadMatchPredicate[] = [];
+  walk(root, {
+    visitFunction: (fn) => {
+      const isColon = fn.name === ':' && fn.subtype === 'binary-expression';
+      const isMatch = fn.name === 'match' && fn.subtype === 'variadic-call';
+      if (!isColon && !isMatch) return;
+
+      const value = getUnquotedLiteral(fn.args[1]);
+      if (value === null) return;
+      if (isMatch && matchOptionsForceAndOperator(fn.args[2])) return;
+      if (!/\s/.test(value.trim())) return;
+
+      issues.push({ field: getColumnName(fn.args[0]), value, operator: isColon ? ':' : 'MATCH' });
+    },
+  });
+  return issues;
+}
+
+/** Shared rejection message for {@link findOverBroadMatchPredicates} results, so callers stay identical. */
+export function renderOverBroadMatchError(predicates: OverBroadMatchPredicate[]): string {
+  const rendered = predicates
+    .map((p) =>
+      p.operator === ':' ? `${p.field} : "${p.value}"` : `MATCH(${p.field}, "${p.value}")`
+    )
+    .join(', ');
+  return (
+    `Full-text predicate(s) match ANY word rather than the whole value - a multi-word ":" or ` +
+    `MATCH value is ORed term-by-term, which is far too broad: ${rendered}. Replace each with ` +
+    `MATCH_PHRASE(field, "a b") for an exact phrase, or MATCH(field, "a b", {"operator": "AND"}) ` +
+    `to require all terms in any order; both match exactly on keyword fields.`
+  );
 }
 
 type ByArg = ESQLCommand['args'][number];

@@ -229,7 +229,7 @@ We support UI end to end test with `kbn-scout`
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run tests
-npx playwright test --project local --grep stateful-classic --config x-pack/platform/plugins/shared/fleet/test/scout/ui/  --ui
+node scripts/playwright test --project local --grep stateful-classic --config x-pack/platform/plugins/shared/fleet/test/scout/ui/  --ui
 ```
 
 ##### Cypress tests

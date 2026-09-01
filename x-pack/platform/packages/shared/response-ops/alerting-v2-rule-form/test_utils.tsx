@@ -11,10 +11,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DELAY_MODE } from './form/types';
 import type { FormValues } from './form/types';
 import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
@@ -36,6 +39,23 @@ export const createTestQueryClient = () =>
   });
 
 /**
+ * Minimal dashboard start contract mock returning an empty find service.
+ * Tests that exercise dashboard resolution override `findDashboardsService`.
+ */
+export const createMockDashboardStart = (): DashboardStart =>
+  ({
+    findDashboardsService: jest.fn().mockResolvedValue({
+      search: jest.fn().mockResolvedValue({
+        data: [],
+        meta: { page: 1, per_page: 100, total: 0 },
+      }),
+      findById: jest.fn(),
+      findByIds: jest.fn().mockResolvedValue([]),
+      findByTitle: jest.fn(),
+    }),
+  } as unknown as DashboardStart);
+
+/**
  * Creates mock services for testing.
  */
 export const createMockServices = (): RuleFormServices => ({
@@ -44,7 +64,11 @@ export const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreMock.createStart().featureFlags,
   lens: lensPluginMock.createStartContract(),
+  uiActions: uiActionsPluginMock.createStartContract(),
+  dashboard: createMockDashboardStart(),
 });
 
 /**
@@ -69,14 +93,7 @@ export const defaultTestFormValues: FormValues = {
   },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: '',
-    },
-  },
-  recoveryPolicy: {
-    type: 'no_breach',
-  },
+  query: { format: 'standalone', breach: { query: '' } },
   stateTransitionAlertDelayMode: DELAY_MODE.immediate,
   stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
 };

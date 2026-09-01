@@ -9,6 +9,10 @@
 
 import type { ActionContext } from '../../connector_spec';
 import {
+  getConnectorActionErrorMeta,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+} from '../../connector_utils';
+import {
   listAmazonS3Buckets,
   listAmazonS3BucketObjects,
   getAmazonS3BucketObjectMetadata,
@@ -54,7 +58,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3Buckets with a single bucket', async () => {
@@ -71,7 +75,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3Buckets with multiple buckets', async () => {
@@ -92,7 +96,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: 'continuation-token',
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3BucketObjects with no objects in bucket', async () => {
@@ -105,7 +109,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3BucketObjects with a single object in bucket', async () => {
@@ -125,7 +129,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3BucketObjects with a multiple objects in bucket', async () => {
@@ -151,7 +155,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: 'continuation-token',
       isTruncated: true,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should getAmazonS3BucketObjectMetadata', async () => {
@@ -180,7 +184,7 @@ describe('amazon_s3_api exports', () => {
       server: 'AmazonS3',
       storageClass: 'STANDARD',
     });
-    expect(mockClient.head).toBeCalledTimes(1);
+    expect(mockClient.head).toHaveBeenCalledTimes(1);
   });
 
   it('should generate a Amazon S3 bucket object presigned url', async () => {
@@ -231,7 +235,7 @@ describe('amazon_s3_api exports', () => {
       encoding: 'base64',
       hasContent: true,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should downloadAmazonS3BucketObject file with spaces in key for URI encoding', async () => {
@@ -256,7 +260,38 @@ describe('amazon_s3_api exports', () => {
       encoding: 'base64',
       hasContent: true,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('should preserve response size metadata when download fails', async () => {
+    const error = new Error('maxContentLength size of 1048576 exceeded') as Error & {
+      name: string;
+      request?: { res?: { headers?: Record<string, string> } };
+    };
+    error.name = 'AxiosError';
+    error.request = {
+      res: {
+        headers: {
+          'content-length': '21005621',
+        },
+      },
+    };
+    mockClient.get.mockRejectedValueOnce(error);
+
+    try {
+      await downloadAmazonS3BucketObject(mockContext, 'test-bucket-name', '20mb.pdf', 'us-east-1');
+      throw new Error('Expected download to fail');
+    } catch (s3Error) {
+      expect(s3Error).toEqual(
+        expect.objectContaining({
+          message: 'AWS S3 error (AxiosError): maxContentLength size of 1048576 exceeded',
+        })
+      );
+      expect(getConnectorActionErrorMeta(s3Error)).toEqual({
+        contentLengthBytes: 21005621,
+        estimatedOutputBytes: Math.ceil(21005621 / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+      });
+    }
   });
 
   const responseListBucketsNoBuckets = '<ListAllMyBucketsResult></ListAllMyBucketsResult>';

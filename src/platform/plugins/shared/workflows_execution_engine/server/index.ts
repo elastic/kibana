@@ -19,9 +19,17 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  DataClient,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataClient,
+  TriggerEventsContract,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
 
 export type {
   LogsRepository,
@@ -33,3 +41,9 @@ export type {
 export type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export { resolveWorkflowEventsModeFromOn } from './trigger_events/lib/resolve_workflow_events_mode_from_on';
+
+export type {
+  SearchTriggerEventLogHit,
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
+} from './trigger_events/event_logs/trigger_event_log_query';

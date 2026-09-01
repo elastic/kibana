@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./suggest'));
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./get_current'));
+    loadTestFile(require.resolve('./get_current_profile_id'));
   });
 }

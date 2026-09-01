@@ -17,8 +17,7 @@ import {
   buildTargetEntityIdEvals,
   buildEntityFieldHints,
   buildSourceMetadataEvals,
-  buildEntityEnrichment,
-  checkIfEntitiesIndexLookupMode,
+  resolveEntitiesIndexName,
 } from '../graph/utils';
 import type { EventRecord } from './types';
 
@@ -45,13 +44,12 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  const entityStoreIndexName = await resolveEntitiesIndexName(esClient, logger, spaceId);
 
   const query = buildEventsEsqlQuery({
     indexPatterns,
     eventCount: eventIds.length,
-    isLookupIndexAvailable,
-    spaceId,
+    entityStoreIndexName,
   });
 
   logger.trace(`Fetching events with query [${query}]`);
@@ -89,20 +87,54 @@ const buildDslFilter = (eventIds: string[], start: string | number, end: string 
 interface BuildEventsQueryParams {
   indexPatterns: string[];
   eventCount: number;
-  isLookupIndexAvailable: boolean;
-  spaceId: string;
+  /** Resolved concrete entities index for LOOKUP JOIN, or null when none is live. */
+  entityStoreIndexName: string | null;
 }
 
 const buildEventsEsqlQuery = ({
   indexPatterns,
   eventCount,
-  isLookupIndexAvailable,
-  spaceId,
+  entityStoreIndexName,
 }: BuildEventsQueryParams): string => {
   // Generate document ID params
   const documentIdParams = Array.from({ length: eventCount }, (_, idx) => `?doc_id${idx}`).join(
     ', '
   );
+
+  const indexName = entityStoreIndexName;
+  const enrichmentEsql =
+    indexName != null
+      ? `| DROP entity.id
+| DROP entity.target.id
+// rename entity.*fields before next pipeline to avoid name collisions
+| EVAL entity.id = actorEntityId
+| LOOKUP JOIN ${indexName} ON entity.id
+| RENAME actorEntityName    = entity.name
+| RENAME actorEntityType    = entity.type
+| RENAME actorEntitySubType = entity.sub_type
+| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
+| RENAME actorLookupEntityId = entity.id
+| RENAME actorEntityEngineType = entity.EngineMetadata.Type
+
+| EVAL entity.id = targetEntityId
+| LOOKUP JOIN ${indexName} ON entity.id
+| RENAME targetEntityName    = entity.name
+| RENAME targetEntityType    = entity.type
+| RENAME targetEntitySubType = entity.sub_type
+| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
+| RENAME targetLookupEntityId = entity.id
+| RENAME targetEntityEngineType = entity.EngineMetadata.Type`
+      : `// No enrichment available - use null values
+| EVAL actorEntityName = TO_STRING(null)
+| EVAL actorEntityType = TO_STRING(null)
+| EVAL actorEntitySubType = TO_STRING(null)
+| EVAL actorHostIp = TO_STRING(null)
+| EVAL actorEntityEngineType = TO_STRING(null)
+| EVAL targetEntityName = TO_STRING(null)
+| EVAL targetEntityType = TO_STRING(null)
+| EVAL targetEntitySubType = TO_STRING(null)
+| EVAL targetHostIp = TO_STRING(null)
+| EVAL targetEntityEngineType = TO_STRING(null)`;
 
   return `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
@@ -114,7 +146,7 @@ ${buildTargetEntityIdEvals(GRAPH_TARGET_ENTITY_FIELDS)}
 | MV_EXPAND targetEntityId
 ${buildEntityFieldHints(GRAPH_ACTOR_ENTITY_FIELDS, GRAPH_TARGET_ENTITY_FIELDS)}
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
-${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
+${enrichmentEsql}
 | EVAL docId = _id
 | EVAL eventId = event.id
 | EVAL index = _index

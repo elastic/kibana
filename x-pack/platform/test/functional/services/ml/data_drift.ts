@@ -16,7 +16,7 @@ export function MachineLearningDataDriftProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header']);
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
@@ -33,10 +33,10 @@ export function MachineLearningDataDriftProvider({
     },
 
     async assertDataViewTitle(expectedTitle: string) {
-      const selector = 'mlDataDriftPageDataViewTitle';
+      const selector = 'mlDataSourceSelectorButton';
       await testSubjects.existOrFail(selector);
       await retry.tryForTime(5000, async () => {
-        const title = await testSubjects.getVisibleText(selector);
+        const title = await testSubjects.getAttribute(selector, 'title');
         expect(title).to.eql(
           expectedTitle,
           `Expected data drift page's data view title to be '${expectedTitle}' (got '${title}')`
@@ -242,8 +242,8 @@ export function MachineLearningDataDriftProvider({
     },
 
     async navigateToCreateNewDataViewPage() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click(`dataDriftCreateDataViewButton`);
+      await PageObjects.common.navigateToApp('ml', { path: 'data_drift_custom' });
+      await retry.tryForTime(10000, async () => {
         await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
       });
     },
@@ -357,6 +357,55 @@ export function MachineLearningDataDriftProvider({
       await comboBox.set('mlDataDriftTimestampField', timeFieldName);
 
       await this.assertDataDriftTimestampField(timeFieldName);
+    },
+
+    async openDataViewPicker() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('mlDataSourceSelectorButton');
+        await testSubjects.existOrFail('changeDataViewPopover');
+      });
+    },
+
+    async openCreateDataViewFromPicker() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.openDataViewPicker();
+        await testSubjects.click('dataview-create-new');
+      });
+    },
+
+    async createDataViewViaFlyout({
+      name,
+      indexPattern,
+      timeField,
+    }: {
+      name: string;
+      indexPattern: string;
+      timeField?: string;
+    }) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.existOrFail('createIndexPatternNameInput');
+      });
+
+      await testSubjects.setValue('createIndexPatternNameInput', name);
+      await testSubjects.setValue('createIndexPatternTitleInput', indexPattern);
+
+      if (timeField) {
+        await testSubjects.click('toggleAdvancedSetting');
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.existOrFail('allowHiddenField');
+        });
+        const timeFieldInput = 'timestampField';
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.existOrFail(timeFieldInput);
+        });
+        await testSubjects.click(timeFieldInput);
+        await testSubjects.setValue(timeFieldInput, timeField);
+      }
+
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('saveIndexPatternButton');
+        await testSubjects.missingOrFail('createIndexPatternNameInput');
+      });
     },
   };
 }

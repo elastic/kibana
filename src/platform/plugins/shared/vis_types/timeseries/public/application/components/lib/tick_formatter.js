@@ -49,7 +49,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
       value = val;
     } else {
       try {
-        value = formatter.convert(val, 'text');
+        value = formatter.convertToText(val);
       } catch (e) {
         value = val;
       }

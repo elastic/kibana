@@ -17,6 +17,7 @@ import {
 import { AGENT_POLICY_INDEX } from '../../common';
 import type {
   AgentPolicySOAttributes,
+  BeatsOutputSOAttributes,
   PackagePolicySOAttributes,
   OutputSOAttributes,
 } from '../types';
@@ -33,7 +34,6 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
 describe('Fleet cloud preconfiguration', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
@@ -435,124 +435,142 @@ describe('Fleet cloud preconfiguration', () => {
       });
     });
     describe('Adding APM to a preconfigured agent policy after first setup', () => {
+      let startOrRestartKibana: (kbnConfig?: any) => Promise<void>;
+
       beforeAll(async () => {
         // 1. Start with a preconfigured policy withtout APM
-        const { startOrRestartKibana } = await startServers(CLOUD_KIBANA_CONFIG_WITHOUT_APM);
-
-        // 2. Add APM to the preconfigured policy
-        await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
-        agentPolicyType = await getAgentPolicySavedObjectType();
-        packagePolicyType = await getPackagePolicySavedObjectType();
+        ({ startOrRestartKibana } = await startServers(CLOUD_KIBANA_CONFIG_WITHOUT_APM));
       });
 
       afterAll(async () => {
         await stopServers();
       });
 
-      it('Works and preconfigure correctly agent policies', async () => {
-        const agentPolicies = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
-          .find<AgentPolicySOAttributes>({
-            type: agentPolicyType,
-            perPage: 10000,
-          });
-
-        expect(agentPolicies.total).toBe(2);
-        expect(
-          agentPolicies.saved_objects.find((so) => so.id === 'policy-elastic-agent-on-cloud')
-        ).toBeDefined();
-        expect(agentPolicies.saved_objects.find((so) => so.id === 'default-policy')).toBeDefined();
-      });
-
-      it('Create a .fleet-policies document with the APM package policy', async () => {
-        const res = await kbnServer.coreStart.elasticsearch.client.asInternalUser.search({
-          index: AGENT_POLICY_INDEX,
-          q: `policy_id:policy-elastic-agent-on-cloud`,
-          sort: 'revision_idx:desc',
+      describe('after adding APM', () => {
+        beforeAll(async () => {
+          // 2. Add APM to the preconfigured policy
+          await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
+          agentPolicyType = await getAgentPolicySavedObjectType();
+          packagePolicyType = await getPackagePolicySavedObjectType();
         });
 
-        expect(
-          (res.hits.hits[0]._source as any)!.data.inputs.find(
-            (input: any) => input.meta.package.name === 'apm'
-          )
-        ).toBeDefined();
-      });
+        it('Works and preconfigure correctly agent policies', async () => {
+          const agentPolicies = await kbnServer.coreStart.savedObjects
+            .getUnsafeInternalClient()
+            .find<AgentPolicySOAttributes>({
+              type: agentPolicyType,
+              perPage: 10000,
+            });
 
-      it('Create correct package policies', async () => {
-        const packagePolicies = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
-          .find<PackagePolicySOAttributes>({
-            type: packagePolicyType,
-            perPage: 10000,
+          expect(agentPolicies.total).toBe(2);
+          expect(
+            agentPolicies.saved_objects.find((so) => so.id === 'policy-elastic-agent-on-cloud')
+          ).toBeDefined();
+          expect(
+            agentPolicies.saved_objects.find((so) => so.id === 'default-policy')
+          ).toBeDefined();
+        });
+
+        it('Create a .fleet-policies document with the APM package policy', async () => {
+          const res = await kbnServer.coreStart.elasticsearch.client.asInternalUser.search({
+            index: AGENT_POLICY_INDEX,
+            q: `policy_id:policy-elastic-agent-on-cloud`,
+            sort: 'revision_idx:desc',
           });
 
-        expect(packagePolicies.total).toBe(3);
-        expect(
-          packagePolicies.saved_objects.find((so) => so.id === 'elastic-cloud-fleet-server')
-        ).toBeDefined();
-        expect(
-          packagePolicies.saved_objects.find((so) => so.id === 'elastic-cloud-apm')
-        ).toBeDefined();
-        expect(
-          packagePolicies.saved_objects.find((so) => so.id === 'default-system')
-        ).toBeDefined();
+          expect(
+            (res.hits.hits[0]._source as any)!.data.inputs.find(
+              (input: any) => input.meta.package.name === 'apm'
+            )
+          ).toBeDefined();
+        });
+
+        it('Create correct package policies', async () => {
+          const packagePolicies = await kbnServer.coreStart.savedObjects
+            .getUnsafeInternalClient()
+            .find<PackagePolicySOAttributes>({
+              type: packagePolicyType,
+              perPage: 10000,
+            });
+
+          expect(packagePolicies.total).toBe(3);
+          expect(
+            packagePolicies.saved_objects.find((so) => so.id === 'elastic-cloud-fleet-server')
+          ).toBeDefined();
+          expect(
+            packagePolicies.saved_objects.find((so) => so.id === 'elastic-cloud-apm')
+          ).toBeDefined();
+          expect(
+            packagePolicies.saved_objects.find((so) => so.id === 'default-system')
+          ).toBeDefined();
+        });
       });
     });
 
     describe('Adding package policy id to a preconfigured package policy after first setup', () => {
+      let startOrRestartKibana: (kbnConfig?: any) => Promise<void>;
+
       beforeAll(async () => {
         // 1. Start with a preconfigured policy withtout APM
-        const { startOrRestartKibana } = await startServers(
+        ({ startOrRestartKibana } = await startServers(
           CLOUD_KIBANA_WITHOUT_PACKAGE_POLICY_ID_CONFIG
-        );
-
-        // 2. Add pacakge policy ids to the preconfigured policy
-        await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
-        agentPolicyType = await getAgentPolicySavedObjectType();
-        packagePolicyType = await getPackagePolicySavedObjectType();
+        ));
       });
 
       afterAll(async () => {
         await stopServers();
       });
 
-      it('Works and preconfigure correctly agent policies', async () => {
-        const agentPolicies = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
-          .find<AgentPolicySOAttributes>({
-            type: agentPolicyType,
-            perPage: 10000,
-          });
+      describe('after adding package policy ids', () => {
+        beforeAll(async () => {
+          // 2. Add pacakge policy ids to the preconfigured policy
+          await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
+          agentPolicyType = await getAgentPolicySavedObjectType();
+          packagePolicyType = await getPackagePolicySavedObjectType();
+        });
 
-        expect(agentPolicies.total).toBe(2);
-        expect(
-          agentPolicies.saved_objects.find((so) => so.id === 'policy-elastic-agent-on-cloud')
-        ).toBeDefined();
-        expect(agentPolicies.saved_objects.find((so) => so.id === 'default-policy')).toBeDefined();
-      });
+        it('Works and preconfigure correctly agent policies', async () => {
+          const agentPolicies = await kbnServer.coreStart.savedObjects
+            .getUnsafeInternalClient()
+            .find<AgentPolicySOAttributes>({
+              type: agentPolicyType,
+              perPage: 10000,
+            });
 
-      it('Create correct package policies and use the name of package policies instead of id', async () => {
-        const packagePolicies = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
-          .find<PackagePolicySOAttributes>({
-            type: packagePolicyType,
-            perPage: 10000,
-          });
+          expect(agentPolicies.total).toBe(2);
+          expect(
+            agentPolicies.saved_objects.find((so) => so.id === 'policy-elastic-agent-on-cloud')
+          ).toBeDefined();
+          expect(
+            agentPolicies.saved_objects.find((so) => so.id === 'default-policy')
+          ).toBeDefined();
+        });
 
-        expect(packagePolicies.total).toBe(3);
-        expect(
-          packagePolicies.saved_objects.find((so) => so.attributes.name === 'Fleet Server')
-        ).toBeDefined();
-        expect(
-          packagePolicies.saved_objects.find((so) => so.attributes.name === 'Elastic APM')
-        ).toBeDefined();
+        it('Create correct package policies and use the name of package policies instead of id', async () => {
+          const packagePolicies = await kbnServer.coreStart.savedObjects
+            .getUnsafeInternalClient()
+            .find<PackagePolicySOAttributes>({
+              type: packagePolicyType,
+              perPage: 10000,
+            });
+
+          expect(packagePolicies.total).toBe(3);
+          expect(
+            packagePolicies.saved_objects.find((so) => so.attributes.name === 'Fleet Server')
+          ).toBeDefined();
+          expect(
+            packagePolicies.saved_objects.find((so) => so.attributes.name === 'Elastic APM')
+          ).toBeDefined();
+        });
       });
     });
 
     describe('Support removing a field from output after first setup', () => {
+      let startOrRestartKibana: (kbnConfig?: any) => Promise<void>;
+
       beforeAll(async () => {
         // 1. Start with a preconfigured policy withtout APM
-        const { startOrRestartKibana } = await startServers({
+        ({ startOrRestartKibana } = await startServers({
           xpack: {
             fleet: {
               outputs: [
@@ -566,44 +584,48 @@ describe('Fleet cloud preconfiguration', () => {
               ],
             },
           },
-        });
-
-        // 2. Change the output remove config
-        await startOrRestartKibana({
-          xpack: {
-            fleet: {
-              outputs: [
-                {
-                  name: 'Elastic Cloud internal output',
-                  type: 'elasticsearch',
-                  id: 'es-containerhost',
-                  hosts: ['https://cloudinternales:9200'],
-                },
-              ],
-            },
-          },
-        });
-        agentPolicyType = await getAgentPolicySavedObjectType();
+        }));
       });
 
       afterAll(async () => {
         await stopServers();
       });
 
-      it('Works and preconfigure correctly agent policies', async () => {
-        const agentPolicies = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
-          .find<OutputSOAttributes>({
-            type: 'ingest-outputs',
-            perPage: 10000,
+      describe('after removing the config field', () => {
+        beforeAll(async () => {
+          // 2. Change the output remove config
+          await startOrRestartKibana({
+            xpack: {
+              fleet: {
+                outputs: [
+                  {
+                    name: 'Elastic Cloud internal output',
+                    type: 'elasticsearch',
+                    id: 'es-containerhost',
+                    hosts: ['https://cloudinternales:9200'],
+                  },
+                ],
+              },
+            },
           });
+          agentPolicyType = await getAgentPolicySavedObjectType();
+        });
 
-        expect(agentPolicies.total).toBe(2);
-        const outputSO = agentPolicies.saved_objects.find(
-          (so) => so.attributes.output_id === 'es-containerhost'
-        );
-        expect(outputSO).toBeDefined();
-        expect(outputSO?.attributes.config_yaml).toBeNull();
+        it('Works and preconfigure correctly agent policies', async () => {
+          const agentPolicies = await kbnServer.coreStart.savedObjects
+            .getUnsafeInternalClient()
+            .find<OutputSOAttributes>({
+              type: 'ingest-outputs',
+              perPage: 10000,
+            });
+
+          expect(agentPolicies.total).toBe(2);
+          const outputSO = agentPolicies.saved_objects.find(
+            (so) => so.attributes.output_id === 'es-containerhost'
+          );
+          expect(outputSO).toBeDefined();
+          expect((outputSO?.attributes as BeatsOutputSOAttributes)?.config_yaml).toBeNull();
+        });
       });
     });
   });

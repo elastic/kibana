@@ -13,19 +13,17 @@ import { test } from '../fixtures';
 // Modals, flyouts, and context menus render in EUI portals outside .kbnAppWrapper.
 const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
 
-// Failing: See https://github.com/elastic/kibana/issues/267280
-test.describe.skip('Tags management — accessibility', { tag: tags.stateful.classic }, () => {
+test.describe('Tags management — accessibility', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('tags management page a11y', async ({ page, browserAuth, pageObjects, kbnUrl }) => {
+  test('tags management page a11y', async ({ page, browserAuth, pageObjects }) => {
     const { tagManagement } = pageObjects;
     const { tagModal, assignFlyout, tagsTable } = tagManagement;
 
     await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.app('management/kibana/tags'));
-    await tagsTable.waitForLoaded();
+    await tagManagement.goto();
 
     await test.step('main page', async () => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
@@ -45,16 +43,9 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
       expect(violations).toStrictEqual([]);
     });
 
-    await test.step('tag actions panel', async () => {
-      await tagsTable.openCollapsedRowMenu('a11yTag');
-      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toStrictEqual([]);
-      await page.keyboard.press('Escape');
-    });
-
     await test.step('tag assignment flyout and listing', async () => {
-      await tagsTable.openCollapsedRowMenu('a11yTag');
-      await tagsTable.clickRowAction('assign');
+      await tagsTable.clickCollapsedRowAction('a11yTag', 'assign');
+      await assignFlyout.waitForResultsLoaded();
       const { violations: flyoutViolations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(flyoutViolations).toStrictEqual([]);
       await assignFlyout.closeButton.click();
@@ -64,8 +55,7 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
     });
 
     await test.step('edit tag panel', async () => {
-      await tagsTable.openCollapsedRowMenu('a11yTag');
-      await tagsTable.clickRowAction('edit');
+      await tagsTable.clickRowAction('a11yTag', 'edit');
       await tagModal.form.waitFor({ state: 'visible' });
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
@@ -82,12 +72,19 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
       await tagManagement.submitTagModal();
       await tagsTable.selectAllTags();
       await tagsTable.openBulkActionsMenu();
+      await page.waitForFunction(
+        () => document.querySelectorAll('[data-is-loading="true"]').length === 0
+      );
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
 
     await test.step('delete tags confirmation panel', async () => {
       await page.testSubj.click('actionBar-button-delete');
+      await page.testSubj.locator('confirmModalConfirmButton').waitFor({ state: 'visible' });
+      await page.waitForFunction(
+        () => document.querySelectorAll('[data-is-loading="true"]').length === 0
+      );
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
       await page.testSubj.click('confirmModalConfirmButton');

@@ -10,6 +10,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { XSOARRunActionParams } from '@kbn/connector-schemas/xsoar';
 import {
   CONNECTOR_ID,
@@ -213,7 +214,7 @@ describe('XSOARConnector', () => {
 
     it('XSOAR API call is successful with correct parameters', async () => {
       const response = await connector.getPlaybooks(undefined, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           method: 'post',
@@ -232,7 +233,7 @@ describe('XSOARConnector', () => {
 
     it('Auth headers are correctly set for cloud instance', async () => {
       const response = await cloudConnector.getPlaybooks(undefined, connectorUsageCollector);
-      expect(mockCloudRequest).toBeCalledTimes(1);
+      expect(mockCloudRequest).toHaveBeenCalledTimes(1);
       expect(mockCloudRequest).toHaveBeenCalledWith(
         {
           method: 'post',
@@ -494,7 +495,7 @@ describe('XSOARConnector', () => {
 
     it('XSOAR API call is successful with correct parameters', async () => {
       await connector.run(incident, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/incident',
@@ -519,9 +520,22 @@ describe('XSOARConnector', () => {
     });
 
     it('error when malformed incident is passed', async () => {
-      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrowError(
+      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrow(
         `Error parsing Body: SyntaxError: Expected property name or '}' in JSON at position 1`
       );
+    });
+
+    it('marks malformed incident body errors as user errors', async () => {
+      expect.assertions(2);
+
+      try {
+        await connector.run(malformedIncident, connectorUsageCollector);
+      } catch (error) {
+        expect(error.message).toContain(
+          `Error parsing Body: SyntaxError: Expected property name or '}' in JSON at position 1`
+        );
+        expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   extractBucketIntervalMs,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
   getStatsQueryHints,
   hasSameEsql,
   hasStatsCommand,
@@ -180,31 +181,42 @@ describe('deriveQueryType', () => {
 
 describe('getStatsQueryHints', () => {
   it('warns about missing temporal bucketing', () => {
-    const hints = getStatsQueryHints(
-      'FROM logs | STATS c = COUNT(*) BY service.name | WHERE c > 10'
-    );
+    const hints = getStatsQueryHints('FROM logs | STATS metric_value = COUNT(*) BY service.name');
     expect(hints).toEqual(
       expect.arrayContaining([expect.stringContaining('no temporal bucketing')])
     );
   });
 
-  it('warns about missing threshold filter after STATS', () => {
+  it('warns when metric_value column is missing', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m)'
+      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, c'
     );
-    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('No threshold filter')]));
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('metric_value')]));
   });
 
-  it('returns no hints for well-formed STATS queries', () => {
+  it('warns about post-STATS WHERE that drops buckets', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | WHERE c > 10'
+      'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | WHERE metric_value > 10'
     );
-    expect(hints).toEqual([]);
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('Avoid WHERE after STATS')])
+    );
   });
 
-  it('warns about disallowed commands in STATS queries', () => {
+  it('returns no metric-contract hints for well-formed STATS series queries', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | WHERE c > 10 | SORT c | LIMIT 100'
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value'
+    );
+    expect(hints).not.toEqual(expect.arrayContaining([expect.stringContaining('metric_value')]));
+    expect(hints).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('Avoid WHERE after STATS')])
+    );
+    expect(hints).not.toEqual(expect.arrayContaining([expect.stringContaining('No threshold')]));
+  });
+
+  it('warns about disallowed SORT/LIMIT after STATS', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value | SORT metric_value | LIMIT 100'
     );
     expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('SORT, LIMIT')]));
   });
@@ -220,34 +232,45 @@ describe('getStatsQueryHints', () => {
     expect(getStatsQueryHints('INVALID {{{')).toEqual([]);
   });
 
-  it('warns about missing sample-size floor for rate queries', () => {
+  it('warns about non-1m bucket intervals', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE error_rate != 0'
+      'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | KEEP bucket, metric_value'
     );
-    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('sample-size floor')]));
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('1-minute')]));
   });
 
-  it('does not warn about sample-size floor when total > N guard is present', () => {
+  it('warns about entity BY dimensions', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
+      'FROM logs | STATS metric_value = COUNT(*) BY service.name, bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value'
+    );
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('non-temporal GROUP BY')])
+    );
+  });
+
+  it('notes unfiltered COUNT(*) denominators in rate queries', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value'
+    );
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('unfiltered COUNT(*)')]));
+  });
+
+  it('does not note unfiltered COUNT when denominator uses IS NOT NULL', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value'
     );
     expect(hints).not.toEqual(
-      expect.arrayContaining([expect.stringContaining('sample-size floor')])
+      expect.arrayContaining([expect.stringContaining('unfiltered COUNT(*)')])
     );
   });
 
-  it('notes missing IS NOT NULL on unfiltered total denominator', () => {
+  it('does not note unfiltered COUNT when denominator uses IN (auth-rate shape)', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
+      'FROM logs | STATS failures = COUNT(*) WHERE event.outcome == "failure", attempts = COUNT(*) WHERE event.outcome IN ("success", "failure") BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(attempts > 0, failures * 100.0 / attempts, 0) | KEEP bucket, metric_value'
     );
-    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('IS NOT NULL')]));
-  });
-
-  it('does not note IS NOT NULL when denominator already filters', () => {
-    const hints = getStatsQueryHints(
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
+    expect(hints).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('unfiltered COUNT(*)')])
     );
-    expect(hints).not.toEqual(expect.arrayContaining([expect.stringContaining('IS NOT NULL')]));
   });
 });
 
@@ -362,10 +385,11 @@ describe('normalizeEsqlSafe', () => {
 
   it('handles STATS queries without altering structure', () => {
     const q =
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10';
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value';
     const normalized = normalizeEsqlSafe(q);
     expect(normalized).toContain('STATS');
     expect(normalized).toContain('BUCKET');
+    expect(normalized).toContain('metric_value');
   });
 });
 
@@ -398,5 +422,43 @@ describe('hasSameEsql', () => {
 
   it('distinguishes valid but different queries', () => {
     expect(hasSameEsql('FROM logs | WHERE a > 1', 'FROM logs | WHERE b > 2')).toBe(false);
+  });
+});
+
+describe('findOverBroadMatchPredicates', () => {
+  it('flags a multi-word `:` value', () => {
+    expect(findOverBroadMatchPredicates('FROM logs | WHERE message : "request failed"')).toEqual([
+      { field: 'message', value: 'request failed', operator: ':' },
+    ]);
+  });
+
+  it('flags a multi-word MATCH value with no options', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE MATCH(message, "request failed")')
+    ).toEqual([{ field: 'message', value: 'request failed', operator: 'MATCH' }]);
+  });
+
+  it('does not flag a single-word `:` value', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE error.type : "OutOfMemoryError"')
+    ).toEqual([]);
+  });
+
+  it('does not flag MATCH_PHRASE', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE MATCH_PHRASE(message, "request failed")')
+    ).toEqual([]);
+  });
+
+  it('does not flag MATCH with an explicit AND operator', () => {
+    expect(
+      findOverBroadMatchPredicates(
+        'FROM logs | WHERE MATCH(message, "request failed", {"operator": "AND"})'
+      )
+    ).toEqual([]);
+  });
+
+  it('returns an empty array for an unparseable query', () => {
+    expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
   });
 });

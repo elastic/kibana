@@ -158,6 +158,25 @@ describe('extractMigrationInfo', () => {
         'properties.hits.type': 'integer',
       });
     });
+
+    it('preserves empty-object fields instead of dropping them', () => {
+      const type = createType({
+        mappings: {
+          dynamic: false,
+          properties: {
+            title: { type: 'text' },
+            meta: { dynamic: false, properties: {} },
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+      expect(output.mappings).toEqual({
+        dynamic: false,
+        'properties.title.type': 'text',
+        'properties.meta.dynamic': false,
+        'properties.meta.properties': {},
+      });
+    });
   });
 
   describe('modelVersions', () => {

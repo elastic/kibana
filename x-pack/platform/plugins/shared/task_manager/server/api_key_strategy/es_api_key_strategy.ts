@@ -8,15 +8,19 @@
 import type {
   Logger,
   SecurityServiceStart,
-  IBasePath,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { getApiKeyAndUserScope } from '../lib/api_key_utils';
-import type { ApiKeySOFields, ApiKeyStrategy, InvalidationTarget } from './api_key_strategy';
-import { markApiKeysForInvalidation } from './api_key_strategy';
+import type {
+  ApiKeySOFields,
+  ApiKeyStrategy,
+  GrantApiKeysOpts,
+  InvalidationTarget,
+} from './api_key_strategy';
+import { markApiKeysForInvalidation, recordTaskRunCredentialUsage } from './api_key_strategy';
 
 export class EsApiKeyStrategy implements ApiKeyStrategy {
   public readonly shouldGrantUiam = false;
@@ -26,12 +30,18 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     security: SecurityServiceStart,
-    basePath: IBasePath
+    opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>> {
-    return getApiKeyAndUserScope(taskInstances, request, security, basePath);
+    return getApiKeyAndUserScope(taskInstances, request, security, opts);
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
+    const record = recordTaskRunCredentialUsage(taskInstance);
+    if (taskInstance.apiKey) {
+      record('es_api_key', 'config');
+    } else {
+      record('none', 'not_set');
+    }
     return taskInstance.apiKey;
   }
 

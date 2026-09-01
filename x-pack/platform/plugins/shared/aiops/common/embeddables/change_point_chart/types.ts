@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 
-interface ChangePointCommonState extends SerializedTimeRange {
-  viewType: ChangePointDetectionViewType;
-  fn: 'avg' | 'sum' | 'min' | 'max' | string;
-  metricField: string;
-  splitField?: string;
-  partitions?: string[];
-  maxSeriesToPlot?: number;
-}
-
-export type ChangePointEmbeddableState = ChangePointCommonState &
-  SerializedTitles & { dataViewId: string };
-
-export type StoredChangePointEmbeddableState = Omit<ChangePointEmbeddableState, 'dataViewId'>;
+export type StoredChangePointChartEmbeddableState = Omit<
+  ChangePointChartEmbeddableState,
+  'data_view_id'
+>;

@@ -1,6 +1,229 @@
 {
-  "sha1": "42179970de75a2ea072213c9d9d62f6b0cc49e0f",
+  "sha1": "522db71fc1487d20f60e9bde9c72869bd294645d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "ee269d746d5108c-1f60021f34227ea",
+      "title": "tags - create creates a tag (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 29,
+        "column": 45
+      }
+    },
+    {
+      "id": "ee269d746d5108c-fc28c38e5223a4c",
+      "title": "tags - create creates a tag with a generated color when omitted (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 63,
+        "column": 25
+      }
+    },
+    {
+      "id": "ee269d746d5108c-ed0cbd5c59b22a9",
+      "title": "tags - create returns details when validation fails (400)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 73,
+        "column": 13
+      }
+    },
+    {
+      "id": "ee269d746d5108c-e38371aa702ac35",
+      "title": "tags - create returns 409 when name already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee269d746d5108c-20c73b48caf3b5a",
+      "title": "tags - create authorization - returns error if user does not have permission to create a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 115,
+        "column": 40
+      }
+    },
+    {
+      "id": "a5982555e38f691-68a09d47e2d93e8",
+      "title": "tags - delete returns 404 when deleting a missing tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
+        "line": 29,
+        "column": 45
+      }
+    },
+    {
+      "id": "a5982555e38f691-6374e21a041af28",
+      "title": "tags - delete authorization - returns 403 when user is not authorized to delete the tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
+        "line": 37,
+        "column": 72
+      }
+    },
+    {
+      "id": "a5982555e38f691-843f0d4cf27f2df",
+      "title": "tags - delete deletes an existing tag (204)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
+        "line": 50,
+        "column": 24
+      }
+    },
+    {
+      "id": "2fc2efa52ac48cf-0680ceec7a77529",
+      "title": "tags - get returns 200 when tag exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/get_tag.spec.ts",
+        "line": 21,
+        "column": 45
+      }
+    },
+    {
+      "id": "2fc2efa52ac48cf-4cdd67ba5c6e210",
+      "title": "tags - get returns 404 when tag does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/get_tag.spec.ts",
+        "line": 28,
+        "column": 40
+      }
+    },
+    {
+      "id": "139a2d13664ab43-16d5830ad99b48c",
+      "title": "tags - search searches tags (200)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/search_tags.spec.ts",
+        "line": 21,
+        "column": 45
+      }
+    },
     {
       "id": "f9d2b70425d8a75-d70fe63df1204d1",
       "title": "POST /api/saved_objects_tagging/assignments/update_by_tags allows to update tag assignments",
@@ -11,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -25,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -39,8 +262,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 117,
+        "column": 18
       }
     },
     {
@@ -53,8 +276,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -67,8 +290,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 71,
+        "column": 20
       }
     },
     {
@@ -81,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 99,
+        "column": 24
       }
     },
     {
@@ -95,8 +318,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -109,8 +332,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
-        "line": 57,
-        "column": 12
+        "line": 44,
+        "column": 9
       }
     },
     {
@@ -123,8 +346,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 22,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -137,8 +360,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 27,
+        "column": 46
       }
     },
     {
@@ -151,8 +374,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 38,
+        "column": 49
       }
     },
     {
@@ -165,8 +388,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 50,
+        "column": 25
       }
     },
     {
@@ -179,8 +402,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 40,
+        "column": 33
       }
     },
     {
@@ -193,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 59,
+        "column": 23
       }
     },
     {
@@ -207,8 +430,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 85,
+        "column": 6
       }
     },
     {
@@ -221,8 +444,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 129,
+        "column": 86
       }
     },
     {
@@ -235,8 +458,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 159,
-        "column": 12
+        "line": 168,
+        "column": 11
       }
     },
     {
@@ -249,8 +472,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 31,
+        "column": 31
       }
     },
     {
@@ -263,8 +486,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 48,
-        "column": 10
+        "line": 41,
+        "column": 64
       }
     },
     {
@@ -277,8 +500,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 60,
-        "column": 10
+        "line": 53,
+        "column": 15
       }
     },
     {
@@ -291,8 +514,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 63,
+        "column": 21
       }
     },
     {
@@ -305,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 25,
+        "column": 5
       }
     },
     {
@@ -319,8 +542,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 51,
-        "column": 10
+        "line": 46,
+        "column": 27
       }
     },
     {
@@ -333,8 +556,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 63,
+        "column": 88
       }
     },
     {
@@ -347,8 +570,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 91,
-        "column": 10
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -361,8 +584,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 31
       }
     },
     {
@@ -375,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 50,
-        "column": 10
+        "line": 42,
+        "column": 75
       }
     },
     {
@@ -389,8 +612,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 62,
-        "column": 10
+        "line": 48,
+        "column": 5
       }
     },
     {
@@ -403,8 +626,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -417,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_find.spec.ts",
-        "line": 27,
-        "column": 10
+        "line": 19,
+        "column": 31
       }
     },
     {
@@ -431,8 +654,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_find.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 36,
+        "column": 24
       }
     },
     {
@@ -445,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -459,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 60,
-        "column": 10
+        "line": 48,
+        "column": 20
       }
     },
     {
@@ -473,8 +696,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 87,
+        "column": 20
       }
     },
     {
@@ -487,8 +710,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -501,8 +724,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 33,
+        "column": 7
       }
     },
     {
@@ -515,8 +738,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 31
       }
     },
     {
@@ -529,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 59,
-        "column": 10
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -543,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 64,
+        "column": 15
       }
     },
     {
@@ -557,8 +780,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 78,
+        "column": 63
       }
     },
     {
@@ -571,8 +794,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -585,8 +808,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -599,8 +822,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 114,
-        "column": 12
+        "line": 99,
+        "column": 9
       }
     },
     {
@@ -613,8 +836,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 135,
-        "column": 12
+        "line": 118,
+        "column": 14
       }
     },
     {
@@ -624,12 +847,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -639,8 +856,128 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_usage_collector.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 47,
+        "column": 32
+      }
+    },
+    {
+      "id": "8974f71e87a518f-a05aa279010b40c",
+      "title": "tags - upsert updates an existing tag (200)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 29,
+        "column": 45
+      }
+    },
+    {
+      "id": "8974f71e87a518f-073f68eba0bec92",
+      "title": "tags - upsert creates a tag at the provided id (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 48,
+        "column": 27
+      }
+    },
+    {
+      "id": "8974f71e87a518f-bbd433f233a8a81",
+      "title": "tags - upsert creates a tag with a generated color when omitted (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 64,
+        "column": 21
+      }
+    },
+    {
+      "id": "8974f71e87a518f-05c72396e7ffc70",
+      "title": "tags - upsert returns 409 when updating to an existing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 82,
+        "column": 8
+      }
+    },
+    {
+      "id": "8974f71e87a518f-028f2165baa27e3",
+      "title": "tags - upsert returns details when validation fails (400)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 98,
+        "column": 40
+      }
+    },
+    {
+      "id": "8974f71e87a518f-e7e9b0550c79977",
+      "title": "tags - upsert authorization - returns 403 when user does not have permission to update a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 119,
+        "column": 16
       }
     }
   ]

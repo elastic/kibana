@@ -16,18 +16,23 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   meanA: 0.8,
   meanB: 0.7,
   pValue: 0.03,
+  direction: 'maximize',
   ...overrides,
 });
 
 describe('formatPairedTTestReport', () => {
   it('returns correct header and summary for a single result', () => {
     const { header, summary, significantCount } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results: [makeResult()],
     });
 
-    expect(header).toEqual(['Run A: run-1', 'Run B: run-2', 'Significance threshold: p < 0.05']);
+    expect(header).toEqual([
+      'Target: experiment-1',
+      'Baseline: experiment-2',
+      'Significance threshold: p < 0.05',
+    ]);
     expect(summary).toBe('Significant differences: 1/1');
     expect(significantCount).toBe(1);
   });
@@ -40,8 +45,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { significantCount, summary } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 
@@ -56,8 +61,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { significantCount, header } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
       significanceThreshold: 0.1,
     });
@@ -74,8 +79,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { tableOutput } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 
@@ -95,8 +100,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { tableOutput } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 
@@ -109,8 +114,8 @@ describe('formatPairedTTestReport', () => {
     const results = [makeResult({ meanA: 0.9, meanB: 0.5 })];
 
     const { tableOutput } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 
@@ -121,8 +126,8 @@ describe('formatPairedTTestReport', () => {
     const results = [makeResult({ meanA: 0.3, meanB: 0.8 })];
 
     const { tableOutput } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 
@@ -131,8 +136,8 @@ describe('formatPairedTTestReport', () => {
 
   it('handles empty results gracefully', () => {
     const { header, summary, tableOutput, significantCount } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results: [],
     });
 
@@ -146,8 +151,8 @@ describe('formatPairedTTestReport', () => {
     const results = [makeResult({ pValue: null })];
 
     const { significantCount } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 
@@ -158,8 +163,8 @@ describe('formatPairedTTestReport', () => {
     const results = [makeResult({ sampleSize: 42, meanA: 0.1234, meanB: 0.5678 })];
 
     const { tableOutput } = formatPairedTTestReport({
-      runIdA: 'run-1',
-      runIdB: 'run-2',
+      experimentIdA: 'experiment-1',
+      experimentIdB: 'experiment-2',
       results,
     });
 

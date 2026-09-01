@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Maps spaces smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const { common, maps, security, header } = getPageObjects([
@@ -17,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'header',
   ]);
-  const listingTable = getService('listingTable');
+  const contentList = getService('contentList');
   const appsMenu = getService('appsMenu');
 
   describe('spaces feature controls', () => {
@@ -71,13 +76,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Can not use maps.deleteSavedMaps because maps.deleteSavedMaps will
         // navigate to default space if on list page check fails
-        await listingTable.searchForItemWithName('my test map');
+        await contentList.search('my test map');
         await header.waitUntilLoadingHasFinished();
-        await listingTable.checkListingSelectAllCheckbox();
-        await listingTable.clickDeleteSelected();
-        await common.clickConfirmOnModal();
+        await contentList.selectAllAndDelete();
         await header.waitUntilLoadingHasFinished();
-        await listingTable.expectItemsCount('map', 0);
+        await contentList.expectItemCount(0);
       });
     });
 

@@ -8,7 +8,8 @@
  */
 
 import fs from 'fs/promises';
-import { dump } from 'js-yaml';
+import { Document, isScalar, visit } from 'yaml';
+import type { Pair } from 'yaml';
 import { dirname } from 'path';
 
 export async function writeYamlDocument(filePath: string, document: unknown): Promise<void> {
@@ -22,27 +23,79 @@ export async function writeYamlDocument(filePath: string, document: unknown): Pr
   }
 }
 
+/**
+ * Apply BLOCK_LITERAL formatting to code samples in x-codeSamples.
+ * Code samples should preserve exact formatting including line breaks and indentation.
+ */
+const applyCodeSampleFormatting = (doc: Document): void => {
+  visit(doc, {
+    Pair(_key, node) {
+      // Check if this is a 'source' key within x-codeSamples
+      if (
+        isScalar(node.key) &&
+        node.key.value === 'source' &&
+        isScalar(node.value) &&
+        typeof node.value.value === 'string' &&
+        node.value.value.includes('\n')
+      ) {
+        // Check if we're inside an x-codeSamples array by walking up the path
+        // This is a heuristic: if the parent context looks like a code sample, use literal block
+        node.value.type = 'BLOCK_LITERAL';
+      }
+    },
+  });
+};
+
+const prepareDocument = (doc: Document): void => {
+  applyCodeSampleFormatting(doc);
+};
+
 function stringifyToYaml(document: unknown): string {
   try {
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
     // It makes YAML much more human readable
-    return dump(document, {
-      noRefs: true,
-      sortKeys: sortYamlKeys,
-      skipInvalid: true, // Skip invalid types like `undefined`
+    const doc = new Document(document, {
+      aliasDuplicateObjects: false,
+      sortMapEntries: sortYamlKeys,
+      // Use yaml-1.1 schema so that date-like strings (e.g. '2023-10-31') and
+      // extended boolean literals (yes/no/on/off/…) are automatically quoted,
+      // matching the behaviour of js-yaml's default schema.
+      schema: 'yaml-1.1',
+      strict: false,
     });
+    prepareDocument(doc);
+    // Prefer single quotes over double quotes when a string requires quoting,
+    // matching js-yaml's default style. The serialiser falls back to double
+    // quotes automatically when the value contains a single quote but no
+    // double quote (e.g. "status: 'inactive'" stays double-quoted).
+    return doc.toString({ singleQuote: true });
   } catch (e) {
     // Try to stringify with YAML Anchors enabled
-    return dump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true });
+    const doc = new Document(document, {
+      aliasDuplicateObjects: true,
+      sortMapEntries: sortYamlKeys,
+      schema: 'yaml-1.1',
+      strict: false,
+    });
+    prepareDocument(doc);
+    return doc.toString({ singleQuote: true });
   }
 }
 
-function sortYamlKeys(a: string, b: string): number {
-  if (a in FIELDS_ORDER && b in FIELDS_ORDER) {
-    return FIELDS_ORDER[a as CustomOrderedField] - FIELDS_ORDER[b as CustomOrderedField];
+function sortYamlKeys(a: Pair, b: Pair): number {
+  if (!isScalar(a.key) || !isScalar(b.key)) {
+    return 0;
+  }
+  const keyA = a.key.value;
+  const keyB = b.key.value;
+  if (typeof keyA !== 'string' || typeof keyB !== 'string') {
+    return 0;
+  }
+  if (keyA in FIELDS_ORDER && keyB in FIELDS_ORDER) {
+    return FIELDS_ORDER[keyA as CustomOrderedField] - FIELDS_ORDER[keyB as CustomOrderedField];
   }
 
-  return a.localeCompare(b);
+  return keyA.localeCompare(keyB);
 }
 
 const FIELDS_ORDER = {

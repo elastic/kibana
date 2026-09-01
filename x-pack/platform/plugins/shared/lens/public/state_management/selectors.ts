@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';

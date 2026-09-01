@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  WorkflowExecutionInvalidStatusError,
+  WorkflowNotFoundError,
+} from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
+import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
+import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 
@@ -37,18 +42,26 @@ describe('WorkflowsManagementApi', () => {
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
+      getWorkflowsByIds: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
+      restoreWorkflowVersion: jest.fn(),
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
+      disableAllWorkflows: jest.fn(),
+      getHistoryForWorkflow: jest.fn(),
       validateWorkflow: jest.fn(),
+      getWorkflowExecution: jest.fn(),
+      markStepAsResponded: jest.fn(),
+      getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
 
     mockRequest = httpServerMock.createKibanaRequest();
   });
@@ -92,17 +105,13 @@ describe('WorkflowsManagementApi', () => {
 
       const result = await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-        { loose: false },
-        'default',
-        mockRequest
-      );
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
           yaml: expect.stringContaining('name: Original Workflow Copy'),
         }),
         'default',
-        mockRequest
+        mockRequest,
+        { nameFallback: 'Original Workflow Copy' }
       );
       expect(result.name).toBe('Original Workflow Copy');
       expect(result.id).toBe('workflow-clone-456');
@@ -112,9 +121,6 @@ describe('WorkflowsManagementApi', () => {
       const originalWorkflow = createMockWorkflow({
         yaml: 'name: Original Workflow\ndescription: A workflow to be cloned\nenabled: true',
       });
-
-      const mockZodSchema = createMockZodSchema();
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
 
       const clonedWorkflow: WorkflowDetailDto = {
         ...originalWorkflow,
@@ -162,16 +168,6 @@ steps:
     action: test-action`,
       });
 
-      const mockZodSchema = z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        enabled: z.boolean().optional(),
-        tags: z.array(z.string()).optional(),
-        steps: z.array(z.any()).optional(),
-      });
-
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
-
       mockWorkflowsService.createWorkflow.mockImplementation((command) => {
         const yamlString = command.yaml;
         // Verify all properties are preserved
@@ -201,42 +197,95 @@ steps:
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalled();
     });
 
-    it('should handle YAML parsing errors gracefully', async () => {
+    it('should clone a schema-invalid workflow without throwing', async () => {
+      // Missing required `triggers`/`steps` makes this schema-invalid, but it is
+      // still an editable workflow the user should be able to clone.
+      const invalidYaml = `name: Broken Workflow
+description: Missing required fields
+enabled: true`;
       const originalWorkflow = createMockWorkflow({
-        yaml: 'invalid: yaml: content: with: multiple: colons',
+        name: 'Broken Workflow',
+        yaml: invalidYaml,
+        valid: false,
       });
 
-      const mockZodSchema = createMockZodSchema();
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
+      mockWorkflowsService.createWorkflow.mockImplementation((command) =>
+        Promise.resolve({
+          ...originalWorkflow,
+          id: 'workflow-clone-invalid',
+          name: 'Broken Workflow Copy',
+          yaml: command.yaml,
+          valid: false,
+        })
+      );
 
-      await expect(api.cloneWorkflow(originalWorkflow, 'default', mockRequest)).rejects.toThrow();
+      await expect(
+        api.cloneWorkflow(originalWorkflow, 'default', mockRequest)
+      ).resolves.toBeDefined();
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalled();
-      expect(mockWorkflowsService.createWorkflow).not.toHaveBeenCalled();
+      const clonedYaml = mockWorkflowsService.createWorkflow.mock.calls[0][0].yaml;
+      // Name is renamed while the rest of the (invalid) content is preserved.
+      expect(clonedYaml).toContain('name: Broken Workflow Copy');
+      expect(clonedYaml).toContain('description: Missing required fields');
+    });
+
+    it('passes an explicit name override so a clone of non-mapping YAML keeps the "Copy" name', async () => {
+      // A scalar YAML root cannot receive a `name` key, so updateWorkflowYamlFields returns it
+      // unchanged. Without the explicit override the clone would collapse to "Untitled workflow"
+      // instead of "<name> Copy".
+      const originalWorkflow = createMockWorkflow({
+        name: 'Original',
+        yaml: 'not-a-workflow',
+        valid: false,
+      });
+
+      mockWorkflowsService.createWorkflow.mockImplementation((command) =>
+        Promise.resolve({
+          ...originalWorkflow,
+          id: 'workflow-clone-scalar',
+          name: 'Original Copy',
+          yaml: command.yaml,
+          valid: false,
+        })
+      );
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
+        // YAML is unchanged because it has no mapping root to receive `name`.
+        { yaml: 'not-a-workflow' },
+        'default',
+        mockRequest,
+        { nameFallback: 'Original Copy' }
+      );
+    });
+
+    it('should not call getWorkflowZodSchema when cloning', async () => {
+      const originalWorkflow = createMockWorkflow();
+      mockWorkflowsService.createWorkflow.mockResolvedValue(originalWorkflow);
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.getWorkflowZodSchema).not.toHaveBeenCalled();
     });
 
     it('should handle workflow creation errors', async () => {
       const originalWorkflow = createMockWorkflow();
-      const mockZodSchema = createMockZodSchema();
       const creationError = new Error('Failed to create workflow');
 
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
       mockWorkflowsService.createWorkflow.mockRejectedValue(creationError);
 
       await expect(api.cloneWorkflow(originalWorkflow, 'default', mockRequest)).rejects.toThrow(
         'Failed to create workflow'
       );
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalled();
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalled();
     });
 
     it('should work with different space contexts', async () => {
       const originalWorkflow = createMockWorkflow();
-      const mockZodSchema = createMockZodSchema();
       const spaceId = 'custom-space';
 
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
       mockWorkflowsService.createWorkflow.mockResolvedValue({
         ...originalWorkflow,
         id: 'workflow-clone-789',
@@ -245,15 +294,11 @@ steps:
 
       await api.cloneWorkflow(originalWorkflow, spaceId, mockRequest);
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-        { loose: false },
-        spaceId,
-        mockRequest
-      );
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
         expect.any(Object),
         spaceId,
-        mockRequest
+        mockRequest,
+        { nameFallback: 'Original Workflow Copy' }
       );
     });
   });
@@ -362,7 +407,14 @@ steps:
       it('should throw error when YAML validation fails', async () => {
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -410,7 +462,13 @@ steps:
 
     describe('when testing with workflowId parameter', () => {
       it('should fetch workflow YAML by ID and execute it', async () => {
-        mockWorkflowsService.getWorkflow.mockResolvedValue(mockWorkflowDetailDto);
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
 
         const result = await api.testWorkflow({
           workflowId: 'existing-workflow-id',
@@ -429,6 +487,41 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
+          }),
+          expect.any(Object),
+          mockRequest
+        );
+      });
+
+      it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
+
+        await api.testWorkflow({
+          workflowId: 'existing-workflow-id',
+          workflowYaml: mockWorkflowYaml,
+          inputs,
+          spaceId,
+          request: mockRequest,
+        });
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'existing-workflow-id',
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
           }),
           expect.any(Object),
           mockRequest
@@ -462,7 +555,14 @@ steps:
         });
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -577,6 +677,216 @@ steps:
     });
   });
 
+  describe('executeWorkflow', () => {
+    const workflowDefinition = {
+      version: '1' as const,
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      steps: [],
+    };
+    const workflowExecution = {
+      id: 'test-exec-id',
+      workflowId: 'workflow-123',
+      status: 'completed',
+      isTestRun: false,
+      startedAt: '2025-01-01T00:00:00.000Z',
+      finishedAt: '2025-01-01T00:00:01.000Z',
+      workflowDefinition,
+      stepExecutions: [],
+      duration: 1000,
+      error: null,
+      yaml: 'name: Test Workflow',
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockWorkflowsService.getWorkflowExecution.mockResolvedValue(workflowExecution as any);
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: workflowDefinition as any,
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const runWithTimers = async <T>(promise: Promise<T>): Promise<T> => {
+      await jest.advanceTimersByTimeAsync(10_000);
+      return promise;
+    };
+
+    it('executes a saved workflow by id and returns the execution document', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: { foo: 'bar' },
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          metadata: { agent_id: 'agent-1' },
+        })
+      );
+
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        execution: workflowExecution,
+      });
+      expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledWith('workflow-123', 'default');
+      const [workflowArg] = mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0];
+      expect(workflowArg).toEqual(
+        expect.objectContaining({
+          id: 'workflow-123',
+        })
+      );
+      expect(workflowArg).not.toHaveProperty('isEphemeral');
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.any(Object),
+        {
+          event: undefined,
+          spaceId: 'default',
+          inputs: { foo: 'bar' },
+          triggeredBy: undefined,
+          metadata: { agent_id: 'agent-1' },
+        },
+        mockRequest
+      );
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledWith(
+        'test-exec-id',
+        'default',
+        { includeOutput: true }
+      );
+    });
+
+    it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'inline-workflow',
+          yaml: 'name: Test Workflow',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          isTestRun: false,
+        })
+      );
+
+      expect(result.workflowExecutionId).toBe('test-exec-id');
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test Workflow',
+        'default',
+        mockRequest
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inline-workflow',
+          definition: workflowDefinition,
+          isEphemeral: true,
+          isTestRun: false,
+        }),
+        expect.any(Object),
+        mockRequest
+      );
+    });
+
+    it('allows inline ephemeral executions to opt into test-run semantics', async () => {
+      await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'inline-test-workflow',
+          yaml: 'name: Test Workflow',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          isTestRun: true,
+        })
+      );
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inline-test-workflow',
+          isEphemeral: true,
+          isTestRun: true,
+        }),
+        expect.any(Object),
+        mockRequest
+      );
+    });
+
+    it('polls until the execution reaches a final status when waiting for completion', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+      mockWorkflowsService.getWorkflowExecution
+        .mockResolvedValueOnce({
+          ...workflowExecution,
+          status: 'running',
+        } as any)
+        .mockResolvedValueOnce(workflowExecution as any);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: true,
+        })
+      );
+
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        execution: workflowExecution,
+      });
+    });
+
+    it('reports timeout when the execution document is not visible before the deadline', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+      mockWorkflowsService.getWorkflowExecution.mockResolvedValue(null);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          completionTimeoutSec: 0,
+        })
+      );
+
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        timedOut: true,
+      });
+    });
+  });
+
   describe('validateWorkflow', () => {
     it('should delegate to workflowsService.validateWorkflow', async () => {
       const expectedResult = { valid: true, diagnostics: [] };
@@ -596,7 +906,13 @@ steps:
       const expectedResult = {
         valid: false,
         diagnostics: [
-          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+          {
+            severity: 'error' as const,
+            message: 'Required',
+            source: 'schema',
+            path: ['name'],
+            ruleId: 'schemaViolation' as const,
+          },
         ],
       };
       mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
@@ -609,6 +925,212 @@ steps:
         mockRequest
       );
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('updateWorkflow', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('allows enablement-only updates for managed workflows', async () => {
+      const updateResult = { enabled: false } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      const result = await api.updateWorkflow('wf-1', { enabled: false }, 'default', mockRequest);
+
+      expect(result).toBe(updateResult);
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { enabled: false },
+        'default',
+        mockRequest
+      );
+    });
+
+    it('rejects managed workflow updates with fields other than enabled', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+
+      await expect(
+        api.updateWorkflow(
+          'wf-1',
+          { enabled: false, name: 'Updated Workflow' },
+          'default',
+          mockRequest
+        )
+      ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('allows managed workflow route option to edit managed workflows', async () => {
+      const updateResult = { name: 'Updated Workflow' } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest, {
+          allowManagedWorkflowMutation: true,
+        })
+      ).resolves.toBe(updateResult);
+
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { name: 'Updated Workflow' },
+        'default',
+        mockRequest
+      );
+    });
+
+    it('keeps unmanaged workflow updates unchanged', async () => {
+      const updateResult = { name: 'Updated Workflow' } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: false }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
+      ).resolves.toBe(updateResult);
+
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+  });
+
+  describe('restoreWorkflowVersion', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('restores a historical workflow version for unmanaged workflows', async () => {
+      const existingWorkflow = createWorkflowDto({ managed: false });
+      const restoreResult = {
+        id: 'wf-1',
+        version: 8,
+        lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+        lastUpdatedBy: 'alice',
+        enabled: true,
+        valid: true,
+        validationErrors: [],
+      };
+
+      mockWorkflowsService.getWorkflow.mockResolvedValue(existingWorkflow);
+      mockWorkflowsService.restoreWorkflowVersion.mockResolvedValue(restoreResult);
+
+      const result = await api.restoreWorkflowVersion('wf-1', 'event-v3', 'default', mockRequest);
+
+      expect(result).toBe(restoreResult);
+      expect(mockWorkflowsService.restoreWorkflowVersion).toHaveBeenCalledWith(
+        'wf-1',
+        'event-v3',
+        'default',
+        mockRequest
+      );
+    });
+
+    it('throws when the workflow is not found', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+
+      await expect(
+        api.restoreWorkflowVersion('missing', 'event-v3', 'default', mockRequest)
+      ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+
+      expect(mockWorkflowsService.restoreWorkflowVersion).not.toHaveBeenCalled();
+    });
+
+    it('rejects restore for managed workflows', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+
+      await expect(
+        api.restoreWorkflowVersion('wf-1', 'event-v3', 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.restoreWorkflowVersion).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteWorkflows', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('rejects deleting managed workflows', async () => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'system-workflow', managed: true }),
+      ]);
+
+      await expect(
+        api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowDeleteForbiddenError);
+
+      expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('rejects deleting managed workflows even with managed workflow update privilege', async () => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'system-workflow', managed: true }),
+      ]);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.updateManaged]: true,
+      };
+
+      await expect(
+        api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowDeleteForbiddenError);
+
+      expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('keeps unmanaged workflow deletes unchanged', async () => {
+      const deleteResult = {
+        total: 1,
+        deleted: 1,
+        failures: [],
+        successfulIds: ['wf-1'],
+      };
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'wf-1', managed: false }),
+      ]);
+      mockWorkflowsService.deleteWorkflows.mockResolvedValue(deleteResult);
+
+      await expect(api.deleteWorkflows(['wf-1'], 'default', mockRequest)).resolves.toBe(
+        deleteResult
+      );
+
+      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        undefined
+      );
     });
   });
 
@@ -654,7 +1176,7 @@ steps:
       expect(mockSmlIndex).toHaveBeenCalledWith({
         request: mockRequest,
         originId: 'wf-new',
-        attachmentType: WORKFLOW_SML_TYPE,
+        attachmentType: WORKFLOW_KI_TYPE,
         action: 'create',
       });
     });
@@ -676,13 +1198,16 @@ steps:
     it('notifies SML with "update" action on updateWorkflow', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-upd' }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue({} as any);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+      };
 
       await api.updateWorkflow('wf-upd', { name: 'Updated' }, 'default', mockRequest);
 
       expect(mockSmlIndex).toHaveBeenCalledWith({
         request: mockRequest,
         originId: 'wf-upd',
-        attachmentType: WORKFLOW_SML_TYPE,
+        attachmentType: WORKFLOW_KI_TYPE,
         action: 'update',
       });
     });
@@ -739,18 +1264,26 @@ steps:
       );
     });
 
-    it('uses "update" action in bulkCreateWorkflows when overwrite is true', async () => {
+    it('notifies SML with "create" for bulkCreateWorkflows when overwrite is true', async () => {
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
-        created: [createWorkflowDto({ id: 'wf-ow' })],
+        created: [createWorkflowDto({ id: 'wf-new' }), createWorkflowDto({ id: 'wf-existing' })],
         failed: [],
       });
 
-      await api.bulkCreateWorkflows([{ yaml: 'name: W1' }], 'default', mockRequest, {
-        overwrite: true,
-      });
+      await api.bulkCreateWorkflows(
+        [{ yaml: 'name: W1' }, { yaml: 'name: W2' }],
+        'default',
+        mockRequest,
+        {
+          overwrite: true,
+        }
+      );
 
       expect(mockSmlIndex).toHaveBeenCalledWith(
-        expect.objectContaining({ originId: 'wf-ow', action: 'update' })
+        expect.objectContaining({ originId: 'wf-new', action: 'create' })
+      );
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-existing', action: 'create' })
       );
     });
 
@@ -765,6 +1298,40 @@ steps:
       expect(mockSmlLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining("Failed to create SML index for workflow 'wf-err'")
       );
+    });
+  });
+
+  describe('delegation', () => {
+    it('delegates disableAllWorkflows with spaceId and request', async () => {
+      mockWorkflowsService.disableAllWorkflows.mockResolvedValue({
+        total: 2,
+        disabled: 2,
+        failures: [],
+      });
+
+      const result = await api.disableAllWorkflows('my-space', mockRequest);
+
+      expect(mockWorkflowsService.disableAllWorkflows).toHaveBeenCalledWith(
+        'my-space',
+        mockRequest
+      );
+      expect(result).toEqual({ total: 2, disabled: 2, failures: [] });
+    });
+
+    it('delegates getHistoryForWorkflow with pagination options', async () => {
+      const history = { page: 2, perPage: 10, total: 1, items: [] };
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(history);
+
+      const result = await api.getHistoryForWorkflow('wf-1', 'default', {
+        page: 2,
+        perPage: 10,
+      });
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+        page: 2,
+        perPage: 10,
+      });
+      expect(result).toBe(history);
     });
   });
 
@@ -961,6 +1528,82 @@ steps:
       );
 
       expect(result).toBe(engineResults);
+    });
+  });
+
+  describe('resumeWorkflowExecution (consolidated HITL claim)', () => {
+    beforeEach(() => {
+      mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(true);
+    });
+
+    it('claims the caller-supplied step before resuming and forwards the channel', async () => {
+      const result = await api.resumeWorkflowExecution(
+        'run-1',
+        'default',
+        { approved: true },
+        mockRequest,
+        { channel: 'agent_builder', stepExecutionId: 'step-exec-1' }
+      );
+
+      expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-1',
+        mockRequest,
+        'agent_builder',
+        'default'
+      );
+      const claimOrder = (mockWorkflowsService.markStepAsResponded as jest.Mock).mock
+        .invocationCallOrder[0];
+      const resumeOrder = (mockWorkflowsExecutionEngine.resumeWorkflowExecution as jest.Mock).mock
+        .invocationCallOrder[0];
+      expect(claimOrder).toBeLessThan(resumeOrder);
+      expect(result).toEqual({ resumedBy: 'user' });
+    });
+
+    it('resolves the waiting step and defaults the channel to "inbox" when none is supplied', async () => {
+      (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(
+        'step-exec-9'
+      );
+
+      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest);
+
+      expect(mockWorkflowsService.getWaitingStepExecutionId).toHaveBeenCalledWith(
+        'run-1',
+        'default'
+      );
+      expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-9',
+        mockRequest,
+        'inbox',
+        'default'
+      );
+    });
+
+    it('throws a conflict and never resumes when the first-writer-wins claim is lost', async () => {
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          stepExecutionId: 'step-exec-1',
+        })
+      ).rejects.toThrow(WorkflowExecutionInvalidStatusError);
+
+      expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('resumes without stamping when no waiting step can be resolved (non-HITL wait)', async () => {
+      (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(null);
+
+      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest);
+
+      expect(mockWorkflowsService.markStepAsResponded).not.toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'run-1',
+        'default',
+        { approved: true },
+        mockRequest
+      );
     });
   });
 });

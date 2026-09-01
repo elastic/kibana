@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import deepEqual from 'fast-deep-equal';
 
 import { appContextService } from '..';

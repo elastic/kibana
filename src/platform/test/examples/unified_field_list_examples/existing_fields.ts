@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/unified_field_list_examples/existing_fields.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+
+/**
+ * Migration recommendation: DELETE. Field-existence filtering is covered in
+ * src/platform/packages/shared/kbn-unified-field-list/src/services/field_existing/field_existing_utils.test.ts
+ * and hooks/use_existing_fields.test.tsx. Exact sidebar field-name lists after DSL/time filters
+ * are data-correctness, not UI.
+ */
 
 const TEST_START_TIME = 'Jan 2, 2021 @ 00:00:00.000';
 const TEST_END_TIME = 'Jan 2, 2022 @ 00:00:00.000';

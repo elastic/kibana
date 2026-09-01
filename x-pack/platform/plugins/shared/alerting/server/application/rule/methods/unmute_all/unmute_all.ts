@@ -48,10 +48,6 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
       operation: WriteOperations.UnmuteAll,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

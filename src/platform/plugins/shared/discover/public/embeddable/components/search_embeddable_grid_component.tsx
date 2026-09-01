@@ -11,18 +11,20 @@ import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-  getSortArray,
-} from '@kbn/discover-utils';
+import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
 import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -36,6 +38,7 @@ import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import { showTimeFieldColumn } from '../../utils/show_time_field_column';
 import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
@@ -48,9 +51,12 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
-  onRefreshData?: () => void;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -60,9 +66,12 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
-  onRefreshData,
   enableDocumentViewer,
   inlineEditing,
+  docViewerRef,
+  expandedDoc,
+  initialDocViewerTabId,
+  setExpandedDoc,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
@@ -202,6 +211,12 @@ export function SearchEmbeddableGridComponent({
       onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
         stateManager.density.next(newDensity);
       },
+      onUpdateDocumentsDisplayMode: (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+        stateManager.documentsDisplayMode.next(newDocumentsDisplayMode);
+      },
+      onUpdateJsonModeSettings: (newJsonModeSettings: JsonModeSettings) => {
+        stateManager.jsonModeSettings.next(newJsonModeSettings);
+      },
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
         stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
       },
@@ -217,6 +232,8 @@ export function SearchEmbeddableGridComponent({
       stateManager.sort,
       stateManager.sampleSize,
       stateManager.density,
+      stateManager.documentsDisplayMode,
+      stateManager.jsonModeSettings,
       stateManager.grid,
       grid,
     ]
@@ -228,6 +245,17 @@ export function SearchEmbeddableGridComponent({
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
+  // should be aligned with discover documents `showTimeCol` prop
+  const showTimeCol = useMemo(
+    () => showTimeFieldColumn({ uiSettings: discoverServices.uiSettings, query: savedSearchQuery }),
+    [discoverServices.uiSettings, savedSearchQuery]
+  );
+
+  const isDataTableJsonViewEnabled = useMemo(
+    () => discoverServices.discoverFeatureFlags.getDataTableJsonViewEnabled(),
+    [discoverServices.discoverFeatureFlags]
+  );
+
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
@@ -236,7 +264,6 @@ export function SearchEmbeddableGridComponent({
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
-      onRefreshData={onRefreshData}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}
@@ -265,10 +292,24 @@ export function SearchEmbeddableGridComponent({
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
-      showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
+      showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
+      documentsDisplayModeState={
+        isDataTableJsonViewEnabled ? savedSearch.documentsDisplayMode : undefined
+      }
+      onUpdateDocumentsDisplayMode={
+        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateDocumentsDisplayMode : undefined
+      }
+      jsonModeSettingsState={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
+      onUpdateJsonModeSettings={
+        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateJsonModeSettings : undefined
+      }
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
+      expandedDoc={expandedDoc}
+      initialDocViewerTabId={initialDocViewerTabId}
+      docViewerRef={docViewerRef}
+      setExpandedDoc={setExpandedDoc}
     />
   );
 }

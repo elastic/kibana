@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/client-apps-plugin",
+  "owner": ["@elastic/apm-agent-approvers"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "clientApps",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": ["common"]
+  }
+}

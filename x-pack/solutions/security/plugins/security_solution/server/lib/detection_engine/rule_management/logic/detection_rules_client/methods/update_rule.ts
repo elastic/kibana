@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -21,7 +23,7 @@ import {
   formatBulkEditResultErrors,
   hasOnlyReadAuthEditableChanges,
   toggleRuleEnabledOnUpdate,
-  validateFieldWritePermissions,
+  validateEditedFieldWritePermissions,
   validateMlAuth,
 } from '../utils';
 
@@ -39,6 +41,7 @@ interface UpdateRuleArguments {
   ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const updateRule = async ({
@@ -48,6 +51,7 @@ export const updateRule = async ({
   ruleUpdate,
   mlAuthz,
   rulesAuthz,
+  changeTracking,
 }: UpdateRuleArguments): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = ruleUpdate;
 
@@ -84,15 +88,18 @@ export const updateRule = async ({
    * `all` privileges for rules.
    */
   if (hasOnlyReadAuthEditableChanges(ruleWithUpdates, existingRule)) {
-    // We're only modifying the fields that are editable with read permissions
+    // We're only modifying the fields that are editable with read permissions.
+    // `modifiedFields` contains only the fields that changed (including a field
+    // being unset), so presence of a restricted field means the user is editing it.
     const modifiedFields = extractChangedUpdatableFields(ruleWithUpdates, existingRule);
-    validateFieldWritePermissions(modifiedFields, rulesAuthz);
+    validateEditedFieldWritePermissions(modifiedFields, rulesAuthz);
 
     const appliedUpdateWithReadPrivs: BulkEditResult<RuleParams> =
       await updateReadAuthEditRuleFields({
         rulesClient,
         ruleUpdate: modifiedFields,
         existingRule,
+        changeTracking,
       });
 
     const updateErrors = formatBulkEditResultErrors(appliedUpdateWithReadPrivs);
@@ -114,6 +121,7 @@ export const updateRule = async ({
   const updatedRule = await rulesClient.update({
     id: existingRule.id,
     data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
+    changeTracking,
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);

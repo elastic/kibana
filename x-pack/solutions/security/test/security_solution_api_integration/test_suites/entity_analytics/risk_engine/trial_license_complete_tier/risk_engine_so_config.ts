@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess @ serverless @serverless QA risk_engine_so_update_config', () => {
+  describe('@ess @ serverless @serverless QA @skipInServerlessMKI risk_engine_so_update_config', () => {
     before(async () => {
       const soId = await kibanaServer.savedObjects.find({
         type: riskEngineConfigurationTypeName,

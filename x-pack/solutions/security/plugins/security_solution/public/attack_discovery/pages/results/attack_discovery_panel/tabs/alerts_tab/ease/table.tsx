@@ -12,7 +12,6 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { useBrowserFields } from '../../../../../../../data_view_manager/hooks/use_browser_fields';
-import { PageScope } from '../../../../../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -27,6 +26,8 @@ import {
 } from '../../../../../../../detections/components/alert_summary/table/table';
 import { ActionsCell } from '../../../../../../../detections/components/alert_summary/table/actions_cell';
 import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useBulkAddToChatConfig } from '../../../../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { CellValue } from '../../../../../../../detections/components/alert_summary/table/render_cell';
 import { useAdditionalBulkActions } from '../../../../../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
@@ -55,23 +56,51 @@ export interface TableProps {
  */
 export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
   const {
-    services: { application, cases, data, fieldFormats, http, licensing, notifications, settings },
+    services: {
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    },
   } = useKibana();
   const services = useMemo(
     () => ({
+      agentBuilder,
+      application,
       cases,
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
-      application,
       licensing,
       settings,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
   );
 
-  const browserFields = useBrowserFields(PageScope.alerts, dataView);
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_attack_discovery');
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
+
+  const browserFields = useBrowserFields(dataView);
 
   const additionalContext: AdditionalTableContext = useMemo(
     () => ({
@@ -111,6 +140,7 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={maybeBulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

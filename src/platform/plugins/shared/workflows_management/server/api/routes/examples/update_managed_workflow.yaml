@@ -1,0 +1,50 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateManagedWorkflowExample:
+          description: 'Example request to update a managed workflow'
+          value:
+            name: Updated managed workflow
+            description: Updated managed workflow description
+            enabled: true
+            tags:
+              - managed
+              - updated
+            yaml: "name: Updated managed workflow\nenabled: true\ndescription: Updated managed workflow description\ntriggers:\n  - type: manual\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"hello world\"\n"
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          updateManagedWorkflowResponseExample:
+            description: 'Example response returning the updated managed workflow'
+            value:
+              id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              lastUpdatedAt: '2026-03-23T13:38:59.568Z'
+              lastUpdatedBy: elastic
+              enabled: true
+              validationErrors: []
+              valid: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/workflows/managed/workflow/{id}" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "name": "Updated managed workflow",
+          "enabled": true,
+          "tags": ["managed", "updated"]
+        }'
+  - lang: Console
+    source: |
+      PUT kbn://api/workflows/managed/workflow/{id}
+      {
+        "name": "Updated managed workflow",
+        "enabled": true,
+        "tags": ["managed", "updated"]
+      }

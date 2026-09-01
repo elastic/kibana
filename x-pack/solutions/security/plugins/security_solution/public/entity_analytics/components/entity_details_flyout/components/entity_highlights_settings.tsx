@@ -7,16 +7,16 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiContextMenu,
   EuiPopover,
-  EuiButtonIcon,
-  EuiText,
   EuiPopoverTitle,
+  EuiText,
   EuiTextTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,7 @@ import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
 import { css } from '@emotion/react';
+import { AnonymizationSwitch } from '../../../../flyout_v2/shared/components/anonymization_switch';
 
 interface EntityHighlightsSettingsProps {
   showAnonymizedValues: boolean;
@@ -127,48 +128,36 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
                   }
                 )}
               >
-                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup
-                      alignItems="center"
-                      data-test-subj="anonymizationGroup"
-                      gutterSize="s"
-                      responsive={false}
-                      wrap={false}
+                <AnonymizationSwitch
+                  hasSummary={selectedConversationHasAnonymizedValues}
+                  showAnonymizedValues={showAnonymizedValues}
+                  onChange={onChangeShowAnonymizedValues}
+                  icon={
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.securitySolution.flyout.entityDetails.highlights.anonymizationArialLabel',
+                        {
+                          defaultMessage: 'Anonymization',
+                        }
+                      )}
+                      disableScreenReaderOutput
                     >
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          label={i18n.translate(
-                            'xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues',
-                            {
-                              defaultMessage: 'Show anonymized values',
-                            }
-                          )}
-                          checked={showAnonymizedValues}
-                          onChange={onChangeShowAnonymizedValues}
-                          compressed
-                          disabled={!selectedConversationHasAnonymizedValues}
-                        />
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.securitySolution.flyout.entityDetails.highlights.anonymizationArialLabel',
-                            {
-                              defaultMessage: 'Anonymization',
-                            }
-                          )}
-                          data-test-subj="anonymizationSettings"
-                          iconType="gear"
-                          onClick={showAnonymizationModal}
-                          size="s"
-                          color="text"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.securitySolution.flyout.entityDetails.highlights.anonymizationArialLabel',
+                          {
+                            defaultMessage: 'Anonymization',
+                          }
+                        )}
+                        data-test-subj="anonymizationSettings"
+                        iconType="gear"
+                        onClick={showAnonymizationModal}
+                        size="s"
+                        color="text"
+                      />
+                    </EuiToolTip>
+                  }
+                />
               </EuiContextMenuItem>
             ),
           },
@@ -220,18 +209,34 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.highlights.settingsPopoverAriaLabel',
+        {
+          defaultMessage: 'Entity highlights settings',
+        }
+      )}
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.securitySolution.flyout.entityDetails.highlights.openMenuAriaLabel',
             {
               defaultMessage: 'Entity highlights settings menu',
             }
           )}
-          iconType="boxesVertical"
-          onClick={openPopover}
-          disabled={isLoading}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.openMenuAriaLabel',
+              {
+                defaultMessage: 'Entity highlights settings menu',
+              }
+            )}
+            iconType="boxesVertical"
+            onClick={openPopover}
+            disabled={isLoading}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { isCloudConnectorSecretReference } from '../../../common/types';
 import type {
   CloudProvider,
   CloudConnectorVars,
@@ -89,10 +90,17 @@ async function extractAwsCloudConnectorSecrets(
   const roleArnVar = findFirstVarEntry(vars, roleArnKeys);
   const roleArn = roleArnVar?.value as string | undefined;
 
-  // Look for external_id using schema-defined keys
+  // Look for external_id using schema-defined keys. It is optional.
   const externalIdVar = findFirstVarEntry(vars, externalIdKeys);
 
-  if (roleArn && externalIdVar) {
+  if (roleArn) {
+    if (!externalIdVar) {
+      logger.debug('Extracted AWS cloud connector vars: role_arn only (no external_id)');
+      return {
+        role_arn: { type: 'text' as const, value: roleArn },
+      };
+    }
+
     let externalIdWithSecretRef: { type: 'password'; value: CloudConnectorSecretReference };
 
     // If external_id is not already a secret reference, create a secret for it
@@ -136,7 +144,7 @@ async function extractAwsCloudConnectorSecrets(
 
   logger.error('AWS cloud connector vars not found or incomplete');
   throw new CloudConnectorInvalidVarsError(
-    'Missing required AWS cloud connector variables: role_arn and external_id'
+    'Missing required AWS cloud connector variable: role_arn'
   );
 }
 
@@ -354,8 +362,9 @@ export function extractSecretIdsFromCloudConnectorVars(
   if (cloudProvider === 'aws') {
     const awsVars = cloudConnectorVars as AwsCloudConnectorVars;
     // AWS has external_id as a secret
-    if (awsVars.external_id?.value?.isSecretRef && awsVars.external_id.value.id) {
-      secretIds.push(awsVars.external_id.value.id);
+    const externalIdValue = awsVars.external_id?.value;
+    if (isCloudConnectorSecretReference(externalIdValue) && externalIdValue.isSecretRef) {
+      secretIds.push(externalIdValue.id);
     }
   } else if (cloudProvider === 'azure') {
     const azureVars = cloudConnectorVars as AzureCloudConnectorVars;

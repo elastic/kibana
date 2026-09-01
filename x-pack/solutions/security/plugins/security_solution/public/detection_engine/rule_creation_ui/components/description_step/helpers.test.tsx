@@ -9,6 +9,10 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
@@ -141,7 +145,7 @@ describe('helpers', () => {
       const indexPattern = {
         fields: [{ name: 'event.category', type: 'test type' }],
         title: 'test title',
-        getFormatterForField: () => ({ convert: (val: unknown) => val }),
+        getFormatterForField: () => ({ convertToText: (val: unknown) => val }),
       } as unknown as DataViewBase;
 
       const result: ListItems[] = buildQueryBarDescription({

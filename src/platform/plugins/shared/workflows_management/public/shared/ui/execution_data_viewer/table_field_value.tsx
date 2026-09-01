@@ -79,7 +79,7 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="warning" />
+          <EuiIcon type="warning" color="warning" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTextColor color="warning">
@@ -170,17 +170,18 @@ export const TableFieldValue = ({
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexStart">
         {isCollapsible && (
           <EuiFlexItem grow={false} css={styles.collapseButtonWrapper}>
-            <EuiButtonIcon
-              iconType={isCollapsed ? 'plusSquare' : 'minusSquare'}
-              size="xs"
-              color="primary"
-              data-test-subj={`toggleLongFieldValue-${field}`}
-              title={toggleButtonLabel}
-              aria-label={toggleButtonLabel}
-              aria-expanded={!isCollapsed}
-              aria-controls={valueElementId}
-              onClick={onToggleCollapse}
-            />
+            <EuiToolTip content={toggleButtonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType={isCollapsed ? 'plusSquare' : 'minusSquare'}
+                size="xs"
+                color="primary"
+                data-test-subj={`toggleLongFieldValue-${field}`}
+                aria-label={toggleButtonLabel}
+                aria-expanded={!isCollapsed}
+                aria-controls={valueElementId}
+                onClick={onToggleCollapse}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         <EuiFlexItem>

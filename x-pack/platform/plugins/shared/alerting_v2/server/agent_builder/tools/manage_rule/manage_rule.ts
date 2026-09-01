@@ -11,14 +11,21 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import {
+  ALERTING_TOOL_IDS,
+  DASHBOARD_ARTIFACT_TYPE,
+  RUNBOOK_ARTIFACT_TYPE,
+} from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { alertingTools } from '../../common/constants';
+import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import {
   ruleOperationSchema,
   executeRuleOperations,
   RuleOperationValidationError,
 } from './operations';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
 
 const manageRuleSchema = z.object({
   ruleAttachmentId: z
@@ -30,8 +37,14 @@ const manageRuleSchema = z.object({
   operations: z.array(ruleOperationSchema).min(1),
 });
 
-export const manageRuleTool = (): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
-  id: alertingTools.manageRule,
+export interface ManageRuleToolDeps {
+  logger: LoggerServiceContract;
+}
+
+export const manageRuleTool = ({
+  logger,
+}: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
+  id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 rule in the conversation.
 
@@ -41,31 +54,49 @@ direct the user to the "Create rule" or "Update Rule" button in the rendered
 attachment.
 
 Use operations[] to:
-1. set_metadata — set name, description, and tags
-2. set_kind — set rule kind (alert | signal)
-3. set_schedule — set execution interval and lookback window
-4. set_query — set the base ES|QL detection query
-5. set_grouping — set fields to group alerts by
-6. set_state_transition — set consecutive breaches threshold
-7. set_recovery_policy — set recovery detection type and optional query`,
+${generateRuleOperationsUsageList()}`,
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { logger, attachments, esClient }
+    { attachments, esClient, spaceId, savedObjectsClient }
   ) => {
+    let ruleId: string | undefined;
     try {
-      const persistedRecord = previousAttachmentId
+      const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
         : undefined;
 
-      const isNew = !persistedRecord;
+      const isNew = !currentAttachment;
       const attachmentId = previousAttachmentId ?? uuidv4();
 
-      const currentData: Partial<RuleAttachmentData> = persistedRecord?.versions.at(-1)?.data ?? {};
+      const currentData: Partial<RuleAttachmentData> =
+        currentAttachment?.versions.at(-1)?.data ?? {};
+      ruleId = currentAttachment?.origin;
 
-      const updatedData = (await executeRuleOperations(currentData, operations, esClient, {
-        isNew,
-      })) as RuleAttachmentData;
+      const { data: updatedData, queryColumns } = await executeRuleOperations(
+        currentData,
+        operations,
+        esClient,
+        savedObjectsClient,
+        { isNew }
+      );
+
+      // Pre-assign a stable rule ID so that action policies can reference it
+      // via `rule.id` before the rule is persisted. The UI will use this ID
+      // when calling PUT /api/alerting/v2/rules/{id} (upsert).
+      if (isNew && !updatedData.id) {
+        updatedData.id = uuidv4();
+      }
+      // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
+      ruleId = ruleId ?? updatedData.id;
+
+      const dashboards = (updatedData.artifacts ?? [])
+        .filter((artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE)
+        .map((artifact) => artifact.data.dashboardId)
+        .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
+      const runbookAttached = (updatedData.artifacts ?? []).some(
+        (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+      );
 
       const attachmentInput = {
         id: attachmentId,
@@ -85,9 +116,13 @@ Use operations[] to:
         throw new Error(`Failed to persist rule attachment "${attachmentId}".`);
       }
 
-      logger.debug(
-        `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`
-      );
+      logger.debug({
+        message: () => (isNew ? 'Rule attachment created' : 'Rule attachment updated'),
+        labels: {
+          space_id: spaceId,
+          ...(ruleId != null ? { rule_id: ruleId } : {}),
+        },
+      });
 
       return {
         results: [
@@ -98,11 +133,15 @@ Use operations[] to:
               version: attachment.current_version ?? 1,
               ruleAttachment: {
                 id: attachment.id,
+                ruleId: updatedData.id,
                 name: updatedData.metadata?.name,
                 kind: updatedData.kind,
                 schedule: updatedData.schedule,
-                query: updatedData.evaluation?.query?.base,
+                query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
+                ...(dashboards.length > 0 ? { dashboards } : {}),
+                ...(runbookAttached ? { runbookAttached: true } : {}),
               },
+              ...(queryColumns ? { queryColumns } : {}),
             },
           },
         ],
@@ -110,9 +149,23 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.warn(`manage_rule tool: invalid input — ${message}`);
+        logger.debug({
+          message: 'Invalid manage_rule input',
+          labels: {
+            space_id: spaceId,
+            ...(ruleId != null ? { rule_id: ruleId } : {}),
+          },
+        });
       } else {
-        logger.error(`Error in manage_rule tool: ${message}`);
+        logger.warn({
+          message: 'Failed to manage rule',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+          labels: {
+            space_id: spaceId,
+            ...(ruleId != null ? { rule_id: ruleId } : {}),
+          },
+          error,
+        });
       }
       return {
         results: [

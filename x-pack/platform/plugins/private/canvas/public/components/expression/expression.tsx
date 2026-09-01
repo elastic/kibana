@@ -6,7 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiPanel,
   EuiButton,
@@ -16,6 +17,7 @@ import {
   EuiToolTip,
   EuiLink,
   EuiPortal,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
@@ -99,7 +101,17 @@ export const Expression: FC<Props> = ({
   isCompact,
   toggleCompactView,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const refExpressionInput: ExpressionInputEditorRef = useRef(null);
+
+  const settingsStyles = useMemo(
+    () =>
+      css({
+        borderTop: euiTheme.border.thin,
+        backgroundColor: euiTheme.colors.emptyShade,
+      }),
+    [euiTheme]
+  );
 
   const handleRun = () => {
     setExpression(formState.expression);
@@ -150,7 +162,7 @@ export const Expression: FC<Props> = ({
         onEditorDidMount={onEditorDidMount}
         editorRef={refExpressionInput}
       />
-      <div className="canvasExpression__settings">
+      <div className="canvasExpression__settings" css={settingsStyles}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">

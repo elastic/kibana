@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useChildWorkflowExecutions } from './use_child_workflow_executions';
+import { CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: jest.fn(),
@@ -167,5 +168,102 @@ describe('useChildWorkflowExecutions', () => {
 
     expect(result.current.childExecutions.has('step-a')).toBe(true);
     expect(result.current.childExecutions.has('step-b')).toBe(true);
+  });
+
+  describe('serial polling', () => {
+    const runningParent = () =>
+      createMockExecution({
+        status: ExecutionStatus.RUNNING,
+        finishedAt: undefined,
+      });
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
+    it('refetches on interval while parent execution is non-terminal', async () => {
+      const execution = runningParent();
+
+      renderHook(() => useChildWorkflowExecutions(execution), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS);
+        await Promise.resolve();
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+      expect(mockGetChildrenExecutions).toHaveBeenCalledWith('exec-1');
+    });
+
+    it('does not schedule serial refetches when parent is already terminal', async () => {
+      const execution = createMockExecution();
+
+      renderHook(() => useChildWorkflowExecutions(execution), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS * 3);
+        await Promise.resolve();
+      });
+
+      expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
+    });
+
+    it('stops serial polling when parent execution becomes terminal', async () => {
+      const { rerender } = renderHook(
+        ({ execution }: { execution: WorkflowExecutionDto }) =>
+          useChildWorkflowExecutions(execution),
+        {
+          initialProps: { execution: runningParent() },
+          wrapper: createWrapper(queryClient),
+        }
+      );
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      rerender({ execution: createMockExecution() });
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS * 3);
+        await Promise.resolve();
+      });
+
+      expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
+    });
+
+    it('clears pending poll timer on unmount', async () => {
+      const execution = runningParent();
+
+      const { unmount } = renderHook(() => useChildWorkflowExecutions(execution), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(mockGetChildrenExecutions).toHaveBeenCalledTimes(1));
+
+      unmount();
+
+      mockGetChildrenExecutions.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS * 3);
+        await Promise.resolve();
+      });
+
+      expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
+    });
   });
 });

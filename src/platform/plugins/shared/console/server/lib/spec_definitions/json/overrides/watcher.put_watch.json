@@ -1,12 +1,7 @@
 {
   "watcher.put_watch": {
     "data_autocomplete_rules": {
-      "metadata": {},
-      "trigger": {},
-      "input": {},
-      "condition": {},
-      "throttle_period": 5,
-      "actions": {}
+      "throttle_period": 5
     }
   }
 }

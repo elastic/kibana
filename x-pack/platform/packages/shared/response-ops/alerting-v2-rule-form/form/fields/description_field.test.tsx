@@ -6,30 +6,23 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useForm, FormProvider } from 'react-hook-form';
+import { QueryClientProvider } from '@kbn/react-query';
 import { DescriptionField } from './description_field';
-import { createFormWrapper, createMockServices } from '../../test_utils';
+import {
+  createFormWrapper,
+  createMockServices,
+  createTestQueryClient,
+  defaultTestFormValues,
+} from '../../test_utils';
+import type { FormValues } from '../types';
+import { RuleFormProvider } from '../contexts';
 
 describe('DescriptionField', () => {
-  it('renders "Add description" button when no description value exists', () => {
+  it('renders the description textarea immediately without any interaction', () => {
     render(<DescriptionField />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByTestId('addDescriptionButton')).toBeInTheDocument();
-    expect(screen.getByText('Add description')).toBeInTheDocument();
-  });
-
-  it('does not render textarea initially when no description', () => {
-    render(<DescriptionField />, { wrapper: createFormWrapper() });
-
-    expect(screen.queryByTestId('ruleDescriptionInput')).not.toBeInTheDocument();
-  });
-
-  it('shows textarea when "Add description" button is clicked', async () => {
-    const user = userEvent.setup();
-    render(<DescriptionField />, { wrapper: createFormWrapper() });
-
-    await user.click(screen.getByTestId('addDescriptionButton'));
 
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
@@ -48,14 +41,10 @@ describe('DescriptionField', () => {
 
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescriptionInput')).toHaveValue('Initial description');
-    expect(screen.queryByTestId('addDescriptionButton')).not.toBeInTheDocument();
   });
 
-  it('displays placeholder text in textarea', async () => {
-    const user = userEvent.setup();
+  it('displays placeholder text in textarea', () => {
     render(<DescriptionField />, { wrapper: createFormWrapper() });
-
-    await user.click(screen.getByTestId('addDescriptionButton'));
 
     expect(
       screen.getByPlaceholderText('Add an optional description for this rule...')
@@ -66,20 +55,16 @@ describe('DescriptionField', () => {
     const user = userEvent.setup();
     render(<DescriptionField />, { wrapper: createFormWrapper() });
 
-    await user.click(screen.getByTestId('addDescriptionButton'));
     const textarea = screen.getByTestId('ruleDescriptionInput');
     await user.type(textarea, 'My new description');
 
     expect(textarea).toHaveValue('My new description');
   });
 
-  it('renders correctly in flyout layout', async () => {
-    const user = userEvent.setup();
+  it('renders correctly in flyout layout', () => {
     render(<DescriptionField />, {
       wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
     });
-
-    await user.click(screen.getByTestId('addDescriptionButton'));
 
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
   });
@@ -88,12 +73,119 @@ describe('DescriptionField', () => {
     const user = userEvent.setup();
     render(<DescriptionField />, { wrapper: createFormWrapper() });
 
-    await user.click(screen.getByTestId('addDescriptionButton'));
     const textarea = screen.getByTestId('ruleDescriptionInput');
     await user.type(textarea, 'test');
     await user.clear(textarea);
 
     // Textarea should still be visible even though value is cleared
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
+  });
+
+  it('shows error when submitted with a description longer than 1024 characters', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          metadata: { ...defaultTestFormValues.metadata, description: 'a'.repeat(1025) },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(() => {})}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<DescriptionField />, { wrapper: WrapperWithSubmit });
+
+    await user.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Description cannot exceed 1024 characters.')).toBeInTheDocument();
+    });
+  });
+
+  it('does not show a length error when submitted with a description of exactly 1024 characters', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+    const onSubmit = jest.fn();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          metadata: { ...defaultTestFormValues.metadata, description: 'a'.repeat(1024) },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(onSubmit)}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<DescriptionField />, { wrapper: WrapperWithSubmit });
+
+    await user.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
+    expect(
+      screen.queryByText('Description cannot exceed 1024 characters.')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not show a length error when the description is empty', async () => {
+    const onSubmit = jest.fn();
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({ defaultValues: defaultTestFormValues });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(onSubmit)}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<DescriptionField />, { wrapper: WrapperWithSubmit });
+
+    await user.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
   });
 });

@@ -59,9 +59,13 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
     )
   );
 
-  const isVisible$ = combineLatest([appHidden$, forceHidden.$, isPrinting$]).pipe(
-    map(([appHidden, forceHiddenValue, isPrinting]) => {
-      return !appHidden && !forceHiddenValue && !isPrinting;
+  // App Not Found leaves currentAppId$ unset; keep chrome visible so capability-pruned
+  // navigation remains a recovery surface. Embed, print, and forced-hidden still win.
+  const appNotFound$ = application.appNotFound$.pipe(startWith(false), distinctUntilChanged());
+
+  const isVisible$ = combineLatest([appHidden$, appNotFound$, forceHidden.$, isPrinting$]).pipe(
+    map(([appHidden, appNotFound, forceHiddenValue, isPrinting]) => {
+      return (!appHidden || appNotFound) && !forceHiddenValue && !isPrinting;
     }),
     distinctUntilChanged(),
     shareReplay(1)

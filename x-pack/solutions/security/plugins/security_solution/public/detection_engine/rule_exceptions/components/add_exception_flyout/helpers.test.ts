@@ -36,6 +36,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if "isSubmitting" is "true"', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: true,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -55,6 +57,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if "isClosingAlerts" is "true"', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: true,
           errorSubmitting: null,
@@ -74,6 +78,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if "itemConditionValidationErrorExists" is "true"', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -93,6 +99,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if "commentErrorExists" is "true"', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -112,6 +120,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if "expireErrorExists" is "true"', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -131,6 +141,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if item name is empty', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -150,6 +162,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if error submitting exists', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: new Error('uh oh'),
@@ -169,6 +183,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if all items do not include any entries', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -193,6 +209,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if exception is to be added to a list, but no list is specified', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -212,6 +230,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns true if exception is to be added to a rule but no rule is specified', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -231,6 +251,8 @@ describe('add_exception_flyout#helpers', () => {
     it('returns false if conditions are met for adding exception to a rule', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,
@@ -255,6 +277,50 @@ describe('add_exception_flyout#helpers', () => {
     it('returns false if conditions are met for adding exception to a list', () => {
       expect(
         isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: false,
+          isSubmitting: false,
+          isClosingAlerts: false,
+          errorSubmitting: null,
+          exceptionItemName: 'Item name',
+          exceptionItems: items,
+          itemConditionValidationErrorExists: false,
+          commentErrorExists: false,
+          expireErrorExists: false,
+          addExceptionToRadioSelection: 'add_to_lists',
+          selectedRulesToAddTo: [],
+          listType: ExceptionListTypeEnum.DETECTION,
+          exceptionListsToAddTo: [getExceptionListSchemaMock()],
+        })
+      ).toBeFalsy();
+    });
+
+    it('returns true if bulk close is selected while the runtime-field map is still resolving', () => {
+      expect(
+        isSubmitDisabled({
+          bulkCloseAlerts: true,
+          isRuntimeFieldsResolving: true,
+          isSubmitting: false,
+          isClosingAlerts: false,
+          errorSubmitting: null,
+          exceptionItemName: 'Item name',
+          exceptionItems: items,
+          itemConditionValidationErrorExists: false,
+          commentErrorExists: false,
+          expireErrorExists: false,
+          addExceptionToRadioSelection: 'add_to_lists',
+          selectedRulesToAddTo: [],
+          listType: ExceptionListTypeEnum.DETECTION,
+          exceptionListsToAddTo: [getExceptionListSchemaMock()],
+        })
+      ).toBeTruthy();
+    });
+
+    it('returns false if the runtime-field map is still resolving but bulk close is not selected', () => {
+      expect(
+        isSubmitDisabled({
+          bulkCloseAlerts: false,
+          isRuntimeFieldsResolving: true,
           isSubmitting: false,
           isClosingAlerts: false,
           errorSubmitting: null,

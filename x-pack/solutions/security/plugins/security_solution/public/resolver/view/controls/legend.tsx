@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { useColors } from '../use_colors';
 import { StyledDescriptionList } from '../panels/styles';
 import { CubeForProcess } from '../panels/cube_for_process';
@@ -34,6 +34,7 @@ export const NodeLegend = ({
 }) => {
   const setAsActivePopover = useCallback(() => setActivePopover('nodeLegend'), [setActivePopover]);
   const colorMap = useColors();
+  const nodeLegendTitleId = useGeneratedHtmlId();
 
   const nodeLegendButtonTitle = i18n.translate(
     'xpack.securitySolution.resolver.graphControls.nodeLegendButtonTitle',
@@ -60,8 +61,9 @@ export const NodeLegend = ({
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
+      aria-labelledby={nodeLegendTitleId}
     >
-      <EuiPopoverTitle css={{ textTransform: 'uppercase' }}>
+      <EuiPopoverTitle id={nodeLegendTitleId} css={{ textTransform: 'uppercase' }}>
         {i18n.translate('xpack.securitySolution.resolver.graphControls.nodeLegend', {
           defaultMessage: 'legend',
         })}

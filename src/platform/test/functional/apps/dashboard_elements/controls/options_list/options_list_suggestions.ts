@@ -15,6 +15,11 @@ import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/
 export default function ({ getPageObjects }: FtrProviderContext) {
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
+  /**
+   * Purpose: Suggestions smoke test
+   *
+   * Migration: See if can be broken into unit tests and API tests
+   */
   describe('Dashboard options list suggestions', () => {
     let controlId: string;
 

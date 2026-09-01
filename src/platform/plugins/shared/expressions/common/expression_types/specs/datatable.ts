@@ -10,7 +10,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-
 import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import type { PointSeries, PointSeriesColumn } from './pointseries';
 import type { ExpressionValueRender } from './render';
@@ -24,6 +23,9 @@ export enum DimensionType {
   SPLIT_COLUMN = 'splitCol',
   SPLIT_ROW = 'splitRow',
 }
+
+export const MAX_DATATABLE_ROWS = 10_000; // matches default ES index.max_result_window
+const MAX_DATATABLE_CELLS = MAX_DATATABLE_ROWS * 50; // max rows * 50 columns per row
 
 const name = 'datatable';
 
@@ -55,6 +57,7 @@ export type DatatableColumnType =
   | 'nested'
   | 'histogram'
   | 'flattened'
+  | 'number_range'
   | 'null';
 
 /**
@@ -103,6 +106,10 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
+  /**
+   * raw metadata from the data source (e.g. ES column _meta)
+   */
+  esMeta?: Record<string, unknown>;
 }
 
 interface SourceParamsESQL extends Record<string, unknown> {
@@ -110,14 +117,46 @@ interface SourceParamsESQL extends Record<string, unknown> {
   sourceField: string;
   operationType: string;
   interval?: number;
+  dropPartials?: boolean;
+  appliedTimeRange?: {
+    from?: string;
+    to?: string;
+  };
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isOptionalNumber = (value: unknown): value is number | undefined =>
+  value === undefined || typeof value === 'number';
+
+const isOptionalBoolean = (value: unknown): value is boolean | undefined =>
+  value === undefined || typeof value === 'boolean';
+
+const isOptionalString = (value: unknown): value is string | undefined =>
+  value === undefined || typeof value === 'string';
+
+const isOptionalAppliedTimeRange = (
+  value: unknown
+): value is SourceParamsESQL['appliedTimeRange'] => {
+  if (value === undefined) {
+    return true;
+  }
+
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return isOptionalString(value.from) && isOptionalString(value.to);
+};
 
 export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
   return (
-    obj &&
     typeof obj.indexPattern === 'string' &&
     typeof obj.sourceField === 'string' &&
-    (typeof obj.interval === 'number' || !obj.interval)
+    isOptionalNumber(obj.interval) &&
+    isOptionalBoolean(obj.dropPartials) &&
+    isOptionalAppliedTimeRange(obj.appliedTimeRange)
   );
 }
 
@@ -211,6 +250,12 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   },
   deserialize: (table) => {
     const { columns, rows } = table;
+    if (rows.length > MAX_DATATABLE_ROWS) {
+      throw new Error(`Datatable exceeds maximum of ${MAX_DATATABLE_ROWS} rows.`);
+    }
+    if (columns.length * rows.length > MAX_DATATABLE_CELLS) {
+      throw new Error(`Datatable exceeds maximum allowed size of ${MAX_DATATABLE_CELLS} cells.`);
+    }
     return {
       ...table,
       rows: rows.map((row) => {

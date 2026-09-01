@@ -54,4 +54,18 @@ describe('getDefaultSecurityImplementation', () => {
       expect(logger.log({ message: 'no request' })).toBeUndefined();
     });
   });
+
+  describe('serviceAccounts.isEnabled', () => {
+    it('returns false', () => {
+      expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+  });
+
+  describe('fakeRequestEnricher', () => {
+    it('is a no-op (no security delegate registered)', () => {
+      expect(() =>
+        implementation.fakeRequestEnricher({} as any, { profileId: 'u_test_profile_123' })
+      ).not.toThrow();
+    });
+  });
 });

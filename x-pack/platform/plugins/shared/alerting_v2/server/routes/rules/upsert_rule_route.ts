@@ -8,9 +8,9 @@ import { inject, injectable } from 'inversify';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   createRuleDataSchema,
+  errorResponseSchema,
   ruleResponseSchema,
   type CreateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -21,6 +21,12 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_UPSERT_CONFLICT_DESCRIPTION,
+} from './rule_response_descriptions';
+import { upsertRuleOasExamples } from './upsert_rule_oas_example';
 
 @injectable()
 export class UpsertRuleRoute extends BaseAlertingRoute {
@@ -35,11 +41,12 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     summary: 'Create or replace a rule',
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertRuleOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createRuleDataSchema),
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      body: createRuleDataSchema,
+      params: ruleIdParamsSchema,
     },
     response: {
       200: {
@@ -51,7 +58,16 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
         description: 'Returns the newly created rule.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      404: {
+        body: () => errorResponseSchema,
+        description: RULE_NOT_FOUND_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: RULE_UPSERT_CONFLICT_DESCRIPTION,
       },
     },
   };

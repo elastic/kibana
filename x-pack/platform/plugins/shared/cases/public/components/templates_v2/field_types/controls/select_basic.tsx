@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -16,16 +17,35 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema> & ConditionRenderProps;
+type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
-export const SelectBasic = ({ label, metadata, name, type, isRequired }: SelectBasicProps) => {
-  const { control } = useFormContext();
+export const SelectBasic = ({
+  label,
+  metadata,
+  name,
+  type,
+  isRequired,
+  isRequiredOnClose,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
+}: SelectBasicProps) => {
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const options = useMemo(
-    () => metadata.options.map((option) => ({ value: option, text: option })),
+    // Drop nullish entries so a stray `null` in the YAML options never renders as a literal "null"
+    // choice.
+    () =>
+      metadata.options
+        .filter((option) => option != null)
+        .map((option) => ({ value: option, text: option })),
     [metadata.options]
   );
 
@@ -39,6 +59,11 @@ export const SelectBasic = ({ label, metadata, name, type, isRequired }: SelectB
     };
   }, [isRequired]);
 
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
+
   return (
     <Controller
       key={name}
@@ -47,25 +72,40 @@ export const SelectBasic = ({ label, metadata, name, type, isRequired }: SelectB
       rules={rules}
       defaultValue=""
       render={({ field, fieldState }) => (
-        <EuiFormRow
-          label={label}
-          labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-          isInvalid={!!fieldState.error}
-          error={fieldState.error?.message}
-          fullWidth
-        >
-          <EuiSelect
-            inputRef={field.ref}
-            name={field.name}
-            options={options}
-            value={(field.value as string) ?? ''}
-            onChange={(e) => field.onChange(e.target.value)}
-            onBlur={field.onBlur}
-            hasNoInitialSelection={!field.value}
-            isInvalid={!!fieldState.error}
+        <>
+          <EuiFormRow
+            label={label}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+            isInvalid={Boolean(fieldState.error)}
+            error={fieldState.error?.message}
             fullWidth
-          />
-        </EuiFormRow>
+          >
+            <EuiSelect
+              inputRef={field.ref}
+              name={field.name}
+              options={options}
+              value={(field.value as string) ?? ''}
+              onChange={(e) => {
+                field.onChange(e.target.value);
+                field.onBlur();
+              }}
+              onBlur={field.onBlur}
+              hasNoInitialSelection={!field.value}
+              isInvalid={Boolean(fieldState.error)}
+              disabled={isSaving}
+              fullWidth
+            />
+          </EuiFormRow>
+          {fieldState.isDirty && onConfirm && (
+            <InlineFieldActions
+              name={name}
+              onConfirm={onConfirm}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+              isDisabled={isSaveDisabled}
+            />
+          )}
+        </>
       )}
     />
   );

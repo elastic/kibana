@@ -10,10 +10,10 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { RULE_ATTACHMENT_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { RulesClient } from '../../lib/rules_client';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createRuleSmlType } from './rule_sml_type';
 
 const baseRuleAttrs: RuleSavedObjectAttributes = {
@@ -26,7 +26,10 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  evaluation: { query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  },
   state_transition: null,
   enabled: true,
   createdBy: 'elastic',
@@ -34,6 +37,17 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   updatedBy: 'elastic',
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as RuleSavedObjectAttributes;
+
+// `getRule` returns the snake_case API response, not the saved object attributes.
+const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
+const baseRuleResponse = {
+  ...restRuleAttrs,
+  created_by: createdBy,
+  created_at: createdAt,
+  updated_by: updatedBy,
+  updated_at: updatedAt,
+  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+};
 
 const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
   esClient: {} as ElasticsearchClient,
@@ -51,6 +65,7 @@ describe('createRuleSmlType', () => {
   let getRule: jest.Mock;
   let getRepoSo: jest.Mock;
   let createFinder: jest.Mock;
+  let getIsAlertingV2Enabled: jest.Mock;
   let repository: ISavedObjectsRepository;
   let rulesClient: RulesClient;
 
@@ -58,6 +73,7 @@ describe('createRuleSmlType', () => {
     getRule = jest.fn();
     getRepoSo = jest.fn();
     createFinder = jest.fn();
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
 
     repository = {
       get: getRepoSo,
@@ -71,11 +87,12 @@ describe('createRuleSmlType', () => {
     createRuleSmlType({
       getScopedRulesClient: () => rulesClient,
       getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared RULE_SML_TYPE constant', () => {
-      expect(buildDefinition().id).toBe(RULE_SML_TYPE);
+    it('uses the shared RULE_KI_TYPE constant', () => {
+      expect(buildDefinition().id).toBe(RULE_KI_TYPE);
     });
 
     it('returns "1m" as fetch frequency', () => {
@@ -164,31 +181,36 @@ describe('createRuleSmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never touches the repository when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(createFinder).not.toHaveBeenCalled();
+    });
   });
 
-  describe('getSmlData', () => {
-    it('returns a single chunk built from rule metadata + query', async () => {
+  describe('getSmlEntry', () => {
+    it('returns a single entry built from rule metadata + query', async () => {
       getRepoSo.mockResolvedValueOnce({ id: 'rule-1', attributes: baseRuleAttrs });
 
-      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
 
       expect(getRepoSo).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: 'High CPU',
-            content: [
-              'High CPU',
-              'CPU breach detection',
-              'alert',
-              'ops, cpu',
-              baseRuleAttrs.evaluation!.query!.base,
-            ].join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
-          },
-        ],
+        type: RULE_KI_TYPE,
+        title: 'High CPU',
+        content: [
+          'High CPU',
+          'CPU breach detection',
+          'alert',
+          'ops, cpu',
+          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+        ].join('\n'),
       });
+      expect(result).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
@@ -200,41 +222,63 @@ describe('createRuleSmlType', () => {
         } as unknown as RuleSavedObjectAttributes,
       });
 
-      const result = await buildDefinition().getSmlData('rule-bare', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-bare', buildSmlContext());
 
-      expect(result?.chunks[0].title).toBe('rule-bare');
+      expect(result?.title).toBe('rule-bare');
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
       getRepoSo.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
-      const result = await buildDefinition().getSmlData('rule-missing', buildSmlContext(logger));
+      const result = await buildDefinition().getSmlEntry('rule-missing', buildSmlContext(logger));
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML rule: failed to get data for 'rule-missing'")
       );
     });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(getRepoSo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the registered ai_index read action for rules', () => {
+      const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
+      expect(permissions).toEqual({
+        kibana: { privileges: { name: [`ai_index:${RULE_KI_TYPE}/read`] } },
+      });
+    });
   });
 
   describe('toAttachment', () => {
-    const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => ({
-      id: 'sml-1',
-      type: RULE_SML_TYPE,
-      title: 'High CPU',
-      origin_id: 'rule-1',
-      content: '',
-      created_at: '2026-04-10T00:00:00.000Z',
-      updated_at: '2026-04-10T00:00:00.000Z',
-      spaces: ['default'],
-      permissions: [],
-      ...overrides,
-    });
+    const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
+      const originId = overrides.origin_id ?? 'rule-1';
+      return {
+        id: 'sml-1',
+        type: RULE_KI_TYPE,
+        title: 'High CPU',
+        origin_id: originId,
+        origin: { uri: `${RULE_KI_TYPE}://${originId}` },
+        content: '',
+        created_at: '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        spaces: ['default'],
+        permissions: { kibana: { privileges: [] } },
+        ingestion_method: 'crawled' as const,
+      };
+    };
 
     it('returns an attachment input wrapping the parsed rule', async () => {
       getRule.mockResolvedValueOnce({
-        ...baseRuleAttrs,
+        ...baseRuleResponse,
         id: 'rule-1',
       });
 
@@ -268,6 +312,18 @@ describe('createRuleSmlType', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('returns undefined without calling the rules client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getRule).not.toHaveBeenCalled();
     });
   });
 });

@@ -179,7 +179,7 @@ export const FieldStatsContent: FC<FieldStatsContentProps> = ({
             field={field}
             fieldValue={fieldValue}
             formattedPercentage={individualStatForDisplay.percentage}
-            formattedFieldValue={formatter.convert(fieldValue)}
+            formattedFieldValue={formatter.convertToText(fieldValue)}
             // Always set as completed since calc is done once we're here
             progressValue={100}
             count={0}

@@ -119,12 +119,12 @@ describe('serializeEditorContent', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Sml,
       label: 'visualization/Pacific Sales',
-      id: 'chunk-1',
+      id: 'entry-1',
       metadata: {},
     });
     div.appendChild(badge);
 
-    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://chunk-1)');
+    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://entry-1)');
   });
 });
 
@@ -214,7 +214,7 @@ describe('deserializeBadgeContent', () => {
   });
 
   it('parses an SML badge', () => {
-    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](sml://chunk-1)');
+    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](sml://entry-1)');
 
     expect(segments).toEqual([
       {
@@ -222,7 +222,7 @@ describe('deserializeBadgeContent', () => {
         data: {
           commandId: CommandId.Sml,
           label: 'visualization/Pacific Sales',
-          id: 'chunk-1',
+          id: 'entry-1',
           metadata: {},
         },
       },
@@ -265,7 +265,7 @@ describe('round-trip serialization', () => {
   });
 
   it('round-trips SML badge', () => {
-    const original = 'Ref [@visualization/Pacific Sales](sml://chunk-1) here';
+    const original = 'Ref [@visualization/Pacific Sales](sml://entry-1) here';
     const segments = deserializeCommandBadge(original);
 
     const div = document.createElement('div');

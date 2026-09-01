@@ -76,6 +76,39 @@ describe('useLastPageUserActions', () => {
     );
   });
 
+  it('does not report loading when disabled, even if the underlying query reports isLoading', async () => {
+    // react-query v4 quirk: a disabled query with no data keeps reporting
+    // `isLoading: true` forever. When there's no separate last page to fetch
+    // (lastPage === 1, e.g. because search/author collapses everything into
+    // the infinite query), this hook must not surface that as loading,
+    // otherwise consumers relying on it (e.g. to resolve a loading skeleton)
+    // would hang indefinitely.
+    useFindCaseUserActionsMock.mockReturnValue({ isLoading: true, data: undefined });
+
+    const { result } = renderHook(() =>
+      useLastPageUserActions({
+        lastPage: 1,
+        userActivityQueryParams,
+        caseId: basicCase.id,
+      })
+    );
+
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      basicCase.id,
+      { ...userActivityQueryParams, page: 1 },
+      false
+    );
+
+    await waitFor(() => {
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          isLoadingLastPageUserActions: false,
+          lastPageUserActions: [],
+        })
+      );
+    });
+  });
+
   it('returns loading state correctly', async () => {
     useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
 

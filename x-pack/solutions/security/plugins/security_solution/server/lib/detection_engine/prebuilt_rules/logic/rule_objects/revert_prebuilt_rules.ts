@@ -23,6 +23,12 @@ export const revertPrebuiltRules = async (
   ruleVersions: RuleTriad[]
 ) =>
   withSecuritySpan('revertPrebuiltRule', async () => {
+    const changeTracking = {
+      metadata: {
+        bulkCount: ruleVersions.length,
+      },
+    };
+
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: ruleVersions,
@@ -30,6 +36,7 @@ export const revertPrebuiltRules = async (
         return detectionRulesClient.revertPrebuiltRule({
           ruleAsset: target,
           existingRule: current,
+          changeTracking,
         });
       },
     });

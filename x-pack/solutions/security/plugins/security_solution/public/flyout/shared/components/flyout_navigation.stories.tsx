@@ -7,7 +7,8 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { FlyoutNavigation } from './flyout_navigation';
 
@@ -39,7 +40,22 @@ export const CollapsableWithAction: StoryFn = () => {
       <FlyoutNavigation
         flyoutIsExpandable={true}
         expandDetails={expandDetails}
-        actions={<EuiButtonIcon iconType="share" />}
+        actions={
+          <EuiToolTip
+            content={i18n.translate('xpack.securitySolution.flyout.navigation.shareAriaLabel', {
+              defaultMessage: 'Share',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="share"
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.navigation.shareAriaLabel',
+                { defaultMessage: 'Share' }
+              )}
+            />
+          </EuiToolTip>
+        }
       />
     </TestProvider>
   );
@@ -48,7 +64,25 @@ export const CollapsableWithAction: StoryFn = () => {
 export const NonCollapsableWithAction: StoryFn = () => {
   return (
     <TestProvider>
-      <FlyoutNavigation flyoutIsExpandable={false} actions={<EuiButtonIcon iconType="share" />} />
+      <FlyoutNavigation
+        flyoutIsExpandable={false}
+        actions={
+          <EuiToolTip
+            content={i18n.translate('xpack.securitySolution.flyout.navigation.shareAriaLabel', {
+              defaultMessage: 'Share',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="share"
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.navigation.shareAriaLabel',
+                { defaultMessage: 'Share' }
+              )}
+            />
+          </EuiToolTip>
+        }
+      />
     </TestProvider>
   );
 };

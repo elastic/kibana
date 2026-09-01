@@ -10,6 +10,7 @@ import { isFunctionExpression, within, isAssignment, isColumn } from '@elastic/e
 import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import {
   getNewUserDefinedColumnSuggestion,
+  newLineCompleteItem,
   pipeCompleteItem,
   commaCompleteItem,
   assignCompletionItem,
@@ -37,7 +38,7 @@ export async function suggestFieldsList(
   cursorPosition: number = query.length,
   options?: {
     /** Listed functions will not be suggested in expressions */
-    functionsToIgnore?: ExpressionContextOptions['functionsToIgnore'];
+    getFunctionsToIgnore?: ExpressionContextOptions['getFunctionsToIgnore'];
     /** Suggestions to show after a complete field expression */
     afterCompleteSuggestions?: ISuggestionItem[];
     /** Include pipe/comma suggestions after a complete field expression */
@@ -50,6 +51,8 @@ export async function suggestFieldsList(
     ignoredColumnsForEmptyExpression?: string[];
     /** If true, disables col0 and assignment suggestions (for contexts where assignments are not supported) */
     disableNewColumnSuggestion?: boolean;
+    /** Whether this expression context can suggest subquery operands after IN / NOT IN */
+    allowSubquery?: ExpressionContextOptions['allowSubquery'];
   }
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
@@ -81,8 +84,9 @@ export async function suggestFieldsList(
     callbacks,
     options: {
       preferredExpressionType: options?.preferredExpressionType,
-      functionsToIgnore: options?.functionsToIgnore,
+      getFunctionsToIgnore: options?.getFunctionsToIgnore,
       ignoredColumnsForEmptyExpression: options?.ignoredColumnsForEmptyExpression,
+      allowSubquery: options?.allowSubquery,
     },
   });
 
@@ -113,7 +117,7 @@ export async function suggestFieldsList(
         };
       }
 
-      suggestions.push(pipeCompleteItem, commaSuggestion);
+      suggestions.push(newLineCompleteItem, pipeCompleteItem, commaSuggestion);
     }
 
     if (options?.afterCompleteSuggestions) {

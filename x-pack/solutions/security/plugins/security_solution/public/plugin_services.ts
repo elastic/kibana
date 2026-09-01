@@ -6,8 +6,8 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
@@ -157,7 +157,7 @@ export class PluginServices {
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
       storage: this.storage,
       sessionStorage: this.sessionStorage,
-      security: startPlugins.security,
+      security: { ...coreStart.security, ...startPlugins.security },
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
       telemetry,

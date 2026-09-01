@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -119,6 +119,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 import { UiamApiKeyProvisioningTask } from './provisioning';
 import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
+import { ruleCreateTelemetryEvents } from './application/rule/methods/common_utils/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -189,7 +190,7 @@ export interface AlertingServerStart {
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
@@ -366,6 +367,7 @@ export class AlertingPlugin {
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
+          totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
         });
       }
     }
@@ -428,6 +430,9 @@ export class AlertingPlugin {
     );
 
     uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    ruleCreateTelemetryEvents.forEach((eventConfig) =>
+      core.analytics.registerEventType(eventConfig)
+    );
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
@@ -607,12 +612,18 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
+          ...pick(this.config.rules, [
+            'minimumScheduleInterval',
+            'maxScheduledPerMinute',
+            'run',
+            'apiKeyType',
+          ]),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
+        getTotalFieldsLimit: () => this.config.alertsService.totalFieldsLimit,
         getContextInitializationPromise: (
           context: string,
           namespace: string
@@ -707,6 +718,7 @@ export class AlertingPlugin {
       shouldGrantUiam,
       isServerless: this.isServerless,
       featureFlags: core.featureFlags,
+      analytics: core.analytics,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -730,7 +742,7 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequestInSpace = async (
       request: KibanaRequest,
-      spaceId: string,
+      spaceId: SpaceId,
       options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
@@ -762,8 +774,8 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
+      auditService: core.security.audit,
       backfillClient: this.backfillClient!,
-      basePathService: core.http.basePath,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       data: plugins.data,
@@ -796,6 +808,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
+      uiamConvert: core.security.authc.apiKeys.uiam?.convert,
     });
 
     this.eventLogService!.registerSavedObjectProvider(

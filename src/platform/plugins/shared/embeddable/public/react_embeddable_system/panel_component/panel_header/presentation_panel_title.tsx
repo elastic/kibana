@@ -40,7 +40,7 @@ export const PresentationPanelTitle = ({
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }) => {
   const { euiTheme } = useEuiTheme();
   const isEditableTitle = viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api);
@@ -51,6 +51,20 @@ export const PresentationPanelTitle = ({
       focusOnTitle: true,
     });
   }, [api]);
+
+  /**
+   * Ensures the flyout opens on Enter across all browsers, since some browsers (e.g. Safari)
+   * do not fire click events when Enter is pressed on <a> elements without an href.
+   */
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault(); // prevent `onClick` event from firing and causing a double flyout
+        onClick();
+      }
+    },
+    [onClick]
+  );
 
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
@@ -85,6 +99,7 @@ export const PresentationPanelTitle = ({
       <EuiLink
         color="text"
         onClick={onClick}
+        onKeyDown={onKeyDown}
         css={titleStyles}
         aria-label={i18n.translate('embeddableApi.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
@@ -97,6 +112,7 @@ export const PresentationPanelTitle = ({
     );
   }, [
     onClick,
+    onKeyDown,
     hideTitle,
     panelTitle,
     isEditableTitle,
@@ -160,6 +176,10 @@ export const PresentationPanelTitle = ({
               // styles necessary for applying ellipsis and showing the info icon if description is present
               css={css`
                 overflow: hidden;
+                // The panel title is a heading, but rendered at the regular text size. Reset the
+                // heading's font and margin so a global h2 style cannot override the panel title size
+                font: inherit;
+                margin: 0;
               `}
             >
               <EuiScreenReaderOnly>

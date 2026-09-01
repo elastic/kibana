@@ -16,21 +16,19 @@ import { allCasesPermissions, renderWithTestingProviders } from '../../../common
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
-import { useBulkPostObservables } from '../../../containers/use_bulk_post_observables';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
 jest.mock('../../../analytics/use_attach_events_ebt');
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../containers/use_create_attachments');
-jest.mock('../../../containers/use_bulk_post_observables');
+jest.mock('../../create/flyout/use_cases_add_to_new_case_flyout');
 // dummy mock, will call onRowclick when rendering
 jest.mock('./all_cases_selector_modal', () => {
   return {
@@ -41,6 +39,7 @@ jest.mock('./all_cases_selector_modal', () => {
 const onSuccess = jest.fn();
 const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
+const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
@@ -57,18 +56,11 @@ const TestComponent: React.FC<AddToExistingCaseModalProps> = (
 };
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
-const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 
-const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
-    mutateAsync: jest.fn(),
-  });
-
-  useBulkPostObservablesMock.mockReturnValue({
     mutateAsync: jest.fn(),
   });
 
@@ -78,18 +70,14 @@ describe('use cases add to existing case modal hook', () => {
     return (
       <CasesContext.Provider
         value={{
-          externalReferenceAttachmentTypeRegistry,
-          persistableStateAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
           owner: ['test'],
           permissions: allCasesPermissions(),
           basePath: '/jest',
           dispatch,
           features: {
-            alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+            alerts: { read: true, all: true },
             metrics: [],
-            observables: { enabled: true, autoExtract: true },
-            events: { enabled: true },
           },
           releasePhase: 'ga',
         }}
@@ -103,10 +91,17 @@ describe('use cases add to existing case modal hook', () => {
     return { onSuccess };
   };
 
+  const mockOpenCreateCaseFlyout = jest.fn();
+
   beforeEach(() => {
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
     onSuccess.mockReset();
+    mockOpenCreateCaseFlyout.mockReset();
+    useCasesAddToNewCaseFlyoutMock.mockReturnValue({
+      open: mockOpenCreateCaseFlyout,
+      close: jest.fn(),
+    });
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -124,7 +119,7 @@ describe('use cases add to existing case modal hook', () => {
       },
       { wrapper }
     );
-    result.current.open();
+    result.current.open({ getAttachments: () => [] });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
@@ -297,6 +292,47 @@ describe('use cases add to existing case modal hook', () => {
       expect(mockBulkCreateAttachments).not.toHaveBeenCalled();
       expect(mockedToastSuccess).not.toHaveBeenCalled();
     });
+  });
+
+  it('should lazily resolve owner-dependent attachments when creating a new case from the modal', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      // user clicked "create new case" inside the "add to existing case" modal
+      onRowClick(undefined);
+      return null;
+    });
+
+    // an owner-dependent getAttachments, like ML's or Osquery's, that can only build
+    // the correct unified attachment once the (new) case's owner is known
+    const ownerDependentGetAttachments = jest
+      .fn()
+      .mockImplementation(({ theCase }: { theCase?: CaseUI }) => (theCase ? [alertComment] : []));
+
+    const TestComponentWithOwnerDependentAttachments: React.FC<AddToExistingCaseModalProps> = (
+      props
+    ) => {
+      const hook = useCasesAddToExistingCaseModal({ onSuccess, ...props });
+      const onClick = () => {
+        hook.open({ getAttachments: ownerDependentGetAttachments });
+      };
+      return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
+    };
+
+    renderWithTestingProviders(<TestComponentWithOwnerDependentAttachments />);
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(mockOpenCreateCaseFlyout).toHaveBeenCalledWith({
+        getAttachments: expect.any(Function),
+      });
+    });
+
+    const { getAttachments: flyoutGetAttachments } = mockOpenCreateCaseFlyout.mock.calls[0][0];
+
+    // the flyout only knows the owner once the case is created; the modal must
+    // forward that owner back to the caller's getAttachments instead of the
+    // empty array it would have eagerly resolved with theCase === undefined
+    expect(flyoutGetAttachments('cases')).toEqual([alertComment]);
+    expect(ownerDependentGetAttachments).toHaveBeenCalledWith({ theCase: { owner: 'cases' } });
   });
 
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {

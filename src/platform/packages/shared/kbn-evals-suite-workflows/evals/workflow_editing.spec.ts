@@ -20,14 +20,20 @@ import {
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
+  createLiquidCorrectnessEvaluator,
+  createLiquidPresenceEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
+  skipCompositeMode,
   skipInfraErrors,
   skipNegativeCases,
   extractResultYaml,
   extractYamlFromAttachments,
 } from '../src/evaluators';
+
+const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
+const liquidPresence = skipInfraErrors(skipNegativeCases(createLiquidPresenceEvaluator()));
 
 const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 
@@ -73,7 +79,7 @@ const evaluate = base.extend<
       await use(async ({ dataset }) => {
         await executorClient.runExperiment(
           {
-            dataset,
+            datasets: [dataset],
             task: async ({ input }) => {
               const startMs = Date.now();
               const response = await chatClient.converse({
@@ -110,13 +116,15 @@ const evaluate = base.extend<
           },
           selectEvaluators<WorkflowEditExample, WorkflowTaskOutput>([
             skip(createNoErrorsEvaluator()),
-            skip(createEditSuccessEvaluator()),
+            skip(skipCompositeMode(createEditSuccessEvaluator())),
             skip(createValidationPassEvaluator()),
-            skip(createToolUsageEvaluator()),
+            skip(skipCompositeMode(createToolUsageEvaluator())),
             skip(createStructuralCorrectnessEvaluator()),
             skip(createEditPreservationEvaluator()),
-            skip(createEfficiencyEvaluator()),
-            skip(createToolTrajectoryEvaluator()),
+            liquid,
+            liquidPresence,
+            skip(skipCompositeMode(createEfficiencyEvaluator())),
+            skip(skipCompositeMode(createToolTrajectoryEvaluator())),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])
@@ -131,11 +139,12 @@ evaluate.describe(
   'Workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('inserts a new step', async ({ evaluateEditDataset }) => {
+    evaluate('core editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing: insert-step',
-          description: 'Evaluate the ability to insert new steps into an existing workflow',
+          name: 'workflow-editing: core',
+          description:
+            'Core editing cases: insert step, modify step, delete step, modify property, multi-step edits',
           examples: [
             {
               input: {
@@ -147,15 +156,11 @@ evaluate.describe(
                   'A new step was added to the workflow.',
                   'The new step sends a message indicating that the data fetch is done or complete.',
                 ],
-                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+                expectedToolIds: ['platform.core.generate_workflow'],
                 expectedStepCount: { min: 4, max: 4 },
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'insert-step' },
             },
@@ -174,24 +179,10 @@ evaluate.describe(
                 expectedStepTypes: ['elasticsearch.search'],
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'insert-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('modifies an existing step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: modify-step',
-          description: 'Evaluate the ability to modify existing workflow steps',
-          examples: [
             {
               input: {
                 instruction: 'Switch fetch_data to POST and add a body with a test query',
@@ -209,17 +200,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('deletes a step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: delete-step',
-          description: 'Evaluate the ability to delete steps from a workflow',
-          examples: [
             {
               input: {
                 instruction: 'Remove the log_end step from the workflow.',
@@ -230,26 +210,15 @@ evaluate.describe(
                   'The log_end step was removed from the workflow.',
                   'The remaining steps (log_start, fetch_data) are intact.',
                 ],
-                expectedToolIds: ['platform.workflows.workflow_delete_step'],
+                expectedToolIds: ['platform.core.generate_workflow'],
                 expectedStepCount: 2,
                 expectedStepNames: ['log_start', 'fetch_data'],
                 preservedStepNames: ['log_start', 'fetch_data'],
                 expectedMaxToolCalls: 2,
-                expectedToolSequence: ['platform.workflows.workflow_delete_step'],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'delete-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('modifies a top-level property', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: modify-property',
-          description: 'Evaluate the ability to modify top-level workflow properties',
-          examples: [
             {
               input: {
                 instruction:
@@ -265,24 +234,12 @@ evaluate.describe(
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
                 expectedMaxToolCalls: 3,
                 expectedToolSequence: [
-                  'platform.workflows.workflow_modify_property',
-                  'platform.workflows.workflow_modify_property',
+                  'platform.core.generate_workflow',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'modify-property' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('performs multi-step edits', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: multi-step-edits',
-          description:
-            'Evaluate the ability to perform multiple edits in a single conversation turn',
-          examples: [
             {
               input: {
                 instruction:
@@ -300,8 +257,8 @@ evaluate.describe(
                 preservedStepNames: ['log_start'],
                 expectedMaxToolCalls: 5,
                 expectedToolSequence: [
-                  'platform.workflows.workflow_modify_property',
-                  'platform.workflows.workflow_delete_step',
+                  'platform.core.generate_workflow',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'multi-step' },
@@ -350,11 +307,12 @@ evaluate.describe(
   'Elasticsearch workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('modifies an Elasticsearch step', async ({ evaluateEditDataset }) => {
+    evaluate('ES editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing-es: modify-step',
-          description: 'Evaluate the ability to modify Elasticsearch-specific workflow steps',
+          name: 'workflow-editing-es: core',
+          description:
+            'Elasticsearch editing cases: modify step, insert ES|QL step, multi-step edits',
           examples: [
             {
               input: {
@@ -373,17 +331,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-es-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts an Elasticsearch step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-es: insert-step',
-          description: 'Evaluate the ability to insert Elasticsearch-specific steps',
-          examples: [
             {
               input: {
                 instruction:
@@ -396,30 +343,15 @@ evaluate.describe(
                   'The ES|QL query references the my-data-index index.',
                   'The query filters or aggregates data.',
                 ],
-                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+                expectedToolIds: ['platform.core.generate_workflow'],
                 expectedStepCount: { min: 5, max: 6 },
                 expectedStepTypes: ['elasticsearch.esql.query'],
                 preservedStepNames: ['create_index', 'index_document', 'search_data'],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'insert-es-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('performs multi-step ES edits', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-es: multi-step-edits',
-          description:
-            'Evaluate the ability to perform multiple Elasticsearch-related edits at once',
-          examples: [
             {
               input: {
                 instruction:
@@ -468,11 +400,12 @@ evaluate.describe(
   'Cases workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('modifies a cases step', async ({ evaluateEditDataset }) => {
+    evaluate('cases editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing-cases: modify-step',
-          description: 'Evaluate the ability to modify cases workflow steps',
+          name: 'workflow-editing-cases: core',
+          description:
+            'Cases editing cases: modify case step, insert comment step, multi-step edits',
           examples: [
             {
               input: {
@@ -490,17 +423,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-cases-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts a cases step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-cases: insert-step',
-          description: 'Evaluate the ability to insert cases-specific steps',
-          examples: [
             {
               input: {
                 instruction:
@@ -513,29 +435,15 @@ evaluate.describe(
                   'The step references the created case ID from the previous step output.',
                   'The comment text is "Initial triage started" or similar.',
                 ],
-                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+                expectedToolIds: ['platform.core.generate_workflow'],
                 expectedStepCount: 3,
-                expectedStepTypes: ['cases.addComment|kibana.addCaseComment|kibana.request'],
+                expectedStepTypes: ['kibana.addCaseComment'],
                 preservedStepNames: ['create_case', 'log_case_id'],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'insert-cases-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('performs multi-step cases edits', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-cases: multi-step-edits',
-          description: 'Evaluate the ability to perform multiple cases-related edits at once',
-          examples: [
             {
               input: {
                 instruction:
@@ -557,9 +465,8 @@ evaluate.describe(
                 preservedStepNames: ['create_case'],
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_insert_step',
-                  'platform.workflows.workflow_insert_step',
+                  'platform.core.generate_workflow',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'multi-step-cases' },
@@ -583,10 +490,11 @@ steps:
       method: GET
       url: "https://api.example.com/alerts"
   - name: notify_slack
-    type: slack
-    connector-id: my-slack-connector
+    type: slack2.sendMessage
+    connector-id: my-slack2-connector
     with:
-      message: "New alert detected"
+      channel: "C0123456789"
+      text: "New alert detected"
   - name: log_done
     type: console
     with:
@@ -597,11 +505,12 @@ evaluate.describe(
   'Connector workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('modifies a connector step', async ({ evaluateEditDataset }) => {
+    evaluate('connector editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing-connector: modify-step',
-          description: 'Evaluate the ability to modify connector workflow steps',
+          name: 'workflow-editing-connector: core',
+          description:
+            'Connector editing cases: modify Slack message, insert email step, replace connector',
           examples: [
             {
               input: {
@@ -619,17 +528,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-connector-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts a connector step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-connector: insert-step',
-          description: 'Evaluate the ability to insert connector steps',
-          examples: [
             {
               input: {
                 instruction:
@@ -644,29 +542,14 @@ evaluate.describe(
                   'The message body references the alert data from a previous step.',
                   'Connector steps include a connector-id field (either a real connector ID or a descriptive placeholder).',
                 ],
-                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+                expectedToolIds: ['platform.core.generate_workflow'],
                 expectedStepCount: 4,
                 preservedStepNames: ['fetch_alerts', 'notify_slack', 'log_done'],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'insert-connector-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('replaces a connector step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-connector: replace-step',
-          description: 'Evaluate the ability to replace one connector step with another',
-          examples: [
             {
               input: {
                 instruction:
@@ -684,11 +567,7 @@ evaluate.describe(
                 expectedStepCount: 3,
                 preservedStepNames: ['fetch_alerts', 'log_done'],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_modify_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'replace-connector-step' },
             },
@@ -696,5 +575,78 @@ evaluate.describe(
         },
       });
     });
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Conditional indexing — "only index when fetch succeeded" requires an actual
+// `if` that references the prior step's result, not just an empty no-op gate
+// or a hard-coded `true`. Captured from a dogfood conversation where the
+// agent flipped between step-level `if:` and an `if`-step-type, and the chosen
+// KQL silently matched nothing.
+// ---------------------------------------------------------------------------
+
+const fetchAndIndexYaml = `version: '1'
+name: Fetch and Index
+description: Fetch records then write them to an index
+enabled: true
+tags:
+  - test
+
+triggers:
+  - type: manual
+
+steps:
+  - name: fetch_records
+    type: http
+    with:
+      method: GET
+      url: "https://api.example.com/records"
+  - name: index_records
+    type: elasticsearch.index
+    with:
+      index: my-records
+      document: "{{ steps.fetch_records.output.body }}"
+`;
+
+evaluate.describe(
+  'Conditional gating: only act when the prior step actually produced data',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate(
+      'index_records only runs when fetch_records succeeded',
+      async ({ evaluateEditDataset }) => {
+        await evaluateEditDataset({
+          dataset: {
+            name: 'workflow-editing: conditional-indexing-on-fetch-success',
+            description:
+              'A step-level `if:` referencing the prior step result — empty gates or hard-coded `true` should not pass.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Only run the index_records step when the fetch_records step succeeded — if the API call failed or returned an empty body, skip indexing.',
+                  initialYaml: fetchAndIndexYaml,
+                },
+                output: {
+                  criteria: [
+                    'The index_records step now has an `if:` (or equivalent conditional gating) that prevents it from running on a failed fetch.',
+                    'The condition explicitly references the fetch_records step — either its status, error, output, or body — not a hard-coded literal like `true`, an empty string, or a constant Liquid expression that always resolves true.',
+                    'The condition is correct: when fetch_records errors OR returns no/empty body, index_records is skipped; when fetch_records succeeds with a body, index_records runs.',
+                    'The fetch_records step itself is preserved unchanged.',
+                  ],
+                  expectedStepCount: { min: 2, max: 4 },
+                  preservedStepNames: ['fetch_records', 'index_records'],
+                  expectedLiquidChains: [{ ref: 'steps.fetch_records', resolvesTo: 'step-output' }],
+                  expectedMaxToolCalls: 4,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'conditional-edit' },
+              },
+            ],
+          },
+        });
+      }
+    );
   }
 );

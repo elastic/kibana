@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { routeDefinitions, type FallbackToTransactionsResponse } from '@kbn/apm-api-shared';
 import { getIsUsingTransactionEvents } from '../../lib/helpers/transactions/get_is_using_transaction_events';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { kueryRt, rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const fallbackToTransactionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fallback_to_transactions',
-  params: t.partial({
-    query: t.intersection([kueryRt, t.partial(rangeRt.props)]),
-  }),
+  endpoint: routeDefinitions.fallbackToTransactions.fallbackToTransactions.endpoint,
+  params: routeDefinitions.fallbackToTransactions.fallbackToTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ fallbackToTransactions: boolean }> => {
+  handler: async (resources): Promise<FallbackToTransactionsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const {
       config,

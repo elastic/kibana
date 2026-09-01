@@ -11,6 +11,10 @@ import { shallow } from 'enzyme';
 import { AddMitreAttackThreat } from '.';
 import { useFormFieldMock } from '../../../../common/mock';
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 describe('AddMitreThreat', () => {
   it('renders correctly', () => {
     const Component = () => {

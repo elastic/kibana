@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { EuiBadge } from '@elastic/eui';
 import { DataLifecycleSummary } from './data_lifecycle_summary';
 import { type LifecyclePhase } from './lifecycle_types';
 
@@ -17,6 +18,7 @@ describe('DataLifecycleSummary', () => {
     },
     capabilities: { canManageLifecycle: true },
     showDownsampling: true,
+    title: 'Data lifecycle',
   };
   describe('Loading State', () => {
     it('should show skeleton when data is being fetched', () => {
@@ -24,6 +26,31 @@ describe('DataLifecycleSummary', () => {
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
+    });
+
+    it('exposes the stats readiness signal as loading while a (re)fetch is inflight', () => {
+      const phases: LifecyclePhase[] = [
+        { color: '#FF0000', name: 'hot', label: 'hot', size: '10gb', grow: 5 },
+      ];
+      // Phases already rendered while loading models a post-save refetch, not the initial load.
+      render(<DataLifecycleSummary {...defaultProps} model={{ loading: true, phases }} />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-stats-loaded')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
+    });
+
+    it('prefixes the stats readiness signal with testSubjPrefix when provided', () => {
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          model={{ loading: false, phases: [], testSubjPrefix: 'failureStore' }}
+        />
+      );
+
+      expect(
+        screen.getByTestId('failureStore-dataLifecycleSummary-stats-loaded')
+      ).toBeInTheDocument();
     });
   });
 
@@ -33,6 +60,20 @@ describe('DataLifecycleSummary', () => {
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
+    });
+
+    it('should render the title badge when provided', () => {
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          titleBadge={
+            <EuiBadge data-test-subj="dataLifecycleSummary-titleBadge">Inherited</EuiBadge>
+          }
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleSummary-titleBadge')).toHaveTextContent('Inherited');
     });
   });
 
@@ -278,7 +319,7 @@ describe('DataLifecycleSummary', () => {
       expect(screen.getByText('40d')).toBeInTheDocument();
     });
 
-    it('should not render downsampling bar when no downsample steps', () => {
+    it('should render downsampling empty state when no downsample steps', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
@@ -292,7 +333,9 @@ describe('DataLifecycleSummary', () => {
 
       render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
-      expect(screen.queryByTestId('downsamplingPhase-1d-label')).not.toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingBar-empty')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingBar-emptyLabel')).toHaveTextContent('No downsampling');
     });
   });
 

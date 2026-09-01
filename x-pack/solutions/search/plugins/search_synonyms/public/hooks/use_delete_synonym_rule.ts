@@ -25,7 +25,9 @@ export const useDeleteSynonymRule = (onSuccess?: () => void, onError?: (error: s
   return useMutation(
     async ({ synonymsSetId, ruleId }: MutationArgs) => {
       return await http.delete<{ acknowledged: boolean }>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}/${ruleId}`
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(
+          synonymsSetId
+        )}/${encodeURIComponent(ruleId)}`
       );
     },
     {

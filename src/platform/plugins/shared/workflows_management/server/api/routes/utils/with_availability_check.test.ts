@@ -44,6 +44,12 @@ function createWorkflowsContext({
     workflows: Promise.resolve({
       isWorkflowsAvailable,
       emitEvent: jest.fn(),
+      managedWorkflows: {
+        install: jest.fn(),
+        uninstall: jest.fn(),
+        getWorkflowStatus: jest.fn(),
+        execute: jest.fn(),
+      },
     }),
     actions: {} as never,
     alerting: {} as never,

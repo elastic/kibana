@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiFieldText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import {
   STEP_1_TITLE,
@@ -179,14 +179,12 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
         {error && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title="Authentication failed"
-              color="danger"
-              iconType="error"
               data-test-subj="connectionWizardError"
-            >
-              <p>{error}</p>
-            </EuiCallOut>
+              text={error}
+            />
           </>
         )}
       </>

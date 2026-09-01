@@ -16,7 +16,7 @@ permissions:
 # github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
 # the verify step below enforces that.
 env:
-  GH_AW_VERSION: v0.74.4
+  GH_AW_VERSION: v0.86.2
 
 concurrency:
   group: validate-agentic-workflow-locks-${{ github.event.pull_request.number || github.ref }}
@@ -30,7 +30,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -47,11 +47,12 @@ jobs:
           echo "Pinned gh-aw version: ${version}"
           if [[ "${version}" != "${GH_AW_VERSION}" ]]; then
             echo "::error::actions-lock.json pins gh-aw ${version} but this workflow installs gh-aw ${GH_AW_VERSION} (set via GH_AW_VERSION). Update one of them so they match."
+            echo "To install the repo-pinned gh-aw locally, run: node scripts/ensure_gh_aw_version.js"
             exit 1
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@489dbab88cc78e35506b5ccbf08a4037166824ac # v0.72.1
+        uses: github/gh-aw/actions/setup-cli@466b8ad27fcfaaa861da3f16ba7c01272df25f46 # v0.87.3
         with:
           version: ${{ env.GH_AW_VERSION }}
 
@@ -67,6 +68,7 @@ jobs:
           status=$(git status --porcelain -- '.github/workflows/*.lock.yml' '.github/aw/actions-lock.json')
           if [[ -n "${status}" ]]; then
             echo "::error::Compiled output is out of date. Run 'gh aw compile --purge --validate' with gh-aw ${GH_AW_VERSION} and commit the resulting lock changes."
+            echo "To install the repo-pinned gh-aw locally, run: node scripts/ensure_gh_aw_version.js"
             echo "Files that differ:"
             echo "${status}"
             echo

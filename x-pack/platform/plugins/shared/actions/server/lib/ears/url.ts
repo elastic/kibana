@@ -11,7 +11,9 @@ const EARS_API_VERSION = 'v1';
 
 export function resolveEarsUrl(urlPath: string, earsBaseUrl: string | undefined): string {
   if (!earsBaseUrl) {
-    throw new Error('EARS base URL is not configured');
+    throw new Error(
+      'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml'
+    );
   }
 
   const base = earsBaseUrl.replace(/\/$/, ''); // strip trailing slash if any present
@@ -24,6 +26,7 @@ export interface EarsEndpoints {
   authorizeEndpoint: string;
   tokenEndpoint: string;
   refreshEndpoint: string;
+  revokeEndpoint: string;
 }
 
 export function getEarsEndpointsForProvider(provider: string | undefined): EarsEndpoints {
@@ -38,5 +41,6 @@ export function getEarsEndpointsForProvider(provider: string | undefined): EarsE
     authorizeEndpoint: `${EARS_API_VERSION}/${provider}/oauth/authorize`,
     tokenEndpoint: `${EARS_API_VERSION}/${provider}/oauth/token`,
     refreshEndpoint: `${EARS_API_VERSION}/${provider}/oauth/refresh`,
+    revokeEndpoint: `${EARS_API_VERSION}/${provider}/oauth/revoke`,
   };
 }

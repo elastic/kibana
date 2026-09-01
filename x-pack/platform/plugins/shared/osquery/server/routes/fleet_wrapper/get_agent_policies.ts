@@ -11,7 +11,7 @@ import { satisfies } from 'semver';
 import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';

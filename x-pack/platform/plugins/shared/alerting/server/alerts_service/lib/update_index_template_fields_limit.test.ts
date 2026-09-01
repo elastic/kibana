@@ -139,6 +139,86 @@ describe('updateIndexTemplateFieldsLimit', () => {
     expect(call.ignore_missing_component_templates).toBeUndefined();
   });
 
+  it('does not lower an existing limit that is higher than the requested value', async () => {
+    const template = createTemplate({
+      template: {
+        settings: {
+          hidden: true,
+          'index.mapping.total_fields.limit': 5000,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+        },
+        mappings: { dynamic: false },
+      },
+    });
+
+    await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2800 });
+
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('skips the update when the existing limit equals the requested value', async () => {
+    const template = createTemplate({
+      template: {
+        settings: {
+          hidden: true,
+          'index.mapping.total_fields.limit': 2800,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+        },
+        mappings: { dynamic: false },
+      },
+    });
+
+    await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2800 });
+
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('preserves a higher existing limit when the ignore_dynamic_beyond_limit flag is missing', async () => {
+    const template = createTemplate({
+      template: {
+        settings: {
+          hidden: true,
+          'index.mapping.total_fields.limit': 5000,
+        },
+        mappings: { dynamic: false },
+      },
+    });
+
+    await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2800 });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    expect(call.template?.settings).toEqual(
+      expect.objectContaining({
+        'index.mapping.total_fields.limit': 5000,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+      })
+    );
+  });
+
+  it('does not lower a higher existing limit expressed in nested settings form', async () => {
+    const template = createTemplate({
+      template: {
+        settings: {
+          hidden: true,
+          index: { mapping: { total_fields: { limit: '5000' } } },
+        },
+        mappings: { dynamic: false },
+      },
+    });
+
+    await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2800 });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    expect(call.template?.settings).toEqual(
+      expect.objectContaining({
+        'index.mapping.total_fields.limit': 5000,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+      })
+    );
+  });
+
   it('handles a template with no existing settings', async () => {
     const template = createTemplate({ template: { mappings: { dynamic: false } } });
 

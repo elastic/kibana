@@ -7,58 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { shallow } from 'enzyme';
-import { coreMock } from '@kbn/core/public/mocks';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-
 import { BytesFormatEditor } from './bytes';
+import { createFieldFormatMock } from '../test_utils';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public/context';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
-type BytesFormatEditorProps = React.ComponentProps<typeof BytesFormatEditor>;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
+}));
 
 const fieldType = 'number';
-const format = {
-  reactConvert: jest.fn().mockImplementation((input: number) => input * 2),
-  getParamDefaults: jest.fn().mockImplementation(() => {
-    return { pattern: '0,0.[000]b' };
-  }),
-};
+
+const format = createFieldFormatMock({
+  getParamDefaults: jest.fn().mockImplementation(() => ({ pattern: '0,0.[000]b' })),
+  convertToReact: jest.fn().mockImplementation((input: number) => input * 2),
+});
+
 const formatParams = {
   pattern: '',
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
-const KibanaReactContext = createKibanaReactContext(
-  coreMock.createStart({ basePath: 'my-base-path' })
-);
+const fieldFormattersNumberDocLink =
+  'https://www.elastic.co/docs/explore-analyze/numeral-formatting';
 
-describe('BytesFormatEditor', () => {
-  beforeAll(() => {
-    // Enzyme does not support the new Context API in shallow rendering.
-    // @see https://github.com/enzymejs/enzyme/issues/2189
-    (BytesFormatEditor as React.ComponentType<BytesFormatEditorProps>).contextTypes = {
-      services: () => null,
-    };
-    delete (BytesFormatEditor as Partial<typeof BytesFormatEditor>).contextType;
-  });
+const docLinks = {
+  links: {
+    indexPatterns: {
+      fieldFormattersNumber: fieldFormattersNumberDocLink,
+    },
+  },
+} as CoreStart['docLinks'];
 
-  it('should have a formatId', () => {
-    expect(BytesFormatEditor.formatId).toEqual('bytes');
-  });
+const KibanaReactContext = createKibanaReactContext({ docLinks });
 
-  it('should render normally', async () => {
-    const component = shallow(
+const renderBytesFormatEditor = () =>
+  renderWithI18n(
+    <KibanaReactContext.Provider>
       <BytesFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={format}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
-      />,
-      { context: KibanaReactContext.value }
+      />
+    </KibanaReactContext.Provider>
+  );
+
+describe('BytesFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(BytesFormatEditor.formatId).toEqual(formatId);
+  });
+
+  it('should render normally', () => {
+    renderBytesFormatEditor();
+
+    expect(screen.getByLabelText(/Numeral\.js format pattern/)).toBeVisible();
+    expect(screen.getByText('0,0.[000]b')).toBeVisible();
+    expect(screen.getByText('Documentation')).toBeVisible();
+    expect(screen.getByText('Documentation').closest('a')).toHaveAttribute(
+      'href',
+      fieldFormattersNumberDocLink
     );
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('256')).toBeVisible();
+    expect(screen.getByText('512')).toBeVisible();
   });
 });

@@ -28,6 +28,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<UserProfileServiceStart> = {
     getCurrent: jest.fn(),
+    getCurrentProfileId: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
   };
@@ -46,6 +47,7 @@ const createInternalSetupMock = () => {
 const createInternalStartMock = () => {
   const mock: jest.Mocked<InternalUserProfileServiceStart> = {
     getCurrent: jest.fn(),
+    getCurrentProfileId: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),
@@ -67,6 +69,7 @@ const createServiceMock = () => {
 const createRequestHandlerContextMock = () => {
   const mock: jest.Mocked<UserProfileRequestHandlerContext> = {
     getCurrent: jest.fn(),
+    getCurrentProfileId: jest.fn(),
   };
 
   return mock;

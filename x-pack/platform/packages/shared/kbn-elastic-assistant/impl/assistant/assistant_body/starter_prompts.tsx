@@ -125,7 +125,7 @@ export const StarterPrompts: React.FC<Props> = ({
             className={starterPromptInnerClassName}
           >
             <EuiSpacer size="s" />
-            <EuiIcon type={icon} size={compressed ? 'm' : 'xl'} />
+            <EuiIcon type={icon} size={compressed ? 'm' : 'xl'} aria-hidden={true} />
             <EuiSpacer size="s" />
             <EuiText size={compressed ? 'xs' : 's'}>
               <h3>{title}</h3>

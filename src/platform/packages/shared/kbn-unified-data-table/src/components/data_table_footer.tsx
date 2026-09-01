@@ -129,7 +129,7 @@ const UnifiedDataTableFooterContainer: React.FC<
 
   const formattedRowCount = fieldFormats
     .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-    .convert(rowCount);
+    .convertToText(rowCount);
 
   return (
     <p

@@ -7,8 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendCommandToSuggestionItem } from './helpers';
+import { appendCommandToSuggestionItem, getSafeInsertText } from './helpers';
 import type { ISuggestionItem } from '../../../registry/types';
+
+describe('getSafeInsertText', () => {
+  it('escapes invalid segments in a column path', () => {
+    expect(getSafeInsertText('system.cpu.load_average.1')).toBe('system.cpu.load_average.`1`');
+  });
+
+  it('preserves dashes in contexts that support them', () => {
+    expect(getSafeInsertText('my-policy', { dashSupported: true })).toBe('my-policy');
+  });
+
+  it('quotes an expression-derived column name as a single identifier', () => {
+    expect(getSafeInsertText('host.cpu.pct > 0.5', { asExpression: true })).toBe(
+      '`host.cpu.pct > 0.5`'
+    );
+  });
+
+  it('quotes a function-call expression-derived column name as a single identifier', () => {
+    expect(getSafeInsertText('ROUND(system.cpu.total.pct)', { asExpression: true })).toBe(
+      '`ROUND(system.cpu.total.pct)`'
+    );
+  });
+
+  it('quotes a name that matches a keyword', () => {
+    expect(getSafeInsertText('true')).toBe('`true`');
+  });
+
+  it('leaves a normal dotted path unchanged', () => {
+    expect(getSafeInsertText('host.name')).toBe('host.name');
+  });
+
+  it('preserves already-partially-escaped input passed directly', () => {
+    expect(getSafeInsertText('system.cpu.load_average.`1`')).toBe('system.cpu.load_average.`1`');
+  });
+
+  it('preserves a user-defined column name that is already backtick-quoted', () => {
+    expect(getSafeInsertText('`system.cpu 1m`', { asExpression: true })).toBe('`system.cpu 1m`');
+  });
+
+  it('preserves a user-defined column path with an escaped segment', () => {
+    expect(getSafeInsertText('system.cpu.`1m`', { asExpression: true })).toBe('system.cpu.`1m`');
+  });
+
+  it('quotes an expression that contains an escaped field segment', () => {
+    expect(getSafeInsertText('system.cpu.load_average.`1` < 0', { asExpression: true })).toBe(
+      '`system.cpu.load_average.``1`` < 0`'
+    );
+  });
+
+  it('escapes dotted field paths with spaces per segment', () => {
+    expect(getSafeInsertText('cpu.test a.col.1m')).toBe('cpu.`test a`.col.`1m`');
+  });
+
+  it('quotes a flat field name with a space as a single identifier', () => {
+    expect(getSafeInsertText('my field')).toBe('`my field`');
+  });
+});
 
 describe('appendCommandToSuggestionItem', () => {
   it('should add a command to a suggestion item without a command', () => {

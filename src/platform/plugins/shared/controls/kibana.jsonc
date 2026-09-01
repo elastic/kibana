@@ -10,13 +10,14 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "presentationUtil",
       "embeddable",
       "dataViews",
       "data",
       "kql",
       "uiActions",
-      "kibanaReact"
-    ]
+      "kibanaReact",
+      "esql"
+    ],
+    "requiredBundles": ["presentationUtil"]
   }
 }

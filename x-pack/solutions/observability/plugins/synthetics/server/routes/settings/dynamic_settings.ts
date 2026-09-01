@@ -122,8 +122,7 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
-    useAllRemoteClusters: attr.useAllRemoteClusters ?? false,
-    selectedRemoteClusters: attr.selectedRemoteClusters ?? [],
+    rebalancePrivateLocationShardsEnabled: attr.rebalancePrivateLocationShardsEnabled ?? true,
   };
 };
 
@@ -146,6 +145,7 @@ export const DynamicSettingsSchema = schema.object({
   defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
   defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
   defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
+  rebalancePrivateLocationShardsEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string()),
@@ -160,6 +160,4 @@ export const DynamicSettingsSchema = schema.object({
       validate: validateInteger,
     })
   ),
-  useAllRemoteClusters: schema.maybe(schema.boolean()),
-  selectedRemoteClusters: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });

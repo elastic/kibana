@@ -7,7 +7,7 @@
 
 import type TestAgent from 'supertest/lib/agent';
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import expect from '@kbn/expect';
 import {
   AGENT_STATUS_ROUTE,
@@ -24,8 +24,9 @@ export default function ({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/247374
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
+    this.timeout(10 * 60 * 1000);
+
     let adminSupertest: TestAgent;
     let dataSpaceA: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
     let dataSpaceB: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;

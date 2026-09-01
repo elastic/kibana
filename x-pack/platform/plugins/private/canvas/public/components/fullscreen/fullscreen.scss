@@ -15,11 +15,6 @@ body.canvas-isFullscreen {
     display: none;
   }
 
-  // set the background color
-  .canvasLayout {
-    background: $euiColorPlainDark;
-  }
-
   // hide all the interface parts
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,

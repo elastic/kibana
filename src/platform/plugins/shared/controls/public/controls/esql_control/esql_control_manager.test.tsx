@@ -16,9 +16,12 @@ import { BehaviorSubject } from 'rxjs';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
-jest.mock('./utils/get_esql_single_column_values', () => {
+jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const fn = Object.assign(
-    jest.fn(async () => ({ values: MOCK_VALUES_FROM_QUERY })),
+    jest.fn(async () => ({
+      values: MOCK_VALUES_FROM_QUERY,
+      column: { type: 'keyword' },
+    })),
     {
       isSuccess: () => true,
     }
@@ -27,7 +30,8 @@ jest.mock('./utils/get_esql_single_column_values', () => {
 });
 
 const getMock = () =>
-  jest.requireMock('./utils/get_esql_single_column_values').getESQLSingleColumnValues as jest.Mock;
+  jest.requireMock('../../../common/options_list/get_esql_single_column_values')
+    .getESQLSingleColumnValues as jest.Mock;
 
 const mockFetch$ = new BehaviorSubject({});
 jest.mock('@kbn/presentation-publishing', () => ({
@@ -346,6 +350,62 @@ describe('initializeESQLControlManager', () => {
       manager.cleanup();
 
       expect(callArgs.signal.aborted).toBe(true);
+    });
+
+    test('cancelRequests() should abort in-flight request', async () => {
+      const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'variable1',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
+
+      const mock = getMock();
+      mock.mockClear();
+      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+
+      await waitFor(() => {
+        expect(mock).toHaveBeenCalled();
+      });
+
+      const callArgs = mock.mock.calls[0][0];
+      expect(callArgs.signal.aborted).toBe(false);
+
+      manager.api.cancelRequests();
+
+      expect(callArgs.signal.aborted).toBe(true);
+    });
+
+    test('should abort previous request when new fetch starts', async () => {
+      const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'variable2',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | WHERE col == ?variable1 | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
+
+      const mock = getMock();
+      mock.mockClear();
+      initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+
+      // Wait for initial fetch (triggered on subscription); mock was cleared before init
+      // so mock.mock.calls[0] belongs to this manager's initial fetch
+      await waitFor(() => expect(mock).toHaveBeenCalled());
+
+      const firstSignal: AbortSignal = mock.mock.calls[0][0].signal;
+      expect(firstSignal.aborted).toBe(false);
+
+      // Trigger second fetch by changing the variable value; switchMap aborts the
+      // previous AbortController synchronously before starting the new request
+      mockFetch$.next({
+        esqlVariables: [
+          { key: 'variable1', value: 'newAbortTestValue', type: ESQLVariableType.VALUES },
+        ],
+      });
+
+      await waitFor(() => expect(firstSignal.aborted).toBe(true));
     });
   });
 });

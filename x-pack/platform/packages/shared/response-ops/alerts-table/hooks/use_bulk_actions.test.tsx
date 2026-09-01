@@ -15,12 +15,13 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import {
   useBulkActions,
   useBulkAddToCaseActions,
+  useBulkAddToChatActions,
   useBulkUntrackActions,
   useBulkMuteActions,
 } from './use_bulk_actions';
 import { createCasesServiceMock } from '../mocks/cases.mock';
 import { BulkActionsVerbs, type PublicAlertsDataGridProps } from '../types';
-import type { AdditionalContext, RenderContext } from '../types';
+import type { AdditionalContext, OpenChatService, RenderContext, TimelineItem } from '../types';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -63,11 +64,13 @@ describe('bulk action hooks', () => {
 
   const refresh = jest.fn();
   const clearSelection = jest.fn();
-  const mockOpenNewCase = jest.fn();
+  const mockOpenNewCase = jest.fn().mockImplementation(({ getAttachments }) => {
+    getAttachments?.('cases');
+  });
   const setIsBulkActionsLoading = jest.fn();
 
   const mockOpenExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
-    getAttachments({ theCase: { id: caseId } });
+    getAttachments({ theCase: { id: caseId, owner: 'cases' } });
   });
 
   mockCasesService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
@@ -173,7 +176,7 @@ describe('bulk action hooks', () => {
       // @ts-expect-error: cases do not need all arguments
       result.current[0].onClick([]);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalled();
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith([], 'cases');
       expect(mockOpenNewCase).toHaveBeenCalled();
     });
 
@@ -254,7 +257,7 @@ describe('bulk action hooks', () => {
       // @ts-expect-error: cases do not need all arguments
       result.current[1].onClick(alerts);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts);
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts, 'cases');
     });
 
     it('should remove alerts that are already attached to the case', async () => {
@@ -305,22 +308,25 @@ describe('bulk action hooks', () => {
         },
       ]);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith([
-        {
-          _id: 'alert1',
-          _index: 'idx1',
-          data: [
-            {
-              field: 'kibana.alert.case_ids',
-              value: ['test-case-2'],
-            },
-          ],
-          ecs: {
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+        [
+          {
             _id: 'alert1',
             _index: 'idx1',
+            data: [
+              {
+                field: 'kibana.alert.case_ids',
+                value: ['test-case-2'],
+              },
+            ],
+            ecs: {
+              _id: 'alert1',
+              _index: 'idx1',
+            },
           },
-        },
-      ]);
+        ],
+        'cases'
+      );
     });
 
     it('should not show the bulk actions when the user does not have write access', async () => {
@@ -424,6 +430,97 @@ describe('bulk action hooks', () => {
       );
 
       expect(result.current.length).toBe(0);
+    });
+  });
+
+  describe('useBulkAddToChatActions', () => {
+    const mockOpenChat = jest.fn();
+    const agentBuilderService: OpenChatService = { openChat: mockOpenChat };
+    const mockAttachments = [{ type: 'security.alerts', data: { alertIds: ['id1'] } }];
+    const convertAlertToAttachment = jest.fn().mockReturnValue(mockAttachments);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns empty array when agentBuilderService is not provided', () => {
+      const { result } = renderHook(
+        () =>
+          useBulkAddToChatActions({
+            bulkAddToChatConfig: { convertAlertToAttachment },
+          }),
+        { wrapper }
+      );
+
+      expect(result.current).toEqual([]);
+    });
+
+    it('returns empty array when bulkAddToChatConfig is not provided', () => {
+      const { result } = renderHook(() => useBulkAddToChatActions({ agentBuilderService }), {
+        wrapper,
+      });
+
+      expect(result.current).toEqual([]);
+    });
+
+    it('returns the add-to-chat action when both service and config are provided', () => {
+      const { result } = renderHook(
+        () =>
+          useBulkAddToChatActions({
+            agentBuilderService,
+            bulkAddToChatConfig: { convertAlertToAttachment },
+          }),
+        { wrapper }
+      );
+
+      expect(result.current).toHaveLength(1);
+      expect(result.current[0].key).toBe('bulk-add-to-chat');
+      expect(result.current[0]['data-test-subj']).toBe('bulk-add-to-chat');
+    });
+
+    it('calls openChat with converted attachments when the action is clicked', () => {
+      const alerts: TimelineItem[] = [
+        { _id: 'id1', _index: 'idx', data: [], ecs: { _id: 'id1', _index: 'idx' } },
+      ];
+
+      const { result } = renderHook(
+        () =>
+          useBulkAddToChatActions({
+            agentBuilderService,
+            bulkAddToChatConfig: { convertAlertToAttachment },
+          }),
+        { wrapper }
+      );
+
+      result.current[0].onClick(alerts);
+
+      expect(convertAlertToAttachment).toHaveBeenCalledWith(alerts);
+      expect(mockOpenChat).toHaveBeenCalledWith({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        initialMessage: undefined,
+        attachments: mockAttachments,
+      });
+    });
+
+    it('passes initialMessage to openChat', () => {
+      const { result } = renderHook(
+        () =>
+          useBulkAddToChatActions({
+            agentBuilderService,
+            bulkAddToChatConfig: {
+              convertAlertToAttachment,
+              initialMessage: 'Please triage these alerts.',
+            },
+          }),
+        { wrapper }
+      );
+
+      result.current[0].onClick([]);
+
+      expect(mockOpenChat).toHaveBeenCalledWith(
+        expect.objectContaining({ initialMessage: 'Please triage these alerts.' })
+      );
     });
   });
 

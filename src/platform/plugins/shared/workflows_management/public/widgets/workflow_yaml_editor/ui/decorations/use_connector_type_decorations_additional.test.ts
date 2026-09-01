@@ -40,7 +40,7 @@ jest.mock('../../../../../common/schema', () => ({
   getCachedAllConnectorsMap: () => mockConnectorsMap,
 }));
 
-jest.mock('../../../../shared/ui/step_icons/get_base_connector_type', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
   getBaseConnectorType: (type: string) => {
     if (type.startsWith('elasticsearch.')) return 'elasticsearch';
     if (type.startsWith('kibana.')) return 'kibana';

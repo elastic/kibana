@@ -40,12 +40,12 @@ import { useChartThemes } from '../../hooks/use_chart_theme';
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
 const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
-  'kbnApmUiShared.durationDistributionChart.numberOfTransactionsLabel',
+  'apmUiShared.durationDistributionChart.numberOfTransactionsLabel',
   { defaultMessage: 'Transactions' }
 );
 
 const NUMBER_OF_SPANS_LABEL = i18n.translate(
-  'kbnApmUiShared.durationDistributionChart.numberOfSpansLabel',
+  'apmUiShared.durationDistributionChart.numberOfSpansLabel',
   { defaultMessage: 'Spans' }
 );
 
@@ -126,7 +126,7 @@ export function DurationDistributionChart({
     () => [
       {
         dataValue: markerValue,
-        details: i18n.translate('kbnApmUiShared.durationDistributionChart.percentileMarkerLabel', {
+        details: i18n.translate('apmUiShared.durationDistributionChart.percentileMarkerLabel', {
           defaultMessage: '{markerPercentile}th percentile',
           values: {
             markerPercentile,
@@ -246,7 +246,7 @@ export function DurationDistributionChart({
                 {
                   dataValue: markerCurrentEvent,
                   details: i18n.translate(
-                    'kbnApmUiShared.durationDistributionChart.currentEventMarkerLabel',
+                    'apmUiShared.durationDistributionChart.currentEventMarkerLabel',
                     {
                       defaultMessage: 'Current sample',
                     }
@@ -255,7 +255,7 @@ export function DurationDistributionChart({
               ]}
               style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
               marker={i18n.translate(
-                'kbnApmUiShared.durationDistributionChart.currentEventMarkerLabel',
+                'apmUiShared.durationDistributionChart.currentEventMarkerLabel',
                 {
                   defaultMessage: 'Current sample',
                 }
@@ -275,7 +275,7 @@ export function DurationDistributionChart({
             id="x-axis"
             title={
               showAxisTitle
-                ? i18n.translate('kbnApmUiShared.durationDistributionChart.latencyLabel', {
+                ? i18n.translate('apmUiShared.durationDistributionChart.latencyLabel', {
                     defaultMessage: 'Latency',
                   })
                 : ''

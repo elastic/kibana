@@ -18,10 +18,13 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-data-lifecycle-phases
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
   - '@kbn/storybook'
   - '@kbn/index-lifecycle-management-common-shared'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/ui-callout'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform

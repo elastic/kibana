@@ -1,0 +1,242 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { Suspense, useMemo, useState, useLayoutEffect } from 'react';
+import { css } from '@emotion/react';
+import type {
+  ChromeBreadcrumb,
+  AppHeaderBack,
+  ChromeAppHeaderConfig,
+} from '@kbn/core-chrome-browser';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { useObservable } from '@kbn/use-observable';
+
+import type { AppMenuConfig } from '@kbn/app-menu';
+import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
+import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
+
+const AppHeaderViewLazy = React.lazy(async () => {
+  const { AppHeaderView } = await import('@kbn/app-header');
+  return { default: AppHeaderView };
+});
+
+// Reserve the app-header's height while the lazy chunk loads so the layout holds the space from the
+// first paint and content doesn't jump down once the header renders. Values approximate the rendered
+// single-row height in @kbn/app-header per spacing mode (kept local to avoid eagerly bundling that
+// package and defeating the lazy import above): the shorter compact height for titleless headers, the
+// standard height (with room for a control) otherwise.
+const RESERVED_COMPACT_MIN_HEIGHT_PX = 48;
+const RESERVED_STANDARD_MIN_HEIGHT_PX = 64;
+
+function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
+  if (typeof crumb.text === 'string') return crumb.text;
+  if (typeof crumb['aria-label'] === 'string') return crumb['aria-label'];
+  return undefined;
+}
+
+function isCurrentLocation(href: string): boolean {
+  try {
+    const currentUrl = new URL(window.location.href);
+    const targetUrl = new URL(href, currentUrl);
+    const normalizePath = (path: string) => path.replace(/\/+$/, '');
+
+    return (
+      targetUrl.origin === currentUrl.origin &&
+      normalizePath(targetUrl.pathname) === normalizePath(currentUrl.pathname) &&
+      targetUrl.search === currentUrl.search &&
+      normalizePath(targetUrl.hash) === normalizePath(currentUrl.hash)
+    );
+  } catch {
+    return false;
+  }
+}
+
+interface FallbackProps {
+  back?: AppHeaderBack[];
+  menu?: AppMenuConfig;
+  hasBadges: boolean;
+  hasLegacyActionMenu: boolean;
+}
+
+function useFallbackProps(): FallbackProps {
+  const chrome = useChromeService();
+
+  const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
+  const breadcrumbs = useObservable(breadcrumbs$, []);
+
+  const appMenu$ = useMemo(() => chrome.getAppMenu$(), [chrome]);
+  const appMenu = useObservable(appMenu$, undefined);
+
+  const hasLegacyActionMenu = useHasLegacyActionMenu();
+  const legacyBadge$ = useMemo(() => chrome.getBadge$(), [chrome]);
+  const legacyBadge = useObservable(legacyBadge$, undefined);
+  const breadcrumbsBadges$ = useMemo(() => chrome.getBreadcrumbsBadges$(), [chrome]);
+  const breadcrumbsBadges = useObservable(breadcrumbsBadges$, []);
+
+  return useMemo(() => {
+    const backTargets: AppHeaderBack[] = [];
+    for (let i = breadcrumbs.length - 2; i >= 0; i--) {
+      const crumb = breadcrumbs[i];
+      const label = getBreadcrumbText(crumb);
+      if (label && crumb.href && !isCurrentLocation(crumb.href)) {
+        backTargets.push({
+          href: crumb.href,
+          onClick: crumb.onClick,
+          label,
+        });
+      }
+    }
+
+    const hasBack = backTargets.length > 0;
+    const hasMenu = !!appMenu?.items?.length;
+
+    return {
+      back: hasBack ? backTargets : undefined,
+      menu: hasMenu ? appMenu : undefined,
+      hasBadges: !!legacyBadge || breadcrumbsBadges.length > 0,
+      hasLegacyActionMenu,
+    };
+  }, [breadcrumbs, appMenu, legacyBadge, breadcrumbsBadges, hasLegacyActionMenu]);
+}
+
+function useAppHeaderConfig(): ChromeAppHeaderConfig | undefined {
+  const chrome = useChromeService();
+  const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  return useObservable(config$, undefined);
+}
+
+function hasConfiguredBack(back: ChromeAppHeaderConfig['back']): boolean {
+  return back !== undefined && back !== false;
+}
+
+function hasEffectiveBack(back: AppHeaderBack | AppHeaderBack[] | undefined): boolean {
+  if (back === undefined) return false;
+  return Array.isArray(back) ? back.length > 0 : true;
+}
+
+function resolveEffectiveBack(
+  config: ChromeAppHeaderConfig | undefined,
+  fallbackBack: AppHeaderBack[] | undefined
+): AppHeaderBack | AppHeaderBack[] | undefined {
+  if (config?.back === false) {
+    return undefined;
+  }
+  if (config?.back !== undefined) {
+    return config.back;
+  }
+  return fallbackBack;
+}
+
+function hasExplicitAppHeaderContent(config: ChromeAppHeaderConfig | undefined): boolean {
+  if (!config) return false;
+  return (
+    config.title !== undefined ||
+    hasConfiguredBack(config.back) ||
+    !!config.tabs?.length ||
+    !!config.badges?.length ||
+    !!config.menu?.items?.length ||
+    !!config.favorite ||
+    !!config.share ||
+    !!config.description ||
+    !!config.metadata?.length
+  );
+}
+
+function useResolvedChromeAppHeader() {
+  const config = useAppHeaderConfig();
+  const fallback = useFallbackProps();
+
+  const back = resolveEffectiveBack(config, fallback.back);
+  const menu = config?.menu ?? fallback.menu;
+  const hasContent =
+    hasExplicitAppHeaderContent(config) ||
+    hasEffectiveBack(back) ||
+    !!menu?.items?.length ||
+    fallback.hasBadges ||
+    fallback.hasLegacyActionMenu;
+
+  return { config, back, menu, hasContent };
+}
+
+export function useHasChromeAppHeaderContent(): boolean {
+  return useResolvedChromeAppHeader().hasContent;
+}
+
+function useMeasuredAppHeaderHeight(): React.RefCallback<HTMLDivElement> {
+  const updateLayout = useLayoutUpdate();
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (!el) return;
+
+    updateLayout({ applicationTopBarHeight: el.offsetHeight });
+
+    const ro = new ResizeObserver(([entry]) => {
+      const h = entry.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
+      updateLayout({ applicationTopBarHeight: h });
+    });
+    ro.observe(el);
+
+    return () => ro.disconnect();
+  }, [el, updateLayout]);
+
+  return setEl;
+}
+
+export const ChromeAppHeaderRenderer = React.memo(() => {
+  const { config, back, menu, hasContent } = useResolvedChromeAppHeader();
+  const measureRef = useMeasuredAppHeaderHeight();
+
+  if (!hasContent) return null;
+
+  // Predict the height AppHeaderView will settle on so the reserved space matches: an explicit compact
+  // request or a titleless header (only back/overflow) renders at the shorter compact floor,
+  // everything else at the standard floor.
+  const isSparse =
+    config?.title === undefined &&
+    !config?.tabs?.length &&
+    !config?.description &&
+    !config?.metadata?.length &&
+    !config?.badges?.length &&
+    !config?.favorite &&
+    !config?.share;
+  const reservedMinHeight =
+    config?.spacing === 'compact' || isSparse
+      ? RESERVED_COMPACT_MIN_HEIGHT_PX
+      : RESERVED_STANDARD_MIN_HEIGHT_PX;
+  const secondaryContent = config?.description
+    ? { description: config.description }
+    : { metadata: config?.metadata };
+
+  return (
+    <div
+      ref={measureRef}
+      css={css`
+        min-height: ${reservedMinHeight}px;
+      `}
+    >
+      <Suspense fallback={null}>
+        <AppHeaderViewLazy
+          title={config?.title}
+          back={back}
+          tabs={config?.tabs}
+          badges={config?.badges}
+          menu={menu}
+          favorite={config?.favorite}
+          share={config?.share}
+          {...secondaryContent}
+          sticky={false}
+          spacing={config?.spacing}
+        />
+      </Suspense>
+    </div>
+  );
+});
+
+ChromeAppHeaderRenderer.displayName = 'ChromeAppHeaderRenderer';

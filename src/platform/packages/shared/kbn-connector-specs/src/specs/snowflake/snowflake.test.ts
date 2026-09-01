@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { Snowflake } from './snowflake';
 
 const ACCOUNT_URL = 'https://myorg-myaccount.snowflakecomputing.com';
@@ -41,9 +42,10 @@ describe('Snowflake', () => {
       expect(Snowflake.metadata.id).toBe('.snowflake');
     });
 
-    it('should support workflows and agentBuilder features', () => {
+    it('should support workflows, agentBuilder, and contextEngine features', () => {
       expect(Snowflake.metadata.supportedFeatureIds).toContain('workflows');
       expect(Snowflake.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(Snowflake.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 
@@ -60,6 +62,15 @@ describe('Snowflake', () => {
         (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
       );
       expect(oauthType).toBeDefined();
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(Snowflake.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
     });
 
     it('sets required headers', () => {
@@ -550,8 +561,7 @@ describe('Snowflake', () => {
         { statement: 'SELECT CURRENT_VERSION()' },
         expect.any(Object)
       );
-      expect(result?.ok).toBe(true);
-      expect(result?.message).toContain('8.44.0');
+      expect(result).toEqual({});
     });
 
     it('should return success when statement is accepted asynchronously', async () => {
@@ -566,8 +576,7 @@ describe('Snowflake', () => {
 
       const result = await testHandler?.(mockContext);
 
-      expect(result?.ok).toBe(true);
-      expect(result?.message).toContain('handle-test');
+      expect(result).toEqual({});
     });
   });
 

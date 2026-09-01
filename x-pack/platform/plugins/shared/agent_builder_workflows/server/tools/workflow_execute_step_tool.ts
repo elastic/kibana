@@ -540,6 +540,13 @@ export function registerWorkflowExecuteStepTool(
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Execute Workflow Step',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description: `Execute a single workflow step against the real environment.
 - Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
 - Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
@@ -549,7 +556,9 @@ export function registerWorkflowExecuteStepTool(
 Provide \`contextOverride\` with mock data when the step references outputs from previous steps.
 Provide \`yaml\` to execute a step without needing a workflow.yaml attachment (useful for field discovery before creating the full workflow).
 
-If the user declines a confirmation, do NOT retry the same step. Acknowledge the cancellation and continue with other unrelated work.`,
+If the user declines a confirmation, do NOT retry the same step. Acknowledge the cancellation and continue with other unrelated work.
+
+API documentation — Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,
     schema: z.object({
       stepName: z.string().describe('Name of the step to execute'),
       yaml: z
@@ -572,7 +581,6 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         ),
     }),
     tags: ['workflows', 'yaml', 'execution', 'testing'],
-    experimental: true,
     handler: async (
       { stepName, yaml: inlineYaml, contextOverride, confirmation_body: confirmationBody },
       context

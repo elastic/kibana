@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { BaseFeature } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ExcludedFeatureSummary, IgnoredFeature } from '@kbn/streams-ai';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
+import type { TaskOutputWithReportedTokens } from '../reported_tokens';
 import { ExcludeCompliancePrompt } from './prompt';
 
 interface ExclusionViolation {
@@ -18,7 +19,7 @@ interface ExclusionViolation {
   reason: string;
 }
 
-export interface ExcludeExperimentOutput {
+export interface ExcludeExperimentOutput extends TaskOutputWithReportedTokens {
   initialFeatures: BaseFeature[];
   excludedFeatures: ExcludedFeatureSummary[];
   followUpRuns: Array<{
@@ -35,6 +36,7 @@ export const createExcludeSemanticEvaluator = ({
 }) => ({
   name: 'llm_exclude_compliance',
   kind: 'LLM' as const,
+  direction: 'maximize' as const,
   evaluate: async ({
     output,
   }: {

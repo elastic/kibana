@@ -16,7 +16,6 @@
       "expressions",
       "visualizations",
       "charts",
-      "presentationUtil",
       "fieldFormats"
     ],
     "optionalPlugins": [

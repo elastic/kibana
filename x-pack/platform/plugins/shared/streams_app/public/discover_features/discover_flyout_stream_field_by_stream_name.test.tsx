@@ -10,11 +10,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsAppLocator } from '../../common/locators';
-
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
-  ContentFrameworkSection: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 import { DiscoverFlyoutStreamFieldByStreamName } from './discover_flyout_stream_field_by_stream_name';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -55,7 +50,7 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
         streamName="logs-foo-default"
         streamsRepositoryClient={streamsRepositoryClient}
         locator={locator}
-        renderCpsWarning
+        cpsHasLinkedProjects
       />
     );
 
@@ -79,7 +74,7 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
         streamName="logs-foo-remote"
         streamsRepositoryClient={streamsRepositoryClient}
         locator={locator}
-        renderCpsWarning
+        cpsHasLinkedProjects
       />
     );
 
@@ -88,5 +83,29 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
     });
 
     expect(screen.queryByRole('link')).toBeNull();
+  });
+
+  it('renders a CCS-qualified name as annotated non-clickable text without hitting any endpoint', async () => {
+    const fetch = jest.fn();
+    const streamsRepositoryClient = { fetch } as unknown as StreamsRepositoryClient;
+    const locator = { getRedirectUrl: jest.fn() } as unknown as StreamsAppLocator;
+
+    renderWithI18n(
+      <DiscoverFlyoutStreamFieldByStreamName
+        streamName="remote_cluster:metrics-activemq.broker-default"
+        streamsRepositoryClient={streamsRepositoryClient}
+        locator={locator}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/metrics-activemq\.broker-default/)).toBeInTheDocument();
+    });
+
+    // The remote cluster is surfaced as an annotation next to the clean stream name.
+    expect(screen.getByText(/\(Remote cluster: remote_cluster\)/)).toBeInTheDocument();
+    // Remote streams cannot be linked locally, and no local resolution is attempted.
+    expect(screen.queryByRole('link')).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

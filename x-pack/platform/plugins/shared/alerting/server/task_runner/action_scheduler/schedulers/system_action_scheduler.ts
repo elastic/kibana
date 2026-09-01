@@ -7,6 +7,7 @@
 
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleSystemAction, RuleTypeParams } from '@kbn/alerting-types';
+import { createTaskRunnerLogger } from '../../lib';
 import type { CombinedSummarizedAlerts } from '../../../types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -35,6 +36,7 @@ export class SystemActionScheduler<
 > implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private actions: RuleSystemAction[] = [];
+  private snoozedAlertIdsSet: Set<string> = new Set();
 
   constructor(
     private readonly context: ActionSchedulerOptions<
@@ -50,6 +52,8 @@ export class SystemActionScheduler<
   ) {
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
+
+    this.snoozedAlertIdsSet = context.activeSnoozedIds ?? new Set();
 
     // only process system actions when rule type supports summarized alerts
     this.actions = canGetSummarizedAlerts ? context.rule.systemActions ?? [] : [];
@@ -67,12 +71,23 @@ export class SystemActionScheduler<
       summarizedAlerts: CombinedSummarizedAlerts;
     }> = [];
     const results: ActionsToSchedule[] = [];
+    const logger = createTaskRunnerLogger({
+      logger: this.context.logger,
+      labels: {
+        ruleId: this.context.rule.id,
+        ruleType: this.context.ruleType.id,
+        spaceId: this.context.taskInstance.params.spaceId,
+      },
+    });
 
     for (const action of this.actions) {
       const options: GetSummarizedAlertsParams = {
         spaceId: this.context.taskInstance.params.spaceId,
         ruleId: this.context.rule.id,
-        excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
+        excludedAlertInstanceIds: [
+          ...this.context.rule.mutedInstanceIds,
+          ...this.snoozedAlertIdsSet,
+        ],
         executionUuid: this.context.executionId,
       };
 
@@ -93,7 +108,7 @@ export class SystemActionScheduler<
     const ruleUrl = buildRuleUrl({
       getViewInAppRelativeUrl: this.context.ruleType.getViewInAppRelativeUrl,
       kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
-      logger: this.context.logger,
+      logger,
       rule: this.context.rule,
       spaceId: this.context.taskInstance.params.spaceId,
     });
@@ -106,7 +121,7 @@ export class SystemActionScheduler<
           action,
           actionsConfigMap: this.context.taskRunnerContext.actionsConfigMap,
           isActionExecutable: this.context.taskRunnerContext.actionsPlugin.isActionExecutable,
-          logger: this.context.logger,
+          logger,
           ruleId: this.context.rule.id,
           ruleRunMetricsStore: this.context.ruleRunMetricsStore,
         })
@@ -120,8 +135,16 @@ export class SystemActionScheduler<
 
       // System actions without an adapter cannot be executed
       if (!hasConnectorAdapter) {
-        this.context.logger.warn(
-          `Rule "${this.context.rule.id}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
+        logger.warn(
+          `Rule "${this.context.rule.id}" skipped scheduling system action "${action.id}" because no connector adapter is configured`,
+          {
+            labels: {
+              actionId: action.id,
+              actionTypeId: action.actionTypeId,
+              ruleId: this.context.rule.id,
+              executionId: this.context.executionId,
+            },
+          }
         );
 
         continue;
@@ -158,6 +181,7 @@ export class SystemActionScheduler<
           action: actionToRun,
           apiKey: this.context.apiKey,
           apiKeyId: this.context.apiKeyId,
+          uiamApiKeyExternal: this.context.uiamApiKeyExternal,
           executionId: this.context.executionId,
           priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,

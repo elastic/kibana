@@ -32,6 +32,9 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    managedOtlp: {
+      url: undefined,
+    },
     onboarding: {},
     isServerlessEnabled: false,
     serverless: {
@@ -60,6 +63,9 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
+  },
+  managedOtlp: {
+    url: undefined,
   },
   fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
   getUrls: jest.fn().mockReturnValue({}),

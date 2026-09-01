@@ -7,17 +7,21 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EntityActionsButton } from './entity_actions_button';
+import { EntityActionsButton as BaseEntityActionsButton } from './entity_actions_button';
 import type { EntityItem } from '../types';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 import {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
 } from '../../../../test_ids';
 import {
   emitFilterToggle,
   emitIsOneOfFilterToggle,
   isFilterActiveForScope,
+  emitEntityRelationshipToggle,
+  isEntityRelationshipExpandedForScope,
+  emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 
@@ -41,14 +45,23 @@ const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFuncti
 const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
   typeof isFilterActiveForScope
 >;
+const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
+  typeof emitEntityRelationshipToggle
+>;
+const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as jest.MockedFunction<
+  typeof emitPinnedEuidToggle
+>;
+const mockIsEntityRelationshipExpandedForScope =
+  isEntityRelationshipExpandedForScope as jest.MockedFunction<
+    typeof isEntityRelationshipExpandedForScope
+  >;
 
-// Mock useExpandableFlyoutApi
-const mockOpenPreviewPanel = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  })),
-}));
+const mockOnShowEntity = jest.fn();
+
+// Test wrapper supplying a default `onShowEntity` so cases stay terse.
+const EntityActionsButton = (
+  props: Omit<React.ComponentProps<typeof BaseEntityActionsButton>, 'onShowEntity'>
+) => <BaseEntityActionsButton {...props} onShowEntity={mockOnShowEntity} />;
 
 describe('EntityActionsButton', () => {
   const mockEntityItem: EntityItem = {
@@ -93,7 +106,7 @@ describe('EntityActionsButton', () => {
       expect(screen.getByText('Show entity details')).toBeInTheDocument();
     });
 
-    it('should open preview panel when entity details is clicked', () => {
+    it('should call onShowEntity when entity details is clicked', () => {
       render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
 
       // Click the button to open the popover
@@ -102,13 +115,8 @@ describe('EntityActionsButton', () => {
       const entityDetailsButton = screen.getByText('Show entity details');
       fireEvent.click(entityDetailsButton);
 
-      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            entityId: mockEntityItem.id,
-            scopeId,
-          }),
-        })
+      expect(mockOnShowEntity).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: mockEntityItem.id })
       );
     });
 
@@ -140,7 +148,7 @@ describe('EntityActionsButton', () => {
         );
         fireEvent.click(entityDetailsItem);
 
-        expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
+        expect(mockOnShowEntity).not.toHaveBeenCalled();
       });
     });
   });
@@ -247,6 +255,82 @@ describe('EntityActionsButton', () => {
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       expect(screen.getByText('Hide related events')).toBeInTheDocument();
+    });
+  });
+
+  describe('entity relationships toggle', () => {
+    it('should emit both emitEntityRelationshipToggle and emitPinnedEuidToggle with "show" when clicking Show entity relationships', () => {
+      mockIsEntityRelationshipExpandedForScope.mockReturnValue(false);
+
+      render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+      const relationshipsBtn = screen.getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      fireEvent.click(relationshipsBtn);
+
+      expect(mockEmitEntityRelationshipToggle).toHaveBeenCalledWith(
+        scopeId,
+        mockEntityItem.id,
+        'show'
+      );
+      expect(mockEmitPinnedEuidToggle).toHaveBeenCalledWith(scopeId, mockEntityItem.id, 'show');
+    });
+
+    it('should emit both emitEntityRelationshipToggle and emitPinnedEuidToggle with "hide" when clicking Hide entity relationships', () => {
+      mockIsEntityRelationshipExpandedForScope.mockReturnValue(true);
+
+      render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+      const relationshipsBtn = screen.getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      fireEvent.click(relationshipsBtn);
+
+      expect(mockEmitEntityRelationshipToggle).toHaveBeenCalledWith(
+        scopeId,
+        mockEntityItem.id,
+        'hide'
+      );
+      expect(mockEmitPinnedEuidToggle).toHaveBeenCalledWith(scopeId, mockEntityItem.id, 'hide');
+    });
+
+    it('should show "Hide entity relationships" label when relationships are already expanded', () => {
+      mockIsEntityRelationshipExpandedForScope.mockReturnValue(true);
+
+      render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+      expect(screen.getByText('Hide entity relationships')).toBeInTheDocument();
+    });
+
+    it('should disable the relationships item when isInitialEntity is true', () => {
+      render(
+        <EntityActionsButton item={mockEntityItem} scopeId={scopeId} isInitialEntity={true} />
+      );
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+      const relationshipsBtn = screen.getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(relationshipsBtn).toBeDisabled();
+    });
+
+    it('should disable the relationships item when entity is not available in entity store', () => {
+      const notInStoreItem: EntityItem = {
+        ...mockEntityItem,
+        entity: { availableInEntityStore: false },
+      };
+
+      render(<EntityActionsButton item={notInStoreItem} scopeId={scopeId} />);
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+      const relationshipsBtn = screen.getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(relationshipsBtn).toBeDisabled();
     });
   });
 });

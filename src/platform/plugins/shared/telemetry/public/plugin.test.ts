@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
@@ -58,8 +58,8 @@ describe('TelemetryPlugin', () => {
             home,
           });
 
-          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
-          expect(home.welcomeScreen.registerOnRendered).not.toBeCalled();
+          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toHaveBeenCalled();
+          expect(home.welcomeScreen.registerOnRendered).not.toHaveBeenCalled();
         });
       });
     });
@@ -117,15 +117,32 @@ describe('TelemetryPlugin', () => {
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(true);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
-      expect(isScreenshotModeSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(1);
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
-      expect(isScreenshotModeSpy).toBeCalledTimes(2);
-      expect(optInSpy).toBeCalledTimes(1);
+      // Once in setup, once in the early skip-mode guard, once in the currentAppId$ subscription.
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(3);
+      expect(optInSpy).toHaveBeenCalledTimes(1);
       expect(optInSpy).toHaveBeenCalledWith({ global: { enabled: false } });
+    });
+
+    it('seeds isOptedIn$ with the synchronous config default in screenshot mode', async () => {
+      const initializerContext = coreMock.createPluginInitializerContext({ optIn: false });
+
+      const plugin = new TelemetryPlugin(initializerContext);
+      jest.spyOn(screenshotMode, 'isScreenshotMode').mockReturnValue(true);
+      plugin.setup(coreMock.createSetup(), { screenshotMode, home });
+
+      const coreStartMock = coreMock.createStart();
+      coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
+      const { telemetryService } = plugin.start(coreStartMock, { screenshotMode });
+
+      // No server fetch happens in screenshot mode, but subscribers still get the injected default.
+      await expect(firstValueFrom(telemetryService.isOptedIn$)).resolves.toBe(false);
+      expect(coreStartMock.http.get).not.toHaveBeenCalled();
     });
 
     it('disables telemetry when the user agent contains Elastic/Synthetics', async () => {
@@ -136,15 +153,17 @@ describe('TelemetryPlugin', () => {
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(false);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
-      expect(isScreenshotModeSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(1);
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
-      isSyntheticsMonitorMock.mockReturnValueOnce(true);
+      // Skip mode is detected via the synthetics user-agent on each `shouldSkipTelemetry` call.
+      isSyntheticsMonitorMock.mockReturnValue(true);
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
-      expect(isScreenshotModeSpy).toBeCalledTimes(2);
-      expect(optInSpy).toBeCalledTimes(1);
+      // Once in setup, once in the early skip-mode guard, once in the currentAppId$ subscription.
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(3);
+      expect(optInSpy).toHaveBeenCalledTimes(1);
       expect(optInSpy).toHaveBeenCalledWith({ global: { enabled: false } });
     });
   });

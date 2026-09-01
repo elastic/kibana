@@ -11,4 +11,5 @@ export interface UiConfig {
     value: string;
     enforce: boolean;
   };
+  apiKeyType?: 'es' | 'uiam';
 }

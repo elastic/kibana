@@ -44,6 +44,10 @@ export class InjectedMetadataService {
         return this.state.serverBasePath;
       },
 
+      getSpaceId: () => {
+        return this.state.spaceId;
+      },
+
       getPublicBaseUrl: () => {
         return this.state.publicBaseUrl;
       },
@@ -98,6 +102,10 @@ export class InjectedMetadataService {
 
       getFeatureFlags: () => {
         return this.state.featureFlags;
+      },
+
+      getUserStorage: () => {
+        return this.state.userStorage;
       },
     };
   }

@@ -18,6 +18,7 @@ export enum ToolResultType {
   other = 'other',
   error = 'error',
   fileReference = 'file_reference',
+  image = 'image',
 }
 
 interface ToolResultTypeDataMap {
@@ -30,6 +31,7 @@ interface ToolResultTypeDataMap {
   [ToolResultType.error]: ErrorResultData;
   [ToolResultType.fileReference]: FileReferenceResultData;
   [ToolResultType.other]: OtherResultData;
+  [ToolResultType.image]: ImageResultData;
 }
 
 export type ToolResultDataOf<Type extends ToolResultType> = ToolResultTypeDataMap[Type];
@@ -113,11 +115,11 @@ export type QueryResult = ToolResultMixin<ToolResultType.query>;
 export enum SupportedChartType {
   Metric = 'metric',
   Gauge = 'gauge',
-  Tagcloud = 'tagcloud',
+  Tagcloud = 'tag_cloud',
   XY = 'xy',
   RegionMap = 'region_map',
   Heatmap = 'heatmap',
-  Datatable = 'datatable',
+  Datatable = 'data_table',
   Pie = 'pie',
   Treemap = 'treemap',
   Waffle = 'waffle',
@@ -125,10 +127,21 @@ export enum SupportedChartType {
 }
 
 export interface VisualizationResultData {
-  visualization: Record<string, unknown>;
-  chart_type: SupportedChartType;
   esql: string;
   time_range?: TimeRange;
+  renderer?: 'lens' | 'vega';
+  /** Shared visualization payload. Vega stores spec at visualization.spec. */
+  visualization: Record<string, unknown> & { spec?: string };
+  /** Optional chart type identifier (primarily Lens). */
+  chart_type?: SupportedChartType;
+  /**
+   * ID of the persisted visualization attachment. Present when persistence
+   * succeeded; the agent renders the visualization inline via
+   * `<render_attachment id version>` and reuses it for follow-up updates.
+   */
+  attachment_id?: string;
+  /** Version of the persisted attachment backing this result. */
+  version?: number;
 }
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
@@ -195,4 +208,19 @@ export const isFileReferenceResult = (result: ToolResult): result is FileReferen
 
 export const isVisualizationResult = (result: ToolResult): result is VisualizationResult => {
   return result.type === ToolResultType.visualization;
+};
+
+// image
+
+export interface ImageResultData {
+  attachment_id: string;
+  mime_type: string;
+  name?: string;
+  description: string;
+}
+
+export type ImageResult = ToolResultMixin<ToolResultType.image>;
+
+export const isImageResult = (result: ToolResult): result is ImageResult => {
+  return result.type === ToolResultType.image;
 };

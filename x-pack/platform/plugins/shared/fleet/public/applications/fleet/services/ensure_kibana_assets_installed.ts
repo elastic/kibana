@@ -7,7 +7,7 @@
 
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { sendGetPackageInfoByKeyForRq, sendInstallKibanaAssetsForRq } from '../../../hooks';
 

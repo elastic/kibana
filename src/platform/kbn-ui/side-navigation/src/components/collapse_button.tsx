@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
@@ -46,13 +46,8 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
 
   return (
     <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
-      <EuiButtonIcon
-        data-test-subj="sideNavCollapseButton"
-        css={styles.sideNavCollapseButton}
-        size="s"
-        color="text"
-        iconType={iconType}
-        aria-label={
+      <EuiToolTip
+        content={
           isCollapsed
             ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
                 defaultMessage: 'Expand navigation menu',
@@ -61,11 +56,29 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
                 defaultMessage: 'Collapse navigation menu',
               })
         }
-        aria-pressed={!isCollapsed}
-        aria-expanded={!isCollapsed}
-        aria-controls={PRIMARY_NAVIGATION_ID}
-        onClick={() => toggle(!isCollapsed)}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          data-test-subj="sideNavCollapseButton"
+          css={styles.sideNavCollapseButton}
+          size="s"
+          color="text"
+          iconType={iconType}
+          aria-label={
+            isCollapsed
+              ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
+                  defaultMessage: 'Expand navigation menu',
+                })
+              : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
+                  defaultMessage: 'Collapse navigation menu',
+                })
+          }
+          aria-pressed={!isCollapsed}
+          aria-expanded={!isCollapsed}
+          aria-controls={PRIMARY_NAVIGATION_ID}
+          onClick={() => toggle(!isCollapsed)}
+        />
+      </EuiToolTip>
     </div>
   );
 };

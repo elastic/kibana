@@ -9,19 +9,18 @@ import {
   getAncestors,
   getSegments,
   isDescendantOf,
-  isRootStreamDefinition,
+  isIlmLifecycle,
   LOGS_ECS_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   Streams,
 } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
-import { parseDurationInSeconds } from '../../util/parse_duration';
+import { lifecycleToRetentionMs } from '../../util/lifecycle_to_retention_ms';
 
-const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
+const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs', 'ingestionRate', 'storageBytes'] as const;
 
 export type SortableField = (typeof SORTABLE_FIELDS)[number];
 
@@ -29,7 +28,9 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  ingestionRate: number;
+  storageBytes: number;
+  type: 'wired' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
 
@@ -173,16 +174,22 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
   return trees;
 }
 
-export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
-  let retentionMs = 0;
-  const lc = node.effective_lifecycle!;
-  if (isDslLifecycle(lc)) {
-    retentionMs = lc.dsl.data_retention
-      ? parseDurationInSeconds(lc.dsl.data_retention) * 1000
-      : Number.POSITIVE_INFINITY;
-  } else if (isIlmLifecycle(lc)) {
-    retentionMs = Number.POSITIVE_INFINITY;
+const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] => {
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return 'classic';
   }
+  if (Streams.QueryStream.Definition.is(stream)) {
+    return 'query';
+  }
+  return 'wired';
+};
+
+export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
+  const lifecycle = node.effective_lifecycle;
+  const retentionMs =
+    lifecycle && isIlmLifecycle(lifecycle)
+      ? Number.POSITIVE_INFINITY
+      : lifecycleToRetentionMs(lifecycle) ?? 0;
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`
@@ -197,11 +204,9 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     nameSortKey,
     documentsCount: 0,
     retentionMs,
-    type: Streams.ClassicStream.Definition.is(node.stream)
-      ? 'classic'
-      : isRootStreamDefinition(node.stream)
-      ? 'root'
-      : 'wired',
+    ingestionRate: 0,
+    storageBytes: 0,
+    type: getStreamType(node.stream),
     ...(children && { children }),
   };
 };

@@ -133,6 +133,9 @@ export function SloEditFormObjectiveSection() {
                     data-test-subj="sloFormTimeWindowTypeSelect"
                     options={TIMEWINDOW_TYPE_OPTIONS}
                     value={field.value}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowType.ariaLabel', {
+                      defaultMessage: 'Time window',
+                    })}
                   />
                 )}
               />
@@ -170,6 +173,9 @@ export function SloEditFormObjectiveSection() {
                         : ROLLING_TIMEWINDOW_OPTIONS
                     }
                     value={field.value}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.ariaLabel', {
+                      defaultMessage: 'Duration',
+                    })}
                   />
                 )}
               />
@@ -236,6 +242,9 @@ export function SloEditFormObjectiveSection() {
                     id={budgetingSelect}
                     data-test-subj="sloFormBudgetingMethodSelect"
                     options={BUDGETING_METHOD_OPTIONS}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.budgetingMethod.ariaLabel', {
+                      defaultMessage: 'Budgeting method',
+                    })}
                   />
                 )}
               />

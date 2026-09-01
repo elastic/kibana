@@ -32,8 +32,20 @@ export const createParser = (): ConsoleParser => {
   };
   let text = '';
   let errors: ErrorAnnotation[] = [];
-  const addError = function (errorText: string) {
-    errors.push({ text: errorText, offset: at });
+  const addError = function (errorText: string, offset = at, endOffset?: number) {
+    const errorAnnotation: ErrorAnnotation = { text: errorText, offset };
+    if (endOffset !== undefined) {
+      errorAnnotation.endOffset = endOffset;
+    }
+    errors.push(errorAnnotation);
+  };
+  const hasErrorCoveringOffset = function (offset: number) {
+    return errors.some(
+      (errorAnnotation) =>
+        errorAnnotation.endOffset !== undefined &&
+        errorAnnotation.offset <= offset &&
+        offset <= errorAnnotation.endOffset
+    );
   };
   let requests: ParsedRequest[] = [];
   let requestStartOffset: number | undefined;
@@ -57,8 +69,8 @@ export const createParser = (): ConsoleParser => {
     lastRequest.endOffset = requestEndOffset;
     requests.push(lastRequest);
   };
-  const error = function (m: string): never {
-    throw Object.assign(new SyntaxError(m), { at, text });
+  const error = function (m: string, errorAt = at, errorEndAt?: number): never {
+    throw Object.assign(new SyntaxError(m), { at: errorAt, endAt: errorEndAt, text });
   };
   const reset = function (newAt: number) {
     ch = text.charAt(newAt);
@@ -89,11 +101,27 @@ export const createParser = (): ConsoleParser => {
     if (i < 0) {
       error(errorMessage || "Expected '" + upTo + "'");
     }
-    reset(i + upTo.length);
+    // Example: `"query": """...""",` can be followed by more fields in the same body.
+    // If the closing `"""` is stored as the request end, autocomplete below it shows request
+    // methods or no suggestions instead of body fields.
+    const afterClosingDelimiter = i + upTo.length;
+    ch = text.charAt(afterClosingDelimiter);
+    at = afterClosingDelimiter + 1;
+
     return text.substring(currentAt, i);
   };
   const peek = function (offset: number) {
     return text.charAt(at + offset);
+  };
+  const isRequestLineSeparator = function (character: string) {
+    return character === ' ' || character === '\t' || character === '\n' || character === '\r';
+  };
+  const readCurrentLineTokenEndOffset = function (startOffset: number) {
+    let tokenEndOffset = startOffset;
+    while (tokenEndOffset < text.length && !isRequestLineSeparator(text[tokenEndOffset])) {
+      tokenEndOffset++;
+    }
+    return tokenEndOffset;
   };
   const number = function () {
     let numString = '';
@@ -234,6 +262,18 @@ export const createParser = (): ConsoleParser => {
     }
     return error("Unexpected '" + ch + "'");
   };
+  // After consuming method letters, the next character must separate the
+  // method from the URL/body: horizontal whitespace, a line break, or
+  // end-of-input. Anything else is part of an invalid method token.
+  const methodBoundary = function () {
+    if (ch && !isRequestLineSeparator(ch)) {
+      error(
+        'Expected one of GET/POST/PUT/DELETE/HEAD/PATCH',
+        requestStartOffset ?? at,
+        readCurrentLineTokenEndOffset(at)
+      );
+    }
+  };
   // parses and returns the method
   const method = function () {
     const upperCaseChar = ch.toUpperCase();
@@ -242,12 +282,14 @@ export const createParser = (): ConsoleParser => {
         nextOneOf(['G', 'g']);
         nextOneOf(['E', 'e']);
         nextOneOf(['T', 't']);
+        methodBoundary();
         return 'GET';
       case 'H':
         nextOneOf(['H', 'h']);
         nextOneOf(['E', 'e']);
         nextOneOf(['A', 'a']);
         nextOneOf(['D', 'd']);
+        methodBoundary();
         return 'HEAD';
       case 'D':
         nextOneOf(['D', 'd']);
@@ -256,6 +298,7 @@ export const createParser = (): ConsoleParser => {
         nextOneOf(['E', 'e']);
         nextOneOf(['T', 't']);
         nextOneOf(['E', 'e']);
+        methodBoundary();
         return 'DELETE';
       case 'P':
         nextOneOf(['P', 'p']);
@@ -266,15 +309,18 @@ export const createParser = (): ConsoleParser => {
             nextOneOf(['T', 't']);
             nextOneOf(['C', 'c']);
             nextOneOf(['H', 'h']);
+            methodBoundary();
             return 'PATCH';
           case 'U':
             nextOneOf(['U', 'u']);
             nextOneOf(['T', 't']);
+            methodBoundary();
             return 'PUT';
           case 'O':
             nextOneOf(['O', 'o']);
             nextOneOf(['S', 's']);
             nextOneOf(['T', 't']);
+            methodBoundary();
             return 'POST';
           default:
             error("Unexpected '" + ch + "'");
@@ -417,10 +463,16 @@ export const createParser = (): ConsoleParser => {
         request();
         white();
       } catch (e: unknown) {
-        addError(getErrorMessage(e));
+        const syntaxError = e as { at?: number; endAt?: number };
+        addError(getErrorMessage(e), syntaxError.at, syntaxError.endAt);
         // snap
         const remainingText = text.substr(at);
-        const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)\b/im);
+        // Match the verb without a trailing `\b` so that lines starting with
+        // a valid method prefix but continuing with identifier characters
+        // (`GETT`, `POSTS`, `PUThjjkjoj`) are picked up as recovery anchors;
+        // `method()` then re-throws at the boundary and an error annotation
+        // is recorded for each such line.
+        const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)/im);
         const nextCommentLine = remainingText.search(/^\s*(#|\/\*|\/\/).*$/m);
         if (nextMethodIndex === -1 && nextCommentLine === -1) {
           // If there are no comments or other requests after the error, there is no point in parsing more so we stop here
@@ -444,7 +496,9 @@ export const createParser = (): ConsoleParser => {
     multiRequest();
     white();
     if (ch) {
-      addError('Syntax error');
+      if (!hasErrorCoveringOffset(at)) {
+        addError('Syntax error');
+      }
     }
 
     const result = { errors, requests };

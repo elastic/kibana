@@ -10,7 +10,8 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { DATASETS_ROUTE, SOURCES_AUTOCOMPLETE_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { getIndexForESQLQuery } from './get_esql_adhoc_dataview';
 
 function createMockDataViewsService() {
   return {
@@ -93,6 +94,22 @@ describe('getESQLAdHocDataview', () => {
 
       expect(result.id).toBe('explicit-id');
     });
+
+    it('should generate different IDs for different project routing', async () => {
+      const query = uniqueQuery();
+      const originResult = await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        projectRouting: '_alias:_origin',
+      });
+      const allProjectsResult = await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        projectRouting: '_alias:*',
+      });
+
+      expect(originResult.id).not.toBe(allProjectsResult.id);
+    });
   });
 
   describe('DataView spec', () => {
@@ -105,6 +122,22 @@ describe('getESQLAdHocDataview', () => {
       expect(dataViewsService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'my_index',
+          type: ESQL_TYPE,
+        }),
+        false
+      );
+    });
+
+    it('should ignore coordinator lookup join targets when extracting the index pattern', async () => {
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query:
+          'FROM "my_remote_cluster:customer_orders" | LOOKUP JOIN _coordinator:customer_profiles_lookup ON customer_id',
+      });
+
+      expect(dataViewsService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'my_remote_cluster:customer_orders',
           type: ESQL_TYPE,
         }),
         false
@@ -160,6 +193,22 @@ describe('getESQLAdHocDataview', () => {
       );
     });
 
+    it('should forward effective project routing to the time field route', async () => {
+      const http = createMockHttp('@timestamp');
+      const query = uniqueQuery();
+
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        http,
+        projectRouting: '_alias:*',
+      });
+
+      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
+        body: JSON.stringify({ query, projectRouting: '_alias:*' }),
+      });
+    });
+
     it('should leave timeFieldName undefined when no http is provided', async () => {
       await getESQLAdHocDataview({
         dataViewsService,
@@ -207,6 +256,26 @@ describe('getESQLAdHocDataview', () => {
 
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('a'), http });
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('b'), http });
+
+      expect(http.post).toHaveBeenCalledTimes(2);
+    });
+
+    it('should make separate HTTP calls for different project routing', async () => {
+      const http = createMockHttp('@timestamp');
+      const query = uniqueQuery();
+
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        http,
+        projectRouting: '_alias:_origin',
+      });
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        http,
+        projectRouting: '_alias:*',
+      });
 
       expect(http.post).toHaveBeenCalledTimes(2);
     });
@@ -288,5 +357,97 @@ describe('getESQLAdHocDataview', () => {
       expect(dataViewsService.clearInstanceCache).toHaveBeenCalled();
       expect(http.post).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('getIndexForESQLQuery', () => {
+  const LOCAL_ROUTE = `${SOURCES_AUTOCOMPLETE_ROUTE}local`;
+  const REMOTE_ROUTE = `${SOURCES_AUTOCOMPLETE_ROUTE}remote`;
+
+  function makeHttp(
+    local: Array<{ name: string; hidden: boolean }>,
+    remote: Array<{ name: string; hidden: boolean }>,
+    datasets: Array<{ name: string; data_source: string; resource: string }>
+  ) {
+    return {
+      get: jest.fn().mockImplementation((path: string) => {
+        if (path === LOCAL_ROUTE) return Promise.resolve(local);
+        if (path === REMOTE_ROUTE) return Promise.resolve(remote);
+        if (path === DATASETS_ROUTE) return Promise.resolve({ datasets });
+        return Promise.resolve([]);
+      }),
+    } as unknown as HttpStart;
+  }
+
+  it('returns logs* when a local index starting with logs exists', async () => {
+    const http = makeHttp([{ name: 'logs-2024', hidden: false }], [], []);
+    expect(await getIndexForESQLQuery({ http })).toBe('logs*');
+  });
+
+  it('returns the first local index when no logs pattern exists', async () => {
+    const http = makeHttp([{ name: 'metrics-2024', hidden: false }], [], []);
+    expect(await getIndexForESQLQuery({ http })).toBe('metrics-2024');
+  });
+
+  it('prefers local over remote when both exist', async () => {
+    const http = makeHttp(
+      [{ name: 'local-index', hidden: false }],
+      [{ name: 'cluster:index', hidden: false }],
+      []
+    );
+    expect(await getIndexForESQLQuery({ http })).toBe('local-index');
+  });
+
+  it('falls back to remote when no local indices exist', async () => {
+    const http = makeHttp([], [{ name: 'cluster:index', hidden: false }], []);
+    expect(await getIndexForESQLQuery({ http })).toBe('cluster:index');
+  });
+
+  it('falls back to first ES|QL dataset when no local or remote indices exist', async () => {
+    const http = makeHttp([], [], [{ name: 'fds_dataset', data_source: 's3', resource: 'bucket' }]);
+    expect(await getIndexForESQLQuery({ http })).toBe('fds_dataset');
+  });
+
+  it('returns null when no local indices, remote indices, or datasets exist', async () => {
+    const http = makeHttp([], [], []);
+    expect(await getIndexForESQLQuery({ http })).toBeNull();
+  });
+
+  it('returns null when the datasets endpoint fails', async () => {
+    const http = {
+      get: jest.fn().mockImplementation((path: string) => {
+        if (path === DATASETS_ROUTE) return Promise.reject(new Error('network error'));
+        return Promise.resolve([]);
+      }),
+    } as unknown as HttpStart;
+    expect(await getIndexForESQLQuery({ http })).toBeNull();
+  });
+
+  it('skips hidden indices', async () => {
+    const http = makeHttp(
+      [
+        { name: '.hidden', hidden: true },
+        { name: 'visible', hidden: false },
+      ],
+      [],
+      []
+    );
+    expect(await getIndexForESQLQuery({ http })).toBe('visible');
+  });
+
+  it('only queries local when a local index is found', async () => {
+    const http = makeHttp([{ name: 'logs-2024', hidden: false }], [], []);
+    await getIndexForESQLQuery({ http });
+    expect(http.get).toHaveBeenCalledWith(LOCAL_ROUTE);
+    expect(http.get).not.toHaveBeenCalledWith(REMOTE_ROUTE);
+    expect(http.get).not.toHaveBeenCalledWith(DATASETS_ROUTE);
+  });
+
+  it('queries remote and datasets in parallel when no local indices exist', async () => {
+    const http = makeHttp([], [{ name: 'cluster:index', hidden: false }], []);
+    await getIndexForESQLQuery({ http });
+    expect(http.get).toHaveBeenCalledWith(LOCAL_ROUTE);
+    expect(http.get).toHaveBeenCalledWith(REMOTE_ROUTE);
+    expect(http.get).toHaveBeenCalledWith(DATASETS_ROUTE);
   });
 });

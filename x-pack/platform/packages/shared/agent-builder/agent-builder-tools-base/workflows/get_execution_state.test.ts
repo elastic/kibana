@@ -6,7 +6,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { getExecutionState } from './get_execution_state';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { getExecutionState, toWorkflowExecutionState } from './get_execution_state';
 import { getWorkflowOutput } from './get_workflow_output';
 
 jest.mock('./get_workflow_output', () => ({
@@ -330,6 +331,45 @@ describe('getExecutionState', () => {
       });
 
       expect(state?.waiting_input).toBeUndefined();
+    });
+
+    it('includes waitForApproval waiting_input with approval schema', () => {
+      const state = toWorkflowExecutionState({
+        id: 'exec-approval',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-approval',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        workflowDefinition: {
+          name: 'Approval Flow',
+          steps: [
+            {
+              name: 'request-approval',
+              type: 'waitForApproval',
+              with: { message: 'Approve change?' },
+            },
+          ],
+        },
+        stepExecutions: [
+          {
+            id: 'step-exec-approval',
+            stepId: 'request-approval',
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            scopeStack: [],
+          },
+        ],
+      } as unknown as WorkflowExecutionDto);
+
+      expect(state.waiting_input).toEqual({
+        step_execution_id: 'step-exec-approval',
+        message: 'Approve change?',
+        schema: {
+          type: 'object',
+          properties: {
+            approved: { type: 'boolean', description: 'Whether the request was approved' },
+          },
+          required: ['approved'],
+        },
+      });
     });
   });
 });

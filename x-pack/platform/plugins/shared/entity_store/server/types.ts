@@ -1,0 +1,124 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type {
+  CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import type { IRouter } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AssetManagerClient } from './domain/asset_manager';
+import type {
+  EntityMaintainersClient,
+  EntityMaintainerStatusEntry,
+} from './domain/entity_maintainers';
+import type { FeatureFlags } from './infra/feature_flags';
+import type { LogsExtractionClient } from './domain/logs_extraction';
+import type { HistorySnapshotClient } from './domain/history_snapshot';
+import type { CRUDClient } from './domain/crud';
+import type { EntityMetadataClient } from './domain/entity_metadata';
+import type { RelationshipsClient } from './domain/relationships';
+import type { ResolutionClient } from './domain/resolution';
+import type { ResolutionRulesClient } from './domain/resolution/rules';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import type { TelemetryReporter } from './telemetry/events';
+
+export interface EntityStoreSetupPlugins {
+  taskManager: TaskManagerSetupContract;
+  spaces: SpacesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+}
+
+export interface EntityStoreStartPlugins {
+  taskManager: TaskManagerStartContract;
+  spaces: SpacesPluginStart;
+  dataViews: DataViewsPluginStart;
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  licensing: LicensingPluginStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+}
+
+export interface EntityStoreApiRequestHandlerContext {
+  core: CoreRequestHandlerContext;
+  logger: Logger;
+  assetManagerClient: AssetManagerClient;
+  entityMaintainersClient: EntityMaintainersClient;
+  crudClient: CRUDClient;
+  entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
+  resolutionClient: ResolutionClient;
+  entityResolutionRuleClient: ResolutionRulesClient;
+  featureFlags: FeatureFlags;
+  logsExtractionClient: LogsExtractionClient;
+  historySnapshotClient: HistorySnapshotClient;
+  security: SecurityPluginStart;
+  namespace: string;
+  analytics: TelemetryReporter;
+}
+
+export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
+  entityStore: EntityStoreApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
+}>;
+
+export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
+
+export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
+
+export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
+
+export interface EntityStoreStartContract {
+  createCRUDClient: (
+    esClient: ElasticsearchClient,
+    namespace: string,
+    getWorkflowsClient?: () => Promise<{
+      emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+    }>
+  ) => EntityStoreCRUDClient;
+  createEntityMetadataClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => EntityMetadataClient;
+  createRelationshipsClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => RelationshipsClient;
+  createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
+  getMaintainerStatus: (
+    namespace: string,
+    ids?: string[]
+  ) => Promise<EntityMaintainerStatusEntry[]>;
+}
+
+export interface EntityStoreSetupContract {
+  registerEntityMaintainer: RegisterEntityMaintainer;
+}
+
+export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

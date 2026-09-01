@@ -22,12 +22,13 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { findLast } from 'lodash';
 import type { KbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -241,17 +242,27 @@ export function Assignments({
                   }
                 )}
                 button={
-                  <EuiButtonIcon
-                    iconType="boxesVertical"
-                    color="text"
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
                       {
                         defaultMessage: 'Open additional assignments actions',
                       }
                     )}
-                    onClick={() => setShowOtherActions(true)}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="boxesVertical"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
+                        {
+                          defaultMessage: 'Open additional assignments actions',
+                        }
+                      )}
+                      onClick={() => setShowOtherActions(true)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={showOtherActions}
                 closePopover={() => setShowOtherActions(false)}

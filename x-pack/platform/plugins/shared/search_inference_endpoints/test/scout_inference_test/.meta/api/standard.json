@@ -1,19 +1,63 @@
 {
-  "sha1": "63793ffcd2b26cee9d3d486a944ff3b4ba7c2da1",
+  "sha1": "0298d08dab75b9f8348bb25951f7049a5f10bf6b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "ae3d37266a51314-58daa05cefa5c4d",
+      "title": "Inference features authorization feature-privileged user can GET features",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_features_authorization.spec.ts",
+        "line": 19,
+        "column": 96
+      }
+    },
+    {
+      "id": "ae3d37266a51314-e20394c3e6d16ff",
+      "title": "Inference features authorization read-privileged user can GET features",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_features_authorization.spec.ts",
+        "line": 23,
+        "column": 40
+      }
+    },
+    {
+      "id": "ae3d37266a51314-41b49a1429842c6",
+      "title": "Inference features authorization user with no inference privilege gets 403 on GET features",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_features_authorization.spec.ts",
+        "line": 31,
+        "column": 13
+      }
+    },
     {
       "id": "0e7ddf934973be7-7cabd7589c944d7",
       "title": "Inference settings authorization feature-privileged user can GET settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 36,
-        "column": 10
+        "line": 31,
+        "column": 16
       }
     },
     {
@@ -22,43 +66,40 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 36,
+        "column": 64
       }
     },
     {
-      "id": "0e7ddf934973be7-4192c89357af784",
-      "title": "Inference settings authorization user without searchInferenceEndpoints privilege gets 403 on GET",
+      "id": "0e7ddf934973be7-b79d137dfde4474",
+      "title": "Inference settings authorization viewer (read privilege) can GET settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 46,
+        "column": 75
       }
     },
     {
-      "id": "0e7ddf934973be7-5ed69e05e2e8c78",
-      "title": "Inference settings authorization user without searchInferenceEndpoints privilege gets 403 on PUT",
+      "id": "0e7ddf934973be7-efac034bc5c5e70",
+      "title": "Inference settings authorization viewer (read privilege) gets 403 on PUT settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 68,
-        "column": 10
+        "line": 54,
+        "column": 12
       }
     },
     {
@@ -67,13 +108,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 32,
-        "column": 10
+        "line": 27,
+        "column": 40
       }
     },
     {
@@ -82,13 +122,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 40
       }
     },
     {
@@ -97,13 +136,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 56,
-        "column": 10
+        "line": 47,
+        "column": 27
       }
     },
     {
@@ -112,13 +150,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 67,
+        "column": 54
       }
     },
     {
@@ -127,13 +164,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 34,
+        "column": 5
       }
     },
     {
@@ -142,13 +178,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 50,
+        "column": 21
       }
     },
     {
@@ -157,13 +192,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 68,
+        "column": 23
       }
     },
     {
@@ -172,13 +206,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 20,
-        "column": 10
+        "line": 16,
+        "column": 45
       }
     },
     {
@@ -187,13 +220,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
         "line": 36,
-        "column": 10
+        "column": 11
       }
     },
     {
@@ -202,13 +234,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 55,
+        "column": 22
       }
     },
     {
@@ -217,13 +248,278 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 68,
+        "column": 21
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-4a8987ab946ed49",
+      "title": "Region policy authorization feature-privileged user gets 404 on GET when no policy exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 27,
+        "column": 56
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-d65958d003f0c68",
+      "title": "Region policy authorization feature-privileged user gets 200 on GET when a policy exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 35,
+        "column": 5
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-031c56245504eec",
+      "title": "Region policy authorization feature-privileged user can PUT a region policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 50,
+        "column": 47
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-a879a902235e87c",
+      "title": "Region policy authorization feature-privileged user can DELETE the region policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-12efb3dc14c72e6",
+      "title": "Region policy authorization feature-read user gets 403 on GET when no policy exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 77,
+        "column": 5
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-d194e10a9c0c196",
+      "title": "Region policy authorization feature-read user gets 403 on GET when a policy exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 81,
+        "column": 56
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-48869803bae810b",
+      "title": "Region policy authorization feature-read user gets 403 on PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 99,
+        "column": 23
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-801668e498ddc0d",
+      "title": "Region policy authorization feature-read user gets 403 on DELETE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 114,
+        "column": 23
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-759fc69c7087e19",
+      "title": "Region policy authorization user with no inference privilege gets 403 on GET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 120,
+        "column": 18
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-44a4137a05b36f8",
+      "title": "Region policy authorization user with no inference privilege gets 403 on PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 128,
+        "column": 83
+      }
+    },
+    {
+      "id": "e189edf1bfa4d46-805250221117e0b",
+      "title": "Region policy authorization user with no inference privilege gets 403 on DELETE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
+        "line": 139,
+        "column": 11
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-7029ea0bdbf0a8e",
+      "title": "Region policy CRUD GET returns 404 when no policy exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 24,
+        "column": 46
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-f70b7c0d6c552ba",
+      "title": "Region policy CRUD PUT creates a geo policy and GET returns it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 30,
+        "column": 77
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-9a71dfc6509673d",
+      "title": "Region policy CRUD PUT geo policy overwrites an existing geo policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-e8bbd1615715f41",
+      "title": "Region policy CRUD PUT creates a regions policy and GET returns it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 97,
+        "column": 31
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-52a6d5baa2702f8",
+      "title": "Region policy CRUD DELETE removes an existing policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 138,
+        "column": 16
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-cfd52e11396e46d",
+      "title": "Region policy CRUD DELETE is idempotent when no policy exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 154,
+        "column": 82
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-f0b8559feeacdd9",
+      "title": "Region policy CRUD PUT with both allowed_geos and allowed_regions returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 159,
+        "column": 39
+      }
+    },
+    {
+      "id": "7aa2e9b301f7071-eaa10fd9ba6a698",
+      "title": "Region policy CRUD PUT with an empty payload is accepted (all fields are optional)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
+        "line": 179,
+        "column": 3
       }
     }
   ]

@@ -27,12 +27,13 @@ export function ChangePointDetectionPageProvider(
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const cases = getService('cases');
 
   return {
     async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab changePointDetection');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async assertChangePointDetectionPageExists() {
@@ -122,6 +123,12 @@ export function ChangePointDetectionPageProvider(
     async closeFlyout() {
       await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.missingOrFail('aiopsChangePointDetectionSelectedCharts');
+    },
+
+    async ensureFlyoutClosed() {
+      if (await testSubjects.exists('aiopsChangePointDetectionSelectedCharts')) {
+        await this.closeFlyout();
+      }
     },
 
     async addChangePointConfig() {
@@ -242,12 +249,7 @@ export function ChangePointDetectionPageProvider(
         }
 
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
+        await common.waitForSaveModalToClose();
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

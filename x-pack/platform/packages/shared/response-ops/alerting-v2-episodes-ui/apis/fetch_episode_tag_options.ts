@@ -15,6 +15,7 @@ import {
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchEpisodeTagOptionsParams {
+  spaceId: string;
   timeRange?: TimeRange | null;
   abortSignal?: AbortSignal;
   services: { expressions: ExpressionsStart };
@@ -24,11 +25,12 @@ export interface FetchEpisodeTagOptionsParams {
  * Returns tag option rows from `.alert-actions` tag events in the given time range.
  */
 export const fetchEpisodeTagOptions = ({
+  spaceId,
   abortSignal,
   timeRange,
   services: { expressions },
 }: FetchEpisodeTagOptionsParams): Promise<EpisodeTagOptionRow[]> => {
-  const query = buildEpisodeTagOptionsQuery().print('basic');
+  const query = buildEpisodeTagOptionsQuery(spaceId).print('basic');
 
   const input: {
     type: 'kibana_context';

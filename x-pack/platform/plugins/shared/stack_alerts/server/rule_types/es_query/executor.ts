@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
 import { getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
@@ -39,7 +37,7 @@ import type {
 import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule, getSourceFieldsFromHit } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
@@ -235,7 +233,7 @@ export async function executor(
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
-      sourceFields: [],
+      sourceFields: getSourceFieldsFromHit(recoveredAlert.hit, sourceFields),
       grouping: recoveredAlert.hit?.[ALERT_GROUPING],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
@@ -278,10 +276,6 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
-}
-
-export function getChecksum(params: OnlyEsQueryRuleParams) {
-  return sha256.create().update(JSON.stringify(params));
 }
 
 export function getInvalidComparatorError(comparator: string) {

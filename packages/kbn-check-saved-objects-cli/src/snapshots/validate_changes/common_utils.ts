@@ -263,10 +263,14 @@ export function validateNoIndexOrEnabledFalse(
   const fieldsWithEnabledFalse: string[] = [];
 
   modelVersionsToCheck.forEach((modelVersion) => {
-    modelVersion.newMappings.forEach((mapping) => {
-      const lastDot = mapping.lastIndexOf('.');
-      const fieldPath = lastDot > 0 ? mapping.slice(0, lastDot) : mapping;
+    const fieldPaths = new Set(
+      modelVersion.newMappings.map((mapping) => {
+        const lastDot = mapping.lastIndexOf('.');
+        return lastDot > 0 ? mapping.slice(0, lastDot) : mapping;
+      })
+    );
 
+    fieldPaths.forEach((fieldPath) => {
       if (to.mappings[`properties.${fieldPath}.index`] === false) {
         fieldsWithIndexFalse.push(fieldPath);
       }

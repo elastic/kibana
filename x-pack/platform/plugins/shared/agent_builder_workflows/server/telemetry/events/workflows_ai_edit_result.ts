@@ -10,7 +10,7 @@ import type { RootSchema } from '@kbn/core/server';
 export const WORKFLOWS_AI_EDIT_RESULT_EVENT_TYPE = 'workflows_ai_edit_result';
 
 export interface WorkflowsAiEditResultParams {
-  /** The edit tool ID (e.g., 'workflows.workflow_insert_step') */
+  /** The edit tool ID (e.g., 'platform.core.generate_workflow') */
   tool_id: string;
   /** Conversation ID from the agent execution context */
   conversation_id?: string;
@@ -20,7 +20,7 @@ export interface WorkflowsAiEditResultParams {
   validation_passed?: boolean;
   /** Number of validation errors. Only present when edit_success is true. */
   validation_error_count?: number;
-  /** Whether this edit created a new workflow (setYaml with no prior attachment) */
+  /** Whether this edit created a new workflow (no prior attachment) */
   is_creation: boolean;
   /**
    * True when this tool call produced a valid result and the previous edit tool call
@@ -33,7 +33,7 @@ export const workflowsAiEditResultSchema: RootSchema<WorkflowsAiEditResultParams
   tool_id: {
     type: 'keyword',
     _meta: {
-      description: 'The edit tool ID (e.g., workflows.workflow_insert_step)',
+      description: 'The edit tool ID (e.g., platform.core.generate_workflow)',
       optional: false,
     },
   },
@@ -69,7 +69,7 @@ export const workflowsAiEditResultSchema: RootSchema<WorkflowsAiEditResultParams
   is_creation: {
     type: 'boolean',
     _meta: {
-      description: 'Whether this edit created a new workflow (setYaml with no prior attachment)',
+      description: 'Whether this edit created a new workflow (no prior attachment)',
       optional: false,
     },
   },

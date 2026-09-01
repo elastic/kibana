@@ -13,6 +13,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorFailedTests = ({
@@ -32,6 +33,8 @@ export const MonitorFailedTests = ({
 
   const [, updateUrl] = useUrlParams();
 
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
+
   if (!queryIdFilter && !errorStateId) {
     return null;
   }
@@ -44,6 +47,7 @@ export const MonitorFailedTests = ({
         reportType="heatmap"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
         attributes={[
           {
             time,

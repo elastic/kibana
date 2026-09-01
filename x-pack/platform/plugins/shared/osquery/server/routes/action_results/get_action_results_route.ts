@@ -9,6 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import {
   getActionResultsRequestParamsSchema,
@@ -28,6 +29,11 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { ACTIONS_INDEX } from '../../../common/constants';
 import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
@@ -89,7 +95,36 @@ export const getActionResultsRoute = (
             );
           }
 
-          const search = await context.search;
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
+
+          if (osqueryContext.cpsEnabled) {
+            const [coreStartServices] = await osqueryContext.getStartServices();
+            const clusterClient = coreStartServices.elasticsearch.client;
+            const readEsClient = getReadEsClient(clusterClient, request, true);
+            const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
+              index: `${ACTIONS_INDEX}*`,
+            });
+
+            const hasMetadata = await findOsqueryActionMetadata({
+              esClient: readEsClient,
+              spaceId,
+              actionId: request.params.actionId,
+              actionsIndexExists,
+            });
+
+            if (!hasMetadata) {
+              return response.notFound({ body: { message: 'Action not found' } });
+            }
+          }
 
           // Parse agentIds from query parameter
           const agentIds = request.query.agentIds
@@ -121,8 +156,9 @@ export const getActionResultsRoute = (
                 integrationNamespaces: integrationNamespaces[OSQUERY_INTEGRATION_NAME]?.length
                   ? integrationNamespaces[OSQUERY_INTEGRATION_NAME]
                   : undefined,
+                spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -156,10 +192,10 @@ export const getActionResultsRoute = (
             },
           });
         } catch (err) {
-          const error = err as Error;
+          const error = err as Error & { statusCode?: number };
 
           return response.customError({
-            statusCode: 500,
+            statusCode: error.statusCode ?? 500,
             body: { message: error.message },
           });
         }

@@ -12,6 +12,7 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { useCompositeSloEnabled } from '../../hooks/use_composite_slo_enabled';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
@@ -33,15 +34,16 @@ export function CompositeSloEditPage() {
     useFetchCompositeSlo(compositeSloId);
 
   const { data: permissions } = usePermissions();
-  const { ObservabilityPageTemplate, experimentalFeatures } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const isCompositeSloEnabled = useCompositeSloEnabled();
 
   useEffect(() => {
     if (
       hasRightLicense === false ||
       permissions?.hasAllReadRequested === false ||
-      !experimentalFeatures?.compositeSlo?.enabled
+      !isCompositeSloEnabled
     ) {
       navigateToUrl(basePath.prepend(paths.slos));
     }
@@ -49,7 +51,7 @@ export function CompositeSloEditPage() {
     if (permissions?.hasAllWriteRequested === false) {
       navigateToUrl(basePath.prepend(paths.slos));
     }
-  }, [hasRightLicense, permissions, navigateToUrl, basePath, experimentalFeatures]);
+  }, [hasRightLicense, permissions, navigateToUrl, basePath, isCompositeSloEnabled]);
 
   useBreadcrumbs(
     [

@@ -31,7 +31,7 @@ describe('WorkflowsAiTelemetryClient', () => {
   describe('reportEditResult', () => {
     it('reports a successful edit with passing validation', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: true },
@@ -41,7 +41,7 @@ describe('WorkflowsAiTelemetryClient', () => {
       expect(analytics.reportEvent).toHaveBeenCalledWith(
         WORKFLOWS_AI_EDIT_RESULT_EVENT_TYPE,
         expect.objectContaining({
-          tool_id: 'workflows.workflow_insert_step',
+          tool_id: 'platform.core.generate_workflow',
           edit_success: true,
           is_creation: false,
           validation_passed: true,
@@ -52,7 +52,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('reports validation failure with error count', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_modify_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: false, errors: ['error1', 'error2'] },
@@ -70,7 +70,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('reports a failed edit', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: false,
         isCreation: false,
         conversationId: 'conv-1',
@@ -87,7 +87,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('does not include validation fields when editSuccess is false', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: false,
         isCreation: false,
         conversationId: 'conv-1',
@@ -101,7 +101,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('reports creation flag correctly', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_set_yaml',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: true,
         validation: { valid: true },
@@ -119,7 +119,7 @@ describe('WorkflowsAiTelemetryClient', () => {
   describe('self-correction tracking', () => {
     it('detects self-correction after validation failure then success', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: false, errors: ['error1'] },
@@ -127,7 +127,7 @@ describe('WorkflowsAiTelemetryClient', () => {
       });
 
       client.reportEditResult({
-        toolId: 'workflows.workflow_modify_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: true },
@@ -141,7 +141,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('does not flag self-correction on first success', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: true },
@@ -154,7 +154,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('tracks per conversation independently', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: false, errors: ['error1'] },
@@ -162,7 +162,7 @@ describe('WorkflowsAiTelemetryClient', () => {
       });
 
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: true },
@@ -175,14 +175,14 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('does not track self-correction without conversationId', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: false, errors: ['error1'] },
       });
 
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: true },
@@ -196,7 +196,7 @@ describe('WorkflowsAiTelemetryClient', () => {
       const cap = 1000;
       for (let i = 0; i < cap + 10; i++) {
         client.reportEditResult({
-          toolId: 'workflows.workflow_insert_step',
+          toolId: 'platform.core.generate_workflow',
           editSuccess: true,
           isCreation: false,
           validation: { valid: false, errors: ['err'] },
@@ -205,7 +205,7 @@ describe('WorkflowsAiTelemetryClient', () => {
       }
 
       client.reportEditResult({
-        toolId: 'workflows.workflow_insert_step',
+        toolId: 'platform.core.generate_workflow',
         editSuccess: true,
         isCreation: false,
         validation: { valid: true },

@@ -14,6 +14,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { getTabStateMock, getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
@@ -61,6 +62,42 @@ const tab2 = getTabStateMock({
 });
 
 describe('tab mapping utils', () => {
+  describe('fromSavedObjectTabToAppState', () => {
+    it('should map saved object tab to app state', () => {
+      const persistedTab = getPersistedTabMock({
+        tabId: 'test-tab',
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: {
+          columns: ['column1'],
+          sort: [],
+        },
+      });
+      expect(fromSavedObjectTabToAppState({ tab: persistedTab })).toMatchInlineSnapshot(`
+        Object {
+          "breakdownField": "",
+          "columns": Array [
+            "column1",
+          ],
+          "dataSource": Object {
+            "dataViewId": "the-data-view-id",
+            "type": "dataView",
+          },
+          "filters": Array [],
+          "grid": Object {},
+          "hideChart": false,
+          "hideTable": false,
+          "interval": "auto",
+          "query": Object {
+            "language": "kuery",
+            "query": "",
+          },
+          "sort": Array [],
+        }
+      `);
+    });
+  });
+
   describe('fromSavedObjectTabToTabState', () => {
     it('should map saved object tab to tab state', () => {
       let tabState = fromSavedObjectTabToTabState({
@@ -83,20 +120,10 @@ describe('tab mapping utils', () => {
               "dataViewId": "test-data-view-2",
               "type": "dataView",
             },
-            "density": undefined,
-            "filters": undefined,
             "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
             "hideChart": false,
             "hideTable": false,
-            "interval": undefined,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
             "sort": Array [],
-            "viewMode": undefined,
           },
           "attributes": Object {
             "controlGroupState": undefined,
@@ -116,11 +143,6 @@ describe('tab mapping utils', () => {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
-          },
-          "defaultProfileState": Object {
-            "fieldsToReset": "none",
-            "resetId": "",
-            "snapshotsByProfileId": Object {},
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
@@ -154,6 +176,12 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
+          "profileAppStateDefaults": Object {
+            "fieldsToReset": "none",
+            "resetId": "",
+            "snapshotsByProfileId": Object {},
+          },
+          "profileState": Object {},
           "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
@@ -178,20 +206,10 @@ describe('tab mapping utils', () => {
               "dataViewId": "test-data-view-2",
               "type": "dataView",
             },
-            "density": undefined,
-            "filters": undefined,
             "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
             "hideChart": false,
             "hideTable": false,
-            "interval": undefined,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
             "sort": Array [],
-            "viewMode": undefined,
           },
           "attributes": Object {
             "controlGroupState": undefined,
@@ -211,11 +229,6 @@ describe('tab mapping utils', () => {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
-          },
-          "defaultProfileState": Object {
-            "fieldsToReset": "none",
-            "resetId": "",
-            "snapshotsByProfileId": Object {},
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
@@ -249,6 +262,12 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
+          "profileAppStateDefaults": Object {
+            "fieldsToReset": "none",
+            "resetId": "",
+            "snapshotsByProfileId": Object {},
+          },
+          "profileState": Object {},
           "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
@@ -365,6 +384,7 @@ describe('tab mapping utils', () => {
           "controlGroupJson": undefined,
           "density": undefined,
           "description": "description",
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -372,6 +392,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "the-saved-search-id-with-timefield",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "managed": true,
           "references": undefined,
           "refreshInterval": Object {
@@ -434,6 +455,8 @@ describe('tab mapping utils', () => {
           ],
           "controlGroupJson": undefined,
           "density": undefined,
+          "documentsDisplayMode": undefined,
+          "esqlApproximation": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -441,6 +464,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -474,6 +498,8 @@ describe('tab mapping utils', () => {
           ],
           "controlGroupJson": undefined,
           "density": undefined,
+          "documentsDisplayMode": undefined,
+          "esqlApproximation": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -481,6 +507,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": Object {
             "pause": true,
@@ -588,6 +615,7 @@ describe('tab mapping utils', () => {
           ],
           "controlGroupJson": undefined,
           "density": undefined,
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -595,6 +623,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -632,6 +661,7 @@ describe('tab mapping utils', () => {
           ],
           "controlGroupJson": undefined,
           "density": undefined,
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -639,6 +669,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 2",
           "refreshInterval": Object {
             "pause": false,
@@ -689,6 +720,7 @@ describe('tab mapping utils', () => {
           ],
           "controlGroupJson": undefined,
           "density": undefined,
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -696,6 +728,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": Object {
             "pause": false,
@@ -737,6 +770,7 @@ describe('tab mapping utils', () => {
           ],
           "controlGroupJson": undefined,
           "density": undefined,
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -744,6 +778,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 2",
           "refreshInterval": Object {
             "pause": false,

@@ -141,5 +141,202 @@ describe('DistributionBar', () => {
     });
   });
 
+  describe('tooltip overflow edge cases', () => {
+    let mockGetBoundingClientRect: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGetBoundingClientRect = jest.spyOn(Element.prototype, 'getBoundingClientRect');
+    });
+
+    afterEach(() => {
+      mockGetBoundingClientRect.mockRestore();
+    });
+
+    it('should add flipped tooltip attribute for small segments', () => {
+      const containerRect = {
+        left: 0,
+        right: 500,
+        width: 500,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+
+      const smallPartRect = {
+        left: 0,
+        right: 50,
+        width: 50,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+
+      const tooltipContentRect = {
+        left: 0,
+        right: 120,
+        width: 120,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+
+      const largePartRect = {
+        left: 250,
+        right: 500,
+        width: 250,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+
+      mockGetBoundingClientRect
+        .mockReturnValueOnce(containerRect)
+        .mockReturnValueOnce(smallPartRect)
+        .mockReturnValueOnce(tooltipContentRect)
+        .mockReturnValueOnce(largePartRect)
+        .mockReturnValueOnce(tooltipContentRect);
+
+      const stats = [
+        {
+          key: 'small',
+          count: 1,
+          color: 'green',
+          label: 'Small',
+        },
+        {
+          key: 'large',
+          count: 1000,
+          color: 'red',
+          label: 'Large',
+        },
+      ];
+
+      const { container } = render(<DistributionBar stats={stats} data-test-subj={testSubj} />);
+      expect(container).toBeInTheDocument();
+
+      const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
+      expect(parts.length).toEqual(stats.length);
+
+      expect(parts[0].getAttribute('data-tooltip-flipped')).toBe('true');
+
+      expect(parts[1].getAttribute('data-tooltip-flipped')).toBe('false');
+    });
+
+    it('should not flip tooltip when segment is in the right half and flipping would cause more overflow', () => {
+      // Segment near the right side: flipping would extend the tooltip further right than
+      // the current left overflow — so keep right-aligned.
+      const containerRect = {
+        left: 0,
+        right: 300,
+        width: 300,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+      const partRect = {
+        left: 200,
+        right: 220,
+        width: 20,
+        top: 0,
+        bottom: 0,
+        x: 200,
+        y: 0,
+        toJSON: () => ({}),
+      };
+      // Content is 250px wide: right-aligned overflows left by 30px; flipped overflows right by 120px.
+      // The right side has only 100px of space vs 220px on the left, so don't flip.
+      const tooltipContentRect = {
+        left: 0,
+        right: 250,
+        width: 250,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+
+      mockGetBoundingClientRect
+        .mockReturnValueOnce(containerRect)
+        .mockReturnValueOnce(partRect)
+        .mockReturnValueOnce(tooltipContentRect);
+
+      const stats = [
+        {
+          key: 'right-side',
+          count: 10,
+          color: 'orange',
+          label: 'Right Side',
+        },
+      ];
+
+      const { container } = render(<DistributionBar stats={stats} data-test-subj={testSubj} />);
+      const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
+      expect(parts[0].getAttribute('data-tooltip-flipped')).toBe('false');
+    });
+
+    it('should not flip tooltip when there is enough space', () => {
+      const containerRect = {
+        left: 0,
+        right: 500,
+        width: 500,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+      const partRect = {
+        left: 200,
+        right: 500,
+        width: 300,
+        top: 0,
+        bottom: 0,
+        x: 200,
+        y: 0,
+        toJSON: () => ({}),
+      };
+      const tooltipRect = {
+        left: 0,
+        right: 120,
+        width: 120,
+        top: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      };
+
+      mockGetBoundingClientRect
+        .mockReturnValueOnce(containerRect)
+        .mockReturnValueOnce(partRect)
+        .mockReturnValueOnce(tooltipRect);
+
+      const stats = [
+        {
+          key: 'medium',
+          count: 500,
+          color: 'yellow',
+          label: 'Medium',
+        },
+      ];
+
+      const { container } = render(<DistributionBar stats={stats} data-test-subj={testSubj} />);
+
+      const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
+      expect(parts[0].getAttribute('data-tooltip-flipped')).toBe('false');
+    });
+  });
+
   // todo: test tooltip visibility logic
 });

@@ -21,7 +21,7 @@ export const createFilterRange = (
       aggConfig.params.field,
       params,
       aggConfig.getIndexPattern(),
-      deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
+      deserialize(aggConfig.toSerializedFieldFormat()).convertToText(params)
     );
   };
 };

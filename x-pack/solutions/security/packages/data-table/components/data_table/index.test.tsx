@@ -23,8 +23,8 @@ import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: () => mockDispatch,
 }));
 
@@ -256,7 +256,7 @@ describe('DataTable', () => {
     fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
 
     // `EuiDataGrid` renders switches for hiding in the `Columns` popover when `showColumnSelector.allowHide` is `true`
-    const switches = await screen.queryAllByRole('switch');
+    const switches = await screen.queryAllByTestId(/dataGridColumnSelectorToggleColumnVisibility-/);
 
     expect(switches.length).toBe(0); // no switches are rendered, because `allowHide` is `false`
   });
@@ -274,7 +274,7 @@ describe('DataTable', () => {
     // click the `Remove column` action in the popover
     fireEvent.click(await screen.getByText(REMOVE_COLUMN));
 
-    expect(mockDispatch).toBeCalledWith({
+    expect(mockDispatch).toHaveBeenCalledWith({
       payload: { columnId: '@timestamp', id: 'table-test' },
       type: 'x-pack/security_solution/data-table/REMOVE_COLUMN',
     });
@@ -292,7 +292,7 @@ describe('DataTable', () => {
     fireEvent.mouseMove(screen.getAllByTestId('dataGridColumnResizer')[0]);
     fireEvent.mouseUp(screen.getAllByTestId('dataGridColumnResizer')[0]);
 
-    expect(mockDispatch).toBeCalledWith({
+    expect(mockDispatch).toHaveBeenCalledWith({
       payload: { columnId: '@timestamp', id: 'table-test', width: NaN },
       type: 'x-pack/security_solution/data-table/UPDATE_COLUMN_WIDTH',
     });

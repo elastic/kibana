@@ -39,7 +39,7 @@ describe('Bulk uninstall task', () => {
   describe('_runBulkUninstallTask', () => {
     it('should work for successfull uninstall', async () => {
       const res = await _runBulkUninstallTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_uninstall',
@@ -50,7 +50,7 @@ describe('Bulk uninstall task', () => {
         },
       });
 
-      expect(removeInstallation).toBeCalledTimes(2);
+      expect(removeInstallation).toHaveBeenCalledTimes(2);
 
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
@@ -60,7 +60,7 @@ describe('Bulk uninstall task', () => {
 
     it('should return error for non successful upgrade', async () => {
       const res = await _runBulkUninstallTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_uninstall',
@@ -73,7 +73,7 @@ describe('Bulk uninstall task', () => {
         },
       });
 
-      expect(removeInstallation).toBeCalledTimes(4);
+      expect(removeInstallation).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -95,7 +95,7 @@ describe('Bulk uninstall task', () => {
       abortController.abort();
       await expect(() =>
         _runBulkUninstallTask({
-          abortController,
+          signal: abortController.signal,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
             type: 'bulk_uninstall',
@@ -109,7 +109,7 @@ describe('Bulk uninstall task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(removeInstallation).toBeCalledTimes(0);
+      expect(removeInstallation).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteRule } from './use_delete_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
-
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
 
@@ -50,15 +49,15 @@ describe('useDeleteRule', () => {
     });
   });
 
-  it('should delete a rule and show a success toast', async () => {
+  it('should delete a rule and show a success toast with the rule name', async () => {
     mockDeleteRule.mockResolvedValue(undefined);
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1');
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' });
 
     await waitFor(() => {
       expect(mockDeleteRule).toHaveBeenCalledWith('rule-1');
-      expect(mockAddSuccess).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" deleted successfully');
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
@@ -67,7 +66,7 @@ describe('useDeleteRule', () => {
     mockDeleteRule.mockRejectedValue(new Error('delete failed'));
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1');
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' });
 
     await waitFor(() => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
@@ -80,7 +79,7 @@ describe('useDeleteRule', () => {
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1', { onSuccess });
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' }, { onSuccess });
 
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledTimes(1);
@@ -93,7 +92,7 @@ describe('useDeleteRule', () => {
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1', { onSuccess });
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' }, { onSuccess });
 
     await waitFor(() => {
       expect(onSuccess).not.toHaveBeenCalled();
