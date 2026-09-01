@@ -301,9 +301,9 @@ describe('EntityStoreGlobalStateClient', () => {
         SavedObjectsErrorHelpers.createConflictError(EntityStoreGlobalStateTypeName, soId)
       );
 
-      await expect(client.update({ logsExtraction: { frequency: '5m' } })).rejects.toThrow(
-        'conflict'
-      );
+      await expect(
+        client.update({ logsExtraction: { frequency: '5m' } }, { retries: 2, minTimeout: 0 })
+      ).rejects.toThrow('conflict');
     });
   });
 });

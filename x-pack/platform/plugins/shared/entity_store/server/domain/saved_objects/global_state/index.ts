@@ -19,7 +19,7 @@ import {
 } from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
 import { getLegacyLogExtractionOverrides } from './legacy_defaults';
-import { retryOnConflict } from '../../../infra/elasticsearch';
+import { retryOnConflict, type RetryOnConflictOptions } from '../../../infra/elasticsearch';
 
 const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
   attrs.defaultsVersion === 'latest'
@@ -93,7 +93,10 @@ export class EntityStoreGlobalStateClient {
     return getWithLatestDefaults(attributes);
   }
 
-  async update(overrides: EntityStoreGlobalStateOverrides): Promise<EntityStoreGlobalState> {
+  async update(
+    overrides: EntityStoreGlobalStateOverrides,
+    retryOpts?: RetryOnConflictOptions
+  ): Promise<EntityStoreGlobalState> {
     // retries on version conflict, so concurrent writers
     // (e.g. the history snapshot task vs a config update) cannot overwrite each other
     return retryOnConflict(async () => {
@@ -104,7 +107,7 @@ export class EntityStoreGlobalStateClient {
         );
       }
       return this.replace(mergeOverrides(raw.attributes, overrides), raw.version);
-    });
+    }, retryOpts);
   }
 
   private async replace(
