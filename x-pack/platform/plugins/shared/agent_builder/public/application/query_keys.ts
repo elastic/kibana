@@ -13,7 +13,12 @@ import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-
 export const queryKeys = {
   conversations: {
     all: ['conversations'] as const,
-    byAgent: (agentId: string) => ['conversations', 'list', { agentId }],
+    list: ['conversations', 'list'] as const,
+    byAgent: (agentId: string, opts: { pinned?: boolean } = {}) => [
+      'conversations',
+      'list',
+      { agentId, pinned: opts.pinned ?? null },
+    ],
     byId: (conversationId: string) => ['conversations', conversationId],
   },
   agentProfiles: {

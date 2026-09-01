@@ -133,5 +133,19 @@ export function enrichFunctionParameters(functionDefinition: FunctionDefinition)
     };
   }
 
+  // COUNT's field param is optional (COUNT() without args is valid, equivalent to COUNT(*))
+  // ES metadata incorrectly marks it as required, so we override it here.
+  if (functionDefinition.name === 'count') {
+    return {
+      ...functionDefinition,
+      signatures: functionDefinition.signatures.map((sig) => ({
+        ...sig,
+        params: sig.params.map((param) =>
+          param.name === 'field' ? { ...param, optional: true } : param
+        ),
+      })),
+    };
+  }
+
   return functionDefinition;
 }
