@@ -32,7 +32,7 @@ import {
 } from '../../fixtures/ml_anomaly_summary_test_data';
 
 const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
-const ENTITY_STORE_LATEST_ALIAS = '.entities.v2.latest.default-00001';
+const ENTITY_STORE_LATEST_ALIAS = 'entities-latest-default'; // '.entities.v2.latest.default-00001';
 const UNKNOWN_ENTITY_EUID = 'user:does-not-exist@a1b2c3d4e5f6789012345678901234ab@local';
 const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
 
@@ -59,6 +59,8 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let defaultHeaders: Record<string, string>;
+    let noMlPrivsHeaders: Record<string, string>;
+    let noEntityStorePrivsHeaders: Record<string, string>;
     let agentPolicyId = '';
     let packagePolicyId = '';
 
@@ -66,6 +68,24 @@ apiTest.describe(
       apiTest.setTimeout(300_000);
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
+
+      const noMlPrivsCredentials = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: [ENTITY_STORE_LATEST_ALIAS], privileges: ['read'] }],
+        },
+        kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
+      });
+      noMlPrivsHeaders = { ...noMlPrivsCredentials.cookieHeader, ...INTERNAL_HEADERS };
+
+      const noEntityStorePrivsCredentials = await samlAuth.asInteractiveUser({
+        elasticsearch: { cluster: [] },
+        kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
+      });
+      noEntityStorePrivsHeaders = {
+        ...noEntityStorePrivsCredentials.cookieHeader,
+        ...INTERNAL_HEADERS,
+      };
 
       log.debug(`Installing entity store...`);
       await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
@@ -978,20 +998,7 @@ apiTest.describe(
 
     apiTest(
       'Anomaly summary API: returns error for user without ML read access',
-      async ({ samlAuth, apiClient }) => {
-        const { cookieHeader: noMlPrivsCookieHeader } = await samlAuth.asInteractiveUser({
-          elasticsearch: {
-            cluster: [],
-            indices: [
-              {
-                names: [ENTITY_STORE_LATEST_ALIAS],
-                privileges: ['read'],
-              },
-            ],
-          },
-          kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
-        });
-        const noMlPrivsHeaders = { ...INTERNAL_HEADERS, ...noMlPrivsCookieHeader };
+      async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
@@ -1005,20 +1012,7 @@ apiTest.describe(
 
     apiTest(
       'Anomaly overview API: returns error for user without ML read access',
-      async ({ samlAuth, apiClient }) => {
-        const { cookieHeader: noMlPrivsCookieHeader } = await samlAuth.asInteractiveUser({
-          elasticsearch: {
-            cluster: [],
-            indices: [
-              {
-                names: [ENTITY_STORE_LATEST_ALIAS],
-                privileges: ['read'],
-              },
-            ],
-          },
-          kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
-        });
-        const noMlPrivsHeaders = { ...INTERNAL_HEADERS, ...noMlPrivsCookieHeader };
+      async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
@@ -1032,15 +1026,7 @@ apiTest.describe(
 
     apiTest(
       'Anomaly summary API: returns error for user without entity store access',
-      async ({ samlAuth, apiClient, log }) => {
-        const { cookieHeader: noEntityStorePrivsCookieHeader } = await samlAuth.asInteractiveUser({
-          elasticsearch: { cluster: [] },
-          kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
-        });
-        const noEntityStorePrivsHeaders = {
-          ...INTERNAL_HEADERS,
-          ...noEntityStorePrivsCookieHeader,
-        };
+      async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
@@ -1054,15 +1040,7 @@ apiTest.describe(
 
     apiTest(
       'Anomaly overview API: returns error for user without entity store access',
-      async ({ samlAuth, apiClient }) => {
-        const { cookieHeader: noEntityStorePrivsCookieHeader } = await samlAuth.asInteractiveUser({
-          elasticsearch: { cluster: [] },
-          kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
-        });
-        const noEntityStorePrivsHeaders = {
-          ...INTERNAL_HEADERS,
-          ...noEntityStorePrivsCookieHeader,
-        };
+      async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
@@ -1076,20 +1054,7 @@ apiTest.describe(
 
     apiTest(
       'Anomaly privileges API: returns has_all_required false for user without .ml-anomlies* access',
-      async ({ samlAuth, apiClient }) => {
-        const { cookieHeader: noMlPrivsCookieHeader } = await samlAuth.asInteractiveUser({
-          elasticsearch: {
-            cluster: [],
-            indices: [
-              {
-                names: [ENTITY_STORE_LATEST_ALIAS],
-                privileges: ['read'],
-              },
-            ],
-          },
-          kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
-        });
-        const noMlPrivsHeaders = { ...INTERNAL_HEADERS, ...noMlPrivsCookieHeader };
+      async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
           headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
@@ -1116,20 +1081,7 @@ apiTest.describe(
 
     apiTest(
       'Anomaly privileges API: returns has_all_required false for user without ML Kibana feature privilege',
-      async ({ samlAuth, apiClient }) => {
-        const { cookieHeader: noMlPrivsCookieHeader } = await samlAuth.asInteractiveUser({
-          elasticsearch: {
-            cluster: [],
-            indices: [
-              {
-                names: [ENTITY_STORE_LATEST_ALIAS],
-                privileges: ['read'],
-              },
-            ],
-          },
-          kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
-        });
-        const noMlPrivsHeaders = { ...INTERNAL_HEADERS, ...noMlPrivsCookieHeader };
+      async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
           headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
