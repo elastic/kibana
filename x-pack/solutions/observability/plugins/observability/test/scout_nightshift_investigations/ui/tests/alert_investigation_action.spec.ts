@@ -24,10 +24,9 @@ test.describe(
   () => {
     test.beforeAll(async ({ esClient }) => {
       const timestamp = new Date().toISOString();
-      await esClient.index({
+      await esClient.create({
         index: alertIndex,
         id: alertId,
-        op_type: 'create',
         refresh: 'wait_for',
         document: {
           '@timestamp': timestamp,
@@ -37,6 +36,7 @@ test.describe(
           'kibana.alert.reason': 'Failed transaction rate exceeded the threshold',
           'kibana.alert.status': 'active',
           'kibana.alert.start': timestamp,
+          'kibana.alert.time_range': { gte: timestamp },
           'kibana.alert.workflow_status': 'open',
           'kibana.alert.rule.category': 'Failed transaction rate threshold',
           'kibana.alert.rule.consumer': 'alerts',
@@ -56,12 +56,24 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient }) => {
-      await esClient.delete({ index: alertIndex, id: alertId, refresh: true });
+      await esClient.deleteByQuery({
+        index: alertIndex,
+        query: { ids: { values: [alertId] } },
+        refresh: true,
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+      });
     });
 
     test('starts an investigation from an alert row action', async ({ page, pageObjects }) => {
-      await pageObjects.alertsTablePage.goto({ withoutFilter: true });
-      await pageObjects.alertsTablePage.submitQuery(`kibana.alert.rule.name: "${ruleName}"`);
+      await pageObjects.alertsTablePage.gotoWithAppState({
+        kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+      });
+      await expect
+        .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
+        .toBe(1);
 
       const requestPromise = page.waitForRequest(
         (request) =>
