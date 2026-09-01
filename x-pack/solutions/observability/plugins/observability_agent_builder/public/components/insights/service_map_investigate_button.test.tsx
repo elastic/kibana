@@ -156,7 +156,11 @@ describe('ServiceMapInvestigateButton', () => {
 
     render(
       <EuiThemeProvider>
-        <ServiceMapInvestigateButton rangeFrom="now-15m" rangeTo="now" highlightedServiceNames={[]} />
+        <ServiceMapInvestigateButton
+          rangeFrom="now-15m"
+          rangeTo="now"
+          highlightedServiceNames={[]}
+        />
       </EuiThemeProvider>
     );
 
