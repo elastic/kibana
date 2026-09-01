@@ -11,7 +11,6 @@ import { OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED } from '@kbn/man
 import type { RunBudgetGroupId, RunLimit } from '../../../../common/run_quotas';
 import {
   DEFAULT_RUN_LIMITS,
-  DEFAULT_RUN_QUOTA_SETTINGS,
   MAX_RUN_LIMIT,
   RUN_BUDGET_GROUP_IDS,
 } from '../../../../common/run_quotas';
@@ -112,7 +111,6 @@ const getRunQuotasRoute = createServerRoute({
 
     return {
       settings: {
-        timezone: DEFAULT_RUN_QUOTA_SETTINGS.timezone,
         limits,
       },
       window,
