@@ -18,6 +18,7 @@ import {
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -34,6 +35,7 @@ import {
 import { InputPopoverButton } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
+import { ModelBadgesReveal, ModelNewBadge } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -178,7 +180,7 @@ const ConnectorListFooter: React.FC = () => {
   );
 };
 
-type ConnectorOptionData = EuiSelectableOption<{}>;
+type ConnectorOptionData = EuiSelectableOption<{ metadata?: EisInferenceEndpointMetadata }>;
 
 export const ConnectorSelector: React.FC<{}> = () => {
   const {
@@ -230,7 +232,14 @@ export const ConnectorSelector: React.FC<{}> = () => {
       label: connector.name,
       checked: connector.id === selectedConnectorId ? 'on' : undefined,
       prepend: <ConnectorIcon connectorName={connector.name} />,
-      append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
+      append: (
+        <>
+          <ModelNewBadge metadata={connector.metadata} />
+          <ModelBadgesReveal metadata={connector.metadata} />
+          {connector.id === defaultConnectorId && <DefaultConnectorBadge />}
+        </>
+      ),
+      metadata: connector.metadata,
     });
     const groupLabel = (label: string, dataTestSubj: string): ConnectorOptionData =>
       ({
