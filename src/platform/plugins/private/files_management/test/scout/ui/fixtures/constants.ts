@@ -13,6 +13,6 @@ export const FILE_KIND = 'defaultImage';
 
 export const FILES_API = {
   CREATE: `/api/files/files/${FILE_KIND}`,
-  // Delete is a per-kind route, so the kind is part of the path.
-  delete: (fileKind: string, id: string) => `/api/files/files/${fileKind}/${id}`,
+  // Delete is a per-kind route; every file this suite creates is `FILE_KIND`.
+  delete: (id: string) => `/api/files/files/${FILE_KIND}/${id}`,
 };

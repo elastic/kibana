@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { escapeRegExp } from 'lodash';
 import type { Locator, ScoutPage, KibanaUrl } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -92,12 +93,28 @@ export class SavedObjectsManagementPage {
     return texts.map(firstLine);
   }
 
-  /** Types into the search bar and waits for the table to refilter. */
-  async searchFor(query: string): Promise<void> {
-    await this.searchBar.fill('');
-    await this.searchBar.fill(query);
+  /** Types a query into the search bar and submits it. */
+  private async typeSearch(query: string): Promise<void> {
+    // The SOM search is a QueryStringInput, which syncs through React props:
+    // `fill()` races with that sync and can drop characters, so clear the value
+    // and type it character by character.
+    await this.searchBar.clear();
+    await this.searchBar.pressSequentially(query);
     await this.searchBar.press('Enter');
+  }
+
+  /** Searches, expecting at least one match, and waits for the table to refilter. */
+  async searchFor(query: string): Promise<void> {
+    await this.typeSearch(query);
     await this.waitForTableLoaded();
+  }
+
+  /** Searches, expecting no match, and waits for the table's empty state. */
+  async searchForExpectingNoResults(query: string): Promise<void> {
+    await this.typeSearch(query);
+    // EuiBasicTable renders a phantom row when empty, so assert on the empty-state
+    // copy rather than a zero row count.
+    await expect(this.table).toContainText('No items found');
   }
 
   /**
@@ -215,10 +232,12 @@ export class SavedObjectsManagementPage {
    * can await it — the table refreshes asynchronously after an import.
    */
   rowByTitle(title: string): Locator {
-    // `filter({ hasText })` keeps titles with punctuation matchable.
+    // Anchor on the exact title: a plain `hasText` substring match would also
+    // match a row whose title is a superstring (e.g. "logstash" vs "logstash-*"),
+    // which then trips Playwright strict mode.
     const titleLocator = this.page.testSubj
       .locator('savedObjectsTableRowTitle')
-      .filter({ hasText: title });
+      .filter({ hasText: new RegExp(`^${escapeRegExp(title)}$`) });
     return this.page
       .locator('[data-test-subj~="savedObjectsTableRow"]')
       .filter({ has: titleLocator });

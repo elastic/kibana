@@ -18,14 +18,16 @@
 // FTR source: x-pack/platform/test/accessibility/apps/group1/management.ts
 //             -> describe('index management')
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-// Modals, flyouts, and context menus render in EUI portals outside .kbnAppWrapper.
-const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
+// This suite only scans the in-app content (list + details tabs); it never opens
+// a modal, flyout, or context menu, so the app wrapper is the whole surface.
+const A11Y_SELECTORS = ['.kbnAppWrapper'];
 
-const testIndexName = `a11y-index-${Math.random().toString(36).slice(2)}`;
+const testIndexName = `a11y-index-${randomUUID()}`;
 
 test.describe('Index Management - accessibility', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esClient }) => {
@@ -37,13 +39,8 @@ test.describe('Index Management - accessibility', { tag: tags.stateful.classic }
     await pageObjects.indexManagement.goto();
   });
 
-  test.afterAll(async ({ esClient, log }) => {
-    try {
-      await esClient.indices.delete({ index: testIndexName }, { ignore: [404] });
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : String(e);
-      log.debug(`Index cleanup failed for ${testIndexName}: ${message}`);
-    }
+  test.afterAll(async ({ esClient }) => {
+    await esClient.indices.delete({ index: testIndexName }, { ignore: [404] });
   });
 
   test('indices list has no a11y violations', async ({ page, pageObjects }) => {

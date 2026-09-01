@@ -18,8 +18,9 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-// Modals, flyouts, and context menus render in EUI portals outside .kbnAppWrapper.
-const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
+// This suite only scans the in-app content; it never opens a modal, flyout, or
+// context menu, so the app wrapper is the whole surface.
+const A11Y_SELECTORS = ['.kbnAppWrapper'];
 
 test.describe('Stack Management - accessibility', { tag: tags.stateful.classic }, () => {
   test('landing page has no a11y violations', async ({ browserAuth, page, pageObjects }) => {

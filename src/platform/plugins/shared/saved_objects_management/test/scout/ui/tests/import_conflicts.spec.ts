@@ -96,6 +96,29 @@ test.describe('Saved objects management - import conflicts', { tag: tags.statefu
     await expect(som.importNoneImported).toBeVisible();
   });
 
+  test('drops a visualization whose saved search keeps an unresolvable data view', async ({
+    apiServices,
+    pageObjects,
+  }) => {
+    const som = pageObjects.savedObjectsManagement;
+
+    // Remove the data view the bundled saved search points at, so the conflict
+    // cannot be resolved. Mirrors the FTR flow (delete `logstash-*`, import,
+    // Confirm Changes without a replacement) and asserts through the UI that the
+    // connected visualization does not land — the API-level outcome for this same
+    // payload lives in `api/tests/import_references.spec.ts`.
+    await apiServices.dataViews.deleteByTitle(IMPORT_FIXTURE_OBJECTS.INDEX_PATTERN_TITLE);
+
+    await som.selectImportFile(ndjsonPath(NDJSON_EXPORTS.WITH_SAVED_SEARCH));
+    await som.submitImport();
+
+    await expect(som.importConflictsWarning).toBeVisible();
+    await som.confirmImportChanges();
+    await som.finishImport();
+
+    await som.searchForExpectingNoResults(IMPORT_FIXTURE_OBJECTS.CONNECTED_TO_SAVED_SEARCH_TITLE);
+  });
+
   test('imports a visualization whose saved search had an unresolved data view', async ({
     pageObjects,
   }) => {

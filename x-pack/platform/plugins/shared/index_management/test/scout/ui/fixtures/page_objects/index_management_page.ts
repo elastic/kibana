@@ -275,13 +275,15 @@ export class IndexManagement extends AbstractPageObject {
       const editModeSwitch = this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch');
       await editModeSwitch.waitFor({ state: 'visible' });
       await editModeSwitch.click();
-      // Edit mode swaps the read-only code block for the Monaco editor. The code
-      // block's removal is the reliable "edit mode engaged" signal so callers
-      // don't scan the read-only view; Monaco's own wrapper does not forward a
-      // queryable data-test-subj, so we can't wait on the editor directly.
+      // Edit mode swaps the read-only code block for the Monaco editor. Wait for
+      // both: the read-only block detaches AND the editor wrapper attaches, so a
+      // caller (e.g. an a11y scan) never captures the transitional empty panel.
       await this.page.testSubj
         .locator('indexDetailsSettingsCodeBlock')
         .waitFor({ state: 'detached', timeout: 30_000 });
+      await this.page.testSubj
+        .locator('indexDetailsSettingsEditor')
+        .waitFor({ state: 'attached', timeout: 30_000 });
     },
   };
 
