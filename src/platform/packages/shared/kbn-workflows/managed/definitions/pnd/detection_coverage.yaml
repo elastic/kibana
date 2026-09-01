@@ -221,7 +221,8 @@ steps:
           and steps.enable_existing_rule.output.enabled != true }}
       install_approved_not_applied: >-
         ${{ steps.review_install.output.response.approved == true
-          and steps.install_prebuilt_rule.output.summary.succeeded == null }}
+          and (steps.install_prebuilt_rule.output.summary.succeeded == null
+            or steps.install_prebuilt_rule.output.summary.succeeded == 0) }}
       # Empty when the check produced a verdict; set when it failed or returned nothing, so
       # upstream automation can tell "no gap found" from "no decision made".
       check_error: >-

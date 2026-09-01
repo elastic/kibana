@@ -228,7 +228,9 @@ export async function seedDetectionCoverageFixtures({
         log.info(`[detection-coverage eval] removed ${stale.length} leftover fixture rule(s)`);
       }
     } catch (error) {
-      log.warning(`[detection-coverage eval] fixture cleanup skipped: ${error}`);
+      log.warning(
+        `[detection-coverage eval] fixture cleanup skipped: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   };
 

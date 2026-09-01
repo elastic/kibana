@@ -146,8 +146,8 @@ interface FilterInput {
 }
 
 // Rule params live in a flattened field, so description values index as exact keywords.
-// Wildcard matching on keywords is case-sensitive; emit a few case variants per token so
-// "powershell" still matches a description that says "PowerShell".
+// Wildcard matching on keywords is case-sensitive; emit lowercase, uppercase, and
+// sentence-case variants per token. Mixed-case forms like "PowerShell" are not covered.
 const PARAMS_DESCRIPTION_FIELD = 'alert.attributes.params.description';
 const MIN_DESCRIPTION_TOKEN_LENGTH = 3;
 

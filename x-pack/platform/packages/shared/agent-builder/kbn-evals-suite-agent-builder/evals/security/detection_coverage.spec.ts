@@ -16,7 +16,7 @@ import { COVERAGE_RULE_NAMES, seedDetectionCoverageFixtures } from './detection_
  * Evals for the `detection-coverage` skill. Three kinds live in this file:
  *
  * 1. **Verdict correctness** (deterministic `converse` + `expect`). The skill must return
- *    exactly one of five verdict tokens for a seeded situation, and name the rule that
+ *    exactly one of four verdict tokens for a seeded situation, and name the rule that
  *    justifies it. These read the answer text and the `security.find_rules` /
  *    `security.find_prebuilt_rules` tool calls, so a right verdict for the wrong reason
  *    still fails. Two of them are traps that previously produced wrong verdicts:

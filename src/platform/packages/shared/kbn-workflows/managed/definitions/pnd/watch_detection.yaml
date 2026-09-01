@@ -11,7 +11,7 @@ settings:
   # Keyed by technique so a pending creation approval cannot block the sweep, and two
   # gaps for different techniques can be worked at once.
   concurrency:
-    key: "detection-watch-{{ inputs.technique | default: inputs.gap_description | default: 'sweep' | slice: 0, 48 }}"
+    key: "detection-watch-{{ inputs.technique | default: inputs.gap_description | default: 'sweep' | strip_newlines | strip | slice: 0, 48 }}"
     strategy: drop
     max: 1
 triggers:
