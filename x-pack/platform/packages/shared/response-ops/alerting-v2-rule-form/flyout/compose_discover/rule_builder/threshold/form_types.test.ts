@@ -126,7 +126,7 @@ describe('severity helpers', () => {
   });
 
   describe('reconcileSeverity', () => {
-    const severity = { mode: 'multi' as const, singleLevel: 'high' as const, levels: [] };
+    const severity = { mode: 'multi' as const, singleLevelSeverity: 'high' as const, levels: [] };
 
     it('clears severity for multiple conditions', () => {
       expect(

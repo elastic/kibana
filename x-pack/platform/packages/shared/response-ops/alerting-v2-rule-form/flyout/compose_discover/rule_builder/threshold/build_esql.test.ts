@@ -325,6 +325,132 @@ describe('buildThresholdEsql', () => {
       expect(lines.some((l) => l.trim().startsWith('|'))).toBe(true);
     });
   });
+
+  describe('severity', () => {
+    const cpuStat = {
+      id: 's1',
+      label: 'cpu_avg',
+      aggregation: Aggregation.AVG,
+      field: 'system.cpu',
+    };
+    const cpuCondition = {
+      id: 'c1',
+      metric: 'cpu_avg',
+      comparator: Comparator.GT,
+      threshold: [0.8],
+    };
+
+    it('emits a constant EVAL for single severity', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [cpuStat],
+          alertConditions: [cpuCondition],
+          severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+        })
+      );
+      expect(result).toContain('| WHERE cpu_avg > 0.8');
+      expect(result).toContain('| EVAL severity = "high"');
+    });
+
+    it('emits a CASE evaluated most-to-least severe for multi severity', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [cpuStat],
+          alertConditions: [cpuCondition],
+          severity: {
+            mode: 'multi',
+            singleLevelSeverity: 'high',
+            levels: [
+              { id: 'l1', severity: 'low', threshold: 0.8 },
+              { id: 'l2', severity: 'medium', threshold: 0.9 },
+              { id: 'l3', severity: 'high', threshold: 0.95 },
+            ],
+          },
+        })
+      );
+      expect(result).toContain(
+        '| EVAL severity = CASE(cpu_avg > 0.95, "high", cpu_avg > 0.9, "medium", "low")'
+      );
+    });
+
+    it('drives the WHERE off the lowest-severity threshold in multi mode', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [cpuStat],
+          alertConditions: [{ ...cpuCondition, threshold: [0.95] }],
+          severity: {
+            mode: 'multi',
+            singleLevelSeverity: 'high',
+            levels: [
+              { id: 'l1', severity: 'low', threshold: 0.8 },
+              { id: 'l2', severity: 'high', threshold: 0.95 },
+            ],
+          },
+        })
+      );
+      expect(result).toContain('| WHERE cpu_avg > 0.8');
+    });
+
+    it('supports descending thresholds with a < comparator', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [{ id: 's1', label: 'mem_free', aggregation: Aggregation.AVG, field: 'mem' }],
+          alertConditions: [
+            { id: 'c1', metric: 'mem_free', comparator: Comparator.LT, threshold: [500] },
+          ],
+          severity: {
+            mode: 'multi',
+            singleLevelSeverity: 'high',
+            levels: [
+              { id: 'l1', severity: 'low', threshold: 500 },
+              { id: 'l2', severity: 'medium', threshold: 300 },
+              { id: 'l3', severity: 'high', threshold: 100 },
+            ],
+          },
+        })
+      );
+      expect(result).toContain(
+        '| EVAL severity = CASE(mem_free < 100, "high", mem_free < 300, "medium", "low")'
+      );
+      expect(result).toContain('| WHERE mem_free < 500');
+    });
+
+    it('omits severity for range comparators in multi mode', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [cpuStat],
+          alertConditions: [
+            { id: 'c1', metric: 'cpu_avg', comparator: Comparator.BETWEEN, threshold: [0.8, 0.9] },
+          ],
+          severity: {
+            mode: 'multi',
+            singleLevelSeverity: 'high',
+            levels: [{ id: 'l1', severity: 'low', threshold: 0.8 }],
+          },
+        })
+      );
+      expect(result).not.toContain('severity');
+    });
+
+    it('omits severity when multiple conditions are configured', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [cpuStat, { id: 's2', label: 'mem', aggregation: Aggregation.AVG, field: 'mem' }],
+          alertConditions: [
+            cpuCondition,
+            { id: 'c2', metric: 'mem', comparator: Comparator.GT, threshold: [10] },
+          ],
+          severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+        })
+      );
+      expect(result).not.toContain('severity');
+    });
+
+    it('omits severity when no severity config is present', () => {
+      const result = buildThresholdEsql(makeValues({ stats: [cpuStat], alertConditions: [cpuCondition] }));
+      expect(result).not.toContain('severity');
+    });
+  });
 });
 
 describe('buildRecoveryBlock', () => {

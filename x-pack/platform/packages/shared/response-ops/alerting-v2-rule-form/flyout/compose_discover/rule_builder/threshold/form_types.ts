@@ -62,7 +62,7 @@ export type SeverityMode = 'single' | 'multi';
 /** A single severity level with its own threshold (multi-severity mode). */
 export interface SeverityLevel {
   id: string;
-  level: AlertEventSeverity;
+  severity: AlertEventSeverity;
   threshold: number;
 }
 
@@ -75,7 +75,7 @@ export interface SeverityLevel {
 export interface SeverityConfig {
   mode: SeverityMode;
   /** Level applied to all alerts in single mode. */
-  singleLevel: AlertEventSeverity;
+  singleLevelSeverity: AlertEventSeverity;
   /** Ordered from least to most severe in multi mode. */
   levels: SeverityLevel[];
 }
@@ -246,7 +246,7 @@ export const isMultiSeveritySupported = (comparator: Comparator): boolean =>
 
 export const createDefaultSeverityConfig = (): SeverityConfig => ({
   mode: 'single',
-  singleLevel: DEFAULT_SINGLE_SEVERITY_LEVEL,
+  singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL,
   levels: [],
 });
 
