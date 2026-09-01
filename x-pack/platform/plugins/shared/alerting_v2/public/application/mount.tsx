@@ -8,12 +8,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Container } from 'inversify';
-import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
-import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import type { AppUnmount } from '@kbn/core-application-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -37,19 +36,16 @@ import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type { AlertingV2AppMountParams } from '../types';
 
-interface AlertingV2MountParams {
-  element: HTMLElement;
-  history: AppMountParameters['history'];
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-}
+export type { AlertingV2AppMountParams };
 
 export const mountAlertingV2App = async ({
   params,
   container,
   coreStart,
 }: {
-  params: AlertingV2MountParams;
+  params: AlertingV2AppMountParams;
   container: Container;
   coreStart: CoreStart;
 }): Promise<AppUnmount> => {
@@ -82,7 +78,7 @@ export const mountRuleLibraryApp = async ({
   container,
   coreStart,
 }: {
-  params: AlertingV2MountParams;
+  params: AlertingV2AppMountParams;
   container: Container;
   coreStart: CoreStart;
 }): Promise<AppUnmount> => {
@@ -115,7 +111,7 @@ export const mountEpisodesApp = async ({
   container,
   coreStart,
 }: {
-  params: ManagementAppMountParams;
+  params: AlertingV2AppMountParams;
   container: Container;
   coreStart: CoreStart;
 }): Promise<AppUnmount> => {
@@ -181,7 +177,7 @@ export const mountActionPoliciesApp = async ({
   container,
   coreStart,
 }: {
-  params: AlertingV2MountParams;
+  params: AlertingV2AppMountParams;
   container: Container;
   coreStart: CoreStart;
 }): Promise<AppUnmount> => {
@@ -214,7 +210,7 @@ export const mountExecutionHistoryApp = async ({
   container,
   coreStart,
 }: {
-  params: AlertingV2MountParams;
+  params: AlertingV2AppMountParams;
   container: Container;
   coreStart: CoreStart;
 }): Promise<AppUnmount> => {

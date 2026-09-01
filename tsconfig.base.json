@@ -1913,6 +1913,8 @@
       "@kbn/observability-ai-assistant-plugin/*": ["./x-pack/platform/plugins/shared/observability_ai_assistant/*"],
       "@kbn/observability-alert-details": ["./x-pack/solutions/observability/packages/alert-details"],
       "@kbn/observability-alert-details/*": ["./x-pack/solutions/observability/packages/alert-details/*"],
+      "@kbn/observability-alerting-plugin": ["./x-pack/solutions/observability/plugins/observability_alerting"],
+      "@kbn/observability-alerting-plugin/*": ["./x-pack/solutions/observability/plugins/observability_alerting/*"],
       "@kbn/observability-alerting-test-data": ["./x-pack/solutions/observability/packages/alerting-test-data"],
       "@kbn/observability-alerting-test-data/*": ["./x-pack/solutions/observability/packages/alerting-test-data/*"],
       "@kbn/observability-fixtures-plugin": ["./x-pack/platform/test/cases_api_integration/common/plugins/observability"],

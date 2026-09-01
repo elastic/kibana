@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-alerting-plugin",
+  "owner": ["@elastic/rna-project-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Observability-owned mounts for Alerting pages.",
+  "plugin": {
+    "id": "observabilityAlerting",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": ["alertingVTwo"],
+    "optionalPlugins": [],
+    "requiredBundles": ["alertingVTwo"]
+  }
+}

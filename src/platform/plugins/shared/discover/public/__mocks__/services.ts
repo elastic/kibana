@@ -333,6 +333,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     alertingVTwo: {
       CreateRuleOptionsFlyout: jest.fn(() => null),
+      mountRulesApp: jest.fn(),
+      mountRuleLibraryApp: jest.fn(),
+      mountEpisodesApp: jest.fn(),
+      mountActionPoliciesApp: jest.fn(),
+      mountExecutionHistoryApp: jest.fn(),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },
