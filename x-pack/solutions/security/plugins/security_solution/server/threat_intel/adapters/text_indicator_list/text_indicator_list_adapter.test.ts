@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { textIndicatorListAdapter } from './text_indicator_list_adapter';
 import { parseIndicatorList } from './parse_indicator_list';
 import { normalizedReportSchema } from '../../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
@@ -31,7 +31,6 @@ const MAX_NESTED_PER_DOC = 5000;
 const makeContext = (
   fetchImpl: jest.Mock<Promise<Response>, [string | URL | Request, RequestInit?]>
 ): AdapterRunContext => ({
-  esClient: elasticsearchServiceMock.createElasticsearchClient(),
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,
   now: () => FIXED_NOW,
@@ -64,9 +63,7 @@ const makeIoc = (value: string, type: IocType = 'ip'): ExtractedIoc => ({
   tier_basis: 'maltrail_indicator_list',
 });
 
-/** Two interleaved blocks: block 0 has a social reference, block 1 has a candidate reference.
- *  1.2.3.4 appears in both blocks → within-file dedup test.
- *  Total nested: 3 IOCs + 2 refs = 5 (well under MAX_NESTED_PER_DOC). */
+/** Two interleaved blocks. 1.2.3.4 appears in both, so first-block attribution wins. */
 const BLOCKS_FIXTURE: IndicatorBlock[] = [
   {
     block_index: 0,
@@ -182,66 +179,6 @@ describe('textIndicatorListAdapter', () => {
     expect(values).toHaveLength(3);
   });
 
-  it('populates content.external_references with classified social/candidate descriptions', async () => {
-    parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
-
-    const [report] = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
-      makeContext(fetchMock)
-    );
-
-    const refs = report.content.external_references ?? [];
-    expect(refs).toHaveLength(2);
-
-    const twitterRef = refs.find((r) => r.url?.includes('twitter.com'));
-    expect(twitterRef?.source_name).toBe('maltrail');
-    expect(twitterRef?.description).toBe('social');
-
-    const blogRef = refs.find((r) => r.url?.includes('malwareanalysis'));
-    expect(blogRef?.source_name).toBe('maltrail');
-    expect(blogRef?.description).toBe('candidate');
-  });
-
-  it('deduplicates external_references by url', async () => {
-    const blocksWithDupRef: IndicatorBlock[] = [
-      {
-        block_index: 0,
-        reference: 'https://example.com/post',
-        reference_class: 'candidate',
-        iocs: [makeIoc('1.1.1.1')],
-      },
-      {
-        block_index: 1,
-        reference: 'https://example.com/post',
-        reference_class: 'candidate',
-        iocs: [makeIoc('2.2.2.2')],
-      },
-    ];
-    parseIndicatorListMock.mockReturnValue(blocksWithDupRef);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
-
-    const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/mytrail.txt'),
-      makeContext(fetchMock)
-    );
-
-    // Both blocks share the same reference URL — dedup means both IOCs survive but
-    // in this case they may end up in separate chunks or the same chunk. The key
-    // invariant is: external_references entries for the same URL are NOT duplicated
-    // within a single report doc (dedup-by-url within each chunk).
-    const allRefs = reports.flatMap((r) => r.content.external_references ?? []);
-    const urls = allRefs.map((r) => r.url);
-    // Each chunk that contains IOCs from this reference should have exactly one ref entry for it.
-    for (const report of reports) {
-      const refsInDoc = report.content.external_references ?? [];
-      const urlsInDoc = refsInDoc.map((r) => r.url);
-      const uniqueUrlsInDoc = new Set(urlsInDoc);
-      expect(urlsInDoc).toHaveLength(uniqueUrlsInDoc.size);
-    }
-    expect(urls.every((u) => u === 'https://example.com/post')).toBe(true);
-  });
-
   it('returns [] when the parser produces 0 blocks', async () => {
     parseIndicatorListMock.mockReturnValue([]);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
@@ -322,7 +259,7 @@ describe('textIndicatorListAdapter', () => {
   it('chunking: trail with multiple blocks splits into N reports at block boundaries', async () => {
     // Three blocks. Each has (MAX_NESTED_PER_DOC / 2) IOCs + 1 ref = just over half capacity.
     // So block 0 fills one chunk; block 1 can't join it; block 2 fills another chunk; etc.
-    const halfCap = Math.floor((MAX_NESTED_PER_DOC - 1) / 2); // leave 1 slot for ref entry
+    const halfCap = Math.floor(MAX_NESTED_PER_DOC / 2) + 1;
     const blocks: IndicatorBlock[] = [
       makeIocBlock(0, halfCap, 'https://ref0.example.com/post'),
       makeIocBlock(1, halfCap, 'https://ref1.example.com/post'),
@@ -336,8 +273,7 @@ describe('textIndicatorListAdapter', () => {
       makeContext(fetchMock)
     );
 
-    // Each block is ~ halfCap + 1 nested. Two blocks can fit together only if 2*(halfCap+1) ≤ MAX.
-    // 2*(halfCap+1) = 2*halfCap + 2 ≈ MAX-1+2 = MAX+1 > MAX. So each goes in its own chunk.
+    // Two blocks exceed the per-document IOC limit, so at least two reports are required.
     expect(reports.length).toBeGreaterThanOrEqual(2);
 
     // Block integrity: every IOC from block 0 appears in exactly one report.
@@ -347,16 +283,15 @@ describe('textIndicatorListAdapter', () => {
       expect(allIocValues.filter((x) => x === v)).toHaveLength(1);
     }
 
-    // Total nested per doc ≤ MAX_NESTED_PER_DOC.
+    // Total nested IOCs per document stays bounded.
     for (const report of reports) {
       const iocCount = report.extracted?.iocs?.length ?? 0;
-      const refCount = report.content.external_references?.length ?? 0;
-      expect(iocCount + refCount).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
+      expect(iocCount).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
     }
   });
 
   it('chunking: each chunk gets a unique content_fingerprint', async () => {
-    const halfCap = Math.floor((MAX_NESTED_PER_DOC - 1) / 2);
+    const halfCap = Math.floor(MAX_NESTED_PER_DOC / 2) + 1;
     const blocks: IndicatorBlock[] = [
       makeIocBlock(0, halfCap, 'https://ref0.example.com/'),
       makeIocBlock(1, halfCap, 'https://ref1.example.com/'),
@@ -375,9 +310,8 @@ describe('textIndicatorListAdapter', () => {
     expect(new Set(fps).size).toBe(fps.length);
   });
 
-  it('chunking: single oversized reference splits into fragment docs with correct ref_part/ref_part_count', async () => {
-    // One block with MAX_NESTED_PER_DOC * 2 IOCs → must split across ≥3 docs.
-    const bigCount = MAX_NESTED_PER_DOC * 2;
+  it('chunking: a single oversized block splits without losing IOC references', async () => {
+    const bigCount = MAX_NESTED_PER_DOC * 2 + 1;
     const ref = 'https://big-ref.example.com/post';
     const blocks: IndicatorBlock[] = [
       {
@@ -399,102 +333,11 @@ describe('textIndicatorListAdapter', () => {
 
     expect(reports.length).toBeGreaterThanOrEqual(3);
 
-    // All reports reference the same URL with ascending ref_part.
-    const refEntries = reports.flatMap((r) => r.content.external_references ?? []);
-    const forRef = refEntries.filter((e) => e.url === ref);
-    expect(forRef).toHaveLength(reports.length); // each doc carries exactly one entry for this ref
-
-    const partCount = forRef[0].ref_part_count!;
-    expect(partCount).toBe(reports.length);
-
-    const parts = forRef.map((e) => e.ref_part!).sort((a, b) => a - b);
-    expect(parts).toEqual(Array.from({ length: partCount }, (_, i) => i + 1));
-
-    // Total nested per doc ≤ MAX.
+    const emittedIocs = reports.flatMap((report) => report.extracted?.iocs ?? []);
+    expect(emittedIocs).toHaveLength(bigCount);
+    expect(emittedIocs.every(({ reference }) => reference === ref)).toBe(true);
     for (const report of reports) {
-      const total =
-        (report.extracted?.iocs?.length ?? 0) + (report.content.external_references?.length ?? 0);
-      expect(total).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
-    }
-  });
-
-  it('chunking: unsplit reference always carries ref_part=1 and ref_part_count=1', async () => {
-    parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
-
-    const [report] = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
-      makeContext(fetchMock)
-    );
-
-    const refs = report.content.external_references ?? [];
-    expect(refs).toHaveLength(2);
-    for (const ref of refs) {
-      expect(ref.ref_part).toBe(1);
-      expect(ref.ref_part_count).toBe(1);
-    }
-  });
-
-  it('chunking: doc carrying tail of R and head of S has both m/n correct independently', async () => {
-    // R has MAX_NESTED_PER_DOC - 1 IOCs (fills exactly one chunk, ref uses 1 slot).
-    // S has 2 IOCs. Because R fills chunk 0 exactly, S goes into chunk 1.
-    // But if R is split 2-ways: first fragment fills chunk 0, second fragment (+S) goes in chunk 1.
-    // Let's force a split: R = MAX_NESTED_PER_DOC IOCs (needs split since MAX+1 ref slot > MAX).
-    const rCount = MAX_NESTED_PER_DOC; // forces split into 2 fragments
-    const refR = 'https://ref-r.example.com/';
-    const refS = 'https://ref-s.example.com/';
-
-    const blocks: IndicatorBlock[] = [
-      {
-        block_index: 0,
-        reference: refR,
-        reference_class: 'candidate',
-        iocs: Array.from({ length: rCount }, (_, i) =>
-          makeIoc(`10.1.${Math.floor(i / 256)}.${i % 256}`)
-        ),
-      },
-      {
-        block_index: 1,
-        reference: refS,
-        reference_class: 'candidate',
-        iocs: [makeIoc('10.2.0.1'), makeIoc('10.2.0.2')],
-      },
-    ];
-    parseIndicatorListMock.mockReturnValue(blocks);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
-
-    const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/mixed.txt'),
-      makeContext(fetchMock)
-    );
-
-    // R is split across ≥2 docs. S goes in the last doc (tail of R's last fragment + S).
-    const rEntries = reports
-      .flatMap((r) => r.content.external_references ?? [])
-      .filter((e) => e.url === refR);
-    const sEntries = reports
-      .flatMap((r) => r.content.external_references ?? [])
-      .filter((e) => e.url === refS);
-
-    const rPartCount = rEntries[0].ref_part_count!;
-    expect(rPartCount).toBeGreaterThan(1);
-    const rParts = rEntries.map((e) => e.ref_part!).sort((a, b) => a - b);
-    expect(rParts).toEqual(Array.from({ length: rPartCount }, (_, i) => i + 1));
-
-    // S is unsplit: 1/1.
-    expect(sEntries).toHaveLength(1);
-    expect(sEntries[0].ref_part).toBe(1);
-    expect(sEntries[0].ref_part_count).toBe(1);
-
-    // The doc that contains S may also contain the last fragment of R — verify m/n independent.
-    const docWithS = reports.find((r) =>
-      (r.content.external_references ?? []).some((e) => e.url === refS)
-    )!;
-    const docSRefs = docWithS.content.external_references ?? [];
-    const rEntryInDocS = docSRefs.find((e) => e.url === refR);
-    if (rEntryInDocS) {
-      // The last R fragment in this doc should have ref_part = rPartCount.
-      expect(rEntryInDocS.ref_part).toBe(rPartCount);
+      expect(report.extracted?.iocs?.length ?? 0).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
     }
   });
 
@@ -513,9 +356,7 @@ describe('textIndicatorListAdapter', () => {
     );
 
     for (const report of reports) {
-      const total =
-        (report.extracted?.iocs?.length ?? 0) + (report.content.external_references?.length ?? 0);
-      expect(total).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
+      expect(report.extracted?.iocs?.length ?? 0).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
     }
   });
 

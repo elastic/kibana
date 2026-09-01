@@ -10,15 +10,14 @@ import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
 import { buildReportContent } from '../../services/report_content';
+import { normalizeProvenanceUrl } from '../../services/provenance_url';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
-import { canonicalizeUrl } from './canonicalize_url';
 import { parseIndicatorList } from './parse_indicator_list';
 import type { IndicatorBlock } from './parse_indicator_list';
 
 const SOURCE_DOC_REF_INDEX = 'maltrail:trail';
 
-// ES default is 10k nested objects per doc (sum of ALL nested types). We target ≤5k to leave
-// headroom for content.external_references entries that also count toward the limit.
+// ES defaults to 10k nested objects per document. Keep a wide margin for future fields.
 const MAX_NESTED_PER_DOC = 5000;
 
 const readTrailUrl = (source: SourceHit): string | undefined => {
@@ -38,32 +37,16 @@ const trailLabelFromUrl = (url: string): string => {
 };
 
 type IocEntry = NonNullable<NonNullable<NormalizedReport['extracted']>['iocs']>[number];
-type ExtRefEntry = NonNullable<NormalizedReport['content']['external_references']>[number];
 
 /**
- * Partition a flat IOC list and its associated blocks into chunks that each stay under
- * MAX_NESTED_PER_DOC total nested objects (iocs + external_references).
- *
- * Strategy:
- * 1. Trail-wide IOC dedup (type:value, first block wins) happens BEFORE chunking — a value
- *    repeated across blocks is emitted once total, not once per chunk.
- * 2. Group whole `# Reference:` blocks together until adding the next block would exceed the
- *    bound. Then start a new chunk.
- * 3. Within-block split: if a SINGLE block's IOC count alone exceeds the bound, split it across
- *    multiple fragment chunks. Each fragment's external_references entry for that reference carries
- *    ref_part (1-based) and ref_part_count (total fragments for THIS reference). Both are always
- *    stamped — unsplit references get 1/1.
- * 4. A chunk may hold the tail fragment of reference R and the first fragment of reference S, so
- *    both m/n values are correct independently on their own external_references entries.
+ * Keep reference blocks together when possible while bounding nested IOCs per report.
+ * Trail-wide dedup happens before this function, and each IOC already carries its
+ * nearest reference, so no parallel reference metadata needs to be reconstructed.
  */
 const chunkBlocks = (
   blocks: IndicatorBlock[],
   dedupedIocs: Map<string, IocEntry>
-): Array<{
-  iocs: IocEntry[];
-  refEntries: ExtRefEntry[];
-}> => {
-  // Build a lookup: block_index → deduped IOCs that belong to that block.
+): IocEntry[][] => {
   const iocsByBlock = new Map<number, IocEntry[]>();
   for (const ioc of dedupedIocs.values()) {
     const bi = ioc.block_index ?? 0;
@@ -75,109 +58,29 @@ const chunkBlocks = (
     }
   }
 
-  const chunks: Array<{ iocs: IocEntry[]; refEntries: ExtRefEntry[] }> = [];
+  const chunks: IocEntry[][] = [];
   let currentIocs: IocEntry[] = [];
-  let currentRefs: ExtRefEntry[] = [];
-  // Per-chunk ref URL dedup: same URL in two different blocks doesn't produce two ref entries
-  // in one doc. Reset on flush so cross-chunk fragments of the same URL each get their own entry.
-  let currentRefUrls = new Set<string>();
 
   const flush = () => {
-    if (currentIocs.length > 0 || currentRefs.length > 0) {
-      chunks.push({ iocs: currentIocs, refEntries: currentRefs });
+    if (currentIocs.length > 0) {
+      chunks.push(currentIocs);
       currentIocs = [];
-      currentRefs = [];
-      currentRefUrls = new Set();
     }
-  };
-
-  const nestedInCurrent = () => currentIocs.length + currentRefs.length;
-
-  // Helper: push a ref entry into the current chunk, respecting within-chunk URL dedup.
-  // A ref URL already seen in this chunk does not get a second entry.
-  // Returns the number of nested slots consumed (0 if URL was already present, 1 otherwise).
-  const pushRef = (entry: ExtRefEntry): number => {
-    const key = entry.url ?? '';
-    if (currentRefUrls.has(key)) {
-      return 0;
-    }
-    currentRefUrls.add(key);
-    currentRefs.push(entry);
-    return 1;
-  };
-
-  const buildRefEntry = (block: IndicatorBlock, part: number, partCount: number): ExtRefEntry => {
-    const canonical = block.reference ? canonicalizeUrl(block.reference) : undefined;
-    return {
-      source_name: 'maltrail',
-      url: block.reference,
-      ...(block.reference_class !== undefined ? { description: block.reference_class } : {}),
-      ...(canonical !== undefined ? { canonical_url: canonical } : {}),
-      ref_part: part,
-      ref_part_count: partCount,
-    };
   };
 
   for (const block of blocks) {
     const blockIocs = iocsByBlock.get(block.block_index) ?? [];
-    const hasRef = block.reference !== undefined;
+    if (blockIocs.length === 0) continue;
 
-    if (blockIocs.length === 0 && !hasRef) {
-      // Empty block with no reference — nothing to emit.
-    } else if (blockIocs.length === 0) {
-      // Reference-only block (no surviving IOCs after dedup). Add the ref entry alone.
-      // Cost of a new ref entry in the current chunk (0 if URL already seen here).
-      const refCostInCurrent = !currentRefUrls.has(block.reference ?? '') ? 1 : 0;
-      if (nestedInCurrent() + refCostInCurrent > MAX_NESTED_PER_DOC) {
-        flush();
-      }
-      pushRef(buildRefEntry(block, 1, 1));
-    } else {
-      // Cost of a new ref entry in the current chunk (0 if URL already seen here).
-      const refCostInCurrent = hasRef && !currentRefUrls.has(block.reference ?? '') ? 1 : 0;
-      // Cost to add this block whole to the current chunk.
-      const blockCostInCurrent = blockIocs.length + refCostInCurrent;
-      // Cost to add this block whole to a fresh chunk (ref URL is always new after flush).
-      const blockCostFresh = blockIocs.length + (hasRef ? 1 : 0);
+    if (blockIocs.length <= MAX_NESTED_PER_DOC) {
+      if (currentIocs.length + blockIocs.length > MAX_NESTED_PER_DOC) flush();
+      currentIocs.push(...blockIocs);
+      continue;
+    }
 
-      if (
-        blockCostInCurrent <= MAX_NESTED_PER_DOC &&
-        nestedInCurrent() + blockCostInCurrent <= MAX_NESTED_PER_DOC
-      ) {
-        // Whole block fits in the current chunk.
-        if (hasRef) {
-          pushRef(buildRefEntry(block, 1, 1));
-        }
-        currentIocs.push(...blockIocs);
-      } else if (blockCostFresh <= MAX_NESTED_PER_DOC) {
-        // Block fits whole but not in the current chunk — start a new chunk.
-        flush();
-        if (hasRef) {
-          pushRef(buildRefEntry(block, 1, 1));
-        }
-        currentIocs.push(...blockIocs);
-      } else {
-        // Within-block split: the block alone exceeds MAX_NESTED_PER_DOC. Split the IOC slice
-        // across multiple fragment docs. Each fragment's ref entry carries ref_part / ref_part_count.
-        const iocBudgetPerFragment = MAX_NESTED_PER_DOC - (hasRef ? 1 : 0);
-        const refPartCount = Math.ceil(blockIocs.length / iocBudgetPerFragment);
-
-        for (let part = 1; part <= refPartCount; part++) {
-          const slice = blockIocs.slice(
-            (part - 1) * iocBudgetPerFragment,
-            part * iocBudgetPerFragment
-          );
-
-          // Each split fragment always gets its own chunk so ref_part is unambiguous.
-          // Flush before each fragment (the ref URL is fresh after flush).
-          flush();
-
-          if (hasRef) {
-            pushRef(buildRefEntry(block, part, refPartCount));
-          }
-          currentIocs.push(...slice);
-        }
-      }
+    flush();
+    for (let offset = 0; offset < blockIocs.length; offset += MAX_NESTED_PER_DOC) {
+      chunks.push(blockIocs.slice(offset, offset + MAX_NESTED_PER_DOC));
     }
   }
 
@@ -201,7 +104,8 @@ export const textIndicatorListAdapter: FetchAdapter = {
     // reached the stored `source.url`, which the promote task copies onto the
     // indicator document, so it was leaking well past the logs. Keep the raw URL
     // for the request only.
-    const safeUrl = redactUrl(url);
+    const redactedUrl = redactUrl(url);
+    const provenanceUrl = normalizeProvenanceUrl(url);
 
     const response = await fetchUrl(url, {
       abortSignal: context.abortSignal,
@@ -209,13 +113,13 @@ export const textIndicatorListAdapter: FetchAdapter = {
     });
     if (response.status >= 400) {
       throw new Error(
-        `text_indicator_list fetch ${safeUrl} failed: HTTP ${response.status} ${response.statusText}`
+        `text_indicator_list fetch ${redactedUrl} failed: HTTP ${response.status} ${response.statusText}`
       );
     }
 
     const blocks = parseIndicatorList(response.body);
     if (blocks.length === 0) {
-      log.warn(`text_indicator_list at ${safeUrl} produced 0 blocks for source ${source._id}`);
+      log.warn(`text_indicator_list at ${redactedUrl} produced 0 blocks for source ${source._id}`);
       return [];
     }
 
@@ -240,7 +144,7 @@ export const textIndicatorListAdapter: FetchAdapter = {
 
     if (dedupedIocs.size === 0) {
       log.warn(
-        `text_indicator_list at ${safeUrl} had blocks but 0 parseable IOCs for source ${source._id}`
+        `text_indicator_list at ${redactedUrl} had blocks but 0 parseable IOCs for source ${source._id}`
       );
       return [];
     }
@@ -266,13 +170,13 @@ export const textIndicatorListAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
 
     for (let chunkIdx = 0; chunkIdx < chunks.length; chunkIdx++) {
-      const { iocs, refEntries } = chunks[chunkIdx];
+      const iocs = chunks[chunkIdx];
 
       // Per-chunk fingerprint: fold chunk index so N chunks of one trail don't collide on dedup.
       // Seeded with the redacted URL so rotating the feed credential does not
       // change the identity of every report from that feed.
       const contentFingerprint = buildFingerprint([
-        safeUrl,
+        provenanceUrl ?? redactedUrl,
         trailLabel,
         changeSignal,
         String(chunkIdx),
@@ -297,11 +201,10 @@ export const textIndicatorListAdapter: FetchAdapter = {
           // 'maltrail'. The catalog can seed more than one text-list source, so hard-coding
           // this would misattribute every text-list feed's reports and indicators to maltrail.
           name: source._source.name,
-          url: safeUrl,
+          ...(provenanceUrl ? { url: provenanceUrl } : {}),
           adapter_id: `text_indicator_list:${source._id}`,
         },
-        content:
-          refEntries.length > 0 ? { ...baseContent, external_references: refEntries } : baseContent,
+        content: baseContent,
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,
@@ -319,7 +222,7 @@ export const textIndicatorListAdapter: FetchAdapter = {
     }
 
     log.info(
-      `text_indicator_list: ${safeUrl} → ${dedupedIocs.size} deduped IOCs across ${reports.length} chunk(s) for source ${source._id}`
+      `text_indicator_list: ${redactedUrl} → ${dedupedIocs.size} deduped IOCs across ${reports.length} chunk(s) for source ${source._id}`
     );
 
     return reports;
