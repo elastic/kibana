@@ -420,10 +420,13 @@ const buildTokenCost = (
  * Groups rows into tiers of statistically indistinguishable models.
  *
  * Re-running one model on an unchanged commit and stack moves its overall by
- * about 0.2 (stdev across 7 haiku runs on golden), so a 0.05 gap between two
- * adjacent rows is noise, not a ranking. Rows stay in the same tier until the
- * drop from the tier leader exceeds the combined 95% interval; only crossing
- * a tier boundary is a difference the data can support.
+ * about 0.48 on the 0-10 scale: the pooled within-commit stdev across 19
+ * model/commit groups on golden (df=87, up to 8 repeats each, measured over
+ * the same evaluator set Overall actually aggregates). The earlier 0.2 figure
+ * came from 7 haiku runs scored over ALL evaluators, including saturated ones
+ * that barely move between runs and so damped the spread. Rows stay in the
+ * same tier until the drop from the tier leader exceeds the combined 95%
+ * interval; only crossing a tier boundary is a difference the data supports.
  */
 const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
   const sd = config.overall.runStdev;

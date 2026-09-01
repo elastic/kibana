@@ -12,7 +12,7 @@
   "notRecommendedBelow": 0,
   "minCoverage": 12,
   "overall": {
-    "runStdev": 0.575,
+    "runStdev": 0.478,
     "excludeSaturatedEvaluators": true
   },
   "toolCallWarnAbove": 40,
