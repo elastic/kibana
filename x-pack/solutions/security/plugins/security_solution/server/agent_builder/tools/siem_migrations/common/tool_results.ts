@@ -46,7 +46,7 @@ export const createMissingPrivilegeError = (action: string) => ({
       tool_result_id: getToolResultId(),
       type: ToolResultType.error,
       data: {
-        message: `The current user does not have the required privileges to ${action}. Ask the user to grant Security > Automatic Migration: All.`,
+        message: `The current user does not have the required privileges to ${action}. Ask the user to grant Security > Automatic Migration: All and Rules: Read.`,
       },
     },
   ],
