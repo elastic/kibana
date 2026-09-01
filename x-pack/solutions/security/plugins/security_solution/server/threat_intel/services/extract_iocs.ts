@@ -78,16 +78,12 @@ const trimUrlPunctuation = (url: string): string => {
     const last = url[end - 1];
     if (TRAILING_PROSE_CHARS.includes(last)) {
       end -= 1;
-      continue;
-    }
-
-    const opener = CLOSER_TO_OPENER[last];
-    if (opener !== undefined && counts[last] > counts[opener]) {
+    } else {
+      const opener = CLOSER_TO_OPENER[last];
+      if (opener === undefined || counts[last] <= counts[opener]) break;
       counts[last] -= 1;
       end -= 1;
-      continue;
     }
-    break;
   }
   return url.slice(0, end);
 };
@@ -881,9 +877,7 @@ const sectionOverrideFor = (
   return { tier: 'reference', basis: 'references_section' };
 };
 
-const applySectionOverrides = (
-  iocs: readonly WorkingIoc[]
-): void => {
+const applySectionOverrides = (iocs: readonly WorkingIoc[]): void => {
   for (const ioc of iocs) {
     const override =
       ioc._sectionKind === undefined ? null : sectionOverrideFor(ioc, ioc._sectionKind);
@@ -1345,9 +1339,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           )
           .digest('hex');
 
-  const cleanedIocs: ExtractedIoc[] = iocs.map(
-    ({ _offset: _offset, _sectionKind: _sectionKind, ...rest }) => rest
-  );
+  const cleanedIocs: ExtractedIoc[] = iocs.map(({ _offset, _sectionKind, ...rest }) => rest);
 
   // Highest tier first, so a truncated report keeps its most promotable indicators
   // rather than whichever happened to appear earliest in the text.
