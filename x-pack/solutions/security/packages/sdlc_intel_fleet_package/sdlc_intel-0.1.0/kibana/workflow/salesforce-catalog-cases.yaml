@@ -96,26 +96,26 @@ steps:
             [
             {%- for node in items -%}
               {
-                "Id": "${{ node.Id }}",
+                "Id": "{{ node.Id }}",
                 "@timestamp": "{{ execution.startedAt }}",
                 "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
                 "case": {
-                  "id": "${{ node.Id }}",
-                  "number": "${{ node.CaseNumber }}",
-                  "subject": "${{ node.Subject }}",
-                  "status": "${{ node.Status }}",
-                  "priority": "${{ node.Priority }}",
-                  "created_at": "${{ node.CreatedDate }}",
-                  "closed_at": "${{ node.ClosedDate }}",
-                  "last_modified_at": "${{ node.LastModifiedDate }}"
+                  "id": "{{ node.Id }}",
+                  "number": "{{ node.CaseNumber }}",
+                  "subject": "{{ node.Subject }}",
+                  "status": "{{ node.Status }}",
+                  "priority": "{{ node.Priority }}",
+                  "created_at": "{{ node.CreatedDate }}",
+                  "closed_at": "{{ node.ClosedDate }}",
+                  "last_modified_at": "{{ node.LastModifiedDate }}"
                 },
                 "account": {
-                  "id": "${{ node.AccountId }}",
-                  "name": "${{ node.Account?.Name ?? "" }}"
+                  "id": "{{ node.AccountId }}",
+                  "name": "{{ node.Account?.Name ?? "" }}"
                 },
-                "product": {"area": "${{ node.REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD ?? "" }}"},
+                "product": {"area": "{{ node.REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD ?? "" }}"},
                 "links": {
-                  "github_issue_url": "${{ node.REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD ?? "" }}",
+                  "github_issue_url": "{{ node.REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD ?? "" }}",
                   "link_source": "salesforce_field"
                 },
                 "feedback": {"is_escalated": false, "linked_to_sdh": false},
