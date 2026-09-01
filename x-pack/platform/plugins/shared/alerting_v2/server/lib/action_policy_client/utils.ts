@@ -12,7 +12,7 @@ import type {
   ThrottleStrategy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { needsInterval, type PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -42,23 +42,6 @@ const resolveNextNullableField = <T>(
 
   return normalizeNullableField(existing);
 };
-
-type StoredMatcher = ActionPolicySavedObjectAttributes['matcher'];
-
-/**
- * TEMPORARY: the HTTP contract still carries `matcher` as a KQL string while the saved object
- * already stores the structured `{ tags, expression }` shape. Removed once the API exposes the
- * structured matcher directly.
- */
-const toStoredMatcher = (matcher: string | null | undefined): StoredMatcher => {
-  if (matcher === undefined) return undefined;
-  if (matcher === null) return null;
-  return { expression: matcher };
-};
-
-/** Counterpart of {@link toStoredMatcher}: unwraps the stored matcher back to a KQL string. */
-const toApiMatcher = (matcher: StoredMatcher): string | null =>
-  normalizeNullableField(matcher)?.expression ?? null;
 
 const normalizeThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
@@ -107,7 +90,7 @@ export const buildCreateActionPolicyAttributes = ({
     description: data.description,
     enabled: true,
     destinations: data.destinations,
-    matcher: toStoredMatcher(data.matcher) ?? null,
+    matcher: data.matcher ?? null,
     groupBy: data.group_by ?? null,
     tags: data.tags ?? null,
     groupingMode: data.grouping_mode ?? null,
@@ -139,7 +122,7 @@ export const buildUpdateActionPolicyAttributes = ({
     description: update.description ?? existing.description,
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
-    matcher: resolveNextNullableField(toStoredMatcher(update.matcher), existing.matcher),
+    matcher: resolveNextNullableField(update.matcher, existing.matcher),
     groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
     tags: resolveNextNullableField(update.tags, existing.tags),
     groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
@@ -169,7 +152,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     description: attributes.description,
     enabled: attributes.enabled,
     destinations: attributes.destinations,
-    matcher: toApiMatcher(attributes.matcher),
+    matcher: normalizeNullableField(attributes.matcher) as PolicyMatcher | null,
     group_by: normalizeNullableField(attributes.groupBy),
     tags: normalizeNullableField(attributes.tags),
     grouping_mode: normalizeNullableField(attributes.groupingMode),

@@ -8535,7 +8535,8 @@ paths:
                         group_by: null
                         grouping_mode: per_episode
                         id: action-policy-1
-                        matcher: 'host.name: "web-*"'
+                        matcher:
+                          expression: 'host.name: "web-*"'
                         name: Notify on host alerts
                         snoozed_until: null
                         tags:
@@ -8661,7 +8662,8 @@ paths:
                     - id: workflow-1
                       type: workflow
                   grouping_mode: per_episode
-                  matcher: 'host.name: "web-*"'
+                  matcher:
+                    expression: 'host.name: "web-*"'
                   name: Notify on host alerts
                   tags:
                     - production
@@ -8690,7 +8692,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -9579,7 +9582,8 @@ paths:
                           group_by: null
                           grouping_mode: per_episode
                           id: action-policy-1
-                          matcher: 'host.name: "web-*"'
+                          matcher:
+                            expression: 'host.name: "web-*"'
                           name: Notify on host alerts
                           snoozed_until: null
                           tags:
@@ -9838,7 +9842,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -10005,7 +10010,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts (updated)
                     snoozed_until: null
                     tags:
@@ -10167,7 +10173,8 @@ paths:
                     - id: workflow-1
                       type: workflow
                   grouping_mode: per_episode
-                  matcher: 'host.name: "web-*"'
+                  matcher:
+                    expression: 'host.name: "web-*"'
                   name: Notify on host alerts
                   tags:
                     - production
@@ -10196,7 +10203,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -10230,7 +10238,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -10402,7 +10411,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -10573,7 +10583,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -10754,7 +10765,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
                     tags:
@@ -10925,7 +10937,8 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
+                    matcher:
+                      expression: 'host.name: "web-*"'
                     name: Notify on host alerts
                     snoozed_until: null
                     tags:
@@ -95985,9 +95998,23 @@ components:
           description: The unique identifier for the action policy.
           type: string
         matcher:
-          description: A KQL query to match alerts, or null to match all.
+          additionalProperties: false
+          description: Structured matcher, or null to match all.
           nullable: true
-          type: string
+          type: object
+          properties:
+            expression:
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
         name:
           description: The name of the action policy.
           type: string
@@ -96493,9 +96520,22 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
           description: The grouping mode for alert notifications.
         matcher:
-          description: A KQL query string to match alerts.
-          maxLength: 4096
-          type: string
+          additionalProperties: false
+          description: Structured matcher for the action policy.
+          type: object
+          properties:
+            expression:
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
         name:
           description: The name of the action policy.
           maxLength: 256
@@ -97392,10 +97432,23 @@ components:
           description: The grouping mode for alert notifications.
           nullable: true
         matcher:
-          description: A KQL query string to match alerts.
-          maxLength: 4096
+          additionalProperties: false
+          description: Structured matcher; null clears the matcher (catch-all).
           nullable: true
-          type: string
+          type: object
+          properties:
+            expression:
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
         name:
           description: The name of the action policy.
           maxLength: 256

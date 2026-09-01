@@ -33,7 +33,7 @@ export const DispatchSection = () => {
     control,
     name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
   });
-  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
+  const { data: dataFieldNames } = useFetchRuleEventFields(matcher?.expression ?? undefined);
 
   useEffect(() => {
     if (needsInterval(getValues('throttleStrategy')) && !getValues('throttleInterval')) {

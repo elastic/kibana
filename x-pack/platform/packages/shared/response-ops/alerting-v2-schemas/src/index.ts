@@ -18,6 +18,7 @@ export {
   validateEsqlQuery,
   parseDurationToMs,
 } from './validation';
+export * from './policy_matcher_schema';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
