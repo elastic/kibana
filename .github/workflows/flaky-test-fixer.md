@@ -205,7 +205,6 @@ safe-outputs:
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
 strict: false
 timeout-minutes: 90
-max-ai-credits: 1000
 ---
 
 # Flaky Test Fixer
@@ -250,7 +249,6 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 - **Read each file once, in the smallest useful slice.** Prefer a ranged read or a targeted `grep` over dumping a whole file, and never re-read or re-download a file you already have — after you edit a file, trust the returned state instead of reading it back.
 - **Don't pull large or binary artifacts into context.** Describe a failure screenshot from its metadata rather than loading the image, and `grep`/`sed` a big log for the failure timestamp instead of reading it end to end. Fetch only the specific artifacts you will actually use.
 - **Don't repeat a check whose inputs haven't changed.** A lint or search returns the same result until you edit the code it inspects, so re-running it just burns budget — reuse the result you already have, and never loop a command hoping for a different outcome. (The repeated runs in [Verifying a Jest fix](#verifying-a-jest-fix) are the deliberate exception: they measure flakiness, not a fixed result.)
-- **Deliver the core result before optional enrichment.** Once the patch passes verification, don't make new API calls or repository searches solely for attribution or label metadata. The Flaky Fix Verifier owns release-note and backport labels after it validates the PR, so every PR you create must carry only the automatically-added `flaky-test-fixer` label. Record the essential safe outputs immediately.
 
 ## Steps
 
