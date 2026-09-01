@@ -149,4 +149,34 @@ describe('SeveritySection', () => {
     expect(next.levels).toHaveLength(1);
     expect(next.levels[0].severity).toBe('low');
   });
+
+  it('shows a validation error when multi thresholds are out of order', () => {
+    renderSection({
+      alertConditions: [condition()],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.9 },
+          { id: 'l2', severity: 'high', threshold: 0.8 },
+        ],
+      },
+    });
+    expect(screen.getByTestId('ruleBuilderSeverityValidationError')).toBeInTheDocument();
+  });
+
+  it('shows no validation error for a well-formed multi config', () => {
+    renderSection({
+      alertConditions: [condition()],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l2', severity: 'high', threshold: 0.95 },
+        ],
+      },
+    });
+    expect(screen.queryByTestId('ruleBuilderSeverityValidationError')).not.toBeInTheDocument();
+  });
 });

@@ -10,6 +10,8 @@ import {
   Aggregation,
   areAllStatsValid,
   Comparator,
+  compareSeverity,
+  getSeverityValidationError,
   isMultiSeveritySupported,
   isSeveritySupported,
   isStatFieldValid,
@@ -216,6 +218,113 @@ describe('severity helpers', () => {
           })
         ).toBe(single);
       });
+    });
+  });
+
+  describe('compareSeverity', () => {
+    it('orders by ascending severity', () => {
+      expect(compareSeverity('low', 'high')).toBeLessThan(0);
+      expect(compareSeverity('critical', 'info')).toBeGreaterThan(0);
+      expect(compareSeverity('medium', 'medium')).toBe(0);
+    });
+  });
+
+  describe('getSeverityValidationError', () => {
+    const multi = (levels: SeverityConfig['levels']): SeverityConfig => ({
+      mode: 'multi',
+      singleLevelSeverity: 'high',
+      levels,
+    });
+
+    it('accepts disabled and single-mode severity', () => {
+      expect(getSeverityValidationError(undefined, Comparator.GT)).toBeNull();
+      expect(
+        getSeverityValidationError(
+          { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+          Comparator.LT
+        )
+      ).toBeNull();
+    });
+
+    it('accepts ascending thresholds for a > comparator', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 0.8 },
+            { id: 'b', severity: 'medium', threshold: 0.9 },
+            { id: 'c', severity: 'high', threshold: 0.95 },
+          ]),
+          Comparator.GT
+        )
+      ).toBeNull();
+    });
+
+    it('accepts descending thresholds for a < comparator', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 500 },
+            { id: 'b', severity: 'medium', threshold: 300 },
+            { id: 'c', severity: 'high', threshold: 100 },
+          ]),
+          Comparator.LT
+        )
+      ).toBeNull();
+    });
+
+    it('flags empty levels and non-finite thresholds', () => {
+      expect(getSeverityValidationError(multi([]), Comparator.GT)).toBe('invalid_threshold');
+      expect(
+        getSeverityValidationError(multi([{ id: 'a', severity: 'low', threshold: NaN }]), Comparator.GT)
+      ).toBe('invalid_threshold');
+    });
+
+    it('flags duplicate severity levels', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 1 },
+            { id: 'b', severity: 'low', threshold: 2 },
+          ]),
+          Comparator.GT
+        )
+      ).toBe('duplicate_level');
+    });
+
+    it('flags duplicate thresholds', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 1 },
+            { id: 'b', severity: 'high', threshold: 1 },
+          ]),
+          Comparator.GT
+        )
+      ).toBe('duplicate_threshold');
+    });
+
+    it('flags thresholds not ordered by severity (ascending)', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 0.9 },
+            { id: 'b', severity: 'high', threshold: 0.8 },
+          ]),
+          Comparator.GT
+        )
+      ).toBe('threshold_order');
+    });
+
+    it('flags thresholds not ordered by severity (descending)', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 100 },
+            { id: 'b', severity: 'high', threshold: 300 },
+          ]),
+          Comparator.LT
+        )
+      ).toBe('threshold_order');
     });
   });
 });

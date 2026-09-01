@@ -28,16 +28,52 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
-import type { AlertCondition, SeverityConfig, SeverityLevel, SeverityMode } from './form_types';
+import type {
+  AlertCondition,
+  Comparator,
+  SeverityConfig,
+  SeverityLevel,
+  SeverityMode,
+} from './form_types';
 import {
   createDefaultSeverityConfig,
   createDefaultSeverityLevels,
   generateId,
+  getSeverityValidationError,
   isMultiSeveritySupported,
   isSeveritySupported,
   DEFAULT_SINGLE_SEVERITY_LEVEL,
 } from './form_types';
-import { SEVERITY_LEVEL_OPTIONS, SEVERITY_MODE_OPTIONS } from './translations';
+import {
+  SEVERITY_LEVEL_OPTIONS,
+  SEVERITY_MODE_OPTIONS,
+  SEVERITY_VALIDATION_ERRORS,
+} from './translations';
+
+interface SeverityValidationCalloutProps {
+  severity: SeverityConfig;
+  comparator: Comparator;
+}
+
+const SeverityValidationCallout: React.FC<SeverityValidationCalloutProps> = ({
+  severity,
+  comparator,
+}) => {
+  const error = getSeverityValidationError(severity, comparator);
+  if (!error) return null;
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        color="danger"
+        iconType="error"
+        title={SEVERITY_VALIDATION_ERRORS[error]}
+        data-test-subj="ruleBuilderSeverityValidationError"
+      />
+    </>
+  );
+};
 
 interface SeveritySectionProps {
   severity: SeverityConfig | undefined;
@@ -297,6 +333,9 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                       defaultMessage="Add severity level"
                     />
                   </EuiButtonEmpty>
+                  {condition && (
+                    <SeverityValidationCallout severity={severity} comparator={condition.comparator} />
+                  )}
                 </>
               )}
             </>

@@ -6,6 +6,7 @@
  */
 
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import { SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
 
 export enum Aggregation {
   COUNT = 'count',
@@ -312,6 +313,51 @@ export const syncConditionToSeverityThreshold = (
   const [condition] = alertConditions;
   const lowestThreshold = severity.levels[0].threshold;
   return [{ ...condition, threshold: [lowestThreshold, ...condition.threshold.slice(1)] }];
+};
+
+/** Order two severity levels by ascending severity (info < low < ... < critical). */
+export const compareSeverity = (a: AlertEventSeverity, b: AlertEventSeverity): number =>
+  SEVERITY_LEVELS.indexOf(a) - SEVERITY_LEVELS.indexOf(b);
+
+export type SeverityValidationError =
+  | 'invalid_threshold'
+  | 'duplicate_level'
+  | 'duplicate_threshold'
+  | 'threshold_order';
+
+/**
+ * Validate a multi-severity config against the inherited comparator. Returns the
+ * first validation error, or `null` when valid. Single mode and disabled
+ * severity are always valid.
+ */
+export const getSeverityValidationError = (
+  severity: SeverityConfig | undefined,
+  comparator: Comparator
+): SeverityValidationError | null => {
+  if (!severity || severity.mode === 'single') return null;
+
+  const { levels } = severity;
+  if (levels.length === 0) return 'invalid_threshold';
+
+  if (levels.some((lvl) => !Number.isFinite(lvl.threshold))) return 'invalid_threshold';
+
+  const severities = levels.map((lvl) => lvl.severity);
+  if (new Set(severities).size !== severities.length) return 'duplicate_level';
+
+  const thresholds = levels.map((lvl) => lvl.threshold);
+  if (new Set(thresholds).size !== thresholds.length) return 'duplicate_threshold';
+
+  // More severe levels must have more severe thresholds: strictly increasing for
+  // ascending comparators (>, >=), strictly decreasing for descending (<, <=).
+  const ascending = comparator === Comparator.GT || comparator === Comparator.GTE;
+  const bySeverity = [...levels].sort((a, b) => compareSeverity(a.severity, b.severity));
+  for (let i = 1; i < bySeverity.length; i++) {
+    const prev = bySeverity[i - 1].threshold;
+    const curr = bySeverity[i].threshold;
+    if (ascending ? curr <= prev : curr >= prev) return 'threshold_order';
+  }
+
+  return null;
 };
 
 const FLIPPED_COMPARATOR: Record<Comparator, Comparator> = {
