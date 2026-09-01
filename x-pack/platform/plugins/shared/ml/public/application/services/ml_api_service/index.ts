@@ -12,11 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { chunk, isNumber } from 'lodash';
-import type {
-  MlServerDefaults,
-  MlServerLimits,
-  MlNodeCount,
-} from '@kbn/ml-common-types/ml_server_info';
+import type { MlNodeCount, MlInfoResponse } from '@kbn/ml-common-types/ml_server_info';
 import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import type { RecognizeModuleResult } from '@kbn/ml-common-types/modules';
 import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-types/calendars';
@@ -55,22 +51,6 @@ import { inferenceModelsApiProvider } from './inference_models';
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
   upgradeInProgress: boolean;
-}
-
-export interface MlInfoResponse {
-  defaults: MlServerDefaults;
-  limits: MlServerLimits;
-  native_code: {
-    build_hash: string;
-    version: string;
-  };
-  upgrade_mode: boolean;
-  cloudId?: string;
-  isCloudTrial?: boolean;
-  cloudUrl?: string;
-  isMlAutoscalingEnabled: boolean;
-  showNodeInfo: boolean;
-  showLicenseInfo: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {

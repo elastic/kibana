@@ -8,6 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
@@ -20,8 +21,13 @@ import {
   type PersistNoteRouteResponse,
 } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
-export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
+export const persistNoteRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  eventBus?: SecuritySolutionEventBus
+) => {
   router.versioned
     .patch({
       path: NOTE_URL,
@@ -45,14 +51,47 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const { note } = request.body;
-          const noteId = request.body?.noteId ?? null;
+          const incomingNoteId = request.body?.noteId ?? null;
+          const isCreate = incomingNoteId == null;
 
           const res = await persistNote({
             request: frameworkRequest,
-            noteId,
+            noteId: incomingNoteId,
             note,
             overrideOwner: true,
           });
+
+          // For updates, the request body may omit eventId; fall back to the persisted value.
+          const documentId =
+            note.eventId ?? (!isCreate ? res.note.eventId ?? undefined : undefined);
+          if (eventBus && documentId) {
+            const { noteId } = res.note;
+            if (!noteId) {
+              logger.warn('Skipping workflow trigger: noteId missing after note persist');
+            } else if (isCreate) {
+              const { createdBy } = res.note;
+              if (!createdBy) {
+                logger.warn(`Skipping noteCreated trigger: createdBy missing (noteId: ${noteId})`);
+              } else {
+                void eventBus.emitNoteCreated(request, {
+                  noteId,
+                  createdBy,
+                  documentId,
+                });
+              }
+            } else {
+              const updatedBy = res.note.updatedBy ?? res.note.createdBy;
+              if (!updatedBy) {
+                logger.warn(`Skipping noteUpdated trigger: updatedBy missing (noteId: ${noteId})`);
+              } else {
+                void eventBus.emitNoteUpdated(request, {
+                  noteId,
+                  updatedBy,
+                  documentId,
+                });
+              }
+            }
+          }
 
           return response.ok({
             body: res,
