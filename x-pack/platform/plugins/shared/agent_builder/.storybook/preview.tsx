@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { configure } from '@storybook/test';
+import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Decorator } from '@storybook/react';
+
+// Map data-test-subj to the testId attribute so play/findByTestId works
+configure({ testIdAttribute: 'data-test-subj' });
 
 const I18nDecorator: Decorator = (storyFn) => <I18nProvider>{storyFn()}</I18nProvider>;
 

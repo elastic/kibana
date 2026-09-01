@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-/** Max width for command pills in the editor and in `CommandBadgeText`, in `ch` units. */
+/** Max width for command pills in the editor and in `RoundInputText`, in `ch` units. */
 export const COMMAND_BADGE_MAX_WIDTH_CH = 64;

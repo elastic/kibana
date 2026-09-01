@@ -25,7 +25,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
-import { CommandBadgeText } from './command_badge_text';
+import { RoundInputText } from './round_input_text';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -76,7 +76,7 @@ export const RoundInput = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <CommandBadgeText text={input} />
+              <RoundInputText text={input} />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

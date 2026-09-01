@@ -153,12 +153,14 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     licenseManagement: undefined,
     share: {},
     workflowsExtensions: {},
+    files: { registerFileKind: jest.fn() },
   } as unknown as AgentBuilderSetupDependencies);
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
+    files: { filesClientFactory: { asScoped: jest.fn().mockReturnValue({}) } },
   } as unknown as AgentBuilderStartDependencies);
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({
