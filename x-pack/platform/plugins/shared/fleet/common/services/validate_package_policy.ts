@@ -862,7 +862,7 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (varName === DATASET_VAR_NAME && packageType === 'input' && parsedValue !== undefined) {
+  if (varName === DATASET_VAR_NAME && parsedValue !== undefined) {
     const { valid, error } = isValidDataset(
       parsedValue.dataset ? parsedValue.dataset : parsedValue,
       false

@@ -169,7 +169,7 @@ export const AdvancedSettingsForm = () => {
         description={
           <FormattedMessage
             id="xpack.synthetics.settings.advanced.rebalanceShards.description"
-            defaultMessage="Reassign monitors across the healthy agents of scalable private locations. Disabling this pauses rebalancing without unscheduling the underlying task."
+            defaultMessage="Reassign monitors across the healthy agents of scalable private locations. Applies to all Kibana spaces. Disabling this pauses rebalancing and removes agent pins from existing monitors in the background."
           />
         }
       >
