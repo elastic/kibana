@@ -6,46 +6,27 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { stateBlocksNewActivity } from '../../../common/maintenance/state_machine';
-import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
+
+// The sync workflow is installed and scheduled in the default space, matching the
+// continuous onboarding precedent (streams/KIs are global).
+const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
 
 export interface SyncWorkflowService {
-  /** Ensures the deployment-wide KI sync workflow is enabled in the default space. */
+  /**
+   * Ensures the managed KI sync (groundedness) sweep workflow is enabled.
+   *
+   * Enabling schedules the workflow's trigger task under the API key minted from
+   * the given request (the startup install path only writes the document and
+   * never schedules the trigger). Idempotent: a single `getWorkflow` read short-
+   * circuits when the workflow is already enabled, so it is cheap to call from
+   * the hot extraction path. Once enabled, the persisted Task Manager task keeps
+   * firing on its own schedule, independent of extraction.
+   */
   ensureEnabled(params: { request: KibanaRequest }): Promise<void>;
 }
-
-/** Best-effort enables KI sync when Significant Events activity is allowed. */
-export const bootstrapSyncWorkflow = async ({
-  syncWorkflowService,
-  maintenanceService,
-  request,
-  logger,
-}: {
-  syncWorkflowService: SyncWorkflowService | undefined;
-  maintenanceService: SignificantEventsMaintenanceService;
-  request: KibanaRequest;
-  logger: Pick<Logger, 'warn'>;
-}): Promise<void> => {
-  if (!syncWorkflowService) {
-    return;
-  }
-  try {
-    const state = await maintenanceService.getState({ request });
-    if (stateBlocksNewActivity(state)) {
-      return;
-    }
-    await syncWorkflowService.ensureEnabled({ request });
-  } catch (error) {
-    logger.warn(
-      `Failed to ensure KI sync workflow is enabled: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-};
 
 export const createSyncWorkflowService = ({
   logger,
@@ -60,7 +41,7 @@ export const createSyncWorkflowService = ({
     async ensureEnabled({ request }) {
       const existing = await managementApi.getWorkflow(
         SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-        DEFAULT_SPACE_ID
+        MANAGED_WORKFLOW_SPACE_ID
       );
 
       if (!existing) {
@@ -77,11 +58,11 @@ export const createSyncWorkflowService = ({
       await managementApi.updateWorkflow(
         SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
         { enabled: true },
-        DEFAULT_SPACE_ID,
+        MANAGED_WORKFLOW_SPACE_ID,
         request
       );
 
-      log.info('Enabled KI sync workflow');
+      log.info(`Enabled KI sync workflow`);
     },
   };
 };

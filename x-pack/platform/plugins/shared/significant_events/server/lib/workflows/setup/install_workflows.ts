@@ -35,7 +35,8 @@ const WORKFLOWS_TO_INSTALL: Array<{
     spaceId: DEFAULT_SPACE_ID,
   },
   // Installed disabled in the default space (streams/KIs are global); enabled on
-  // demand by SyncWorkflowService from the identification path.
+  // demand by SyncWorkflowService.ensureEnabled from the extraction path, which
+  // schedules its trigger. Restorable + `enabled: false` YAML => installed disabled.
   {
     workflowId: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
@@ -46,11 +47,7 @@ const WORKFLOWS_TO_INSTALL: Array<{
   },
 ];
 
-export const installWorkflows = async ({
-  client,
-}: {
-  client: PluginScopedManagedWorkflowsApi;
-}): Promise<void> => {
+export const installWorkflows = async ({ client }: { client: PluginScopedManagedWorkflowsApi }) => {
   // Install every workflow independently and report all failures at once. A fail-fast Promise.all
   // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
   const installs: Array<{ id: string; run: Promise<void> }> = [

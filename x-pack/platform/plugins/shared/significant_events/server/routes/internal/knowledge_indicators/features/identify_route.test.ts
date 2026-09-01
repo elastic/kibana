@@ -268,7 +268,7 @@ describe('inferred feature identification route', () => {
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
   });
 
-  it('identifies inferred features and bootstraps the KI sync workflow while enabled', async () => {
+  it('identifies inferred features and bootstraps the sync workflow while enabled', async () => {
     const {
       handlerParams,
       request,
@@ -329,7 +329,7 @@ describe('inferred feature identification route', () => {
     expect(ensureEnabled).toHaveBeenCalledWith({ request });
   });
 
-  it('returns identification results when KI sync workflow bootstrap fails', async () => {
+  it('returns identification results when sync workflow bootstrap fails', async () => {
     const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({
       ensureEnabled,

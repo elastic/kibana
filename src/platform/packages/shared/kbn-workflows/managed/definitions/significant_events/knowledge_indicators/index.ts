@@ -78,6 +78,9 @@ export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
+// The sync (groundedness) sweep workflow is installed disabled and enabled on
+// demand by SyncWorkflowService, so it uses the same restorable management as
+// continuous onboarding to preserve the enabled/disabled choice across upgrades.
 export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   pluginId: 'significantEvents',

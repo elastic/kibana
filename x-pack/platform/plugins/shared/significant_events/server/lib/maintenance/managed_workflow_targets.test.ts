@@ -10,7 +10,6 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
@@ -45,12 +44,9 @@ describe('managed_workflow_targets registry', () => {
     ]);
   });
 
-  it('keeps continuous onboarding and KI sync in the default-space set', () => {
+  it('keeps continuous onboarding in the default-space set (not memory)', () => {
     expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).toEqual(
-      expect.arrayContaining([
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      ])
+      expect.arrayContaining([SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID])
     );
     for (const id of MEMORY_WORKFLOW_IDS) {
       expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).not.toContain(id);
