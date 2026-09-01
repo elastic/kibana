@@ -1592,7 +1592,7 @@ describe('Fleet integrations', () => {
 
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
-      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+      ).toHaveBeenCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
 
     it('searches for notes across all spaces and both package policy reference types', async () => {
@@ -1647,11 +1647,11 @@ describe('Fleet integrations', () => {
 
       await invokeDeleteCallback();
 
-      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toBeCalledWith({
+      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toHaveBeenCalledWith({
         spaceId: 'legacy-space',
         readonly: false,
       });
-      expect(soClientMock.delete).toBeCalledWith(
+      expect(soClientMock.delete).toHaveBeenCalledWith(
         'policy-settings-protection-updates-note',
         'legacy-note-id',
         { force: true }
