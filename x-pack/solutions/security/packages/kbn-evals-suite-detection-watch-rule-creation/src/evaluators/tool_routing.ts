@@ -37,11 +37,13 @@ export function createToolRoutingEvaluator({
       const result = output as RuleCreationResult | undefined;
       const conversationIds = extractConversationId(result);
 
-      const { toolCallIds, failedToolCallIds, unavailable } = await readAgentToolCallsFromTraces({
+      const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
         traceEsClient,
         conversationIds,
         log,
-        includeFailures: true,
+        // includeFailures deliberately NOT set: its query references
+        // attributes.gen_ai.tool.call.failed, absent from the Scout trace mapping
+        // (build 498: verification_exception on every evaluation → N/A×30).
       });
 
       if (unavailable) {
@@ -55,29 +57,28 @@ export function createToolRoutingEvaluator({
         };
       }
 
-      const routed = toolCallIds.includes(RULE_CREATION_TOOL_ID);
       // Sequence scoring: membership alone saturated at 1.000 on every run (490/493/496),
-      // so it ranks nothing. The reader returns failed calls alongside the ordered
-      // sequence; score the shape:
-      //   1.0  tool present and none of the run's tool calls failed
-      //   0.5  tool present but at least one tool call failed (retry-to-success still
-      //        indicates unstable routing, distinct from clean routing)
-      //   0.0  tool never called
-      const failed = failedToolCallIds ?? [];
-      const score = !routed ? 0 : failed.length > 0 ? 0.5 : 1;
+      // so it ranks nothing. The reader returns an ORDERED tool-call sequence; score
+      // the routing shape on it:
+      //   1.0  the required tool is the LAST call (clean routing, draft produced)
+      //   0.5  required tool present but other calls follow it (post-draft wandering)
+      //   0.0  required tool never called
+      const lastIdx = toolCallIds.lastIndexOf(RULE_CREATION_TOOL_ID);
+      const score = lastIdx === -1 ? 0 : lastIdx === toolCallIds.length - 1 ? 1 : 0.5;
       return {
         score,
         label: undefined,
-        explanation: !routed
-          ? `agent never called ${RULE_CREATION_TOOL_ID} (saw: ${
-              toolCallIds.join(', ') || 'no tools'
-            })`
-          : failed.length > 0
-          ? `agent called ${RULE_CREATION_TOOL_ID} but ${
-              failed.length
-            } tool call(s) failed: ${failed.join(', ')}`
-          : `agent called ${RULE_CREATION_TOOL_ID} cleanly (sequence: ${toolCallIds.join(' -> ')})`,
-        metadata: { toolCallIds, failedToolCallIds: failed },
+        explanation:
+          lastIdx === -1
+            ? `agent never called ${RULE_CREATION_TOOL_ID} (saw: ${
+                toolCallIds.join(', ') || 'no tools'
+              })`
+            : lastIdx === toolCallIds.length - 1
+            ? `agent routed cleanly: ${RULE_CREATION_TOOL_ID} was the final tool call`
+            : `agent called ${RULE_CREATION_TOOL_ID} but calls followed it: ${toolCallIds
+                .slice(lastIdx + 1)
+                .join(', ')}`,
+        metadata: { toolCallIds },
       };
     },
   };

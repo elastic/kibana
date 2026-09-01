@@ -65,10 +65,9 @@ describe('createToolRoutingEvaluator', () => {
     expect(r.score).toBe(1);
   });
 
-  it('scores 0.5 when the required tool ran but a tool call failed', async () => {
+  it('scores 0.5 when calls follow the required tool (unstable routing)', async () => {
     mockedReader.mockResolvedValue({
-      toolCallIds: ['security.create_detection_rule'],
-      failedToolCallIds: ['security.create_detection_rule'],
+      toolCallIds: ['security.create_detection_rule', 'security.labs_search'],
       unavailable: false,
     });
     const r = await run({
