@@ -7,7 +7,7 @@
 
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { ActionDetails, ResponseActionScript } from '../../../../../common/endpoint/types';
-import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { BaseSelectorState } from './types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';

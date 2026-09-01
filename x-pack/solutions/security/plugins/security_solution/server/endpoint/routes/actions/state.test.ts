@@ -15,7 +15,7 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 

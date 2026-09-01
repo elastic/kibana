@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
-import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import { prefixIndexPatternsWithCcs } from '../../../../../endpoint/utils/ccs_utils';

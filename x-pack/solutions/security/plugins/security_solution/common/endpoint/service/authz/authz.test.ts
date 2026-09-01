@@ -13,7 +13,7 @@ import {
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
-import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
+import type { EndpointAuthz, EndpointAuthzKeyList } from '@kbn/security-solution-endpoint-common';
 import {
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,

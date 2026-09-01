@@ -1452,6 +1452,6 @@ export interface MetadataListResponse {
   sortDirection: 'asc' | 'desc';
 }
 
-export type { EndpointPrivileges } from './authz';
+export type { EndpointPrivileges } from '@kbn/security-solution-endpoint-common';
 
 export type { EndpointHeartbeat } from './heartbeat';

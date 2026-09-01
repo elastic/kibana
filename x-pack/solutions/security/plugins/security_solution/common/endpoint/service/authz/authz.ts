@@ -15,7 +15,7 @@ import {
   CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
-import type { EndpointAuthz } from '../../types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { MaybeImmutable } from '../../types';
 
 /**

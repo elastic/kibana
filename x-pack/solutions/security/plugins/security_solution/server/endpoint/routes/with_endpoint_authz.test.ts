@@ -10,7 +10,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
 import type { EndpointApiNeededAuthz } from './with_endpoint_authz';
 import { withEndpointAuthz } from './with_endpoint_authz';
-import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { EndpointAuthorizationError, NotFoundError } from '../errors';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 

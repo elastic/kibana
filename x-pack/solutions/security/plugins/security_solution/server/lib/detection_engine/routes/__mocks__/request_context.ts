@@ -36,7 +36,7 @@ import type {
 } from '../../../../types';
 
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
-import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';

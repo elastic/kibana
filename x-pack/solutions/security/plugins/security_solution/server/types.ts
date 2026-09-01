@@ -35,7 +35,7 @@ import type {
   IRuleExecutionLogForRoutes,
 } from './lib/detection_engine/rule_monitoring';
 import type { FrameworkRequest } from './lib/framework';
-import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
 import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';

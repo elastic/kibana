@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { ScriptsLibraryClientInterface } from '../../scripts_library';
 import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
-import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
   RuleResponse,

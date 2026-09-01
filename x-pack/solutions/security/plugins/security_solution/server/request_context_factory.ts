@@ -14,7 +14,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import type { Immutable } from '../common/endpoint/types';
-import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
