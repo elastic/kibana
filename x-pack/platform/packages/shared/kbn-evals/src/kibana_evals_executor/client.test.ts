@@ -756,7 +756,7 @@ describe('KibanaEvalsClient', () => {
   });
 
   it('passes example identity to evaluators so per-example readouts can key on it', async () => {
-    const client = createClient();
+    const client = createClient({ repetitions: 2 });
 
     const dataset: EvaluationDataset = {
       name: 'identity-ds',
@@ -767,7 +767,11 @@ describe('KibanaEvalsClient', () => {
       ],
     };
 
-    const seen: Array<{ exampleId?: string; exampleIndex: number; repetition: number }> = [];
+    const seen: Array<{
+      exampleId?: string;
+      exampleIndex?: number;
+      repetition?: number;
+    }> = [];
     const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
       {
         name: 'Identity',
@@ -787,8 +791,11 @@ describe('KibanaEvalsClient', () => {
 
     // Without this an evaluator can only re-derive identity by hashing `input`,
     // which breaks whenever a dataset edits an input string (#288243).
-    expect(seen.map((entry) => entry.exampleId)).toEqual(['ex-a', undefined]);
-    expect(seen.map((entry) => entry.exampleIndex)).toEqual([0, 1]);
-    expect(seen.map((entry) => entry.repetition)).toEqual([0, 0]);
+    expect(seen).toEqual([
+      { exampleId: 'ex-a', exampleIndex: 0, repetition: 0 },
+      { exampleId: undefined, exampleIndex: 1, repetition: 0 },
+      { exampleId: 'ex-a', exampleIndex: 0, repetition: 1 },
+      { exampleId: undefined, exampleIndex: 1, repetition: 1 },
+    ]);
   });
 });

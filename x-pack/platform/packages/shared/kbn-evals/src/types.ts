@@ -70,8 +70,16 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
    * `exampleIndex` and `repetition` are always populated and are stable within a run.
    */
   exampleId?: string;
-  exampleIndex: number;
-  repetition: number;
+  /**
+   * Zero-based position within the dataset. Optional for compatibility with direct
+   * evaluator invocations outside `KibanaEvalsClient`.
+   */
+  exampleIndex?: number;
+  /**
+   * Zero-based repetition number. Optional for compatibility with direct evaluator
+   * invocations outside `KibanaEvalsClient`.
+   */
+  repetition?: number;
 }
 
 /**
