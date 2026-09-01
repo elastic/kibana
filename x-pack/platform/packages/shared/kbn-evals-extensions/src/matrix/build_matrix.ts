@@ -567,6 +567,23 @@ export const buildMatrix = (
         );
       }
     }
+
+    // The per-prefix fetch is what fills individual cells. If it returns
+    // nothing while the suite-wide aggregate is healthy, cells silently fall
+    // back to a coarser source and the board LOOKS fine while being wrong.
+    // That is exactly how a stripped `evaluator.metadata` inflated every
+    // model's Overall (#286691 fallout): the failure had no symptom until
+    // two runs were compared cell by cell.
+    const scoredCells = allRows.reduce(
+      (sum, row) =>
+        sum + config.columns.filter((column) => row.cells[column.id]?.kind === 'score').length,
+      0
+    );
+    if (scoredCells === 0) {
+      log.warning(
+        `No column produced a single scored cell across ${allRows.length} models. The per-prefix score fetch returned nothing usable -- do NOT publish this run. Check that the scores route still returns the fields the verdict ladder reads before blaming the models.`
+      );
+    }
   }
 
   return {

@@ -676,3 +676,59 @@ describe('buildMatrix sparse-column warning', () => {
     expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('"Dense"'));
   });
 });
+
+describe('buildMatrix total-score-loss guard', () => {
+  // Regression guard for the failure mode that inflated the published board:
+  // the per-prefix score fetch returned nothing usable, cells fell back to a
+  // coarser source, and the matrix rendered normally while every Overall was
+  // wrong. Root cause was `evaluator.metadata` being stripped server-side
+  // (#286691), which left the verdict ladder with nothing to map.
+  const lossConfig: MatrixConfig = parseMatrixConfig({
+    minCoverage: 1,
+    columns: [{ id: 'only', label: 'Only', suites: ['suite-a'], weight: 1 }],
+    models: [
+      { id: 'model-a', label: 'A' },
+      { id: 'model-b', label: 'B' },
+    ],
+  });
+
+  it('warns loudly when not a single cell scored', () => {
+    // Models present, but no suite produced any usable evaluator score.
+    const empty = [
+      { modelId: 'model-a', suites: [] },
+      { modelId: 'model-b', suites: [] },
+    ] as unknown as AggregatedModelScores[];
+
+    const log = { warning: jest.fn() };
+    buildMatrix(empty, lossConfig, log);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('No column produced a single scored cell')
+    );
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('do NOT publish this run'));
+  });
+
+  it('stays quiet when cells actually scored', () => {
+    const scored = ['model-a', 'model-b'].map((modelId) => ({
+      modelId,
+      suites: [
+        {
+          suiteId: 'suite-a',
+          datasets: [
+            {
+              datasetName: 'suite-a',
+              evaluators: [{ evaluatorName: 'correctness', mean: 0.8, count: 5 }],
+            },
+          ],
+        },
+      ],
+    })) as unknown as AggregatedModelScores[];
+
+    const log = { warning: jest.fn() };
+    buildMatrix(scored, lossConfig, log);
+
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('No column produced a single scored cell')
+    );
+  });
+});
