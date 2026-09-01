@@ -17,6 +17,9 @@ import type {
   ValueOf,
   Output,
   OtelExporterOutput,
+  NewBeatsOutput,
+  NewOtlpOutput,
+  PresetCapableOutput,
 } from '../types';
 import {
   FLEET_APM_PACKAGE,
@@ -27,12 +30,13 @@ import {
   BEATS_OUTPUT_TYPES,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
+  OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES,
   RESERVED_CONFIG_YML_KEYS,
   AGENTLESS_ALLOWED_OUTPUT_TYPES,
   DEFAULT_OUTPUT,
 } from '../constants';
 
-import { packagePolicyHasOtelInputs } from './otelcol_helpers';
+import { packagePolicyHasOtelInputs, packagePolicyHasOnlyOtelInputs } from './otelcol_helpers';
 
 /**
  * Minimal agent policy shape needed to evaluate output eligibility — just the package name
@@ -57,6 +61,16 @@ const agentPolicyUsesConnectors = (agentPolicy: AgentPolicyForOutputEligibility)
  */
 export const canUseManagedBulk = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
   !agentPolicyUsesConnectors(agentPolicy) && !agentPolicyHasOtelInputs(agentPolicy);
+
+export const agentPolicyHasOnlyOtelInputs = (
+  agentPolicy: AgentPolicyForOutputEligibility
+): boolean => {
+  const packagePolicies = agentPolicy.package_policies ?? [];
+  return (
+    packagePolicies.length > 0 &&
+    packagePolicies.every((pp) => packagePolicyHasOnlyOtelInputs(pp.inputs))
+  );
+};
 
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,
@@ -84,6 +98,16 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
+  // A policy with no package policies has no inputs to constrain the output; every type is valid.
+  // Eligibility is re-checked against the resolved output on package policy create.
+  if ((agentPolicy.package_policies ?? []).length === 0) {
+    return Object.values(outputType);
+  }
+
+  if (agentPolicyHasOnlyOtelInputs(agentPolicy)) {
+    return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES;
+  }
+
   if (agentPolicyHasOtelInputs(agentPolicy)) {
     return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
@@ -103,6 +127,10 @@ export function getAllowedOutputTypesForPackagePolicy(
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
+  if (packagePolicyHasOnlyOtelInputs(packagePolicy.inputs)) {
+    return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES;
+  }
+
   if (packagePolicyHasOtelInputs(packagePolicy.inputs)) {
     return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
@@ -111,15 +139,11 @@ export function getAllowedOutputTypesForPackagePolicy(
 }
 
 export function getAllowedOutputTypesForIntegration(packageName?: string): string[] {
-  if (packageName) {
-    const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
-
-    if (isRestrictedToSameClusterES) {
-      return [outputType.Elasticsearch];
-    }
+  if (packageName && sameClusterRestrictedPackages.includes(packageName)) {
+    return [outputType.Elasticsearch];
   }
 
-  return BEATS_OUTPUT_TYPES;
+  return Object.values(outputType);
 }
 
 export function outputYmlIncludesReservedPerformanceKey(
@@ -156,8 +180,10 @@ export function getDefaultPresetForEsOutput(
   return 'balanced';
 }
 
-export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
-  return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
+export function outputTypeSupportPresets<T extends { type: ValueOf<OutputType> }>(
+  output: T
+): output is T & PresetCapableOutput {
+  return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(output.type);
 }
 
 export function outputTypeSupportsOtelExporter(type: ValueOf<OutputType> | undefined): boolean {
@@ -169,6 +195,20 @@ export function isOtelExporterOutput<T extends { type?: ValueOf<OutputType> }>(
   output: T
 ): output is T & OtelExporterOutput {
   return outputTypeSupportsOtelExporter(output.type);
+}
+
+/** Narrows any output to beats-style types (ES, RemoteES, Logstash, Kafka). */
+export function isBeatsOutput<T extends { type: ValueOf<OutputType> }>(
+  output: T
+): output is T & NewBeatsOutput {
+  return BEATS_OUTPUT_TYPES.includes(output.type);
+}
+
+/** Narrows any output to the OTLP type. */
+export function isOtlpOutput<T extends { type: ValueOf<OutputType> }>(
+  output: T
+): output is T & NewOtlpOutput {
+  return output.type === outputType.Otlp;
 }
 
 /**

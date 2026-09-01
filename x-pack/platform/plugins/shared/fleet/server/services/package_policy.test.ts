@@ -363,6 +363,7 @@ jest.mock('./secrets', () => ({
     isSecretRef: true,
   })),
   extractAndWriteSecrets: jest.fn(),
+  extractAndUpdateSecrets: jest.fn(),
   deleteSecretsIfNotReferenced: jest.fn(),
 }));
 
@@ -482,7 +483,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package-policy',
         name: 'Test Package Policy',
@@ -525,7 +526,7 @@ describe('Package policy service', () => {
           // Skipping unique name verification just means we have to less mocking/setup
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
     });
@@ -569,7 +570,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
+      ).rejects.toThrow(/Input tcp in test is not allowed for deployment mode 'agentless'/);
     });
 
     it('should throw validation error when global_data_tags is set on a non-agentless package policy', async () => {
@@ -613,9 +614,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(
-        /`global_data_tags` can only be set on agentless integration policies/
-      );
+      ).rejects.toThrow(/`global_data_tags` can only be set on agentless integration policies/);
     });
 
     beforeEach(() => {
@@ -786,7 +785,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(agentPolicyService.bumpRevision).toBeCalledWith(
+      expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test',
@@ -872,7 +871,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(agentPolicyService.bumpRevision).toBeCalledWith(
+      expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test',
@@ -2133,7 +2132,7 @@ describe('Package policy service', () => {
 
       await packagePolicyService.get(soClient, 'test-package-policy');
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'test-package-policy',
         name: 'Test',
@@ -4596,7 +4595,7 @@ describe('Package policy service', () => {
               },
             }
           )
-        ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
+        ).rejects.toThrow(/Input tcp in test is not allowed for deployment mode 'agentless'/);
       });
     });
 
@@ -4699,6 +4698,155 @@ describe('Package policy service', () => {
           expect.objectContaining({ revision: 2 }),
           expect.anything()
         );
+      });
+    });
+
+    describe('secret storage', () => {
+      const buildUpdateSOMocks = (
+        soClient: ReturnType<typeof createSavedObjectClientMock>,
+        storedAttributes: Record<string, unknown> = {}
+      ) => {
+        const policy = {
+          ...createPackagePolicyMock(),
+          ...storedAttributes,
+        };
+        soClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: policy.id,
+              type: 'ingest-package-policies',
+              references: [],
+              version: '1',
+              attributes: policy,
+            },
+          ],
+        });
+        soClient.update.mockImplementation(
+          async (_type, _id, attrs) =>
+            ({
+              id: policy.id,
+              type: 'ingest-package-policies',
+              references: [],
+              version: '2',
+              attributes: attrs,
+            } as any)
+        );
+        soClient.get.mockResolvedValue({
+          id: policy.id,
+          type: 'ingest-package-policies',
+          references: [],
+          version: '2',
+          attributes: policy,
+        } as any);
+        return policy;
+      };
+
+      beforeEach(() => {
+        mockedSecretsModule.isSecretStorageEnabled.mockReset();
+        mockedSecretsModule.extractAndUpdateSecrets.mockReset();
+        mockedSecretsModule.deleteSecretsIfNotReferenced.mockReset();
+      });
+
+      it('writes an empty secret_references array when the last secret var is removed', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        buildUpdateSOMocks(soClient, { secret_references: [{ id: 'old-secret-1' }] });
+        mockAgentPolicyGet();
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [{ id: 'old-secret-1' }],
+          })
+        );
+
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          createPackagePolicyMock()
+        );
+
+        const updatedAttrs = soClient.update.mock.calls[0][2] as any;
+        expect(updatedAttrs.secret_references).toEqual([]);
+      });
+
+      it('omits secret_references key entirely when secret storage is disabled', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        buildUpdateSOMocks(soClient);
+        mockAgentPolicyGet();
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(false);
+
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          createPackagePolicyMock()
+        );
+
+        const updatedAttrs = soClient.update.mock.calls[0][2] as any;
+        expect(updatedAttrs).not.toHaveProperty('secret_references');
+      });
+
+      it('does not call deleteSecretsIfNotReferenced when cloud_connector_id is set', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        buildUpdateSOMocks(soClient, {
+          cloud_connector_id: 'connector-1',
+          secret_references: [{ id: 'connector-secret-1' }],
+        });
+        mockAgentPolicyGet();
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [{ id: 'connector-secret-1' }],
+          })
+        );
+
+        await packagePolicyService.update(soClient, esClient, createPackagePolicyMock().id, {
+          ...createPackagePolicyMock(),
+          cloud_connector_id: 'connector-1',
+        } as any);
+
+        expect(mockedSecretsModule.deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+      });
+
+      it('backfills vars from the stored policy when the update payload omits them', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        buildUpdateSOMocks(soClient, { vars: { stored_var: { type: 'text', value: 'stored' } } });
+        mockAgentPolicyGet();
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [],
+          })
+        );
+
+        const payloadWithoutVars = createPackagePolicyMock();
+        delete (payloadWithoutVars as any).vars;
+
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          payloadWithoutVars
+        );
+
+        const extractCall = mockedSecretsModule.extractAndUpdateSecrets.mock.calls[0][0] as any;
+        expect(extractCall.packagePolicyUpdate.vars).toEqual({
+          stored_var: { type: 'text', value: 'stored' },
+        });
       });
     });
   });
@@ -5464,7 +5612,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).toBeCalled();
+      expect(mockedSendTelemetryEvents).toHaveBeenCalled();
     });
 
     it('should not send telemetry event when updating a package policy without upgrade', async () => {
@@ -5564,7 +5712,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).not.toBeCalled();
+      expect(mockedSendTelemetryEvents).not.toHaveBeenCalled();
     });
 
     it('should call audit logger', async () => {
@@ -5690,8 +5838,8 @@ describe('Package policy service', () => {
         },
       ]);
 
-      expect(callbackOne).toBeCalledTimes(2);
-      expect(callbackTwo).toBeCalledTimes(2);
+      expect(callbackOne).toHaveBeenCalledTimes(2);
+      expect(callbackTwo).toHaveBeenCalledTimes(2);
     });
 
     describe('remove protections', () => {
@@ -13381,18 +13529,23 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'package-policy-1',
-        {
+        expect.objectContaining({
           name: 'policy1',
           enabled: true,
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],
+          vars: undefined,
           package: { name: 'test-package', version: '1.0.0' },
-        },
+        }),
         {
           force: undefined,
         }
       );
+
+      const findFields = soClient.find.mock.calls[0][0].fields as string[];
+      expect(findFields).toContain('vars');
+      expect(findFields).toContain('package');
     });
   });
 
