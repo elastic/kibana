@@ -130,7 +130,6 @@ export function ESQLEditor({
   }, [layerQuery]);
 
   const currentAttributes = useCurrentAttributes({
-    textBasedMode: isTextBasedLanguage,
     initialAttributes: attributes,
   });
 

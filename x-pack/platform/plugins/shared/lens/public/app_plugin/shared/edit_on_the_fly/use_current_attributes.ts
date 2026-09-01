@@ -12,11 +12,9 @@ import { extractReferencesFromState } from '../../../utils';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
 export const useCurrentAttributes = ({
-  textBasedMode,
   initialAttributes,
 }: {
   initialAttributes?: TypedLensSerializedState['attributes'];
-  textBasedMode?: boolean;
 }) => {
   const { visualizationMap, datasourceMap } = useEditorFrameService();
 
@@ -38,23 +36,26 @@ export const useCurrentAttributes = ({
         return [id, dsState];
       })
     );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references =
-      !textBasedMode && visualization.state
-        ? extractReferencesFromState({
-            activeDatasourceId,
-            activeDatasources: Object.keys(datasourceStates).reduce(
-              (acc, id) => ({
-                ...acc,
-                [id]: datasourceMap[id],
-              }),
-              {}
-            ),
-            datasourceStates,
-            visualizationState: visualization.state,
-            activeVisualization,
-          })
-        : [];
+    // ES|QL layers use adHoc dataviews whose ids are not saved objects, so their
+    // references must not be persisted. References from other datasources must be
+    // kept though: e.g. form-based reference line or query annotation layers next
+    // to ES|QL data layers resolve their data view exclusively via references.
+    const adHocDataViewIds = new Set(Object.keys(initialAttributes?.state.adHocDataViews ?? {}));
+    const references = visualization.state
+      ? extractReferencesFromState({
+          activeDatasourceId,
+          activeDatasources: Object.keys(datasourceStates).reduce(
+            (acc, id) => ({
+              ...acc,
+              [id]: datasourceMap[id],
+            }),
+            {}
+          ),
+          datasourceStates,
+          visualizationState: visualization.state,
+          activeVisualization,
+        }).filter((ref) => !(ref.type === 'index-pattern' && adHocDataViewIds.has(ref.id)))
+      : [];
     const attributes = initialAttributes ?? createEmptyLensState().attributes;
     const attrs: TypedLensSerializedState['attributes'] = {
       ...attributes,
@@ -73,7 +74,6 @@ export const useCurrentAttributes = ({
     datasourceMap,
     datasourceStates,
     initialAttributes,
-    textBasedMode,
     visualization.state,
   ]);
 

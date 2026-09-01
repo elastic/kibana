@@ -342,7 +342,6 @@ export function LayerPanel(props: LayerPanelProps) {
   const usesLayerScopedQuery =
     textBasedDatasourceState !== undefined &&
     activeVisualization.getLayerIds(visualizationState).length > 1;
-  const activeQuery = layerQuery ?? editorProps.attributes?.state.query;
   const shouldRenderESQLEditor =
     isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 
