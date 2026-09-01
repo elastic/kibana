@@ -9,6 +9,7 @@ import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { severityScore } from '../../services/severity';
 import { buildReportContent } from '../../services/report_content';
+import { normalizeProvenanceUrl } from '../../services/provenance_url';
 import type { FetchAdapter, NormalizedReport, SourceHit, AdapterRunContext } from '../types';
 
 /**
@@ -66,33 +67,14 @@ const readFeedUrl = (source: SourceHit): string => {
   return typeof url === 'string' && url.length > 0 ? url : KEV_FEED_URL;
 };
 
-const parseNotesRefs = (notes: string | undefined): string[] => {
-  if (!notes) return [];
-  return notes
-    .split(';')
-    .map((s) => s.trim())
-    .filter((s) => s.startsWith('http://') || s.startsWith('https://'));
-};
-
 const buildKevReport = (
   vuln: KevVulnerability,
-  feedUrl: string,
+  provenanceUrl: string | undefined,
   ingestedAt: string,
   spaceId: string,
   sourceId: string
 ): NormalizedReport => {
   const bodyText = `${vuln.shortDescription}\n\nRequired Action: ${vuln.requiredAction}`;
-
-  const noteUrls = parseNotesRefs(vuln.notes);
-  const externalRefs: NonNullable<NormalizedReport['content']['external_references']> = [
-    {
-      source_name: 'CISA KEV',
-      url: feedUrl,
-      external_id: vuln.cveID,
-      description: `CISA Known Exploited Vulnerability: ${vuln.cveID}`,
-    },
-    ...noteUrls.map((url) => ({ source_name: 'CISA KEV notes', url })),
-  ];
 
   return {
     '@timestamp': ingestedAt,
@@ -114,7 +96,7 @@ const buildKevReport = (
     source: {
       type: 'kev',
       name: 'CISA Known Exploited Vulnerabilities',
-      url: feedUrl,
+      ...(provenanceUrl ? { url: provenanceUrl } : {}),
       // Identifies the *source*, not the item, matching every other adapter
       // (`<type>:<source doc id>`). list_sources aggregates report activity on
       // this field, so a per-CVE value would leave the KEV catalog row with no
@@ -122,10 +104,7 @@ const buildKevReport = (
       // extracted.vulnerability.cve_id.
       adapter_id: `kev:${sourceId}`,
     },
-    content: {
-      ...buildReportContent({ title: vuln.vulnerabilityName, bodyText, language: 'en' }),
-      external_references: externalRefs,
-    },
+    content: buildReportContent({ title: vuln.vulnerabilityName, bodyText, language: 'en' }),
     severity: {
       level: 'high',
       score: severityScore('high'),
@@ -161,6 +140,7 @@ export const kevAdapter: FetchAdapter = {
     const fetchUrl = fetchUrlForContext(context);
 
     const feedUrl = readFeedUrl(source);
+    const provenanceUrl = normalizeProvenanceUrl(feedUrl);
     const ingestedAt = now().toISOString();
     const spaceId = source._source.space_id ?? '*';
 
@@ -194,7 +174,7 @@ export const kevAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
     for (const vuln of vulnerabilities) {
       if (isCompleteKevEntry(vuln)) {
-        reports.push(buildKevReport(vuln, feedUrl, ingestedAt, spaceId, source._id));
+        reports.push(buildKevReport(vuln, provenanceUrl, ingestedAt, spaceId, source._id));
       } else {
         log.warn(
           `kev-adapter: skipping malformed entry (missing required fields): ${JSON.stringify(

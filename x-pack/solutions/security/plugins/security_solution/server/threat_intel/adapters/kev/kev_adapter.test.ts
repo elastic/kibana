@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { kevAdapter } from './kev_adapter';
 import { normalizedReportSchema } from '../../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
 import type { AdapterRunContext, SourceHit } from '../types';
@@ -60,7 +60,6 @@ const makeContext = (body: string, status = 200): AdapterRunContext => {
     })
   );
   return {
-    esClient: elasticsearchServiceMock.createElasticsearchClient(),
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
     now: () => FIXED_NOW,
@@ -192,7 +191,6 @@ describe('kevAdapter', () => {
       })
     );
     const ctx: AdapterRunContext = {
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
       logger: loggingSystemMock.createLogger(),
       abortSignal: new AbortController().signal,
       now: () => FIXED_NOW,
@@ -206,6 +204,16 @@ describe('kevAdapter', () => {
     const requestInit = callArgs[1] as RequestInit;
     const headers = requestInit?.headers as Record<string, string>;
     expect(headers?.['User-Agent']).toMatch(/Mozilla/);
+  });
+
+  it('removes credentials from stored feed provenance', async () => {
+    const [report] = await kevAdapter.run(
+      makeSource(`https://feed-user:feed-password@www.cisa.gov/kev.json`),
+      makeContext(makeEnvelope([VULN_1]))
+    );
+
+    expect(report.source.url).toBe('https://www.cisa.gov/kev.json');
+    expect(JSON.stringify(report)).not.toContain('feed-password');
   });
 
   it('skips malformed entries missing required fields', async () => {
