@@ -93,6 +93,7 @@ const PackagesPump = memo(
     // router-derived category state, which is wrong outside the onboarding route.
     const { allCards, isLoading, eprPackageLoadingError } = fleetHooks.useAvailablePackages({
       prereleaseIntegrationsEnabled,
+      enableCollectionGrouping: true,
     });
 
     useEffect(() => {

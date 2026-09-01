@@ -47,6 +47,29 @@ const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): new
   return typeof newLabel === 'string' && oldLabel !== newLabel;
 };
 
+const isPrivateLocationShardingChanged = (existing?: boolean, next?: boolean): boolean =>
+  typeof next === 'boolean' && next !== Boolean(existing);
+
+const withIntendedLocationEdits = <
+  T extends { id: string; label?: string; isAgentSharding?: boolean }
+>(
+  locations: T[],
+  locationId: string,
+  edits: { label?: string; isAgentSharding?: boolean }
+): T[] =>
+  locations.map((location) => {
+    if (location.id !== locationId) {
+      return location;
+    }
+    return {
+      ...location,
+      ...(edits.label !== undefined ? { label: edits.label } : {}),
+      ...(typeof edits.isAgentSharding === 'boolean'
+        ? { isAgentSharding: edits.isAgentSharding }
+        : {}),
+    };
+  });
+
 const isPrivateLocationChanged = ({
   privateLocation,
   newParams,
@@ -63,9 +86,10 @@ const isPrivateLocationChanged = ({
     (!privateLocation.attributes.tags ||
       (privateLocation.attributes.tags &&
         !isEqual(privateLocation.attributes.tags, newParams.tags)));
-  const isShardingChanged =
-    typeof newParams.isAgentSharding === 'boolean' &&
-    newParams.isAgentSharding !== Boolean(privateLocation.attributes.isAgentSharding);
+  const isShardingChanged = isPrivateLocationShardingChanged(
+    privateLocation.attributes.isAgentSharding,
+    newParams.isAgentSharding
+  );
 
   return isLabelChanged || areTagsChanged || isShardingChanged;
 };
@@ -155,11 +179,20 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       if (
         isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
       ) {
-        // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (
-          isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
-          monitorsInLocation.length
-        ) {
+        const isLabelChanged = isPrivateLocationLabelChanged(
+          existingLocation.attributes.label,
+          newLocationLabel
+        );
+        const isShardingChanged = isPrivateLocationShardingChanged(
+          existingLocation.attributes.isAgentSharding,
+          newIsAgentSharding
+        );
+        const shouldSyncMonitors = isLabelChanged || isShardingChanged;
+
+        // Rewrite monitors before persisting: generateNewPolicy reads the
+        // in-memory location list (label and isAgentSharding), so overlay the
+        // intended edits. A failed rewrite must not leave the SO flipped.
+        if (shouldSyncMonitors && monitorsInLocation.length) {
           const privilegeResponse = await checkPrivileges({
             routeContext,
             monitorsSpaces: [
@@ -171,6 +204,23 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           }
         }
 
+        if (shouldSyncMonitors) {
+          const storedLocations = await getPrivateLocations(savedObjectsClient);
+          const allPrivateLocations = withIntendedLocationEdits(storedLocations, locationId, {
+            ...(isLabelChanged ? { label: newLocationLabel } : {}),
+            ...(isShardingChanged && typeof newIsAgentSharding === 'boolean'
+              ? { isAgentSharding: newIsAgentSharding }
+              : {}),
+          });
+          await updatePrivateLocationMonitors({
+            locationId,
+            newLocationLabel: newLocationLabel || existingLocation.attributes.label,
+            allPrivateLocations,
+            routeContext,
+            monitorsInLocation,
+          });
+        }
+
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
@@ -178,16 +228,6 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             ? { isAgentSharding: newIsAgentSharding }
             : {}),
         });
-
-        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
-          await updatePrivateLocationMonitors({
-            locationId,
-            newLocationLabel,
-            allPrivateLocations: await getPrivateLocations(savedObjectsClient),
-            routeContext,
-            monitorsInLocation,
-          });
-        }
       }
 
       return toClientContract({

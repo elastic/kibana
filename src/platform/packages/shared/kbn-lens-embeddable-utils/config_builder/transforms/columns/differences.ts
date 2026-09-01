@@ -22,9 +22,7 @@ export function fromDifferencesAPItoLensState(
     operationType: 'differences',
     references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
-    params: {
-      ...(options.format ? { format: fromFormatAPIToLensState(options.format) } : {}),
-    },
+    ...(options.format ? { params: { format: fromFormatAPIToLensState(options.format) } } : {}),
   };
 }
 
