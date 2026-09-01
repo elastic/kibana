@@ -32,7 +32,12 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
+import type {
+  FormValues,
+  RecoveryStrategy,
+  RuleNotificationsValue,
+  RuleQuery,
+} from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
@@ -59,7 +64,7 @@ import {
   parseDiscoverQueryForBuilder,
   type BuilderState,
 } from './rule_builder';
-import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab } from './types';
 import { isBuilderConditionStepId } from './types';
 import { validateStep, evaluateStepValidation } from './validate_step';
 import {
@@ -169,34 +174,6 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
   if (mode === 'clone') return CLONE_TITLE;
   if (mode === 'edit') return EDIT_TITLE;
   return CREATE_TITLE;
-};
-
-const getInitialRecoveryType = (
-  hasInitialCustomRecovery: boolean,
-  rule: ComposeDiscoverFlyoutProps['rule']
-): RecoveryType => {
-  if (hasInitialCustomRecovery) return 'custom';
-  if (rule != null && (rule.recovery_strategy === 'none' || rule.recovery_strategy == null)) {
-    return 'none';
-  }
-  return 'default';
-};
-
-/*
- * FormValues counterpart of getInitialRecoveryType, used to keep the
- * recovery-type dropdown in sync with parsed YAML. A present recovery query
- * (or an explicit 'query' strategy) means custom; otherwise the strategy maps
- * directly, with a missing value meaning no recovery.
- */
-export const deriveRecoveryTypeFromFormValues = (values: FormValues): RecoveryType => {
-  if (values.kind !== 'alert') return 'default';
-  const hasCustomRecovery =
-    values.query.format === 'composed'
-      ? Boolean(values.query.recovery?.segment?.trim())
-      : Boolean(values.query.recovery?.query?.trim());
-  if (hasCustomRecovery || values.recoveryStrategy === 'query') return 'custom';
-  if (values.recoveryStrategy === 'no_breach') return 'default';
-  return 'none';
 };
 
 /*
@@ -314,9 +291,6 @@ export function ComposeDiscoverFlyout({
 
   const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
-  const hasInitialCustomRecovery =
-    initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
-  const initialRecoveryType = getInitialRecoveryType(hasInitialCustomRecovery, rule);
 
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
@@ -343,7 +317,6 @@ export function ComposeDiscoverFlyout({
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
-    initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
   });
@@ -446,12 +419,6 @@ export function ComposeDiscoverFlyout({
   const hasBeenEditedRef = useRef(false);
 
   /*
-   * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
-   * the form dirty. Track the initial value to detect user changes.
-   */
-  const initialRecoveryTypeRef = useRef(initialRecoveryType);
-
-  /*
    * Tracks whether the close was triggered by the Cancel button ('button')
    * or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
    * EUI path calls closeAllFlyouts() which unregisters the flyout and
@@ -480,13 +447,12 @@ export function ComposeDiscoverFlyout({
   const handleRequestClose = useCallback(() => {
     const yamlDirty =
       yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
-    const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
-    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
+    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current) {
       setIsConfirmCloseVisible(true);
     } else {
       onClose();
     }
-  }, [onClose, uiState.recoveryType]);
+  }, [onClose]);
 
   const handleConfirmDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
@@ -529,6 +495,7 @@ export function ComposeDiscoverFlyout({
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
   const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
+  const hasCustomRecovery = watchedRecoveryStrategy === 'query';
   const watchedNoDataStrategy = useWatch({ control: methods.control, name: 'noDataStrategy' });
 
   const isFormStateNonRepresentable = isNonRepresentableFormState({
@@ -627,13 +594,9 @@ export function ComposeDiscoverFlyout({
       methods.reset(composed);
       setSandboxQuery(composed.query);
       setSandboxTimeField(composed.timeField);
-      dispatch({
-        type: 'SYNC_RECOVERY_TYPE',
-        recoveryType: deriveRecoveryTypeFromFormValues(composed),
-      });
       return composed;
     },
-    [methods, dispatch]
+    [methods]
   );
 
   /*
@@ -653,17 +616,24 @@ export function ComposeDiscoverFlyout({
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
+  const hasCustomRecoveryRef = useRef(hasCustomRecovery);
+  hasCustomRecoveryRef.current = hasCustomRecovery;
 
   /*
    * After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
    * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening.
-   * Read isAlert via ref so this effect only fires on flyoutKey changes,
-   * not on kind toggles (where reopenChildRef is always false anyway).
+   * Read isAlert and hasCustomRecovery via refs so this effect only fires on
+   * flyoutKey changes, not on kind or recovery toggles (where reopenChildRef
+   * is always false anyway).
    */
   useEffect(() => {
     if (reopenChildRef.current) {
       reopenChildRef.current = false;
-      dispatch({ type: 'OPEN_CHILD', isAlert: isAlertRef.current });
+      dispatch({
+        type: 'OPEN_CHILD',
+        isAlert: isAlertRef.current,
+        hasCustomRecovery: hasCustomRecoveryRef.current,
+      });
     }
   }, [flyoutKey, dispatch]);
 
@@ -708,10 +678,9 @@ export function ComposeDiscoverFlyout({
   }, [isBuilderMode, methods]);
 
   const handleRecoveryTypeChange = useCallback(
-    (type: RecoveryType) => {
-      if (type === 'custom') {
-        // Clear any explicit override so it's re-derived from query.recovery, not left stale.
-        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
+    (strategy: RecoveryStrategy) => {
+      methods.setValue('recoveryStrategy', strategy, { shouldDirty: true });
+      if (strategy === 'query') {
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.recovery?.segment ?? '';
@@ -731,10 +700,10 @@ export function ComposeDiscoverFlyout({
             },
           };
         });
+        if (!isBuilderMode) {
+          dispatch({ type: 'OPEN_CHILD', isAlert, hasCustomRecovery: true });
+        }
       } else {
-        methods.setValue('recoveryStrategy', type === 'none' ? 'none' : 'no_breach', {
-          shouldDirty: true,
-        });
         /*
          * (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
          * query from surviving a type change even when the sandbox is still open.
@@ -772,11 +741,11 @@ export function ComposeDiscoverFlyout({
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
     },
     [
       dispatch,
       methods,
+      isAlert,
       isBuilderMode,
       builderState,
       uiState.queryCommitted,
@@ -842,6 +811,9 @@ export function ComposeDiscoverFlyout({
 
       if (enabled) {
         manualSplitUncommittedRef.current = false;
+        if (isDirtyRef.current) {
+          hasBeenEditedRef.current = true;
+        }
         const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
@@ -1069,16 +1041,11 @@ export function ComposeDiscoverFlyout({
     </>
   ) : null;
 
-  /*
-   * TODO: recoveryType drives whether the recovery tab appears in YAML mode.
-   * Follow schema decisions in #268984 — if recoveryType is superseded by a
-   * field on RuleQuery itself, gate this on query shape instead.
-   */
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
     if (!uiState.yamlMode) {
       return getSandboxTabs(isAlert, {
         step: uiState.step,
-        recoveryType: uiState.recoveryType,
+        hasCustomRecovery,
         manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
@@ -1088,10 +1055,10 @@ export function ComposeDiscoverFlyout({
      * the single unified editor; composed queries keep the split tabs.
      */
     if (sandboxQuery.format === 'standalone') return undefined;
-    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    return hasCustomRecovery ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
   }, [
     uiState.yamlMode,
-    uiState.recoveryType,
+    hasCustomRecovery,
     uiState.step,
     uiState.manualSplitEnabled,
     sandboxQuery.format,
@@ -1291,7 +1258,9 @@ export function ComposeDiscoverFlyout({
                             color="text"
                             iconType="chevronLimitLeft"
                             isDisabled={uiState.childOpen}
-                            onClick={() => dispatch({ type: 'OPEN_CHILD', isAlert })}
+                            onClick={() =>
+                              dispatch({ type: 'OPEN_CHILD', isAlert, hasCustomRecovery })
+                            }
                             data-test-subj="composeDiscoverYamlQuerySandbox"
                           >
                             {QUERY_SANDBOX_LABEL}

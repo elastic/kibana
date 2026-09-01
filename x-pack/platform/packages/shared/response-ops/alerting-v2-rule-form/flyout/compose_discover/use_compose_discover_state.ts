@@ -13,7 +13,6 @@ import type {
   ComposeDiscoverAction,
   ComposeDiscoverMode,
   QueryTab,
-  RecoveryType,
 } from './types';
 
 export const getStepIds = (isAlert: boolean): StepId[] =>
@@ -29,7 +28,6 @@ export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
   initialKind?: RuleKind;
-  initialRecoveryType?: RecoveryType;
   /** When true, the query is already populated (e.g. from Discover) and the sandbox gate is skipped. */
   isQueryPrePopulated?: boolean;
   /** When true, the flyout opens directly in YAML mode with the sandbox open. */
@@ -39,39 +37,36 @@ export interface InitialStateConfig {
 export const createInitialState = ({
   mode,
   initialKind = 'alert',
-  initialRecoveryType = 'default',
   isQueryPrePopulated = false,
   forceYamlMode = false,
-}: InitialStateConfig): ComposeDiscoverState => {
-  const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
-  return {
-    step: 0,
-    recoveryType,
-    activeTab: defaultTabForTabs(
-      getSandboxTabs(initialKind === 'alert', {
-        step: 0,
-        recoveryType,
-        manualSplitEnabled: false,
-      })
-    ),
-    childOpen: forceYamlMode,
-    queryCommitted: mode === 'edit' || isQueryPrePopulated,
-    yamlMode: forceYamlMode,
-    manualSplitEnabled: false,
-  };
-};
+}: InitialStateConfig): ComposeDiscoverState => ({
+  step: 0,
+  activeTab: defaultTabForTabs(
+    getSandboxTabs(initialKind === 'alert', {
+      step: 0,
+      hasCustomRecovery: false,
+      manualSplitEnabled: false,
+    })
+  ),
+  childOpen: forceYamlMode,
+  queryCommitted: mode === 'edit' || isQueryPrePopulated,
+  yamlMode: forceYamlMode,
+  manualSplitEnabled: false,
+});
 
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
  * alertCondition + manualSplitEnabled → ['base', 'alert']
  * alertCondition                      → undefined (unified editor; heuristic split on Apply)
- * isAlert + outcome + custom          → ['recovery']
+ * isAlert + outcome + hasCustomRecovery → ['recovery']
  * everything else                     → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'manualSplitEnabled'>
+  state: Pick<ComposeDiscoverState, 'step' | 'manualSplitEnabled'> & {
+    hasCustomRecovery: boolean;
+  }
 ): QueryTab[] | undefined {
   if (!isAlert) return undefined;
 
@@ -80,7 +75,7 @@ export function getSandboxTabs(
   if (stepId === 'alertCondition') {
     return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
   }
-  if (stepId === 'outcome' && state.recoveryType === 'custom') return ['recovery'];
+  if (stepId === 'outcome' && state.hasCustomRecovery) return ['recovery'];
   return undefined;
 }
 
@@ -95,44 +90,10 @@ export function reducer(
   action: ComposeDiscoverAction
 ): ComposeDiscoverState {
   switch (action.type) {
-    case 'SET_RECOVERY_TYPE':
-      return {
-        ...state,
-        recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom' && !action.isBuilderMode
-          ? { childOpen: true, activeTab: 'recovery' as const }
-          : {}),
-      };
-    /*
-     * Passive recoveryType sync from parsed YAML — no RHF or sandbox side
-     * effects (the parsed values already carry the correct query shape) and
-     * childOpen is untouched. Becoming custom focuses the recovery tab;
-     * leaving custom moves off the removed recovery tab.
-     */
-    case 'SYNC_RECOVERY_TYPE': {
-      if (action.recoveryType === state.recoveryType) return state;
-      if (action.recoveryType === 'custom') {
-        return { ...state, recoveryType: action.recoveryType, activeTab: 'recovery' };
-      }
-      return {
-        ...state,
-        recoveryType: action.recoveryType,
-        ...(state.activeTab === 'recovery' ? { activeTab: 'alert' as const } : {}),
-      };
-    }
     case 'KIND_CHANGE':
-      /*
-       * Reset manual split when switching kind — the unified query is rebuilt.
-       * Stay on the current step (Outcome owns mode selection); do not force the sandbox open.
-       */
       return action.kind === 'alert'
         ? { ...state, activeTab: 'base', manualSplitEnabled: false }
-        : {
-            ...state,
-            recoveryType: 'default',
-            activeTab: 'alert',
-            manualSplitEnabled: false,
-          };
+        : { ...state, activeTab: 'alert', manualSplitEnabled: false };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
@@ -160,17 +121,27 @@ export function reducer(
       return {
         ...state,
         childOpen: true,
-        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, state)),
+        activeTab: defaultTabForTabs(
+          getSandboxTabs(action.isAlert, {
+            step: state.step,
+            hasCustomRecovery: action.hasCustomRecovery ?? false,
+            manualSplitEnabled: state.manualSplitEnabled,
+          })
+        ),
       };
-    case 'OPEN_CHILD_FOR_STEP': {
-      const stateAtStep = { ...state, step: action.step };
+    case 'OPEN_CHILD_FOR_STEP':
       return {
         ...state,
         step: action.step,
         childOpen: true,
-        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, stateAtStep)),
+        activeTab: defaultTabForTabs(
+          getSandboxTabs(action.isAlert, {
+            step: action.step,
+            hasCustomRecovery: action.hasCustomRecovery ?? false,
+            manualSplitEnabled: state.manualSplitEnabled,
+          })
+        ),
       };
-    }
     case 'CLOSE_CHILD':
       return { ...state, childOpen: false };
     case 'COMMIT_QUERY':
