@@ -236,7 +236,9 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
     const [invokedMessages] = mockInvoke.mock.calls[0];
     expect(String(invokedMessages.at(-1)?.content)).toContain(RETRY_SEARCH_PROMPT_PREFIX);
     expect(String(invokedMessages.at(-1)?.content)).toContain(
-      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS - 1} more time(s) after this.`
+      `You may call searchPrebuiltRules at most ${
+        MAX_TOOL_CALL_ATTEMPTS - 1
+      } more time(s) after this.`
     );
     expect(result.match_prebuilt_rules_messages).toHaveLength(2);
     expect(result.match_prebuilt_rules_result).toBeUndefined();
