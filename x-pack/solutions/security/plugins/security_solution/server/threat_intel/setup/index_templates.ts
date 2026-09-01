@@ -859,7 +859,10 @@ const migrateExistingExternalReferencesMapping = async (
         log.info(`Migrated external_references mapping on ${indexName} (v18 backfill)`);
       } else if (!extRefProps?.canonical_url) {
         // State 3: index has external_references (v18/v19) but canonical_url subfield is absent.
-        // putMapping onto an existing nested field is additive and idempotent.
+        // putMapping onto an existing nested field is additive and idempotent. `description`
+        // is included in every repair branch so a single pass converges: the v26 bounds
+        // migration recreates the parent with only the keyword fields, so an index can reach
+        // this state with `description` missing, and it is the only child State 2 alone adds.
         await esClient.indices.putMapping({
           index: indexName,
           properties: {
@@ -871,6 +874,7 @@ const migrateExistingExternalReferencesMapping = async (
                     canonical_url: { type: 'keyword' },
                     ref_part: { type: 'integer' },
                     ref_part_count: { type: 'integer' },
+                    description: { type: 'text', index: false },
                   },
                 },
               },
@@ -878,7 +882,7 @@ const migrateExistingExternalReferencesMapping = async (
           },
         });
         log.info(
-          `Migrated canonical_url + ref_part/ref_part_count subfields on ${indexName} (v19 backfill)`
+          `Migrated canonical_url + ref_part/ref_part_count + description subfields on ${indexName} (v19 backfill)`
         );
       } else if (!extRefProps?.ref_part || !extRefProps?.ref_part_count) {
         // State 4: index has external_references + canonical_url but lacks ref_part/ref_part_count
@@ -893,6 +897,7 @@ const migrateExistingExternalReferencesMapping = async (
                   properties: {
                     ref_part: { type: 'integer' },
                     ref_part_count: { type: 'integer' },
+                    description: { type: 'text', index: false },
                   },
                 },
               },
@@ -900,7 +905,32 @@ const migrateExistingExternalReferencesMapping = async (
           },
         });
         log.info(
-          `Migrated ref_part/ref_part_count subfields on ${indexName} (v19 chunking backfill)`
+          `Migrated ref_part/ref_part_count + description subfields on ${indexName} (v19 chunking backfill)`
+        );
+      } else if (!extRefProps?.description) {
+        // State 5: every keyword child and the chunking fields are present, but the
+        // `text`/`index:false` `description` is not. Reachable when a failed State 2 is
+        // followed by the v26 bounds migration recreating the parent (keyword fields only),
+        // then a later boot backfilling ref_part/ref_part_count. Without this branch,
+        // `description` would never be re-added once the parent exists and the readiness
+        // verifier (which now requires it) would fail every retry.
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                external_references: {
+                  type: 'nested',
+                  properties: {
+                    description: { type: 'text', index: false },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(
+          `Migrated external_references.description subfield on ${indexName} (v18 backfill)`
         );
       }
     } catch (err) {
@@ -1493,6 +1523,12 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.external_references.url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'content.external_references.canonical_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'content.external_references.external_id', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  // Only State 2 of the external-references migration (whole block absent) writes this
+  // `text`/`index:false` child; States 3/4 and the v26 bounds migration recreate the
+  // parent with only the keyword fields. So a failed State 2 followed by a v26 recreate
+  // leaves `description` unmapped while every other child is present, and `dynamic:
+  // strict` then rejects any STIX report carrying an external-reference description.
+  { path: 'content.external_references.description' },
   // v26. `body_is_title_fallback` is a new field, so a failed v26 putMapping makes
   // `dynamic: strict` reject every title-only report; the bounded keywords are
   // existing paths whose parameter changed, which is why they are checked by value.

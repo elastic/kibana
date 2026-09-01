@@ -368,7 +368,7 @@ describe('index_templates — migrations', () => {
       }
     });
 
-    it('adds canonical_url and ref_parts on a v18 index', async () => {
+    it('adds canonical_url, ref_parts and description on a v18 index', async () => {
       const { patchedPaths } = await runMigrations({
         reportMappings: withExternalRefs({ source_name: {}, url: {} }),
       });
@@ -376,15 +376,37 @@ describe('index_templates — migrations', () => {
       expect(patchedPaths).toContain('content.external_references.canonical_url');
       expect(patchedPaths).toContain('content.external_references.ref_part');
       expect(patchedPaths).toContain('content.external_references.ref_part_count');
+      // Repaired in the same pass so a single retry converges (no second-boot gap).
+      expect(patchedPaths).toContain('content.external_references.description');
     });
 
-    it('adds only ref_parts on a v19 index that has canonical_url', async () => {
+    it('adds ref_parts and description on a v19 index that has canonical_url', async () => {
       const { patchedPaths } = await runMigrations({
         reportMappings: withExternalRefs({ source_name: {}, url: {}, canonical_url: {} }),
       });
 
       expect(patchedPaths).toContain('content.external_references.ref_part');
+      expect(patchedPaths).toContain('content.external_references.description');
       expect(patchedPaths).not.toContain('content.external_references.canonical_url');
+    });
+
+    // The v26 bounds migration recreates external_references with only the keyword
+    // children, so an index can have every field except the text `description`. State 2
+    // (whole block absent) never fires here, so without a dedicated branch this leaf
+    // would stay unmapped forever and the readiness verifier would fail every retry.
+    it('adds description when only that text child is missing', async () => {
+      const { patchedPaths } = await runMigrations({
+        reportMappings: withExternalRefs({
+          source_name: {},
+          url: {},
+          canonical_url: {},
+          external_id: {},
+          ref_part: {},
+          ref_part_count: {},
+        }),
+      });
+
+      expect(patchedPaths).toContain('content.external_references.description');
     });
 
     it('is a no-op when fully migrated', async () => {
@@ -635,7 +657,7 @@ describe('index_templates — post-migration schema check', () => {
   // own errors, so checking only the parent could not tell a pre-migration mapping
   // from a migrated one: a failed child putMapping passed verification and writes
   // carrying those fields were then rejected by dynamic: strict.
-  it.each(['canonical_url', 'ref_part', 'ref_part_count'])(
+  it.each(['canonical_url', 'ref_part', 'ref_part_count', 'description'])(
     'fails when the external_references child %s is still missing',
     async (child) => {
       const mappings = fullyMigratedReportMappings();
