@@ -62,7 +62,7 @@ describe('fetchEntityRelationships', () => {
       const batchCount = Math.ceil(
         ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
       );
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(batchCount);
+      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
@@ -132,7 +132,7 @@ describe('fetchEntityRelationships', () => {
       const batchCount = Math.ceil(
         ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
       );
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(batchCount);
+      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
@@ -184,7 +184,7 @@ describe('fetchEntityRelationships', () => {
       const batchCount = Math.ceil(
         ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
       );
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(batchCount);
+      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
 
       // Filter should be undefined when no entityIds provided

@@ -25,21 +25,21 @@ export const MetricItemBody = ({
   const tags = monitor.tags;
   const history = useHistory();
 
-  const typeBadge = (
-    <MonitorTypeBadge
-      monitorType={monitor.type}
-      onClick={() => {
-        history.push({
-          search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
-        });
-      }}
-    />
-  );
-  // Each badge is its own flex item — EuiFlexItem is a flex column, so placing
-  // multiple badges in one item would stack them vertically.
-  const badges = (
-    <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
-      <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
+  // One wrapping flex group for type/remote/heartbeat/locations + tags.
+  // Nested wrap groups (badges | TagsList) vertically center the type badge
+  // against a multi-row tag block and indent the second tag row.
+  const leadingBadges = (
+    <>
+      <EuiFlexItem grow={false}>
+        <MonitorTypeBadge
+          monitorType={monitor.type}
+          onClick={() => {
+            history.push({
+              search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
+            });
+          }}
+        />
+      </EuiFlexItem>
       {monitor.remote && (
         <EuiFlexItem grow={false}>
           <SyntheticsRemoteBadge remote={monitor.remote} />
@@ -50,40 +50,35 @@ export const MetricItemBody = ({
           <SyntheticsHeartbeatBadge origin={monitor.origin} />
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+      {monitor.locations.length > 1 && (
+        <EuiFlexItem grow={false}>
+          <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />
+        </EuiFlexItem>
+      )}
+    </>
   );
-  if (tags.length === 0 && (monitor?.locations?.length ?? 0) <= 1) {
-    return (
-      <>
-        <EuiSpacer size="xs" />
-        {badges}
-      </>
-    );
-  }
 
   return (
     <>
       <EuiSpacer size="xs" />
-      <EuiFlexGroup gutterSize="xs" alignItems="center" wrap>
-        <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
-        {monitor?.locations?.length > 1 && (
-          <EuiFlexItem grow={false}>
-            <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />
-          </EuiFlexItem>
-        )}
-        {(tags ?? []).length > 0 && (
-          <EuiFlexItem grow={false}>
-            <TagsList
-              color="default"
-              tags={tags}
-              disableExpand={true}
-              onClick={(tag) => {
-                history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
-              }}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      {tags.length > 0 ? (
+        <div css={{ width: '100%', minWidth: 0 }}>
+          <TagsList
+            color="default"
+            tags={tags}
+            disableExpand={true}
+            maxWidth="100%"
+            prependChildren={leadingBadges}
+            onClick={(tag) => {
+              history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
+            }}
+          />
+        </div>
+      ) : (
+        <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
+          {leadingBadges}
+        </EuiFlexGroup>
+      )}
     </>
   );
 };

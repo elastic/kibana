@@ -72,7 +72,7 @@ describe('TagsClient', () => {
       const error = new Error('something when wrong');
       http.post.mockRejectedValue(error);
 
-      await expect(tagsClient.create(createTagAttributes())).rejects.toThrowError(error);
+      await expect(tagsClient.create(createTagAttributes())).rejects.toThrow(error);
     });
     it('notifies its cache if the http call succeed', async () => {
       await tagsClient.create(createTagAttributes());
@@ -117,7 +117,7 @@ describe('TagsClient', () => {
       const error = new Error('something when wrong');
       http.put.mockRejectedValue(error);
 
-      await expect(tagsClient.update(tagId, createTagAttributes())).rejects.toThrowError(error);
+      await expect(tagsClient.update(tagId, createTagAttributes())).rejects.toThrow(error);
     });
     it('notifies its cache if the http call succeed', async () => {
       await tagsClient.update(tagId, createTagAttributes());
@@ -160,7 +160,7 @@ describe('TagsClient', () => {
       const error = new Error('something when wrong');
       http.get.mockRejectedValue(error);
 
-      await expect(tagsClient.get(tagId)).rejects.toThrowError(error);
+      await expect(tagsClient.get(tagId)).rejects.toThrow(error);
     });
   });
 
@@ -200,7 +200,7 @@ describe('TagsClient', () => {
       const error = new Error('something when wrong');
       http.get.mockRejectedValue(error);
 
-      await expect(tagsClient.getAll()).rejects.toThrowError(error);
+      await expect(tagsClient.getAll()).rejects.toThrow(error);
     });
     it('notifies its cache if the http call succeed', async () => {
       await tagsClient.getAll();
@@ -348,7 +348,7 @@ describe('TagsClient', () => {
       const error = new Error('something when wrong');
       http.delete.mockRejectedValue(error);
 
-      await expect(tagsClient.delete(tagId)).rejects.toThrowError(error);
+      await expect(tagsClient.delete(tagId)).rejects.toThrow(error);
     });
     it('notifies its cache if the http call succeed', async () => {
       await tagsClient.delete(tagId);
@@ -398,7 +398,7 @@ describe('TagsClient', () => {
         const error = new Error('something when wrong');
         http.get.mockRejectedValue(error);
 
-        await expect(tagsClient.find(findOptions)).rejects.toThrowError(error);
+        await expect(tagsClient.find(findOptions)).rejects.toThrow(error);
       });
     });
 
@@ -426,7 +426,7 @@ describe('TagsClient', () => {
         const error = new Error('something when wrong');
         http.post.mockRejectedValue(error);
 
-        await expect(tagsClient.bulkDelete(tagIds)).rejects.toThrowError(error);
+        await expect(tagsClient.bulkDelete(tagIds)).rejects.toThrow(error);
       });
       it('notifies its cache if the http call succeed', async () => {
         await tagsClient.bulkDelete(tagIds);
