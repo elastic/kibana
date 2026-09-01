@@ -92,12 +92,11 @@ describe('esql-valid-runtime verifier', () => {
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
     });
 
-    it('bounds the query with a row limit before any downstream command', async () => {
+    it('appends a row limit at the end of the query', async () => {
       await verifier.verify(makeKi(VALID_QUERY), context);
 
       const [sent] = sentQueries();
-      expect(sent).toContain('LIMIT 1');
-      expect(sent.indexOf('LIMIT 1')).toBeLessThan(sent.indexOf('WHERE'));
+      expect(sent).toMatch(/LIMIT 1\s*$/);
     });
 
     it('executes a time-series data stream query using the TS source command', async () => {
@@ -108,6 +107,18 @@ describe('esql-valid-runtime verifier', () => {
       expect(outcome).toEqual({ passed: true });
       const [sent] = sentQueries();
       expect(sent).toContain('TS metrics-*');
+    });
+
+    it('executes a time-series RATE aggregation query without corrupting its structure', async () => {
+      const rateQuery =
+        'TS metrics-* | STATS SUM(RATE(network.bytes_in)) BY BUCKET(@timestamp, 1 hour)';
+
+      const outcome = await verifier.verify(makeKi(rateQuery), context);
+
+      expect(outcome).toEqual({ passed: true });
+      const [sent] = sentQueries();
+      expect(sent).toContain('TS metrics-*');
+      expect(sent).toContain('RATE(network.bytes_in)');
     });
 
     it('refuses partial results and forwards the abort signal', async () => {
@@ -211,6 +222,14 @@ describe('esql-valid-runtime verifier', () => {
 
       await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow('socket hang up');
       expect(esClient.esql.query).toHaveBeenCalledTimes(3);
+    });
+
+    it('propagates a mid-query abort immediately without retrying', async () => {
+      const abortError = new errors.RequestAbortedError('Request aborted');
+      esClient.esql.query.mockRejectedValue(abortError);
+
+      await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow(abortError);
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     });
 
     it('propagates an authorization error immediately without retrying', async () => {

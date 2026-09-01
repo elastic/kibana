@@ -35,7 +35,7 @@ export class KiVerificationService {
 
     const results: KiVerifierResult[] = [];
 
-    for (const id of verifiers) {
+    for (const id of [...new Set(verifiers)]) {
       const verifier = this.registry.get(id);
       if (!verifier) {
         throw new Error(`Unknown verifier id: "${id}"`);

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { isResponseError } from '@kbn/es-errors';
+import { isResponseError, isRequestAbortedError } from '@kbn/es-errors';
 
-// 429 and 5xx are transient; non-response errors (transport, connection) are also retryable.
+// Abort is user cancellation — never retry.
+// 429 and 5xx are transient; other non-response errors (transport, connection) are retryable.
 // 400 is a query/content error and 403 is authorization — neither will resolve on retry.
 export const isRetryableError = (error: unknown): boolean => {
+  if (isRequestAbortedError(error) || (error instanceof Error && error.name === 'AbortError')) {
+    return false;
+  }
   if (isResponseError(error)) {
     const { statusCode } = error;
     return statusCode === 429 || (statusCode !== undefined && statusCode >= 500);

@@ -6,7 +6,6 @@
  */
 
 import type { errors } from '@elastic/elasticsearch';
-import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import { isResponseError } from '@kbn/es-errors';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import {
@@ -24,14 +23,8 @@ export const ESQL_EXECUTION_ROW_LIMIT = 1;
 
 const MAX_QUERY_ATTEMPTS = 3;
 
-/** Returns the original query when limit injection cannot parse it. */
-const boundQuery = (query: string): string => {
-  try {
-    return getESQLWithSafeLimit(query, ESQL_EXECUTION_ROW_LIMIT);
-  } catch {
-    return query;
-  }
-};
+const boundQuery = (query: string): string =>
+  `${query.trimEnd()} | LIMIT ${ESQL_EXECUTION_ROW_LIMIT}`;
 
 const formatEsError = (error: errors.ResponseError): string => {
   const details = error.body as ElasticsearchErrorDetails | undefined;
