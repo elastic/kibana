@@ -137,7 +137,7 @@ const validateMetaArchField = (
   result: YaraValidateResult
 ) => {
   if (rule.meta.arch !== undefined) {
-    const values = rule.meta.arch.split(',').map((value) => value.trim());
+    const values = rule.meta.arch.split(/, ?/);
 
     if (
       values.length > 2 ||
@@ -153,7 +153,9 @@ const validateMetaArchField = (
 
       result.errorCount++;
       result.errors.push({
-        message: `Invalid "meta.arch" value "${rule.meta.arch}" on rule "${rule.identifier}", only "x86" and\/or "arm64" are allowed in a comma separated list`,
+        message: `Invalid "meta.arch" value "${shortenMetaValue(rule.meta.arch)}" on rule "${
+          rule.identifier
+        }", only "x86" and\/or "arm64" are allowed in a comma separated list`,
         line: lineNumber,
         severity: 'error',
       });
@@ -176,7 +178,9 @@ const validateMetaScanTypeField = (
 
     result.errorCount++;
     result.errors.push({
-      message: `Invalid "meta.scan_type" value "${rule.meta.scan_type}" on rule "${rule.identifier}", only "Memory" is allowed`,
+      message: `Invalid "meta.scan_type" value "${shortenMetaValue(
+        rule.meta.scan_type
+      )}" on rule "${rule.identifier}", only "Memory" is allowed`,
       line: lineNumber,
       severity: 'error',
     });
@@ -190,7 +194,7 @@ const validateMetaOsField = (
   osTypes: ('linux' | 'macos' | 'windows')[]
 ) => {
   if (rule.meta.os !== undefined) {
-    const values = rule.meta.os.split(',').map((value) => value.trim());
+    const values = rule.meta.os.split(/, ?/);
 
     // Validate values
     if (
@@ -207,7 +211,9 @@ const validateMetaOsField = (
 
       result.errorCount++;
       result.errors.push({
-        message: `Invalid "meta.os" value "${rule.meta.os}" on rule "${rule.identifier}", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list`,
+        message: `Invalid "meta.os" value "${shortenMetaValue(rule.meta.os)}" on rule "${
+          rule.identifier
+        }", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list`,
         line: lineNumber,
         severity: 'error',
       });
@@ -241,3 +247,14 @@ const validateMetaOsField = (
     }
   }
 };
+
+// Should be smaller than or equal to `MAX_META_VALUE_LEN - 2` from `validate_yara.c`
+// (-1 for the trailing zero byte in the buffer, so the max string length is actually `MAX_META_VALUE_LEN - 1`.
+// Another -1 for making sure we don't display `...` when the string is at its maximum
+// length and we don't know if it was truncated or not)
+const MAXIMUM_META_VALUE_LENGTH = 30;
+
+const shortenMetaValue = (value: string): string =>
+  value.length > MAXIMUM_META_VALUE_LENGTH
+    ? `${value.slice(0, MAXIMUM_META_VALUE_LENGTH)}...`
+    : value;
