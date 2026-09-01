@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
+import { useConversationSearch } from '../../../hooks/use_conversation_search';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
 import { useInfiniteScroll } from '../../../hooks/use_infinite_scroll';
@@ -40,28 +41,41 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { conversationTemplatesService } = useAgentBuilderServices();
+  const isSearching = searchValue.trim().length > 0;
+
   const {
-    conversations = [],
-    isLoading,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
+    conversations: listConversations = [],
+    isLoading: isListLoading,
+    hasNextPage: hasNextListPage,
+    fetchNextPage: fetchNextListPage,
+    isFetchingNextPage: isFetchingNextListPage,
   } = useConversationList({ agentId });
+
+  const {
+    conversations: searchResults,
+    isLoading: isSearchLoading,
+    hasNextPage: hasNextSearchPage,
+    fetchNextPage: fetchNextSearchPage,
+    isFetchingNextPage: isFetchingNextSearchPage,
+  } = useConversationSearch({ agentId, query: searchValue });
+
+  const isLoading = isSearching ? isSearchLoading : isListLoading;
+  const hasNextPage = isSearching ? hasNextSearchPage : hasNextListPage;
+  const fetchNextPage = isSearching ? fetchNextSearchPage : fetchNextListPage;
+  const isFetchingNextPage = isSearching ? isFetchingNextSearchPage : isFetchingNextListPage;
   const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
 
+  // Recency sort applies only to the unfiltered list — search results are already
+  // relevance-ranked, and re-sorting them by recency would discard that ranking.
   const sortedConversations = useMemo(
     () =>
-      [...conversations].sort(
+      [...listConversations].sort(
         (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
       ),
-    [conversations]
+    [listConversations]
   );
 
-  const filteredConversations = useMemo(() => {
-    if (!searchValue) return sortedConversations;
-    const lower = searchValue.toLowerCase();
-    return sortedConversations.filter((c) => c.title.toLowerCase().includes(lower));
-  }, [sortedConversations, searchValue]);
+  const conversations = isSearching ? searchResults : sortedConversations;
 
   const itemStyles = createConversationListItemStyles(euiTheme);
   const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
@@ -82,13 +96,13 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
     );
   }
 
-  if (filteredConversations.length === 0) {
-    return <NoConversationsPrompt isFiltered={searchValue.length > 0} />;
+  if (conversations.length === 0) {
+    return <NoConversationsPrompt isFiltered={isSearching} />;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {filteredConversations.map((conversation) => {
+      {conversations.map((conversation) => {
         const isActive = conversationId === conversation.id;
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
