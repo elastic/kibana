@@ -56,6 +56,7 @@ const baseParams = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   onRunPreview: mockOnRunPreview,
 };
 
@@ -79,6 +80,7 @@ describe('useEditFlyoutState', () => {
           projectRouting: undefined,
           query: undefined,
           filters: undefined,
+          esqlVariables: undefined,
           onRunPreview: mockOnRunPreview,
         })
       );
@@ -148,6 +150,7 @@ describe('useEditFlyoutState', () => {
           projectRouting: undefined,
           query: undefined,
           filters: undefined,
+          esqlVariables: undefined,
           onRunPreview: mockOnRunPreview,
         })
       );

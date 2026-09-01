@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import type { CoreStart } from '@kbn/core/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,6 +29,7 @@ import type { CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
+import { ApiKeysCpsCallout } from './api_keys_cps_callout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable, categorizeAggregations } from './api_keys_table';
 import type { QueryFilters } from './api_keys_table';
@@ -61,7 +63,11 @@ const DEFAULT_TABLE_STATE: ApiKeysTableState = {
 
 const PLUS_SIGN_REGEX = /[+]/g;
 
-export const APIKeysGridPage: FunctionComponent = () => {
+export interface APIKeysGridPageProps {
+  cpsManager?: ICPSManager;
+}
+
+export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsManager }) => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
   const authc = useAuthentication();
@@ -345,19 +351,22 @@ export const APIKeysGridPage: FunctionComponent = () => {
         />
       )}
       {totalKeys === 0 ? (
-        <ApiKeysEmptyPrompt readOnly={readOnly}>
-          <EuiButton
-            {...reactRouterNavigate(history, '/create')}
-            fill
-            iconType="plusCircle"
-            data-test-subj="apiKeysCreatePromptButton"
-          >
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.createButton"
-              defaultMessage="Create API key"
-            />
-          </EuiButton>
-        </ApiKeysEmptyPrompt>
+        <>
+          <ApiKeysCpsCallout cpsManager={cpsManager} />
+          <ApiKeysEmptyPrompt readOnly={readOnly}>
+            <EuiButton
+              {...reactRouterNavigate(history, '/create')}
+              fill
+              iconType="plusCircle"
+              data-test-subj="apiKeysCreatePromptButton"
+            >
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.createButton"
+                defaultMessage="Create API key"
+              />
+            </EuiButton>
+          </ApiKeysEmptyPrompt>
+        </>
       ) : (
         <>
           <KibanaPageTemplate.Header
@@ -395,6 +404,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
           />
           <EuiSpacer />
           <KibanaPageTemplate.Section paddingSize="none">
+            <ApiKeysCpsCallout cpsManager={cpsManager} />
+
             {createdApiKey && (
               <>
                 <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
