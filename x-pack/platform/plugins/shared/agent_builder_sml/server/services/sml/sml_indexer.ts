@@ -46,9 +46,9 @@ export interface SmlIndexer {
    * **`getPermissions` failures fail-closed.** When the registered type's
    * `getPermissions` hook throws, the call is aborted *before* any
    * mutation (the existing entry remains intact) and the throw is propagated
-   * to the caller. Stamping empty permissions instead would be fail-open:
-   * the read-path filter treats `kbnPrivs.length === 0` as publicly
-   * readable. See `resolvePermissionsForOrigin` for the full rationale.
+   * to the caller. Stamping an empty action list instead would be fail-open:
+   * the read path treats a `count: 0` element as requiring nothing, i.e. public
+   * within its spaces. See `resolvePermissionsForOrigin` for the full rationale.
    *
    * For `action: 'delete'`, only an entry with `ingestion_method: 'crawled'` is
    * removed — a manual entry for the same `origin_id` is preserved. This keeps
@@ -257,7 +257,9 @@ class SmlIndexerImpl implements SmlIndexer {
    * origin. Called **once per origin** before any ES mutation.
    *
    * - If the type's `getPermissions` hook is present, its result is used.
-   * - Otherwise, permissions are left empty.
+   * - Otherwise the action list is empty, which `buildIndexOp` stamps as a
+   *   `count: 0` element per space — the type opts out of privilege gating and
+   *   its entries are public within those spaces.
    */
   private async resolvePermissionsForOrigin({
     definition,
@@ -307,7 +309,9 @@ class SmlIndexerImpl implements SmlIndexer {
 
     // One nested element per space. `count` is per-space: "how many actions THIS space requires".
     // The ES-side DLS query evaluates each element independently, so a caller must satisfy a whole
-    // element to see the document — matches cannot accumulate across spaces.
+    // element to see the document — matches cannot accumulate across spaces. `count: 0` (a type
+    // with no `getPermissions` hook) means "requires nothing here" and the read filter admits it
+    // on space scoping alone.
     const privileges = normalizedSpaces
       .slice()
       .sort()
