@@ -7,7 +7,7 @@
 
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useQuery } from '@kbn/react-query';
-import { AI_INDEX_API_VERSION, aiIndexPath } from '@kbn/context-engine-plugin/common/constants';
+import { AI_INDEX_API_VERSION, aiIndexPath } from '@kbn/context-engine-plugin/common';
 import type {
   AiIndexHttpItem,
   ListAiIndexResponse,
@@ -26,8 +26,8 @@ interface UseListAiIndicesResult {
 /**
  * Lists the AI indices registered in the Context Engine for the current space.
  *
- * Agent Builder does not depend on the `contextEngine` plugin: this calls the public HTTP API
- * directly and only borrows types and constants from its `common/` directory.
+ * Agent Builder does not depend on the `contextEngine` plugin at runtime: this calls the public
+ * HTTP API directly and only imports constants and types from its common public API.
  */
 export const useListAiIndices = (): UseListAiIndicesResult => {
   const {
