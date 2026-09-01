@@ -246,10 +246,39 @@ A `vX.Y.Z` label on a Kibana PR is a backport target. Confirm the patch shipped 
 
 ## Description style
 
-Write for operators and admins. Use the Elastic style guide. Use substitutions such as `{{kib}}` and `{{es}}`.
+Write for the person who sets the value. For `kibana.yml`, that is an operator. For Advanced Settings, that is someone using the {{kib}} UI.
 
-Do not paste PR titles or issue wording. Do not name TypeScript symbols, test IDs, or plugin IDs.
+Lead with the effect. Then say how to set it.
 
-Bold UI labels when you mention the Advanced Settings control. The YAML `setting` key stays in backticks.
+Do:
 
-Keep one idea per sentence. Prefer the active voice.
+- Say what changes in {{kib}} or on the deployment when the value changes.
+- For a boolean, say what `true` and `false` do.
+- For a limit or duration, include the unit.
+- Bold the Advanced Settings UI label when you mention that control.
+- Link related settings.
+- Use substitutions such as `{{kib}}` and `{{es}}`.
+
+Do not:
+
+- Restate the key as the whole description, for example "The `xpack.example.enabled` setting enables the example feature."
+- Copy the PR title, issue wording, or i18n `name` string as the description.
+- Name TypeScript symbols, test IDs, or plugin IDs.
+- Repeat `datatype` or `default` in the prose. Those render as their own fields.
+- Put version numbers in the description next to a badge.
+
+Keep one idea per sentence. Use the active voice. Verify every claim against the implementation at HEAD.
+
+Wrong:
+
+```yaml
+        description: |
+          Feature flag consumed by ExampleService. See `enableFeature` in `plugin.ts`.
+```
+
+Right:
+
+```yaml
+        description: |
+          Turns the example feature on in {{kib}}. Set to `false` to turn it off.
+```

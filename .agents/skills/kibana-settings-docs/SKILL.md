@@ -95,6 +95,8 @@ Required on every setting:
 
 Include `datatype` and `default` when the source defines them. Include `id` when the key would produce an ugly or colliding anchor.
 
+The `description` is user-facing. Lead with what the setting does for the reader. Follow [Description style](references/yaml-schema.md#description-style).
+
 Place a new Advanced Settings entry in the group that matches `category` in code. Keep order close to the UI. The Advanced Settings page states that settings are ordered as they appear in Kibana.
 
 ### 5. Host Markdown, TOC, and Cloud include
@@ -169,6 +171,7 @@ Skip this when the reference entry is enough.
 
 - [ ] Entry is in the YAML that matches kibana.yml vs space vs global
 - [ ] `setting` matches the runtime key at HEAD
+- [ ] Description says what the setting does for the user. It does not describe the code
 - [ ] Default and datatype match the schema or `uiSettings` registration
 - [ ] `stack` has no version only when the setting applies to all versions
 - [ ] New settings include a version, unless the key already existed and was missing from the docs

@@ -10,7 +10,7 @@ This setting is new in the product, so `stack` includes a version.
       - setting: xpack.example.enabled
         id: xpack-example-enabled
         description: |
-          Enables the example feature. Set to `false` to disable it.
+          Turns the example feature on in {{kib}}. Set to `false` to turn it off.
         datatype: bool
         default: true
         applies_to:
