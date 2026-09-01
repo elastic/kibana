@@ -18,3 +18,14 @@ export function assertConnectorSucceeded(result: {
 
   throw new Error(result.serviceMessage ?? result.message ?? 'Connector execution failed');
 }
+
+export type SlackApiChannelTarget = { channelNames: string[] } | { channelIds: string[] };
+
+/** Maps a HITL `channels.slack_api.channels` entry to the Slack API connector param. */
+export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
+  if (channel.startsWith('#')) {
+    return { channelNames: [channel] };
+  }
+
+  return { channelIds: [channel] };
+}

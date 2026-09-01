@@ -65,14 +65,14 @@ Web API Slack connectors have the following actions:
 Post message
 :   Send a plain text message to a Slack channel.
     - `channelNames` (optional): Slack channel names. Channel names must start with `#`, for example `#alerts`. Only one channel is supported. Takes priority over `channelIds` and `channels`.
-    - `channelIds` (optional): Slack channel IDs, for example `C123ABC456`. Values that start with `#` are treated as channel names for allowlist checks. Only one channel is supported.
+    - `channelIds` (optional): Slack channel IDs, for example `C123ABC456`. Only one channel is supported.
     - `channels` (optional, deprecated): Legacy channel values. Use `channelNames` or `channelIds` instead.
     - `text` (required): Message text.
 
 Post Block Kit
 :   Send a Slack [Block Kit](https://api.slack.com/block-kit) message to a Slack channel.
     - `channelNames` (optional): Slack channel names. Channel names must start with `#`, for example `#alerts`. Only one channel is supported. Takes priority over `channelIds` and `channels`.
-    - `channelIds` (optional): Slack channel IDs, for example `C123ABC456`. Values that start with `#` are treated as channel names for allowlist checks. Only one channel is supported.
+    - `channelIds` (optional): Slack channel IDs, for example `C123ABC456`. Only one channel is supported.
     - `channels` (optional, deprecated): Legacy channel values. Use `channelNames` or `channelIds` instead.
     - `text` (required): A JSON string that contains the Block Kit payload. The JSON object must include a top-level `blocks` property. In workflow YAML, use a block scalar (`|`) when the payload spans multiple lines.
 

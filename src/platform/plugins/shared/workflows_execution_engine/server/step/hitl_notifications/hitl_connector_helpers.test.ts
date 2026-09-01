@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { assertConnectorSucceeded } from './hitl_connector_helpers';
+import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
 
 describe('assertConnectorSucceeded', () => {
   it('does not throw when status is ok', () => {
@@ -32,5 +32,15 @@ describe('assertConnectorSucceeded', () => {
         message: 'Slack unavailable',
       })
     ).toThrow('Slack unavailable');
+  });
+});
+
+describe('slackApiChannelTarget', () => {
+  it('routes #names to channelNames', () => {
+    expect(slackApiChannelTarget('#alerts')).toEqual({ channelNames: ['#alerts'] });
+  });
+
+  it('routes other values to channelIds', () => {
+    expect(slackApiChannelTarget('C0123456789')).toEqual({ channelIds: ['C0123456789'] });
   });
 });

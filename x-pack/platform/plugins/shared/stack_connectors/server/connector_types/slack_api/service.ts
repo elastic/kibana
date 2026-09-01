@@ -203,30 +203,11 @@ export const createExternalService = (
   };
 
   /**
-   * Channel names are authored with a leading `#` (connector UI / `channelNames`).
-   * Values without `#` are treated as channel IDs for allowlist purposes.
-   * Slack's `channel` field accepts either form.
-   */
-  const isSlackChannelName = (value: string): boolean => value.startsWith('#');
-
-  /**
-   * Validate channel values by shape: `#…` against allowed names, otherwise against
-   * allowed IDs. Empty allowlist sides are skipped. Used for both `channelNames` and
-   * `channelIds` so allowlist behavior matches what Slack accepts.
-   */
-  const validateChannelsAgainstAllowlist = (values: string[]) => {
-    const names = values.filter(isSlackChannelName);
-    const ids = values.filter((value) => !isSlackChannelName(value));
-    validateChannels({ channels: names, allowedList: allowedChannelNames });
-    validateChannels({ channels: ids, allowedList: allowedChannelIds });
-  };
-
-  /**
    * Selects the Slack channel to use for message delivery. At the moment, only posting to a single channel is supported.
    *
    * Priority order:
-   *   1. If channelNames is provided and non-empty, validates by value shape (`#…` → names, otherwise → ids) and returns the first entry.
-   *   2. If channelIds is provided and non-empty, validates by the same value-shape rules and returns the first entry.
+   *   1. If channelNames is provided and non-empty, validates against allowedChannelNames (if configured) and returns the first entry.
+   *   2. If channelIds is provided and non-empty, validates against allowedChannelIds (if configured) and returns the first entry.
    *   3. If channels (legacy) is provided and non-empty, returns the first entry.
    *   4. Throws if none are provided or all are empty.
    *
@@ -251,12 +232,16 @@ export const createExternalService = (
 
     // priority: channelNames > channelIds > channels
     if (channelNames.length > 0) {
-      validateChannelsAgainstAllowlist(channelNames);
+      validateChannels({
+        channels: channelNames,
+        allowedList: allowedChannelNames,
+      });
+
       return channelNames[0];
     }
 
     if (channelIds.length > 0) {
-      validateChannelsAgainstAllowlist(channelIds);
+      validateChannels({ channels: channelIds, allowedList: allowedChannelIds });
       return channelIds[0];
     }
 

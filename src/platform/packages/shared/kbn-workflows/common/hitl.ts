@@ -16,7 +16,7 @@ export const MAX_HITL_EXTERNAL_RESUME_TOKEN_LENGTH = 128 as const;
 export const MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH = 512 as const;
 
 /** Max length for a Slack channel id or name in `slack_api` config. */
-export const MAX_HITL_SLACK_CHANNEL_ID_LENGTH = 256 as const;
+export const MAX_HITL_SLACK_CHANNEL_LENGTH = 256 as const;
 
 /** Max length for HITL step messages and channel notification templates. */
 export const MAX_HITL_MESSAGE_LENGTH = 10_240 as const;

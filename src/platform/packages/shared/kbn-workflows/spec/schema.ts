@@ -25,7 +25,7 @@ import {
   MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
-  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
@@ -304,7 +304,7 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
       z
         .string()
         .min(1)
-        .max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
         .describe('Slack channel ID (e.g. C0123456789) or channel name (e.g. #alerts)')
     )
     .min(1)
