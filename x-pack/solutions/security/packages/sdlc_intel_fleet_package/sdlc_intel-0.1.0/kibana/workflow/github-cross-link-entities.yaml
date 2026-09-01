@@ -4,7 +4,7 @@ description: >
   Tier-3 linkage workflow. Writes github-intel-relationships edges for PRs that close issues
   (from enrich payload) and project items that reference issue/PR content. Run catalog, activity,
   and enrich workflows first.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

@@ -3,7 +3,7 @@ name: SDLC GitHub build release calendar
 description: >
   Tier-2 projection workflow. Builds sdlc-release-calendar entries from sdlc-epic-phases release
   milestones and roadmap stages. Run github-project-epic-phases first.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

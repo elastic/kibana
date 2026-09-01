@@ -6,7 +6,7 @@ description: >
   sdlc-project-items-enriched-view. Run github-catalog-project-items first. Pages catalog-sourced
   items until none remain so a full backfill can complete in one run. Catalog must merge-update
   (not replace) documents so these fields are not wiped.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

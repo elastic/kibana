@@ -9,7 +9,7 @@ description: >
   checkpoints after every GraphQL page so a 60m timeout cannot stall the catalog. When a team
   is fully paged from the start, stale member_of_team edges are deleted. When every team is
   complete, checkpoints are cleared so the next run can refresh membership.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

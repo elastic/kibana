@@ -4,7 +4,7 @@ description: >
   Tier-2 projection workflow. Builds sdlc-team-dimension documents from github-intel-teams
   catalog data. Maps org team slug/name to project field aliases used for epic attribution.
   Run github-catalog-teams first.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

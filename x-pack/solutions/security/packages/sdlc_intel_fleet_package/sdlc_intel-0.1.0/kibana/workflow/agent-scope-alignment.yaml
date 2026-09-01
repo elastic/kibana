@@ -4,7 +4,7 @@ description: >
   Agentic development workflow. Runs the SDLC scope alignment agent over recent pull requests,
   linked GitHub issues, and parent epics, then persists misalignment findings to sdlc-agent-insights.
   Read-only analysis (NFR-003).
-enabled: false
+enabled: true
 tags:
   - sdlc
   - agent

@@ -5,7 +5,7 @@ description: >
   (parent_of edges), indexes child tickets into github-intel-epic-tickets, and updates
   sdlc-epic-phases with rollup coverage, phase gate summaries, and tickets_by_repo. Run
   github-project-epic-phases and github-enrich-issues-graph first.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

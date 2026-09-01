@@ -5,7 +5,7 @@ description: >
   pages organization repositories via GitHub GraphQL (orgCatalog.repos template),
   upserts normalized documents into github-intel-repos, and updates the checkpoint.
   Requires a configured .github connector with read:org and repo scopes.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

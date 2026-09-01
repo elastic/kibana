@@ -5,7 +5,7 @@ description: >
   parent/sub-issue/comment graph via graph.issueGraph, updates issue documents, and writes comments
   and hierarchy edges to github-intel-comments and github-intel-relationships. Run github-activity-issues
   first. Processes a batch per run with watermark checkpointing.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

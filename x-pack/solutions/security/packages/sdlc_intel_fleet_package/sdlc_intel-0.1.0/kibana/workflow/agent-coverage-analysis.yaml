@@ -4,7 +4,7 @@ description: >
   Agentic planning workflow. Runs the SDLC coverage analysis agent over sdlc-epic-phases,
   github-intel-project-items, and sdlc-team-dimension, then persists structured findings to
   sdlc-agent-insights. Read-only analysis (NFR-003).
-enabled: false
+enabled: true
 tags:
   - sdlc
   - agent

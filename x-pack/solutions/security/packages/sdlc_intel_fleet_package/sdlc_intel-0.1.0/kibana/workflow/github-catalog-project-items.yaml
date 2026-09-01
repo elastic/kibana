@@ -9,7 +9,7 @@ description: >
   timeout cannot stall the catalog. When a project is fully paged from the start, stale items
   and raw pages are deleted. When every project is complete, checkpoints are cleared so the
   next run can refresh items.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

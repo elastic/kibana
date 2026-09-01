@@ -5,7 +5,7 @@ description: >
   for each project in github-intel-projects and upserts github-intel-project-views. Run
   github-catalog-projects first. Pages projects from Elasticsearch in batches (projectsPageSize)
   until all projects are processed.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github
