@@ -67,6 +67,7 @@ import {
   createCleanupWorkflowService,
   type CleanupWorkflowService,
 } from './lib/workflows/cleanup_workflow';
+import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
@@ -291,6 +292,7 @@ export class SignificantEventsPlugin
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
+    let syncWorkflowService: SyncWorkflowService | undefined;
     let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
@@ -305,7 +307,7 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.workflowsManagement) {
-      cleanupWorkflowService = createCleanupWorkflowService({
+      syncWorkflowService = createSyncWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
       });
@@ -319,19 +321,27 @@ export class SignificantEventsPlugin
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      const getManagedWorkflowsClient = async () => {
+        const [, pluginsStart] = await core.getStartServices();
+        if (!pluginsStart.workflowsExtensions) {
+          throw new Error('Workflows extensions are not available');
+        }
+        return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
+          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+        );
+      };
+
+      cleanupWorkflowService = createCleanupWorkflowService({
+        logger: this.logger,
+        managementApi: plugins.workflowsManagement.management,
+        getManagedWorkflowsClient,
+      });
+
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
-          getManagedWorkflowsClient: async () => {
-            const [, pluginsStart] = await core.getStartServices();
-            if (!pluginsStart.workflowsExtensions) {
-              throw new Error('Workflows extensions are not available');
-            }
-            return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
-              SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-            );
-          },
+          getManagedWorkflowsClient,
         }
       );
     }
@@ -352,6 +362,7 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousKiOnboardingWorkflowService,
+        syncWorkflowService,
         cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,

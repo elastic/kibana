@@ -29,7 +29,7 @@ import {
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
-import { bootstrapCleanupWorkflow } from '../../../../lib/workflows/cleanup_workflow';
+import { bootstrapSyncWorkflow } from '../../../../lib/workflows/sync_workflow';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -74,7 +74,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     server,
     logger,
     telemetry,
-    cleanupWorkflowService,
+    syncWorkflowService,
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
@@ -166,10 +166,10 @@ const identifyInferredFeaturesRoute = createServerRoute({
           : {}),
       });
 
-      // Inferred identification is the first streams.manage-scoped request in every identification
-      // run, so it can bootstrap cleanup even when discovery never executes.
-      await bootstrapCleanupWorkflow({
-        cleanupWorkflowService,
+      // Inferred identification is the first streams.manage-scoped request in every KI
+      // identification run, so it can bootstrap the deployment-wide sync workflow once.
+      await bootstrapSyncWorkflow({
+        syncWorkflowService,
         maintenanceService,
         request,
         logger: routeLogger,

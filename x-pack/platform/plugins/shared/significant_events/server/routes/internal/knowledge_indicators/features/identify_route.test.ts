@@ -127,7 +127,7 @@ const makeInferredHandlerParams = ({
     server,
     logger: { get: jest.fn().mockReturnValue(routeLogger) },
     telemetry,
-    cleanupWorkflowService: { ensureEnabled },
+    syncWorkflowService: { ensureEnabled },
     maintenanceService,
   } as unknown as InferredHandlerParams;
 
@@ -268,7 +268,7 @@ describe('inferred feature identification route', () => {
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
   });
 
-  it('identifies inferred features and bootstraps the cleanup workflow while enabled', async () => {
+  it('identifies inferred features and bootstraps the KI sync workflow while enabled', async () => {
     const {
       handlerParams,
       request,
@@ -329,7 +329,7 @@ describe('inferred feature identification route', () => {
     expect(ensureEnabled).toHaveBeenCalledWith({ request });
   });
 
-  it('returns identification results when cleanup workflow bootstrap fails', async () => {
+  it('returns identification results when KI sync workflow bootstrap fails', async () => {
     const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({
       ensureEnabled,
@@ -340,7 +340,7 @@ describe('inferred feature identification route', () => {
       connectorId: 'connector-1',
     });
     expect(routeLogger.warn).toHaveBeenCalledWith(
-      'Failed to ensure Significant Events cleanup workflow is enabled: workflow unavailable'
+      'Failed to ensure KI sync workflow is enabled: workflow unavailable'
     );
   });
 });

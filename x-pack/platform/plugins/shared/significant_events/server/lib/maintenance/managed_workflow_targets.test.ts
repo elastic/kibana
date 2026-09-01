@@ -9,13 +9,17 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
+  buildDisableTargets,
   DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
   MEMORY_WORKFLOW_IDS,
+  PER_SPACE_MAINTENANCE_WORKFLOW_IDS,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
 
@@ -24,7 +28,7 @@ describe('managed_workflow_targets registry', () => {
     const maintenanceIds = new Set<string>([
       ...GLOBAL_MAINTENANCE_WORKFLOW_IDS,
       ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
-      ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
+      ...PER_SPACE_MAINTENANCE_WORKFLOW_IDS,
     ]);
 
     for (const id of ALL_INSTALLABLE_WORKFLOW_IDS) {
@@ -41,12 +45,26 @@ describe('managed_workflow_targets registry', () => {
     ]);
   });
 
-  it('keeps continuous onboarding in the default-space set (not memory)', () => {
+  it('keeps continuous onboarding and KI sync in the default-space set', () => {
     expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).toEqual(
-      expect.arrayContaining([SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID])
+      expect.arrayContaining([
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      ])
     );
     for (const id of MEMORY_WORKFLOW_IDS) {
       expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).not.toContain(id);
     }
+  });
+
+  it('tracks cleanup as a per-space workflow without coupling it to scheduled discovery', () => {
+    expect(PER_SPACE_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
+    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).not.toContain(
+      SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID
+    );
+    expect(buildDisableTargets(['space-a'])).toContainEqual({
+      id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      spaceId: 'space-a',
+    });
   });
 });

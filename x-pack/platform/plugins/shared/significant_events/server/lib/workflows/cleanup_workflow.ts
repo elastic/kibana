@@ -7,27 +7,20 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID } from '@kbn/workflows/managed';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { stateBlocksNewActivity } from '../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 
-// The cleanup workflow is installed and scheduled in the default space because
-// Significant Events data is deployment-wide rather than scoped per Kibana space.
-const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
-
 export interface CleanupWorkflowService {
   /**
-   * Ensures the managed Significant Events cleanup workflow is enabled.
+   * Ensures the per-space managed Significant Events cleanup workflow is installed and enabled.
    *
    * Enabling schedules the workflow's trigger task under the API key minted from
-   * the given request (the startup install path only writes the document and
-   * never schedules the trigger). Idempotent: a single `getWorkflow` read short-
-   * circuits when the workflow is already enabled, so it is cheap to call from
-   * the hot extraction path. Once enabled, the persisted Task Manager task keeps
-   * firing on its own schedule, independent of extraction.
+   * the discovery request. Idempotent: an already-enabled workflow returns after
+   * one read, while a missing workflow is installed with the space ID suffix.
    */
-  ensureEnabled(params: { request: KibanaRequest }): Promise<void>;
+  ensureEnabled(params: { request: KibanaRequest; spaceId: string }): Promise<void>;
 }
 
 /** Best-effort enables the cleanup workflow when Significant Events activity is allowed. */
@@ -35,11 +28,13 @@ export const bootstrapCleanupWorkflow = async ({
   cleanupWorkflowService,
   maintenanceService,
   request,
+  spaceId,
   logger,
 }: {
   cleanupWorkflowService: CleanupWorkflowService | undefined;
   maintenanceService: SignificantEventsMaintenanceService;
   request: KibanaRequest;
+  spaceId: string;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
   if (!cleanupWorkflowService) {
@@ -50,7 +45,7 @@ export const bootstrapCleanupWorkflow = async ({
     if (stateBlocksNewActivity(state)) {
       return;
     }
-    await cleanupWorkflowService.ensureEnabled({ request });
+    await cleanupWorkflowService.ensureEnabled({ request, spaceId });
   } catch (error) {
     logger.warn(
       `Failed to ensure Significant Events cleanup workflow is enabled: ${
@@ -63,38 +58,41 @@ export const bootstrapCleanupWorkflow = async ({
 export const createCleanupWorkflowService = ({
   logger,
   managementApi,
+  getManagedWorkflowsClient,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
+  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
 }): CleanupWorkflowService => {
   const log = logger.get('cleanup-workflow');
 
   return {
-    async ensureEnabled({ request }) {
-      const existing = await managementApi.getWorkflow(
-        SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-        MANAGED_WORKFLOW_SPACE_ID
-      );
+    async ensureEnabled({ request, spaceId }) {
+      const workflowDocumentId = `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+      let existing = await managementApi.getWorkflow(workflowDocumentId, spaceId);
 
       if (!existing) {
-        log.warn(
-          `Managed cleanup workflow ${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID} is not installed yet; skipping enablement`
-        );
-        return;
+        const managedWorkflowsClient = await getManagedWorkflowsClient();
+        await managedWorkflowsClient.install(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        });
+        existing = await managementApi.getWorkflow(workflowDocumentId, spaceId);
+        if (!existing) {
+          log.warn(
+            `Managed cleanup workflow ${workflowDocumentId} was not installed; skipping enablement`
+          );
+          return;
+        }
       }
 
       if (existing.enabled ?? false) {
         return;
       }
 
-      await managementApi.updateWorkflow(
-        SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-        { enabled: true },
-        MANAGED_WORKFLOW_SPACE_ID,
-        request
-      );
+      await managementApi.updateWorkflow(workflowDocumentId, { enabled: true }, spaceId, request);
 
-      log.info(`Enabled Significant Events cleanup workflow`);
+      log.info(`Enabled Significant Events cleanup workflow in space ${spaceId}`);
     },
   };
 };

@@ -28,8 +28,12 @@ const assertYamlContains = (expected: string) => {
 };
 
 describe('cleanup.yaml managed workflow definition', () => {
-  it('is registered as a restorable managed workflow', () => {
-    expect(definition?.management.enablement).toBe('restorable');
+  it('is registered as a dynamic, restorable managed workflow', () => {
+    expect(definition?.management).toEqual({
+      lifecycle: 'dynamic',
+      versionStrategy: 'auto',
+      enablement: 'restorable',
+    });
   });
 
   it('is disabled by default so CleanupWorkflowService controls enablement', () => {
@@ -42,23 +46,10 @@ describe('cleanup.yaml managed workflow definition', () => {
     assertYamlContains('max: 1');
   });
 
-  it('lists streams from the _streams_with_indicators endpoint', () => {
-    assertYamlContains('/internal/streams/_knowledge_indicators/_streams_with_indicators');
-  });
-
-  it('fans out over streams and reconciles each one', () => {
-    assertYamlContains("foreach: '${{ steps.get_streams.output.streams }}'");
-    assertYamlContains(
-      '/internal/streams/{{ foreach.item.streamName }}/knowledge_indicators/_reconcile'
-    );
-  });
-
-  it('continues the sweep when a single stream fails to reconcile', () => {
-    assertYamlContains('iteration-on-failure:\n          continue: true');
-  });
-
-  it('closes stale events after reconciling knowledge indicators', () => {
+  it('only cleans stale events in the workflow execution space', () => {
     assertYamlContains("name: 'Significant Events Cleanup'");
-    assertYamlContains('/internal/significant_events/events/_cleanup');
+    assertYamlContains('/s/{{ workflow.spaceId }}/internal/significant_events/events/_cleanup');
+    expect(WORKFLOW_YAML).not.toContain('_streams_with_indicators');
+    expect(WORKFLOW_YAML).not.toContain('knowledge_indicators/_reconcile');
   });
 });

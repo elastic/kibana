@@ -37,7 +37,7 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
 } as const;
 
 const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT = {
-  lifecycle: 'static',
+  lifecycle: 'dynamic',
   versionStrategy: 'auto',
   enablement: 'restorable',
 } as const;
@@ -54,7 +54,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 18,
+  version: 19,
   billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
