@@ -5,8 +5,22 @@
  * 2.0.
  */
 
-import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { InvestigationState, Severity } from '@kbn/significant-events-schema';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
+  TriggerFeedback,
+} from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
+
+/**
+ * Re-exported so consumers of these responses do not need their own dependency on
+ * `@kbn/significant-events-schema`. Investigations rate themselves on the same severity tier scale
+ * significant events use, so a tier added there widens these responses too.
+ */
+export type { Severity } from '@kbn/significant-events-schema';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -72,6 +86,9 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
+/** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
+export const MAX_KEYWORD_LENGTH = 500;
+
 export const INVESTIGATION_STATUSES = [
   'pending',
   'running',
@@ -80,6 +97,17 @@ export const INVESTIGATION_STATUSES = [
   'cancelled',
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
+
+export interface InvestigationStructuredOutput {
+  summary?: string;
+  conclusion?: string;
+  severity?: Severity;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blind_spots?: InvestigationBlindSpot[];
+  trigger_feedback?: TriggerFeedback[];
+  impact?: InvestigationImpact;
+}
 
 export interface GetInvestigationResponse {
   investigation_id: string;
@@ -95,6 +123,16 @@ export interface GetInvestigationResponse {
    * gets when `result` had to be dropped for failing validation.
    */
   conclusion?: string;
+  /**
+   * The investigation's own severity verdict for the situation it investigated. Absent for runs
+   * that are still going, failed, predate the field, or completed without the agent rating one —
+   * an absent severity means unrated, never low.
+   *
+   * Also present inside `result`. It is lifted out for the same reason `conclusion` is: it is read
+   * straight off the raw payload, so it survives `result` being dropped for failing validation,
+   * and it is the one field the list endpoint carries per row.
+   */
+  severity?: Severity;
   /**
    * Everything the investigation produced: the hypotheses it considered with the evidence and
    * ES|QL behind each verdict, the gaps it could not see past, and what it recommends doing.
@@ -131,6 +169,8 @@ export interface ListInvestigationItem {
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
+  /** See {@link GetInvestigationResponse.severity}. */
+  severity?: Severity;
   concurrency_key?: string;
   executed_by?: string;
 }
