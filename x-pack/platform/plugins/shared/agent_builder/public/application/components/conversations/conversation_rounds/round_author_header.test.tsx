@@ -53,7 +53,7 @@ describe('RoundAuthorHeader', () => {
   });
 
   it('renders the user author and Slack origin', () => {
-    render(
+    const { container } = render(
       <RoundAuthorHeader
         startedAt={startedAt}
         author={{ id: 'user-1', full_name: 'Jane Doe', username: 'jdoe' }}
@@ -63,6 +63,7 @@ describe('RoundAuthorHeader', () => {
 
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
     expect(screen.getByText('via Slack')).toBeInTheDocument();
+    expect(container).toHaveTextContent('·');
   });
 
   it('uses the user profile display name without rendering the avatar', () => {
@@ -94,6 +95,17 @@ describe('RoundAuthorHeader', () => {
 
     expect(screen.queryByText('Me')).not.toBeInTheDocument();
     expect(container.querySelector('strong')).not.toBeInTheDocument();
+    expect(container).not.toHaveTextContent('·');
+  });
+
+  it('does not render a leading separator before Slack origin when there is no author name', () => {
+    const { container } = render(
+      <RoundAuthorHeader startedAt={startedAt} origin={{ type: ConversationOriginType.Slack }} />
+    );
+
+    expect(container.textContent?.trim().startsWith('·')).toBe(false);
+    expect(screen.getByText('via Slack')).toBeInTheDocument();
+    expect(container).toHaveTextContent('·');
   });
 
   it('renders the agent name', () => {

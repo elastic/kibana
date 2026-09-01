@@ -125,24 +125,27 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
           flex-wrap: wrap;
         `}
       >
-        {name && <RoundAuthorName name={name} />}
-        {isAgent && (
+        {isAgent ? (
           <>
+            {name && <RoundAuthorName name={name} />}
             <RoundAgentBadge />
+            <RoundAuthorSeparator />
           </>
+        ) : (
+          name && (
+            <>
+              <RoundAuthorName name={name} />
+              <RoundAuthorSeparator />
+            </>
+          )
         )}
         {origin && (
           <>
-            <RoundAuthorSeparator />
             <RoundOrigin origin={origin} />
-          </>
-        )}
-        {time && (
-          <>
             <RoundAuthorSeparator />
-            <RoundTime time={time} />
           </>
         )}
+        <RoundTime time={time} />
       </span>
     </EuiText>
   );
