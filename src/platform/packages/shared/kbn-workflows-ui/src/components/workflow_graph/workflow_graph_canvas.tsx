@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiToolTip, transparentize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiToolTip,
+  transparentize,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   Background,
   type ColorMode,
@@ -100,9 +107,6 @@ const EDGE_TYPES: EdgeTypes = {
 const INITIAL_ZOOM = 1;
 const TOP_PADDING = 80;
 
-const CANVAS_CONTROLS_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
-
 /**
  * Returns the `setCenter` target (x, y) for the initial / reset view.
  *
@@ -123,6 +127,8 @@ const getResetViewTarget = (
     ? { x: bounds.minX + wrapperWidth / 2 - TOP_PADDING, y: bounds.centerY }
     : { x: bounds.centerX, y: bounds.minY + wrapperHeight / 2 - TOP_PADDING };
 
+const CORNER_CONTROLS_INSET = 12;
+
 function CanvasZoomControls({
   onResetView,
   onFitView,
@@ -131,6 +137,7 @@ function CanvasZoomControls({
   onFitView: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const floatingShadow = useEuiShadow('m');
   const { zoomIn, zoomOut } = useReactFlow();
 
   const zoomOutLabel = i18n.translate('workflowsUi.graph.zoomOut', {
@@ -150,60 +157,172 @@ function CanvasZoomControls({
   const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
 
   return (
-    <Panel position="bottom-right" style={{ margin: 12 }}>
-      <div
-        css={{
+    <div
+      css={[
+        {
           background: euiTheme.colors.backgroundBasePlain,
-          borderRadius: 8,
-          boxShadow: CANVAS_CONTROLS_SHADOW,
+          borderRadius: euiTheme.border.radius.small,
           display: 'flex',
           flexDirection: 'column',
           padding: 4,
           gap: 2,
-        }}
+          position: 'relative',
+        },
+        floatingShadow,
+      ]}
+    >
+      <EuiToolTip content={zoomInLabel} position="right" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="plus"
+          aria-label={zoomInLabel}
+          color="text"
+          size="s"
+          onClick={handleZoomIn}
+          data-test-subj="workflowCanvas-zoom-in"
+        />
+      </EuiToolTip>
+      <EuiToolTip content={zoomOutLabel} position="right" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="minus"
+          aria-label={zoomOutLabel}
+          color="text"
+          size="s"
+          onClick={handleZoomOut}
+          data-test-subj="workflowCanvas-zoom-out"
+        />
+      </EuiToolTip>
+      <EuiToolTip content={resetZoomLabel} position="right" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="bullseye"
+          aria-label={resetZoomLabel}
+          color="text"
+          size="s"
+          onClick={onResetView}
+          data-test-subj="workflowCanvas-reset-zoom"
+        />
+      </EuiToolTip>
+      <EuiToolTip content={fitViewLabel} position="right" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="fullScreen"
+          aria-label={fitViewLabel}
+          color="text"
+          size="s"
+          onClick={onFitView}
+          data-test-subj="workflowCanvas-fit-view"
+        />
+      </EuiToolTip>
+    </div>
+  );
+}
+
+function CanvasMinimap({
+  nodeColor,
+}: {
+  nodeColor: (n: { type?: string; data?: unknown }) => string;
+}) {
+  const { euiTheme } = useEuiTheme();
+  // Keep the shadow mixin's dark-mode ::after ring off this wrapper; that
+  // overlay sits at z-index 0 and the MiniMap paints over it, so the border
+  // would only show around the collapse header.
+  const floatingShadow = useEuiShadow('m', { border: 'none' });
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const collapseLabel = i18n.translate('workflowsUi.graph.collapseMinimapAriaLabel', {
+    defaultMessage: 'Collapse minimap',
+  });
+  const expandLabel = i18n.translate('workflowsUi.graph.expandMinimapAriaLabel', {
+    defaultMessage: 'Expand minimap',
+  });
+
+  if (!isExpanded) {
+    return (
+      <div
+        css={[
+          {
+            background: euiTheme.colors.backgroundBasePlain,
+            borderRadius: euiTheme.border.radius.small,
+            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            padding: 4,
+            position: 'relative',
+          },
+          floatingShadow,
+        ]}
       >
-        <EuiToolTip content={zoomInLabel} position="left" disableScreenReaderOutput>
+        <EuiToolTip content={expandLabel} position="left" disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="plusCircle"
-            aria-label={zoomInLabel}
+            iconType="map"
+            aria-label={expandLabel}
             color="text"
             size="s"
-            onClick={handleZoomIn}
-            data-test-subj="workflowCanvas-zoom-in"
-          />
-        </EuiToolTip>
-        <EuiToolTip content={zoomOutLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="minusCircle"
-            aria-label={zoomOutLabel}
-            color="text"
-            size="s"
-            onClick={handleZoomOut}
-            data-test-subj="workflowCanvas-zoom-out"
-          />
-        </EuiToolTip>
-        <EuiToolTip content={resetZoomLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="bullseye"
-            aria-label={resetZoomLabel}
-            color="text"
-            size="s"
-            onClick={onResetView}
-            data-test-subj="workflowCanvas-reset-zoom"
-          />
-        </EuiToolTip>
-        <EuiToolTip content={fitViewLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="fullScreen"
-            aria-label={fitViewLabel}
-            color="text"
-            size="s"
-            onClick={onFitView}
-            data-test-subj="workflowCanvas-fit-view"
+            onClick={() => setIsExpanded(true)}
+            data-test-subj="workflowCanvas-expand-minimap"
           />
         </EuiToolTip>
       </div>
-    </Panel>
+    );
+  }
+
+  return (
+    <div
+      css={[
+        {
+          position: 'relative',
+          borderRadius: euiTheme.border.radius.small,
+          background: euiTheme.colors.emptyShade,
+          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+          overflow: 'hidden',
+          '& .react-flow__minimap.react-flow__panel': {
+            position: 'relative',
+            inset: 'auto',
+            margin: 0,
+            transform: 'none',
+          },
+          '& .react-flow__minimap-svg': {
+            margin: 4,
+            width: 'calc(100% - 8px)',
+            height: 'calc(100% - 8px)',
+          },
+        },
+        floatingShadow,
+      ]}
+    >
+      <div
+        css={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          paddingTop: 4,
+          paddingRight: 4,
+        }}
+      >
+        <EuiToolTip content={collapseLabel} position="left" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="minus"
+            aria-label={collapseLabel}
+            color="text"
+            size="xs"
+            onClick={() => setIsExpanded(false)}
+            data-test-subj="workflowCanvas-collapse-minimap"
+          />
+        </EuiToolTip>
+      </div>
+      <MiniMap
+        pannable
+        zoomable
+        position="bottom-right"
+        bgColor={euiTheme.colors.backgroundBaseSubdued}
+        maskColor={transparentize(euiTheme.colors.backgroundBaseSubdued, 0.7)}
+        nodeColor={nodeColor}
+        nodeStrokeWidth={0}
+        nodeBorderRadius={2}
+        style={{
+          width: 160,
+          height: 126,
+          boxSizing: 'border-box',
+          background: euiTheme.colors.emptyShade,
+        }}
+      />
+    </div>
   );
 }
 
@@ -246,7 +365,7 @@ export interface WorkflowGraphCanvasProps {
   };
   /** Whether to render the minimap. Pass false to suppress it (e.g. for exports). */
   readonly showMinimap?: boolean;
-  /** Whether to render the floating zoom controls in the bottom-right corner. */
+  /** Whether to render the floating zoom controls in the bottom-left corner. */
   readonly showZoomControls?: boolean;
   /**
    * Whether to render the dot-pattern background and the coloured wrapper div
@@ -321,13 +440,10 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     }),
     [onStepRun, canRunSteps, renderStepIcon, onStepSelect]
   );
-  const { euiTheme, colorMode: euiColorMode } = useEuiTheme();
-  // Background dots: `borderBasePlain` in light; softened to 50% opacity in dark
-  // so the grid reads as subtle texture rather than active dots on the dark canvas.
-  const backgroundDotColor =
-    euiColorMode === 'DARK'
-      ? transparentize(euiTheme.colors.borderBasePlain, 0.5)
-      : euiTheme.colors.borderBasePlain;
+  const { euiTheme } = useEuiTheme();
+  // Dots are a readable grid so nodes lift off the canvas. `borderBaseProminent`
+  // at 40% alpha holds in both color modes without a mode-specific branch.
+  const backgroundDotColor = transparentize(euiTheme.colors.borderBaseProminent, 0.4);
 
   const { nodes, edges } = useWorkflowLayout({
     workflow,
@@ -569,6 +685,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         | undefined;
       const status = data?.stepExecution?.status;
       if (status === 'failed') return euiTheme.colors.danger;
+      if (status === 'completed') return euiTheme.colors.success;
       // Figma (node 10808:19179): the trigger node reads as pink (accent) in the
       // minimap, matching its icon accent; all other steps are blue (primary).
       // Tokens keep the light look (#0b64dd / #ee72a6) and adapt in dark mode.
@@ -576,7 +693,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         data?.isTrigger || (data?.stepType ? TRIGGER_STEP_TYPES.has(data.stepType) : false);
       return isTriggerNode ? euiTheme.colors.accent : euiTheme.colors.primary;
     },
-    [euiTheme.colors.danger, euiTheme.colors.accent, euiTheme.colors.primary]
+    [euiTheme.colors.danger, euiTheme.colors.success, euiTheme.colors.accent, euiTheme.colors.primary]
   );
 
   const dimmed = !isYamlValid;
@@ -590,16 +707,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           width: '100%',
           height: '100%',
           background: showBackground ? euiTheme.colors.backgroundBaseSubdued : 'transparent',
-          // Inset the MiniMap's inner SVG so the container's white background
-          // shows through as a 4px frame on all sides. React Flow sizes the
-          // SVG via attributes to match the container's outer dimensions, so
-          // CSS padding alone only takes effect on top/left — shrinking the
-          // SVG dimensions in CSS is what works uniformly.
-          '& .react-flow__minimap-svg': {
-            margin: 4,
-            width: 'calc(100% - 8px)',
-            height: 'calc(100% - 8px)',
-          },
         }}
         data-test-subj="workflowGraphCanvas"
       >
@@ -671,33 +778,20 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 <Background
                   bgColor={euiTheme.colors.backgroundBaseSubdued}
                   color={backgroundDotColor}
+                  gap={16}
+                  size={1.25}
                 />
               )}
               {toolbar}
               {showZoomControls && (
-                <CanvasZoomControls onResetView={handleResetView} onFitView={handleFitView} />
+                <Panel position="bottom-left" style={{ margin: CORNER_CONTROLS_INSET }}>
+                  <CanvasZoomControls onResetView={handleResetView} onFitView={handleFitView} />
+                </Panel>
               )}
               {showMinimap && (
-                <MiniMap
-                  pannable
-                  zoomable
-                  position="bottom-left"
-                  bgColor={euiTheme.colors.backgroundBaseSubdued}
-                  maskColor={transparentize(euiTheme.colors.backgroundBaseSubdued, 0.7)}
-                  nodeColor={minimapNodeColor}
-                  nodeStrokeWidth={0}
-                  nodeBorderRadius={2}
-                  style={{
-                    width: 160,
-                    height: 126,
-                    boxSizing: 'border-box',
-                    background: euiTheme.colors.emptyShade,
-                    borderRadius: 4,
-                    overflow: 'hidden',
-                    boxShadow:
-                      '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)',
-                  }}
-                />
+                <Panel position="bottom-right" style={{ margin: CORNER_CONTROLS_INSET }}>
+                  <CanvasMinimap nodeColor={minimapNodeColor} />
+                </Panel>
               )}
             </ReactFlow>
           </GraphErrorBoundary>

@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { deslugifyStepName } from './deslugify_step_name';
+import { resolveNodeChipStyle } from './resolve_node_chip_style';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
@@ -104,6 +105,10 @@ export function WorkflowVisualEditorFlyout({
     target.kind === 'step'
       ? target.stepInfo?.stepType ?? target.stepType ?? 'package'
       : target.triggerType;
+  const chip = resolveNodeChipStyle(euiTheme, iconStepType, isTrigger, {
+    isSuccess: false,
+    isFailed: false,
+  });
 
   const yamlSlice = useMemo(() => {
     if (target.kind === 'trigger') return target.yamlSnippet;
@@ -148,7 +153,7 @@ export function WorkflowVisualEditorFlyout({
         display: 'flex',
         flexDirection: 'column',
         background: euiTheme.colors.backgroundBasePlain,
-        borderRadius: 8,
+        borderRadius: euiTheme.border.radius.small,
         overflow: 'hidden',
         border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       }}
@@ -173,18 +178,16 @@ export function WorkflowVisualEditorFlyout({
           <EuiFlexItem grow={false}>
             <div
               css={{
-                width: 40,
-                height: 40,
-                // Same light-gray inner-box stroke the graph step uses
-                // (Figma FIGMA_STEP_INNER_BOX_BORDER) so the flyout header
-                // visually echoes the row that opened it.
-                border: `1px solid #e4e7f1`,
-                borderRadius: 8,
-                background: euiTheme.colors.backgroundBasePlain,
+                width: 28,
+                height: 28,
+                border: `1px solid ${chip.border}`,
+                borderRadius: euiTheme.border.radius.small,
+                background: chip.background,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                color: chip.iconColor,
               }}
             >
               {renderStepIcon ? (

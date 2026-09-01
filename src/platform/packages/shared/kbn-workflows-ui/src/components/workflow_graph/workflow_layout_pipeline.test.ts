@@ -354,9 +354,9 @@ describe('workflow layout pipeline', () => {
   it('constants match the hook: nodeSep is WORKFLOW_NODE_SEP and rankSep is WORKFLOW_RANK_SEP', () => {
     // Regression guard: if the constants drifted between the hook and the
     // pipeline, layout results would silently differ. The test just asserts
-    // the exported values have the expected numeric meaning (50 / 70) that
+    // the exported values have the expected numeric meaning (50 / 90) that
     // was hard-coded in the original use_workflow_layout.ts.
     expect(WORKFLOW_NODE_SEP).toBe(50);
-    expect(WORKFLOW_RANK_SEP).toBe(70);
+    expect(WORKFLOW_RANK_SEP).toBe(90);
   });
 });
