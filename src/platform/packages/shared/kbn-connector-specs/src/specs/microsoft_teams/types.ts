@@ -12,7 +12,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // =============================================================================
 // Shared limits
 // =============================================================================
-const MAX_FREEFORM = 2000;
+const MAX_FREEFORM = 10000;
 const MAX_ID = 200;
 const MAX_TITLE = 255;
 
