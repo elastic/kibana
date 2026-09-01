@@ -142,7 +142,7 @@ steps:
                     "id": "{{ node.id }}",
                     "@timestamp": "{{ execution.startedAt }}",
                     "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
-                    "person": {"login": "{{ node.login }}", "name": "{{ node.name }}", "id": "{{ node.id }}"},
+                    "person": {"login": {{ node.login | json }}, "name": {{ node.name | json }}, "id": "{{ node.id }}"},
                     "payload": {{ node | json }}
                   }  {% unless forloop.last %},{% endunless %}
                 {%- endfor -%}
@@ -166,10 +166,10 @@ steps:
                     "id": "{{ consts.orgLogin }}-{{ variables.teamSlug }}-{{ node.id }}",
                     "@timestamp": "{{ execution.startedAt }}",
                     "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
-                    "from": "{{ node.login }}",
-                    "to": "{{ variables.teamSlug }}",
+                    "from": {{ node.login | json }},
+                    "to": {{ variables.teamSlug | json }},
                     "relation": "member_of_team",
-                    "metadata": {"org": "{{ consts.orgLogin }}", "team_name": "{{ variables.teamName }}"},
+                    "metadata": {"org": "{{ consts.orgLogin }}", "team_name": {{ variables.teamName | json }}},
                     "payload": {{ node | json }}
                   }  {% unless forloop.last %},{% endunless %}
                 {%- endfor -%}

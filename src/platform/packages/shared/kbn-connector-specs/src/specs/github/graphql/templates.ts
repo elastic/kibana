@@ -113,7 +113,6 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
                 id
                 login
                 name
-                email
                 avatarUrl
                 company
                 location
@@ -142,7 +141,6 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
                 id
                 login
                 name
-                email
                 company
                 location
                 avatarUrl
