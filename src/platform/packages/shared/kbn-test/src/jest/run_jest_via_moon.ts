@@ -104,6 +104,7 @@ const WORKER_OOM_MESSAGE_RE =
  * when the whole Jest process dies before producing any JSON for us to parse.
  */
 const RAW_OOM_SIGNATURE_RE = /heap out of memory|allocation failure;|Last few GCs/i;
+const MOON_JEST_PROJECT_ID_RE = '([^:)\\s]+)';
 
 /** Walk up from a test file to find the nearest jest config. */
 export const findJestConfig = (testFilePath: string): string | undefined => {
@@ -202,15 +203,18 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
   for (const rawLine of output.split('\n')) {
     const stripped = stripAnsi(rawLine).trim();
 
-    // "pass RunTask(@kbn/foo:jest) (cached, ...)" from --summary detailed
-    const cachedMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+    // "pass RunTask(@kbn/foo:jest) (cached, ...)" from --summary detailed.
+    // Project ids aren't always @-scoped (e.g. `kibana-buildkite`).
+    const cachedMatch = stripped.match(
+      new RegExp(`^pass RunTask\\(${MOON_JEST_PROJECT_ID_RE}:jest\\) \\(cached`)
+    );
     if (cachedMatch) {
       cachedProjects.add(cachedMatch[1]);
       continue;
     }
 
     // Jest --json output: either prefixed "@kbn/foo:jest | {...}" or unprefixed "{...}"
-    const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+    const jsonPrefixMatch = stripped.match(new RegExp(`^${MOON_JEST_PROJECT_ID_RE}:jest \\| \\{`));
     const isUnprefixedJson = !jsonPrefixMatch && stripped.startsWith('{"num');
     if (jsonPrefixMatch || isUnprefixedJson) {
       const project = jsonPrefixMatch ? jsonPrefixMatch[1] : '_single';
@@ -336,17 +340,21 @@ export const buildMoonJestWarnings = ({
 const parseMoonJestProgressProject = (rawLine: string) => {
   const stripped = stripAnsi(rawLine).trim();
 
-  const cachedSummaryMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+  const cachedSummaryMatch = stripped.match(
+    new RegExp(`^pass RunTask\\(${MOON_JEST_PROJECT_ID_RE}:jest\\) \\(cached`)
+  );
   if (cachedSummaryMatch) {
     return cachedSummaryMatch[1];
   }
 
-  const summaryMatch = stripped.match(/^(?:pass|fail) RunTask\((@[^:]+):jest\) \(/);
+  const summaryMatch = stripped.match(
+    new RegExp(`^(?:pass|fail) RunTask\\(${MOON_JEST_PROJECT_ID_RE}:jest\\) \\(`)
+  );
   if (summaryMatch) {
     return summaryMatch[1];
   }
 
-  const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+  const jsonPrefixMatch = stripped.match(new RegExp(`^${MOON_JEST_PROJECT_ID_RE}:jest \\| \\{`));
   if (jsonPrefixMatch) {
     return jsonPrefixMatch[1];
   }

@@ -855,6 +855,10 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async createEntitySource(props: CreateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
     return this.kbnClient
@@ -868,6 +872,10 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
     return this.kbnClient
@@ -881,6 +889,10 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+    */
   async createPrivMonUser(props: CreatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
     return this.kbnClient
@@ -1164,6 +1176,10 @@ Delete the asset criticality record for a specific entity.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async deleteEntitySource(props: DeleteEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
     return this.kbnClient
@@ -1176,6 +1192,9 @@ Delete the asset criticality record for a specific entity.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
     return this.kbnClient
@@ -1211,6 +1230,10 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+    */
   async deletePrivMonUser(props: DeletePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
     return this.kbnClient
@@ -1328,6 +1351,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   async disableMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
     return this.kbnClient
@@ -1965,6 +1991,10 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async getEntitySource(props: GetEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntitySource`);
     return this.kbnClient
@@ -2437,6 +2467,9 @@ response reports a result for each one.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
     return this.kbnClient
@@ -2608,6 +2641,10 @@ Each row will match up to 10,000 entities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async listEntitySources(props: ListEntitySourcesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListEntitySources`);
     return this.kbnClient
@@ -2622,6 +2659,10 @@ Each row will match up to 10,000 entities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+    */
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -2814,6 +2855,10 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+    */
   async privmonBulkUploadUsersCsv(props: PrivmonBulkUploadUsersCSVProps) {
     this.log.info(`${new Date().toISOString()} Calling API PrivmonBulkUploadUsersCSV`);
     return this.kbnClient
@@ -2827,6 +2872,9 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   async privMonHealth() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
     return this.kbnClient
@@ -2840,8 +2888,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Check if the current user has all required permissions for Privilege Monitoring
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Check if the current user has all required permissions for Privilege Monitoring.
+
+    */
   async privMonPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
     return this.kbnClient
@@ -3075,6 +3126,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   async scheduleMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
     return this.kbnClient
@@ -3118,6 +3172,10 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -3438,6 +3496,10 @@ remain on the watchlist.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+    */
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient
@@ -3451,6 +3513,10 @@ remain on the watchlist.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+    */
   async updatePrivMonUser(props: UpdatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
     return this.kbnClient

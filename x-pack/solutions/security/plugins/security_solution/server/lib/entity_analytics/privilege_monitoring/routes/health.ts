@@ -17,7 +17,9 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .get({
@@ -33,6 +35,17 @@ export const healthCheckPrivilegeMonitoringRoute = (
       {
         version: API_VERSIONS.public.v1,
         validate: {},
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
 
       withMinimumLicense(

@@ -294,6 +294,7 @@ export const getAgentTagsHandler: RequestHandler<
   const tags = await AgentService.getAgentTags(soClient, esClient, {
     showInactive: request.query.showInactive,
     kuery: request.query.kuery,
+    spaceId: getCurrentNamespace(soClient),
   });
 
   const body: GetAgentTagsResponse = {
@@ -595,8 +596,10 @@ export const postRetrieveAgentsByActionsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
-  const agents = await AgentService.getAgentsByActionsIds(esClient, request.body.actionIds);
+  const allAgentIds = await AgentService.getAgentsByActionsIds(esClient, request.body.actionIds);
+  const agents = await AgentService.filterAgentIdsByNamespace(esClient, soClient, allAgentIds);
   const body: PostRetrieveAgentsByActionsResponse = { items: agents };
   return response.ok({ body });
 };
@@ -606,6 +609,10 @@ export const getAgentUploadsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  await AgentService.getAgentById(esClient, soClient, request.params.agentId);
+
   const body: GetAgentUploadsResponse = {
     items: await AgentService.getAgentUploads(esClient, request.params.agentId),
   };
@@ -618,6 +625,11 @@ export const getAgentUploadFileHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  const agentId = await AgentService.getAgentIdForUploadFile(esClient, request.params.fileId);
+  await AgentService.getAgentById(esClient, soClient, agentId);
+
   const resp = await AgentService.getAgentUploadFile(
     esClient,
     request.params.fileId,
@@ -632,6 +644,11 @@ export const deleteAgentUploadFileHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  const agentId = await AgentService.getAgentIdForUploadFile(esClient, request.params.fileId);
+  await AgentService.getAgentById(esClient, soClient, agentId);
+
   const resp = await AgentService.deleteAgentUploadFile(esClient, request.params.fileId);
 
   return response.ok({ body: resp });

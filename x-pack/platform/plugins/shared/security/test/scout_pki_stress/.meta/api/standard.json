@@ -1,0 +1,22 @@
+{
+  "sha1": "6f5eaf7eab8147d4c3f4acdc58237af9bd505dfe",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ef1a2f35345926a-0680a03337668fd",
+      "title": "PKI HTTP/2 stream cancel cancelling one stream during PKI auth does not revoke the session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_pki_stress/api/tests/pki_http2_stream_cancel.spec.ts",
+        "line": 41,
+        "column": 5
+      }
+    }
+  ]
+}
