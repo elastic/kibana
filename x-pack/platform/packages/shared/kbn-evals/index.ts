@@ -89,6 +89,8 @@ export type {
   OnEvaluationComplete,
   ExperimentStartEvent,
   OnExperimentStart,
+  ExperimentCompleteEvent,
+  OnExperimentComplete,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';

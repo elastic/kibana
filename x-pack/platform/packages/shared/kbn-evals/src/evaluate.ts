@@ -284,6 +284,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const gitMetadata = getGitMetadata();
       const hostName = osHostname();
+      const scoreIngestFailures = new Map<string, number>();
+      const countIngestFailures = (experimentId: string, count: number) => {
+        scoreIngestFailures.set(experimentId, (scoreIngestFailures.get(experimentId) ?? 0) + count);
+      };
 
       const executorClient = new KibanaEvalsClient({
         log,
@@ -300,8 +304,52 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             examples: dataset.examples.map(toDatasetRouteExample),
           }),
         getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
-        onExperimentStart: async ({ experimentId }) => {
-          workerExperimentId.current = experimentId;
+        onExperimentStart: async (event) => {
+          workerExperimentId.current = event.experimentId;
+          // Snapshot the protocol into an experiment record. Best effort — an
+          // older Kibana without the record API is skipped inside the client.
+          await evalsClient.createExperimentRecord(event.experimentId, {
+            name: event.experimentName.slice(0, 256),
+            protocol: {
+              dataset: {
+                id: event.dataset.id,
+                name: event.dataset.name,
+                ...(event.dataset.description
+                  ? { description: event.dataset.description.slice(0, 2048) }
+                  : {}),
+                examples_count: event.dataset.examplesCount,
+              },
+              task: { model: toScoreModel(model) },
+              evaluators: event.evaluators.map((evaluator) => ({
+                name: evaluator.name,
+                ...(evaluator.version ? { version: evaluator.version } : {}),
+                kind: evaluator.kind === 'LLM' ? ('llm' as const) : ('code' as const),
+                // Code evaluators invoke no model, so none is attributed to them.
+                ...(evaluator.kind === 'LLM' && evaluator.model ? { model: evaluator.model } : {}),
+              })),
+              total_repetitions: repetitions,
+              ...(event.metadata ? { metadata: event.metadata } : {}),
+            },
+            provenance: {
+              ...(executionId ? { execution_id: executionId } : {}),
+              ...(suiteId ? { suite_id: suiteId } : {}),
+              hostname: hostName,
+              git: { branch: gitMetadata.branch, commit_sha: gitMetadata.commitSha },
+              ...(buildkiteMetadata ? { ci: buildkiteMetadata } : {}),
+            },
+            ...(spaceIds?.length ? { space_ids: spaceIds } : {}),
+          });
+        },
+        onExperimentComplete: async (event) => {
+          await evalsClient.finalizeExperimentRecord(event.experimentId, {
+            status: event.status,
+            ...(event.error ? { error: event.error.slice(0, 4096) } : {}),
+            completeness: {
+              successful_tasks: event.completeness.successfulTasks,
+              failed_tasks: event.completeness.failedTasks,
+              score_ingest_failures: scoreIngestFailures.get(event.experimentId) ?? 0,
+            },
+          });
         },
         onEvaluationComplete: async (event) => {
           try {
@@ -323,6 +371,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             );
             for (const result of results) {
               if (result.failed.length > 0) {
+                countIngestFailures(event.experimentId, result.failed.length);
                 log.warning(
                   `Score ingest partially failed for example ${event.exampleId}: ${result.failed
                     .map((f) => f.reason)
@@ -331,6 +380,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               }
             }
           } catch (error) {
+            countIngestFailures(event.experimentId, 1);
             log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
           }
         },

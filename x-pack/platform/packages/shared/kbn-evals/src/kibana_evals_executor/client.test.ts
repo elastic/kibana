@@ -754,4 +754,125 @@ describe('KibanaEvalsClient', () => {
       expect(exp.evaluationRuns).toHaveLength(4);
     });
   });
+
+  describe('experiment lifecycle events', () => {
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [
+        { id: 'ex-1', input: { q: 1 }, output: { expected: 1 } },
+        { id: 'ex-2', input: { q: 2 }, output: { expected: 2 } },
+      ],
+    };
+
+    const judgeModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
+
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'Judge',
+        kind: 'LLM',
+        direction: 'maximize',
+        evaluate: async () => ({ score: 1 }),
+        getModel: () => judgeModel,
+        getVersion: () => '2.0.0',
+      },
+      {
+        name: 'AlwaysOne',
+        kind: 'CODE',
+        direction: 'maximize',
+        evaluate: async () => ({ score: 1 }),
+      },
+    ];
+
+    it('emits the protocol snapshot on onExperimentStart', async () => {
+      const onExperimentStart = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 2, onExperimentStart });
+
+      const [exp] = await client.runExperiment(
+        {
+          name: 'My experiment',
+          datasets: [dataset],
+          task: async () => ({ value: 1 }),
+          metadata: { foo: 'bar' },
+        },
+        evaluators
+      );
+
+      expect(onExperimentStart).toHaveBeenCalledTimes(1);
+      expect(onExperimentStart).toHaveBeenCalledWith({
+        experimentId: exp.id,
+        experimentName: 'My experiment',
+        dataset: {
+          id: exp.datasetId,
+          name: 'ds',
+          description: 'desc',
+          examplesCount: 2,
+        },
+        evaluators: [
+          { name: 'Judge', kind: 'LLM', version: '2.0.0', model: judgeModel },
+          { name: 'AlwaysOne', kind: 'CODE', version: undefined, model: undefined },
+        ],
+        metadata: { foo: 'bar' },
+      });
+    });
+
+    it('emits a completed onExperimentComplete event with task counts', async () => {
+      const onExperimentComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 2, onExperimentComplete });
+
+      const [exp] = await client.runExperiment(
+        { datasets: [dataset], task: async () => ({ value: 1 }) },
+        evaluators
+      );
+
+      expect(onExperimentComplete).toHaveBeenCalledTimes(1);
+      expect(onExperimentComplete).toHaveBeenCalledWith({
+        experimentId: exp.id,
+        status: 'completed',
+        completeness: { successfulTasks: 4, failedTasks: 0 },
+      });
+    });
+
+    it('emits a failed event with counts before rethrowing when a task throws', async () => {
+      const onExperimentComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onExperimentComplete });
+
+      const task = async ({ input }: { input?: Record<string, unknown> }) => {
+        if (input?.q === 2) {
+          throw new Error('task exploded');
+        }
+        return { value: 1 };
+      };
+
+      await expect(client.runExperiment({ datasets: [dataset], task }, evaluators)).rejects.toThrow(
+        'task exploded'
+      );
+
+      expect(onExperimentComplete).toHaveBeenCalledTimes(1);
+      expect(onExperimentComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'failed',
+          error: 'task exploded',
+          // Every run settles before the failure surfaces, so the healthy
+          // example is still counted.
+          completeness: { successfulTasks: 1, failedTasks: 1 },
+        })
+      );
+    });
+
+    it('does not mask the experiment outcome when onExperimentComplete throws', async () => {
+      const onExperimentComplete = jest.fn().mockRejectedValue(new Error('record write failed'));
+      const client = createClient({ repetitions: 1, onExperimentComplete });
+
+      const [exp] = await client.runExperiment(
+        { datasets: [dataset], task: async () => ({ value: 1 }) },
+        evaluators
+      );
+
+      expect(exp.evaluationRuns).toHaveLength(4);
+      expect(mockLog.warning).toHaveBeenCalledWith(
+        expect.stringContaining('onExperimentComplete callback failed')
+      );
+    });
+  });
 });

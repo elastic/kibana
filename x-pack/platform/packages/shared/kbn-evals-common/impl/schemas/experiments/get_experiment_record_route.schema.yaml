@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Experiment Record API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}/_record:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationExperimentRecord
+      description: >-
+        Get the stored record of an experiment: the protocol snapshot taken
+        when the run started, its lifecycle status, provenance, and the
+        completeness counters reported when it was finalized. Returns 404
+        for experiments that never created a record.
+      summary: Get evaluation experiment record
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+      responses:
+        '200':
+          description: The stored experiment record
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationExperimentRecord'
+        '404':
+          description: No record exists for this experiment in this space
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024

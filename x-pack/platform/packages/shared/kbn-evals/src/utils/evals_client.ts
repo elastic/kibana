@@ -15,6 +15,8 @@ import {
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
+  EVALS_EXPERIMENT_RECORD_FINALIZE_URL,
+  EVALS_EXPERIMENT_RECORD_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
@@ -30,8 +32,10 @@ import {
   ResolveEvaluationDatasetResponse,
   UpsertEvaluationDatasetResponse,
   getDatasetId,
+  type CreateEvaluationExperimentRecordRequestBodyInput,
   type DatasetMaturity,
   type EvaluationScoreDocument,
+  type FinalizeEvaluationExperimentRecordRequestBodyInput,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
@@ -237,6 +241,76 @@ export class EvalsClient {
     }
 
     return IngestScoresResponse.parse(data);
+  }
+
+  /**
+   * Creates the experiment record when a run starts.
+   */
+  async createExperimentRecord(
+    experimentId: string,
+    body: CreateEvaluationExperimentRecordRequestBodyInput
+  ): Promise<void> {
+    try {
+      await this.kbnClient.request({
+        path: this.path(
+          EVALS_EXPERIMENT_RECORD_URL.replace('{experimentId}', encodeURIComponent(experimentId))
+        ),
+        method: 'POST',
+        body,
+        headers: VERSIONED_HEADERS,
+        retries: 0,
+      });
+    } catch (error: unknown) {
+      const statusCode = getStatusCode(error);
+      if (statusCode === 404) {
+        this.log.debug(
+          `Target Kibana has no experiment record API; skipping the record for experiment ${experimentId}`
+        );
+        return;
+      }
+      if (statusCode === 409) {
+        this.log.debug(`Experiment record for ${experimentId} already exists; leaving it as-is`);
+        return;
+      }
+      this.log.warning(
+        `Failed to create experiment record for ${experimentId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Marks the experiment record as completed or failed.
+   */
+  async finalizeExperimentRecord(
+    experimentId: string,
+    body: FinalizeEvaluationExperimentRecordRequestBodyInput
+  ): Promise<void> {
+    try {
+      await this.kbnClient.request({
+        path: this.path(
+          EVALS_EXPERIMENT_RECORD_FINALIZE_URL.replace(
+            '{experimentId}',
+            encodeURIComponent(experimentId)
+          )
+        ),
+        method: 'POST',
+        body,
+        headers: VERSIONED_HEADERS,
+        retries: 0,
+      });
+    } catch (error: unknown) {
+      if (getStatusCode(error) === 404) {
+        this.log.debug(`No experiment record to finalize for experiment ${experimentId}`);
+        return;
+      }
+      this.log.warning(
+        `Failed to finalize experiment record for ${experimentId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   async getExperimentStats(

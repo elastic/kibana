@@ -212,9 +212,47 @@ export interface DatasetRunResult {
  */
 export interface ExperimentStartEvent {
   experimentId: string;
+  experimentName: string;
+  dataset: {
+    id: string;
+    name: string;
+    description?: string;
+    examplesCount: number;
+  };
+  /**
+   * Evaluators as configured at start. API-backed evaluators only learn their
+   * model and version from their first `_evaluate` response, so those fields
+   * may still be absent here.
+   */
+  evaluators: Array<{
+    name: string;
+    kind: EvaluatorKind;
+    version?: string;
+    model?: ScoreModel;
+  }>;
+  metadata?: Record<string, unknown>;
 }
 
 export type OnExperimentStart = (event: ExperimentStartEvent) => Promise<void>;
+
+/**
+ * Emitted by the executor client when an experiment finishes, whether it ran
+ * to the end or threw part-way.
+ */
+export interface ExperimentCompleteEvent {
+  experimentId: string;
+  status: 'completed' | 'failed';
+  /** What failed; present when status is `failed`. */
+  error?: string;
+  completeness: {
+    /** Task runs (example × repetition) that ran and were evaluated. */
+    successfulTasks: number;
+    /** Task runs that threw during the task or its evaluators. */
+    failedTasks: number;
+  };
+}
+
+export type OnExperimentComplete = (event: ExperimentCompleteEvent) => Promise<void>;
 
 /**
  * Emitted by the executor client after each evaluator completes for a single

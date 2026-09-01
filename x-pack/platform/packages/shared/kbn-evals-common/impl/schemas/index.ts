@@ -9,9 +9,14 @@ export * from './common_attributes.gen';
 
 export * from './experiments/get_experiments_route.gen';
 export * from './experiments/get_experiment_route.gen';
+export * from './experiments/get_experiment_record_route.gen';
+export * from './experiments/get_experiment_runs_route.gen';
+export * from './experiments/get_experiment_traces_route.gen';
 export * from './experiments/get_experiment_scores_route.gen';
 export * from './experiments/get_experiment_dataset_examples_route.gen';
 export * from './experiments/compare_experiments_route.gen';
+export * from './experiments/create_experiment_record_route.gen';
+export * from './experiments/finalize_experiment_record_route.gen';
 
 export * from './datasets/get_datasets_route.gen';
 export * from './datasets/create_dataset_route.gen';
