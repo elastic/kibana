@@ -128,6 +128,20 @@ export const rowAgreement = (cells: TrajectoryCell[], modelId: string): Reliabil
  * Docs sharing a repetition_index are the same agent run (one per evaluator);
  * the first complete trail wins. Key on tool_id only.
  */
+/**
+ * Hunt/investigation examples have no repeatable path (0/5 on the 3-rep
+ * pilot). They stay diagnostic probes and must not enter the agreement rate.
+ */
+export const PROBE_EXAMPLE_PREFIXES = [
+  'alert-analysis-',
+  'entity-analytics-',
+  'multi-step-',
+  'threat-hunting-',
+] as const;
+
+export const isProbeExample = (exampleId: string): boolean =>
+  PROBE_EXAMPLE_PREFIXES.some((prefix) => exampleId.startsWith(prefix));
+
 export const trailsFromDocs = (docs: ReadonlyArray<{ task?: unknown }>): string[][] => {
   const byRep = new Map<number, string[]>();
   for (const doc of docs) {

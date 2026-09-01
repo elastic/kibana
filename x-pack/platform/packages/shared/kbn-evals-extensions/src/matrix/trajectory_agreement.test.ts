@@ -7,6 +7,7 @@
 
 import {
   cellAgreement,
+  isProbeExample,
   rowAgreement,
   sequenceSimilarity,
   trailsEqual,
@@ -128,5 +129,16 @@ describe('rowAgreement', () => {
     expect(row.status).toBe('measured');
     expect(row.measuredCells).toBe(2);
     expect(row.identicalRate).toBe(0.5);
+  });
+});
+
+describe('isProbeExample', () => {
+  it('marks hunt and investigation ids as probes and leaves workflow paths rankable', () => {
+    expect(isProbeExample('alert-analysis-a')).toBe(true);
+    expect(isProbeExample('entity-analytics-c')).toBe(true);
+    expect(isProbeExample('multi-step-b')).toBe(true);
+    expect(isProbeExample('threat-hunting-a')).toBe(true);
+    expect(isProbeExample('workflow-authoring-a')).toBe(false);
+    expect(isProbeExample('detection-rule-edit-b')).toBe(false);
   });
 });

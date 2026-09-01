@@ -54,4 +54,13 @@ describe('renderReliabilityHtml', () => {
     expect(html).toContain('Unmeasured');
     expect(html).not.toContain('Unmeasured</span><small>0');
   });
+
+  it('excludes probe examples from the identical-path rate', () => {
+    const html = renderReliabilityHtml(matrix, {
+      'measured:alert-analysis-a': { repTrails: [['search'], ['load_skill']] },
+      'measured:workflow-authoring-a': { repTrails: [['search'], ['search']] },
+    });
+    expect(html).toContain('<strong>100%</strong>');
+    expect(html).not.toContain('<strong>50%</strong>');
+  });
 });

@@ -187,6 +187,57 @@ export const countRepetitions = (docs: EvaluationScoreDocument[]): number =>
   new Set(docs.map((doc) => doc.task?.repetition_index ?? 0)).size;
 
 /**
+ * The weekly board stores one repetition per (model, example). The 3-rep
+ * reliability pilots live on older execution ids in the same cache. Overlay
+ * those genuine repeats onto the example-id trace key without concatenating
+ * separate 1-rep weekly runs, which would invent false agreement.
+ *
+ * Cache keys are `${executionId}::${exampleId}`. executionId itself contains
+ * `::`, so the example id is the substring after the last `::`.
+ */
+export const overlayRepeatedCacheTrails = (
+  traces: MatrixTraceData,
+  traceCache?: Record<string, EvaluationScoreDocument[]>
+): void => {
+  if (!traceCache) {
+    return;
+  }
+  const best = new Map<string, string[][]>();
+  for (const [cacheKey, docs] of Object.entries(traceCache)) {
+    const split = cacheKey.lastIndexOf('::');
+    if (split < 0 || docs.length === 0) {
+      continue;
+    }
+    const exampleId = cacheKey.slice(split + 2);
+    const modelId = docs[0].task?.model?.id;
+    if (!modelId || !exampleId) {
+      continue;
+    }
+    const trails = trailsFromDocs(docs);
+    if (trails.length <= 1) {
+      continue;
+    }
+    const combo = `${modelId}\0${exampleId}`;
+    const previous = best.get(combo);
+    if (!previous || trails.length > previous.length) {
+      best.set(combo, trails);
+    }
+  }
+  for (const [combo, trails] of best) {
+    const sep = combo.indexOf('\0');
+    const modelId = combo.slice(0, sep);
+    const exampleId = combo.slice(sep + 1);
+    const key = traceKey(modelId, exampleId);
+    const existing = traces[key];
+    if (existing) {
+      existing.repTrails = trails;
+    } else {
+      traces[key] = { repTrails: trails };
+    }
+  }
+};
+
+/**
  * Merges a batch of full (unstripped) score documents for one example into
  * `traces`. Documents arrive in unknown order and span every experiment and
  * repetition that ever scored this example, so this filters to the requested
@@ -603,5 +654,6 @@ export const queryMatrixTraces = async (
   }
 
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);
+  overlayRepeatedCacheTrails(traces, traceCache);
   return traces;
 };

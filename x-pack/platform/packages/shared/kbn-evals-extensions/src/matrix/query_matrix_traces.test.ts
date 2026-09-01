@@ -10,8 +10,10 @@ import {
   countRepetitions,
   exampleScoresByEvaluator,
   exampleSpreadByEvaluator,
+  overlayRepeatedCacheTrails,
   queryMatrixTraces,
 } from './query_matrix_traces';
+import type { MatrixTraceData } from './trace_types';
 
 const doc = (evaluatorName: string | undefined, score: number | null): EvaluationScoreDocument =>
   ({
@@ -455,5 +457,46 @@ describe('queryMatrixTraces example fetching', () => {
     expect(log.warning).toHaveBeenCalledWith(
       expect.stringContaining("'Tool Calls' reads 0 despite a non-empty tool trail")
     );
+  });
+});
+
+describe('overlayRepeatedCacheTrails', () => {
+  const scored = (model: string, toolId: string, repetition: number): EvaluationScoreDocument =>
+    ({
+      task: {
+        model: { id: model },
+        repetition_index: repetition,
+        output: { steps: [{ type: 'tool_call', tool_id: toolId }] },
+      },
+    } as unknown as EvaluationScoreDocument);
+
+  it('overlays the genuine 3-rep execution and ignores sibling 1-rep weekly runs', () => {
+    const traces: MatrixTraceData = {
+      'opus:workflow-authoring-a': { toolTrail: ['weekly'] },
+    };
+    overlayRepeatedCacheTrails(traces, {
+      'old::security-persona-matrix::opus::workflow-authoring-a': [
+        scored('opus', 'generate_workflow', 0),
+        scored('opus', 'generate_workflow', 1),
+        scored('opus', 'sml_search', 2),
+      ],
+      'weekly::security-persona-matrix::opus::workflow-authoring-a': [
+        scored('opus', 'execute_api', 0),
+      ],
+    });
+    expect(traces['opus:workflow-authoring-a'].repTrails).toEqual([
+      ['generate_workflow'],
+      ['generate_workflow'],
+      ['sml_search'],
+    ]);
+  });
+
+  it('does not invent repeats by concatenating two 1-rep executions', () => {
+    const traces: MatrixTraceData = {};
+    overlayRepeatedCacheTrails(traces, {
+      'run-a::security-persona-matrix::gpt::workflow-authoring-a': [scored('gpt', 'search', 0)],
+      'run-b::security-persona-matrix::gpt::workflow-authoring-a': [scored('gpt', 'load_skill', 0)],
+    });
+    expect(traces['gpt:workflow-authoring-a']).toBeUndefined();
   });
 });

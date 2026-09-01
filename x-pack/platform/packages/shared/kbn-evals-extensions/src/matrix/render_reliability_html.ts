@@ -8,7 +8,7 @@
 import type { Matrix, MatrixCell, MatrixRow } from './build_matrix';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData } from './trace_types';
-import { rowAgreement, type TrajectoryCell } from './trajectory_agreement';
+import { rowAgreement, isProbeExample, type TrajectoryCell } from './trajectory_agreement';
 
 const esc = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -41,10 +41,14 @@ export const reliabilityCellsFromTraces = (traces: MatrixTraceData = {}): Trajec
     if (split < 1) {
       return [];
     }
+    const example = key.slice(split + 1);
+    if (isProbeExample(example)) {
+      return [];
+    }
     return [
       {
         model: key.slice(0, split),
-        example: key.slice(split + 1),
+        example,
         trails: trace.repTrails,
       },
     ];
