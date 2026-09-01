@@ -49,7 +49,7 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
         // still in use, exactly like `apiKeyId` in model version 2.
         type: 'mappings_addition',
         addedMappings: {
-          uiamApiKeyId: { type: 'keyword' },
+          uiamApiKeyId: { type: 'keyword', ignore_above: 1024 },
         },
       },
     ],

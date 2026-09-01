@@ -80,7 +80,7 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
         // holding the key.
         type: 'mappings_addition',
         addedMappings: {
-          uiamApiKeyId: { type: 'keyword' },
+          uiamApiKeyId: { type: 'keyword', ignore_above: 1024 },
         },
       },
     ],
