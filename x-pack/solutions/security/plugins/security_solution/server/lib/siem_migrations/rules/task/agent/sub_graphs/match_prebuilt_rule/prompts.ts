@@ -76,7 +76,7 @@ const MATCH_GUIDELINES_GENERIC = buildMatchGuidelines(MATCH_CORE_GUIDELINE_BULLE
 const OUTPUT_FORMAT_GUIDELINES = `<expected_output>
 - Always reply with a JSON object with the field "match" and the value being the most relevant matched elastic detection rule name if any, else the value should be an emptry string, and a "summary" entry with the reasons behind the match. Do not reply with anything else.
 - Only reply with exact matches, if you are unsure or do not find a very confident match, always reply with an empty string value in the match field, do not guess or reply with anything else.
-- If the Splunk rule is a much more complex usecase with custom logic not covered by the prebuilt rules, reply with an empty string in the match field.
+- If the source rule is a much more complex usecase with custom logic not covered by the prebuilt rules, reply with an empty string in the match field.
 - If there is only one match, answer with the name of the rule in the "match" key. Do not reply with anything else.
 - If there are multiple matches, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
 - Finally, write a "summary" in markdown format with the reasoning behind the decision. Starting with "## Prebuilt Rule Matching Summary" followed by a newline. Make sure the content is valid JSON by escaping any necessary special characters.
