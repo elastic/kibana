@@ -66,9 +66,10 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
     prompt: {
       review: {
         critical: [
-          'Any w or h that violates ### Grid sizes by chart type or Grid Packing Rules is a critical issue. A last panel in a row stretched to fill leftover columns (row sums to 48) is not this issue.',
+          'Any w or h that violates ### Grid sizes by chart type or Grid Packing Rules is a critical issue. A last panel in a row stretched to fill leftover columns (row sums to 48) is not this issue — except a datatable with w less than 24, which is always this issue.',
           'Visible gaps or dead space is a critical issue: unused columns in a row, leftover odd widths (not 6/8/12/24/48), or a row/section that was only partly reflowed. Rethink where panels live — do not patch a subset.',
           'An L-shaped hole is a critical issue — a short panel with empty space beside it while a taller neighbor continues. Do not invent that packing.',
+          'A datatable with w less than 24 is a critical issue — give it its own row at w: 48, or w: 24 beside another half-width panel.',
         ],
       },
       config: {

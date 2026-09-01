@@ -116,7 +116,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       review: {
         critical: [
-          'A title on a metric is a critical issue — clear it.',
+          'A title on a metric is a critical issue. The query MUST include the exact phrase "remove the panel title" — on `add_section.panels` when wrapping, otherwise on `edit_panels`.',
           'Invented static colors or BACKGROUND fills on the primary metric are a critical issue.',
         ],
         suggestions: [
@@ -179,6 +179,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'A solid area fill on the painted chart is a critical issue.',
           'A visible legend on a one-series categorical chart is a critical issue.',
           'Invented static or custom series colors (explicit hex or `type: "static"`) are a critical issue.',
+        ],
+        suggestions: [
+          'Most time-series line charts should be gradient area. Keep at most one line (the primary overview trend); convert the rest to area with `styling.areas.fill: "gradient"`. Skip bars, categorical charts, and a lone line that is already the only time series.',
         ],
       },
       config: {
