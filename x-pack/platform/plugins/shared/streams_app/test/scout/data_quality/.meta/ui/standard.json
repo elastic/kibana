@@ -1,21 +1,9 @@
 {
-  "sha1": "35ab3d9517c4b4a8e7c317216b43678adf03003f",
+  "sha1": "8ac242f8256ee40b7137bd8231ecf5d9cfc7e578",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "180c2ab7059d4dc-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "00326eb69e240b4-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -30,7 +18,7 @@
     {
       "id": "c0229d5f01d9765-673bfeac807f871",
       "title": "Stream data quality should show data quality metrics",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -39,14 +27,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 73,
-        "column": 25
+        "line": 110,
+        "column": 41
       }
     },
     {
       "id": "c0229d5f01d9765-ccd2761d79f84f2",
       "title": "Stream data quality date picker should show same time range as Streams Main page",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -55,14 +43,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 81,
+        "line": 116,
         "column": 7
       }
     },
     {
       "id": "c0229d5f01d9765-690079b58151ce0",
       "title": "Stream data quality changing time range should also update date picker on Streams Main page",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -71,14 +59,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 98,
+        "line": 132,
         "column": 7
       }
     },
     {
       "id": "c0229d5f01d9765-f71d78d4ae9a924",
       "title": "Stream data quality time range should persist after page refresh on Data Quality tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -87,14 +75,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 109,
-        "column": 13
+        "line": 143,
+        "column": 7
       }
     },
     {
       "id": "c0229d5f01d9765-4469d65a10929c8",
       "title": "Stream data quality time range should persist after page refresh on Retention tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -103,14 +91,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 122,
-        "column": 11
+        "line": 155,
+        "column": 25
       }
     },
     {
       "id": "c0229d5f01d9765-ee97b0d5664f74d",
       "title": "Stream data quality time range should be globally synced across all tabs",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -119,14 +107,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 148,
-        "column": 7
+        "line": 182,
+        "column": 25
       }
     },
     {
       "id": "c0229d5f01d9765-4775d23430ce410",
       "title": "Stream data quality should toggle between degraded and failed docs quality issues charts",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -135,14 +123,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 165,
-        "column": 24
+        "line": 201,
+        "column": 7
       }
     },
     {
       "id": "c0229d5f01d9765-d433732b148e845",
       "title": "Stream data quality should show degraded fields table with data",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -151,14 +139,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 209,
+        "column": 25
       }
     },
     {
       "id": "c0229d5f01d9765-dd8fbacadb48e67",
       "title": "Stream data quality should open and close degraded field flyout",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -167,14 +155,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 196,
-        "column": 24
+        "line": 230,
+        "column": 7
       }
     },
     {
       "id": "c0229d5f01d9765-20b23641495bf7b",
       "title": "Stream data quality should navigate to Discover from degraded field flyout",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -183,14 +171,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 218,
-        "column": 66
+        "line": 240,
+        "column": 24
       }
     },
     {
       "id": "c0229d5f01d9765-27ee667d7063050",
       "title": "Stream data quality should edit failure store for wired streams",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -199,8 +187,19 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 234,
+        "line": 251,
         "column": 13
+      }
+    },
+    {
+      "id": "180c2ab7059d4dc-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

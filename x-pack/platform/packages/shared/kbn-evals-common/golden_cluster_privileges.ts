@@ -41,7 +41,11 @@ export const goldenClusterPrivileges = {
             ],
           },
           {
-            names: [`${EvaluationIndices.DATASETS}*`, `${EvaluationIndices.DATASET_EXAMPLES}*`],
+            names: [
+              `${EvaluationIndices.DATASETS}*`,
+              `${EvaluationIndices.DATASET_EXAMPLES}*`,
+              `${EvaluationIndices.EVALUATORS}*`,
+            ],
             privileges: [
               'auto_configure',
               'create_index',

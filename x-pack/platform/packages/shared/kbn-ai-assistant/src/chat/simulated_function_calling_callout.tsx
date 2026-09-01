@@ -5,13 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 export function SimulatedFunctionCallingCallout() {
   return (
-    <EuiCallOut
-      color="warning"
+    <KbnWarningCallout
       title={i18n.translate('xpack.aiAssistant.simulatedFunctionCallingCalloutLabel', {
         defaultMessage:
           'Simulated function calling is enabled. You might see degraded performance.',

@@ -10,7 +10,8 @@ import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
-import { getDiverseSampleDocuments, getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getDiverseSampleDocuments } from '@kbn/streams-ai';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
@@ -128,7 +129,7 @@ export async function fetchSampleDocuments({
               start,
               end,
               sampleSize: size,
-              requestTimeout: samplingTimeoutMs,
+              abortSignal: samplingSignal,
             })
         ),
         samplingTimeoutMs
@@ -182,7 +183,7 @@ export async function fetchSampleDocuments({
             sampleSize: entityFilteredSize,
             whereCondition,
             unmappedFields: 'LOAD',
-            requestTimeout: samplingTimeoutMs,
+            abortSignal: samplingSignal,
           })
       ).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
@@ -226,7 +227,7 @@ export async function fetchSampleDocuments({
               start,
               end,
               sampleSize: size,
-              requestTimeout: samplingTimeoutMs,
+              abortSignal: samplingSignal,
             })
         ),
         samplingTimeoutMs

@@ -44,6 +44,13 @@ export const SO_SEARCH_LIMIT = 10000;
 
 export const ES_SEARCH_LIMIT = 10000;
 
+// Elasticsearch's .security index enforces index.max_result_window (default
+// 10,000) on the ids query used by invalidateApiKey. This is deliberately
+// set well below that limit -- NOT derived from SO_SEARCH_LIMIT, which is a
+// Kibana-side Saved Objects constant for a different index and is not
+// guaranteed to match .security's setting, which an operator can lower.
+export const API_KEY_INVALIDATION_BATCH_SIZE = 1000;
+
 export const FLEET_SERVER_INDICES_VERSION = 1;
 
 export const FLEET_SERVER_ARTIFACTS_INDEX = '.fleet-artifacts';

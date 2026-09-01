@@ -10,10 +10,8 @@ import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-// Both services are in the default "Security, Identity and Compliance" category,
+// Both services are in the "security_identity_compliance" category,
 // visible without switching signal filter or category.
-//   guardduty → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
-//   inspector → agentless:                       needsDeploySettingsStep = true
 const NON_AGENTLESS_ID = 'guardduty';
 const AGENTLESS_ID = 'inspector';
 
@@ -86,7 +84,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
       stepState: {
         services: 'complete',
         'service-settings': 'complete',
-        'deploy-settings': 'incomplete',
+        'authenticate-and-deploy': 'incomplete',
         'deploy-and-detect': 'incomplete',
       },
     });
@@ -105,45 +103,6 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
 
     // service-settings must immediately become incomplete.
     await expect(page.testSubj.locator('onboardingStepIndicator-service-settings')).toHaveAttribute(
-      'data-step-status',
-      'incomplete'
-    );
-  });
-
-  // Path 2: with only non-agentless services selected, the services step auto-marks
-  // deploy-settings complete and skips it. Adding an agentless service (which requires
-  // credentials) must immediately invalidate that stale flag so the credentials step
-  // can no longer be bypassed, preventing a deploy with no auth configured.
-  test('path 2 — deploy-settings indicator loses checkmark when agentless service is added', async ({
-    browserAuth,
-    page,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    // Seed before navigation so react-use picks up the values on first mount.
-    await seedSessionStorage(page, {
-      selectedServiceIds: [NON_AGENTLESS_ID],
-      stepState: {
-        services: 'complete',
-        'service-settings': 'complete',
-        'deploy-settings': 'complete',
-        'deploy-and-detect': 'incomplete',
-      },
-    });
-    await page.gotoApp('onboarding/aws#services');
-
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
-
-    // Confirm deploy-settings starts as complete (stale from the auto-skip).
-    await expect(page.testSubj.locator('onboardingStepIndicator-deploy-settings')).toHaveAttribute(
-      'data-step-status',
-      'complete'
-    );
-
-    // Add an agentless service — flips needsDeploySettingsStep to true.
-    await page.testSubj.locator(`servicesStep-toggle-${AGENTLESS_ID}`).click();
-
-    // deploy-settings indicator must immediately become incomplete.
-    await expect(page.testSubj.locator('onboardingStepIndicator-deploy-settings')).toHaveAttribute(
       'data-step-status',
       'incomplete'
     );

@@ -7,40 +7,45 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BRIEFING_CARD_LABELS = Object.freeze({
-  watchedBy: i18n.translate('xpack.pnd.brief.watchedBy', {
+export const CONVERSATION_CARD_LABELS = Object.freeze({
+  templateTypes: {
+    investigation: i18n.translate('xpack.pnd.conversationCard.templateTypes.investigation', {
+      defaultMessage: 'Investigation',
+    }),
+    incident: i18n.translate('xpack.pnd.conversationCard.templateTypes.incident', {
+      defaultMessage: 'Incident',
+    }),
+  },
+  watchedBy: i18n.translate('xpack.pnd.conversationCard.watchedBy', {
     defaultMessage: 'Watched by',
   }),
-  inMotion: i18n.translate('xpack.pnd.brief.inMotion', {
+  inMotion: i18n.translate('xpack.pnd.conversationCard.inMotion', {
     defaultMessage: 'In motion',
   }),
   pendingProposals: (count: number) =>
-    i18n.translate('xpack.pnd.brief.pendingProposals', {
+    i18n.translate('xpack.pnd.conversationCard.pendingProposals', {
       defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
       values: { count },
     }),
 });
 
 export const CONVERSATION_CARD_ACTIONS = Object.freeze({
-  openChat: i18n.translate('xpack.pnd.brief.openChat', {
-    defaultMessage: 'Open in chat',
-  }),
-  default: i18n.translate('xpack.pnd.brief.defaultAction', {
+  default: i18n.translate('xpack.pnd.conversationCard.defaultAction', {
     defaultMessage: 'Review',
   }),
-  viewDetails: i18n.translate('xpack.pnd.brief.viewDetails', {
+  viewDetails: i18n.translate('xpack.pnd.conversationCard.viewDetails', {
     defaultMessage: 'View details',
   }),
 });
 
 export const WATCH_TIER_LABELS = Object.freeze({
-  officer: i18n.translate('xpack.pnd.brief.watchTier.officer', {
+  officer: i18n.translate('xpack.pnd.conversationCard.watchTier.officer', {
     defaultMessage: 'Watch Officer',
   }),
-  dark: i18n.translate('xpack.pnd.brief.watchTier.dark', {
+  dark: i18n.translate('xpack.pnd.conversationCard.watchTier.dark', {
     defaultMessage: 'Dark Watch',
   }),
-  deep: i18n.translate('xpack.pnd.brief.watchTier.deep', {
+  deep: i18n.translate('xpack.pnd.conversationCard.watchTier.deep', {
     defaultMessage: 'Deep Watch',
   }),
   detection: i18n.translate('xpack.pnd.brief.watchTier.detection', {

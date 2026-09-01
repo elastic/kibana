@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -48,8 +49,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      <EuiCallOut
-        color="danger"
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallCallout.title"
@@ -57,14 +57,13 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
             values={{ numOfAssets }}
           />
         }
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallCallout.description"
             defaultMessage="Kibana and Elasticsearch assets that were created by this integration will be removed. Agents policies and any data sent by your agents will not be effected."
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="l" />
       <p>
         <FormattedMessage

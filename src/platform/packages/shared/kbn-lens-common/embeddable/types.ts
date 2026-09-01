@@ -296,17 +296,13 @@ export type LensComponentProps = Simplify<
        */
       disabledActions?: string[];
       /**
-       * Toggles the inspector
-       */
-      showInspector?: boolean;
-      /**
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
       /**
-       * Optional search term to highlight in the panel title
+       * Optional search terms to highlight in the panel title
        */
-      titleHighlight?: string;
+      titleHighlight?: string | string[];
     }
 >;
 

@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
+  createInferenceInternalError,
   createInferenceRequestError,
   InferenceTaskErrorCode,
   getConnectorFamily,
@@ -64,6 +65,8 @@ interface CreateChatCompleteApiOptions {
   callbackManager?: InferenceCallbackManager;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -119,6 +122,8 @@ export function createChatCompleteCallbackApi({
   callbackManager,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -147,6 +152,8 @@ export function createChatCompleteCallbackApi({
         anonymization,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
       })
     ).pipe(
       retryHoldingTokenCountEvents({
@@ -210,10 +217,13 @@ function createChatCompletePipeline({
         metadata,
         modelName,
         temperature,
+        reasoning,
         toolChoice,
         tools,
         timeout,
         maxContentLength,
+        cacheControl,
+        sessionId,
       } = callback(callbackContext);
 
       const messages = sanitizeMessages(givenMessages);
@@ -253,6 +263,8 @@ function createChatCompletePipeline({
               messages: preparedAnonymization.messages,
               tools,
               toolChoice,
+              cacheControl,
+              sessionId,
               ...(spanModel ? { model: spanModel } : {}),
               ...metadata?.attributes,
             },
@@ -263,6 +275,7 @@ function createChatCompletePipeline({
                 toolChoice,
                 tools,
                 temperature,
+                reasoning,
                 logger,
                 functionCalling,
                 modelName,
@@ -270,6 +283,8 @@ function createChatCompletePipeline({
                 metadata,
                 timeout,
                 maxContentLength,
+                cacheControl,
+                sessionId,
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
@@ -311,6 +326,8 @@ function resolveAndCreatePipeline({
   anonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -327,8 +344,17 @@ function resolveAndCreatePipeline({
   anonymization?: InferenceAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
 }) {
-  return from(endpointIdCache.has(connectorId)).pipe(
+  return from(
+    throwIfConnectorNotAllowed({
+      connectorId,
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+      logger,
+    }).then(() => endpointIdCache.has(connectorId))
+  ).pipe(
     switchMap((isInferenceEndpoint) => {
       let resolvedAsInferenceEndpoint = isInferenceEndpoint;
 
@@ -468,6 +494,42 @@ function resolveAndCreatePipeline({
         })
       );
     })
+  );
+}
+
+async function throwIfConnectorNotAllowed({
+  connectorId,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  logger,
+}: {
+  connectorId: string;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  logger: Logger;
+}): Promise<void> {
+  if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
+    return;
+  }
+  let defaultConnectorId: string | undefined;
+  try {
+    if (!(await isDefaultConnectorOnly())) {
+      return;
+    }
+    defaultConnectorId = await getDefaultConnectorId();
+  } catch (error) {
+    // fail closed: block the call when the restriction cannot be verified
+    logger.error(`Failed to verify the default AI connector restriction: ${error.message}`);
+    throw createInferenceInternalError('Failed to verify the default AI connector restriction');
+  }
+  if (connectorId === defaultConnectorId) {
+    return;
+  }
+  throw createInferenceRequestError(
+    `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${
+      defaultConnectorId ? ` "${defaultConnectorId}"` : ''
+    }`,
+    400
   );
 }
 

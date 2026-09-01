@@ -259,15 +259,19 @@ export class WorkflowsApiService {
 
   async waitForTermination({
     workflowExecutionId,
+    timeout = 20_000,
   }: {
     workflowExecutionId: string;
+    timeout?: number;
   }): Promise<WorkflowExecutionDto | undefined> {
     return waitForConditionOrThrow({
       action: () => this.getExecution(workflowExecutionId),
       condition: (execution) => !!execution && isTerminalStatus(execution.status ?? ''),
       interval: 1000,
-      timeout: 20_000,
-      errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
+      timeout,
+      errorMessage: (execution) =>
+        `Execution with id ${workflowExecutionId} did not reach a terminal status` +
+        ` (last status: ${execution?.status ?? 'undefined'})`,
     });
   }
 

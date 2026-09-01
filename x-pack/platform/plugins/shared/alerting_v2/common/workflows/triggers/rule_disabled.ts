@@ -27,7 +27,8 @@ export const ruleDisabledTriggerCommonDefinition: CommonTriggerDefinition<
     details: i18n.translate(
       'xpack.alertingV2.workflowTriggers.ruleDisabled.documentation.details',
       {
-        defaultMessage: 'Emitted when a rule transitions to disabled.',
+        defaultMessage:
+          'Emitted when a rule transitions to disabled. The payload includes event.rule with ruleId, spaceId, and tags.',
       }
     ),
     examples: [
@@ -41,7 +42,20 @@ triggers:
 \`\`\``,
         values: { triggerId: RuleDisabledTriggerId },
       }),
+      i18n.translate(
+        'xpack.alertingV2.workflowTriggers.ruleDisabled.documentation.tagConditionExample',
+        {
+          defaultMessage: `## Run for rules with a tag
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.rule.tags: "critical"'
+\`\`\``,
+          values: { triggerId: RuleDisabledTriggerId },
+        }
+      ),
     ],
   },
-  snippets: { condition: 'event.rule.ruleId: "my-rule-id"' },
+  snippets: { condition: 'event.rule.tags: "my-tag"' },
 };

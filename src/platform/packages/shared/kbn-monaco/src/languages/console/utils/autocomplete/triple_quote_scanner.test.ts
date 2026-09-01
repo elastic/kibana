@@ -7,12 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
+
 import {
   checkForTripleQuotesAndEsqlQuery,
+  endsWithConsoleBodyContinuation,
+  getLineRemainderWithoutConsoleComments,
+  isInsideConsoleComment,
+  isInsideConsoleString,
   isInsideTripleQuotedJsonValue,
 } from './triple_quote_scanner';
 
 describe('triple_quote_scanner', () => {
+  it('scans long request lines without repeatedly rescanning the comment boundary', () => {
+    const request = `GET _search?q=${'a'.repeat(16_000)}`;
+    const start = performance.now();
+
+    expect(isInsideConsoleString(request)).toBe(false);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+
   describe('checkForTripleQuotesAndQueries', () => {
     it('returns false for all flags for an empty string', () => {
       expect(checkForTripleQuotesAndEsqlQuery('')).toEqual({
@@ -245,6 +259,184 @@ describe('triple_quote_scanner', () => {
       });
     }
   );
+
+  it.each([
+    { content: '# docs', expected: true },
+    { content: '// docs', expected: true },
+    { content: '/* docs', expected: true },
+    { content: '/* docs */', expected: false },
+    { content: '{"pattern": "*/", "nested": {', expected: false },
+    { content: '"""# not a comment"""', expected: false },
+  ])(
+    'detects whether the end of Console input is inside a comment: $content',
+    ({ content, expected }) => {
+      expect(isInsideConsoleComment(content)).toBe(expected);
+    }
+  );
+
+  it.each([
+    { content: '"open', expected: true },
+    { content: '"closed"', expected: false },
+    { content: '"""open', expected: true },
+    { content: '"""def quote = \'"\';""", "nested": {', expected: false },
+    { content: 'GET _search?q="foo{', expected: true },
+  ])(
+    'detects whether the end of Console input is inside a string: $content',
+    ({ content, expected }) => {
+      expect(isInsideConsoleString(content)).toBe(expected);
+    }
+  );
+
+  it.each([
+    {
+      contentBeforePosition: 'GET _search\n{"field": "',
+      lineContentAfterPosition: '"}',
+      expected: '"}',
+    },
+    {
+      contentBeforePosition: 'GET _search\n{"field": "',
+      lineContentAfterPosition: '"} // note',
+      expected: '"} ',
+    },
+    {
+      contentBeforePosition: 'GET _search\n{"field": "',
+      lineContentAfterPosition: '" /* note */ }',
+      expected: '"  }',
+    },
+    {
+      contentBeforePosition: 'GET _search\n{"field": "',
+      lineContentAfterPosition: 'http://host/*path#x"}',
+      expected: 'http://host/*path#x"}',
+    },
+    {
+      contentBeforePosition: 'GET _search\n{"field": 1, /* note',
+      lineContentAfterPosition: ' */ "next": 2}',
+      expected: ' "next": 2}',
+    },
+    {
+      contentBeforePosition: 'GET _search\n{"script": """',
+      lineContentAfterPosition: '// not comment""", "next": 1}',
+      expected: '// not comment""", "next": 1}',
+    },
+  ])(
+    'removes only Console comments from the line remainder: $lineContentAfterPosition',
+    ({ contentBeforePosition, lineContentAfterPosition, expected }) => {
+      expect(
+        getLineRemainderWithoutConsoleComments(contentBeforePosition, lineContentAfterPosition)
+      ).toBe(expected);
+    }
+  );
+
+  it('detects an inline comment at the end of a request line', () => {
+    expect(isInsideConsoleComment('GET _search // docs {')).toBe(true);
+    expect(isInsideConsoleComment('GET _search # docs {')).toBe(true);
+  });
+
+  it('detects a whitespace-separated block comment at the end of a request line', () => {
+    expect(isInsideConsoleComment('GET _search /* docs {')).toBe(true);
+    expect(isInsideConsoleComment('GET _search /* docs */ ')).toBe(false);
+  });
+
+  it('preserves an unterminated trailing block comment across request lines', () => {
+    const openComment = 'GET _search /* docs\n{';
+    expect(isInsideConsoleComment(openComment)).toBe(true);
+    expect(endsWithConsoleBodyContinuation(openComment)).toBe(false);
+
+    const openCommentAfterQuotedUrl = 'GET _search?q="foo bar" /* docs\n{';
+    expect(isInsideConsoleComment(openCommentAfterQuotedUrl)).toBe(true);
+    expect(endsWithConsoleBodyContinuation(openCommentAfterQuotedUrl)).toBe(false);
+
+    const closedComment = 'GET _search /* docs\n*/\n{';
+    expect(isInsideConsoleComment(closedComment)).toBe(false);
+    expect(endsWithConsoleBodyContinuation(closedComment)).toBe(true);
+  });
+
+  it.each([
+    'GET _search // docs /* not block\n{',
+    'GET _search # docs /* not block\n{',
+    'GET _search?q="foo /* bar"\n{',
+  ])('does not carry block-like request-line text into the next line: %s', (content) => {
+    expect(isInsideConsoleComment(content)).toBe(false);
+    expect(endsWithConsoleBodyContinuation(content)).toBe(true);
+  });
+
+  it('preserves ES|QL body state after block-like text in a quoted URL', () => {
+    const content = 'POST _query?q="foo /* bar"\n{"query": """FROM logs';
+    const analysis = checkForTripleQuotesAndEsqlQuery(content);
+    expect(analysis.insideTripleQuotes).toBe(true);
+    expect(analysis.insideEsqlQuery).toBe(true);
+  });
+
+  // The URL token itself may start with a comment-like marker; only a marker
+  // after both the method and the URL is a trailing comment.
+  it.each(['DELETE /*', 'GET /*', 'GET /*/_search?pretty', 'GET //_search'])(
+    'treats a comment-like marker in the URL position as a URL: %s',
+    (content) => {
+      expect(isInsideConsoleComment(content)).toBe(false);
+    }
+  );
+
+  it.each([
+    'GET _search?q=http://example.com/path&size=',
+    'GET _search?q=tag#1&size=',
+    'GET _search?q=value/*pattern&size=',
+  ])('preserves comment-like text inside a request URL: %s', (content) => {
+    expect(isInsideConsoleComment(content)).toBe(false);
+  });
+
+  it.each([
+    'GET _search\n{',
+    'GET _search\n  "fields": [',
+    'GET _search\n    "field", // note',
+    'GET _search\n    "field", /* note */',
+    'GET _search\n    "field", /* note\n      more */',
+    'GET _search\n{"script": """code""", "fields": [',
+  ])('detects a body continuation before whitespace or a trailing comment: %s', (content) => {
+    expect(endsWithConsoleBodyContinuation(content)).toBe(true);
+  });
+
+  it.each([
+    'GET _search\n{\n  # next item,',
+    'GET _search\n{\n  // next item,',
+    'GET _search\n{\n  /* next item, */',
+    'GET _search\n["field"',
+    'GET _search\n["value,',
+    'GET index-a, // request docs',
+    '/* docs */ GET index-a,',
+    '/* docs\n*/ GET index-a,',
+    'GET _search\n{\n  "field"',
+  ])('rejects a non-code or non-continuation ending: %s', (content) => {
+    expect(endsWithConsoleBodyContinuation(content)).toBe(false);
+  });
+
+  it('uses request-line comment rules after a leading block-comment prefix', () => {
+    expect(isInsideConsoleComment('/* c */ GET _search?q=http://example.com&size=')).toBe(false);
+    expect(isInsideConsoleComment('/* c */ GET _search // docs')).toBe(true);
+  });
+
+  it('uses request-line comment rules after closing a multiline block comment', () => {
+    expect(isInsideConsoleComment('/* c\n*/ GET _search?q=http://example.com&size=')).toBe(false);
+    expect(isInsideConsoleComment('/* c\n*/ GET _search // docs')).toBe(true);
+  });
+
+  it.each([
+    '/* c */ GET _search?q="foo\n{',
+    '/* c\n*/ GET _search?q="foo\n{',
+    '/* c */ GET _search?q=value/*pattern\n{',
+    '/* c\n*/ GET _search?q=value/*pattern\n{',
+    'GET _search\n{} /* c\n*/ GET _search?q="foo\n{',
+    'GET _search\n{} /* c\n*/ GET _search?q=value/*pattern\n{',
+  ])('preserves request-line state after a closed block-comment prefix: %s', (content) => {
+    expect(isInsideConsoleComment(content)).toBe(false);
+    expect(isInsideConsoleString(content)).toBe(false);
+    expect(endsWithConsoleBodyContinuation(content)).toBe(true);
+  });
+
+  it('does not treat a comment-prefixed request-like line inside triple quotes as a request', () => {
+    const content = 'POST _query\n{"script": """\n/* c */ GET _search?q=http://example.com';
+    expect(isInsideConsoleString(content)).toBe(true);
+    expect(isInsideConsoleComment(content)).toBe(false);
+  });
 
   it.each(['# """', '// """', '/* """ */'])(
     'does not treat comment markers inside triple-quoted content as comments: %s',

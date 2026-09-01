@@ -22,6 +22,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiSpacer,
+  EuiTextTruncate,
   EuiTitle,
   EuiToolTip,
   EuiFlyout,
@@ -46,7 +47,8 @@ interface DefaultArgs {
   maxColumns: InfoBlocksMaxColumns | 'auto';
 }
 
-// A truncating link with a trailing copy action.
+// A middle-truncating link with a trailing copy action. The render prop lets
+// EuiTextTruncate measure the column and hand the fitted string to the link.
 const RESOURCE_LINK = (
   <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
     <EuiFlexItem
@@ -55,15 +57,16 @@ const RESOURCE_LINK = (
         min-width: 0;
       `}
     >
-      <EuiLink
-        href="#"
-        className="eui-textTruncate"
-        css={css`
-          display: block;
-        `}
+      <EuiTextTruncate
+        text="etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system"
+        truncation="middle"
       >
-        etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system
-      </EuiLink>
+        {(truncatedText) => (
+          <EuiLink href="#" onClick={(event) => event.preventDefault()}>
+            {truncatedText}
+          </EuiLink>
+        )}
+      </EuiTextTruncate>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiToolTip content="Copy resource identifier" disableScreenReaderOutput>
@@ -84,6 +87,11 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Latency', value: <EuiHealth color="success">Healthy</EuiHealth> },
   // Long value that must truncate within its column.
   { title: 'Resource', value: RESOURCE_LINK },
+  // The string counterpart: truncates in the middle, so both ends stay readable.
+  {
+    title: 'Resource ID',
+    value: 'etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system',
+  },
   { title: 'Throughput', value: '1.2k tpm' },
   { title: 'Environment', value: 'production' },
   { title: 'Error rate', value: <EuiHealth color="warning">0.4%</EuiHealth> },
