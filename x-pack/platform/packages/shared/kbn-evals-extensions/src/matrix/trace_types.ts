@@ -53,6 +53,20 @@ export interface MatrixTraceEntry {
    * excluded because providers generate a new id for every call.
    */
   repTrails?: string[][];
+  /**
+   * Final answer text per repetition, index-aligned with `repTrails`. Path
+   * churn and answer churn are only weakly related (r=0.14 on the pilot), so
+   * the board must measure them separately rather than implying one from the
+   * other.
+   */
+  repAnswers?: string[];
+  /**
+   * The example's declared path contract, read from
+   * `example.metadata.pathContract`. Absent on corpora predating the field.
+   */
+  pathContract?: 'rankable' | 'candidate' | 'probe';
+  /** Execution ids that contributed the repetitions above, for auditability. */
+  repExecutionIds?: string[];
 }
 
 /**

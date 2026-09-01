@@ -6,12 +6,18 @@
  */
 
 import {
+  answerSimilarity,
+  answersFromDocs,
   cellAgreement,
-  isProbeExample,
+  firstDivergence,
+  intervalsOverlap,
+  pathContractFromDocs,
+  resolveProbe,
   rowAgreement,
   sequenceSimilarity,
   trailsEqual,
   trailsFromDocs,
+  wilsonInterval,
 } from './trajectory_agreement';
 
 describe('trailsEqual / sequenceSimilarity', () => {
@@ -132,13 +138,119 @@ describe('rowAgreement', () => {
   });
 });
 
-describe('isProbeExample', () => {
-  it('marks hunt and investigation ids as probes and leaves workflow paths rankable', () => {
-    expect(isProbeExample('alert-analysis-a')).toBe(true);
-    expect(isProbeExample('entity-analytics-c')).toBe(true);
-    expect(isProbeExample('multi-step-b')).toBe(true);
-    expect(isProbeExample('threat-hunting-a')).toBe(true);
-    expect(isProbeExample('workflow-authoring-a')).toBe(false);
-    expect(isProbeExample('detection-rule-edit-b')).toBe(false);
+describe('answersFromDocs / pathContractFromDocs', () => {
+  const doc = (rep: number, message: string, pathContract?: string) => ({
+    task: { repetition_index: rep, output: { messages: [{ message }] } },
+    example: pathContract ? { metadata: { pathContract } } : {},
+  });
+
+  it('returns one answer per repetition, ordered by repetition index', () => {
+    const long = 'a'.repeat(60);
+    expect(answersFromDocs([doc(1, `${long}-second`), doc(0, `${long}-first`)])).toEqual([
+      `${long}-first`,
+      `${long}-second`,
+    ]);
+  });
+
+  it('aligns with trailsFromDocs so answer pairs match path pairs', () => {
+    const long = 'a'.repeat(60);
+    const docs = [
+      {
+        ...doc(0, `${long}-x`),
+        task: { repetition_index: 0, output: { steps: [], messages: [{ message: `${long}-x` }] } },
+      },
+      {
+        ...doc(1, `${long}-y`),
+        task: { repetition_index: 1, output: { steps: [], messages: [{ message: `${long}-y` }] } },
+      },
+    ];
+    expect(answersFromDocs(docs).length).toBe(trailsFromDocs(docs).length);
+  });
+
+  it('reads the declared contract and returns undefined for pre-field corpora', () => {
+    expect(pathContractFromDocs([doc(0, 'x', 'probe')])).toBe('probe');
+    expect(pathContractFromDocs([doc(0, 'x')])).toBeUndefined();
+  });
+});
+
+describe('resolveProbe', () => {
+  it('prefers the declared contract over the example id', () => {
+    // A hunt-prefixed example the dataset declares rankable must be treated as
+    // rankable: the dataset is the source of truth, not the id.
+    expect(resolveProbe('threat-hunting-a', 'rankable')).toEqual({
+      probe: false,
+      source: 'declared',
+    });
+    expect(resolveProbe('workflow-authoring-a', 'probe')).toEqual({
+      probe: true,
+      source: 'declared',
+    });
+  });
+
+  it('falls back to the legacy prefix list and reports it, for pre-field corpora', () => {
+    expect(resolveProbe('alert-analysis-a')).toEqual({ probe: true, source: 'legacy-prefix' });
+    expect(resolveProbe('entity-analytics-c')).toEqual({ probe: true, source: 'legacy-prefix' });
+    expect(resolveProbe('workflow-authoring-a')).toEqual({
+      probe: false,
+      source: 'legacy-prefix',
+    });
+  });
+});
+
+describe('wilsonInterval', () => {
+  it('brackets the point estimate and stays inside [0, 1]', () => {
+    const wide = wilsonInterval(7, 27);
+    expect(wide.low).toBeGreaterThan(0.1);
+    expect(wide.high).toBeLessThan(0.5);
+    expect(wide.low).toBeLessThan(7 / 27);
+    expect(wide.high).toBeGreaterThan(7 / 27);
+  });
+
+  it('does not run below zero at a zero rate', () => {
+    const zero = wilsonInterval(0, 10);
+    expect(zero.low).toBe(0);
+    expect(zero.high).toBeGreaterThan(0);
+  });
+
+  it('narrows as the sample grows', () => {
+    const small = wilsonInterval(5, 20);
+    const large = wilsonInterval(50, 200);
+    expect(large.high - large.low).toBeLessThan(small.high - small.low);
+  });
+});
+
+describe('intervalsOverlap', () => {
+  it('treats two small-sample rates a few points apart as indistinguishable', () => {
+    // 26% and 22% over ~27 pairs each — the case the board must not order.
+    expect(intervalsOverlap(wilsonInterval(7, 27), wilsonInterval(6, 27))).toBe(true);
+  });
+
+  it('separates rates that genuinely differ at adequate sample size', () => {
+    expect(intervalsOverlap(wilsonInterval(10, 200), wilsonInterval(180, 200))).toBe(false);
+  });
+});
+
+describe('answerSimilarity', () => {
+  it('scores identical text 1 and disjoint text 0', () => {
+    expect(answerSimilarity('the host was compromised', 'the host was compromised')).toBe(1);
+    expect(answerSimilarity('alpha bravo', 'charlie delta')).toBe(0);
+  });
+
+  it('ignores case and punctuation', () => {
+    expect(answerSimilarity('Host: compromised!', 'host compromised')).toBe(1);
+  });
+});
+
+describe('firstDivergence', () => {
+  it('reports the index and tool where two paths split', () => {
+    expect(firstDivergence(['a', 'b', 'c'], ['a', 'x', 'c'])).toEqual({ step: 1, tool: 'b' });
+  });
+
+  it('reports the extra step when one path is a prefix of the other', () => {
+    expect(firstDivergence(['a', 'b'], ['a', 'b', 'c'])).toEqual({ step: 2, tool: 'c' });
+  });
+
+  it('returns undefined for identical paths', () => {
+    expect(firstDivergence(['a', 'b'], ['a', 'b'])).toBeUndefined();
   });
 });

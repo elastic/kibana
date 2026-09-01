@@ -371,6 +371,7 @@ export const matrixCmd: Command<void> = {
         branch,
         lookbackDays,
         commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
+        dirtyWorkingTree: localGit.dirty,
       });
       Fs.writeFileSync(Path.join(outDir, 'matrix.reliability.html'), reliabilityHtml);
       log.info(`Wrote matrix.html and matrix.reliability.html to ${outDir}`);

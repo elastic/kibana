@@ -11,7 +11,8 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { AggregatedModelScores } from './query_matrix_scores';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
 import { traceKey } from './trace_types';
-import { trailsFromDocs } from './trajectory_agreement';
+import type { PathContract } from './trajectory_agreement';
+import { answersFromDocs, pathContractFromDocs, trailsFromDocs } from './trajectory_agreement';
 
 /**
  * Runs `fn` over `items` with at most `limit` in flight, preserving input
@@ -202,7 +203,13 @@ export const overlayRepeatedCacheTrails = (
   if (!traceCache) {
     return;
   }
-  const best = new Map<string, string[][]>();
+  interface RepeatedCell {
+    trails: string[][];
+    answers: string[];
+    pathContract?: PathContract;
+    executionId: string;
+  }
+  const best = new Map<string, RepeatedCell>();
   for (const [cacheKey, docs] of Object.entries(traceCache)) {
     const split = cacheKey.lastIndexOf('::');
     if (split < 0 || docs.length === 0) {
@@ -219,20 +226,31 @@ export const overlayRepeatedCacheTrails = (
     }
     const combo = `${modelId}\0${exampleId}`;
     const previous = best.get(combo);
-    if (!previous || trails.length > previous.length) {
-      best.set(combo, trails);
+    if (!previous || trails.length > previous.trails.length) {
+      best.set(combo, {
+        trails,
+        answers: answersFromDocs(docs),
+        pathContract: pathContractFromDocs(docs),
+        executionId: cacheKey.slice(0, split),
+      });
     }
   }
-  for (const [combo, trails] of best) {
+  for (const [combo, cell] of best) {
     const sep = combo.indexOf('\0');
     const modelId = combo.slice(0, sep);
     const exampleId = combo.slice(sep + 1);
     const key = traceKey(modelId, exampleId);
+    const measured = {
+      repTrails: cell.trails,
+      repAnswers: cell.answers,
+      pathContract: cell.pathContract,
+      repExecutionIds: [cell.executionId],
+    };
     const existing = traces[key];
     if (existing) {
-      existing.repTrails = trails;
+      Object.assign(existing, measured);
     } else {
-      traces[key] = { repTrails: trails };
+      traces[key] = measured;
     }
   }
 };
