@@ -24,7 +24,7 @@ import { getStatusCellRenderers } from './status_cell_renderers';
 import { euiProgressCss } from '../results/results_table_shared';
 import { useBulkAgentDetails } from './use_bulk_agent_details';
 import { enrichEdgesWithErrors } from './enrich_edges';
-import type { ActionResultsSummaryProps } from './legacy_action_results_summary';
+import type { ActionResultsSummaryProps } from './types';
 
 const DEFAULT_PAGE_SIZE = 20;
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];

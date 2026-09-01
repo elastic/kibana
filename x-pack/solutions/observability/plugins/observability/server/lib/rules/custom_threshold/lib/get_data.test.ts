@@ -151,6 +151,23 @@ describe('getData', () => {
     expect(response).toEqual(expectedNoDataResponse);
   });
 
+  it('returns a fresh object for each no-data call so in-place mutation cannot leak across rules', async () => {
+    const search = jest.fn().mockResolvedValue({
+      aggregations: { groupings: { buckets: [] } },
+      _shards: { successful: 1 },
+    });
+
+    const first = await callGetData(search, 'host.name');
+    const second = await callGetData(search, 'host.name');
+
+    expect(first).toEqual(expectedNoDataResponse);
+    expect(second).toEqual(expectedNoDataResponse);
+    expect(first).not.toBe(second);
+
+    first[UNGROUPED_FACTORY_KEY].value = 42;
+    expect(second[UNGROUPED_FACTORY_KEY].value).toBeNull();
+  });
+
   it('throws other Elasticsearch errors', async () => {
     const error = new Error('Elasticsearch failed for another reason');
 

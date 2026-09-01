@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -39,7 +39,6 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     deployAndDetectStep,
     updateDeployAndDetectStep,
     getLatestFailedInstances,
-    registerDeployHandler,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -215,10 +214,6 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       deployAndDetectStep.failedInstances,
     ]
   );
-
-  useEffect(() => {
-    registerDeployHandler(handleDeploy);
-  }, [handleDeploy, registerDeployHandler]);
 
   return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
 }

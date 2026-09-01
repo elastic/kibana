@@ -147,7 +147,7 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         pitId: state.pitId,
         searchAfter: state.lastHitSortValue,
-        batchSize: context.migrationConfig.batchSize,
+        batchSize: state.batchSize,
         query: state.outdatedDocumentsQuery,
         seqNoPrimaryTerm: true,
       }),

@@ -9,7 +9,23 @@ export const THREAT_REPORTS_INDEX = '.kibana-threat-reports' as const;
 /** Wildcard omits dash so `.kibana-threat-reports` matches (not only suffixed indices). */
 export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
 export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as const;
-export const THREAT_INTEL_INDICATORS_INDEX = '.kibana-threat-intel-indicators' as const;
+/**
+ * Outside `.kibana-`, unlike the two above, because a Detection Engine Indicator Match
+ * rule has to read it as the rule's own API key. The built-in `viewer` role grants read
+ * on everything that does not start with a dot, plus a hand-maintained list of dotted
+ * exceptions (`.lists-*`, `.alerts*`, `.siem-signals*`, `.entities.*`). Nothing under
+ * `.kibana-` is on that list, and adding one would widen the grant well past this
+ * feature, so `.kibana-threat-intel-indicators` returned a security_exception to the one
+ * consumer it exists for.
+ *
+ * `ReservedRolesStore` grants `.threat-intel-indicators-*`. That pattern requires the
+ * hyphen, so it covers the per-space filtered aliases and never this bare index, which
+ * carries every space's candidates at every confidence level.
+ *
+ * Reports and sources stay under `.kibana-`: only the internal user touches them, and the
+ * sources index holds feed credentials.
+ */
+export const THREAT_INTEL_INDICATORS_INDEX = '.threat-intel-indicators' as const;
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
 
 export const THREAT_INTEL_API_BASE = '/internal/threat_intel' as const;
