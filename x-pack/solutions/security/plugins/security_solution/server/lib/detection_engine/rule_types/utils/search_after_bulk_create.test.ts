@@ -1040,6 +1040,22 @@ describe('searchAfterAndBulkCreate', () => {
       );
 
     test('should halve the page size and retry the same cursor when the response exceeds the limit', async () => {
+      const firstPageSortIds = ['1234567891111', '2233447556677'];
+
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
+      );
+      ruleServices.alertWithPersistence.mockResolvedValueOnce({
+        createdAlerts: [
+          {
+            _id: '1',
+            _index: '.internal.alerts-security.alerts-default-000001',
+            ...mockCommonFields,
+          },
+        ],
+        errors: {},
+        alertsWereTruncated: false,
+      });
       ruleServices.scopedClusterClient.asCurrentUser.search.mockRejectedValueOnce(
         maxResponseSizeError()
       );
@@ -1069,14 +1085,18 @@ describe('searchAfterAndBulkCreate', () => {
           'reducing the number of events fetched per page from 30 to 15 and retrying'
         ),
       ]);
-      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(3);
       expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({ size: 30 })
       );
       expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ size: 15 })
+        expect.objectContaining({ size: 30, search_after: firstPageSortIds })
+      );
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ size: 15, search_after: firstPageSortIds })
       );
       expect(sharedParams.ruleExecutionLogger.error).not.toHaveBeenCalled();
     });
