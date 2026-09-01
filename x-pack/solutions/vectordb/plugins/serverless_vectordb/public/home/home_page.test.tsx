@@ -72,11 +72,17 @@ describe('HomePage', () => {
   const navigateToApp = jest.fn();
   const isInTrial = jest.fn();
 
-  const mockServices = ({ cloud = { isInTrial } }: { cloud?: object | null } = {}) => {
+  const mockServices = ({
+    cloud = { isInTrial },
+    canMonitorAllIndices = true,
+  }: { cloud?: object | null; canMonitorAllIndices?: boolean } = {}) => {
     mockUseKibana.mockReturnValue({
       services: {
         cloud,
-        application: { navigateToApp },
+        application: {
+          navigateToApp,
+          capabilities: { serverlessVectordb: { canMonitorAllIndices } },
+        },
         docLinks: { links: { enterpriseSearch: { vectorDatabaseGetStarted: DOCS_URL } } },
       },
     });
@@ -156,10 +162,7 @@ describe('HomePage', () => {
     });
 
     it('is hidden from a caller that cannot monitor every index', () => {
-      mockUseDeploymentStats.mockReturnValue({
-        stats: { ...stats, vectorCount: undefined },
-        isLoading: false,
-      });
+      mockServices({ canMonitorAllIndices: false });
 
       render(<HomePage />);
 

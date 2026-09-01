@@ -47,10 +47,21 @@ export class ServerlessVectordbPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { serverless, agentBuilder, cloud }: SetupDependencies
+    { serverless, agentBuilder, cloud, features }: SetupDependencies
   ) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
     registerSearchSkills({ agentBuilder, cloud, logger: this.logger });
+
+    features.registerElasticsearchFeature({
+      id: 'serverlessVectordb',
+      privileges: [
+        {
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: { '*': ['monitor'] },
+          ui: ['canMonitorAllIndices'],
+        },
+      ],
+    });
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger);

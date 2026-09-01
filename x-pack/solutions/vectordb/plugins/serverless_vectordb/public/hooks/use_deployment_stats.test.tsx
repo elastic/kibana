@@ -101,6 +101,7 @@ describe('useDeploymentStats', () => {
     expect(result.current.isLoading).toBe(true);
     expect(result.current.stats).toEqual({
       indicesCount: null,
+      vectorCount: null,
       storeSizeBytes: null,
       workflowsCount: null,
       workflowsRunningCount: null,
@@ -145,14 +146,13 @@ describe('useDeploymentStats', () => {
     );
   });
 
-  it('leaves the vector count undefined when the response withholds it', async () => {
+  it('reports the vector count as unavailable when the response withholds it', async () => {
     const { vectorCount, ...withheldVectorCount } = esStats;
     mockResponses({ deploymentStats: withheldVectorCount });
 
     const result = await renderStats();
 
-    // undefined hides the stat, where null would render it as unavailable
-    expect(result.current.stats.vectorCount).toBeUndefined();
+    expect(result.current.stats.vectorCount).toBeNull();
     expect(result.current.stats.indicesCount).toBe(3);
   });
 
