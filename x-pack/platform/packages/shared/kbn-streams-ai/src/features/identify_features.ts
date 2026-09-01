@@ -23,7 +23,7 @@ import {
 import { withSpan } from '@kbn/apm-utils';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
-import { createIdentifyFeaturesPrompt, MAX_SEARCH_CANDIDATES } from './prompt';
+import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
@@ -89,7 +89,6 @@ export interface IdentifyFeaturesOptions {
   signal: AbortSignal;
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
-  searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
@@ -104,7 +103,6 @@ export async function identifyFeatures({
   signal,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
-  searchSimilarFeatures,
   additionalTools,
   additionalToolCallbacks,
 }: IdentifyFeaturesOptions): Promise<{
@@ -139,34 +137,6 @@ export async function identifyFeatures({
       maxSteps: additionalToolCallbacks ? 6 : 4,
       toolCallbacks: {
         ...(additionalToolCallbacks ?? {}),
-        search_similar_features: async (toolCall) => {
-          if (!searchSimilarFeatures) {
-            return {
-              response: { results: [], error: 'Semantic feature search is unavailable.' },
-            };
-          }
-
-          const search = searchSimilarFeatures;
-          const rawCandidates = toolCall.function.arguments?.candidates;
-          const candidates = (Array.isArray(rawCandidates) ? rawCandidates : []).slice(
-            0,
-            MAX_SEARCH_CANDIDATES
-          );
-          const results = await Promise.all(
-            candidates.map(async (candidate) => {
-              try {
-                return { candidate_id: candidate.candidate_id, features: await search(candidate) };
-              } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                logger.warn(
-                  `Failed to search similar features for "${candidate.candidate_id}": ${errorMessage}`
-                );
-                return { candidate_id: candidate.candidate_id, features: [], error: errorMessage };
-              }
-            })
-          );
-          return { response: { results } };
-        },
         finalize_features: async () => ({ response: { finalized: true } }),
       },
       finalToolChoice: {

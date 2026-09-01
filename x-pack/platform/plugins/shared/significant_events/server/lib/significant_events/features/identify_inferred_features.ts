@@ -32,6 +32,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
 import { createMemoryDiscoveryTools, type MemoryDiscoveryTools } from '../memory_discovery_tools';
@@ -46,12 +47,10 @@ import {
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
-import {
-  createFeatureSimilaritySearch,
-  type FeatureSimilaritySearch,
-} from './agent_builder_feature_similarity_search';
+import { createInferenceToolsFromAgentBuilder } from '../../agent_builder/inference_tool_bridge';
 
 export { findSimilarFeatures } from './feature_similarity_search';
+import { buildFeatureSimilarityInferenceTools } from './feature_similarity_search';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 
@@ -321,7 +320,6 @@ interface RunInferredIterationOptions {
   signal: AbortSignal;
   tuning: IterationTuningParams;
   iteration: number;
-  featureSimilaritySearch: FeatureSimilaritySearch;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
@@ -365,7 +363,6 @@ async function runInferredIteration({
   signal,
   tuning,
   iteration,
-  featureSimilaritySearch,
   additionalTools,
   additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
@@ -434,7 +431,6 @@ async function runInferredIteration({
     signal,
     previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
     knownFeatureIds,
-    searchSimilarFeatures: featureSimilaritySearch,
     additionalTools,
     additionalToolCallbacks,
   });
@@ -577,13 +573,34 @@ export async function identifyInferredFeatures({
     (toolset): toolset is MemoryDiscoveryTools | KiExtractionContextTools => toolset !== undefined
   );
 
+  // Bridge the managed Agent Builder tool when available (single schema source; stream_name injected
+  // server-side), else a direct KI-client fallback so dedup still works without Agent Builder.
+  const searchTools =
+    agentBuilderTools && request
+      ? await createInferenceToolsFromAgentBuilder({
+          tools: agentBuilderTools,
+          request,
+          specs: [
+            {
+              sourceToolId: platformSignificantEventsTools.searchSimilarFeatures,
+              name: 'search_similar_features',
+              hiddenParams: ['stream_name'],
+              prepare: () => ({ params: { stream_name: streamName } }),
+            },
+          ],
+          logger: logger.get('feature_similarity_search'),
+        })
+      : buildFeatureSimilarityInferenceTools({ kiClient, streamName });
+
   const additionalTools: Record<string, ToolDefinition> = Object.assign(
     {},
-    ...groundingToolsets.map((toolset) => toolset.tools)
+    ...groundingToolsets.map((toolset) => toolset.tools),
+    searchTools.tools
   );
   const additionalToolCallbacks: Record<string, ToolCallback> = Object.assign(
     {},
-    ...groundingToolsets.map((toolset) => toolset.callbacks)
+    ...groundingToolsets.map((toolset) => toolset.callbacks),
+    searchTools.callbacks
   );
   const combinedSystemPrompt = groundingToolsets.reduce(
     (prompt, toolset) => `${prompt}\n${toolset.promptSnippet}`,
@@ -591,13 +608,6 @@ export async function identifyInferredFeatures({
   );
 
   const startedAt = Date.now();
-  const featureSimilaritySearch = createFeatureSimilaritySearch({
-    agentBuilderTools,
-    request,
-    kiClient,
-    streamName,
-    logger,
-  });
 
   const iterationResult = await runInferredIteration({
     samplingEsClient,
@@ -616,7 +626,6 @@ export async function identifyInferredFeatures({
     signal,
     tuning,
     iteration,
-    featureSimilaritySearch,
     additionalTools,
     additionalToolCallbacks,
   });
