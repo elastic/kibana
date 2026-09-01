@@ -15,6 +15,7 @@ import {
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { reconcileCodeFeatures } from './reconcile_code_features';
 import { formatCitations } from './identify_code_features';
+import { FALLBACK_LOG_STREAM } from './constants';
 import type { CodeEvidenceCitation } from './types';
 
 /** A real stream and the index/pattern its data lives in. */
@@ -417,82 +418,57 @@ export async function linkServiceEntities({
   runId: string;
   logger: Logger;
 }): Promise<{ streams: string[] }> {
-  const bindings = await resolveLogBearingStreams({ streams, esClient, logger });
-  if (bindings.length === 0) {
-    return { streams: [] };
-  }
-
   const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
   const evidence = formatCitations(citations, ref) ?? [
     `code: ${ref} service identified by the code-intelligence agent`,
   ];
   const metadataProperties = serviceMetadataToProperties(metadata);
 
-  // Find existing log-derived service entities to merge onto.
-  const matches = new Map<string, Feature>();
-  await Promise.all(
-    bindings.map(async ({ stream }) => {
-      const { hits } = await kiClient.getFeatures(stream, {
-        type: [ENTITY_FEATURE_TYPE],
-        includeExcluded: true,
-      });
-      const match = hits.find(
-        (feature) =>
-          feature.subtype === SERVICE_ENTITY_SUBTYPE && matchesService(feature, serviceName)
-      );
-      if (match) {
-        matches.set(stream, match);
-      }
-    })
+  // Code-first: always write the service entity to the root `logs` stream.
+  // Stream-to-service correlation is a future concern; for now all
+  // code-discovered services land on the same default and activate when log
+  // data arrives.
+  const targetStream = FALLBACK_LOG_STREAM;
+
+  // Check if a log-derived entity already exists on the target stream.
+  const { hits: existingEntities } = await kiClient.getFeatures(targetStream, {
+    type: [ENTITY_FEATURE_TYPE],
+    includeExcluded: true,
+  });
+  const match = existingEntities.find(
+    (feature) => feature.subtype === SERVICE_ENTITY_SUBTYPE && matchesService(feature, serviceName)
+  );
+  const predicted = !match;
+
+  const incoming: FeatureUpsert = {
+    id: match?.id ?? serviceName,
+    stream_name: targetStream,
+    type: ENTITY_FEATURE_TYPE,
+    subtype: SERVICE_ENTITY_SUBTYPE,
+    title: match?.title ?? serviceName,
+    description: predicted
+      ? `Service "${serviceName}" predicted from code (not yet observed in logs).`
+      : `Service "${serviceName}" corroborated by code.`,
+    properties: { repository, name: serviceName, predicted, ...metadataProperties },
+    confidence: serviceEntityConfidence(metadata),
+    evidence,
+  };
+
+  const reconciled = reconcileCodeFeatures({
+    incoming: [incoming],
+    existing: existingEntities,
+    runId,
+  });
+  await kiClient.bulk(
+    targetStream,
+    reconciled.map((feature) => ({ index: { feature } }))
   );
 
-  // Matches always win; only predictive entities narrow to the inferred
-  // telemetry family, with a fallback to every log-bearing stream.
-  const targetStreams = (
-    matches.size > 0
-      ? bindings.filter((binding) => matches.has(binding.stream))
-      : filterPredictiveBindings(bindings, metadata)
-  ).map((binding) => binding.stream);
-
-  const written: string[] = [];
-  for (const stream of targetStreams) {
-    const match = matches.get(stream);
-    const predicted = !match;
-    const incoming: FeatureUpsert = {
-      id: match?.id ?? serviceName,
-      stream_name: stream,
-      type: ENTITY_FEATURE_TYPE,
-      subtype: SERVICE_ENTITY_SUBTYPE,
-      title: match?.title ?? serviceName,
-      description: predicted
-        ? `Service "${serviceName}" predicted from code (not yet observed in logs).`
-        : `Service "${serviceName}" corroborated by code.`,
-      properties: { repository, name: serviceName, predicted, ...metadataProperties },
-      confidence: serviceEntityConfidence(metadata),
-      evidence,
-    };
-
-    const { hits: existingOnStream } = await kiClient.getFeatures(stream, {
-      type: [ENTITY_FEATURE_TYPE],
-      includeExcluded: true,
-    });
-    const reconciled = reconcileCodeFeatures({
-      incoming: [incoming],
-      existing: existingOnStream,
-      runId,
-    });
-    await kiClient.bulk(
-      stream,
-      reconciled.map((feature) => ({ index: { feature } }))
-    );
-    written.push(stream);
-  }
-
   logger.debug(
-    `code_features: linked service "${serviceName}" as entity on stream(s) [${written.join(', ')}]${
-      matches.size > 0 ? ' (merged with log entity)' : ' (predictive)'
+    `code_features: linked service "${serviceName}" as entity on stream "${targetStream}"${
+      match ? ' (merged with log entity)' : ' (predictive)'
     }`
   );
 
-  return { streams: written };
+  return { streams: [targetStream] };
 }

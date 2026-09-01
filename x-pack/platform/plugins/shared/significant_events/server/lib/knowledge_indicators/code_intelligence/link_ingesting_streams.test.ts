@@ -151,31 +151,28 @@ describe('linkServiceEntities', () => {
     });
   });
 
-  it('narrows predictive entities to the OTel stream', async () => {
+  it('always targets the root logs stream (code-first)', async () => {
     const { result } = await link({ loggingPattern: 'otel' });
-
-    expect(result.streams).toEqual(['logs.otel']);
+    expect(result.streams).toEqual(['logs']);
   });
 
-  it('keeps every stream when telemetry metadata is unknown', async () => {
+  it('targets the root logs stream when telemetry metadata is unknown', async () => {
     const { result } = await link(undefined);
-
-    expect(result.streams).toEqual(['logs.ecs', 'logs.otel']);
+    expect(result.streams).toEqual(['logs']);
   });
 
-  it('falls back to every stream when the selected family has no bindings', async () => {
+  it('targets the root logs stream regardless of available bindings', async () => {
     const { result } = await link({ loggingPattern: 'otel' }, {}, [
       { name: 'logs.ecs', index: 'logs.ecs', convention: 'ecs' },
     ]);
-
-    expect(result.streams).toEqual(['logs.ecs']);
+    expect(result.streams).toEqual(['logs']);
   });
 
-  it('merges with a matching log entity regardless of its telemetry family', async () => {
+  it('merges with a matching log entity on the root logs stream', async () => {
     const matchingLogEntity = {
       id: 'checkout',
       uuid: 'checkout-uuid',
-      stream_name: 'logs.ecs',
+      stream_name: 'logs',
       type: 'entity',
       subtype: 'service',
       title: 'checkout',
@@ -184,8 +181,7 @@ describe('linkServiceEntities', () => {
       confidence: 80,
       evidence: ['logs: checkout observed'],
     } satisfies Feature;
-    const { result } = await link({ loggingPattern: 'otel' }, { 'logs.ecs': [matchingLogEntity] });
-
-    expect(result.streams).toEqual(['logs.ecs']);
+    const { result } = await link({ loggingPattern: 'otel' }, { logs: [matchingLogEntity] });
+    expect(result.streams).toEqual(['logs']);
   });
 });

@@ -68,10 +68,7 @@ const createKiClient = (features: Feature[], existingLinks: QueryLink[] = []) =>
     getFeatures: jest.fn(async () => ({ hits: features })),
     getStreamToQueryLinksMap: jest.fn(async (streamNames: string[]) =>
       Object.fromEntries(
-        streamNames.map((streamName) => [
-          streamName,
-          streamName === INGEST_STREAM ? existingLinks : [],
-        ])
+        streamNames.map((streamName) => [streamName, streamName === 'logs' ? existingLinks : []])
       )
     ),
     bulk,
@@ -175,7 +172,7 @@ describe('identifyCodeQueries', () => {
     expect(query.esql.query).not.toContain('service.name');
   });
 
-  it('generates durable draft predictive queries on the log-bearing stream', async () => {
+  it('always writes predictive queries to the root logs stream (code-first)', async () => {
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
@@ -193,23 +190,21 @@ describe('identifyCodeQueries', () => {
     expect(result.status).toBe('generated');
     expect(result.serviceName).toBe(SERVICE_KEY);
     expect(result.generatedCount).toBe(1);
-    expect(result.streams).toEqual([INGEST_STREAM]);
+    expect(result.streams).toEqual(['logs']);
 
     expect(bulk).toHaveBeenCalledTimes(1);
-    // Queries are written to the real ingesting stream, not the service key.
-    expect(bulk.mock.calls[0][0]).toBe(INGEST_STREAM);
+    expect(bulk.mock.calls[0][0]).toBe('logs');
     const operations = bulk.mock.calls[0][1];
     expect(operations).toHaveLength(1);
     const { query } = operations[0].index;
     expect(operations[0].index.query.rule_backed).toBe(false);
     expect(query.expires_at).toBeUndefined();
-    // Message-based (mirrors the log pipeline); no service field.
-    expect(query.esql.query).toContain(`FROM ${INGEST_STREAM}`);
-    expect(query.esql.query).toContain('message LIKE "*Payment failed for order*"');
+    expect(query.esql.query).toContain('FROM logs*');
+    expect(query.esql.query).toContain('MATCH_PHRASE(message, "Payment failed for order")');
     expect(query.esql.query).not.toContain('service.name');
   });
 
-  it('narrows predictive queries to the inferred telemetry family', async () => {
+  it('targets root logs stream regardless of telemetry metadata', async () => {
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
@@ -225,15 +220,15 @@ describe('identifyCodeQueries', () => {
       logger: loggerMock.create(),
     });
 
-    expect(result.streams).toEqual(['logs.otel']);
-    expect(bulk).toHaveBeenCalledWith('logs.otel', expect.any(Array));
+    expect(result.streams).toEqual(['logs']);
+    expect(bulk).toHaveBeenCalledWith('logs', expect.any(Array));
   });
 
-  it('de-duplicates against queries that already exist on the ingesting stream', async () => {
+  it('de-duplicates against queries that already exist on the logs stream', async () => {
     const existingEsql =
-      'FROM logs.checkout METADATA _id, _source | WHERE message LIKE "*Payment failed for order*"';
+      'FROM logs* METADATA _id, _source | WHERE MATCH_PHRASE(message, "Payment failed for order")';
     const existingLink = {
-      stream_name: INGEST_STREAM,
+      stream_name: 'logs',
       rule_backed: false,
       rule_id: 'r1',
       query: {

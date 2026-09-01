@@ -16,12 +16,10 @@ import {
 } from './constants';
 import { extractLogSignatures } from './extract_log_signatures';
 import { generatePredictiveQueries } from './generate_predictive_queries';
-import type { LogStreamBinding } from './link_ingesting_streams';
-import {
-  filterPredictiveBindings,
-  resolveLogBearingStreams,
-  type ServiceCodeMetadata,
-  type StreamSamplingSource,
+import type {
+  LogStreamBinding,
+  ServiceCodeMetadata,
+  StreamSamplingSource,
 } from './link_ingesting_streams';
 import type { LoggingChunk } from './types';
 
@@ -113,47 +111,19 @@ export async function identifyCodeQueries({
     return { status: 'no_signatures', serviceName };
   }
 
-  // Predictive queries need a stream to target. Mirror the log pipeline: target
-  // the log-bearing stream(s) and match on the message content (no service
-  // field — log streams here carry no queryable service field).
-  const resolvedBindings = filterPredictiveBindings(
-    await resolveLogBearingStreams({ streams, esClient, logger }),
-    metadata
-  );
-
-  // Chicken-vs-egg fallback: a cluster may index its source code before it ever
-  // ships logs, so no log-bearing stream exists yet. Rather than drop the
-  // signatures, write predictive queries against the broad `logs*` index pattern
-  // on the root `logs` stream, matching the conventional `message` field. They
-  // lie dormant until log data arrives, then match automatically.
-  const usingFallback = resolvedBindings.length === 0;
-  if (
-    usingFallback &&
-    authorizedStreamNames !== undefined &&
-    !authorizedStreamNames.has(FALLBACK_LOG_STREAM)
-  ) {
-    logger.debug(
-      `code_queries: fallback stream "${FALLBACK_LOG_STREAM}" is not accessible to the request for service "${serviceName}"; skipping`
-    );
-    return { status: 'no_ingesting', serviceName };
-  }
-  const bindings: LogStreamBinding[] = usingFallback
-    ? [
-        {
-          stream: FALLBACK_LOG_STREAM,
-          index: FALLBACK_LOG_INDEX_PATTERN,
-          convention: 'ecs',
-          messageField: FALLBACK_LOG_MESSAGE_FIELD,
-          messageIsText: true,
-        },
-      ]
-    : resolvedBindings;
-
-  if (usingFallback) {
-    logger.debug(
-      `code_queries: no log-bearing stream for service "${serviceName}"; writing predictive queries against fallback "${FALLBACK_LOG_INDEX_PATTERN}" on stream "${FALLBACK_LOG_STREAM}"`
-    );
-  }
+  // Code-first: always write predictive queries against the broad `logs*`
+  // index pattern on the root `logs` stream. They activate automatically when
+  // log data arrives. Stream-to-service correlation is a future concern;
+  // for now, all code-derived queries target the same default.
+  const bindings: LogStreamBinding[] = [
+    {
+      stream: FALLBACK_LOG_STREAM,
+      index: FALLBACK_LOG_INDEX_PATTERN,
+      convention: 'ecs',
+      messageField: FALLBACK_LOG_MESSAGE_FIELD,
+      messageIsText: true,
+    },
+  ];
 
   let generatedCount = 0;
   const writtenStreams: string[] = [];
