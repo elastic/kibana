@@ -169,9 +169,9 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
-      expect(getKibanaUpgradeStatusMock).toBeCalledTimes(1);
-      expect(getRecentEsDeprecationLogsMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
+      expect(getKibanaUpgradeStatusMock).toHaveBeenCalledTimes(1);
+      expect(getRecentEsDeprecationLogsMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
 
       expect(resp.payload).toEqual({
@@ -203,7 +203,7 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
@@ -228,7 +228,7 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
@@ -293,7 +293,7 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(0);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(0);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
@@ -371,8 +371,8 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(testQuery), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
-      expect(getKibanaUpgradeStatusMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
+      expect(getKibanaUpgradeStatusMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
@@ -397,8 +397,8 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(testQuery), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
-      expect(getKibanaUpgradeStatusMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
+      expect(getKibanaUpgradeStatusMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
@@ -422,7 +422,7 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(testQuery), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
@@ -462,7 +462,7 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(testQuery), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(1);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(1);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
@@ -512,7 +512,7 @@ describe('Status API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(testQuery), kibanaResponseFactory);
 
-      expect(getESSystemIndicesMigrationStatusMock).toBeCalledTimes(0);
+      expect(getESSystemIndicesMigrationStatusMock).toHaveBeenCalledTimes(0);
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
