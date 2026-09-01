@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util'
   - '@kbn/esql-types'
+  - '@kbn/custom-content-server'
 tags:
   - plugin
   - prod
