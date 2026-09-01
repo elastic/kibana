@@ -39,7 +39,6 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 }));
 
 const discoverGridMock = jest.mocked(DiscoverGrid);
-const discoverGridFlyoutMock = jest.mocked(DiscoverGridFlyout);
 const singleEsHit = esHitsMock.slice(0, 1);
 const cascadedColumnsMeta: DataTableColumnsMeta = {
   bytes: {
@@ -240,7 +239,7 @@ describe('Discover documents layout', () => {
       jest
         .mocked(DiscoverGridFlyout)
         .mockImplementation((props) => (
-          <div data-test-subj="discoverGridFlyoutMock">{props.hit.id}</div>
+          <div data-test-subj="discoverGridFlyoutMock">{props.hit?.id ?? 'no-expanded-doc'}</div>
         ));
     });
 
@@ -268,10 +267,9 @@ describe('Discover documents layout', () => {
       expect(discoverGridProps.expandedDoc).toEqual(expandedDoc);
       expect(discoverGridProps.setRenderDocumentViewMeta).toEqual(expect.any(Function));
       expect(toolkit.getCurrentTab().expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
-      expect(screen.queryByTestId('discoverGridFlyoutMock')).not.toBeInTheDocument();
     });
 
-    it('hides expanded state from the main grid and preserves the active owner through flyout navigation', async () => {
+    it('hides expanded state from the main grid and preserves the active owner when another grid owns the flyout', async () => {
       const { toolkit } = await setup();
       const tabId = toolkit.getCurrentTab().id;
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
@@ -329,25 +327,6 @@ describe('Discover documents layout', () => {
       expect(toolkit.getCurrentTab().renderDocumentViewMeta).toEqual({
         displayedRows: [expandedDoc, nextExpandedDoc],
         displayedColumns: ['bytes'],
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverGridFlyoutMock')).toBeVisible();
-      });
-
-      const flyoutProps = discoverGridFlyoutMock.mock.lastCall?.[0]!;
-      expect(flyoutProps.hit).toEqual(expandedDoc);
-      expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
-      expect(flyoutProps.columns).toEqual(['bytes']);
-      expect(flyoutProps.columnsMeta).toEqual(cascadedColumnsMeta);
-
-      act(() => {
-        flyoutProps.setExpandedDoc(nextExpandedDoc);
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc).toEqual(nextExpandedDoc);
-        expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
       });
     });
   });

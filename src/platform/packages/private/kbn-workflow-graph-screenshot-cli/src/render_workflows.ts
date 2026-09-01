@@ -153,7 +153,7 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     // With no --chrome-executable override, Playwright launches the managed
     // Chromium build it downloads during `yarn kbn bootstrap` (no system Chrome
     // detection needed). If that download is missing, Playwright's own launch
-    // error already explains how to fetch it (`npx playwright install chromium`).
+    // error already explains how to fetch it (`node scripts/playwright install chromium`).
     log.debug(
       chromeExecutable
         ? `Using Chrome at: ${chromeExecutable}`

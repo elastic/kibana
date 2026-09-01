@@ -7,6 +7,9 @@
 
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  resolveEsqlQueryEdit,
+  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { PanelFailure } from '../utils';
@@ -17,6 +20,7 @@ import type { ResolveCustomContentTemplate } from './types';
 import {
   PANEL_TYPE_DEFINITIONS,
   type AddPanelsItemInput,
+  type CustomContentPanelConfig,
   type NewPanelInput,
   type PanelContent,
   type PanelRequestInput,
@@ -235,22 +239,20 @@ export const applyCustomContentTemplates = async (
       const { panel } = entry;
       if (!panel) return;
       if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
-      const config = panel.panelContent.config as CustomContentState;
-      if (!config.prompt || config.template) return;
+      const { prompt, esqlQuery, ...persistedConfig } = panel.panelContent
+        .config as CustomContentPanelConfig & CustomContentState;
+      if (!prompt || persistedConfig.template) return;
 
       try {
-        const template = await resolveTemplate({
-          prompt: config.prompt,
-          esqlQuery: config.esqlQuery,
-        });
+        const template = await resolveTemplate({ prompt, esqlQuery });
         panel.panelContent = {
           ...panel.panelContent,
-          config: { ...(config as Record<string, unknown>), template },
+          config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
         };
       } catch (err) {
         failures.push({
           type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
-          identifier: config.prompt,
+          identifier: prompt,
           error: getErrorMessage(err),
         });
         entry.panel = undefined;
@@ -264,17 +266,15 @@ export const mergeAndResolveCustomContentEdit = async (
   existing: CustomContentState,
   resolveTemplate: ResolveCustomContentTemplate
 ): Promise<CustomContentState> => {
-  const mergedPrompt = editConfig.prompt ?? existing.prompt ?? '';
-  const mergedEsqlQuery =
-    editConfig.esqlQuery === undefined
-      ? existing.esqlQuery
-      : editConfig.esqlQuery === null
-      ? undefined
-      : editConfig.esqlQuery;
+  const { query: mergedEsqlQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
+    editConfig.esqlQuery,
+    readEsqlQuery(existing)
+  );
   const template = await resolveTemplate({
-    prompt: mergedPrompt,
-    esqlQuery: mergedEsqlQuery,
+    prompt: editConfig.prompt ?? '',
+    esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
+    hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
-  return { prompt: mergedPrompt, esqlQuery: mergedEsqlQuery, template };
+  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };

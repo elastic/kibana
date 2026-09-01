@@ -16,16 +16,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
-import type { LinkId } from '@kbn/deeplinks-management';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import { useBoolean } from '@kbn/react-hooks';
+import { useQueryClient } from '@kbn/react-query';
+import { noop } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DataConnector } from '../../hooks/use_data_connectors';
+import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { ConnectorTypeIcon } from '../connector_type_icon';
-
-const CONNECTORS_DEEP_LINK_ID: LinkId = 'triggersActionsConnectors';
 
 interface ConnectorsTabProps {
   connectors: DataConnector[];
@@ -35,61 +37,29 @@ interface ConnectorsTabProps {
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
 }
 
-export const ConnectorsTab = ({
-  connectors,
-  isLoading,
-  isError,
-  selectedConnectorIds,
-  onToggle,
-}: ConnectorsTabProps) => {
-  const {
-    services: { application },
-  } = useKibana();
-
-  const selectedIds = useMemo(() => new Set(selectedConnectorIds), [selectedConnectorIds]);
-
-  const options = useMemo<EuiSelectableOption[]>(
-    () =>
-      connectors.map((connector) => ({
-        key: connector.id,
-        label: connector.name,
-        checked: selectedIds.has(connector.id) ? 'on' : undefined,
-        prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
-        'data-test-subj': `contextConnectorOption-${connector.id}`,
-      })),
-    [connectors, selectedIds]
-  );
-
-  const handleChange = (
+interface ConnectorsTabContentProps {
+  connectors: DataConnector[];
+  isLoading: boolean;
+  isError: boolean;
+  options: EuiSelectableOption[];
+  onConnectorSelectionChange: (
     _options: EuiSelectableOption[],
     _event: unknown,
     changedOption: EuiSelectableOption
-  ) => {
-    if (!changedOption.key) {
-      return;
-    }
-    onToggle({
-      id: changedOption.key,
-      name: changedOption.label,
-      checked: changedOption.checked === 'on',
-    });
-  };
+  ) => void;
+  createConnectorButton: React.ReactNode;
+  canCreateConnector: boolean;
+}
 
-  const createConnectorButton = (
-    <EuiButtonEmpty
-      iconType="plusCircle"
-      onClick={() =>
-        application.navigateToApp(MANAGEMENT_APP_ID, { deepLinkId: CONNECTORS_DEEP_LINK_ID })
-      }
-      data-test-subj="contextCreateConnectorButton"
-    >
-      <FormattedMessage
-        id="xpack.contextEngine.sourcePicker.connectors.createButton"
-        defaultMessage="Create connector"
-      />
-    </EuiButtonEmpty>
-  );
-
+const ConnectorsTabContent = ({
+  connectors,
+  isLoading,
+  isError,
+  options,
+  onConnectorSelectionChange,
+  createConnectorButton,
+  canCreateConnector,
+}: ConnectorsTabContentProps) => {
   if (isLoading) {
     return <EuiSkeletonText lines={3} data-test-subj="contextConnectorsLoading" />;
   }
@@ -136,10 +106,17 @@ export const ConnectorsTab = ({
         }
         body={
           <p>
-            <FormattedMessage
-              id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
-              defaultMessage="Create a connector in this space to use it as a source."
-            />
+            {canCreateConnector ? (
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
+                defaultMessage="Create a connector to use it as a source."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
+                defaultMessage="Ask your administrator to create a connector."
+              />
+            )}
           </p>
         }
         actions={createConnectorButton}
@@ -155,7 +132,7 @@ export const ConnectorsTab = ({
         })}
         searchable
         options={options}
-        onChange={handleChange}
+        onChange={onConnectorSelectionChange}
         height={240}
         listProps={{ bordered: true, onFocusBadge: false }}
         data-test-subj="contextConnectorsSelectable"
@@ -168,10 +145,118 @@ export const ConnectorsTab = ({
           </>
         )}
       </EuiSelectable>
-      <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-        <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
-      </EuiFlexGroup>
+      {createConnectorButton && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </div>
+  );
+};
+
+export const ConnectorsTab = ({
+  connectors,
+  isLoading,
+  isError,
+  selectedConnectorIds,
+  onToggle,
+}: ConnectorsTabProps) => {
+  const [isCreateFlyoutOpen, { on: openCreateFlyout, off: closeCreateFlyout }] = useBoolean(false);
+  const queryClient = useQueryClient();
+  const {
+    services: { application, triggersActionsUi },
+  } = useKibana();
+
+  const canCreateConnector = application?.capabilities.actions?.save === true;
+
+  const selectedIds = useMemo(() => new Set(selectedConnectorIds), [selectedConnectorIds]);
+
+  const options = useMemo<EuiSelectableOption[]>(
+    () =>
+      connectors.map((connector) => ({
+        key: connector.id,
+        label: connector.name,
+        checked: selectedIds.has(connector.id) ? 'on' : undefined,
+        prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
+        'data-test-subj': `contextConnectorOption-${connector.id}`,
+      })),
+    [connectors, selectedIds]
+  );
+
+  const handleConnectorSelectionChange = (
+    _options: EuiSelectableOption[],
+    _event: unknown,
+    changedOption: EuiSelectableOption
+  ) => {
+    if (!changedOption.key) {
+      return;
+    }
+    onToggle({
+      id: changedOption.key,
+      name: changedOption.label,
+      checked: changedOption.checked === 'on',
+    });
+  };
+
+  const invalidateConnectorQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.connectors.list() });
+  }, [queryClient]);
+
+  const handleConnectorCreated = useCallback(
+    (connector: ActionConnector) => {
+      invalidateConnectorQueries();
+      onToggle({ id: connector.id, name: connector.name, checked: true });
+    },
+    [invalidateConnectorQueries, onToggle]
+  );
+
+  const handleCloseCreateFlyout = useCallback(() => {
+    invalidateConnectorQueries();
+    closeCreateFlyout();
+  }, [closeCreateFlyout, invalidateConnectorQueries]);
+
+  const createConnectorFlyout = useMemo(
+    () =>
+      isCreateFlyoutOpen
+        ? triggersActionsUi.getAddConnectorFlyout({
+            featureId: ContextEngineConnectorFeatureId,
+            size: 'm',
+            onClose: handleCloseCreateFlyout,
+            onConnectorCreated: handleConnectorCreated,
+            onTestConnector: noop, // Required by CreateConnectorFlyout to render Save & test
+          })
+        : null,
+    [handleCloseCreateFlyout, handleConnectorCreated, isCreateFlyoutOpen, triggersActionsUi]
+  );
+
+  const createConnectorButton = canCreateConnector ? (
+    <EuiButtonEmpty
+      iconType="plusCircle"
+      onClick={openCreateFlyout}
+      data-test-subj="contextCreateConnectorButton"
+    >
+      <FormattedMessage
+        id="xpack.contextEngine.sourcePicker.connectors.createButton"
+        defaultMessage="Create connector"
+      />
+    </EuiButtonEmpty>
+  ) : null;
+
+  return (
+    <>
+      <ConnectorsTabContent
+        connectors={connectors}
+        isLoading={isLoading}
+        isError={isError}
+        options={options}
+        onConnectorSelectionChange={handleConnectorSelectionChange}
+        createConnectorButton={createConnectorButton}
+        canCreateConnector={canCreateConnector}
+      />
+      {createConnectorFlyout}
+    </>
   );
 };

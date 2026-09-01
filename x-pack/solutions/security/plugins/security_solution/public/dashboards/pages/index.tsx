@@ -11,6 +11,7 @@ import { DashboardsLandingPage } from './landing_page';
 import { DashboardView } from './details';
 import { DASHBOARDS_PATH } from '../../../common/constants';
 import { DashboardContextProvider } from '../context/dashboard_context';
+import { HashDashboardLinkRedirect } from '../components/hash_dashboard_link_redirect';
 
 const DashboardsContainerComponent = () => {
   return (
@@ -20,9 +21,11 @@ const DashboardsContainerComponent = () => {
           <DashboardView initialViewMode={'edit'} />
         </Route>
         <Route strict path={`${DASHBOARDS_PATH}/:detailName/edit`}>
+          <HashDashboardLinkRedirect />
           <DashboardView initialViewMode={'edit'} />
         </Route>
         <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
+          <HashDashboardLinkRedirect />
           <DashboardView initialViewMode={'view'} />
         </Route>
         <Route path={`${DASHBOARDS_PATH}`}>

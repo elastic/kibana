@@ -21,7 +21,8 @@ import {
   getWorkflowWithCommentedVariablesYaml,
 } from '../fixtures/workflows';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/285239
+test.describe.skip(
   'Sanity tests for workflows',
   {
     tag: [

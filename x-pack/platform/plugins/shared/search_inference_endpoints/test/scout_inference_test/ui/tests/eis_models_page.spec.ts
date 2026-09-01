@@ -51,13 +51,13 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
 
     await test.step('typing a search term reduces the card count', async () => {
-      await eisModels.searchBar.fill('Anthropic');
+      await eisModels.search('Anthropic');
       await expect(eisModels.allModelCards).toHaveCount(1);
       await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
     });
 
     await test.step('clearing search restores all cards', async () => {
-      await eisModels.searchBar.clear();
+      await eisModels.clearSearch();
       await expect(eisModels.allModelCards).toHaveCount(6);
     });
   });
@@ -85,12 +85,12 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     const { eisModels } = pageObjects;
 
     await test.step('open model family filter popover', async () => {
-      await eisModels.modelFamilyFilter.getByRole('button').click();
+      await eisModels.modelFamilyFilter.click();
     });
 
     await test.step('select Anthropic provider and close popover', async () => {
       await page.getByRole('option', { name: 'Anthropic' }).click();
-      await eisModels.modelFamilyFilter.getByRole('button').click();
+      await eisModels.modelFamilyFilter.click();
     });
 
     await test.step('only Anthropic model card is shown', async () => {
@@ -126,7 +126,7 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     const { eisModels } = pageObjects;
 
     await test.step('search for non-existent model', async () => {
-      await eisModels.searchBar.fill('nonexistent-model-xyz');
+      await eisModels.search('nonexistent-model-xyz');
     });
 
     await test.step('no models found prompt is displayed', async () => {

@@ -20,6 +20,7 @@ export {
   type ToolHandlerContextMock,
   createAgentHandlerContextMock,
   type AgentHandlerContextMock,
+  createInMemoryConversationTemplates,
 } from './runner';
 export {
   createToolsServiceStartMock,

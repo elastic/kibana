@@ -18,6 +18,7 @@ import {
   noDataStrategySchema,
   groupingModeSchema,
   throttleStrategySchema,
+  MATCHER_CONTEXT_FIELDS,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -357,6 +358,15 @@ function formatVariantSchemas(jsonSchema: unknown): string {
   return sections.join('\n\n');
 }
 
+const toOperationJsonSchema = (schema: z.ZodType, title: string): JsonSchemaNode => {
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  throwIfMissingOperationDescribes(
+    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
+    title
+  );
+  return jsonSchema;
+};
+
 /**
  * Generates markdown for a create/update API Zod schema (top-level field table,
  * plus optional extra sections such as query format variants).
@@ -413,13 +423,25 @@ export const generateOperationsDoc = ({
   title: string;
   schema: z.ZodType;
 }): string => {
-  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
-  throwIfMissingOperationDescribes(
-    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
-    title
-  );
-
+  const jsonSchema = toOperationJsonSchema(schema, title);
   return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
+};
+
+/**
+ * Bullet list of each operation's top-level `.describe()`. Use this in a tool
+ * description so usage copy stays in sync with the Zod schema instead of a
+ * hand-written operations list.
+ */
+export const generateOperationsUsageList = ({
+  title,
+  schema,
+}: {
+  title: string;
+  schema: z.ZodType;
+}): string => {
+  const jsonSchema = toOperationJsonSchema(schema, title);
+  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[];
+  return variants.map((variant) => `- ${variant.description}`).join('\n');
 };
 
 /**
@@ -427,6 +449,13 @@ export const generateOperationsDoc = ({
  */
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
+    title: 'Rule Operations Schema Reference',
+    schema: ruleOperationSchema,
+  });
+
+/** Operation `.describe()` list for the `manage_rule` tool description. */
+export const generateRuleOperationsUsageList = (): string =>
+  generateOperationsUsageList({
     title: 'Rule Operations Schema Reference',
     schema: ruleOperationSchema,
   });
@@ -467,9 +496,6 @@ export const getEpisodeStatusValues = (): string[] =>
   getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
     ({ value }) => value
   );
-
-const getGroupingModeValues = (): string[] =>
-  getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema').map(({ value }) => value);
 
 /** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
 const getStateTransitionFields = (): string[] =>
@@ -516,27 +542,53 @@ const formatStrategySet = (strategies: Set<string>): string =>
   formatEnumValuesList([...strategies]);
 
 /**
- * Generates the Throttle / Grouping Compatibility section with heading and
- * strategy-set bullets, derived from the schema's strategy sets.
+ * Generates standalone markdown for throttle / grouping compatibility from
+ * `groupingModeSchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
-  const groupingModes = getGroupingModeValues();
-  const perEpisodeMode = groupingModes.find((m) => m === 'per_episode') ?? 'per_episode';
-  const aggregateModes = groupingModes.filter((m) => m !== perEpisodeMode);
+  const groupingModesList = generateEnumList({
+    schema: groupingModeSchema,
+    schemaName: 'groupingModeSchema',
+  });
 
-  const lines = [
-    '### Throttle / Grouping Compatibility',
-    '',
-    'The throttle strategy must be compatible with the grouping mode:',
-    `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
-    `- For ${aggregateModes.map((m) => `\`${m}\``).join(' / ')}: ${formatStrategySet(
-      AGGREGATE_STRATEGIES
-    )}.`,
-    `- ${formatStrategySet(
+  const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
+    (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
+  );
+  const notPerEpisodeStrategies = [...AGGREGATE_STRATEGIES].filter(
+    (strategy) => !PER_EPISODE_STRATEGIES.has(strategy)
+  );
+
+  const caveats: string[] = [];
+  if (perEpisodeOnlyStrategies.length > 0) {
+    caveats.push(
+      `- Only valid with \`per_episode\`: ${formatEnumValuesList(perEpisodeOnlyStrategies)}.`
+    );
+  }
+  if (notPerEpisodeStrategies.length > 0) {
+    caveats.push(
+      `- Not valid with \`per_episode\`: ${formatEnumValuesList(notPerEpisodeStrategies)}.`
+    );
+  }
+  caveats.push(
+    `- Require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`): ${formatStrategySet(
       STRATEGIES_REQUIRING_INTERVAL
-    )} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
-  ];
-  return lines.join('\n');
+    )}.`
+  );
+
+  return [
+    '# Throttle / Grouping Compatibility',
+    '',
+    groupingModesList,
+    '',
+    'Caveats:',
+    ...caveats,
+    '',
+    'If you set both in one request, put `set_grouping` before `set_throttle`. The tool',
+    'validates compatibility after all operations run.',
+    '',
+    'Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md).',
+  ].join('\n');
 };
 
 /** Product-facing label for a rule kind (`Alerts` / `Events`). Throws if a kind has no UI label. */
@@ -723,25 +775,173 @@ export const generateRecoveryStrategyDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Grouping Modes section with heading and bullet list. */
+/**
+ * Generates markdown for KQL matcher context fields from `MATCHER_CONTEXT_FIELDS`,
+ * enriching enum fields from `alertEpisodeStatusSchema` / `alertEventSeveritySchema`.
+ */
+export const generateMatcherContextDoc = (): string => {
+  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const severities = formatEnumValuesList(getSeverityValues());
+
+  const formatMatcherFieldType = (path: string, type: string): string => {
+    if (path === 'episode_status') return episodeStatuses;
+    if (path === 'severity') return severities;
+    if (path === 'data') return '`data.*` object';
+    return type;
+  };
+
+  const rows = MATCHER_CONTEXT_FIELDS.map((field) => {
+    const typeCell = escapeTableCell(formatMatcherFieldType(field.path, field.type));
+    return `| \`${field.path}\` | ${typeCell} | ${escapeTableCell(field.description)} |`;
+  });
+
+  return [
+    '# Matcher Context Fields',
+    '',
+    "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
+    '',
+    '| Field | Type | Description |',
+    '|---|---|---|',
+    ...rows,
+    '',
+    'An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use `rule.id: "<ruleId>"`.',
+  ].join('\n');
+};
+
+/** Generates standalone markdown for action-policy grouping modes. */
 export const generateGroupingModesDoc = (): string => {
   const list = generateEnumList({
     schema: groupingModeSchema,
     schemaName: 'groupingModeSchema',
   });
 
-  return ['### Grouping Modes', list].join('\n');
+  return [
+    '# Grouping Modes',
+    '',
+    list,
+    '',
+    'Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
+  ].join('\n');
 };
 
-/** Generates the Throttle Strategies section with heading and bullet list. */
+/** Generates standalone markdown for action-policy throttle strategies. */
 export const generateThrottleStrategiesDoc = (): string => {
   const list = generateEnumList({
     schema: throttleStrategySchema,
     schemaName: 'throttleStrategySchema',
   });
 
-  return ['### Throttle Strategies', list].join('\n');
+  return [
+    '# Throttle Strategies',
+    '',
+    list,
+    '',
+    'Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
+  ].join('\n');
 };
+
+/** Generates standalone markdown for action-policy workflow destinations. */
+export const generateWorkflowDestinationsDoc = (): string =>
+  [
+    '# Workflows',
+    '',
+    'A workflow is a **concrete automation defined in YAML** that executes when dispatched by an action policy.',
+    '',
+    '- Workflow steps can use Kibana **connectors** (email, Slack, PagerDuty, etc.) via the `connector-id` field on each step.',
+    '- Action policy destinations reference **workflow IDs**, never connector IDs directly.',
+    '- Destination workflows must use **exactly one** `triggers: - type: manual` trigger — never `alert`.',
+    '- For deeper connector knowledge (types, `connector-id` usage, discovery tools), load the `workflow-authoring` skill.',
+  ].join('\n');
+
+/** Generates standalone markdown for the end-to-end notification dispatch path. */
+export const generateDispatchFlowDoc = (): string =>
+  [
+    '# Dispatch Flow',
+    '',
+    'The end-to-end notification path:',
+    '',
+    '1. **Rule** (`kind: alert`) evaluates its ES|QL query and writes alert episodes to `.rule-events`.',
+    '2. **Dispatcher** (runs on its own Task Manager schedule) reads episodes from `.rule-events`.',
+    '3. Dispatcher loads **enabled action policies** for the relevant space.',
+    "4. **Matcher evaluation**: each policy's KQL matcher is tested against each episode's context.",
+    "5. **Grouping**: matched episodes are grouped according to the policy's `groupingMode` / `groupBy`.",
+    "6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.",
+    "7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via `scheduleWorkflow`.",
+    '8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).',
+    '',
+    "Signal rules (`kind: signal`) are excluded at step 2 — the dispatcher query only selects `type == 'alert'` events.",
+  ].join('\n');
+
+/** Generates standalone markdown for the default single-rule action-policy create path. */
+export const generateSingleRuleActionPolicyDoc = (): string =>
+  [
+    '# Single-rule Action Policies',
+    '',
+    'Use this path when the user wants notifications for **one specific rule**.',
+    '',
+    'Action policies only process alert episodes. If the rule is `kind: signal`, do not',
+    'proceed: ask the user (or the rule-management skill) to convert or recreate the',
+    'rule as `kind: alert` first.',
+    '',
+    'Create the policy with these operations in order:',
+    '',
+    '1. `set_metadata`: name = `"Notify on <rule-name>"`, description = `"Default notification for <rule-name>"`',
+    '2. `set_destinations`: `[{ type: "workflow", id: "<workflowId>" }]`',
+    '   - Use the `workflowId` passed to `generate_workflow`, **not** the workflow `attachmentId`.',
+    '3. `set_matcher`: `rule.id: "<ruleId>"`',
+    '   - `ruleId` comes from the `manage_rule` tool result. It is pre-assigned when the',
+    '     rule attachment is created and becomes the saved-object ID when the user clicks',
+    '     "Create rule".',
+    '   - It is available even for unsaved/proposed rules — do not ask the user to save',
+    '     the rule first.',
+    '4. `set_grouping`: `per_episode`',
+    '5. `set_throttle`: `{ strategy: "on_status_change" }`',
+    '',
+    'If the user explicitly requests a cross-rule or shared policy, consult the',
+    '[multi-rule action policies reference](./action-policy-multi-rule.md).',
+  ].join('\n');
+
+/** Generates standalone markdown for shared / multi-rule action-policy matchers. */
+export const generateMultiRuleActionPolicyDoc = (): string =>
+  [
+    '# Multi-rule Action Policies',
+    '',
+    'Use this path when the user wants **one policy across several rules**, a space-wide',
+    'catch-all, or routing by tag/severity — not a policy tied to a single `rule.id`.',
+    '',
+    'Create the policy with `set_metadata` (name by intent, not by one rule),',
+    '`set_destinations` (same `workflowId` rule as the single-rule path), a matcher from',
+    'the options below, then `set_grouping` / `set_throttle`.',
+    '',
+    'A policy matches **episodes**, not a rule object. Policies are space-scoped and are',
+    'not bound to a single rule. The matcher is optional KQL over',
+    '[matcher context fields](./action-policy-matchers.md).',
+    '',
+    '- **Catch-all**: omit `set_matcher` or set matcher to empty/`null`. Confirm with the',
+    '  user first — this notifies on every `kind: alert` episode in the space, including',
+    '  rules created later.',
+    '- **Several specific rules**: `rule.id: "<id1>" or rule.id: "<id2>"`. Collect each',
+    '  `ruleId` from `manage_rule` / `sml_search` (pre-assigned IDs work for unsaved drafts).',
+    '- **A family of rules**: `rule.tags: "production"` or `rule.name: "CPU*"`. Prefer tags',
+    '  when the set will grow.',
+    '- **Route by severity across rules**: `severity: "critical"` (or combine with tags).',
+    '  Useful for a PagerDuty policy vs an email policy.',
+    '- **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —',
+    '  `inputs.payload.rules[ep.rule_id].name`, `ep.episode_status`, and guarded',
+    '  `ep.data.*` — because query columns often differ across rules. If two rules need',
+    '  different message shapes, use two policies (or two workflows) rather than one',
+    '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
+    '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
+    '  another catch-all or overlapping tag matcher.',
+    '- **Grouping**: `per_episode` is still a safe default. `all` batches mixed-rule',
+    '  episodes into a single notification; only use it when the user wants one combined',
+    '  message.',
+    '',
+    'Name shared policies by intent (`"Notify production alerts"`, `"Page on critical"`),',
+    'not by a single rule name.',
+    '',
+    'For the default one-rule path, see [single-rule action policies](./action-policy-single-rule.md).',
+  ].join('\n');
 
 /**
  * Generates concise markdown documentation from the create-action-policy Zod schema.
@@ -790,10 +990,9 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
   const sections = [
     '# Action Policy Workflow Dispatch Payload',
     '',
-    'Access pattern: `{{ inputs.payload.<field> }}` (e.g. `{{ inputs.payload.policyId }}`,',
-    '`{{ inputs.payload.episodes }}`). For episode fields use',
-    '`{% for ep in inputs.payload.episodes %}{{ ep.<field> }}{% endfor %}`.',
-    'Rule names: `{{ inputs.payload.rules[ep.rule_id].name }}`.',
+    'Catalog of fields the dispatcher passes as `inputs.payload`. In Liquid:',
+    '`{{ inputs.payload.<field> }}`, and inside',
+    '`{% for ep in inputs.payload.episodes %}` use `{{ ep.<field> }}`.',
     '',
     '## Top-Level Fields (`inputs.payload`)',
     '',
@@ -803,6 +1002,47 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
   if (episodeTable) {
     sections.push('', '## Episode Fields (`inputs.payload.episodes[]`)', '', episodeTable);
   }
+
+  sections.push(
+    '',
+    '### `data`',
+    '',
+    "`data` is the rule's ES|QL result row (each query row is written as `data: rowDoc`",
+    'on the alert event). Columns depend on the rule query, so they are not listed above.',
+    '',
+    '- Nested dotted names: `ep.data.host.name`, not `ep.data["host.name"]`.',
+    '- Discover columns with `| LIMIT 0` if they are unclear.',
+    '- Guard empty `data` on recovering/inactive: `| default` or `{% if ep.data %}`.',
+    '',
+    '## Example',
+    '',
+    'For `FROM logs-* | STATS error_count = COUNT(*) BY host.name | WHERE error_count >= 5`:',
+    '',
+    '```yaml',
+    "version: '1'",
+    'name: "Notify: <rule-name>"',
+    'enabled: true',
+    'triggers:',
+    '  - type: manual',
+    'steps:',
+    '  - name: send_email',
+    '    type: email',
+    '    connector-id: <connector-id>',
+    '    with:',
+    '      to:',
+    '        - <user-provided-email>',
+    '      subject: "Alert: {{ inputs.payload.episodes | size }} episode(s)"',
+    '      message: >',
+    '        {% for ep in inputs.payload.episodes %}',
+    '        - Rule: {{ inputs.payload.rules[ep.rule_id].name | default: "unknown" }}',
+    '          Host: {{ ep.data.host.name | default: "unknown" }}',
+    '          Errors: {{ ep.data.error_count | default: "n/a" }}',
+    '          Status: {{ ep.episode_status }}',
+    '        {% endfor %}',
+    '',
+    '        View execution: {{ execution.url }}',
+    '```'
+  );
 
   return sections.join('\n');
 };

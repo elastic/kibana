@@ -28,9 +28,33 @@ import {
 } from '../entity_sources/infra';
 import { watchlistConfigTypeName } from '../management/saved_object/watchlist_config_type';
 import type { StartPlugins } from '../../../../plugin';
+import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
+import { ENTITY_ANALYTICS_WATCHLISTS_PREFIX } from '../entities/utils';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 2;
+
+const WATCHLIST_INDEX_TEMPLATE_NAME = 'entity_analytics_watchlists';
+
+export const installWatchlistIndexTemplate = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  try {
+    await esClient.indices.putIndexTemplate({
+      name: WATCHLIST_INDEX_TEMPLATE_NAME,
+      index_patterns: [`${ENTITY_ANALYTICS_WATCHLISTS_PREFIX}.*`],
+      template: {
+        mappings: generateWatchlistEntityIndexMappings(),
+        settings: { hidden: true, auto_expand_replicas: '0-1' },
+      },
+      priority: 500,
+    });
+    logger.debug(`Watchlist index template '${WATCHLIST_INDEX_TEMPLATE_NAME}' installed`);
+  } catch (err) {
+    logger.error(`Failed to install watchlist index template: ${err.message}`);
+  }
+};
 
 const OKTA_PRIVILEGED_ROLES = [
   'Super Administrator',
@@ -286,22 +310,31 @@ export const installPrebuiltWatchlists = async ({
   logger,
   getStartServices,
   hasEncryptionKey,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
-  // 'space' is a hidden saved object type, so it must be explicitly included or
-  // `find` silently returns an empty result and custom spaces are never discovered.
-  const internalRepo = coreStart.savedObjects.createInternalRepository(['space']);
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const spacesResponse = await internalRepo.find({
-    type: 'space',
-    perPage: 1000,
-  });
+  await installWatchlistIndexTemplate(esClient, logger);
 
-  // Always include 'default' — it may not have an explicit saved object
-  const namespaces = new Set<string>(['default']);
-  for (const so of spacesResponse.saved_objects) {
-    namespaces.add(so.id);
+  let namespaces: Set<string>;
+
+  if (spaceId) {
+    namespaces = new Set([spaceId]);
+  } else {
+    // 'space' is a hidden saved object type, so it must be explicitly included or
+    // `find` silently returns an empty result and custom spaces are never discovered.
+    const internalRepo = coreStart.savedObjects.createInternalRepository(['space']);
+    const spacesResponse = await internalRepo.find({
+      type: 'space',
+      perPage: 1000,
+    });
+
+    // Always include 'default' — it may not have an explicit saved object
+    namespaces = new Set<string>(['default']);
+    for (const so of spacesResponse.saved_objects) {
+      namespaces.add(so.id);
+    }
   }
 
   for (const namespace of namespaces) {

@@ -149,6 +149,11 @@ const isTestFile = (filePath: string) => TEST_FILE_RE.test(filePath);
 
 /** Walk up from a test file to find the nearest jest unit config, stopping at integration or Scout configs. */
 const findJestUnitConfig = (filePath: string): string | undefined => {
+  // integration_tests/ files are never unit tests, even when a unit config sits
+  // below the integration config. bail before the walk finds that nested config.
+  if (/(?:^|\/)integration_tests\//.test(filePath)) {
+    return undefined;
+  }
   let dir = Path.dirname(Path.resolve(REPO_ROOT, filePath));
   while (true) {
     if (existsSync(Path.join(dir, 'jest.integration.config.js')) || dirHasPlaywrightConfig(dir)) {
@@ -442,13 +447,20 @@ run(
           return configs.size === 1;
         })()
       ) {
-        // Fast path: all changes are test files under one config — run them directly.
+        // fast path: run the unit test files directly. integration/Scout files have
+        // no unit config, so they're dropped here — the guard leaves at least one.
         try {
-          const result = await runJestTestsDirectly(changedFiles);
+          const jestUnitFiles = changedFiles.filter((f) => findJestUnitConfig(f));
+          const result = await runJestTestsDirectly(jestUnitFiles);
           if (result.passed) {
             const tests = result.testCount > 0 ? ` · ${result.testCount} tests` : '';
             jestProgress.writeResult(
-              line('jest', '✓', `${changedFiles.length} test files${tests}`, jestProgress.elapsed())
+              line(
+                'jest',
+                '✓',
+                `${jestUnitFiles.length} test files${tests}`,
+                jestProgress.elapsed()
+              )
             );
           } else {
             jestProgress.writeResult(line('jest', '✗', 'failed', jestProgress.elapsed()));
@@ -456,9 +468,9 @@ run(
             const excerpt = result.output.split('\n').slice(-15);
             for (const l of excerpt) writeln(`    ${l}`);
             const rerunCommand =
-              changedFiles.length === 1
-                ? `node scripts/jest ${changedFiles[0]}`
-                : `node scripts/jest --runTestsByPath ${changedFiles.join(' ')}`;
+              jestUnitFiles.length === 1
+                ? `node scripts/jest ${jestUnitFiles[0]}`
+                : `node scripts/jest --runTestsByPath ${jestUnitFiles.join(' ')}`;
             writeln(`    $ ${rerunCommand}`);
             writeln('');
             errors.push(new Error('jest failed'));

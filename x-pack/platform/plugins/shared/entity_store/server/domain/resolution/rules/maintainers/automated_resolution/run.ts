@@ -17,7 +17,7 @@ import type {
   AggregationsStringTermsBucket,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getLatestEntitiesIndexName } from '../../../../../../common';
+import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import type { ResolutionClient } from '../../..';
 import { selectTarget } from '../../..';
 import { getFieldValue } from '../../../../../../common/domain/euid/commons';
@@ -45,7 +45,7 @@ export interface RunDeps {
 
 export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
-  const index = getLatestEntitiesIndexName(namespace);
+  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
   // Step 1: Collect new email values
   const { values, maxTimestamp } = await collectNewEmailValues(esClient, index, state);
