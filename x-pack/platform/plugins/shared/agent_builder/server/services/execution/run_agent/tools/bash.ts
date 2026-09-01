@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import { createOtherResult } from '@kbn/agent-builder-server';
+import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { IBashService } from '@kbn/agent-builder-server/runner';
 import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
@@ -131,6 +131,16 @@ export const createBashTool = ({
     maxResultTokens: SAFEGUARD_TOKEN_COUNT * 2,
     handler: async ({ command }) => {
       const result = await bashService.exec(command);
+      if (result.exit_code !== 0 && result.stderr) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Command exited with code ${result.exit_code}`,
+              metadata: { ...result },
+            }),
+          ],
+        };
+      }
       return { results: [createOtherResult(result)] };
     },
   };

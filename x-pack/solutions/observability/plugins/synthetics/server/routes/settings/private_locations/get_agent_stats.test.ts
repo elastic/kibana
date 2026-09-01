@@ -6,12 +6,20 @@
  */
 
 import type { LocationAgentStats } from '../../../../common/types';
+import { agentIdCondition } from '../../../synthetics_service/private_location/assign_by_condition';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 import { getPrivateLocationAgentStats } from './get_agent_stats';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 
 jest.mock('./get_private_locations');
+jest.mock('../../../synthetics_service/private_location/package_policy_service');
 
 const mockGetLocations = getPrivateLocationsAndAgentPolicies as jest.Mock;
+const mockListByAgentPolicy = jest.fn();
+
+const mockPackagePolicyService = PackagePolicyService as jest.MockedClass<
+  typeof PackagePolicyService
+>;
 
 const GIB = 1024 * 1024 * 1024;
 
@@ -93,6 +101,13 @@ describe('getPrivateLocationAgentStats route', () => {
       locations: [{ id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' }],
       agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
     });
+    mockListByAgentPolicy.mockResolvedValue([]);
+    mockPackagePolicyService.mockImplementation(
+      () =>
+        ({
+          listByAgentPolicy: mockListByAgentPolicy,
+        } as unknown as PackagePolicyService)
+    );
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -201,5 +216,35 @@ describe('getPrivateLocationAgentStats route', () => {
 
     expect(result[0].agentPolicyName).toBe('Policy One');
     expect(result[0].locationLabel).toBe('Location 1');
+    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].agents[0].monitorsAssigned).toBeNull();
+    expect(mockListByAgentPolicy).not.toHaveBeenCalled();
+  });
+
+  it('counts assigned monitors from stamped conditions on a sharded location', async () => {
+    mockGetLocations.mockResolvedValue({
+      locations: [
+        {
+          id: 'loc-1',
+          label: 'Location 1',
+          agentPolicyId: 'policy-1',
+          isAgentSharding: true,
+        },
+      ],
+      agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
+    });
+    mockListByAgentPolicy.mockResolvedValue([
+      { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
+      { id: 'mon-b-loc-1', condition: agentIdCondition('agent-1') },
+      { id: 'mon-c-loc-1', condition: agentIdCondition('other-agent') },
+    ]);
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
+
+    const result = await run(routeContext);
+
+    expect(result[0].isAgentSharding).toBe(true);
+    expect(result[0].agents[0].monitorsAssigned).toBe(2);
+    expect(mockListByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'policy-1' });
   });
 });

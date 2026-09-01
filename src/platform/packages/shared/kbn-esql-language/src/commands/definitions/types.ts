@@ -218,6 +218,7 @@ export interface FunctionFilterPredicates {
 export enum PromQLFunctionDefinitionTypes {
   WITHIN_SERIES = 'within_series',
   ACROSS_SERIES = 'across_series',
+  ACROSS_SERIES_REDUCTION = 'across_series_reduction',
   VALUE_TRANSFORMATION = 'value_transformation',
   VECTOR_CONVERSION = 'vector_conversion',
   SCALAR = 'scalar',
@@ -383,6 +384,14 @@ export interface ValidationErrors {
   columnTypeConflict: {
     message: string;
     type: { columnName: string; types?: string };
+  };
+  inSubqueryTypeMismatch: {
+    message: string;
+    type: { leftField: string; leftType: string; rightField: string; rightType: string };
+  };
+  inSubqueryColumnCountMismatch: {
+    message: string;
+    type: { expected: number; actual: number };
   };
   unsupportedMode: {
     message: string;

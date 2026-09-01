@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { context, trace, TraceFlags } from '@opentelemetry/api';
+import type { Span, SpanContext } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import agent from 'elastic-apm-node';
+import * as apmUtils from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
@@ -34,9 +38,30 @@ jest.mock('../build_workflow_context', () => {
     buildWorkflowContext: jest.fn(),
   };
 });
+
+jest.mock('@kbn/apm-utils', () => {
+  const actual = jest.requireActual('@kbn/apm-utils');
+  return {
+    ...actual,
+    addTransactionLabels: jest.fn(actual.addTransactionLabels),
+  };
+});
+const addTransactionLabelsMock = apmUtils.addTransactionLabels as jest.MockedFunction<
+  typeof apmUtils.addTransactionLabels
+>;
 const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
   typeof buildWorkflowContext
 >;
+
+// Minimal non-recording span carrying a real trace id (same approach as apm_internal.test.ts).
+const spanWithTraceId = (traceId: string): Span => {
+  const spanContext: SpanContext = {
+    traceId,
+    spanId: '0000000000000042',
+    traceFlags: TraceFlags.SAMPLED,
+  };
+  return trace.wrapSpanContext(spanContext);
+};
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
   let workflowExecutionCursor: WorkflowExecutionCursorTestHarness;
@@ -267,6 +292,108 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
+    describe('OTEL trace fallback (EDOT / no APM transaction)', () => {
+      const contextManager = new AsyncLocalStorageContextManager();
+
+      beforeAll(() => {
+        contextManager.enable();
+        context.setGlobalContextManager(contextManager);
+        Object.defineProperty(agent, 'currentTransaction', {
+          configurable: true,
+          enumerable: true,
+          get: () => null,
+        });
+      });
+
+      afterAll(() => {
+        Reflect.deleteProperty(agent, 'currentTransaction');
+        contextManager.disable();
+        context.disable();
+      });
+
+      it('persists the active OTEL span trace id and span id on the execution', async () => {
+        addTransactionLabelsMock.mockClear();
+        const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
+
+        await context.with(trace.setSpan(context.active(), span), async () => {
+          await underTest.start();
+        });
+
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+          traceId: '0af7651916cd43dd8448eb211c80319c',
+          entryTransactionId: '0000000000000042',
+        });
+        expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            workflow_execution_id: 'testWorkflowExecutionid',
+            workflow_id: 'test-workflow-id',
+            service_name: 'kibana',
+            transaction_hierarchy: 'task->steps',
+            triggered_by: 'task_manager',
+          })
+        );
+      });
+
+      it('labels alert-triggered executions with alerting attribution', async () => {
+        addTransactionLabelsMock.mockClear();
+        workflowExecution.triggeredBy = 'alert';
+        const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
+
+        try {
+          await context.with(trace.setSpan(context.active(), span), async () => {
+            await underTest.start();
+          });
+
+          expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              transaction_hierarchy: 'alerting->workflow->steps',
+              triggered_by: 'alerting',
+            })
+          );
+          expect(addTransactionLabelsMock.mock.calls[0][0]).not.toHaveProperty('event_trigger_id');
+        } finally {
+          workflowExecution.triggeredBy = undefined;
+        }
+      });
+
+      it('labels event-driven executions with event_trigger_id under the OTEL fallback', async () => {
+        addTransactionLabelsMock.mockClear();
+        workflowExecution.triggeredBy = 'cases.caseCreated';
+        workflowExecution.context = {
+          event: { eventChainDepth: 2 },
+          metadata: { eventTriggerId: 'cases.caseCreated' },
+        } as EsWorkflowExecution['context'];
+        const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
+
+        try {
+          await context.with(trace.setSpan(context.active(), span), async () => {
+            await underTest.start();
+          });
+
+          expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              triggered_by: 'task_manager',
+              event_trigger_id: 'cases.caseCreated',
+            })
+          );
+        } finally {
+          workflowExecution.triggeredBy = undefined;
+          workflowExecution.context = {} as EsWorkflowExecution['context'];
+        }
+      });
+
+      it('does not persist a trace id when no OTEL span is active either', async () => {
+        await underTest.start();
+
+        expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith({
+          traceId: expect.anything(),
+        });
+        expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
+      });
+    });
+
     describe('task manager APM labels (event-driven)', () => {
       let mockTransaction: {
         addLabels: jest.Mock;
@@ -299,6 +426,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         workflowExecution.triggeredBy = 'cases.caseCreated';
         workflowExecution.context = {
           event: { eventChainDepth: 2 },
+          metadata: { eventTriggerId: 'cases.caseCreated' },
         } as EsWorkflowExecution['context'];
 
         await underTest.start();
@@ -312,7 +440,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('adds event_trigger_id when context.event has no chain depth', async () => {
         workflowExecution.triggeredBy = 'my.custom.trigger';
-        workflowExecution.context = {} as EsWorkflowExecution['context'];
+        workflowExecution.context = {
+          event: { caseId: 'case-1' },
+        } as EsWorkflowExecution['context'];
 
         await underTest.start();
 
@@ -321,6 +451,21 @@ describe('WorkflowExecutionRuntimeManager', () => {
           event_trigger_id: 'my.custom.trigger',
         });
         expect(mockTransaction.addLabels.mock.calls[0][0]).not.toHaveProperty('event_chain_depth');
+      });
+
+      it('does not add event_trigger_id for custom provenance without event evidence', async () => {
+        workflowExecution.triggeredBy = 'attack-discovery-pipeline';
+        workflowExecution.context = {} as EsWorkflowExecution['context'];
+
+        await underTest.start();
+
+        const labels = mockTransaction.addLabels.mock.calls[0][0] as Record<string, unknown>;
+        expect(labels).toMatchObject({
+          triggered_by: 'task_manager',
+          workflow_execution_id: workflowExecution.id,
+        });
+        expect(labels).not.toHaveProperty('event_trigger_id');
+        expect(labels).not.toHaveProperty('event_chain_depth');
       });
 
       it('does not add event labels for well-known triggeredBy values', async () => {

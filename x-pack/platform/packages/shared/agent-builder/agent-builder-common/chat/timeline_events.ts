@@ -17,8 +17,18 @@ import type {
 } from './conversation';
 import type { RoundState } from './round_state';
 
-/** The current schema version for an events-native conversation document.*/
+/**
+ * The projection format that new writes are stamped at.
+ */
 export const CONVERSATION_SCHEMA_VERSION = 1;
+
+/**
+ * The floor for "this document carries a stored events projection".
+ */
+export const MIN_EVENTS_NATIVE_SCHEMA_VERSION = 1;
+
+export const isEventsNativeVersion = (version: number | undefined): version is number =>
+  typeof version === 'number' && version >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
 
 /** The kind of participant that produced a timeline event. */
 export enum EventActorType {

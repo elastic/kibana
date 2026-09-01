@@ -339,6 +339,13 @@ export interface TaskUserScope {
   uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
+  /**
+   * UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key,
+   * captured from `AuthenticatedUser.api_key.internal === false` when the task was scheduled.
+   * External keys must not be presented to Elasticsearch with the UIAM shared secret, so task
+   * runs mark their fake request accordingly. Absent means internal-key treatment.
+   */
+  uiamApiKeyExternal?: boolean;
   userProfileId?: string;
   userName?: string;
 }

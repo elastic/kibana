@@ -18,7 +18,7 @@ export type PndPluginStart = Record<string, never>;
 export interface PndSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface PndStartDependencies {

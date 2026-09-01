@@ -6,6 +6,7 @@
  */
 
 export interface FlyoutParamProps {
+  /** Heartbeat `monitor.id` (project `custom_heartbeat_id`). Diverges from `configId` for project monitors. */
   id: string;
   configId: string;
   location: string;
