@@ -13,6 +13,7 @@ import type {
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStartContract,
@@ -114,6 +115,7 @@ export interface SecuritySolutionPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   workflowsManagement?: WorkflowsServerPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  alertingVTwo?: AlertingV2ServerStart;
 }
 
 export interface SecuritySolutionPluginSetup {

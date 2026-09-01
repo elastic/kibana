@@ -69,3 +69,12 @@ export const ACTION_POLICY_MAX_DESTINATIONS = 10;
  * and `PUT /{id}`.
  */
 export const VERSION_MAX_LENGTH = 256;
+
+/** Maximum length for an explicit fingerprint string on an alert event. */
+export const MAX_FINGERPRINT_LENGTH = 1024;
+
+/** Maximum number of field paths in a `fingerprint_fields` array. */
+export const MAX_FINGERPRINT_FIELDS = 10;
+
+/** Maximum number of top-level keys allowed inside the `data` object of an alert event. */
+export const MAX_ALERT_EVENT_DATA_KEYS = 100;

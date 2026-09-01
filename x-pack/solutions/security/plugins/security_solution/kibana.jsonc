@@ -89,7 +89,8 @@
       "llmTasks",
       "cps",
       "searchInferenceEndpoints",
-      "esql"
+      "esql",
+      "alertingVTwo"
     ],
     "requiredBundles": [
       "esUiShared",
