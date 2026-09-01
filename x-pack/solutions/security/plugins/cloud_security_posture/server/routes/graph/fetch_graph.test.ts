@@ -8,20 +8,27 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
-import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntityRelationships, fetchEntities } from './fetch_entity_relationships_graph';
 import {
-  fetchEntityRelationships,
-  fetchEntities,
+  regroupEvents,
+  enrichEventDocData,
   regroupRelationships,
   enrichRelationshipDocData,
   enrichEntityRecords,
-} from './fetch_entity_relationships_graph';
+} from './parse_records';
 import { fetchEntityEnrichment } from './fetch_entity_enrichment';
+import { resolveEntitiesIndexName } from './utils';
 import type { EventEdge, RelationshipEdge, EntityRecord } from './types';
 
 jest.mock('./fetch_events_graph');
 jest.mock('./fetch_entity_relationships_graph');
+jest.mock('./parse_records');
 jest.mock('./fetch_entity_enrichment');
+jest.mock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  resolveEntitiesIndexName: jest.fn(),
+}));
 
 const mockedFetchEvents = fetchEvents as jest.MockedFunction<typeof fetchEvents>;
 const mockedFetchEntityRelationships = fetchEntityRelationships as jest.MockedFunction<
@@ -207,6 +214,10 @@ describe('fetchGraph', () => {
       { id: 'entity-2', isOrigin: false },
     ];
 
+    (resolveEntitiesIndexName as jest.Mock).mockResolvedValueOnce(
+      '.entities.v2.latest.default-00001'
+    );
+
     await fetchGraph({ ...baseParams, entityIds });
 
     expect(mockedFetchEntityRelationships).toHaveBeenCalledTimes(1);
@@ -214,7 +225,7 @@ describe('fetchGraph', () => {
       esClient,
       logger,
       entityIds,
-      spaceId: 'default',
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
   });
 

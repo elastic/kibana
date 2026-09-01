@@ -11,6 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import type { WorkflowsActionParams } from './types';
 import WorkflowsParamsFields from './workflows_params';
@@ -101,6 +102,11 @@ describe('WorkflowsParamsFields', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: {
+            workflowsManagement: {
+              readManagedWorkflow: true,
+            },
+          },
           getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
         },
       },
@@ -176,6 +182,52 @@ describe('WorkflowsParamsFields', () => {
       const select = screen.getByTestId('workflowIdSelect');
       expect(select).toBeInTheDocument();
     });
+  });
+
+  test('should request rule action managed workflows when user can read managed workflows', async () => {
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 1000,
+          page: 1,
+          query: '',
+          managed: 'all',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+        })
+      );
+    });
+  });
+
+  test('should request the default unmanaged workflow list when user cannot read managed workflows', async () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            workflowsManagement: {
+              readManagedWorkflow: false,
+            },
+          },
+          getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
+        },
+      },
+    } as any);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalled();
+    });
+
+    const [params] = mockWorkflowApi.getWorkflows.mock.calls[0];
+    expect(params).toMatchObject({ size: 1000, page: 1, query: '' });
+    expect(params).not.toHaveProperty('managed');
+    expect(params).not.toHaveProperty('visibilityContext');
   });
 
   test('should handle workflow selection', async () => {

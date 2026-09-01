@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -53,7 +53,6 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -120,7 +119,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 import { UiamApiKeyProvisioningTask } from './provisioning';
 import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
-import { ClearStaleUiamApiKeysTask } from './clear_stale_uiam_api_keys';
+import { ruleCreateTelemetryEvents } from './application/rule/methods/common_utils/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -191,7 +190,7 @@ export interface AlertingServerStart {
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
@@ -213,7 +212,6 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
-  cloud?: CloudSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -262,7 +260,6 @@ export class AlertingPlugin {
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
   private changeTrackingService?: ChangeTrackingService;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
-  private clearStaleUiamApiKeysTask?: ClearStaleUiamApiKeysTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -433,6 +430,9 @@ export class AlertingPlugin {
     );
 
     uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    ruleCreateTelemetryEvents.forEach((eventConfig) =>
+      core.analytics.registerEventType(eventConfig)
+    );
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
@@ -440,13 +440,6 @@ export class AlertingPlugin {
       analytics: core.analytics,
     });
     this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
-
-    this.clearStaleUiamApiKeysTask = new ClearStaleUiamApiKeysTask({
-      logger: this.logger,
-      isServerless: this.isServerless,
-      cloud: plugins.cloud,
-    });
-    this.clearStaleUiamApiKeysTask.register({ core, taskManager: plugins.taskManager });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
@@ -725,6 +718,7 @@ export class AlertingPlugin {
       shouldGrantUiam,
       isServerless: this.isServerless,
       featureFlags: core.featureFlags,
+      analytics: core.analytics,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -748,7 +742,7 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequestInSpace = async (
       request: KibanaRequest,
-      spaceId: string,
+      spaceId: SpaceId,
       options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
@@ -780,6 +774,7 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
+      auditService: core.security.audit,
       backfillClient: this.backfillClient!,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
@@ -813,6 +808,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
+      uiamConvert: core.security.authc.apiKeys.uiam?.convert,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
@@ -846,8 +842,6 @@ export class AlertingPlugin {
     this.uiamApiKeyProvisioningTask
       ?.start({ core, taskManager: plugins.taskManager })
       .catch(() => {});
-
-    this.clearStaleUiamApiKeysTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
@@ -906,7 +900,6 @@ export class AlertingPlugin {
       this.licenseState.clean();
     }
     this.uiamApiKeyProvisioningTask?.stop();
-    this.clearStaleUiamApiKeysTask?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

@@ -13,18 +13,21 @@ applies_to:
 :::{settings} /reference/configuration-reference/internationalization-settings.yml
 :::
 
+To apply these settings in your deployment, refer to [Elastic Stack settings](docs-content://deploy-manage/stack-settings.md). On {{serverless-full}}, Elastic manages these settings for you.
+
 ## Built-in and custom locales
 
 {{kib}} ships translation files for English, French, Japanese, Simplified Chinese, and German. Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
 
 ## Per-user language selection
+```{applies_to}
+stack: beta 9.5
+serverless: beta
+```
 
-When `i18n.locales` is not empty, individual users can choose their preferred display language:
+Each user can change their display language from the user menu or profile page. For steps, see [Change the interface language in Kibana](docs-content://cloud-account/change-interface-language.md).
 
-* {applies_to}`self:` **User Profile page** — Users can select a language from the **Language** section on their profile page (*User icon → Profile*).
-* {applies_to}`serverless:` {applies_to}`ech:` **User menu** — Users can select a language from the **Language** option in the user menu available from the application header.
-
-When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.
+When `i18n.locales` is not empty, language selection is available to users. When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.
 
 ### Resolution priority
 
@@ -38,14 +41,17 @@ When a user sets a preferred language, it is stored in their user profile and ta
    on surfaces where the profile isn't available — login pages, error
    pages, and any browsing the user does after signing out. Only used
    when the cookie value matches a locale {{kib}} can serve.
-3. **`Accept-Language` header** {applies_to}`serverless: ga` — On
-   serverless deployments, {{kib}} consults the browser's
-   `Accept-Language` preferences when neither the profile setting nor
-   the cookie produces a match. The first weighted preference that's an
-   exact match (region included) for an entry in `i18n.locales` wins.
-   This step is skipped on traditional/self-managed deployments to keep
-   existing users' language stable across upgrades.
-4. **`i18n.defaultLocale` config** — The server-wide default set in `kibana.yml`.
+3. **`i18n.defaultLocale` config (when explicitly set)** — When an admin
+   sets `i18n.defaultLocale` to a value other than the built-in `en`
+   default, that server-wide choice takes precedence over browser
+   detection. Per-user signals (profile, cookie) above still win over it.
+4. **`Accept-Language` header** — When the steps above produce no match
+   and `i18n.defaultLocale` is left at its `en` default, {{kib}} consults
+   the browser's `Accept-Language` preferences. The first weighted
+   preference matching an entry in `i18n.locales`, exactly or by language
+   (`fr-CH` or bare `fr` can resolve to a configured `fr-FR`), wins.
+5. **`i18n.defaultLocale` config** — The server-wide default (`en` unless
+   overridden) set in `kibana.yml`, used when nothing above matches.
 
 #### About the `KBN_LOCALE` cookie
 
@@ -62,20 +68,22 @@ It does not track the user, store identity, or enable cross-site activity.
 To disable the cookie entirely, set `i18n.allowLocaleCookie: false` in
 `kibana.yml`. When disabled, the per-user language selection still works via
 user profiles; however, anonymous pages and pages visited after signing out
-will always fall back to `i18n.defaultLocale` (or `Accept-Language` on
-serverless deployments) rather than remembering the previously resolved locale.
+resolve their locale from `i18n.defaultLocale` when it is explicitly set, and
+otherwise from the browser's `Accept-Language` preferences (falling back to the
+`en` default when no preference matches), rather than remembering the
+previously resolved locale.
 
 ## Example configurations
 
 ```yaml
-# 1. Default behavior — picker shows the five bundled locales, server defaults
-#    to English. Equivalent to omitting all i18n.* keys.
+# 1. Default behavior — language selection offers the five bundled locales,
+#    server defaults to English. Equivalent to omitting all i18n.* keys.
 
-# 2. Curate the picker to a subset:
+# 2. Curate the available languages to a subset:
 i18n.locales: ["en", "ja-JP"]
 i18n.defaultLocale: "en"
 
-# 3. Disable the per-user picker entirely (server still serves defaultLocale).
+# 3. Disable language selection entirely (server still serves defaultLocale).
 #    The flow-style empty array (square brackets) is the supported way to
 #    express "no locales"; the block-list form has no syntax for an empty list.
 i18n.locales: []

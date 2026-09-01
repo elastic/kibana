@@ -23,7 +23,7 @@ export const getLazyElbLogsCloudForwarderExtension = (
     const { ElbLogsPanel } = await import('./elb_logs_panel');
 
     const Component: PackagePolicyCreateBottomExtensionComponent = ({ newPolicy: _ }) => (
-      <ElbLogsPanel http={coreStart.http} />
+      <ElbLogsPanel http={coreStart.http} analytics={coreStart.analytics} />
     );
     Component.displayName = 'ElbLogsCloudForwarderExtension';
 

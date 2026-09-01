@@ -7,6 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import path from 'node:path';
+import { getDurationInMilliseconds } from '@kbn/response-ops-schedule-schema';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -19,7 +20,6 @@ import type {
 } from '../../../../schemas/maintenance_window/external/request/create';
 import { createMaintenanceWindowRequestBodySchemaV1 } from '../../../../schemas/maintenance_window/external/request/create';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenance_window/external/response';
-import { getDurationInMilliseconds } from '../../../../../lib/transforms/custom_to_rrule/util';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 import { transformCreateBodyV1 } from './transform_create_body';
 

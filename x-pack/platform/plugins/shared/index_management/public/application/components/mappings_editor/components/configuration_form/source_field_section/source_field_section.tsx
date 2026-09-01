@@ -9,9 +9,9 @@ import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, FormDataProvider, FormRow, SuperSelectField } from '../../../shared_imports';
 import type { ComboBoxOption } from '../../../types';
@@ -21,9 +21,13 @@ import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION }
 import type { IndexMode } from '../../../../../../../common/types/data_streams';
 import { LOGSDB_INDEX_MODE } from '../../../../../../../common/constants';
 
-export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => {
-  const { canUseSyntheticSource } = useAppContext();
-
+export const SourceFieldSection = ({
+  canUseSyntheticSource,
+  indexMode,
+}: {
+  canUseSyntheticSource: boolean;
+  indexMode?: IndexMode;
+}) => {
   const renderOptionDropdownDisplay = (option: SourceOptionKey) => (
     <Fragment>
       <strong>{sourceOptionLabels[option]}</strong>
@@ -58,14 +62,11 @@ export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => 
   });
 
   const renderDisableWarning = () => (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutTitle', {
         defaultMessage: 'Use caution when disabling the _source field',
       })}
-      iconType="warning"
-      color="warning"
-    >
-      <p>
+      text={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1"
           defaultMessage="Disabling {source} is not recommended. If storage overhead is a concern, consider using synthetic {source} instead. Disabling {source} will disable important features, such as the ability to reindex or debug queries by viewing the original document."
@@ -82,37 +83,36 @@ export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => 
             ),
           }}
         />
-      </p>
-
-      <p>
-        <a
-          href={documentationService.getMappingSyntheticSourceFieldLink()}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
-            defaultMessage="Learn more about synthetic {source}."
-            values={{
-              source: (
-                <code>
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2.sourceText',
-                    {
-                      defaultMessage: '_source',
-                    }
-                  )}
-                </code>
-              ),
-            }}
-          />
-        </a>
-      </p>
-    </EuiCallOut>
+      }
+      actionProps={{
+        primary: {
+          href: documentationService.getMappingSyntheticSourceFieldLink(),
+          target: '_blank',
+          children: (
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
+              defaultMessage="Learn more about synthetic {source}."
+              values={{
+                source: (
+                  <code>
+                    {i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2.sourceText',
+                      {
+                        defaultMessage: '_source',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          ),
+        },
+      }}
+    />
   );
 
   const renderSyntheticWarning = () => (
-    <EuiCallOut
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
@@ -144,8 +144,6 @@ export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => 
           }}
         />
       }
-      iconType="warning"
-      color="warning"
     />
   );
 

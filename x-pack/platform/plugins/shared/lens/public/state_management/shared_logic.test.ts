@@ -6,9 +6,54 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { getActiveDataFromDatatable } from './shared_logic';
+import type {
+  DatasourceMap,
+  DatasourceStates,
+  VisualizationMap,
+  VisualizationState,
+} from '@kbn/lens-common';
+import { getActiveDataFromDatatable, mergeToNewDoc } from './shared_logic';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 
 describe('lens shared logic', () => {
+  describe('#mergeToNewDoc', () => {
+    const buildDoc = (query: unknown) => {
+      const datasourceMap = { testDatasource: createMockDatasource() } as unknown as DatasourceMap;
+      const visualizationMap = { testVis: createMockVisualization() } as VisualizationMap;
+      const visualization: VisualizationState = {
+        activeId: 'testVis',
+        state: {},
+        selectedLayerId: null,
+      };
+      const datasourceStates = {
+        testDatasource: { isLoading: false, state: {} },
+      } as DatasourceStates;
+      return mergeToNewDoc(
+        undefined,
+        visualization,
+        datasourceStates,
+        query as Parameters<typeof mergeToNewDoc>[3],
+        [],
+        'testDatasource',
+        {},
+        {
+          datasourceMap,
+          visualizationMap,
+          extractFilterReferences: jest.fn(() => ({ state: [], references: [] })),
+        }
+      );
+    };
+
+    it('never persists an aggregate (ES|QL) editor query into the slot', () => {
+      expect(buildDoc({ esql: 'FROM index | LIMIT 10' })?.state.query).toBeUndefined();
+    });
+
+    it('persists the chart-scoped KQL/Lucene filter', () => {
+      const kqlQuery = { query: 'bytes > 100', language: 'kuery' };
+      expect(buildDoc(kqlQuery)?.state.query).toEqual(kqlQuery);
+    });
+  });
+
   describe('#getActiveDataFromDatatable', () => {
     const defaultLayerId = 'default-layer';
     const firstTable: Datatable = {

@@ -58,6 +58,14 @@ const workflowAiChatOpenedSchema: RootSchema<ReportWorkflowAiChatOpenedParams> =
       optional: true,
     },
   },
+  autoOpened: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True if the chat was opened automatically on editor mount rather than by an explicit user action. Filter to false to measure deliberate user engagement.',
+      optional: false,
+    },
+  },
 };
 
 const workflowAiProposalReceivedSchema: RootSchema<ReportWorkflowAiProposalReceivedParams> = {
@@ -191,6 +199,14 @@ const workflowAiSessionCompletedSchema: RootSchema<ReportWorkflowAiSessionComple
     type: 'integer',
     _meta: {
       description: 'Number of AI proposals still pending when the session ended',
+      optional: false,
+    },
+  },
+  autoOpened: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True if the session started with an automatic open on editor mount (no explicit user click to open the sidebar during the session).',
       optional: false,
     },
   },

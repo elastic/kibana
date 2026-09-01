@@ -14,7 +14,7 @@ import type {
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type {
   DatatableColumn,
   DatatableColumnMeta,
@@ -58,6 +58,7 @@ import {
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
+  JOIN_INDICES_AUTOCOMPLETE_ROUTE,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
 import { isDocDelete, isDocUpdate, isPlaceholderColumn } from '../utils';
@@ -1009,10 +1010,14 @@ export class IndexUpdateService {
   }
 
   /* Partial doc update */
-  public updateDoc(id: string, update: Record<string, unknown>) {
+  public updateDoc(
+    id: string,
+    update: Record<string, unknown>,
+    columnsMeta: DataTableColumnsMeta = {}
+  ) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
       (acc, [key, value]) => {
-        acc[key] = parsePrimitive(value);
+        acc[key] = parsePrimitive(value, columnsMeta[key]?.type);
         return acc;
       },
       {}
@@ -1187,7 +1192,7 @@ export class IndexUpdateService {
 
   public async doesIndexExist(indexName: string): Promise<boolean> {
     const lookupIndexesResult = await this.http.get<IndicesAutocompleteResult>(
-      '/internal/esql/autocomplete/join/indices'
+      JOIN_INDICES_AUTOCOMPLETE_ROUTE
     );
 
     return lookupIndexesResult.indices.some((index) => index.name === indexName);

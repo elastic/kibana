@@ -24,7 +24,10 @@ const ASSET_CRITICALITY_UPDATE_ERROR = i18n.translate(
 );
 export const useUpdateAssetCriticality = (
   entityType: 'user' | 'host' | 'service',
-  { onSuccess }: { onSuccess: () => void }
+  {
+    onSuccess,
+    refetchEntityRecord,
+  }: { onSuccess: () => void; refetchEntityRecord?: () => void | Promise<unknown> }
 ) => {
   const { addError } = useAppToasts();
   const { http } = useKibana().services;
@@ -57,11 +60,12 @@ export const useUpdateAssetCriticality = (
           updatedRecord as EntityStoreRecord
         );
         onSuccess();
+        void refetchEntityRecord?.();
       } catch (error) {
         addError(error, { title: ASSET_CRITICALITY_UPDATE_ERROR });
       }
     },
-    [addError, http, queryClient, entityType, onSuccess]
+    [addError, http, queryClient, entityType, onSuccess, refetchEntityRecord]
   );
 
   const updateAssetCriticalityLevel = useCallback(

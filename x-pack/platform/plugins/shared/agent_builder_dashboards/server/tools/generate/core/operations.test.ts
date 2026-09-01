@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
@@ -13,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { PanelContentAttempt } from './resolve_panel';
 import type { ResolvePanelContent } from './operations/panels';
 import {
@@ -21,6 +23,7 @@ import {
   type DashboardOperation,
 } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
 const createMockLogger = (): Logger =>
@@ -85,10 +88,12 @@ describe('executeDashboardOperations', () => {
   });
 
   const createResolvedPanelContent = (
-    panelContent: Pick<AttachmentPanel, 'type' | 'config'>
+    panelContent: Pick<AttachmentPanel, 'type' | 'config'>,
+    authoringNote = 'Created a visualization using the requested data.'
   ): PanelContentAttempt => ({
     type: 'success',
     panelContent,
+    authoringNote,
   });
 
   const createResolvePanelContent = (
@@ -212,6 +217,37 @@ describe('executeDashboardOperations', () => {
     expect(result.failures).toEqual([]);
   });
 
+  it('adds a by-value Vega config-source panel as a vega-type panel', async () => {
+    const spec = '{"mark":"line","data":{"url":{"%type%":"esql","query":"FROM logs"}}}';
+
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test dashboard', description: 'Description', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'vis',
+              config: { spec },
+              grid: { x: 0, y: 0, w: 48, h: 14 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(result.dashboardData.panels).toEqual([
+      expect.objectContaining({
+        type: VEGA_VIS_TYPE,
+        config: { spec },
+        grid: { x: 0, y: 0, w: 48, h: 14 },
+      }),
+    ]);
+    expect(result.failures).toEqual([]);
+  });
+
   it('adds mixed panel kinds in input order across top-level and section targets', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
@@ -239,6 +275,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -251,6 +288,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
               sectionId: 'section-a',
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -260,10 +298,13 @@ describe('executeDashboardOperations', () => {
       ],
       logger,
       resolvePanelContent: createResolvePanelContent({
-        'show total requests': createResolvedPanelContent({
-          type: LENS_EMBEDDABLE_TYPE,
-          config: { type: 'metric' },
-        }),
+        'show total requests': createResolvedPanelContent(
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric' },
+          },
+          'Created a titleless metric showing total requests.'
+        ),
         'show p95 latency': {
           type: 'failure',
           failure: {
@@ -303,6 +344,15 @@ describe('executeDashboardOperations', () => {
         type: 'add_panels',
         identifier: 'show p95 latency',
         error: 'ES|QL generation failed',
+      },
+    ]);
+    const generatedPanel = getPanelsOnly(result.dashboardData.panels).find(
+      (panel) => panel.grid.x === 24 && panel.grid.y === 0
+    );
+    expect(result.panelAuthoringNotes).toEqual([
+      {
+        panelId: generatedPanel?.id,
+        authoringNote: 'Created a titleless metric showing total requests.',
       },
     ]);
   });
@@ -387,12 +437,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -453,12 +505,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -581,6 +635,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -594,6 +649,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -680,6 +736,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -691,6 +748,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 0, y: 1, w: 24, h: 9 },
             },
@@ -762,6 +820,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
@@ -773,6 +832,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1078,12 +1138,14 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
                 sectionId: 'section-a',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -1154,14 +1216,20 @@ describe('executeDashboardOperations', () => {
         ],
         logger,
         resolvePanelContent: createResolvePanelContent({
-          'panel-1': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'bar' },
-          }),
-          'section-panel-1': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'line' },
-          }),
+          'panel-1': createResolvedPanelContent(
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'bar' },
+            },
+            'Changed the panel to a bar chart and retained its title.'
+          ),
+          'section-panel-1': createResolvedPanelContent(
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'line' },
+            },
+            'Changed the panel to a line chart with the legend below.'
+          ),
         }),
       });
 
@@ -1182,6 +1250,16 @@ describe('executeDashboardOperations', () => {
           config: { type: 'line' },
         })
       );
+      expect(result.panelAuthoringNotes).toEqual([
+        {
+          panelId: 'panel-1',
+          authoringNote: 'Changed the panel to a bar chart and retained its title.',
+        },
+        {
+          panelId: 'section-panel-1',
+          authoringNote: 'Changed the panel to a line chart with the legend below.',
+        },
+      ]);
     });
 
     it('resolves repeated visualization edits against the latest panel state', async () => {
@@ -1310,12 +1388,14 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show p95 latency',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1646,6 +1726,195 @@ describe('executeDashboardOperations', () => {
       );
     });
 
+    it('edits a custom_content panel in place by panelId, passing the existing template to the resolver', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+      const resolveCustomContentTemplate = jest
+        .fn()
+        .mockResolvedValue('<div>Server generated</div>');
+
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { prompt: 'old prompt', template: '<div>Old template</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [existingPanel],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: {
+                  prompt: 'updated prompt',
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+        resolveCustomContentTemplate,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(resolveCustomContentTemplate).toHaveBeenCalledWith({
+        prompt: 'updated prompt',
+        esqlQuery: undefined,
+        existingTemplate: '<div>Old template</div>',
+        hasExistingQuery: false,
+      });
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'cc-1',
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: {
+            esql_query: undefined,
+            template: '<div>Server generated</div>',
+          },
+          grid: { x: 0, y: 0, w: 24, h: 6 },
+        })
+      );
+    });
+
+    it('removes esqlQuery when null is passed in a custom_content config-source edit', async () => {
+      const resolveCustomContentTemplate = jest
+        .fn()
+        .mockResolvedValue('<div>Server generated</div>');
+
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: {
+          prompt: 'old prompt',
+          esql_query: ['FROM logs | STATS count = COUNT(*)'],
+          template: '<div>Old</div>',
+        },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: { esqlQuery: null },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: jest.fn(),
+        resolveCustomContentTemplate,
+      });
+
+      expect(resolveCustomContentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined })
+      );
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0].config).toMatchObject({ esql_query: undefined });
+    });
+
+    it('records a failure when a custom_content config-source edit targets a non-custom_content panel', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'panel-1',
+                config: { prompt: 'new prompt' },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as custom content. Use source: "request" for ES|QL-backed Lens or Vega panels.`,
+        },
+      ]);
+
+      // Lens panel must be left untouched
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
+        expect.objectContaining({
+          id: 'panel-1',
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+        })
+      );
+    });
+
+    it('preserves the existing template when resolveCustomContentTemplate is absent', async () => {
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { template: '<div>Existing</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: { prompt: 'updated prompt' },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: jest.fn(),
+        // resolveCustomContentTemplate intentionally absent
+      });
+
+      expect(result.failures).toEqual([]);
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0].config).toEqual({ template: '<div>Existing</div>' });
+    });
+
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
       const deferred = createDeferred<PanelContentAttempt>();
       const resolvePanelContent = jest.fn<
@@ -1737,6 +2006,43 @@ describe('executeDashboardOperations', () => {
     ).rejects.toThrow('Section "nonexistent-section" not found.');
   });
 
+  it('adds a custom_content panel and maps it to the custom_content embeddable type', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'custom_content',
+              config: {
+                prompt: 'Show error rate KPI',
+                esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+              },
+              grid: { x: 0, y: 0, w: 24, h: 6 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(result.failures).toEqual([]);
+    const panels = getPanelsOnly(result.dashboardData.panels);
+    expect(panels).toHaveLength(1);
+    expect(panels[0]).toEqual(
+      expect.objectContaining({
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: {
+          prompt: 'Show error rate KPI',
+          esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+        },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      })
+    );
+  });
+
   it('accepts a markdown config-source panel with content and optional settings', () => {
     const result = dashboardOperationSchema.safeParse({
       operation: 'add_panels',
@@ -1806,7 +2112,7 @@ describe('executeDashboardOperations', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects a vis config-source panel whose config is not a Lens API config', () => {
+  it('rejects a vis config-source panel whose config is neither a Lens nor a Vega config', () => {
     const result = dashboardOperationSchema.safeParse({
       operation: 'add_panels',
       panels: [
@@ -1820,5 +2126,288 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('accepts a vis config-source panel whose config is a by-value Vega spec', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: '{"mark":"line"}' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a vis config-source Vega panel whose spec is empty', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: '' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('add_controls / remove_controls operations', () => {
+  const logger = {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  } as unknown as import('@kbn/core/server').Logger;
+
+  const emptyDashboard: DashboardAttachmentData = { title: 'Test', panels: [] };
+
+  it('add_controls appends options_list_control with server-built esql_query', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'service.name',
+              index: 'logs-*',
+              title: 'Service',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(control.type).toBe('options_list_control');
+    expect(typeof control.id).toBe('string');
+    expect(control.width).toBe('medium');
+    expect(control.grow).toBe(true);
+    const config = control.config as Record<string, unknown>;
+    expect(config.values_source).toBe('esql');
+    expect(config.esql_query).toBe('FROM logs-* | STATS BY `service.name`');
+    expect(config.title).toBe('Service');
+  });
+
+  it('add_controls escapes ES|QL field identifiers in generated queries', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'labels.pod-name', index: 'logs-*' },
+            {
+              type: 'range_slider_control',
+              field_name: 'kubernetes.labels.app.kubernetes.io/name',
+              index: 'logs-*',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    const controls = dashboardData.pinned_panels as Array<Record<string, unknown>>;
+    expect((controls[0].config as Record<string, unknown>).esql_query).toBe(
+      'FROM logs-* | STATS BY `labels.pod-name`'
+    );
+    expect((controls[1].config as Record<string, unknown>).esql_query).toBe(
+      'FROM logs-* | STATS BY `kubernetes.labels.app.kubernetes.io/name`'
+    );
+  });
+
+  it('add_controls appends range_slider_control', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'range_slider_control', field_name: 'latency', index: 'metrics-*' }],
+        },
+      ],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(control.type).toBe('range_slider_control');
+    const config = control.config as Record<string, unknown>;
+    expect(config.values_source).toBe('esql');
+    expect(config.esql_query).toBe('FROM metrics-* | STATS BY latency');
+    expect(config.step).toBe(1);
+  });
+
+  it('add_controls appends time_slider_control without esql_query', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(control.type).toBe('time_slider_control');
+    const config = control.config as Record<string, unknown>;
+    expect(config).not.toHaveProperty('esql_query');
+    expect(config).not.toHaveProperty('title');
+    expect(config.start_percentage_of_time_range).toBe(0);
+    expect(config.end_percentage_of_time_range).toBe(1);
+  });
+
+  it('add_controls skips extra time_slider_control controls in one operation', async () => {
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'time_slider_control' },
+            { type: 'time_slider_control' },
+            { type: 'options_list_control', field_name: 'service.name', index: 'logs-*' },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(2);
+    expect((dashboardData.pinned_panels as Array<Record<string, unknown>>)[0].type).toBe(
+      'time_slider_control'
+    );
+    expect((dashboardData.pinned_panels as Array<Record<string, unknown>>)[1].type).toBe(
+      'options_list_control'
+    );
+    expect(failures).toEqual([
+      {
+        type: 'add_controls',
+        identifier: 'controls[1]',
+        error: 'A dashboard can contain at most one time_slider_control.',
+      },
+    ]);
+  });
+
+  it('add_controls skips adding a second time_slider_control to an existing dashboard', async () => {
+    const { dashboardData: withTimeSlider } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
+      logger,
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: withTimeSlider,
+      operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    expect(failures).toEqual([
+      {
+        type: 'add_controls',
+        identifier: 'controls[0]',
+        error: 'A dashboard can contain at most one time_slider_control.',
+      },
+    ]);
+  });
+
+  it('add_controls appends to existing controls', async () => {
+    const { dashboardData: after1 } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'options_list_control', field_name: 'host.name', index: 'logs-*' }],
+        },
+      ],
+      logger,
+    });
+
+    const { dashboardData: after2 } = await executeDashboardOperations({
+      dashboardData: after1,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'options_list_control', field_name: 'env', index: 'logs-*' }],
+        },
+      ],
+      logger,
+    });
+
+    expect(after2.pinned_panels).toHaveLength(2);
+  });
+
+  it('remove_controls removes by id and leaves others intact', async () => {
+    const { dashboardData: withControls } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'service.name',
+              index: 'logs-*',
+              title: 'Service',
+            },
+            {
+              type: 'options_list_control',
+              field_name: 'host.name',
+              index: 'logs-*',
+              title: 'Host',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    const controls = withControls.pinned_panels as Array<Record<string, unknown>>;
+    expect(controls).toHaveLength(2);
+    const idToRemove = controls[0].id as string;
+
+    const { dashboardData: afterRemove } = await executeDashboardOperations({
+      dashboardData: withControls,
+      operations: [{ operation: 'remove_controls', control_ids: [idToRemove] }],
+      logger,
+    });
+
+    expect(afterRemove.pinned_panels).toHaveLength(1);
+    const remaining = (afterRemove.pinned_panels as Array<Record<string, unknown>>)[0];
+    expect(remaining.id).not.toBe(idToRemove);
+    expect((remaining.config as Record<string, unknown>).title).toBe('Host');
+  });
+
+  it('remove_controls with unknown id leaves controls unchanged', async () => {
+    const { dashboardData: withControl } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'options_list_control', field_name: 'env', index: 'logs-*' }],
+        },
+      ],
+      logger,
+    });
+
+    const { dashboardData: afterRemove } = await executeDashboardOperations({
+      dashboardData: withControl,
+      operations: [{ operation: 'remove_controls', control_ids: ['nonexistent-id'] }],
+      logger,
+    });
+
+    expect(afterRemove.pinned_panels).toHaveLength(1);
   });
 });

@@ -26,13 +26,17 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
-  SavedObjectsUpdateResponse,
   ElasticsearchClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import {
+  isSavedObjectErrorResult,
+  SavedObjectsErrorHelpers,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
@@ -40,7 +44,6 @@ import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-bas
 import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
-import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
 import type { ExecutionContextRunner } from './lib/execution_context';
@@ -81,7 +84,6 @@ export interface StoreOpts {
   adHocTaskCounter: AdHocTaskCounter;
   allowReadingInvalidState: boolean;
   logger: Logger;
-  requestTimeouts: RequestTimeoutsConfig;
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
@@ -105,14 +107,6 @@ export interface AggregationOpts {
   size?: number;
 }
 
-export interface UpdateByQuerySearchOpts extends SearchOpts {
-  script?: estypes.Script;
-}
-
-export interface UpdateByQueryOpts extends SearchOpts {
-  max_docs?: number;
-}
-
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
@@ -132,12 +126,6 @@ export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
-export interface UpdateByQueryResult {
-  updated: number;
-  version_conflicts: number;
-  total: number;
-}
-
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
@@ -156,7 +144,6 @@ export class TaskStore {
   private _invalidationSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
-  private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
@@ -197,7 +184,6 @@ export class TaskStore {
       definitions: opts.definitions,
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });
-    this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
@@ -300,26 +286,77 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
+  /**
+   * Whether a scheduling call with these options will grant API keys. Guards on the grant path
+   * (like the ensureScheduled existence pre-check) must use this predicate rather than checking
+   * the request themselves, so they cannot drift from the grant condition in
+   * `grantApiKeysFromRequest`.
+   */
+  public willGrantApiKeys(options?: { request?: KibanaRequest }): boolean {
+    return Boolean(options?.request) && this.getIsSecurityEnabled();
+  }
+
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<Map<string, ApiKeySOFields> | null> {
     const request = options?.request;
-    if (!this.getIsSecurityEnabled() || !request) {
+    if (!this.willGrantApiKeys(options) || !request) {
       return null;
     }
 
+    const createdTargets: InvalidationTarget[] = [];
     try {
-      return await this.apiKeyStrategy.grantApiKeys(
-        taskInstances,
-        request,
-        this.security,
-        options?.onEsKey === true ? { onEsKey: true } : undefined
-      );
+      return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
+        ...(options?.onEsKey === true ? { onEsKey: true } : {}),
+        ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        onApiKeyCreated: (target) => createdTargets.push(target),
+      });
     } catch (e) {
+      await this.markApiKeysForInvalidation(createdTargets);
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  private async markApiKeysForInvalidation(targets: InvalidationTarget[]) {
+    if (!targets.length) {
+      return;
+    }
+
+    // Best effort, so cleanup can never mask the failure that made it necessary.
+    try {
+      await this.apiKeyStrategy.markForInvalidation(
+        targets,
+        this.logger,
+        this.invalidationSoClient
+      );
+    } catch (e) {
+      this.logger.error(
+        `Failed to mark ${targets.length} unused API keys for invalidation: ${e.message}`
+      );
+    }
+  }
+
+  /**
+   * Marks API keys that were granted for a task write that never landed, so the invalidation task
+   * can revoke them.
+   *
+   * API keys are granted before the task document is written, so any failure in between leaves them
+   * attached to no task and referenced by nothing. Marking is safe even when a key turns out to be
+   * shared with a task that was written successfully (keys are granted per task type, not per task):
+   * the invalidation task skips keys still referenced by a live task and retries them later.
+   */
+  private async invalidateUnpersistedApiKeys(granted: Array<ApiKeySOFields | undefined>) {
+    const targets = granted.flatMap((fields) =>
+      fields ? this.apiKeyStrategy.getApiKeyIdsForInvalidation(fields) : []
+    );
+
+    // Keys are granted per task type and shared across instances, so several failed tasks can
+    // carry the same key; queue each key once instead of once per task.
+    const uniqueTargets = [...new Map(targets.map((target) => [target.apiKeyId, target])).values()];
+
+    await this.markApiKeysForInvalidation(uniqueTargets);
   }
 
   private async bulkGetDecryptedTaskApiKeys(
@@ -459,7 +496,8 @@ export class TaskStore {
 
     const apiKeySOFieldsMap =
       (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
-    const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
+    const grantedApiKeyFields = apiKeySOFieldsMap.get(taskInstance.id);
+    const apiKeySOFields = grantedApiKeyFields || {};
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -485,6 +523,7 @@ export class TaskStore {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([grantedApiKeyFields]);
       this.errors$.next(e);
       throw e;
     }
@@ -524,55 +563,72 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
+    // Assign generated ids before granting so every credential remains correlated with the saved
+    // object request and response, including per-item failures.
+    const taskInstancesWithIds = taskInstances.map((taskInstance) => ({
+      ...taskInstance,
+      id: taskInstance.id ?? v4(),
+    }));
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstances, options)) || new Map();
+      (await this.grantApiKeysFromRequest(taskInstancesWithIds, options)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 
-    const objects = taskInstances.reduce(
-      (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
-        const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
-        const id = taskInstance.id || v4();
-        this.definitions.ensureHas(taskInstance.taskType);
-
-        try {
-          const validatedTaskInstance =
-            this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
-
-          return [
-            ...acc,
-            {
-              type: 'task',
-              attributes: {
-                ...taskInstanceToAttributes(validatedTaskInstance, id),
-                ...apiKeySOFields,
-                runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
-              },
-              id,
-            },
-          ];
-        } catch (e) {
-          this.logger.error(
-            `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
-          );
-          return acc;
-        }
-      },
-      []
-    );
-
+    // Tasks rejected during local preparation never reach `bulkCreate`, so they get no entry in
+    // the bulk response; collect their granted keys here so they are still invalidated below.
+    const omittedTaskApiKeys: Array<ApiKeySOFields | undefined> = [];
     let savedObjects;
     try {
+      const objects = taskInstancesWithIds.reduce(
+        (
+          acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>,
+          taskInstance
+        ) => {
+          const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
+          const { id } = taskInstance;
+          this.definitions.ensureHas(taskInstance.taskType);
+
+          try {
+            const validatedTaskInstance =
+              this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
+            return [
+              ...acc,
+              {
+                type: 'task',
+                attributes: {
+                  ...taskInstanceToAttributes(validatedTaskInstance, id),
+                  ...apiKeySOFields,
+                  runAt: getFirstRunAt({
+                    taskInstance: validatedTaskInstance,
+                    logger: this.logger,
+                  }),
+                },
+                id,
+              },
+            ];
+          } catch (e) {
+            this.logger.error(
+              `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
+            );
+            omittedTaskApiKeys.push(apiKeySOFieldsMap.get(taskInstance.id));
+            return acc;
+          }
+        },
+        []
+      );
+
       savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
         refresh: false,
         overwrite: true,
       });
       this.adHocTaskCounter.increment(
-        taskInstances.filter((task) => {
+        taskInstancesWithIds.filter((task) => {
           return get(task, 'schedule.interval', null) == null;
         }).length
       );
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
@@ -585,7 +641,23 @@ export class TaskStore {
       );
     }
 
+    const failedTaskIds = savedObjects.saved_objects
+      .filter(isSavedObjectErrorResult)
+      .map(({ id }) => id);
+
+    const unpersistedApiKeys = [
+      ...omittedTaskApiKeys,
+      ...failedTaskIds.map((taskId) => apiKeySOFieldsMap.get(taskId)),
+    ];
+
+    if (unpersistedApiKeys.length) {
+      await this.invalidateUnpersistedApiKeys(unpersistedApiKeys);
+    }
+
     return savedObjects.saved_objects.map((so) => {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
       const taskInstance = savedObjectToConcreteTaskInstance(so);
       return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
@@ -682,6 +754,9 @@ export class TaskStore {
     const apiKeySOFieldsMap = regenerateResult.apiKeySOFieldsMap || new Map();
     const { invalidationTargets } = regenerateResult;
 
+    // Docs rejected during local validation never reach `bulkUpdate`, so they get no entry in the
+    // bulk response; track them here so their regenerated keys are still invalidated below.
+    const omittedDocIds: string[] = [];
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -709,13 +784,16 @@ export class TaskStore {
           this.logger.error(
             `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
           );
+          omittedDocIds.push(doc.id);
         }
         return acc;
       },
       new Map()
     );
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
+    let updatedSavedObjects: Awaited<
+      ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
+    >['saved_objects'];
     try {
       ({ saved_objects: updatedSavedObjects } =
         await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
@@ -725,13 +803,30 @@ export class TaskStore {
           }
         ));
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
 
     const allInvalidationTargets: InvalidationTarget[] = [];
+
+    for (const omittedDocId of omittedDocIds) {
+      // Same as the error-result branch below: the regenerated key never made it onto the task,
+      // but an omitted doc has no bulk response entry, so it has to be queued explicitly.
+      const granted = apiKeySOFieldsMap.get(omittedDocId);
+      if (granted) {
+        allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
+      }
+    }
+
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
-      if (updatedSavedObject.error !== undefined) {
+      if (isSavedObjectErrorResult(updatedSavedObject)) {
+        // The regenerated key never made it onto the task, so nothing references it. Queue it
+        // alongside the replaced keys below rather than leaving it orphaned.
+        const granted = apiKeySOFieldsMap.get(updatedSavedObject.id);
+        if (granted) {
+          allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
+        }
         return asErr({
           type: 'task',
           id: updatedSavedObject.id,
@@ -783,6 +878,7 @@ export class TaskStore {
     }
 
     const bulkBody = [];
+    const updatedDocs: PartialConcreteTaskInstance[] = [];
     for (const doc of docs) {
       if (doc.schedule?.interval && !isInterval(doc.schedule.interval)) {
         this.logger.error(
@@ -790,6 +886,7 @@ export class TaskStore {
         );
         continue;
       }
+      updatedDocs.push(doc);
       bulkBody.push({
         update: {
           _id: `task:${doc.id}`,
@@ -811,7 +908,7 @@ export class TaskStore {
       throw e;
     }
 
-    return result.items.map((item) => {
+    return result.items.map((item, index) => {
       const malformedResponseType = 'malformed response';
 
       if (!item.update || !item.update._id) {
@@ -847,7 +944,10 @@ export class TaskStore {
         });
       }
 
-      const doc = docs.find((d) => d.id === docId);
+      // Map by position (ES returns items in request order), not by id: all runners
+      // share one BufferedTaskStore, so multiple updates for the same task id can be
+      // batched here and an id lookup would return the first doc for every one of them.
+      const doc = updatedDocs[index];
 
       return asOk({
         ...doc,
@@ -960,6 +1060,31 @@ export class TaskStore {
   }
 
   /**
+   * Resolves whether a task document exists, without reading or decrypting its API keys.
+   *
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  public async taskExists(id: string): Promise<boolean> {
+    return this.executionContextRunner.run(() => this._taskExists(id), {
+      id: 'task-exists',
+    });
+  }
+
+  private async _taskExists(id: string): Promise<boolean> {
+    try {
+      await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
+      return true;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return false;
+      }
+      this.errors$.next(e);
+      throw e;
+    }
+  }
+
+  /**
    * Gets tasks by ids
    *
    * @param {Array<string>} ids
@@ -984,7 +1109,7 @@ export class TaskStore {
 
     const tasks: ConcreteTaskInstance[] = [];
     result.saved_objects.forEach((task) => {
-      if (!task.error) {
+      if (!isSavedObjectErrorResult(task)) {
         tasks.push(savedObjectToConcreteTaskInstance(task));
       }
     });
@@ -994,7 +1119,7 @@ export class TaskStore {
     tasksWithDecryptedApiKeys.forEach((task) => taskMap.set(task.id, task));
 
     return result.saved_objects.map((task) => {
-      if (task.error) {
+      if (isSavedObjectErrorResult(task)) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       return asOk(taskMap.get(task.id));
@@ -1239,55 +1364,6 @@ export class TaskStore {
     return body;
   }
 
-  public async updateByQuery(
-    opts: UpdateByQuerySearchOpts = {},
-    updateByQueryOpts: UpdateByQueryOpts = {}
-  ): Promise<UpdateByQueryResult> {
-    return this.executionContextRunner.run(() => this._updateByQuery(opts, updateByQueryOpts), {
-      id: 'update-by-query',
-    });
-  }
-
-  private async _updateByQuery(
-    opts: UpdateByQuerySearchOpts = {},
-    { max_docs: max_docs }: UpdateByQueryOpts = {}
-  ): Promise<UpdateByQueryResult> {
-    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
-    const { sort, ...rest } = opts;
-    try {
-      const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
-        {
-          index: this.index,
-          ignore_unavailable: true,
-          refresh: true,
-          conflicts: 'proceed',
-          ...rest,
-          max_docs,
-          query,
-          // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
-          // However, this one is using a "body" format?
-          body: { sort },
-        },
-        { requestTimeout: this.requestTimeouts.update_by_query, retryOnTimeout: false }
-      );
-
-      const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
-        updated,
-        version_conflicts,
-        max_docs
-      );
-
-      return {
-        total: total || 0,
-        updated: updated || 0,
-        version_conflicts: conflictsCorrectedForContinuation,
-      };
-    } catch (e) {
-      this.errors$.next(e);
-      throw e;
-    }
-  }
-
   public async getDocVersions(esIds: string[]): Promise<Map<string, ConcreteTaskInstanceVersion>> {
     return this.executionContextRunner.run(() => this._getDocVersions(esIds), {
       id: 'get-doc-versions',
@@ -1304,25 +1380,6 @@ export class TaskStore {
     }
     return result;
   }
-}
-
-/**
- * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
- * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
- * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
- * many docs as we could have.
- * This is still no more than an estimation, as there might have been less docuemnt to update that the
- * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
- * have for an unhealthy cluster distribution of Task Manager polling intervals
- */
-
-export function correctVersionConflictsForContinuation(
-  updated: estypes.ReindexResponse['updated'],
-  versionConflicts: estypes.ReindexResponse['version_conflicts'],
-  maxDocs?: number
-): number {
-  // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
-  return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
 /**

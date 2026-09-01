@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux-v7';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -36,20 +35,14 @@ export interface EntityURLStateResult {
   setUrlQuery: (query: Record<string, unknown>) => void;
   sort: SortOrder[];
   filters: Filter[];
-  pageFilters: Filter[];
   query: { bool: BoolQuery };
   queryError?: Error;
   pageIndex: number;
-  urlQuery: URLQuery;
-  setTableOptions: (options: CriteriaWithPagination<object>) => void;
-  handleUpdateQuery: (query: URLQuery) => void;
   pageSize: number;
-  setPageSize: Dispatch<SetStateAction<number | undefined>>;
   onChangeItemsPerPage: (newPageSize: number) => void;
   onChangePage: (newPageIndex: number) => void;
   onSort: (sort: string[][]) => void;
   onResetFilters: () => void;
-  columnsLocalStorageKey: string;
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
@@ -68,11 +61,9 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery) => ({
 export const useEntityURLState = ({
   defaultQuery = getDefaultQuery,
   paginationLocalStorageKey,
-  columnsLocalStorageKey,
 }: {
   defaultQuery?: (params: EntitiesBaseURLQuery) => URLQuery;
   paginationLocalStorageKey: string;
-  columnsLocalStorageKey: string;
 }): EntityURLStateResult => {
   const getPersistedDefaultQuery = usePersistedQuery<URLQuery>(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
@@ -243,66 +234,65 @@ export const useEntityURLState = ({
     [setUrlQuery]
   );
 
-  const setTableOptions = useCallback(
-    ({ page, sort }: CriteriaWithPagination<object>) => {
-      setPageSize(page.size);
-      setUrlQuery({
-        sort,
-        pageIndex: page.index,
-      });
-    },
-    [setUrlQuery, setPageSize]
-  );
-
   const baseEsQuery = useBaseEsQuery({
     filters: urlQuery.filters,
     pageFilters: urlQuery.pageFilters,
     query: urlQuery.query,
   });
 
-  const handleUpdateQuery = useCallback(
-    (query: URLQuery) => {
-      setUrlQuery({ ...query, pageIndex: 0 });
-    },
-    [setUrlQuery]
+  const getRowsFromPages = useCallback(
+    (data: Array<{ page: DataTableRecord[] }> | undefined) =>
+      data
+        ?.map(({ page }: { page: DataTableRecord[] }) => {
+          return page;
+        })
+        .flat() || [],
+    []
   );
-
-  const getRowsFromPages = (data: Array<{ page: DataTableRecord[] }> | undefined) =>
-    data
-      ?.map(({ page }: { page: DataTableRecord[] }) => {
-        return page;
-      })
-      .flat() || [];
 
   const queryError = baseEsQuery instanceof Error ? baseEsQuery : undefined;
 
-  return {
-    setUrlQuery,
-    sort: urlQuery.sort as SortOrder[],
-    filters: urlQuery.filters || [],
-    pageFilters: urlQuery.pageFilters || [],
-    query: baseEsQuery.query
-      ? baseEsQuery.query
-      : {
-          bool: {
-            must: [],
-            filter: [],
-            should: [],
-            must_not: [],
+  // Return a referentially stable object so consumers memoized against `state`
+  // (e.g. `EntitiesTableSection`) don't reconcile when an unrelated URL param
+  // (like the `timeline` param written when Investigate-in-Timeline opens the
+  // timeline) changes `useLocation` without touching the `cspq` state.
+  return useMemo(
+    () => ({
+      setUrlQuery,
+      sort: urlQuery.sort as SortOrder[],
+      filters: urlQuery.filters || [],
+      query: baseEsQuery.query
+        ? baseEsQuery.query
+        : {
+            bool: {
+              must: [],
+              filter: [],
+              should: [],
+              must_not: [],
+            },
           },
-        },
-    queryError,
-    pageIndex: getPageIndexOrDefault(urlQuery.pageIndex),
-    urlQuery,
-    setTableOptions,
-    handleUpdateQuery,
-    pageSize,
-    setPageSize,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
-    onResetFilters,
-    columnsLocalStorageKey,
-    getRowsFromPages,
-  };
+      queryError,
+      pageIndex: getPageIndexOrDefault(urlQuery.pageIndex),
+      pageSize,
+      onChangeItemsPerPage,
+      onChangePage,
+      onSort,
+      onResetFilters,
+      getRowsFromPages,
+    }),
+    [
+      setUrlQuery,
+      urlQuery.sort,
+      urlQuery.filters,
+      urlQuery.pageIndex,
+      baseEsQuery,
+      queryError,
+      pageSize,
+      onChangeItemsPerPage,
+      onChangePage,
+      onSort,
+      onResetFilters,
+      getRowsFromPages,
+    ]
+  );
 };

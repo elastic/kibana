@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   KibanaRequest,
   Logger,
@@ -29,6 +30,9 @@ import {
   isUiamCredential,
 } from '@kbn/core-security-server';
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -66,7 +70,7 @@ export interface RulesClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -87,6 +91,7 @@ export interface RulesClientFactoryOpts {
   shouldGrantUiam: boolean;
   isServerless: boolean;
   featureFlags: CoreStart['featureFlags'];
+  analytics: CoreStart['analytics'];
 }
 
 export class RulesClientFactory {
@@ -96,7 +101,7 @@ export class RulesClientFactory {
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
-  private getSpaceId!: (request: KibanaRequest) => string;
+  private getSpaceId!: (request: KibanaRequest) => SpaceId;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
@@ -117,6 +122,7 @@ export class RulesClientFactory {
   private shouldGrantUiam: boolean = false;
   private isServerless: boolean = false;
   private featureFlags!: CoreStart['featureFlags'];
+  private analytics!: CoreStart['analytics'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -149,6 +155,7 @@ export class RulesClientFactory {
     this.shouldGrantUiam = options.shouldGrantUiam;
     this.isServerless = options.isServerless;
     this.featureFlags = options.featureFlags;
+    this.analytics = options.analytics;
   }
 
   /**
@@ -175,7 +182,7 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
@@ -258,49 +265,80 @@ export class RulesClientFactory {
    * invalidation queue. Errors are logged but never rethrown so that this cannot break
    * the surrounding rule delete operation.
    *
+   * Authentication for both branches is derived from server-side state rather than the
+   * caller's request, so the sync path works regardless of how the delete was authenticated:
+   * - ES keys are invalidated as the Kibana internal user (matches the queued task path).
+   * - UIAM keys are invalidated by forging a request that carries the rule's own UIAM
+   *   credential (mirrors {@link invalidateUiamAPIKeys} in @kbn/task-manager-plugin).
+   *
    * Mirrors the decode logic of {@link bulkMarkApiKeysForInvalidation}: each input is
    * `base64(id:value)`; for UIAM keys the value is a UIAM credential, for ES keys we
    * only need the id.
    */
-  private async invalidateApiKeyNow(
-    request: KibanaRequest,
-    {
-      ruleName,
-      apiKey,
-      uiamApiKey,
-    }: { ruleName: string; apiKey?: string | null; uiamApiKey?: string | null }
-  ): Promise<void> {
+  private async invalidateApiKeyNow({
+    ruleName,
+    apiKey,
+    uiamApiKey,
+  }: {
+    ruleName: string;
+    apiKey?: string | null;
+    uiamApiKey?: string | null;
+  }): Promise<void> {
     const esApiKeyId = apiKey ? decodeApiKeyId(apiKey) : undefined;
-    const uiamApiKeyId = uiamApiKey ? decodeApiKeyId(uiamApiKey) : undefined;
 
     const tasks: Array<Promise<unknown>> = [];
 
-    if (uiamApiKeyId) {
-      tasks.push(
-        (async () => {
-          try {
-            await this.invalidateUiamApiKey(request, ruleName, uiamApiKeyId);
-          } catch (err) {
-            this.logger.error(
-              `Failed to synchronously invalidate UIAM API key for alerting rule : ${ruleName}: ${
-                err instanceof Error ? err.message : String(err)
-              }`,
-              {
-                tags: UIAM_LOGS_INVALIDATE_TAGS,
-                error: { stack_trace: err instanceof Error ? err.stack : undefined },
-              }
-            );
-          }
-        })()
-      );
+    if (uiamApiKey) {
+      const [uiamApiKeyId, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64')
+        .toString()
+        .split(':');
+
+      if (uiamApiKeyId && uiamApiKeyValue && isUiamCredential(uiamApiKeyValue)) {
+        tasks.push(
+          (async () => {
+            try {
+              // `uiam.invalidate` requires the request to carry a UIAM credential. Forge
+              // one from the rule's own stored UIAM key so this works regardless of how
+              // the caller authenticated — mirrors the queued invalidation path in
+              // @kbn/task-manager-plugin.
+              const fakeRawRequest: FakeRawRequest = {
+                headers: { authorization: `ApiKey ${uiamApiKeyValue}` },
+                path: '/',
+              };
+              const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+              await this.invalidateUiamApiKey(fakeRequest, ruleName, uiamApiKeyId);
+            } catch (err) {
+              this.logger.error(
+                `Failed to synchronously invalidate UIAM API key for alerting rule : ${ruleName}: ${
+                  err instanceof Error ? err.message : String(err)
+                }`,
+                {
+                  tags: UIAM_LOGS_INVALIDATE_TAGS,
+                  error: { stack_trace: err instanceof Error ? err.stack : undefined },
+                }
+              );
+            }
+          })()
+        );
+      } else {
+        this.logger.error(
+          `Failed to synchronously invalidate UIAM API key for alerting rule : ${ruleName}: stored credential is not a UIAM API key`,
+          { tags: UIAM_LOGS_INVALIDATE_TAGS }
+        );
+      }
     }
 
     if (esApiKeyId) {
       tasks.push(
         (async () => {
           try {
+            // Use the Kibana internal user so invalidation does not depend on the caller
+            // having `manage_api_key` for the rule's API key. Matches the queued task path
+            // (`alerts_invalidate_api_keys`), Fleet, entity manager, synthetics, etc.
             const result: InvalidateAPIKeyResult | null =
-              await this.securityService.authc.apiKeys.invalidate(request, { ids: [esApiKeyId] });
+              await this.securityService.authc.apiKeys.invalidateAsInternalUser({
+                ids: [esApiKeyId],
+              });
             if (result && result.error_count > 0) {
               this.logger.error(
                 `Failed to synchronously invalidate ES API key for alerting rule : ${ruleName}: ${result.error_details
@@ -332,7 +370,7 @@ export class RulesClientFactory {
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
-    spaceId: string;
+    spaceId: SpaceId;
     isExplicitSpaceOverride: boolean;
     options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {
@@ -359,6 +397,7 @@ export class RulesClientFactory {
       .asScopedToNamespace(spaceId);
 
     return new RulesClient({
+      request,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,
@@ -382,6 +421,7 @@ export class RulesClientFactory {
       shouldGrantUiam: this.shouldGrantUiam,
       isServerless: this.isServerless,
       featureFlags: this.featureFlags,
+      analytics: this.analytics,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -453,6 +493,40 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
+          // UIAM's authoritative verdict on whether the authenticated API key is an external
+          // (user-created Cloud) key, reported by the UIAM authentication provider on the
+          // current user. `internal === false` is the only trustworthy "external" signal: the
+          // flag is absent for session tokens and for keys Kibana granted itself, both of
+          // which keep the internal-key treatment (fail closed).
+          const isExternalApiKey =
+            securityService.authc.getCurrentUser(request)?.api_key?.internal === false;
+
+          // A raw UIAM credential (`essu_...`) means the request was authenticated with a
+          // user-created Cloud API key (obtained from the Elastic Cloud UI). Unlike
+          // framework-granted UIAM keys (encoded as `base64(id:key)`), it carries no key id,
+          // so it is stored on the rule as-is and never invalidated by alerting — lifecycle
+          // management (rotation, deletion) remains the user's responsibility, and
+          // `apiKeyCreatedByUser` gates every invalidation path.
+          if (isUiamCredential(authorizationHeader)) {
+            if (!this.shouldGrantUiam) {
+              // A client error, not a server one: keep it a 4xx with an actionable message
+              // instead of surfacing an opaque 500.
+              throw Boom.badRequest(
+                `Cannot use a Cloud API key to create or enable rule "${name}". ` +
+                  `Cloud API keys are only supported in serverless environments; ` +
+                  `use a project-scoped Elasticsearch API key instead.`
+              );
+            }
+            return {
+              apiKeysEnabled: true,
+              uiamResult: {
+                name: `uiam-${name}`,
+                api_key: authorizationHeader.credentials,
+                ...(isExternalApiKey ? { external: true } : {}),
+              },
+            };
+          }
+
           const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
@@ -474,6 +548,7 @@ export class RulesClientFactory {
                 name: `uiam-${name}`,
                 id: apiKeyId,
                 api_key: apiKey,
+                ...(isExternalApiKey ? { external: true } : {}),
               },
             };
           }
@@ -491,9 +566,22 @@ export class RulesClientFactory {
       },
       cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
       async invalidateApiKeyNow(params) {
-        await factory.invalidateApiKeyNow(request, params);
+        await factory.invalidateApiKeyNow(params);
       },
       async cloneAPIKey(name: string) {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        // UIAM keys can't be cloned (native ES /_security/api_key/clone rejects essu_ keys),
+        // so mint a fresh framework-owned UIAM key instead.
+        if (authorizationHeader && isUiamCredential(authorizationHeader)) {
+          const uiamResult = await factory.createUiamApiKey(request, name);
+          if (!uiamResult) {
+            throw new Error('Failed to grant UIAM API key for cloned alerting rule');
+          }
+          return {
+            apiKeysEnabled: true,
+            uiamResult,
+          };
+        }
         const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
           name,
           metadata: { managed: true, kibana: { type: 'alerting_rule' } },

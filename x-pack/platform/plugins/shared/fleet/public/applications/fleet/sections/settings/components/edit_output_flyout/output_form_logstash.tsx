@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiLink, EuiSwitch, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiSwitch } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -85,25 +86,20 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
       {!inputs.logstashEnableSSLInput.value && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutTitle',
               { defaultMessage: 'Proceed with caution!' }
             )}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutMessage',
-                {
-                  defaultMessage:
-                    'Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash servers, and that your Logstash servers receive data from trusted Elastic Agent clients.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutMessage',
+              {
+                defaultMessage:
+                  'Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash servers, and that your Logstash servers receive data from trusted Elastic Agent clients.',
+              }
+            )}
+          />
         </>
       )}
       <EuiSpacer size="m" />

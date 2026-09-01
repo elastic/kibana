@@ -98,4 +98,15 @@ describe('formatResourceWithSampledValues', () => {
 
     expect(out).toContain('- @timestamp [date]');
   });
+
+  it('backtick-escapes field path segments that start with a digit', () => {
+    const out = formatResourceWithSampledValues({
+      resource: buildResource(
+        [field({ path: 'system.cpu.load_average.1m', type: 'float', tsMetric: 'gauge' })],
+        true
+      ),
+    });
+
+    expect(out).toContain('- system.cpu.load_average.`1m` [float, ts_metric=gauge]');
+  });
 });

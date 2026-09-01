@@ -32,6 +32,7 @@ export const TRANSACTION_DETAILS_BY_NAME_LOCATOR = 'TransactionDetailsByNameLoca
 export interface TransactionDetailsByNameParams extends SerializableRecord {
   serviceName: string;
   transactionName: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
 }

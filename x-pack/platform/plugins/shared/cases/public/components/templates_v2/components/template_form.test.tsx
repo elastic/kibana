@@ -70,21 +70,36 @@ describe('TemplateFormFields', () => {
     });
   });
 
-  it('shows saved check icon when isSaved is true', () => {
+  it('shows the draft saved status when isSaved is true', () => {
     render(
       <TestProviders>
         <TemplateYamlEditor value="test: value" onChange={mockOnChange} isSaved={true} />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('template-saved-icon')).toBeInTheDocument();
+    const status = screen.getByTestId('templateDraftStatus');
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveTextContent('Draft saved');
   });
 
-  it('calls useFieldNameValidation hook with editor and value', () => {
+  it('calls useFieldNameValidation hook with editor, value, and savedValue', () => {
     const yamlValue = 'fields:\n  - name: field1\n    type: keyword';
     renderFields(yamlValue);
 
-    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, yamlValue);
+    // savedValue is undefined here — the test harness never passes it (create-mode default).
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, yamlValue, undefined);
+  });
+
+  it('calls useFieldNameValidation hook with editor, value, and savedValue for grandfathering', () => {
+    const yamlValue = 'fields:\n  - name: field1\n    type: keyword';
+    const savedValue = 'fields:\n  - name: legacy-field\n    type: keyword';
+    render(
+      <TestProviders>
+        <TemplateYamlEditor value={yamlValue} onChange={mockOnChange} savedValue={savedValue} />
+      </TestProviders>
+    );
+
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, yamlValue, savedValue);
   });
 
   it('calls useFieldNameValidation hook when value changes', async () => {
@@ -94,7 +109,7 @@ describe('TemplateFormFields', () => {
       </TestProviders>
     );
 
-    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'initial: value');
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'initial: value', undefined);
 
     rerender(
       <TestProviders>
@@ -103,7 +118,7 @@ describe('TemplateFormFields', () => {
     );
 
     await waitFor(() => {
-      expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'updated: value');
+      expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'updated: value', undefined);
     });
   });
 

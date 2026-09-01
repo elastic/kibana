@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiSkeletonTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -169,14 +170,16 @@ export const AssistantHeader: React.FC<Props> = ({
 
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.CLOSE}
-                data-test-subj="euiFlyoutCloseButton"
-                iconType="cross"
-                color="text"
-                size="xs"
-                onClick={onCloseFlyout}
-              />
+              <EuiToolTip content={i18n.CLOSE} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.CLOSE}
+                  data-test-subj="euiFlyoutCloseButton"
+                  iconType="cross"
+                  color="text"
+                  size="xs"
+                  onClick={onCloseFlyout}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

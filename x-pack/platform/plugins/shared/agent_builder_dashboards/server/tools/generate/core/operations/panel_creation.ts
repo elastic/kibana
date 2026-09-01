@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  resolveEsqlQueryEdit,
+  toEsqlQueryState,
+  type CustomContentState,
+} from '@kbn/custom-content-common';
 import type { PanelFailure } from '../utils';
+import { getErrorMessage } from '../utils';
+import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import type { DashboardOperation } from './registry';
+import type { ResolveCustomContentTemplate } from './types';
 import {
   PANEL_TYPE_DEFINITIONS,
   type AddPanelsItemInput,
+  type CustomContentPanelConfig,
   type NewPanelInput,
   type PanelContent,
   type PanelRequestInput,
@@ -17,6 +28,11 @@ import {
 } from './panels';
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
+
+export interface MaterializedPanelInput {
+  panelContent: PanelContent;
+  authoringNote?: string;
+}
 
 export type PanelCreationRequest =
   | {
@@ -135,6 +151,7 @@ export const resolvePanelCreationRequests = async ({
                 index: request.panelInput.index,
                 chartType: request.panelInput.chartType,
                 esql: request.panelInput.esql,
+                renderer: request.panelInput.renderer,
               }),
             }))
           ),
@@ -176,7 +193,7 @@ export const createPanelInputMaterializer = ({
   operationIndex: number;
   operationType: DashboardOperation['operation'];
   failures: PanelFailure[];
-}): ((item: NewPanelInput, panelInputIndex: number) => PanelContent | undefined) => {
+}): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     getResolvedPanelCreationRequests({
       resolvedRequestsByOperationIndex: resolvedPanelCreationRequests,
@@ -186,7 +203,9 @@ export const createPanelInputMaterializer = ({
 
   return (item, panelInputIndex) => {
     if (item.source === 'config') {
-      return PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config);
+      return {
+        panelContent: PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config),
+      };
     }
 
     const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);
@@ -201,6 +220,61 @@ export const createPanelInputMaterializer = ({
       return undefined;
     }
 
-    return resolvedRequest.resolvedPanel.panelContent;
+    return {
+      panelContent: resolvedRequest.resolvedPanel.panelContent,
+      ...(resolvedRequest.resolvedPanel.authoringNote
+        ? { authoringNote: resolvedRequest.resolvedPanel.authoringNote }
+        : {}),
+    };
   };
+};
+
+export const applyCustomContentTemplates = async (
+  materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
+  resolveTemplate: ResolveCustomContentTemplate,
+  failures: PanelFailure[]
+): Promise<void> => {
+  await Promise.all(
+    materialized.map(async (entry) => {
+      const { panel } = entry;
+      if (!panel) return;
+      if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
+      const { prompt, esqlQuery, ...persistedConfig } = panel.panelContent
+        .config as CustomContentPanelConfig & CustomContentState;
+      if (!prompt || persistedConfig.template) return;
+
+      try {
+        const template = await resolveTemplate({ prompt, esqlQuery });
+        panel.panelContent = {
+          ...panel.panelContent,
+          config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
+        };
+      } catch (err) {
+        failures.push({
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+          identifier: prompt,
+          error: getErrorMessage(err),
+        });
+        entry.panel = undefined;
+      }
+    })
+  );
+};
+
+export const mergeAndResolveCustomContentEdit = async (
+  editConfig: { prompt?: string; esqlQuery?: string | null },
+  existing: CustomContentState,
+  resolveTemplate: ResolveCustomContentTemplate
+): Promise<CustomContentState> => {
+  const { query: mergedEsqlQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
+    editConfig.esqlQuery,
+    readEsqlQuery(existing)
+  );
+  const template = await resolveTemplate({
+    prompt: editConfig.prompt ?? '',
+    esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
+    existingTemplate: existing.template,
+    hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
+  });
+  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };

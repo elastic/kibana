@@ -10,16 +10,16 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
-const getComputedColumnFilterDisabledMessage = ({
-  computedColumnNames,
-  allColumnsAreComputed,
+const buildFilterDrilldownMessage = ({
+  columnNamesToExplain,
+  allColumnsNeedExplanation,
 }: {
-  computedColumnNames: string[];
-  allColumnsAreComputed: boolean;
+  columnNamesToExplain: string[];
+  allColumnsNeedExplanation: boolean;
 }) => {
-  const count = computedColumnNames.length;
+  const count = columnNamesToExplain.length;
 
-  if (allColumnsAreComputed) {
+  if (allColumnsNeedExplanation) {
     return i18n.translate(
       'chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription',
       {
@@ -30,7 +30,7 @@ const getComputedColumnFilterDisabledMessage = ({
     );
   }
 
-  const names = computedColumnNames.map((n) => `'${n}'`).join(', ');
+  const names = columnNamesToExplain.map((n) => `'${n}'`).join(', ');
   return i18n.translate(
     'chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription',
     {
@@ -41,45 +41,41 @@ const getComputedColumnFilterDisabledMessage = ({
   );
 };
 
-function isComputedColumnNonFilterable(column: DatatableColumn): boolean {
+const isNonFilterableComputedColumn = (column: DatatableColumn): boolean => {
   if (column.isComputedColumn !== true) {
     return false;
   }
-  const sourceField = column.meta?.sourceParams?.sourceField;
-  // Without a string sourceField the filter action falls back to column.name, which always
-  // collides with the computed output column itself — filtering is never possible.
-  if (typeof sourceField !== 'string') {
-    return true;
-  }
-  // A column produced by RENAME has name !== sourceField; the underlying index field
-  // remains addressable, so filtering is still possible.
-  return column.name === sourceField;
-}
+  return column.meta?.sourceParams?.isSourceFieldFilterable !== true;
+};
+
+export const isFilterableColumnSet = (columns: Array<DatatableColumn | undefined>): boolean => {
+  const defined = columns.filter((c): c is DatatableColumn => c != null);
+  return !defined.some((col) => isNonFilterableComputedColumn(col));
+};
 
 /**
- * Returns the warning message to show when filterable chart columns are computed ES|QL
- * fields that cannot be used for filtering. Returns `undefined` when there is nothing
- * to warn about.
+ * Returns the warning message to show when filterable chart columns are computed ES|QL fields
+ * that cannot be used for filtering.
  */
-export const getComputedColumnWarningForColumns = (
-  filterableColumns: Array<DatatableColumn | undefined>
+export const getFilterDrilldownWarningMessage = (
+  columns: Array<DatatableColumn | undefined>
 ): string | undefined => {
-  const defined = filterableColumns.filter((c): c is DatatableColumn => c != null);
+  const defined = columns.filter((c): c is DatatableColumn => c != null);
   if (defined.length === 0) {
     return undefined;
   }
 
-  const nonFilterableComputedColumnNames = defined
-    .filter((col) => isComputedColumnNonFilterable(col))
+  // Suppress the message for date columns (product decision).
+  const columnNamesToExplain = defined
+    .filter((col) => isNonFilterableComputedColumn(col) && col.meta.type !== 'date')
     .map((col) => col.name);
 
-  if (nonFilterableComputedColumnNames.length === 0) {
+  if (columnNamesToExplain.length === 0) {
     return undefined;
   }
 
-  const allColumnsAreComputed = nonFilterableComputedColumnNames.length === defined.length;
-  return getComputedColumnFilterDisabledMessage({
-    computedColumnNames: nonFilterableComputedColumnNames,
-    allColumnsAreComputed,
+  return buildFilterDrilldownMessage({
+    columnNamesToExplain,
+    allColumnsNeedExplanation: columnNamesToExplain.length === defined.length,
   });
 };

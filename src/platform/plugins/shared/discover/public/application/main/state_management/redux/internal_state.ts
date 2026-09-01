@@ -17,8 +17,8 @@ import {
   type PayloadActionCreator,
   type SerializableStateInvariantMiddlewareOptions,
   type ThunkAction,
-  type ThunkDispatch,
   type TypedStartListening,
+  type UnknownAction,
   type ListenerEffect,
   configureStore,
   createSlice,
@@ -29,10 +29,10 @@ import {
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
@@ -43,11 +43,11 @@ import {
 } from './runtime_state';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
-  DEFAULT_PROFILE_STATE_FIELDS,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabsBarVisibility,
-  type DefaultProfileStateField,
+  type ProfileAppStateDefaultField,
   type DiscoverInternalState,
-  type ProfileStateSnapshot,
+  type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -79,7 +79,6 @@ const initialState: DiscoverInternalState = {
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
-  isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
@@ -119,35 +118,35 @@ const normalizeVisiblePanelsState = (appState: TabState['appState']) => {
   return appState;
 };
 
-const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
-  snapshot: ProfileStateSnapshot,
+const setProfileAppStateSnapshotField = <TField extends ProfileAppStateDefaultField>(
+  snapshot: ProfileAppStateSnapshot,
   field: TField,
   value: TabState['appState'][TField]
 ) => {
   snapshot[field] = value;
 };
 
-const syncProfileStateSnapshot = (
+const syncProfileAppStateSnapshot = (
   tab: TabState,
   profileId: string,
   nextAppState?: TabState['appState']
 ) => {
-  const profileStateSnapshots = tab.defaultProfileState.snapshotsByProfileId;
-  const profileStateSnapshot = profileStateSnapshots[profileId] ?? {};
+  const profileAppStateSnapshots = tab.profileAppStateDefaults.snapshotsByProfileId;
+  const profileAppStateSnapshot = profileAppStateSnapshots[profileId] ?? {};
   const snapshotAppState = nextAppState ?? tab.appState;
 
-  for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+  for (const field of PROFILE_APP_STATE_DEFAULT_FIELDS) {
     // If no nextAppState was passed, we're syncing the current app state (e.g. on profile init).
     // If nextAppState was passed, we're syncing only the changed fields (e.g. on user action).
     if (!nextAppState || !isEqual(tab.appState[field], nextAppState[field])) {
-      setProfileStateSnapshotField(profileStateSnapshot, field, snapshotAppState[field]);
+      setProfileAppStateSnapshotField(profileAppStateSnapshot, field, snapshotAppState[field]);
     }
   }
 
-  profileStateSnapshots[profileId] = profileStateSnapshot;
+  profileAppStateSnapshots[profileId] = profileAppStateSnapshot;
 };
 
-export const internalStateSlice = createSlice({
+const internalStateSliceDef = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
@@ -323,28 +322,47 @@ export const internalStateSlice = createSlice({
         }
 
         if (!action.payload.isSystemTriggered) {
-          syncProfileStateSnapshot(tab, action.payload.profileId, appState);
+          syncProfileAppStateSnapshot(tab, action.payload.profileId, appState);
         }
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
       }),
 
-    syncProfileStateSnapshot: (
+    syncProfileAppStateSnapshot: (
       state,
       action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
     ) =>
       withTab(state, action.payload, (tab) => {
-        syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
+        syncProfileAppStateSnapshot(tab, action.payload.profileId, action.payload.appState);
+      }),
+
+    setProfileState: (
+      state,
+      action: TabAction<{ key: string; profileState: SerializableRecord | undefined }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        if (action.payload.profileState && Object.keys(action.payload.profileState).length > 0) {
+          tab.profileState[action.payload.key] = action.payload.profileState;
+        } else {
+          delete tab.profileState[action.payload.key];
+        }
       }),
 
     /**
-     * Set the tab app state and previous app state, overwriting existing state and pushing to URL history
+     * Set the initial tab app and profile state
      */
-    resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+    initializeTabState: (
+      state,
+      action: TabAction<{
+        initialAppState: TabState['appState'];
+        initialProfileState: TabState['profileState'];
+      }>
+    ) =>
       withTab(state, action.payload, (tab) => {
-        tab.previousAppState = action.payload.appState;
-        tab.appState = action.payload.appState;
+        tab.previousAppState = action.payload.initialAppState;
+        tab.appState = action.payload.initialAppState;
+        tab.profileState = action.payload.initialProfileState;
       }),
 
     /**
@@ -388,13 +406,9 @@ export const internalStateSlice = createSlice({
         tab.esqlVariables = action.payload.esqlVariables;
       }),
 
-    setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
-      state.isESQLToDataViewTransitionModalVisible = action.payload;
-    },
-
-    setProfileStateFieldsToReset: {
+    setProfileAppStateDefaultFieldsToReset: {
       prepare: (
-        payload: TabActionPayload<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
+        payload: TabActionPayload<Pick<TabState['profileAppStateDefaults'], 'fieldsToReset'>>
       ) => ({
         payload: {
           ...payload,
@@ -407,27 +421,16 @@ export const internalStateSlice = createSlice({
       reducer: (
         state,
         action: TabAction<{
-          fieldsToReset: Pick<TabState['defaultProfileState'], 'fieldsToReset' | 'resetId'>;
+          fieldsToReset: Pick<TabState['profileAppStateDefaults'], 'fieldsToReset' | 'resetId'>;
         }>
       ) =>
         withTab(state, action.payload, (tab) => {
-          tab.defaultProfileState = {
-            ...tab.defaultProfileState,
+          tab.profileAppStateDefaults = {
+            ...tab.profileAppStateDefaults,
             ...action.payload.fieldsToReset,
           };
         }),
     },
-
-    setProfileStateFieldsToResetWithoutResetId: (
-      state,
-      action: TabAction<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.defaultProfileState = {
-          ...tab.defaultProfileState,
-          fieldsToReset: action.payload.fieldsToReset,
-        };
-      }),
 
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
@@ -593,19 +596,22 @@ export const internalStateSlice = createSlice({
   },
 });
 
+/**
+ * immer 11.1.3+ resolves case reducer `state` params to `WritableNonArrayDraft`, which it doesn't
+ * export, so declaration emit inlines the full state per reducer and fails (TS4023/TS7056). The
+ * export must therefore shed every member reaching the case reducers: `caseReducers` and
+ * `injectInto` directly (both unused here), and `actions` via the unresolved `CaseReducerActions`
+ * mapped type, which the spread resolves. Collapse to a plain exported `createSlice` once
+ * https://github.com/immerjs/immer/pull/1197 is fixed.
+ */
+const { caseReducers, injectInto, ...rest } = internalStateSliceDef;
+export const internalStateSlice = { ...rest, actions: { ...internalStateSliceDef.actions } };
+
 export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
 
 export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
-
-export const transitionedFromEsqlToDataView = createAction<TabActionPayload>(
-  'internalState/transitionedFromEsqlToDataView'
-);
-
-export const transitionedFromDataViewToEsql = createAction<TabActionPayload>(
-  'internalState/transitionedFromDataViewToEsql'
-);
 
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
@@ -664,6 +670,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
+            profileState: tab.profileState,
           });
         });
       },
@@ -676,28 +683,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit]);
-    },
-  });
-
-  // This pair of listeners updates the default query mode based on the last used query type (ES|QL vs Data View), we use
-  // this so new discover sessions use that query mode as a default.
-  //
-  // NOTE: In the short term we will add a feature flag to default to ES|QL when there is no existing preference saved.
-  // Right now we use classic - this means that users will have to switch to ES|QL manually the first time if they already
-  // had classic stored as their last used mode.
-  startListening({
-    actionCreator: transitionedFromDataViewToEsql,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'esql');
-    },
-  });
-
-  startListening({
-    actionCreator: transitionedFromEsqlToDataView,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
     },
   });
 
@@ -758,6 +743,7 @@ export const createInternalStateStore = (
     getContextAwarenessToolkit: (tabId: string) => {
       return createContextAwarenessToolkit({
         internalState,
+        profileStateRegistry: options.services.profileStateRegistry,
         tabId,
       });
     },
@@ -789,11 +775,11 @@ export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
 export type InternalStateDispatch = InternalStateStore['dispatch'];
 
-type InternalStateThunkAction<TReturn = void> = ThunkAction<
+export type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
-  InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
-  InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,
-  InternalStateDispatch extends ThunkDispatch<never, never, infer TAction> ? TAction : never
+  DiscoverInternalState,
+  InternalStateDependencies,
+  UnknownAction
 >;
 
 export type InternalStateThunkActionCreator<TArgs extends unknown[] = [], TReturn = void> = (

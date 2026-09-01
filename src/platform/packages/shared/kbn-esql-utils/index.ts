@@ -9,10 +9,11 @@
 
 export {
   getESQLAdHocDataview,
-  getESQLTimeFieldFromQuery,
+  getESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
@@ -20,6 +21,8 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
@@ -28,7 +31,7 @@ export {
   getESQLQueryColumnsRaw,
   getESQLResults,
   formatESQLColumns,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
@@ -39,6 +42,7 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
   sanitazeESQLInput,
+  escapeEsqlColumnName,
   queryCannotBeSampled,
   mapVariableToColumn,
   getValuesFromQueryField,
@@ -95,6 +99,7 @@ export {
   classifyESQLSource,
   isSingleSource,
   type ESQLSourceKind,
+  ensureApproximationLicense,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

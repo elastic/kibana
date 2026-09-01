@@ -6,6 +6,7 @@
  */
 
 import type {
+  AggregationsCalendarInterval,
   ClusterPutComponentTemplateRequest,
   MappingDynamicMapping,
   Metadata,
@@ -44,13 +45,13 @@ import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics/risk_engine';
-import { RISK_SCORE_HISTORY_PAGE_SIZE_MAX } from '../../../../common/entity_analytics/risk_score/constants';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import {
   createEventIngestedPipeline,
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
+import { riskScoreSeriesEntityBatchSize } from '../utils/elasticsearch_terms_limits';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -128,57 +129,75 @@ export class RiskScoreDataClient {
     const idFieldPath = `${entityType}.risk.id_field`;
     const idValuePath = `${entityType}.risk.id_value`;
 
-    const response = await esClient.search({
-      index,
-      size: 0,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { [idFieldPath]: 'entity.id' } },
-            { terms: { [idValuePath]: [...entityIds] } },
-            { range: { '@timestamp': range } },
-          ],
+    // Each request nests a daily date_histogram under a per-entity terms agg, so its
+    // bucket count grows as `entities × days-in-lookback`. Batch entities small enough
+    // that a single request stays under both the terms-query limit and Elasticsearch's
+    // `search.max_buckets` ceiling; larger lookbacks shrink the batch further.
+    const batchSize = riskScoreSeriesEntityBatchSize(range);
+
+    for (let offset = 0; offset < entityIds.length; offset += batchSize) {
+      const batch = entityIds.slice(offset, offset + batchSize);
+
+      const response = await esClient.search({
+        index,
+        size: 0,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { [idFieldPath]: 'entity.id' } },
+              { terms: { [idValuePath]: [...batch] } },
+              { range: { '@timestamp': range } },
+            ],
+          },
         },
-      },
-      aggs: {
-        by_entity: {
-          terms: { field: idValuePath, size: entityIds.length },
-          aggs: {
-            scores_over_time: {
-              date_histogram: { field: '@timestamp', calendar_interval: 'day' },
-              aggs: {
-                avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+        aggs: {
+          by_entity: {
+            terms: { field: idValuePath, size: batch.length },
+            aggs: {
+              scores_over_time: {
+                date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+                aggs: {
+                  avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-      []) as Array<{
-      key: string;
-      scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
-    }>;
+      const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+        []) as Array<{
+        key: string;
+        scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
+      }>;
 
-    for (const bucket of buckets) {
-      const scores = bucket.scores_over_time.buckets
-        .map((b) => b.avg_score.value)
-        .filter((v): v is number => v != null);
-      result.set(bucket.key, scores);
+      for (const bucket of buckets) {
+        const scores = bucket.scores_over_time.buckets
+          .map((b) => b.avg_score.value)
+          .filter((v): v is number => v != null);
+        result.set(bucket.key, scores);
+      }
     }
 
     return result;
   }
 
+  /**
+   * Server-side aggregated risk score history for a single entity. The route
+   * derives the bucket interval from the requested time range; this method just
+   * executes a `date_histogram` and returns, per bucket, the maximum-scoring
+   * document so each entry keeps a real document `@timestamp` (the point-in-time
+   * contributions flow refetches by exact timestamp).
+   */
   public getRiskScoreHistory = async (params: {
     entityType: string;
     entityId: string;
     range: { readonly gte: string; readonly lte: string };
     scoreType?: string;
-    pageSize: number;
+    interval: { readonly value: number; readonly unit: string };
+    includeContributions?: boolean;
   }): Promise<RiskScoreHistoryEntry[]> => {
     const { esClient, namespace } = this.options;
     const index = getRiskScoreTimeSeriesIndex(namespace);
@@ -186,9 +205,9 @@ export class RiskScoreDataClient {
 
     const response = await esClient.search<RiskScoreTimeSeriesSource>({
       index,
-      size: Math.min(params.pageSize, RISK_SCORE_HISTORY_PAGE_SIZE_MAX),
-      sort: [{ '@timestamp': 'asc' }],
-      _source: ['@timestamp', riskPath],
+      size: 0,
+      ignore_unavailable: true,
+      allow_no_indices: true,
       query: {
         bool: {
           filter: [
@@ -199,10 +218,39 @@ export class RiskScoreDataClient {
           ],
         },
       },
+      aggs: {
+        scores_over_time: {
+          date_histogram: {
+            field: '@timestamp',
+            ...toDateHistogramInterval(params.interval),
+            min_doc_count: 1,
+          },
+          aggs: {
+            top_score: {
+              top_hits: {
+                size: 1,
+                sort: [{ [`${riskPath}.calculated_score_norm`]: 'desc' }],
+                _source: ['@timestamp', riskPath],
+              },
+            },
+          },
+        },
+      },
     });
 
-    return response.hits.hits
-      .map((hit) => toHistoryEntry(hit._source, params.entityType))
+    const buckets = ((response.aggregations?.scores_over_time as Record<string, unknown>)
+      ?.buckets ?? []) as Array<{
+      top_score: { hits: { hits: Array<{ _source?: RiskScoreTimeSeriesSource }> } };
+    }>;
+
+    return buckets
+      .map((bucket) =>
+        toHistoryEntry(
+          bucket.top_score.hits.hits[0]?._source,
+          params.entityType,
+          params.includeContributions ?? false
+        )
+      )
       .filter((entry): entry is RiskScoreHistoryEntry => entry !== undefined);
   };
 
@@ -524,6 +572,28 @@ interface RiskScoreTimeSeriesSource {
   readonly service?: { readonly risk: RiskScoreTimeSeriesRisk };
 }
 
+// ES only accepts calendar units (`1w`, `1M`, `1q`, `1y`) with a value of 1 and
+// rejects them as `fixed_interval`; every other unit (`ms/s/m/h/d`) is fixed and
+// accepts any multiple. `1d` is valid either way — we treat it as fixed. TimeBuckets
+// (the only source of `interval`) never emits a calendar unit with value !== 1, so a
+// lookup keyed by unit alone is safe and gives ES the exact literal type it expects.
+const CALENDAR_INTERVAL_EXPRESSIONS: Record<string, AggregationsCalendarInterval> = {
+  w: '1w',
+  M: '1M',
+  q: '1q',
+  y: '1y',
+};
+
+const toDateHistogramInterval = (interval: {
+  value: number;
+  unit: string;
+}): { calendar_interval: AggregationsCalendarInterval } | { fixed_interval: string } => {
+  const calendarExpression = CALENDAR_INTERVAL_EXPRESSIONS[interval.unit];
+  return calendarExpression !== undefined
+    ? { calendar_interval: calendarExpression }
+    : { fixed_interval: `${interval.value}${interval.unit}` };
+};
+
 const toScoreTypeFilter = (
   riskPath: string,
   scoreType: string | undefined
@@ -568,7 +638,8 @@ const getRiskFromSource = (
 
 const toHistoryEntry = (
   source: RiskScoreTimeSeriesSource | undefined,
-  entityType: string
+  entityType: string,
+  includeContributions: boolean
 ): RiskScoreHistoryEntry | undefined => {
   if (source === undefined) {
     return undefined;
@@ -594,5 +665,14 @@ const toHistoryEntry = (
     ...(risk.score_type !== undefined && { score_type: risk.score_type }),
     ...(risk.category_1_score !== undefined && { category_1_score: risk.category_1_score }),
     ...(risk.category_1_count !== undefined && { category_1_count: risk.category_1_count }),
+    ...(includeContributions ? toContributionFields(risk) : {}),
   };
 };
+
+const toContributionFields = (risk: RiskScoreTimeSeriesRisk): Partial<RiskScoreHistoryEntry> => ({
+  ...(risk.inputs !== undefined && { inputs: risk.inputs }),
+  ...(risk.modifiers !== undefined && { modifiers: risk.modifiers }),
+  ...(risk.category_2_score !== undefined && { category_2_score: risk.category_2_score }),
+  ...(risk.category_2_count !== undefined && { category_2_count: risk.category_2_count }),
+  ...(risk.criticality_level !== undefined && { criticality_level: risk.criticality_level }),
+});

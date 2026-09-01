@@ -48,14 +48,12 @@ function aiInsightSseErrorResponse({
   response,
   message,
   retryable,
-  isCloudEnabled,
   logger,
   request,
 }: {
   response: KibanaResponseFactory;
   message: string;
   retryable: boolean;
-  isCloudEnabled: boolean;
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
 }) {
@@ -66,7 +64,7 @@ function aiInsightSseErrorResponse({
       })
   );
   return response.ok({
-    headers: getSSEResponseHeaders(isCloudEnabled),
+    headers: getSSEResponseHeaders(),
     body: observableIntoEventSourceStream(err$, {
       logger,
       signal: getRequestAbortedSignal(request),
@@ -77,13 +75,11 @@ function aiInsightSseErrorResponse({
 function routeAiInsightError({
   error,
   response,
-  isCloudEnabled,
   logger,
   request,
 }: {
   error: unknown;
   response: KibanaResponseFactory;
-  isCloudEnabled: boolean;
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
 }) {
@@ -94,7 +90,6 @@ function routeAiInsightError({
         defaultMessage: 'AI insights are not supported for data from linked projects.',
       }),
       retryable: false,
-      isCloudEnabled,
       logger,
       request,
     });
@@ -106,7 +101,6 @@ function routeAiInsightError({
         defaultMessage: 'The source index for this data is unavailable.',
       }),
       retryable: false,
-      isCloudEnabled,
       logger,
       request,
     });
@@ -115,7 +109,6 @@ function routeAiInsightError({
     response,
     message: getRawErrorMessage(error),
     retryable: true,
-    isCloudEnabled,
     logger,
     request,
   });
@@ -139,7 +132,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     }),
     handler: async ({ core, plugins, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
-      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
       const [, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry, searchInferenceEndpoints } = startDeps;
 
@@ -169,7 +161,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
 
         return response.ok({
-          headers: getSSEResponseHeaders(isCloudEnabled),
+          headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(result.events$, {
             logger,
             signal: getRequestAbortedSignal(request),
@@ -180,7 +172,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         return routeAiInsightError({
           error,
           response,
-          isCloudEnabled,
           logger,
           request,
         });
@@ -209,7 +200,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     }),
     handler: async ({ request, core, plugins, dataRegistry, params, response, logger }) => {
       const { errorId, serviceName, start, end, environment = '' } = params.body;
-      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
       const [, startDeps] = await core.getStartServices();
       const { inference, searchInferenceEndpoints } = startDeps;
@@ -240,7 +230,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
 
         return response.ok({
-          headers: getSSEResponseHeaders(isCloudEnabled),
+          headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(result.events$, {
             logger,
             signal: getRequestAbortedSignal(request),
@@ -251,7 +241,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         return routeAiInsightError({
           error,
           response,
-          isCloudEnabled,
           logger,
           request,
         });
@@ -278,7 +267,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     }),
     handler: async ({ request, core, params, response, logger, plugins }) => {
       const { index, id, fields } = params.body;
-      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
       const hasDocIdentity = typeof index === 'string' && typeof id === 'string';
       // if a user is in ESQL mode, there is currently no id or index metadata
@@ -319,7 +307,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
           logger,
         });
         return response.ok({
-          headers: getSSEResponseHeaders(isCloudEnabled),
+          headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(result.events$, {
             logger,
             signal: getRequestAbortedSignal(request),
@@ -330,7 +318,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         return routeAiInsightError({
           error,
           response,
-          isCloudEnabled,
           logger,
           request,
         });

@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,12 +34,14 @@ import type { IntegrationCardItem } from '../screens/home';
 import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
+import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 
 import {
   InstallationStatus,
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
+import { buildPackageCardNavigateState } from './package_card_navigate_state';
 import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
@@ -57,6 +58,7 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  fromCollection,
   isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
@@ -69,6 +71,7 @@ export function PackageCard({
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  groupMembers,
   titleLineClamp,
   titleBadge,
   titleSize = 'xs',
@@ -167,20 +170,14 @@ export function PackageCard({
     );
   }
 
-  let collectionButton: React.ReactNode | null = null;
-  if (isCollectionCard) {
-    collectionButton = (
-      <EuiFlexItem>
-        <EuiButton
-          color="text"
-          data-test-subj="xpack.fleet.packageCard.collectionButton"
-          iconType="package"
-        >
-          <FormattedMessage
-            id="xpack.fleet.packageCard.collectionButton.copy"
-            defaultMessage="View collection"
-          />
-        </EuiButton>
+  let collectionBadge: React.ReactNode | null = null;
+  if (isCollectionCard && groupMembers?.length) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <VariantCountBadge count={groupMembers.length} />
+        </span>
       </EuiFlexItem>
     );
   }
@@ -202,13 +199,29 @@ export function PackageCard({
     );
   }
 
-  const { application } = useStartServices();
+  const { application, http } = useStartServices();
 
   const onCardClick = () => {
-    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+    // Use basePath-prefixed comparison so this works with server.basePath or space-path prefixes.
+    const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
+    if (url.startsWith(integrationsBase)) {
+      const path = url.slice(integrationsBase.length);
+      // When navigating straight to the add-integration page, pass the current URL as
+      // onCancelUrl so the Cancel button returns the user to where they came from
+      // (e.g. the integrations catalog) rather than the integration detail page.
+      const cancelState = /\/add-integration([/?]|$)/.test(path)
+        ? { onCancelUrl: window.location.href }
+        : {};
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        path: url.slice(INTEGRATIONS_BASE_PATH.length),
-        state: { fromIntegrations },
+        path,
+        state: {
+          ...buildPackageCardNavigateState({
+            search: typeof window !== 'undefined' ? window.location.search : '',
+            fromIntegrations,
+            fromCollection,
+          }),
+          ...cancelState,
+        },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');
@@ -301,12 +314,6 @@ export function PackageCard({
             & > .euiFlexItem {
               min-width: 0;
             }
-
-            ${isCollectionCard
-              ? `& > .euiFlexItem:last-child {
-              min-width: auto;
-            }`
-              : ''}
           `}
         >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
@@ -316,7 +323,7 @@ export function PackageCard({
           {contentBadge}
           {releaseBadge}
           {hasDeferredInstallationsBadge}
-          {collectionButton}
+          {collectionBadge}
           <InstallationStatus
             installStatus={installStatus}
             showInstallationStatus={showInstallationStatus}

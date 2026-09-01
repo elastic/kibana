@@ -16,7 +16,7 @@ const mockDispatch = jest.fn();
 const mockGetState = jest.fn();
 const refreshAction = { type: 'fetchAllRenderables' };
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: (selector: any) => selector(mockGetState()),
 }));

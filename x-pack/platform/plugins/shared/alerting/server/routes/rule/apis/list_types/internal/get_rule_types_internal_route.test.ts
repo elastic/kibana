@@ -99,7 +99,11 @@ describe('internalRuleTypesRoute', () => {
     ];
     rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { query: { include_alert_viewable_types: true } },
+      ['ok']
+    );
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -141,6 +145,7 @@ describe('internalRuleTypesRoute', () => {
     `);
 
     expect(rulesClient.listRuleTypes).toHaveBeenCalledTimes(1);
+    expect(rulesClient.listRuleTypes).toHaveBeenCalledWith({ includeAlertViewableTypes: true });
 
     expect(res.ok).toHaveBeenCalledWith({
       body: expectedResult,
@@ -192,6 +197,7 @@ describe('internalRuleTypesRoute', () => {
       { rulesClient },
       {
         params: { id: '1' },
+        query: { include_alert_viewable_types: false },
       },
       ['ok']
     );

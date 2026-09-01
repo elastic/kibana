@@ -123,7 +123,14 @@ export function initRoutes(
     {
       path: `/api/sample_tasks/schedule_with_api_key`,
       validate: {
-        body: taskSchema,
+        body: schema.object({
+          task: innerTaskSchema,
+          /**
+           * Grants only an Elasticsearch API key, skipping UIAM. Lets a test create a task in the
+           * pre-UIAM state so the UIAM provisioning task has something to convert.
+           */
+          onEsKey: schema.maybe(schema.boolean()),
+        }),
       },
       security: {
         authz: {
@@ -138,13 +145,16 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { task: taskFields } = req.body;
+      const { task: taskFields, onEsKey } = req.body;
       const task = {
         ...taskFields,
         scope: [scope],
       };
 
-      const taskResult = await taskManager.schedule(task, { request: req });
+      const taskResult = await taskManager.schedule(task, {
+        request: req,
+        ...(onEsKey === undefined ? {} : { onEsKey }),
+      });
 
       return res.ok({ body: taskResult });
     }
@@ -180,7 +190,9 @@ export function initRoutes(
 
       const fakeRawRequest: FakeRawRequest = {
         headers: {
-          authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+          authorization: `ApiKey ${Buffer.from(
+            `${apiKeyCreateResult!.id}:${apiKeyCreateResult!.api_key}`
+          ).toString('base64')}`,
         },
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
@@ -202,6 +214,7 @@ export function initRoutes(
         body: schema.object({
           task: innerTaskSchema,
           userProfileId: schema.string(),
+          userName: schema.maybe(schema.string()),
         }),
       },
       security: {
@@ -218,7 +231,7 @@ export function initRoutes(
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
       const security = await coreSecurityStart;
-      const { task: taskFields, userProfileId } = req.body;
+      const { task: taskFields, userProfileId, userName } = req.body;
 
       const apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(req, {
         name: `test task-manager schedule for profile test`,
@@ -228,7 +241,9 @@ export function initRoutes(
 
       const fakeRawRequest: FakeRawRequest = {
         headers: {
-          authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+          authorization: `ApiKey ${Buffer.from(
+            `${apiKeyCreateResult!.id}:${apiKeyCreateResult!.api_key}`
+          ).toString('base64')}`,
         },
         path: '/',
       };
@@ -237,9 +252,10 @@ export function initRoutes(
       // FTR runs under basic auth and can't produce a session-backed request
       // with a profile_uid. We schedule the task through Task Manager's normal
       // path (so the API-key strategy and userScope plumbing run for real),
-      // then patch `userScope.userProfileId` on the stored SO to mimic a task
-      // that was originally scheduled by a session-backed user. `runAt` is
-      // deferred so the poller can't claim the task before the patch lands.
+      // then patch `userScope.userProfileId`/`userName` on the stored SO to
+      // mimic a task that was originally scheduled by a session-backed user.
+      // `runAt` is deferred so the poller can't claim the task before the patch
+      // lands.
       const deferredRunAt = new Date(Date.now() + 10_000);
       const scheduled = await taskManager.schedule(
         {
@@ -254,7 +270,7 @@ export function initRoutes(
         includedHiddenTypes: [TASK_SO_NAME],
       });
       await soClient.update(TASK_SO_NAME, scheduled.id, {
-        userScope: { ...scheduled.userScope, userProfileId },
+        userScope: { ...scheduled.userScope, userProfileId, userName },
       });
 
       // Make the task eligible for the next polling cycle now that userScope
@@ -360,7 +376,9 @@ export function initRoutes(
 
         const fakeRawRequest: FakeRawRequest = {
           headers: {
-            authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+            authorization: `ApiKey ${Buffer.from(
+              `${apiKeyCreateResult!.id}:${apiKeyCreateResult!.api_key}`
+            ).toString('base64')}`,
           },
         };
         const fakeRequest = kibanaRequestFactory(fakeRawRequest);
@@ -583,6 +601,49 @@ export function initRoutes(
 
         const taskManager = await taskManagerStart;
         const taskResult = await taskManager.ensureScheduled(task, { req });
+
+        return res.ok({ body: taskResult });
+      } catch (err) {
+        return res.ok({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/ensure_scheduled_with_api_key`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          task: schema.object({
+            taskType: schema.string(),
+            params: schema.object({}),
+            state: schema.maybe(schema.object({})),
+            id: schema.maybe(schema.string()),
+            schedule: schema.maybe(schema.object({ interval: schema.string() })),
+          }),
+        }),
+      },
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      try {
+        const { task: taskFields } = req.body;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskManager = await taskManagerStart;
+        const taskResult = await taskManager.ensureScheduled(task, { request: req });
 
         return res.ok({ body: taskResult });
       } catch (err) {

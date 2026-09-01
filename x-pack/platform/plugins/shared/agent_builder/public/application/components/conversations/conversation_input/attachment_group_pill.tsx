@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -70,12 +70,12 @@ export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group,
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
+          <div css={iconContainerStyles}>
             <EuiIcon type={DEFAULT_ICON} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
+          <EuiText size="xs" css={titleStyles}>
             <strong>{group.label}</strong>
           </EuiText>
         </EuiFlexItem>

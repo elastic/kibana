@@ -8,7 +8,14 @@
  */
 
 import { of } from 'rxjs';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlQueryParser } from './esql_query_parser';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLTimeField: jest.fn(),
+}));
 
 const rangeStart = 1000000;
 const rangeEnd = 2000000;
@@ -20,7 +27,7 @@ const mockFilters = {
   },
 };
 
-function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}) {
+function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlVariables) {
   const timeCache = {
     getTimeBounds: () => ({ min, max }),
   };
@@ -31,7 +38,7 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}) {
 
   const onWarning = jest.fn();
 
-  const parser = new EsqlQueryParser(timeCache, searchAPI, dashboardCtx, onWarning);
+  const parser = new EsqlQueryParser(timeCache, searchAPI, dashboardCtx, onWarning, esqlVariables);
   parser.$$$warnCount = 0;
   parser._onWarning = (...args) => {
     parser.$$$warnCount++;
@@ -41,7 +48,14 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}) {
   return { parser, searchAPI, onWarning };
 }
 
-jest.mock('../services');
+jest.mock('../services', () => ({
+  getHttp: jest.fn(() => ({})),
+}));
+
+beforeEach(() => {
+  getESQLTimeField.mockReset();
+  getESQLTimeField.mockResolvedValue(undefined);
+});
 
 describe('EsqlQueryParser.parseUrl', () => {
   test('should parse basic ES|QL query', () => {
@@ -117,7 +131,7 @@ describe('EsqlQueryParser.parseUrl', () => {
 
     const result = parser.parseUrl(dataObject, url);
 
-    expect(result.url._useTimeParams).toBe(true);
+    expect(result.url._timeFieldDirective).toBe('@timestamp');
     expect(result.url['%timefield%']).toBeUndefined();
   });
 
@@ -224,32 +238,68 @@ describe('EsqlQueryParser.populateData', () => {
     expect(requests[1].dataObject.values).toEqual([{ total: 200 }]);
   });
 
-  test('should inject time parameters when %timefield% is set', async () => {
+  test('binds dashboard variables per ES|QL data source', async () => {
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+      { key: 'color', value: 'blue', type: ESQLVariableType.VALUES },
+    ]);
+
+    searchAPI.searchEsql.mockReturnValue(of([]));
+
+    await parser.populateData([
+      {
+        url: { query: 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz' },
+        dataObject: { name: 'os_query' },
+      },
+      {
+        url: { query: 'FROM logs-* | WHERE color.keyword == ?color' },
+        dataObject: { name: 'color_query' },
+      },
+    ]);
+
+    const [first, second] = searchAPI.searchEsql.mock.calls[0][0];
+    expect(first.params).toEqual([{ fizzbuzz: 'ios' }]);
+    expect(second.params).toEqual([{ color: 'blue' }]);
+  });
+
+  test('binds an identifier variable and sends the query without mutating the source', async () => {
+    const storedQuery = 'FROM logs-* | STATS COUNT(??field)';
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS },
+    ]);
+
+    searchAPI.searchEsql.mockReturnValue(of([]));
+
+    const url = { query: storedQuery };
+    await parser.populateData([{ url, dataObject: { name: 'field_query' } }]);
+
+    const [request] = searchAPI.searchEsql.mock.calls[0][0];
+    expect(request.query).toBe(storedQuery);
+    expect(request.params).toEqual([{ field: 'bytes' }]);
+    expect(url.query).toBe(storedQuery);
+  });
+
+  test('binds time params when the query contains ?_tstart/?_tend without %timefield%', async () => {
     const { parser, searchAPI } = createParser(1000000, 2000000);
+    const dataObject = { name: 'time_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      query: 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',
+    });
 
-    const mockResponse = [
-      {
-        name: 'time_query',
-        rawResponse: {
-          columns: [{ name: 'count', type: 'long' }],
-          values: [[42]],
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'time_query',
+          rawResponse: {
+            columns: [{ name: 'count', type: 'long' }],
+            values: [[42]],
+          },
         },
-      },
-    ];
+      ])
+    );
 
-    searchAPI.searchEsql.mockReturnValue(of(mockResponse));
-
-    const requests = [
-      {
-        url: {
-          query: 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',
-          _useTimeParams: true,
-        },
-        dataObject: { name: 'time_query' },
-      },
-    ];
-
-    await parser.populateData(requests);
+    await parser.populateData([{ url, dataObject }]);
 
     const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
     expect(callArgs.params).toHaveLength(2);
@@ -288,6 +338,225 @@ describe('EsqlQueryParser.populateData', () => {
 
     const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
     expect(callArgs.filter).toEqual(mockFilters);
+  });
+
+  test('applies both time params and a DSL time filter for BUCKET queries', async () => {
+    getESQLTimeField.mockResolvedValue('timestamp');
+
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
+    const dataObject = { name: 'bucket_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      query:
+        'FROM kibana_sample_data_flights | STATS count = COUNT(*) BY Date = BUCKET(timestamp, 50, ?_tstart, ?_tend) | SORT Date ASC',
+    });
+
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'bucket_query',
+          rawResponse: {
+            columns: [
+              { name: 'Date', type: 'date' },
+              { name: 'count', type: 'long' },
+            ],
+            values: [[new Date(rangeStart).toISOString(), 1]],
+          },
+        },
+      ])
+    );
+
+    await parser.populateData([{ url, dataObject }]);
+
+    const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
+    expect(callArgs.params).toHaveLength(2);
+    expect(callArgs.params[0]).toEqual({ _tstart: new Date(rangeStart).toISOString() });
+    expect(callArgs.params[1]).toEqual({ _tend: new Date(rangeEnd).toISOString() });
+    expect(callArgs.filter).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            {
+              range: {
+                timestamp: {
+                  gte: new Date(rangeStart).toISOString(),
+                  lte: new Date(rangeEnd).toISOString(),
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+          ]),
+        }),
+      })
+    );
+  });
+
+  test('applies a DSL time filter on the default time field when %timefield% is absent', async () => {
+    getESQLTimeField.mockResolvedValue('timestamp');
+
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
+    const dataObject = { name: 'default_time_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      query: 'FROM kibana_sample_data_flights | STATS count = COUNT(*) BY Dest',
+    });
+
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'default_time_query',
+          rawResponse: {
+            columns: [{ name: 'count', type: 'long' }],
+            values: [[1]],
+          },
+        },
+      ])
+    );
+
+    await parser.populateData([{ url, dataObject }]);
+
+    expect(getESQLTimeField).toHaveBeenCalled();
+    const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
+    expect(callArgs.filter).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            {
+              range: {
+                timestamp: {
+                  gte: new Date(rangeStart).toISOString(),
+                  lte: new Date(rangeEnd).toISOString(),
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+          ]),
+        }),
+      })
+    );
+  });
+
+  test('does not apply a time filter when no default time field exists', async () => {
+    getESQLTimeField.mockResolvedValue(undefined);
+
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
+    const dataObject = { name: 'no_time_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      query: 'FROM my-index-without-time | STATS count = COUNT(*)',
+    });
+
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'no_time_query',
+          rawResponse: {
+            columns: [{ name: 'count', type: 'long' }],
+            values: [[1]],
+          },
+        },
+      ])
+    );
+
+    await parser.populateData([{ url, dataObject }]);
+
+    const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
+    expect(callArgs.filter).toBeUndefined();
+  });
+
+  test('merges dashboard context filters with the DSL time filter', async () => {
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd, mockFilters);
+    const dataObject = { name: 'context_time_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      '%context%': true,
+      '%timefield%': 'timestamp',
+      query: 'FROM kibana_sample_data_flights | STATS count = COUNT(*)',
+    });
+
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'context_time_query',
+          rawResponse: {
+            columns: [{ name: 'count', type: 'long' }],
+            values: [[1]],
+          },
+        },
+      ])
+    );
+
+    await parser.populateData([{ url, dataObject }]);
+
+    const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
+    expect(callArgs.filter).toEqual({
+      bool: {
+        must: [
+          mockFilters,
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                {
+                  range: {
+                    timestamp: {
+                      gte: new Date(rangeStart).toISOString(),
+                      lte: new Date(rangeEnd).toISOString(),
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ]),
+            }),
+          }),
+        ],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    });
+  });
+
+  test('applies a DSL time filter on the explicit %timefield% without time params in the query', async () => {
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
+    const dataObject = { name: 'metric_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      '%timefield%': 'timestamp',
+      query: 'FROM kibana_sample_data_flights | STATS total = SUM(AvgTicketPrice)',
+    });
+
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'metric_query',
+          rawResponse: {
+            columns: [{ name: 'total', type: 'double' }],
+            values: [[100]],
+          },
+        },
+      ])
+    );
+
+    await parser.populateData([{ url, dataObject }]);
+
+    const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
+    expect(callArgs.filter).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            {
+              range: {
+                timestamp: {
+                  gte: new Date(rangeStart).toISOString(),
+                  lte: new Date(rangeEnd).toISOString(),
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+          ]),
+        }),
+      })
+    );
   });
 
   test('should handle empty results', async () => {
@@ -351,7 +620,7 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     const { parser } = createParser(1000000, 2000000);
 
     const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart';
-    const url = { query, _useTimeParams: true };
+    const url = { query };
 
     const result = parser._injectNamedParams(query, url);
 
@@ -365,7 +634,7 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     const { parser } = createParser(1000000, 2000000);
 
     const query = 'FROM logs-* | WHERE @timestamp <= ?_tend';
-    const url = { query, _useTimeParams: true };
+    const url = { query };
 
     const result = parser._injectNamedParams(query, url);
 
@@ -379,7 +648,7 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     const { parser } = createParser(1000000, 2000000);
 
     const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend';
-    const url = { query, _useTimeParams: true };
+    const url = { query };
 
     const result = parser._injectNamedParams(query, url);
 
@@ -399,15 +668,18 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params).toHaveLength(0);
   });
 
-  test('should warn when %timefield% set but no time params in query', () => {
+  test('does not warn when %timefield% is set but query has no time params', () => {
     const { parser } = createParser(1000000, 2000000);
+    const dataObject = { name: 'metric' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      '%timefield%': '@timestamp',
+      query: 'FROM logs-* | STATS count=COUNT()',
+    });
 
-    const query = 'FROM logs-* | STATS count=COUNT()';
-    const url = { query, _useTimeParams: true };
+    parser._injectNamedParams(url.query, url);
 
-    parser._injectNamedParams(query, url);
-
-    expect(parser.$$$warnCount).toBe(1);
+    expect(parser.$$$warnCount).toBe(0);
   });
 
   test('should include custom params from url', () => {
@@ -431,7 +703,6 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND level = ?level';
     const url = {
       query,
-      _useTimeParams: true,
       params: [{ level: 'ERROR' }],
     };
 
@@ -446,13 +717,102 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     const { parser } = createParser(1000000, 2000000);
 
     const query = 'FROM logs-* | WHERE @timestamp >= ?_TSTART AND @timestamp <= ?_TEND';
-    const url = { query, _useTimeParams: true };
+    const url = { query };
 
     const result = parser._injectNamedParams(query, url);
 
     expect(result.params).toHaveLength(2);
     expect(result.params[0]).toHaveProperty('_tstart');
     expect(result.params[1]).toHaveProperty('_tend');
+  });
+
+  test('binds an example user-named values variable by key', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.query).toBe(query);
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+  });
+
+  test('omits unused dashboard variables from the request params', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+      { key: 'color', value: 'blue', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+  });
+
+  test('binds an identifier variable written with the ?? prefix', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'field', value: 'host.name', type: ESQLVariableType.FIELDS },
+    ]);
+
+    const query = 'FROM logs-* | STATS COUNT(??field)';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.query).toBe(query);
+    expect(result.params).toEqual([{ field: 'host.name' }]);
+  });
+
+  test('dashboard control values win collisions with static spec params', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, {
+      query,
+      params: [{ fizzbuzz: 'hardcoded' }],
+    });
+
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+  });
+
+  test('keeps static spec params whose keys are not bound by dashboard controls', () => {
+    const { parser } = createParser();
+
+    const query = 'FROM logs-* | WHERE level == ?level';
+    const result = parser._injectNamedParams(query, {
+      query,
+      params: [{ level: 'ERROR' }],
+    });
+
+    expect(result.params).toEqual([{ level: 'ERROR' }]);
+  });
+
+  test('still binds time params together with a user-named variable', () => {
+    const { parser } = createParser(1000000, 2000000, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.params).toHaveLength(2);
+    expect(result.params[0]).toEqual({ _tstart: new Date(1000000).toISOString() });
+    expect(result.params[1]).toEqual({ fizzbuzz: 'ios' });
+  });
+
+  test('dashboard time range wins when spec params try to override _tstart and _tend', () => {
+    const dashboardStart = '2024-01-01T00:00:00.000Z';
+    const dashboardEnd = '2024-12-31T23:59:59.999Z';
+    const { parser } = createParser(Date.parse(dashboardStart), Date.parse(dashboardEnd));
+
+    const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend';
+    const result = parser._injectNamedParams(query, {
+      query,
+      params: [{ _tstart: '2020-01-01T00:00:00.000Z' }, { _tend: '2020-06-30T23:59:59.999Z' }],
+    });
+
+    expect(result.params).toEqual([{ _tstart: dashboardStart }, { _tend: dashboardEnd }]);
   });
 });
 

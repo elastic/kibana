@@ -12,6 +12,8 @@ import { searchIdField, useLocalSearch } from '../../../../../hooks';
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { IntegrationCardItem } from '../../home';
 
+import { STATUS_DEPRECATED } from '../types';
+
 import { useUrlFilters } from './url_filters';
 import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
@@ -43,30 +45,30 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    allCards: originalFilteredCards,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+    allCards,
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled, enableCollectionGrouping: true });
 
   const urlFilters = useUrlFilters();
 
-  const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+  const localSearch = useLocalSearch(allCards, !!isLoading);
   const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
 
   const sortedCards: IntegrationCardItem[] = useMemo(() => {
     const sortKey = urlFilters.sort ?? 'recent-old';
 
     if (sortKey === 'a-z') {
-      return [...originalFilteredCards].sort((a, b) => {
+      return [...allCards].sort((a, b) => {
         return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
-      return [...originalFilteredCards].sort((a, b) => {
+      return [...allCards].sort((a, b) => {
         return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
-      return originalFilteredCards;
+      return allCards;
     }
-  }, [originalFilteredCards, urlFilters.sort]);
+  }, [allCards, urlFilters.sort]);
 
   // Cards filtered by non-category filters (search, status, setup method, signal).
   // Used to compute accurate category counts in the sidebar.
@@ -81,16 +83,11 @@ export function useBrowseIntegrationHook({
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
 
-    // Apply status filters
-    const statusFilters = urlFilters.status;
-    if (statusFilters && statusFilters.length > 0) {
-      const filterDeprecated = statusFilters.includes('deprecated');
-
-      if (filterDeprecated) {
-        cards = cards.filter((card) => {
-          return 'isDeprecated' in card && card.isDeprecated === true;
-        });
-      }
+    // Hide deprecated integrations by default; only show them when the user has explicitly
+    // enabled the filter (status includes STATUS_DEPRECATED).
+    const showDeprecated = urlFilters.status?.includes(STATUS_DEPRECATED) ?? false;
+    if (!showDeprecated) {
+      cards = cards.filter((card) => !('isDeprecated' in card && card.isDeprecated === true));
     }
 
     // Apply setup method filters (union: show cards matching ANY selected method)
@@ -133,12 +130,13 @@ export function useBrowseIntegrationHook({
   ]);
 
   // Apply category filter on top of non-category filters.
-  // When multiple effective categories are active, show cards matching ANY of them (OR logic).
+  // When multiple effective categories are active, show cards matching ALL of them
+  // (AND logic / intersection).
   const filteredCards = useMemo(() => {
     if (effectiveCategories.length > 0 || selectedSubCategory) {
       return nonCategoryFilteredCards.filter((c) => {
         if (selectedSubCategory) return c.categories.includes(selectedSubCategory);
-        return effectiveCategories.some((cat) => c.categories.includes(cat));
+        return effectiveCategories.every((cat) => c.categories.includes(cat));
       });
     }
     return nonCategoryFilteredCards;
@@ -190,6 +188,7 @@ export function useBrowseIntegrationHook({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
+    allCards,
     availableSubCategories,
     onCategoryChange,
     onSortChange,

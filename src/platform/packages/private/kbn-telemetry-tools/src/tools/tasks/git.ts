@@ -8,58 +8,34 @@
  */
 
 import { promisify } from 'util';
-import { exec } from 'child_process';
-import { Octokit } from '@octokit/rest';
+import { execFile } from 'child_process';
 import type { TelemetrySchemaObject } from '../../schema_ftr_validations/schema_to_config_schema';
 
-const execAsync = promisify(exec);
-let octokit: null | Octokit;
+const execFileAsync = promisify(execFile);
+const MAX_BUFFER = 1024 * 1024 * 128;
 let changedFilesCache: null | string[];
 
-function getOctokit() {
-  if (!process.env.GITHUB_TOKEN) {
-    throw new Error('Missing environment variable: GITHUB_TOKEN');
-  }
-  octokit =
-    octokit ??
-    new Octokit({
-      auth: process.env.GITHUB_TOKEN,
-    });
-
-  return octokit;
-}
-
-async function fetchPrChangedFiles(
-  owner = process.env.GITHUB_PR_BASE_OWNER,
-  repo = process.env.GITHUB_PR_BASE_REPO,
-  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
-): Promise<string[]> {
-  if (!owner || !repo || !prNumber) {
-    throw Error(
-      "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes"
-    );
-  }
-
-  const github = getOctokit();
-  const files = await github.paginate(github.pulls.listFiles, {
-    owner,
-    repo,
-    pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
-    per_page: 100,
+async function fetchChangedFilesSinceRef(ref: string): Promise<string[]> {
+  const { stdout } = await execFileAsync('git', ['diff', '--name-only', `${ref}...HEAD`], {
+    maxBuffer: MAX_BUFFER,
   });
 
-  return files.map(({ filename }) => filename);
+  return stdout
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
-async function getPrChangedFiles(): Promise<string[]> {
-  changedFilesCache = changedFilesCache || (await fetchPrChangedFiles());
+async function getChangedFilesSinceRef(ref: string): Promise<string[]> {
+  changedFilesCache = changedFilesCache || (await fetchChangedFilesSinceRef(ref));
   return changedFilesCache;
 }
 
 async function getUncommitedChanges(): Promise<string[]> {
-  const { stdout } = await execAsync(
-    `git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml'`,
-    { maxBuffer: 1024 * 1024 * 128 }
+  const { stdout } = await execFileAsync(
+    'git',
+    ['status', '--porcelain', '--', '.', ':!:config/node.options', ':!config/kibana.yml'],
+    { maxBuffer: MAX_BUFFER }
   );
 
   return stdout
@@ -75,14 +51,20 @@ async function getUncommitedChanges(): Promise<string[]> {
     );
 }
 
-export async function isTelemetrySchemaModified({ path }: { path: string }): Promise<boolean> {
+export async function isTelemetrySchemaModified({
+  path,
+  baselineSha,
+}: {
+  path: string;
+  baselineSha: string;
+}): Promise<boolean> {
   const modifiedFiles = await getUncommitedChanges();
   if (modifiedFiles.includes(path)) {
     return true;
   }
 
-  const prChanges = await getPrChangedFiles();
-  return prChanges.length >= 3000 || prChanges.includes(path);
+  const changedFiles = await getChangedFilesSinceRef(baselineSha);
+  return changedFiles.includes(path);
 }
 
 export async function fetchTelemetrySchemaAtRevision({
@@ -92,20 +74,9 @@ export async function fetchTelemetrySchemaAtRevision({
   path: string;
   ref: string;
 }): Promise<TelemetrySchemaObject> {
-  const github = getOctokit();
-  const res = await github.rest.repos.getContent({
-    mediaType: {
-      format: 'application/vnd.github.VERSION.raw',
-    },
-    owner: 'elastic',
-    repo: 'kibana',
-    path,
-    ref,
+  const { stdout } = await execFileAsync('git', ['show', `${ref}:${path}`], {
+    maxBuffer: MAX_BUFFER,
   });
 
-  if (!Array.isArray(res.data) && res.data.type === 'file') {
-    return JSON.parse(Buffer.from(res.data.content!, 'base64').toString()) as TelemetrySchemaObject;
-  } else {
-    throw new Error(`Error retrieving contents of ${path}, unexpected response data.`);
-  }
+  return JSON.parse(stdout) as TelemetrySchemaObject;
 }

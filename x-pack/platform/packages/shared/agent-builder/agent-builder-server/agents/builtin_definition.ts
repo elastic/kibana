@@ -7,8 +7,13 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { AgentDefinition, AgentConfiguration } from '@kbn/agent-builder-common';
+import type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from '../availability';
 
 /** Same type for now */
 export type BuiltInAgentConfiguration = AgentConfiguration;
@@ -28,6 +33,11 @@ export type BuiltInAgentDefinition = Pick<
   AgentDefinition,
   'id' | 'name' | 'description' | 'labels' | 'avatar_icon' | 'avatar_symbol' | 'avatar_color'
 > & {
+  /**
+   * Id of a registered agent type. Defaults to the chat type (empty base).
+   * The type must be registered before the agent.
+   */
+  type?: string;
   configuration:
     | BuiltInAgentConfiguration
     | ((ctx: AgentConfigContext) => MaybePromise<BuiltInAgentConfiguration>);
@@ -38,50 +48,10 @@ export type BuiltInAgentDefinition = Pick<
 };
 
 /**
- * Information exposed to the {@link AgentAvailabilityHandler}.
+ * Agent-specific aliases for the shared availability types.
+ * See {@link AvailabilityConfig} for full documentation.
  */
-export interface AgentAvailabilityContext {
-  request: KibanaRequest;
-  uiSettings: IUiSettingsClient;
-  spaceId: string;
-}
-
-/**
- * Information exposed to the {@link AgentAvailabilityHandler}.
- */
-export interface AgentAvailabilityResult {
-  /**
-   * Whether the agent is available or not.
-   */
-  status: 'available' | 'unavailable';
-  /**
-   * Optional reason for why the agent is unavailable.
-   */
-  reason?: string;
-}
-
-/**
- * Availability handler for an agent.
- */
-export type AgentAvailabilityHandler = (
-  context: AgentAvailabilityContext
-) => MaybePromise<AgentAvailabilityResult>;
-
-export interface AgentAvailabilityConfig {
-  /**
-   * handler which can be defined to add conditional availability of the agent.
-   */
-  handler: AgentAvailabilityHandler;
-  /**
-   * Cache mode for the result
-   * - global: the result will be cached globally, for all spaces
-   * - space: the result will be cached per-space
-   * - none: the result shouldn't be cached (warning: this can lead to performance issues)
-   */
-  cacheMode: 'global' | 'space' | 'none';
-  /**
-   * Optional TTL for the cached result, *in seconds*.
-   * Default to 300 seconds (5 minutes).
-   */
-  cacheTtl?: number;
-}
+export type AgentAvailabilityContext = AvailabilityContext;
+export type AgentAvailabilityResult = AvailabilityResult;
+export type AgentAvailabilityHandler = AvailabilityHandler;
+export type AgentAvailabilityConfig = AvailabilityConfig;

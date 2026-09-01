@@ -37,12 +37,14 @@ import type {
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesProjectRouting,
+  PublishesApproximation,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
   ViewMode,
   PublishesSearchSession,
   PublishesReload,
+  PublishesFetchOnlyVisible,
 } from '@kbn/presentation-publishing';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
@@ -56,6 +58,7 @@ import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
+import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 
 /** The type identifier for dashboard APIs. */
 export const DASHBOARD_API_TYPE = 'dashboard';
@@ -169,12 +172,14 @@ export type DashboardApi = CanExpandPanels &
   PublishesSettings &
   PublishesUnifiedSearch &
   PublishesProjectRouting &
+  PublishesApproximation &
   PublishesViewMode &
   PublishesWritableViewMode &
   PublishesEditablePauseFetch &
   TrackContentfulRender &
   TracksOverlays &
-  PublishesOnSave & {
+  PublishesOnSave &
+  PublishesFetchOnlyVisible & {
     /*
      * Emits on any dashboard state change
      *
@@ -216,8 +221,9 @@ export type DashboardApi = CanExpandPanels &
     setHighlightPanelId: (id: string | undefined) => void;
     setQuery: (query?: Query | undefined) => void;
     setProjectRouting: (projectRouting?: ProjectRouting) => void;
+    setEsqlApproximation: (esqlApproximation: boolean) => void;
     setScrollToPanelId: (id: string | undefined) => void;
-    setSettings: (settings: DashboardSettings) => void;
+    setSettings: (settings: Partial<DashboardSettings>) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     setState: (state: DashboardState) => void;
@@ -249,7 +255,9 @@ export type UserActivity =
   | { type: ActivityType; start: number; end?: undefined }
   | { type: ActivityType; start?: undefined; end: number };
 
-export interface DashboardInternalApi {
+export type DashboardInternalApi = ReturnType<
+  typeof initializeUnsavedChangesManager
+>['internalApi'] & {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
@@ -258,7 +266,7 @@ export interface DashboardInternalApi {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
-}
+};
 
 export interface DashboardUser {
   uid: string;

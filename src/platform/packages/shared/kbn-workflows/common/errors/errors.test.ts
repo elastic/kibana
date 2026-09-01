@@ -44,4 +44,11 @@ describe('workflow error classes', () => {
       expect(error.message).toBe(expectedMessage);
     }
   );
+
+  it.each([new WorkflowDisabledError('wf-123'), new WorkflowNotFoundError('wf-123')])(
+    '%s is marked as a user error',
+    (error) => {
+      expect(error).toHaveProperty('isUserError', true);
+    }
+  );
 });

@@ -177,4 +177,59 @@ describe('NamespaceCustomizationSection', () => {
     expect(getByTestId('epmSettings.namespaceCustomizationApplying')).toBeInTheDocument();
     expect(queryByTestId('epmSettings.namespaceCustomizationSave')).not.toBeInTheDocument();
   });
+
+  describe('ILM policy removal warning', () => {
+    const removePill = (renderResult: ReturnType<typeof renderSection>, namespace: string) => {
+      const combobox = renderResult.getByTestId('epmSettings.namespaceCustomizationInput');
+      const pill = within(combobox)
+        .getAllByTestId('euiComboBoxPill')
+        .find((p) => p.textContent?.includes(namespace))!;
+      return userEvent.click(within(pill).getByRole('button'));
+    };
+
+    it('does not show when no namespace is removed', () => {
+      const { queryByText } = renderSection({
+        savedNamespaces: ['prod'],
+        namespaceCustomizationSettings: { prod: { ilm_policy: 'my-policy' } },
+      });
+      expect(queryByText('ILM policy will be removed')).not.toBeInTheDocument();
+    });
+
+    it('does not show when the removed namespace has no ilm_policy', async () => {
+      const result = renderSection({
+        savedNamespaces: ['prod'],
+        namespaceCustomizationSettings: {},
+      });
+      await removePill(result, 'prod');
+      expect(result.queryByText('ILM policy will be removed')).not.toBeInTheDocument();
+    });
+
+    it('shows a warning naming the namespace when removing one with an ilm_policy', async () => {
+      const result = renderSection({
+        savedNamespaces: ['prod'],
+        namespaceCustomizationSettings: { prod: { ilm_policy: 'my-policy' } },
+      });
+      await removePill(result, 'prod');
+      expect(result.getByText('ILM policy will be removed')).toBeInTheDocument();
+      expect(
+        result.getByText(
+          (_, node) =>
+            node?.textContent ===
+            'Removing prod will also clear the ILM policy assigned to that namespace.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('hides again after discarding the removal', async () => {
+      const result = renderSection({
+        savedNamespaces: ['prod'],
+        namespaceCustomizationSettings: { prod: { ilm_policy: 'my-policy' } },
+      });
+      await removePill(result, 'prod');
+      expect(result.getByText('ILM policy will be removed')).toBeInTheDocument();
+
+      await userEvent.click(result.getByTestId('epmSettings.namespaceCustomizationDiscard'));
+      expect(result.queryByText('ILM policy will be removed')).not.toBeInTheDocument();
+    });
+  });
 });

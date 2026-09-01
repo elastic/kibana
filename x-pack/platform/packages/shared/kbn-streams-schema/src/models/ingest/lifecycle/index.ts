@@ -139,6 +139,12 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
+// Maps Elasticsearch `_tier` field values to lifecycle phase names. DSL only allocates to hot or frozen.
+export const TIER_TO_PHASE: Record<string, Extract<PhaseName, 'hot' | 'frozen'>> = {
+  data_hot: 'hot',
+  data_frozen: 'frozen',
+};
+
 export interface DownsampleStep {
   after: string;
   fixed_interval: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import type { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import type {
   PrivateLocation,

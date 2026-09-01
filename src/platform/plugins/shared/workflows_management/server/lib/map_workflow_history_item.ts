@@ -8,22 +8,36 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 
 import { WORKFLOW_CHANGE_HISTORY_SYSTEM_USER } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowHistoryItem } from '../../common/lib/workflow_change_history/types';
 
-export const mapWorkflowHistoryItem = (document: ChangeHistoryDocument): WorkflowHistoryItem => ({
+export const mapWorkflowHistoryItem = (
+  document: ChangeHistoryDocument,
+  userProfilesById: Map<string, UserProfile> = new Map()
+): WorkflowHistoryItem => ({
   timestamp: document['@timestamp'],
   id: document.event.id,
   user: document.user.name
     ? {
-        name: document.user.name,
+        name: resolveUserName(document.user, userProfilesById),
         ...(document.user.id ? { profileId: document.user.id } : {}),
       }
     : { name: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER },
   action: document.event.action as WorkflowHistoryItem['action'],
   ...(document.object.sequence != null ? { version: document.object.sequence } : {}),
+  ...(document.event.reason ? { comment: document.event.reason } : {}),
   workflow: {
     yaml: typeof document.object.snapshot.yaml === 'string' ? document.object.snapshot.yaml : '',
   },
 });
+
+function resolveUserName(
+  user: ChangeHistoryDocument['user'],
+  userProfilesById: Map<string, UserProfile>
+): string {
+  const profile = user.id ? userProfilesById.get(user.id) : undefined;
+
+  return profile?.user.full_name || user.name;
+}

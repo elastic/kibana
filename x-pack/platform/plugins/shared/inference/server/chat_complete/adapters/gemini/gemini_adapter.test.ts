@@ -93,6 +93,47 @@ describe('geminiAdapter', () => {
       });
     });
 
+    it('forwards `maxContentLength` for buffered (invokeAIRaw) requests', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeAIRaw',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards `maxContentLength` for streaming (invokeStream) requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too.
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeStream',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
     it('correctly format tools', () => {
       geminiAdapter
         .chatComplete({
@@ -116,6 +157,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     type: 'string',
                     description: 'foo',
+                  },
+                  bar: {
+                    type: 'string',
+                    description: 'bar',
+                    enum: ['a', 'b'],
                   },
                 },
                 required: ['foo'],
@@ -146,7 +192,11 @@ describe('geminiAdapter', () => {
                 properties: {
                   foo: {
                     description: 'foo',
-                    enum: [],
+                    type: 'string',
+                  },
+                  bar: {
+                    description: 'bar',
+                    enum: ['a', 'b'],
                     format: 'enum',
                     type: 'string',
                   },

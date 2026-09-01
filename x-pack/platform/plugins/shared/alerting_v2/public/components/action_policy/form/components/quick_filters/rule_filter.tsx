@@ -21,6 +21,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -28,7 +29,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
 import { mergeRuleIdsIntoMatcher, parseRuleIdsFromMatcher } from '../../matcher_quick_filter_utils';
 import {
-  ALERT_KIND_FILTER,
+  ALERT_KIND_RULE_LIST_FILTER,
   POPOVER_PANEL_STYLE,
   SELECTABLE_LIST_PROPS,
   type QuickFiltersProps,
@@ -39,14 +40,7 @@ interface RuleSelectableMeta {
   rule: RuleResponse | null;
 }
 
-const kindLabel = (kind: RuleResponse['kind']): string =>
-  kind === 'alert'
-    ? i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.kind.alert', {
-        defaultMessage: 'Alert',
-      })
-    : i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.kind.signal', {
-        defaultMessage: 'Signal',
-      });
+const kindLabel = (kind: RuleResponse['kind']): string => RULE_KIND_LABELS[kind];
 
 export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,7 +53,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     perPage: 50,
     search: debouncedSearch || undefined,
     enabled: isOpen,
-    filter: ALERT_KIND_FILTER,
+    filter: ALERT_KIND_RULE_LIST_FILTER,
   });
   const items = data?.items;
 
@@ -156,7 +150,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       panelStyle={POPOVER_PANEL_STYLE}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen((o) => !o)}
           isSelected={isOpen}

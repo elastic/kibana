@@ -15,7 +15,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 
 export const CasesRoutes = () => {
   return (
-    <PluginTemplateWrapper>
+    <PluginTemplateWrapper paddingSize="none">
       <TrackApplicationView viewId="case">
         <Cases />
       </TrackApplicationView>

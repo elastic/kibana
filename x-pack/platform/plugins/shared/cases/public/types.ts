@@ -36,6 +36,7 @@ import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-taggin
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -49,8 +50,6 @@ import type { CasesMetrics, CasesFindResponseUI } from '../common/ui';
 import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
-import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type {
   CasesByAlertIDRequest,
@@ -108,6 +107,7 @@ export interface CasesPublicStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   toastNotifications: IToasts;
+  agentBuilder?: AgentBuilderPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
@@ -125,8 +125,6 @@ export interface RenderAppProps {
   pluginsStart: CasesPublicStartDependencies;
   storage: Storage;
   kibanaVersion: string;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
@@ -138,6 +136,8 @@ export interface CasesPublicStart {
   config: {
     templatesEnabled: boolean;
     attachmentsEnabled: boolean;
+    chatEnabled: boolean;
+    runWorkflowsEnabled: boolean;
     casesRedesign: {
       list: boolean;
       details: boolean;

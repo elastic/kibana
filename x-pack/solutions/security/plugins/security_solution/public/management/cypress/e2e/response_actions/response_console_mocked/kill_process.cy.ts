@@ -57,7 +57,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       cy.wait('@kill-process').then(() => {
         sendActionResponse(killProcessRequestResponse);
       });
-      cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+      cy.contains('Action completed successfully', { timeout: 120000 }).should('exist');
     });
   });
 });

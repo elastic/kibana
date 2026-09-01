@@ -11,13 +11,14 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-http-server",
+    "@kbn/core-http-browser",
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/cps-utils",
     "@kbn/es-query",
-    "@kbn/i18n-react",
     "@kbn/cps-common",
-    "@kbn/core-security-server",
+    "@kbn/cloud-plugin",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",

@@ -1,5 +1,8 @@
 {
-  "sha1": "7f8ebe49ef61bc4f17e512a54445e0c4b0ed04a9",
+  "sha1": "23b69ec1bf47dac3552155cdac63620369e477dd",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "8fe9df63e0d68b2-2d457382a48710c",
@@ -8,8 +11,34 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/global.setup.ts",
-        "line": 13,
-        "column": 16
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "7a42b236e507511-6de323acbc10cee",
+      "title": "Date range picker presets persistence persists save and delete across reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
+        "line": 20,
+        "column": 50
+      }
+    },
+    {
+      "id": "7a42b236e507511-25901aabcbb1c0f",
+      "title": "Date range picker presets persistence does not offer deletion of quick ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
+        "line": 43,
+        "column": 22
       }
     },
     {
@@ -21,8 +50,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_crud.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 26,
+        "column": 64
       }
     },
     {
@@ -34,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
-        "line": 41,
-        "column": 16
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -47,8 +76,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
-        "line": 41,
-        "column": 16
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -60,8 +89,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
-        "line": 41,
-        "column": 16
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -73,8 +102,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_readonly.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 26,
+        "column": 64
       }
     },
     {
@@ -86,8 +115,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_smoke.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 26,
+        "column": 13
       }
     }
   ]

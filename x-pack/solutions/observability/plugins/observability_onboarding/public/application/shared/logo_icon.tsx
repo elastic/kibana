@@ -44,11 +44,14 @@ const SUPPORTED_LOGOS = [
   'windows',
   'apple_black',
   'apple_white',
-  'slack',
-  'jira',
-  'confluence',
-  'salesforce',
-  'splunk',
+  'supabase',
+  'vercel_black',
+  'vercel_white',
+  'apm',
+  'synthetics',
+  'auto_import',
+  'upload_file',
+  'custom_logs',
 ] as const;
 
 export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];
@@ -68,13 +71,17 @@ export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   prometheus: 'logoPrometheus',
   docker: 'logoDocker',
   windows: 'logoWindows',
-  slack: 'logoSlack',
   apache: 'logoApache',
   mysql: 'logoMySQL',
   redis: 'logoRedis',
   rabbitmq: 'logoRabbitmq',
   couchbase: 'logoCouchbase',
   logstash: 'logoLogstash',
+  apm: 'apmApp',
+  synthetics: 'logoUptime',
+  auto_import: 'download',
+  upload_file: 'addDataApp',
+  custom_logs: 'filebeatApp',
 };
 
 export function useIconForLogo(logo?: SupportedLogo): string | undefined {
@@ -120,7 +127,7 @@ export function LogoIcon({
       <EuiAvatar
         color={color}
         iconType={resolvedIconType}
-        name="logoIcon"
+        name=""
         size={size}
         type={avatarType}
         className={className}

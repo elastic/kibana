@@ -51,6 +51,7 @@ export type {
   CheckUserProfilesPrivilegesResponse,
   CasesActions,
   CheckPrivileges,
+  AiIndexActions,
   AlertingActions,
   AlertsActions,
   AppActions,
@@ -66,6 +67,7 @@ export type {
   UserProfileServiceStart,
   UserProfileSuggestParams,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
 } from './src/user_profile';

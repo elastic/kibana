@@ -37,7 +37,15 @@ export const suggestionsApi = ({
   preferredChartType,
   preferredVisAttributes,
 }: SuggestionsApiProps) => {
-  const initialContext = context;
+  const initialContext =
+    'textBasedColumns' in context && context.textBasedColumns
+      ? {
+          ...context,
+          textBasedColumns: context.textBasedColumns.filter(
+            (col) => !col.meta?.esMeta?.approximation
+          ),
+        }
+      : context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {

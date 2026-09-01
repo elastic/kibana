@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import createSagaMiddleware from 'redux-saga';
 import { rootReducer } from '../../synthetics/state/root_reducer';
 import { rootEffect } from '../../synthetics/state/root_effect';

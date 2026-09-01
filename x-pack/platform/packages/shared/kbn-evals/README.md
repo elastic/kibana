@@ -6,7 +6,10 @@ Offline evaluation framework for LLM-based workflows in Kibana. Requires the `ev
 
 - **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
 - **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
-- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand)
+- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
+- **UI** - the "New experiment" form on the Experiments tab runs experiments server-side via Kibana Workflows, no CLI required (see [From the UI](../../../plugins/shared/evals/README.md#from-the-ui))
+- **Agent Builder** - the `eval-experiment-authoring` skill composes, previews, saves, and runs experiments from a chat (see [From Agent Builder](../../../plugins/shared/evals/README.md#from-agent-builder))
+- **Workflow YAML** - a version-controlled experiment workflow file, run via Workflows Management (see [From YAML](../../../plugins/shared/evals/README.md#from-yaml))
 
 ---
 
@@ -41,16 +44,17 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### Key flags
 
-| Flag                | Description                                      |
-| ------------------- | ------------------------------------------------ |
-| `--suite <id>`      | Suite to run (interactive prompt if omitted)     |
-| `--model <id>`      | Connector/model to evaluate (comma-separated OK) |
-| `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
-| `--grep <pattern>`  | Filter tests by name                             |
-| `--repetitions <n>` | Repeat each example N times                      |
-| `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
-| `--skip-init`       | Skip config and connector setup                  |
-| `--dry-run`         | Print configuration and exit                     |
+| Flag                | Description                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| `--suite <id>`      | Suite to run (interactive prompt if omitted)                           |
+| `--model <id>`      | Connector/model to evaluate (comma-separated OK)                       |
+| `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
+| `--grep <pattern>`  | Filter tests by name                                                   |
+| `--repetitions <n>` | Repeat each example N times                                            |
+| `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
+| `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
+| `--skip-init`       | Skip config and connector setup                                        |
+| `--dry-run`         | Print configuration and exit                                           |
 
 #### EIS connector setup
 
@@ -80,15 +84,15 @@ node scripts/evals start --suite agent-builder --repetitions 3
 #### Advanced options
 
 <details>
-<summary>LiteLLM setup</summary>
+<summary>OpenRouter setup</summary>
 
-If you have access to the internal LiteLLM gateway:
+If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 
 ```bash
-bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
+bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This logs you in via SSO, generates a virtual key, and exports `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_AI_CONNECTORS`.
 
 </details>
 
@@ -114,19 +118,6 @@ This wraps `node scripts/scout.js start-server --arch stateful --domain classic 
 node scripts/edot_collector.js
 # Override target ES cluster:
 ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
-```
-
-</details>
-
-<details>
-<summary>Phoenix executor (backward compatibility)</summary>
-
-The Phoenix-backed executor is maintained in [`@kbn/evals-phoenix-executor`](../kbn-evals-phoenix-executor/) for backward compatibility. That package is the source of truth for Phoenix integration.
-
-To switch:
-
-```bash
-KBN_EVALS_EXECUTOR=phoenix node scripts/evals run --suite <id>
 ```
 
 </details>
@@ -197,8 +188,18 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:<model-group>`        | Select model(s) to evaluate (required -- evals skip without this) |
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
+| `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
-Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
+
+PRs touching the eval framework get `evals:smoke-tests` automatically
+([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
+`evals:skip-smoke-tests` to skip it.
+
+When the labels match, PR CI triggers the dedicated
+[`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
+surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
+results and triage.
 
 ---
 
@@ -206,27 +207,55 @@ Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>`
 
 Run a suite on any branch without a PR:
 
-1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
+1. Open [kibana-evals-on-demand-llm-evals](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 
-| Variable                  | Required           | Description                                                                 |
-| ------------------------- | ------------------ | --------------------------------------------------------------------------- |
-| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`                                           |
-| `EVAL_MODEL_GROUPS`       | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2` |
-| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                            |
-| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector override                                             |
-| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` in `evals.suites.json`                               |
-| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another job (skips build step)                    |
-| `EVAL_GREP`               | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)       |
-| `EVALUATION_REPETITIONS`  | no                 | Repeat each example N times (same as `--repetitions`)                       |
+| Variable                          | Required           | Description                                                                                                  |
+| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
+| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
+| `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
+| `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
+| `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
+| `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
+| `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
-Example:
+Example (single suite):
 
 ```text
 EVAL_SUITE_ID=agent-builder
 EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
 EVAL_INCLUDE_EIS_MODELS=1
+```
+
+Example (multiple suites):
+
+```text
+EVAL_SUITE_ID=agent-builder,observability-ai,streams
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+#### Where the triage summary is sent (on-demand)
+
+On-demand triage routing is "branch OR PR" (never both), plus an independent Slack opt-in:
+
+- Run a **branch**: set the New Build **Branch** to branch (e.g. `main`). No PR comment is posted.
+- Run a **PR**: set the New Build **Branch** to `refs/pull/<N>/head` (e.g. `refs/pull/123/head`), Commit `HEAD`.
+- **Slack** is independent: set `EVAL_SLACK_NOTIFICATION_CHANNEL` to send the triage to a Slack channel.
+
+Example (PR run + Slack)
+Set Branch to `refs/pull/<N>/head`, Commit `HEAD`, then under Options -> Environment Variables:
+
+```text
+EVAL_SUITE_ID=observability-ai
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
 ---
@@ -246,6 +275,27 @@ export default createPlaywrightEvalsConfig({ testDir: __dirname });
 ```
 
 This auto-discovers connectors and creates one Playwright project per model so the same test file runs against each.
+
+#### `workers` — parallelising spec files
+
+By default Playwright runs all spec files in the suite serially (`workers: 1`). If your spec files are independent you can run several in parallel:
+
+```ts
+export default createPlaywrightEvalsConfig({
+  testDir: __dirname,
+  workers: 3, // run up to 3 spec files simultaneously
+});
+```
+
+Allowed values are `1` (default), `2`, or `3`.
+
+**Before raising `workers`, verify that every spec file in the suite is isolation-safe:**
+
+hints:
+
+1. **Do two specs write to the same named index / data stream / saved-object namespace?** If yes, their cleanup windows can overlap and corrupt each other's data.
+2. **Do any tests assert hard-coded expected values that depend on the index being empty of other fixtures?** If yes, a concurrently seeding spec will invalidate those assertions.
+3. **Is `beforeAll` cleanup scoped to this run's resources only?** Cleanup via document IDs returned from the current `beforeAll` is safe; `deleteByQuery` on a shared alias without a run-specific filter is not.
 
 ### Writing evaluation tests
 
@@ -274,6 +324,7 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
       {
         name: 'equals',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output, expected }) => ({
           score: output?.content === expected?.content ? 1 : 0,
           metadata: { output: output?.content, expected: expected?.content },
@@ -283,6 +334,30 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
   );
 });
 ```
+
+`direction` sets the optimization goal for this evaluator's score:
+
+| Value      | When to use                          |
+| ---------- | ------------------------------------ |
+| `maximize` | Higher is better (quality, accuracy) |
+| `minimize` | Lower is better (latency)            |
+| `neutral`  | No clear better direction            |
+
+### Tagging datasets
+
+Datasets can declare `tags` and a `maturity` level, which the dataset list in Kibana filters on. Declaring them alongside the examples keeps them current on every run:
+
+```ts
+const dataset = {
+  name: 'my-dataset',
+  description: 'my-description',
+  tags: ['agent-builder', 'esql'],
+  maturity: 'golden', // 'raw' | 'cleaned' | 'golden'
+  examples: [{ input: { content: 'Hi' }, output: { content: 'Hey' } }],
+};
+```
+
+Tags are lowercased and deduplicated when stored, so `ESQL` and `esql` are the same tag. Each tag must start with a letter or number and may otherwise contain letters, numbers and `: . _ -`; a tag with a space or comma in it fails the upsert with a 400, so keep them slug-like (`team:obs-ai`, `esql`). Leaving either field out preserves what the dataset already has, so a suite that doesn't declare them will not wipe tags curated in the UI.
 
 ### Typing datasets
 
@@ -318,7 +393,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
 - **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
-- **Code evaluators** -- any inline `{ name, kind: 'CODE', evaluate }` object
+- **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.
 

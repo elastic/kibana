@@ -26,6 +26,7 @@ export default createTestConfig({
     'serverless.observability.tier=logs_essentials',
   ],
   kbnServerArgs: [
+    '--xpack.fleet.productVersionsApiTimeoutMs=5000',
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller

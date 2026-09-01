@@ -146,6 +146,9 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
    * Returns HTTP authentication scheme that provider uses within `Authorization` HTTP header that
    * it attaches to all successfully authenticated requests to Elasticsearch or `null` in case
    * provider doesn't attach any additional `Authorization` HTTP headers.
+   *
+   * Not to be confused with `AuthenticatedUser.http_authentication_scheme`, which describes the
+   * scheme used on the inbound client request instead of the outbound request to Elasticsearch.
    */
   abstract getHTTPAuthenticationScheme(): string | null;
 
@@ -198,6 +201,7 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
         this.options.isElasticCloudDeployment() &&
         authenticationInfo.authentication_realm.type === 'saml' &&
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
+      http_authentication_scheme: null,
     } as AuthenticatedUser);
   }
 
@@ -216,6 +220,8 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       // We should probably refactor audit logs to avoid using `roles` property for minimally
       // authenticated users and then remove this property altogether and throw for its access.
       roles: [],
+      // Minimally-authenticated users are authenticated via session cookie, not HTTP credentials.
+      http_authentication_scheme: null,
     };
 
     return deepFreeze(

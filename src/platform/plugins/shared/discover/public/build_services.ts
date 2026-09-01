@@ -71,13 +71,15 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
+import type { ProfileStateRegistry } from '../common/context_awareness';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
-  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
+  DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
+import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
 
 /**
  * Location state of internal Discover history instance
@@ -95,7 +97,7 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
-  getEmbeddableTransformsEnabled: () => boolean;
+  getDataTableJsonViewEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -117,6 +119,7 @@ export interface DiscoverServices {
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
+  initialTabStateService: InitialTabStateService;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
@@ -157,12 +160,14 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
+  feedback?: DiscoverStartPlugins['feedback'];
 }
 
 export const buildServices = ({
@@ -176,6 +181,7 @@ export const buildServices = ({
   scopedHistory,
   urlTracker,
   profilesManager,
+  profileStateRegistry,
   ebtManager,
   setHeaderActionMenu = noop,
 }: {
@@ -189,6 +195,7 @@ export const buildServices = ({
   scopedHistory?: ScopedHistory;
   urlTracker: UrlTracker;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
@@ -213,8 +220,8 @@ export const buildServices = ({
       getCascadeLayoutEnabled: () =>
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () => true,
-      getEmbeddableTransformsEnabled: () =>
-        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
+      getDataTableJsonViewEnabled: () =>
+        core.featureFlags.getBooleanValue(DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -225,6 +232,7 @@ export const buildServices = ({
     filterManager: plugins.data.query.filterManager,
     history,
     getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
+    initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
@@ -263,6 +271,7 @@ export const buildServices = ({
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
+    profileStateRegistry,
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
@@ -272,5 +281,6 @@ export const buildServices = ({
       core.application
     ),
     logger: context.logger.get(),
+    feedback: plugins.feedback,
   };
 };

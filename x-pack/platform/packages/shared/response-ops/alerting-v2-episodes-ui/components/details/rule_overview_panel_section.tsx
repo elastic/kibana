@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import {
@@ -44,28 +50,26 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
     return (
-      <>
-        <EuiSpacer size="l" />
-        <EuiLoadingSpinner
-          size="m"
-          data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionLoading"
-        />
-      </>
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
+        data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionLoading"
+      >
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} size="s" />
+      </EuiPanel>
     );
   }
-
   if (isEpisodeError || isRuleError(ruleState)) {
     return (
-      <>
-        <EuiSpacer size="l" />
-        <EuiEmptyPrompt
-          data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionError"
-          iconType="alert"
-          color="danger"
-          titleSize="xs"
-          title={<h3>{i18n.RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE}</h3>}
-        />
-      </>
+      <EuiEmptyPrompt
+        data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionError"
+        iconType="warning"
+        color="danger"
+        titleSize="xs"
+        title={<h3>{i18n.RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE}</h3>}
+      />
     );
   }
 
@@ -80,12 +84,9 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
   }
 
   return (
-    <>
-      <EuiSpacer size="l" />
-      <AlertEpisodeRuleOverviewPanel
-        rule={ruleState.rule}
-        ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(resolvedRuleId))}
-      />
-    </>
+    <AlertEpisodeRuleOverviewPanel
+      rule={ruleState.rule}
+      ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(resolvedRuleId))}
+    />
   );
 };

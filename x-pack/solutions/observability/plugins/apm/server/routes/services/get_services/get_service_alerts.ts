@@ -15,6 +15,7 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import type { ServiceAlertsResponse } from '@kbn/apm-api-shared';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
@@ -22,11 +23,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
-
-export type ServiceAlertsResponse = Array<{
-  serviceName: string;
-  alertsCount: number;
-}>;
 
 export async function getServicesAlerts({
   apmAlertsClient,

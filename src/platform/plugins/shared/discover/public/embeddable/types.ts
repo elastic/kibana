@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   EmbeddableApiContext,
   CanOverrideHoverActions,
   HasEditCapabilities,
@@ -19,6 +20,7 @@ import type {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDescription,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
   PublishesSavedObjectId,
   PublishesWritableTitle,
@@ -61,6 +63,8 @@ export type SearchEmbeddablePublicState = Pick<
   | 'viewMode'
   | 'grid'
   | 'density'
+  | 'documentsDisplayMode'
+  | 'jsonModeSettings'
 > & {
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
@@ -102,10 +106,12 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
+  PublishesEsqlUsage &
   HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
   PublishesSelectedTabId &
+  CanCancelRequests &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &

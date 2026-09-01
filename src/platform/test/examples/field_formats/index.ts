@@ -11,6 +11,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: DELETE. Formatted output is field-formats unit coverage
+ * (src/platform/plugins/shared/field_formats/common/converters/bytes.test.ts and
+ * FieldFormat.convertToText). This example plugin only renders deserialize().convertToText().
+ */
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

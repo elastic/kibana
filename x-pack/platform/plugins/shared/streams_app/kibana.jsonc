@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
+  "owner": "@elastic/streams-ui",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -38,7 +38,6 @@
       "evals"
     ],
     "requiredBundles": [
-      "agentBuilder",
       "discover",
       "esql",
       "kibanaReact",

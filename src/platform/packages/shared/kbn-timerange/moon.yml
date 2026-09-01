@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/timerange'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/timerange'
   description: Moon project for @kbn/timerange
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/streams-ui'
   sourceRoot: src/platform/packages/shared/kbn-timerange
 dependsOn:
   - '@kbn/datemath'

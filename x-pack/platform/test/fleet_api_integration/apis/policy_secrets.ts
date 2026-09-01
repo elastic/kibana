@@ -782,6 +782,117 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('clearing a secret var removes the reference and deletes the secret', () => {
+      let testAgentPolicy: any;
+      let fleetServerAgentPolicy: any;
+      let packagePolicyWithSecrets: any;
+      let multiSecretIds: string[];
+
+      before(async () => {
+        const createFleetServerAgentPolicyRes = await createFleetServerAgentPolicy();
+        fleetServerAgentPolicy = createFleetServerAgentPolicyRes.fleetServerAgentPolicy;
+
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '8.10.0');
+        await callFleetSetup();
+
+        testAgentPolicy = await createAgentPolicy();
+        packagePolicyWithSecrets = await createPackagePolicyWithSecrets(testAgentPolicy.id);
+        multiSecretIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value.ids;
+
+        // Clear the optional multi-secret var (null = clear, not [])
+        const updatedPolicy = createdPolicyToUpdatePolicy(packagePolicyWithSecrets);
+        updatedPolicy.vars.package_var_multi_secret.value = null;
+
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyWithSecrets.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updatedPolicy)
+          .expect(200);
+      });
+
+      after(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
+      });
+
+      it('removes the cleared ids from secret_references on the package policy SO', async () => {
+        const policy = await getPackagePolicyById(packagePolicyWithSecrets.id);
+        // multi-secret ids must be absent; other 3 remain
+        for (const id of multiSecretIds) {
+          expect(policy.secret_references.map((r: any) => r.id)).to.not.contain(id);
+        }
+        expect(policy.secret_references.length).to.eql(3);
+      });
+
+      it('deletes the cleared secrets from the .fleet-secrets index', async () => {
+        // Deletion is async — retry until the expected count is reached
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          searchRes = await getSecrets(multiSecretIds);
+          if (searchRes.hits.hits.length === 0) break;
+        }
+        expect(searchRes!.hits.hits.length).to.eql(0);
+      });
+
+      it('omits the cleared ids from secret_references in the compiled agent policy', async () => {
+        const fullPolicy = await getFullAgentPolicyById(testAgentPolicy.id);
+        for (const id of multiSecretIds) {
+          expect(fullPolicy.secret_references.map((r: any) => r.id)).to.not.contain(id);
+        }
+      });
+    });
+
+    describe('disabling an input removes its secrets from the compiled agent policy', () => {
+      let testAgentPolicy: any;
+      let fleetServerAgentPolicy: any;
+      let packagePolicyWithSecrets: any;
+      let inputVarId: string;
+      let streamVarId: string;
+
+      before(async () => {
+        const createFleetServerAgentPolicyRes = await createFleetServerAgentPolicy();
+        fleetServerAgentPolicy = createFleetServerAgentPolicyRes.fleetServerAgentPolicy;
+
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '8.10.0');
+        await callFleetSetup();
+
+        testAgentPolicy = await createAgentPolicy();
+        packagePolicyWithSecrets = await createPackagePolicyWithSecrets(testAgentPolicy.id);
+        inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
+        streamVarId = packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.id;
+
+        // Disable the only input
+        const updatedPolicy = createdPolicyToUpdatePolicy(packagePolicyWithSecrets);
+        updatedPolicy.inputs[0].enabled = false;
+
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyWithSecrets.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updatedPolicy)
+          .expect(200);
+      });
+
+      after(async () => {
+        await cleanupAgents();
+        await cleanupPolicies();
+        await cleanupSecrets();
+      });
+
+      it('keeps the disabled input secret ids in secret_references on the package policy SO', async () => {
+        const policy = await getPackagePolicyById(packagePolicyWithSecrets.id);
+        expect(policy.secret_references.map((r: any) => r.id)).to.contain(inputVarId);
+        expect(policy.secret_references.map((r: any) => r.id)).to.contain(streamVarId);
+      });
+
+      it('omits the disabled input secret ids from secret_references in the compiled agent policy', async () => {
+        const fullPolicy = await getFullAgentPolicyById(testAgentPolicy.id);
+        expect(fullPolicy.secret_references.map((r: any) => r.id)).to.not.contain(inputVarId);
+        expect(fullPolicy.secret_references.map((r: any) => r.id)).to.not.contain(streamVarId);
+      });
+    });
+
     describe('copy agent policy with secrets', () => {
       let testAgentPolicy: any;
       let fleetServerAgentPolicy: any;
@@ -1157,6 +1268,46 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           upgradedPolicy.inputs[0].streams[0].vars.stream_var_non_secret.value.isSecretRef
         ).to.eql(true);
+      });
+
+      it('should clean up secrets no longer referenced after package upgrade removes a var', async () => {
+        // `package_var_multi_secret` only exists in package version 1.0.0. Upgrading to 1.1.0
+        // drops it from the package spec, so the package policy update triggered by the upgrade
+        // goes through packagePolicyService.bulkUpdate -> deleteSecretsIfNotReferenced ->
+        // findPackagePoliciesUsingSecrets, which queries by the two now-orphaned secret ids.
+        const agentPolicy = await createAgentPolicy();
+
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_4', '8.12.0');
+        await callFleetSetup();
+
+        const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
+        const oldPackageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value
+          .ids as string[];
+
+        await supertest
+          .post('/api/fleet/epm/packages/secrets/1.1.0')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packagePolicyIds: [packagePolicyWithSecrets.id],
+          })
+          .expect(200);
+
+        // Secret deletion is async — retry until the orphaned secrets are gone.
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          searchRes = await getSecrets(oldPackageVarMultiIds);
+          if (searchRes.hits.hits.length === 0) break;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        expect(searchRes!.hits.hits.length).to.eql(0);
       });
 
       it('should store secrets if additional fleet server does not meet minimum version, but is unenrolled', async () => {

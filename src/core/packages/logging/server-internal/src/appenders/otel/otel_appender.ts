@@ -19,16 +19,23 @@ import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/loggi
 import {
   ROOT_CONTEXT,
   TraceFlags,
+  metrics,
   trace,
   type Context,
   type Attributes,
   type AttributeValue,
+  type MeterProvider,
 } from '@opentelemetry/api';
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { resources } from '@elastic/opentelemetry-node/sdk';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
-import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-server';
+import type {
+  OtelAppenderConfig,
+  OtelAppenderPluginConfig,
+  OtelAttributesTransform,
+  LayoutConfigType,
+} from '@kbn/core-logging-server';
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
@@ -41,6 +48,34 @@ import {
 } from './otel_tls';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
+
+const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { then?: unknown }).then === 'function';
+
+/** The value half of a raw resource-attribute entry: an AttributeValue, or a promise of one. */
+type ResolvedResourceValue = ReturnType<resources.Resource['getRawAttributes']>[number][1];
+
+/**
+ * Captures the requested resource-attribute values from the resolved attribute map so they can be
+ * re-emitted as per-record log attributes. Async-detected values (e.g. host.id from getMachineId) are
+ * skipped — per-record attributes must be resolved at emit time. Returns an empty object when nothing
+ * is requested/found.
+ */
+const capturePromotedResourceAttributes = (
+  resolved: ReadonlyMap<string, unknown>,
+  keys?: string[]
+): Attributes => {
+  const promoted: Attributes = {};
+  for (const key of keys ?? []) {
+    const value = resolved.get(key);
+    if (value != null && !isPromiseLike(value)) {
+      promoted[key] = value as AttributeValue;
+    }
+  }
+  return promoted;
+};
 
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
@@ -119,9 +154,16 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
  * - When using the JSON layout, `meta` is already part of the structured body,
  *   so `log.meta` is omitted from attributes to avoid duplication.
  */
-const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes => {
+const toAttributes = (
+  record: LogRecord,
+  includeLogMeta: boolean,
+  promotedAttributes?: Attributes
+): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
+    // Resource attributes promoted to per-record attributes (captured once at construction). Seeded
+    // first so the field transforms below apply to them like any other attribute.
+    ...promotedAttributes,
   };
 
   if (record.transactionId) {
@@ -194,6 +236,10 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
+    includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // Resource-attribute keys to also emit as per-record log attributes.
+    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
     ssl: schema.maybe(
       schema.object(
         {
@@ -229,25 +275,100 @@ export class OtelAppender implements DisposableAppender {
     ),
   });
 
+  /**
+   * {@link OtelAppender.configSchema} plus the plugin-only options of
+   * {@link OtelAppenderPluginConfig}; used only by the {@link LoggingServiceSetup.configure}
+   * validation path, never wired into YAML config validation.
+   */
+  public static runtimeConfigSchema = OtelAppender.configSchema.extends({
+    transformAttributes: schema.maybe(
+      schema.any({
+        validate: (value) => {
+          if (typeof value !== 'function') {
+            return 'expected an attribute-transform function (attrs: Attributes) => Attributes';
+          }
+        },
+      })
+    ),
+    dropResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+  });
+
   private readonly loggerProvider: LoggerProvider;
   private readonly logger: Logger;
   private readonly layout: Layout;
   /** True when using JSON layout: the full LogRecord is sent as `body.structured`. */
   private readonly useStructuredBody: boolean;
+  private readonly transformAttributes?: OtelAttributesTransform;
+  private readonly promotedAttributes: Attributes;
+  private disposed = false;
 
-  constructor(config: OtelAppenderConfig) {
-    const exporter = createExporter(config);
+  constructor(config: OtelAppenderPluginConfig) {
+    const meterProvider = metrics.getMeterProvider();
+    const exporter = createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = buildOtelResources().merge(
+    //
+    // The fully-resolved resource above is then shaped by two config knobs:
+    //   - includeResources: allowlist of keys to keep (default ['*'] = keep all).
+    //   - dropResourceAttributes: denylist, applied to the resource only when includeResources
+    //     includes '*' (its default).
+    // An explicit allowlist fully governs the resource — a key it names is kept even if
+    // dropResourceAttributes also lists it.
+    const includeResources = config.includeResources ?? ['*'];
+    const includeAll = includeResources.includes('*');
+    const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+
+    // The default appender (keep everything, no drops) uses the merged resource directly. Only when
+    // we have to reshape it — filter the resource or promote attributes onto records — do we resolve
+    // the attributes ourselves.
+    const needsFilter = !includeAll || Boolean(config.dropResourceAttributes?.length);
+    const needsPromotion = Boolean(config.promoteResourceAttributes?.length);
+    let resource: resources.Resource = baseResource;
+    let promoted: Attributes = {};
+
+    if (needsFilter || needsPromotion) {
+      // Resolve attribute precedence explicitly instead of trusting the order merge() concatenates
+      // raw entries in: config.attributes (kibana.yml / audit injection) are authoritative for the
+      // keys they set, so seed them first; the remaining detected keys then resolve first-wins,
+      // matching the SDK's public `.attributes` getter (`attrs[k] ??= v`). This keeps the override
+      // precedence correct even if the SDK ever changes merge()'s internal ordering. Reading raw
+      // entries preserves async values (e.g. host.id) for the SDK to await at export time.
+      const resolved = new Map<string, ResolvedResourceValue>(
+        Object.entries(config.attributes ?? {})
+      );
+      for (const [key, value] of baseResource.getRawAttributes()) {
+        if (!resolved.has(key)) {
+          resolved.set(key, value);
+        }
+      }
+
+      // Promotion captures from the resolved map BEFORE the allowlist below narrows it, so a key can
+      // be emitted per-record (e.g. project.id) even when it's dropped from the resource.
+      if (needsPromotion) {
+        promoted = capturePromotedResourceAttributes(resolved, config.promoteResourceAttributes);
+      }
+
+      if (needsFilter) {
+        // Explicit allowlist governs alone; otherwise (['*']) fall back to the denylist.
+        const keepAttribute = (key: string) =>
+          includeAll
+            ? !config.dropResourceAttributes?.includes(key)
+            : includeResources.includes(key);
+        const kept = [...resolved].filter(([key]) => keepAttribute(key));
+        resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+      }
+    }
+    this.promotedAttributes = promoted;
+
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor(exporter)],
+      processors: [new BatchLogRecordProcessor({ exporter, selfObsMeterProvider: meterProvider })],
       resource,
+      meterProvider,
     });
     // The scope name 'kibana' identifies this instrumentation library.
     // Individual logger contexts are passed as the 'log.logger' attribute.
@@ -258,10 +379,15 @@ export class OtelAppender implements DisposableAppender {
     // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
+    this.transformAttributes = config.transformAttributes;
   }
 
   public append(record: LogRecord): void {
     const severityNumber = toSeverityNumber(record.level);
+
+    // log.meta is omitted from attributes when using JSON layout because it
+    // is already part of the structured body.
+    const attributes = toAttributes(record, !this.useStructuredBody, this.promotedAttributes);
 
     this.logger.emit({
       timestamp: record.timestamp,
@@ -277,13 +403,14 @@ export class OtelAppender implements DisposableAppender {
           ? omitDeepNilValues(JsonLayout.ecsRecord(record))
           : this.layout.format(record),
       context: toTraceContext(record),
-      // log.meta is omitted from attributes when using JSON layout because it
-      // is already part of the structured body.
-      attributes: toAttributes(record, !this.useStructuredBody),
+      // The plugin transform hook runs last, on the fully flattened attributes.
+      attributes: this.transformAttributes ? this.transformAttributes(attributes) : attributes,
     });
   }
 
   public async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
     // Wrap shutdown in a timeout to prevent indefinite hangs when the remote
     // endpoint is unreachable or slow (the spike confirmed this is a real risk).
     // Attach .catch() so that a late rejection from shutdown() after the timeout
@@ -305,7 +432,8 @@ const omitDeepNilValues = (obj: Ecs) => {
 };
 
 const createExporter = (
-  config: OtelAppenderConfig
+  config: OtelAppenderConfig,
+  selfObsMeterProvider: MeterProvider
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
   const tls = resolveTlsMaterial(config.ssl);
 
@@ -317,6 +445,7 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         headers: config.headers ?? {},
+        selfObsMeterProvider,
         ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
       });
     }
@@ -327,6 +456,7 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         headers: config.headers ?? {},
+        selfObsMeterProvider,
         ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
       });
     }
@@ -344,6 +474,7 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         metadata,
+        selfObsMeterProvider,
         ...(tls
           ? {
               // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.

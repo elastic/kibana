@@ -64,18 +64,20 @@ export function annotationRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-        try {
-          const { getAnnotations } = annotationServiceProvider(client);
-          const resp = await getAnnotations(request.body);
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, serverless }) => {
+          try {
+            const { getAnnotations } = annotationServiceProvider(client, mlClient, serverless);
+            const resp = await getAnnotations(request.body);
 
-          return response.ok({
-            body: resp,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({
+              body: resp,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   /**
@@ -100,28 +102,30 @@ export function annotationRoutes(
           request: { body: indexAnnotationSchema },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-        try {
-          const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
-          if (annotationsFeatureAvailable === false) {
-            throw getAnnotationsFeatureUnavailableErrorMessage();
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, serverless }) => {
+          try {
+            const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
+            if (annotationsFeatureAvailable === false) {
+              throw getAnnotationsFeatureUnavailableErrorMessage();
+            }
+
+            const { indexAnnotation } = annotationServiceProvider(client, mlClient, serverless);
+
+            const currentUser =
+              securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
+            // @ts-expect-error username doesn't exist on {}
+            const username = currentUser?.username ?? ANNOTATION_USER_UNKNOWN;
+            const resp = await indexAnnotation(request.body, username);
+
+            return response.ok({
+              body: resp,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
           }
-
-          const { indexAnnotation } = annotationServiceProvider(client);
-
-          const currentUser =
-            securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
-          // @ts-expect-error username doesn't exist on {}
-          const username = currentUser?.username ?? ANNOTATION_USER_UNKNOWN;
-          const resp = await indexAnnotation(request.body, username);
-
-          return response.ok({
-            body: resp,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
         }
-      })
+      )
     );
 
   /**
@@ -146,23 +150,25 @@ export function annotationRoutes(
           request: { params: deleteAnnotationSchema },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-        try {
-          const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
-          if (annotationsFeatureAvailable === false) {
-            throw getAnnotationsFeatureUnavailableErrorMessage();
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, serverless }) => {
+          try {
+            const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
+            if (annotationsFeatureAvailable === false) {
+              throw getAnnotationsFeatureUnavailableErrorMessage();
+            }
+
+            const annotationId = request.params.annotationId;
+            const { deleteAnnotation } = annotationServiceProvider(client, mlClient, serverless);
+            const resp = await deleteAnnotation(annotationId);
+
+            return response.ok({
+              body: resp,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
           }
-
-          const annotationId = request.params.annotationId;
-          const { deleteAnnotation } = annotationServiceProvider(client);
-          const resp = await deleteAnnotation(annotationId);
-
-          return response.ok({
-            body: resp,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
         }
-      })
+      )
     );
 }

@@ -433,6 +433,11 @@ const leadGenerationLeadClickedEvent: EntityAnalyticsTelemetryEvent = {
   schema: {},
 };
 
+const leadGenerationHuntWithAiClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.LeadGenerationHuntWithAiClicked,
+  schema: {},
+};
+
 export const entityTelemetryEvents = [
   entityClickedEvent,
   entityAlertsClickedEvent,
@@ -452,4 +457,5 @@ export const entityTelemetryEvents = [
   anomaliesCountClickedEvent,
   leadGenerationGenerateClickedEvent,
   leadGenerationLeadClickedEvent,
+  leadGenerationHuntWithAiClickedEvent,
 ];

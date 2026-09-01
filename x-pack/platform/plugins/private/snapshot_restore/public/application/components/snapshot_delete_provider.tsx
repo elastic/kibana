@@ -9,12 +9,12 @@ import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiConfirmModal,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { deleteSnapshots } from '../services/http';
@@ -180,9 +180,8 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
         </p>
         {!isSingle && isDeleting ? (
           <Fragment>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
-              color="warning"
               title={
                 <Fragment>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -198,14 +197,15 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
                   </EuiFlexGroup>
                 </Fragment>
               }
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
-                  defaultMessage="This may take a few minutes."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
+                    defaultMessage="This may take a few minutes."
+                  />
+                </p>
+              }
+            />
           </Fragment>
         ) : null}
       </EuiConfirmModal>

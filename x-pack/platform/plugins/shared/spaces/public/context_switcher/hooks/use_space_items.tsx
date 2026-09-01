@@ -28,6 +28,14 @@ const ES_SOLUTION = {
     defaultMessage: 'Elasticsearch',
   }),
 };
+
+const VECTORDB_SOLUTION = {
+  iconType: 'logoVectorDB' as const,
+  label: i18n.translate('xpack.spaces.solutionViewInfo.vectorDB', {
+    defaultMessage: 'Vector Database',
+  }),
+};
+
 const OBS_SOLUTION = {
   iconType: 'logoObservability' as const,
   label: i18n.translate('xpack.spaces.solutionViewInfo.observability', {
@@ -39,7 +47,7 @@ const SOLUTION_VIEW_INFO: Record<SolutionKey, { iconType: IconType; label: strin
   es: ES_SOLUTION,
   oblt: OBS_SOLUTION,
   search: ES_SOLUTION,
-  vectordb: ES_SOLUTION,
+  vectordb: VECTORDB_SOLUTION,
   observability: OBS_SOLUTION,
   workplaceai: {
     iconType: 'logoElasticsearch',

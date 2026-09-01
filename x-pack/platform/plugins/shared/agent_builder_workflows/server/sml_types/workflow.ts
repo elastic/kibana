@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WORKFLOW_INDEX_NAME } from '@kbn/workflows';
 import type { WorkflowProperties } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
@@ -28,7 +30,7 @@ const buildSearchContent = (source: WorkflowProperties): string => {
 };
 
 export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefinition => ({
-  id: WORKFLOW_SML_TYPE,
+  id: WORKFLOW_KI_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -78,7 +80,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const response = await context.esClient.search<WorkflowProperties>({
         index: indexPattern,
@@ -100,17 +102,9 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       const title = source.name ?? originId;
 
       return {
-        chunks: [
-          {
-            type: WORKFLOW_SML_TYPE,
-            title,
-            content: buildSearchContent(source),
-            permissions: {
-              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: WORKFLOW_KI_TYPE,
+        title,
+        content: buildSearchContent(source),
       };
     } catch (error) {
       context.logger.warn(
@@ -119,6 +113,14 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       return undefined;
     }
   },
+
+  /**
+   * Workflow chunks are gated by the dedicated `ai_index:workflow/read` action.
+   * The Workflows Management feature grants it by declaring `aiIndex: { read: [WORKFLOW_KI_TYPE] }`
+   * (see `workflows_management/server/features.ts`), so the `kiType` here must stay in step
+   * with that declaration.
+   */
+  getPermissions: () => kibanaPermissions({ kiType: WORKFLOW_KI_TYPE }),
 
   toAttachment: async (item, context) => {
     const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId);

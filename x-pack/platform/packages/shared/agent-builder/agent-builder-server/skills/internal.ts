@@ -6,6 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
+import type { AvailabilityContext, AvailabilityResult } from '../availability';
 import type { SkillBoundedTool } from './tools';
 import type { ReferencedContent } from './type_definition';
 
@@ -71,4 +72,21 @@ export interface InternalSkillDefinition {
    * Number of referenced content items.
    */
   referencedContentCount: number;
+  /**
+   * Required UI setting to enable a skill.
+   * To enable a skill when a boolean UiSetting is true, pass the key as a string.
+   * To enable a skill when a specific value is set for a UiSetting, pass an object with key and value.
+   */
+  uiSettingRequired?: string | { key: string; value: unknown };
+  /**
+   * When true, this skill is not automatically included on agents that have
+   * `enable_elastic_capabilities` set.
+   */
+  excludeFromElasticCapabilities?: boolean;
+  /**
+   * When present, evaluates whether the skill is available for the current
+   * request context. Skills that return `{ status: 'unavailable' }` are
+   * filtered from registry queries (`has`, `get`, `list`, `bulkGet`).
+   */
+  isAvailable?: (context: AvailabilityContext) => MaybePromise<AvailabilityResult>;
 }

@@ -116,6 +116,39 @@ describe('WHERE Validation', () => {
     whereExpectErrors('from a_index | where textField == "a" or null', []);
   });
 
+  describe('parenthesized expressions', () => {
+    test('validates unknown columns inside parens', () => {
+      whereExpectErrors('from a_index | where (unknownColumn > 0)', [
+        'Unknown column "unknownColumn"',
+      ]);
+    });
+
+    test('validates type errors inside parens', () => {
+      whereExpectErrors('from a_index | where (textField + 1)', [
+        getNoValidCallSignatureError('+', ['text', 'integer']),
+      ]);
+    });
+
+    test('accepts valid boolean expressions inside parens', () => {
+      whereExpectErrors('from a_index | where (doubleField > 0)', []);
+      whereExpectErrors('from a_index | where (doubleField > 0) AND booleanField', []);
+      whereExpectErrors('from a_index | where NOT (doubleField > 0)', []);
+    });
+  });
+
+  test('validates the arguments of an IN list', () => {
+    whereExpectErrors('from a_index | where keywordField IN ("a", missingField)', [
+      'Unknown column "missingField"',
+    ]);
+    whereExpectErrors('from a_index | where keywordField NOT IN (missingField)', [
+      'Unknown column "missingField"',
+    ]);
+    whereExpectErrors('from a_index | where keywordField IN (DOES_NOT_EXIST(keywordField))', [
+      'Unknown function DOES_NOT_EXIST',
+    ]);
+    whereExpectErrors('from a_index | where keywordField IN (keywordField, textField)', []);
+  });
+
   test('accepts string literals in IN operator for ip and version fields', () => {
     // ip fields accept string literals via implicit casting (same as == operator)
     whereExpectErrors(`from a_index | where ipField IN ("1.1.1.1")`, []);

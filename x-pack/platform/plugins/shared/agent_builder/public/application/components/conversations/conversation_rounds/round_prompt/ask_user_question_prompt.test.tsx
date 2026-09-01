@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {
   AskUserQuestionPromptResponse,
@@ -79,6 +79,129 @@ const threeQuestions: AskUserQuestionItem[] = [
 describe('AskUserQuestionPrompt', () => {
   beforeEach(() => mockReportEvent.mockClear());
 
+  describe('Keyboard focus', () => {
+    it('focuses the first option on mount', () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      expect(screen.getByLabelText('Red')).toHaveFocus();
+    });
+
+    it('focuses the first option of the next question after auto-advancing', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.click(screen.getByLabelText('A'));
+      expect(screen.getByLabelText('X')).toHaveFocus();
+    });
+
+    it('ArrowDown moves focus without checking the option or auto-advancing', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
+      );
+      await userEvent.keyboard('{ArrowDown}');
+
+      expect(screen.getByLabelText('Blue')).toHaveFocus();
+      expect(screen.getByLabelText('Blue')).not.toBeChecked();
+      expect(screen.getByLabelText('Red')).not.toBeChecked();
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('wraps focus around to the custom row and back with arrow keys', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('{ArrowUp}');
+      expect(getCustomCheckable().querySelector('input')).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowDown}');
+      expect(screen.getByLabelText('Red')).toHaveFocus();
+    });
+
+    it('moves focus to the custom text input once the custom row is selected via keyboard', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('{ArrowUp}'); // focus the custom row, not checked yet
+      expect(screen.getByRole('textbox')).not.toHaveFocus();
+
+      await userEvent.keyboard(' '); // Space selects the focused custom row
+      expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it('re-focuses the custom text input when re-selecting an already-checked custom row', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('{ArrowUp}');
+      await userEvent.keyboard(' '); // first select — focuses the textbox
+      expect(screen.getByRole('textbox')).toHaveFocus();
+
+      // Move focus back to the already-checked custom row
+      getCustomCheckable().querySelector('input')?.focus();
+      expect(screen.getByRole('textbox')).not.toHaveFocus();
+
+      // Picking it again should still work, even though it's already checked
+      await userEvent.keyboard(' ');
+      expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it('Tab from the options group skips the custom text field, landing on Skip', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      // Red is focused automatically when the component loads
+      await userEvent.tab();
+      expect(screen.getByRole('button', { name: 'Skip question' })).toHaveFocus();
+      expect(screen.getByRole('textbox')).not.toHaveFocus();
+    });
+
+    it('Tab from the options group on a non-final question also lands on Skip', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.tab();
+      expect(screen.getByRole('button', { name: 'Skip question' })).toHaveFocus();
+    });
+
+    it('focuses the Submit button after picking an option on the final question', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      await userEvent.click(screen.getByLabelText('Red'));
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus());
+    });
+
+    it('does not steal focus to Submit when picking an option on a non-final question', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.click(screen.getByLabelText('A'));
+      expect(screen.getByLabelText('X')).toHaveFocus();
+    });
+
+    it('Tab from the custom field jumps straight to Submit once it is usable', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      await userEvent.type(screen.getByRole('textbox'), 'teal');
+      await userEvent.tab();
+      expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus();
+    });
+
+    it('Tab from an empty, unselected custom field falls back to native order', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      screen.getByRole('textbox').focus();
+      await userEvent.tab();
+      // Back is disabled here, so Tab goes to Skip instead
+      expect(screen.getByRole('button', { name: 'Skip question' })).toHaveFocus();
+    });
+  });
+
   describe('Confirm gating', () => {
     it('Confirm is disabled until the current question is answered', async () => {
       renderWithProviders(
@@ -110,6 +233,33 @@ describe('AskUserQuestionPrompt', () => {
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
       await userEvent.click(screen.getByLabelText('Blue'));
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ choice: [1] }],
+      } satisfies AskUserQuestionPromptResponse);
+    });
+  });
+
+  describe('single-select auto-advance', () => {
+    it('advances to the next question immediately on pick, without clicking Continue', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
+      );
+      await userEvent.click(screen.getByLabelText('A'));
+      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('does not auto-submit when the picked option is on the final question', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
+      );
+      await userEvent.click(screen.getByLabelText('Blue'));
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled();
+
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
       expect(onSubmit).toHaveBeenCalledWith({
         answers: [{ choice: [1] }],
@@ -273,7 +423,7 @@ describe('AskUserQuestionPrompt', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       // advanced — Q2 visible
       expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
       expect(onSubmit).not.toHaveBeenCalled();
@@ -284,7 +434,7 @@ describe('AskUserQuestionPrompt', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       expect(onSubmit).toHaveBeenCalledWith({
         answers: [{ skipped: true }],
       } satisfies AskUserQuestionPromptResponse);
@@ -292,6 +442,13 @@ describe('AskUserQuestionPrompt', () => {
   });
 
   describe('Back navigation', () => {
+    it('Back is disabled on the first question', () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      expect(screen.getByRole('button', { name: 'Back' })).toBeDisabled();
+    });
+
     it('returns to the previous question with its prior answer preserved', async () => {
       const onSubmit = jest.fn();
       renderWithProviders(
@@ -305,6 +462,28 @@ describe('AskUserQuestionPrompt', () => {
       // Q1 visible again with A still checked
       expect(screen.getByRole('heading', { name: 'Q1: pick one' })).toBeInTheDocument();
       expect(screen.getByLabelText('A')).toBeChecked();
+    });
+
+    it('focuses the previously selected answer, not the first option', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      // Q1: pick B (not the first option) → auto-advances to Q2
+      await userEvent.click(screen.getByLabelText('B'));
+      await userEvent.click(screen.getByRole('button', { name: 'Back' }));
+      expect(screen.getByLabelText('B')).toHaveFocus();
+    });
+
+    it('Tab from an already-answered question (after Back) goes to Continue, not Back', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.click(screen.getByLabelText('A'));
+      await userEvent.click(screen.getByRole('button', { name: 'Back' }));
+      expect(screen.getByLabelText('A')).toHaveFocus();
+
+      await userEvent.tab();
+      expect(screen.getByRole('button', { name: 'Continue' })).toHaveFocus();
     });
   });
 
@@ -329,7 +508,7 @@ describe('AskUserQuestionPrompt', () => {
       await userEvent.click(screen.getByLabelText('A'));
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
       // Q2: skip
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       // Q3: custom text
       await userEvent.type(screen.getByRole('textbox'), 'free text');
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -374,21 +553,10 @@ describe('AskUserQuestionPrompt', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       expect(mockReportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
         expect.objectContaining({ outcome: 'skipped', selected_option_count: 0 })
-      );
-    });
-
-    it('fires HitlQuestionAnswered with outcome=skipped_all on Skip all', async () => {
-      renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
-      );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip all' }));
-      expect(mockReportEvent).toHaveBeenCalledWith(
-        AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
-        expect.objectContaining({ outcome: 'skipped_all' })
       );
     });
 

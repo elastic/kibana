@@ -18,6 +18,12 @@ import {
   getEntityAnalyticsApiService,
   getTimelineApiService,
   getAttackDiscoveryApiService,
+  getCorrelationsApiService,
+  getPrevalenceApiService,
+  getAnalyzerApiService,
+  getNetworkApiService,
+  getHostApiService,
+  getUserApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -66,6 +72,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
         kbnClient,
         log,
+        esClient,
       });
       extendedApiServices.timeline = getTimelineApiService({
         kbnClient,
@@ -75,6 +82,30 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         kbnClient,
         log,
         esClient,
+      });
+      extendedApiServices.correlations = getCorrelationsApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.prevalence = getPrevalenceApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.analyzer = getAnalyzerApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.network = getNetworkApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.host = getHostApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.user = getUserApiService({
+        esClient,
+        log,
       });
 
       await use(extendedApiServices);

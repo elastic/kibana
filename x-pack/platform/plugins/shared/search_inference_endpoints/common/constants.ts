@@ -13,14 +13,12 @@ export const MANAGEMENT_APP_PATH = `/modelManagement/${MODEL_SETTINGS_APP_ID}`;
 
 export const ELASTIC_INFERENCE_SERVICE_APP_ID = 'elastic_inference_service';
 
-export const INFERENCE_PREFERENCES_FEATURE_FLAG_ID =
-  'searchInferenceEndpoints:inferencePreferencesEnabled';
-
 export const INFERENCE_CONNECTORS_QUERY_KEY = 'inferenceConnectorsQueryKey';
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const INFERENCE_FEATURES_QUERY_KEY = 'inferenceFeaturesQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
 export const INFERENCE_SETTINGS_QUERY_KEY = 'inferenceSettingsQueryKey';
+export const REGION_POLICY_QUERY_KEY = 'regionPolicyQueryKey';
 
 export const INFERENCE_SETTINGS_SO_TYPE = 'inference-settings';
 export const INFERENCE_SETTINGS_NAMESPACE_TYPE = 'single';
@@ -33,6 +31,11 @@ export enum ROUTE_VERSIONS {
 export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
 
 export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
+
+export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
+
+export const REGION_PREFERENCES_REDESIGN_FEATURE_FLAG =
+  'searchSolution.regionPreferencesRedesignEnabled';
 
 export const INFERENCE_UI_CAPABILITIES = {
   show: 'show',

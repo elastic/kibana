@@ -19,69 +19,6 @@
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
-/**
- * Files that already import js-yaml. New js-yaml imports must not be added here;
- * this list is expected to shrink as consumers migrate to the `yaml` package.
- * Each entry is an anchored regex tested against the kibana-root-relative file path.
- * The `module_migration` rule evaluates each mapping independently, so this list
- * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
- */
-const JS_YAML_LEGACY_CONSUMERS = [
-  /^\.buildkite[\/\\]/,
-  /^oas_docs[\/\\]scripts[\/\\]/,
-  /^packages[\/\\]kbn-api-contracts[\/\\]/,
-  /^packages[\/\\]kbn-docs-utils[\/\\]/,
-  /^packages[\/\\]kbn-moon[\/\\]/,
-  /^packages[\/\\]kbn-optimizer[\/\\]/,
-  /^packages[\/\\]kbn-rspack-optimizer[\/\\]/,
-  /^scripts[\/\\]/,
-  /^src[\/\\]cli[\/\\]/,
-  /^src[\/\\]dev[\/\\]/,
-  /^src[\/\\]platform[\/\\]kbn-ui[\/\\]_tooling[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-apm-config-loader[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-gen-ai-functional-testing[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-validate-oas[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-config[\/\\]src[\/\\]raw[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-connector-cli[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-edot-collector[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-es[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-openapi-bundler[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-otel-demo[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-otel-semantic-conventions[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-scout[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-synthtrace[\/\\]src[\/\\]cli[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-test[\/\\]src[\/\\]functional_test_runner[\/\\]/,
-  /^src[\/\\]platform[\/\\]plugins[\/\\]private[\/\\]interactive_setup[\/\\]server[\/\\]/,
-  /^src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]telemetry[\/\\]server[\/\\]collectors[\/\\]/,
-  /^x-pack[\/\\]packages[\/\\]kbn-synthetics-private-location[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-data-forge[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-evals[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]response-ops[\/\\]alerting-v2-rule-form[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]agent_builder[\/\\]server[\/\\]services[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import_v2[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]cases[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]inference[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]osquery[\/\\]cypress[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]rule_registry[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]streams[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]test[\/\\]cases_api_integration[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]packages[\/\\]synthetics-test-data[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]apm[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]apm[\/\\]server[\/\\]routes[\/\\]fleet[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_ai_assistant_app[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_onboarding[\/\\]server[\/\\]routes[\/\\]flow[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]test-api-clients[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]cloud_defend[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]elastic_assistant[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]server[\/\\]assistant[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]test[\/\\]security_solution_cypress[\/\\]cypress[\/\\]support[\/\\]/,
-];
-
 const USES_ELASTIC_APM_AGENT = [
   // Core platform APM integration & agent infrastructure
   /src[\/\\]core[\/\\]/,
@@ -138,6 +75,7 @@ module.exports = {
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -291,10 +229,8 @@ module.exports = {
         {
           from: 'js-yaml',
           to: false,
-          exclude: JS_YAML_LEGACY_CONSUMERS,
           disallowedMessage:
-            "Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from 'yaml'`). " +
-            'Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.',
+            "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
         },
       ],
     ],
@@ -456,9 +392,28 @@ module.exports = {
     'no-prototype-builtins': 'error',
 
     /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+    '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
+    '@kbn/kbn-ui/no_restricted_package_imports': 'error',
+
+    /**
      * EUI Team rules
      */
 
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
     '@elastic/eui/no-restricted-eui-imports': [
       'warn',
       {
@@ -471,14 +426,49 @@ module.exports = {
      * a11y-related rules:
      * all existing violations were fixed; keep this as error to prevent new ones.
      */
+    '@elastic/eui/callout-announce-on-mount': 'error',
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/no-unnamed-interactive-element': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/require-table-caption': 'error',
+    '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [
+    {
+      files: [
+        'src/platform/plugins/private/event_annotation/**/*',
+        'src/platform/plugins/private/event_annotation_listing/**/*',
+        'src/platform/plugins/private/vis_default_editor/**/*',
+        'src/platform/plugins/private/vis_types/**/*',
+        'src/platform/plugins/shared/chart_expressions/**/*',
+        'src/platform/plugins/shared/charts/**/*',
+        'src/platform/plugins/shared/expressions/**/*',
+        'src/platform/plugins/shared/vis_types/**/*',
+        'src/platform/plugins/shared/visualization_listing/**/*',
+        'src/platform/plugins/shared/visualizations/**/*',
+        'x-pack/platform/plugins/shared/lens/**/*',
+        'x-pack/platform/plugins/private/graph/**/*',
+        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
+        'src/platform/packages/shared/kbn-lens-common/**/*',
+        'src/platform/packages/shared/kbn-lens-common-2/**/*',
+        'src/platform/packages/shared/kbn-coloring/**/*',
+        'src/platform/packages/shared/kbn-chart-icons/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
+      ],
+      rules: {
+        '@kbn/eslint/no_viz_naming': 'error',
+      },
+    },
     {
       files: [
         'src/platform/plugins/**/server/index.ts',

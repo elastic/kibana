@@ -10,6 +10,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../agent_policy';
@@ -34,18 +35,17 @@ const TASK_TYPE = 'fleet:bump_agent_policies_by_id';
 
 const getRegisteredTaskRunner = (
   taskInstance: ConcreteTaskInstance,
-  abortController = new AbortController()
-): { run: () => Promise<unknown>; abortController: AbortController } => {
+  signal = new AbortController().signal
+): { run: () => Promise<unknown> } => {
   const registerTaskDefinitions = jest.fn();
   registerBumpAgentPoliciesByIdTask({
     registerTaskDefinitions,
   } as unknown as TaskManagerSetupContract);
 
   const definition = registerTaskDefinitions.mock.calls[0][0][TASK_TYPE];
-  return {
-    ...(definition.createTaskRunner({ taskInstance, abortController }) as any),
-    abortController,
-  };
+  return definition.createTaskRunner(
+    taskManagerMock.createRunContext({ taskInstance, signal })
+  ) as any;
 };
 
 const buildTaskInstance = (params: Record<string, unknown>): ConcreteTaskInstance =>
@@ -105,7 +105,7 @@ describe('bump_agent_policies_by_id_task', () => {
             { id: 'policy-2', spaceId: 'space-a' },
           ],
         }),
-        abortController
+        abortController.signal
       );
 
       await runner.run();

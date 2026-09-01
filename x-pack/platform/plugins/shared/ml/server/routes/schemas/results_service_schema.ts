@@ -57,7 +57,7 @@ export const categoryExamplesSchema = schema.object({
 });
 
 export const anomalySearchSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+  jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 1000, minSize: 1 }),
   query: schema.any(),
 });
 

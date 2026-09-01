@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   replaceAnonymizedValuesWithOriginalValues,
@@ -53,6 +60,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
     const {
       services: { telemetry },
     } = useKibana();
+    const { euiTheme } = useEuiTheme();
 
     const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
 
@@ -84,7 +92,16 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
     );
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={false}
+        css={{
+          paddingTop: euiTheme.size.base,
+          paddingBottom: euiTheme.size.base,
+        }}
+      >
         <EuiFlexItem grow={false}>
           <EuiToolTip content={EXPAND_BUTTON_ARIAL_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -100,7 +117,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiFlexGroup
             data-test-subj={`${dataTestSubj}${ATTACK_GROUP_TEST_ID_SUFFIX}`}
             direction="column"
@@ -140,6 +157,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
+              css={{ minWidth: 0 }}
               data-test-subj={`${dataTestSubj}${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`}
             >
               <Subtitle attack={attack} showAnonymized={showAnonymized} />

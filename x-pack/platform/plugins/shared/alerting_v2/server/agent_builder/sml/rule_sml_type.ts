@@ -6,15 +6,15 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
-  RULE_SML_TYPE,
   ruleAttachmentDataSchema,
   getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
+import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { RulesClient } from '../../lib/rules_client';
@@ -22,16 +22,22 @@ import type { RulesClient } from '../../lib/rules_client';
 interface CreateRuleSmlTypeOptions {
   getScopedRulesClient: (request: KibanaRequest) => RulesClient;
   getInternalRepository: () => ISavedObjectsRepository;
+  getIsAlertingV2Enabled: () => Promise<boolean>;
 }
 
 export const createRuleSmlType = ({
   getScopedRulesClient,
   getInternalRepository,
+  getIsAlertingV2Enabled,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
-  id: RULE_SML_TYPE,
+  id: RULE_KI_TYPE,
   fetchFrequency: () => '1m',
 
   async *list() {
+    if (!(await getIsAlertingV2Enabled())) {
+      return;
+    }
+
     const repository = getInternalRepository();
     const finder = repository.createPointInTimeFinder<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -53,7 +59,11 @@ export const createRuleSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return undefined;
+    }
+
     try {
       const repository = getInternalRepository();
       const so = await repository.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, originId);
@@ -67,17 +77,9 @@ export const createRuleSmlType = ({
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 
       return {
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-            permissions: {
-              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: RULE_KI_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(
@@ -87,7 +89,19 @@ export const createRuleSmlType = ({
     }
   },
 
+  /**
+   * Rules are gated by the dedicated `ai_index:alerting_v2_rule/read` action.
+   * The Alerting v2 feature grants it by declaring `aiIndex: { read: [RULE_KI_TYPE] }`
+   * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step
+   * with that declaration.
+   */
+  getPermissions: () => kibanaPermissions({ kiType: RULE_KI_TYPE }),
+
   toAttachment: async (item, context) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return undefined;
+    }
+
     try {
       const rulesClient = getScopedRulesClient(context.request);
       const rule = await rulesClient.getRule({ id: item.origin_id ?? '' });

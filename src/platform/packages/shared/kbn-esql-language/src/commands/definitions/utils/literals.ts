@@ -166,5 +166,9 @@ export function getCompatibleLiterals(
     );
   }
 
+  if (types.includes('boolean')) {
+    suggestions.push(...buildConstantsDefinitions(['true', 'false'], undefined, options));
+  }
+
   return suggestions;
 }

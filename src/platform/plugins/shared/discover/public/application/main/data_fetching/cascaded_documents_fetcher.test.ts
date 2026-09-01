@@ -99,6 +99,7 @@ const createFetchParams = (
     esqlVariables: undefined,
     dataView: dataViewWithTimefieldMock,
     timeRange: { from: 'now-15m', to: 'now' },
+    esqlApproximation: false,
     ...overrides,
   };
 };
@@ -166,6 +167,24 @@ describe('CascadedDocumentsFetcher', () => {
     );
     expect(stateManager.setColumnsMeta).toHaveBeenCalledWith(columnsMeta);
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
+  });
+
+  it('forwards esqlApproximation to fetchEsql so cascade drill-downs match the active search mode', async () => {
+    const { fetcher } = createFetcher();
+    const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+
+    mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
+    mockFetchEsql.mockResolvedValue({ records: [], esqlQueryColumns: [] });
+
+    await fetcher.fetchCascadedDocuments(
+      createFetchParams({ nodeId: 'node-approx', esqlApproximation: true })
+    );
+
+    expect(mockFetchEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlApproximation: true,
+      })
+    );
   });
 
   it('skips updating columns meta when the fetched value is unchanged', async () => {

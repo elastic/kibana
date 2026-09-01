@@ -10,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import {
   getMoonChangedFiles,
   getAffectedMoonProjectsFromChangedFiles,
@@ -77,7 +77,7 @@ export const topologicallySortPackages = (packageNames: string[], kbnUiRoot: str
   for (const name of packageNames) {
     moonData.set(
       name,
-      yaml.load(fs.readFileSync(path.join(kbnUiRoot, name, 'moon.yml'), 'utf-8')) as MoonYml
+      parse(fs.readFileSync(path.join(kbnUiRoot, name, 'moon.yml'), 'utf-8')) as MoonYml
     );
   }
 

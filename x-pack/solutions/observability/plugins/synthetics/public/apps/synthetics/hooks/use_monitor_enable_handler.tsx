@@ -7,7 +7,7 @@
 
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { fetchUpsertMonitorAction } from '../state/monitor_list/actions';
 import { ConfigKey } from '../components/monitors_page/overview/types';
 import { selectMonitorUpsertStatuses } from '../state';

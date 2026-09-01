@@ -11,9 +11,18 @@ import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
+import { useAlertDataLoading } from './use_alert_data_loading';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../flyout_v2/shared/constants/flyout_titles';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -32,6 +41,12 @@ export interface AlertEventProps {
   rule: AlertAttachmentMetadata['rule'];
   savedObjectId: string;
   totalAlerts: number;
+  /**
+   * Whether the alert originates from a linked/remote (CPS) project. When true,
+   * the rule cannot be resolved from the local project, so the rule name is
+   * rendered as plain text instead of a clickable link that opens the rule flyout.
+   */
+  isRemoteAlert?: boolean;
 }
 
 export const AlertEvent: React.FC<AlertEventProps> = ({
@@ -39,24 +54,37 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   totalAlerts,
   savedObjectId,
   rule,
+  isRemoteAlert = false,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openRuleFlyout } = useFlyoutApi();
   const {
     rulesPrivileges: {
       rules: { read: canReadRules },
     },
   } = useUserPrivileges();
+  const { loading: loadingPrivileges, hasAlertsRead } = useAlertsPrivileges();
 
   const ruleId = rule?.id ?? null;
   const ruleName = rule?.name ?? null;
 
-  // Only fetch live alert data when the attachment does not already carry rule info.
   const hasRuleIdFromMetadata = !isEmpty(ruleId);
   const idsToFetch = useMemo(
     () => (hasRuleIdFromMetadata ? [] : [alertId]),
     [hasRuleIdFromMetadata, alertId]
   );
-  const [loadingAlertData, alertsData] = useFetchAlertData(idsToFetch);
+  const [loadingAlertData, alertsData, refetchAlertData] = useFetchAlertData(idsToFetch);
+
+  const isLoadingAlertData = useAlertDataLoading({
+    hasRuleIdFromMetadata,
+    loadingAlertData,
+    loadingPrivileges,
+    hasAlertsRead,
+    alertsData,
+    alertId,
+    refetchAlertData,
+  });
 
   const { ruleId: resolvedRuleId, ruleName: resolvedRuleName } = useMemo(
     () =>
@@ -73,11 +101,19 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
 
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
-      openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
+      if (enableNewFlyout) {
+        openRuleFlyout({
+          ruleId: resolvedRuleId,
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+          title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
+        });
+      } else {
+        openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
+      }
     }
-  }, [openFlyout, canReadRules, resolvedRuleId]);
+  }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
-  if (loadingAlertData) {
+  if (isLoadingAlertData) {
     return <EuiLoadingSpinner size="m" />;
   }
 
@@ -94,7 +130,10 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
         label: resolvedRuleName,
         fallbackLabel: i18n.UNKNOWN_RULE,
         dataTestSubj: `alert-rule-link-${savedObjectId}`,
-        onClick: onRuleClick,
+        // Linked/remote (CPS) alerts reference a rule that only exists on the
+        // linked project and cannot be resolved locally, so omit the click
+        // handler to render the rule name as plain text instead of a broken link.
+        onClick: isRemoteAlert ? undefined : onRuleClick,
       }}
       dataTestSubj={`alerts-user-action-${savedObjectId}`}
     />

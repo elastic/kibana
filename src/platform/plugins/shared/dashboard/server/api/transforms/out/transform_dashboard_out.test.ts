@@ -323,4 +323,41 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
       expect(dashboardState).not.toHaveProperty('project_routing');
     });
   });
+
+  describe('esql_approximation', () => {
+    test('should map esqlApproximation attribute to esql_approximation in dashboardState', () => {
+      const input: DashboardSavedObjectAttributes = {
+        panelsJSON: JSON.stringify([]),
+        optionsJSON: JSON.stringify({}),
+        kibanaSavedObjectMeta: {},
+        title: 'my title',
+        description: 'my description',
+        esqlApproximation: true,
+      };
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
+      expect(dashboardState.esql_approximation).toBe(true);
+    });
+
+    test('should not include esql_approximation when esqlApproximation attribute is undefined', () => {
+      const input: DashboardSavedObjectAttributes = {
+        panelsJSON: JSON.stringify([]),
+        optionsJSON: JSON.stringify({}),
+        kibanaSavedObjectMeta: {},
+        title: 'my title',
+        description: 'my description',
+      };
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
+      expect(dashboardState).not.toHaveProperty('esql_approximation');
+    });
+  });
 });

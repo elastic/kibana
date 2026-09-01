@@ -51,6 +51,11 @@ const defaultActionsConfig: ActionsConfig = {
     },
     ears: { enabled: false, enableExperimental: false },
   },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -608,6 +613,53 @@ describe('getEARSSSLSettings', () => {
   });
 });
 
+describe('getRelaySSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+  });
+
+  test('reads and caches Relay certificate, key, and CA files', () => {
+    mockReadFileSync.mockImplementation((filePath) => Buffer.from(String(filePath)));
+    const configUtils = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: {
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+          certificateAuthorities: ['/path/to/ca-1.pem', '/path/to/ca-2.pem'],
+        },
+      },
+    });
+
+    const first = configUtils.getRelaySSLSettings();
+    const second = configUtils.getRelaySSLSettings();
+
+    expect(first).toBe(second);
+    expect(first).toMatchObject({
+      verificationMode: 'full',
+      cert: Buffer.from('/path/to/cert.pem'),
+      key: Buffer.from('/path/to/key.pem'),
+      allowPartialTrustChain: true,
+    });
+    expect(first.ca).toEqual(expect.any(Buffer));
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-1.pem'))).toBe(true);
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-2.pem'))).toBe(true);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(4);
+  });
+
+  test('does not enable partial trust chains without Relay SSL configuration', () => {
+    const sslSettings = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: { url: 'https://relay.test' },
+    }).getRelaySSLSettings();
+
+    expect(sslSettings).not.toHaveProperty('allowPartialTrustChain');
+    expect(mockReadFileSync).not.toHaveBeenCalled();
+  });
+});
+
 const testEmailsOk = ['bob@elastic.co', 'jim@elastic.co'];
 const testEmailsNotAllowed = ['hal@bad.com', 'lou@notgood.org'];
 const testEmailsInvalid = ['invalid-email-address', '(garbage)'];
@@ -953,6 +1005,61 @@ describe('isEarsExperimentalEnabled()', () => {
       },
     });
     expect(acu.isEarsExperimentalEnabled()).toBe(true);
+  });
+});
+
+describe('isInboundEventsEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isInboundEventsEnabled()).toBe(false);
+  });
+
+  test('returns true when inboundEvents.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        enabled: true,
+      },
+    });
+    expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('getInboundEventsMaxBodyBytes()', () => {
+  test('returns 1mb by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(1024 * 1024);
+  });
+
+  test('returns configured maxBodyBytes in bytes', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(512 * 1024),
+        maxEmitted: 25,
+      },
+    });
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(512 * 1024);
+  });
+});
+
+describe('getInboundEventsMaxEmitted()', () => {
+  test('returns 25 by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(25);
+  });
+
+  test('returns configured maxEmitted', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxEmitted: 100,
+      },
+    });
+    expect(acu.getInboundEventsMaxEmitted()).toBe(100);
   });
 });
 

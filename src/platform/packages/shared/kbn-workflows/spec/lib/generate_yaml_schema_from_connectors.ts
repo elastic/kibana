@@ -24,6 +24,7 @@ import {
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
+  WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -72,7 +73,7 @@ export function generateYamlSchemaFromConnectors(
 
   return workflowBaseWithTriggers.extend({
     settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-    steps: z.array(recursiveStepSchema),
+    steps: z.array(recursiveStepSchema).min(1),
   });
 }
 
@@ -134,6 +135,7 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       WaitForInputStepSchema,
+      WaitForApprovalStepSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,

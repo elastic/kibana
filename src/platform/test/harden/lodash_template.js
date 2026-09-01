@@ -17,40 +17,37 @@ const template = require('lodash/template');
 const fp = require('lodash/fp');
 // eslint-disable-next-line no-restricted-modules
 const fpTemplate = require('lodash/fp/template');
-const test = require('tape');
+const test = require('node:test');
+const { after } = require('node:test');
 
 Object.prototype.sourceURL = '\u2028\u2029\n;global.whoops=true'; // eslint-disable-line no-extend-native
 
-test.onFinish(() => {
+after(() => {
   delete Object.prototype.sourceURL;
 });
 
 test('test setup ok', (t) => {
-  t.equal({}.sourceURL, '\u2028\u2029\n;global.whoops=true');
-  t.end();
+  t.assert.strictEqual({}.sourceURL, '\u2028\u2029\n;global.whoops=true');
 });
 
 // eslint-disable-next-line no-restricted-properties
 [_.template, template].forEach((fn) => {
   test(`_.template('<%= foo %>')`, (t) => {
     const output = fn('<%= foo %>')({ foo: 'bar' });
-    t.equal(output, 'bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output, 'bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 
   test(`_.template('<%= foo %>', {})`, (t) => {
     const output = fn('<%= foo %>', Object.freeze({}))({ foo: 'bar' });
-    t.equal(output, 'bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output, 'bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 
   test(`_.template('<%= data.foo %>', { variable: 'data' })`, (t) => {
     const output = fn('<%= data.foo %>', Object.freeze({ variable: 'data' }))({ foo: 'bar' });
-    t.equal(output, 'bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output, 'bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 
   test(`_.template('<%= foo %>', { sourceURL: '/foo/bar' })`, (t) => {
@@ -61,8 +58,8 @@ test('test setup ok', (t) => {
       template();
     } catch (err) {
       const path = parsePathFromStack(err.stack);
-      t.equal(path, '/foo/bar');
-      t.equal(global.whoops, undefined);
+      t.assert.strictEqual(path, '/foo/bar');
+      t.assert.strictEqual(global.whoops, undefined);
     }
   });
 
@@ -77,8 +74,8 @@ test('test setup ok', (t) => {
       template();
     } catch (err) {
       const path = parsePathFromStack(err.stack);
-      t.equal(path, 'global.whoops=true');
-      t.equal(global.whoops, undefined);
+      t.assert.strictEqual(path, 'global.whoops=true');
+      t.assert.strictEqual(global.whoops, undefined);
     }
   });
 
@@ -86,27 +83,24 @@ test('test setup ok', (t) => {
     const templateStrArr = ['<%= data.foo %>', 'example <%= data.foo %>'];
     const output = _.map(templateStrArr, fn);
 
-    t.equal(output[0]({ data: { foo: 'bar' } }), 'bar');
-    t.equal(output[1]({ data: { foo: 'bar' } }), 'example bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output[0]({ data: { foo: 'bar' } }), 'bar');
+    t.assert.strictEqual(output[1]({ data: { foo: 'bar' } }), 'example bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 });
 
 [fp.template, fpTemplate].forEach((fn) => {
   test(`fp.template('<%= foo %>')`, (t) => {
     const output = fn('<%= foo %>')({ foo: 'bar' });
-    t.equal(output, 'bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output, 'bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 
   test(`fp.template('<%= foo %>', {})`, (t) => {
     // fp.template ignores the second argument, this is negligible in this situation since options is an empty object
     const output = fn('<%= foo %>', Object.freeze({}))({ foo: 'bar' });
-    t.equal(output, 'bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output, 'bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 
   test(`fp.template('<%= data.foo %>', { variable: 'data' })`, (t) => {
@@ -115,8 +109,8 @@ test('test setup ok', (t) => {
     try {
       fn('<%= data.foo %>', Object.freeze({ variable: 'data' }))({ foo: 'bar' });
     } catch (err) {
-      t.equal(err.message, 'data is not defined');
-      t.equal(global.whoops, undefined);
+      t.assert.strictEqual(err.message, 'data is not defined');
+      t.assert.strictEqual(global.whoops, undefined);
     }
   });
 
@@ -130,9 +124,9 @@ test('test setup ok', (t) => {
       template();
     } catch (err) {
       const path = parsePathFromStack(err.stack);
-      t.match(path, /^eval at <anonymous> /);
-      t.doesNotMatch(path, /\/foo\/bar/);
-      t.equal(global.whoops, undefined);
+      t.assert.match(path, /^eval at <anonymous> /);
+      t.assert.doesNotMatch(path, /\/foo\/bar/);
+      t.assert.strictEqual(global.whoops, undefined);
     }
   });
 
@@ -149,9 +143,9 @@ test('test setup ok', (t) => {
       template();
     } catch (err) {
       const path = parsePathFromStack(err.stack);
-      t.match(path, /^eval at <anonymous> /);
-      t.doesNotMatch(path, /\/foo\/bar/);
-      t.equal(global.whoops, undefined);
+      t.assert.match(path, /^eval at <anonymous> /);
+      t.assert.doesNotMatch(path, /\/foo\/bar/);
+      t.assert.strictEqual(global.whoops, undefined);
     }
   });
 
@@ -159,10 +153,9 @@ test('test setup ok', (t) => {
     const templateStrArr = ['<%= data.foo %>', 'example <%= data.foo %>'];
     const output = fp.map(fn)(templateStrArr);
 
-    t.equal(output[0]({ data: { foo: 'bar' } }), 'bar');
-    t.equal(output[1]({ data: { foo: 'bar' } }), 'example bar');
-    t.equal(global.whoops, undefined);
-    t.end();
+    t.assert.strictEqual(output[0]({ data: { foo: 'bar' } }), 'bar');
+    t.assert.strictEqual(output[1]({ data: { foo: 'bar' } }), 'example bar');
+    t.assert.strictEqual(global.whoops, undefined);
   });
 });
 

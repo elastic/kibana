@@ -7,14 +7,25 @@
 
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import {
+  createMemoryDiscoveryTools,
+  MemoryServiceImpl,
+} from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import {
+  getCurrentTraceId,
+  createChatCallsEvaluator,
+  createSpanLatencyEvaluator,
+} from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { GcsConfig } from '../../src/data_generators/replay';
+import {
+  createEvalSignificantEventSearchTool,
+  type AgentBuilderToolResult,
+} from '../../src/tools/significant_event_search_tool';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
-  listAvailableSnapshots,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -27,6 +38,7 @@ import {
   snapshotCatalogKey,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
@@ -40,23 +52,28 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, log }) => {
-    const uniqueCatalogSources = new Map<string, GcsConfig>();
-    for (const dataset of activeDatasets) {
-      for (const scenario of dataset.kiFeatureExtraction) {
-        const source = resolveScenarioSnapshotSource({
-          scenarioId: scenario.input.scenario_id,
-          datasetGcs: dataset.gcs,
-          snapshotSource: scenario.snapshot_source,
-        });
-        uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-      }
-    }
+  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    // The significant_event_search tool is only registered when significant
+    // events availability is on (defaults to false); enable it before any run.
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        },
+      },
+    });
+    log.info('Enabled significant events availability feature flag');
 
-    for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-      const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-      availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-    }
+    const snapshots = await buildAvailableSnapshotsBySource(
+      activeDatasets,
+      (dataset) => dataset.kiFeatureExtraction,
+      esClient,
+      log
+    );
+    snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
   });
 
   for (const dataset of activeDatasets) {
@@ -108,13 +125,44 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+        async ({
+          esClient,
+          executorClient,
+          evaluators,
+          inferenceClient,
+          logger,
+          traceEsClient,
+          log,
+          fetch,
+        }) => {
           const heavyDataByScenario = new Map(
             collectedExamples.map(({ scenario, sampleDocuments }) => [
               scenario.input.scenario_id,
               { sampleDocuments },
             ])
           );
+
+          // Exercise the same grounding tools that production feature extraction
+          // now wires in, so the eval covers the memory + prior-SigEvents paths.
+          const memoryTools = createMemoryDiscoveryTools({
+            memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+          });
+
+          const executeAgentBuilderTool = async (
+            toolId: string,
+            toolParams: Record<string, unknown>
+          ) =>
+            (await fetch('/api/agent_builder/tools/_execute', {
+              method: 'POST',
+              version: '2023-10-31',
+              body: JSON.stringify({ tool_id: toolId, tool_params: toolParams }),
+            })) as { results?: AgentBuilderToolResult[] };
+
+          const eventSearchTool = createEvalSignificantEventSearchTool({
+            executeTool: executeAgentBuilderTool,
+            streamName: MANAGED_STREAM_NAME,
+            logger,
+          });
 
           await executorClient.runExperiment(
             {
@@ -141,19 +189,25 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
-                const { features } = await identifyFeatures({
+                const { features, tokensUsed } = await identifyFeatures({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: heavy.sampleDocuments,
-                  systemPrompt: featuresPrompt,
+                  systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}\n${eventSearchTool.promptSnippet}`,
                   inferenceClient,
                   logger,
                   signal: new AbortController().signal,
+                  additionalTools: { ...memoryTools.tools, ...eventSearchTool.tools },
+                  additionalToolCallbacks: {
+                    ...memoryTools.callbacks,
+                    ...eventSearchTool.callbacks,
+                  },
                 });
 
                 return {
                   features,
                   traceId: getCurrentTraceId(),
                   sample_documents: heavy.sampleDocuments,
+                  tokens_used: tokensUsed,
                 };
               },
             },
@@ -164,7 +218,8 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
-              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              createChatCallsEvaluator({ traceEsClient, log }),
+              createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ]
           );
         }

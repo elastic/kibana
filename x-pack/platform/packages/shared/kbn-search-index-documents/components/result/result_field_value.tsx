@@ -24,12 +24,100 @@ interface ResultFieldValueProps {
   fieldValue: string;
   fieldType: string;
   isExpanded?: boolean;
+  embeddings: string | undefined;
+  dimensions?: number;
 }
+
+function truncateVectors(embeddings: string[] | string[][]): string {
+  const embeds = Array.isArray(embeddings[0])
+    ? truncateVectors(embeddings[0])
+    : embeddings.length > 4
+    ? embeddings.slice(0, 5).concat(['...']).join(', ')
+    : embeddings.join(', ');
+  return `[${embeds}]`;
+}
+
+function getEmbeddings(embeddings: string): {
+  embeddings: string[] | string[][];
+  chunks: number;
+  dims: number;
+} {
+  try {
+    const embeds = JSON.parse(embeddings);
+    if (Array.isArray(embeds) && embeds.length > 0) {
+      if (Array.isArray(embeds[0])) {
+        return { embeddings: embeds, chunks: embeds.length, dims: embeds[0].length };
+      }
+      return { embeddings: embeds, chunks: 1, dims: embeds.length };
+    }
+    return { embeddings: [], chunks: 0, dims: 0 };
+  } catch {
+    return { embeddings: [], chunks: 0, dims: 0 };
+  }
+}
+
+export const VectorFieldValue: React.FC<{ embeddings: string; dimensions?: number }> = ({
+  embeddings,
+  dimensions,
+}) => {
+  const { embeddings: jsonEmbeddings, chunks, dims } = getEmbeddings(embeddings);
+  const dimCount = dimensions ?? dims;
+  return (
+    <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiBadge>
+          {i18n.translate('xpack.searchIndexDocuments.result.value.denseVector.dimLabel', {
+            defaultMessage: '{value} dims',
+            values: {
+              value: dimCount,
+            },
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+      {chunks > 1 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge>
+            {i18n.translate('xpack.searchIndexDocuments.result.value.denseVector.chunksLabel', {
+              defaultMessage: '{value} chunks',
+              values: {
+                value: chunks,
+              },
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        <EuiCodeBlock transparentBackground fontSize="s" paddingSize="none">
+          {truncateVectors(jsonEmbeddings)}
+        </EuiCodeBlock>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy textToCopy={embeddings}>
+          {(copy) => (
+            <EuiIcon
+              type="copy"
+              onClick={copy}
+              data-test-subj="copyDenseVector"
+              aria-label={i18n.translate(
+                'xpack.searchIndexDocuments.result.value.denseVector.copy',
+                {
+                  defaultMessage: 'Copy vector',
+                }
+              )}
+            />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
   fieldValue,
   fieldType,
   isExpanded = false,
+  embeddings,
+  dimensions,
 }) => {
   if (
     isExpanded &&
@@ -44,45 +132,35 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
   } else if (PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType)) {
     return (
       <>
-        <EuiText size="s" color="default">
-          {fieldValue}
-        </EuiText>
-        {fieldType === 'dense_vector' && (
-          <div className={'denseVectorFieldValue'}>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiBadge color="hollow">
-                  {i18n.translate('xpack.searchIndexDocuments.result.value.denseVector.dimLabel', {
-                    defaultMessage: '{value} dims',
-                    values: {
-                      value: JSON.parse(fieldValue).length,
-                    },
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCopy textToCopy={fieldValue}>
-                  {(copy) => (
-                    <EuiIcon
-                      type="copy"
-                      onClick={copy}
-                      data-test-subj="copyDenseVector"
-                      aria-label={i18n.translate(
-                        'xpack.searchIndexDocuments.result.value.denseVector.copy',
-                        {
-                          defaultMessage: 'Copy vector',
-                        }
-                      )}
-                    />
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
+        {fieldType === 'dense_vector' ? (
+          <VectorFieldValue embeddings={fieldValue} dimensions={dimensions} />
+        ) : (
+          <EuiText size="s" color="default">
+            {fieldValue}
+          </EuiText>
         )}
       </>
     );
-  } else {
+  } else if (embeddings && embeddings.length > 0) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        css={{ flex: 1 }}
+      >
+        <EuiFlexItem>
+          <EuiText size="s" color="default">
+            {fieldValue}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <VectorFieldValue embeddings={embeddings} dimensions={dimensions} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  {
     return (
       <EuiText size="s" color="default">
         {fieldValue}

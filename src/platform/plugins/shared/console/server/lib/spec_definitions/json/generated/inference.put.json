@@ -6,7 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "timeout": [
-        "30s",
         "-1",
         "0"
       ]
@@ -20,6 +19,19 @@
         "chat_completion",
         "embedding"
       ]
+    },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": "",
+      "service_settings": "",
+      "task_settings": ""
     },
     "methods": [
       "PUT"

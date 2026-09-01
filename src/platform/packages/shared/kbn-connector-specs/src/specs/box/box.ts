@@ -74,7 +74,7 @@ export const Box: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -105,6 +105,7 @@ export const Box: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://mcp.box.com',
+          hidden: true,
           label: i18n.translate('connectorSpecs.box.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
@@ -362,6 +363,7 @@ export const Box: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Box MCP server directly by name. Use this as an escape hatch for tools not yet exposed as named actions (e.g. write operations like upload_file, create_folder, or create_collaboration). Use listTools first to discover available tool names and their arguments.',
       input: CallToolInputSchema,
@@ -378,13 +380,11 @@ export const Box: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Box MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

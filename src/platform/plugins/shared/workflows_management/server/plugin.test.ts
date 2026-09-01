@@ -22,23 +22,27 @@ import { WorkflowsPlugin } from './plugin';
 const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
 
 describe('WorkflowsPlugin', () => {
+  const setStopping = jest.fn();
+  const cleanupUnregisteredOrphans = jest.fn().mockResolvedValue(undefined);
+
   beforeEach(() => {
     jest.clearAllMocks();
     MockedWorkflowsService.mockImplementation(
       () =>
         ({
           getCoreStart: jest.fn().mockResolvedValue({ security: { authc: {} } }),
-          cleanupUnregisteredOrphans: jest.fn().mockResolvedValue(undefined),
+          cleanupUnregisteredOrphans,
+          setStopping,
         } as unknown as WorkflowsService)
     );
   });
 
-  it('returns an empty start contract', () => {
+  it('returns an empty start contract and clears the stopping flag', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       enabled: true,
       logging: { console: false },
       available: true,
-      globalExecutionsView: { enabled: false },
+      library: { ttlMs: 600_000 },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -59,5 +63,34 @@ describe('WorkflowsPlugin', () => {
     });
 
     expect(start).toEqual({});
+    expect(setStopping).toHaveBeenCalledWith(false);
+  });
+
+  it('marks the workflows service as stopping on stop()', () => {
+    const initializerContext = coreMock.createPluginInitializerContext({
+      enabled: true,
+      logging: { console: false },
+      available: true,
+      library: { ttlMs: 600_000 },
+    });
+
+    const plugin = new WorkflowsPlugin(initializerContext);
+    plugin.setup(coreMock.createSetup(), {
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      workflowsExtensions: workflowsExtensionsMock.createSetup(),
+    });
+    plugin.start(coreMock.createStart(), {
+      taskManager: {} as any,
+      workflowsExecutionEngine: {} as any,
+      actions: {} as any,
+      spaces: {} as any,
+      workflowsExtensions: workflowsExtensionsMock.createStart(),
+      licensing: {} as any,
+    });
+
+    setStopping.mockClear();
+    plugin.stop();
+
+    expect(setStopping).toHaveBeenCalledWith(true);
   });
 });

@@ -1,5 +1,8 @@
 {
-  "sha1": "85796a232e56cf7d151233b307ba3432f36b0d71",
+  "sha1": "00842f1b0efbe1a2eb72c71375f2c3fa953089e0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "c6ec4a747994e21-5b82e5b7ac2b08c",
@@ -14,7 +17,7 @@
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/axe.spec.ts",
         "line": 16,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -29,120 +32,8 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/axe.spec.ts",
-        "line": 41,
-        "column": 9
-      }
-    },
-    {
-      "id": "cfef694ab86356f-79526e55b73e4e5",
-      "title": "EUI testing wrapper: EuiCheckBox checkbox",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/check_box.spec.ts",
-        "line": 23,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-3428dc06d0d6721",
-      "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-5331af19c193bbb",
-      "title": "EUI testing wrapper: EuiComboBox with the single selection",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 68,
-        "column": 9
-      }
-    },
-    {
-      "id": "971167b9a56711d-061f9fed6becd0d",
-      "title": "EUI testing wrapper: EuiDataGrid data grid, run",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/data_grid.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "185afa2a6726770-da531fcc62a90e7",
-      "title": "EUI testing wrapper: EuiFieldText fieldText",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/field_text.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "61a2eae02548a18-ecfb93690a45e0e",
-      "title": "EUI testing wrapper: EuiSelectable selectable with search field",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/selectable.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "eb199ae3cbbe1c6-2dd52577680db76",
-      "title": "EUI testing wrapper: EuiToast toast",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/toast.spec.ts",
-        "line": 19,
-        "column": 9
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -166,7 +57,7 @@
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_serverless.spec.ts",
         "line": 23,
-        "column": 9
+        "column": 68
       }
     },
     {
@@ -179,7 +70,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_stateful.spec.ts",
-        "line": 19,
+        "line": 18,
         "column": 9
       }
     }

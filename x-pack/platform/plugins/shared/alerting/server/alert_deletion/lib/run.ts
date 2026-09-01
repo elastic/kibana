@@ -12,7 +12,7 @@ import { deleteAlertsForSpace, logFailedDeletion, logSuccessfulDeletion } from '
 export const runTask = async (
   context: AlertDeletionContext,
   taskInstance: ConcreteTaskInstance,
-  abortController: AbortController
+  signal: AbortSignal
 ) => {
   const runDate = new Date();
   try {
@@ -29,7 +29,7 @@ export const runTask = async (
           context,
           settings,
           spaceId,
-          abortController
+          signal
         );
 
         if (errors && errors.length > 0) {

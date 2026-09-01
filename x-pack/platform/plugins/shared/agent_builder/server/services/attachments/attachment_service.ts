@@ -7,6 +7,7 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createAttachmentTypeRegistry,
@@ -38,7 +39,15 @@ export class AttachmentServiceImpl implements AttachmentService {
 
   setup(): AttachmentServiceSetup {
     return {
-      registerType: (attachmentType) => this.attachmentTypeRegistry.register(attachmentType),
+      registerType: (attachmentType) => {
+        if (!isAllowedBuiltinAttachment(attachmentType.id)) {
+          throw new Error(
+            `Built-in attachment with id "${attachmentType.id}" is not in the list of allowed built-in attachments.
+             Please add it to the list of allowed built-in attachments in the "@kbn/agent-builder-server/allow_lists.ts" file.`
+          );
+        }
+        return this.attachmentTypeRegistry.register(attachmentType);
+      },
     };
   }
 

@@ -108,6 +108,7 @@ export enum SecurityPageName {
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
+  alertAnalysisWorkflow = 'alert_analysis_workflow',
   configurations = 'configurations',
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
@@ -130,4 +131,24 @@ export enum SecurityPageName {
    * Ingest Hub Onboarding
    */
   onboarding = 'onboarding',
+
+  /**
+   * PND pages.
+   *
+   * These live on the `pnd` plugin rather than `securitySolutionUI`, so their link ids are built with
+   * `pndLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
+   * name is the same concept, and the app prefix is what distinguishes the two links.
+   */
+  pndChats = 'chats',
+  pndRecords = 'records',
+  pndThreatHunt = 'threat_hunt',
+  pndStreams = 'streams',
+  pndWatches = 'watches',
+  pndWatchesWorkers = 'watches_workers',
+  pndWatchesSkills = 'watches_skills',
+  pndWatchFloor = 'watch_floor',
+  pndWatchOfficer = 'watch_officer',
+  pndWatchDark = 'watch_dark',
+  pndWatchDeep = 'watch_deep',
+  pndWatchDetection = 'watch_detection',
 }

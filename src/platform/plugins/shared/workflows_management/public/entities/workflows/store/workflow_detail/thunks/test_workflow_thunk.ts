@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { extractWorkflowMetadata } from '../../../../../common/lib/telemetry/utils/extract_workflow_metadata';
@@ -80,8 +80,20 @@ export const testWorkflowThunk = createAsyncThunk<
 
       return response;
     } catch (error) {
-      // Extract error message from HTTP error body if available
-      const errorMessage = error.body?.message || error.message || 'Failed to test workflow';
+      // Extract error message from HTTP error body if available. Validation
+      // failures carry the specific reasons under `body.attributes.validationErrors`
+      // (e.g. "Parallel step ... has a branch body containing unsupported
+      // flow-control"); surface those instead of the generic top-level message so
+      // the user sees *why* the workflow is invalid, not just that it is. Kibana's
+      // error-response schema strips unknown top-level fields, so the reasons are
+      // carried under the schema-allowed `attributes`.
+      const baseMessage = error.body?.message || error.message || 'Failed to test workflow';
+      const validationErrors: string[] | undefined =
+        error.body?.attributes?.validationErrors ?? error.body?.validationErrors;
+      const errorMessage =
+        Array.isArray(validationErrors) && validationErrors.length > 0
+          ? `${baseMessage}:\n${validationErrors.map((reason) => `• ${reason}`).join('\n')}`
+          : baseMessage;
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
 
       const errorState = getState();

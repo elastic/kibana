@@ -24,6 +24,8 @@ const strictChartTypes = new Set([
   'tag_cloud',
   'region_map',
   'metric',
+  'legacy_metric',
+  'xy',
 ]);
 
 /**
@@ -49,11 +51,11 @@ export function validateStateTransformsFn(
     const newApiConfig = builder.toAPIFormat(attributes);
 
     expect(() => {
-      schema.validate(newApiConfig);
+      schema.parse(newApiConfig);
     }).not.toThrow();
 
     expect(() => {
-      lensApiConfigSchema.validate(newApiConfig);
+      lensApiConfigSchema.parse(newApiConfig);
     }).not.toThrow();
 
     // Temporary strict mode, all checks should eventually be strict

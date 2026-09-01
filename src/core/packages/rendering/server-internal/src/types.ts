@@ -38,7 +38,6 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   darkMode: DarkModeValue;
   stylesheetPaths: string[];
-  scriptPaths: string[];
   /** Font URLs to preload via <link rel="preload" as="font"> (rspack mode only) */
   preloadFonts?: string[];
   /** When true, adds font-display: swap to @font-face declarations (rspack mode only) */

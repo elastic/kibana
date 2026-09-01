@@ -904,3 +904,17 @@ export const createConvertProcessor = i18n.translate(
     defaultMessage: 'Create a convert processor',
   }
 );
+
+export const qualityIssuesTableCaption = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTableCaption',
+  {
+    defaultMessage: 'Quality issues',
+  }
+);
+
+export const failedDocsInfoTableCaption = i18n.translate(
+  'xpack.datasetQuality.details.failedDocsInfoTableCaption',
+  {
+    defaultMessage: 'Failed documents information',
+  }
+);

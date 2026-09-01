@@ -137,6 +137,7 @@ export class TimePickerPageObject extends FtrService {
       // The component's toTestSubj replaces all whitespace with underscores
       const presetTestSubj = `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`;
       await this.testSubjects.exists(presetTestSubj, { timeout: 5000 });
+      await this.testSubjects.scrollIntoView(presetTestSubj);
       await this.testSubjects.click(presetTestSubj);
       await this.testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -178,7 +179,7 @@ export class TimePickerPageObject extends FtrService {
       await input.clearValue();
       await input.type(value);
     } else {
-      await this.testSubjects.setValue(dataTestSubj, value);
+      await this.testSubjects.setValue(dataTestSubj, value, { clearWithKeyboard: true });
     }
 
     await this.testSubjects.pressEnter(dataTestSubj);
@@ -249,9 +250,22 @@ export class TimePickerPageObject extends FtrService {
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
       // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
       const picker = await this.testSubjects.find('dateRangePickerControlButton');
+
+      // In ES|QL mode the picker stays disabled until the time field has been resolved asynchronously.
+      // Wait for it to be enabled.
+      if (!(await picker.isEnabled())) {
+        this.log.debug('dateRangePickerControlButton is disabled, waiting for it to be enabled');
+        return false;
+      }
+
       await picker.moveMouseTo();
       await picker.click();
-      await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 });
+
+      if (!(await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 }))) {
+        this.log.debug('dateRangePickerInput did not appear after opening the picker, retrying');
+        return false;
+      }
+
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
       // Verify the button reflects the new range.

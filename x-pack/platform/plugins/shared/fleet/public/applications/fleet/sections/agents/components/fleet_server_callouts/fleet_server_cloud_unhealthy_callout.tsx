@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -20,45 +21,53 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<
 > = ({ deploymentUrl }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut
-      iconType="warning"
-      color="warning"
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.fleet.fleetServerCloudUnhealthyCallout.calloutTitle"
           defaultMessage="Fleet Server is not Healthy"
         />
       }
-    >
-      <FormattedMessage
-        id="xpack.fleet.fleetServerCloudRequiredCallout.calloutDescription"
-        defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in your {cloudDeploymentLink}. For more information see the {guideLink}."
-        values={{
-          cloudDeploymentLink: (
-            <EuiLink href={deploymentUrl} target="_blank" external>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerCloudRequiredCallout.cloudDeploymentLink"
-                defaultMessage="cloud deployment"
-              />
-            </EuiLink>
-          ),
-          guideLink: (
-            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerCloudRequiredCallout.guideLink"
-                defaultMessage="Fleet and Elastic Agent Guide"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <EuiButton href={deploymentUrl} target="_blank" color="warning" fill>
+      text={
         <FormattedMessage
-          id="xpack.fleet.fleetServerCloudRequiredCallout.editDeploymentButtonLabel"
-          defaultMessage="Edit deployment"
+          id="xpack.fleet.fleetServerCloudRequiredCallout.calloutDescription"
+          defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in your {cloudDeploymentLink}. For more information see the {guideLink}."
+          values={{
+            cloudDeploymentLink: (
+              <EuiLink href={deploymentUrl} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerCloudRequiredCallout.cloudDeploymentLink"
+                  defaultMessage="cloud deployment"
+                />
+              </EuiLink>
+            ),
+            guideLink: (
+              <EuiLink
+                href={docLinks.links.fleet.fleetServerAddFleetServer}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerCloudRequiredCallout.guideLink"
+                  defaultMessage="Fleet and Elastic Agent Guide"
+                />
+              </EuiLink>
+            ),
+          }}
         />
-      </EuiButton>
-    </EuiCallOut>
+      }
+      actionProps={{
+        primary: {
+          href: deploymentUrl,
+          target: '_blank',
+          children: (
+            <FormattedMessage
+              id="xpack.fleet.fleetServerCloudRequiredCallout.editDeploymentButtonLabel"
+              defaultMessage="Edit deployment"
+            />
+          ),
+        },
+      }}
+    />
   );
 };

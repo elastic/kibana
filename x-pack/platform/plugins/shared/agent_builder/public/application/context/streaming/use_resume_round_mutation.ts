@@ -10,9 +10,9 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Conversation, ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
+import { useKibana } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
 import { queryKeys } from '../../query_keys';
@@ -75,6 +75,9 @@ export const useResumeRoundMutation = ({
       const executionId = uuidv4();
       controllersRef.current.set(vars.conversationId, { controller, executionId });
 
+      // Optimistically populate ask_user_question step answers before clearing the prompt —
+      // pending_prompts is needed to reconstruct the step, so this must come first.
+      streamActions.setAskUserQuestionAnswers(vars.prompts);
       // Drop pending prompts from the round — the user has answered, the round is back in progress.
       streamActions.clearPendingPrompts();
 
@@ -90,6 +93,7 @@ export const useResumeRoundMutation = ({
           agentId: vars.agentId,
           connectorId: vars.connectorId,
           browserApiTools: browserApiToolsMetadata,
+          projectRouting: services.plugins.cps?.cpsManager?.getProjectRouting(),
         });
 
         await subscribeToChatEvents({

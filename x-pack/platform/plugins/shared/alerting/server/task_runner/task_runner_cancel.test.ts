@@ -65,8 +65,9 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
+const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
-  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  v4: () => RULE_EXECUTION_UUID,
 }));
 jest.mock('../lib/wrap_scoped_cluster_client', () => ({
   createWrappedScopedClusterClientFactory: jest.fn(),
@@ -99,7 +100,7 @@ describe('Task Runner Cancel', () => {
     mockedTaskInstance = mockTaskInstance();
 
     alertingEventLoggerInitializer = {
-      executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      executionId: RULE_EXECUTION_UUID,
       savedObjectId: mockedTaskInstance.params.alertId,
       savedObjectType: RULE_SAVED_OBJECT_TYPE,
       spaceId: mockedTaskInstance.params.spaceId,
@@ -202,14 +203,19 @@ describe('Task Runner Cancel', () => {
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });
 
-  test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
-    const taskRunner = new TaskRunner({
+  const createTaskRunner = (overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}) =>
+    new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
       internalSavedObjectsRepository,
+      executionUuid: RULE_EXECUTION_UUID,
+      ...overrides,
     });
+
+  test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
+    const taskRunner = createTaskRunner();
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -220,23 +226,55 @@ describe('Task Runner Cancel', () => {
     expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `Aborting any in-progress ES searches for rule type test with id 1`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       `skipping persisting alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       7,
       `skipping updating alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -319,15 +357,8 @@ describe('Task Runner Cancel', () => {
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: {
-        ...taskRunnerFactoryInitializerParams,
-        cancelAlertsOnRuleTimeout: false,
-      },
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
+    const taskRunner = createTaskRunner({
+      context: { ...taskRunnerFactoryInitializerParams, cancelAlertsOnRuleTimeout: false },
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -389,13 +420,7 @@ describe('Task Runner Cancel', () => {
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
-    const taskRunner = new TaskRunner({
-      ruleType: updatedRuleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner({ ruleType: updatedRuleType });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -452,13 +477,7 @@ describe('Task Runner Cancel', () => {
         return { state: {} };
       }
     );
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -479,38 +498,96 @@ describe('Task Runner Cancel', () => {
 
   function testLogger() {
     expect(logger.debug).toHaveBeenCalledTimes(8);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       'Aborting any in-progress ES searches for rule type test with id 1',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       `Updating rule task for test rule with id 1 - execution error due to timeout`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       8,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
   }
 
@@ -551,10 +628,16 @@ describe('Task Runner Cancel', () => {
         consumer: 'bar',
       },
     });
+    expect(alertingEventLogger.initialize).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({ executionId: RULE_EXECUTION_UUID }),
+      })
+    );
     expect(alertingEventLogger.addOrUpdateRuleData).toHaveBeenCalledWith({
       name: mockedRuleTypeSavedObject.name,
       consumer: mockedRuleTypeSavedObject.consumer,
       revision: mockedRuleTypeSavedObject.revision,
+      tags: mockedRuleTypeSavedObject.tags,
     });
     expect(alertingEventLogger.getStartAndDuration).toHaveBeenCalled();
 
