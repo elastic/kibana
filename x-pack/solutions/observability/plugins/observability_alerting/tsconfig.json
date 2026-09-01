@@ -6,8 +6,8 @@
   "include": ["public/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-plugin",
-    "@kbn/alerting-v2-utils",
     "@kbn/core",
     "@kbn/core-application-browser-mocks",
     "@kbn/deeplinks-observability",
