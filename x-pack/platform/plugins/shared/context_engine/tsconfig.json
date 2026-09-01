@@ -72,6 +72,7 @@
     "@kbn/es-types",
     "@kbn/task-manager-plugin",
     "@kbn/alerts-ui-shared",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/esql-utils"
   ]
 }
