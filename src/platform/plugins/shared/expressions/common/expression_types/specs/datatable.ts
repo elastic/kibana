@@ -202,6 +202,11 @@ export interface DatatableMeta {
    */
   source?: string;
 
+  /**
+   * Whether approximate results were applied for the query that generated the `Datatable`.
+   */
+  approximationApplied?: boolean;
+
   [key: string]: unknown;
 }
 
