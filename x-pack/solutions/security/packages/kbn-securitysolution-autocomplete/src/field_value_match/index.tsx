@@ -180,7 +180,12 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
   const handleCreateOption = useCallback(
     (option: string): boolean | undefined => {
-      const err = paramIsValid(option, selectedField, isRequired, touched);
+      const trimmedOption = option.trim();
+      if (!trimmedOption) {
+        return false;
+      }
+
+      const err = paramIsValid(trimmedOption, selectedField, isRequired, touched);
       handleError(err);
       handleWarning(warning);
 
@@ -190,8 +195,8 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         return false;
       }
 
-      handleSpacesWarning(option);
-      onChange(option);
+      handleSpacesWarning(trimmedOption);
+      onChange(trimmedOption);
       return undefined;
     },
     [

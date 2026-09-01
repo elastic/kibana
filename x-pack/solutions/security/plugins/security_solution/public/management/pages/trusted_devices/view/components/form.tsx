@@ -27,8 +27,11 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import {
+  CONTROL_CHARACTER_ERROR,
   OperatingSystem,
   TrustedDeviceConditionEntryField,
+  getInputValueCharacterIssue,
+  InputValueCharacterIssue,
   isTrustedDeviceFieldAvailableForOs,
 } from '@kbn/securitysolution-utils';
 import type {
@@ -155,12 +158,14 @@ const DEVICE_EVENTS_INDEX_NAMES = [DEVICE_EVENTS_INDEX_PATTERN];
 
 interface EntryValidationResult {
   duplicateErrors: string[];
+  characterErrors: string[];
   warnings: string[];
   anyEntryEmpty: boolean;
 }
 
 const validateEntries = (entries: ExceptionListItemSchema['entries']): EntryValidationResult => {
   const duplicateErrors: string[] = [];
+  const characterErrors: string[] = [];
   const warnings: string[] = [];
   const fieldCounts = new Map<string, number>();
   let anyEntryEmpty = false;
@@ -176,6 +181,10 @@ const validateEntries = (entries: ExceptionListItemSchema['entries']): EntryVali
 
       if (isEmpty) {
         anyEntryEmpty = true;
+      } else if (
+        getInputValueCharacterIssue(entry.value) === InputValueCharacterIssue.CONTROL_CHARACTER
+      ) {
+        characterErrors.push(CONTROL_CHARACTER_ERROR);
       } else if (
         typeof entry.value === 'string' &&
         entry.type === 'wildcard' &&
@@ -194,7 +203,7 @@ const validateEntries = (entries: ExceptionListItemSchema['entries']): EntryVali
     }
   }
 
-  return { duplicateErrors, warnings, anyEntryEmpty };
+  return { duplicateErrors, characterErrors, warnings, anyEntryEmpty };
 };
 
 const computeValidation = (
@@ -226,8 +235,14 @@ const computeValidation = (
     if (formData.entries?.length) {
       const entryValidation = validateEntries(formData.entries);
 
-      if (entryValidation.duplicateErrors.length > 0) {
-        errors.entries = entryValidation.duplicateErrors;
+      if (
+        entryValidation.duplicateErrors.length > 0 ||
+        entryValidation.characterErrors.length > 0
+      ) {
+        errors.entries = [
+          ...entryValidation.duplicateErrors,
+          ...entryValidation.characterErrors,
+        ];
       }
 
       if (entryValidation.anyEntryEmpty && hasVisitedAnyEntry) {
@@ -787,7 +802,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
     const handleEntryValueChange = useCallback(
       (index: number, options: Array<EuiComboBoxOptionOption<string>>) => {
-        const value = options.length > 0 ? options[0].label : '';
+        const value = options.length > 0 ? options[0].label.trim() : '';
         updateEntryAtIndex(index, { value });
       },
       [updateEntryAtIndex]
@@ -797,8 +812,16 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       (index: number) => {
         setHasVisitedAnyEntry(true);
         updateVisitedFields({ ...visitedFields, entries: true });
+
+        const entry = currentItem.entries?.[index];
+        if (entry && 'value' in entry && typeof entry.value === 'string') {
+          const trimmedValue = entry.value.trim();
+          if (trimmedValue !== entry.value) {
+            updateEntryAtIndex(index, { value: trimmedValue });
+          }
+        }
       },
-      [visitedFields, updateVisitedFields]
+      [currentItem.entries, updateEntryAtIndex, updateVisitedFields, visitedFields]
     );
 
     const handleAddEntry = useCallback(() => {

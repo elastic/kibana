@@ -198,6 +198,40 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     expect(mockOnChange).toHaveBeenCalledWith(['127.0.0.1']);
   });
 
+  test('it trims created values', () => {
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('ip')}
+        selectedValue={[]}
+      />
+    );
+
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('  127.0.0.1  ');
+
+    expect(mockOnChange).toHaveBeenCalledWith(['127.0.0.1']);
+  });
+
   test('it invokes "onChange" when new value selected', async () => {
     const mockOnChange = jest.fn();
     wrapper = mount(

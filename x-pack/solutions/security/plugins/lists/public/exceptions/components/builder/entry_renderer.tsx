@@ -60,8 +60,11 @@ import {
 import {
   OperatingSystem,
   WILDCARD_WARNING,
+  getInputValueCharacterIssue,
+  getInputValueCharacterIssueMessage,
   validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/kql/public';
 import type { HttpStart } from '@kbn/core/public';
@@ -83,6 +86,7 @@ export interface EntryItemProps {
   indexPattern: DataViewBase;
   showLabel: boolean;
   osTypes?: OsTypeArray;
+  listId?: string;
   listType: ExceptionListType;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
@@ -103,6 +107,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   httpService,
   indexPattern,
   osTypes,
+  listId,
   listType,
   onChange,
   onlyShowListOperators = false,
@@ -130,6 +135,21 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     },
     [setWarningsExist]
   );
+
+  const isEndpointArtifactBuilder =
+    listType === ExceptionListTypeEnum.ENDPOINT_EVENTS ||
+    listType === ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS ||
+    (listType === ExceptionListTypeEnum.ENDPOINT &&
+      (listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id ||
+        listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id));
+
+  const getInvisibleCharacterWarning = (value?: string | string[]): string | undefined => {
+    if (!isEndpointArtifactBuilder) {
+      return undefined;
+    }
+
+    return getInputValueCharacterIssueMessage(getInputValueCharacterIssue(value));
+  };
 
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
@@ -426,9 +446,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     switch (type) {
       case OperatorTypeEnum.MATCH:
         const value = typeof entry.value === 'string' ? entry.value : undefined;
-        const fieldMatchWarning = /[*?]/.test(value ?? '')
-          ? getWildcardWithIsOperatorWarning()
-          : undefined;
+        const fieldMatchWarning =
+          getInvisibleCharacterWarning(value) ??
+          (/[*?]/.test(value ?? '') ? getWildcardWithIsOperatorWarning() : undefined);
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}
@@ -451,6 +471,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.MATCH_ANY:
         const values: string[] = Array.isArray(entry.value) ? entry.value : [];
+        const matchAnyWarning = getInvisibleCharacterWarning(values);
         return (
           <AutocompleteFieldMatchAnyComponent
             autocompleteService={autocompleteService}
@@ -467,6 +488,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             indexPattern={indexPattern}
             onError={handleError}
+            onWarning={handleWarning}
+            warning={matchAnyWarning}
             onChange={handleFieldMatchAnyValueChange}
             isRequired
             aria-label={ariaLabel}
@@ -475,8 +498,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
-        let actualWarning: React.ReactNode | string | undefined;
-        if (listType !== 'detection' && listType !== 'rule_default') {
+        let actualWarning: React.ReactNode | string | undefined =
+          getInvisibleCharacterWarning(wildcardValue);
+        if (!actualWarning && listType !== 'detection' && listType !== 'rule_default') {
           let os: OperatingSystem = OperatingSystem.WINDOWS;
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];

@@ -23,7 +23,12 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
-import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
+import {
+  OperatingSystem,
+  getInputValueCharacterIssue,
+  InputValueCharacterIssue,
+  isPathValid,
+} from '@kbn/securitysolution-utils';
 import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
@@ -272,13 +277,25 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         }
 
         // error if invalid hash
-        if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
+        if (field === 'file.hash.*' && values.some((v) => !isValidHash(v.trim()))) {
           newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
         } else {
           delete newValueErrors.INVALID_HASH;
         }
 
-        const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
+        if (
+          values.some(
+            (v) => getInputValueCharacterIssue(v) === InputValueCharacterIssue.CONTROL_CHARACTER
+          )
+        ) {
+          newValueErrors.CONTROL_CHARACTER = createValidationMessage(ERRORS.CONTROL_CHARACTER);
+        } else {
+          delete newValueErrors.CONTROL_CHARACTER;
+        }
+
+        const isInvalidPath = values.some(
+          (v) => !isPathValid({ os, field, type, value: v.trim() })
+        );
         // warn if invalid path
         if (field !== 'file.hash.*' && isInvalidPath) {
           newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
@@ -304,9 +321,27 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [item, validateValues]);
 
     const handleOnValueBlur = useCallback(() => {
+      if (typeof blocklistEntry.value === 'string') {
+        const trimmedValue = blocklistEntry.value.trim();
+        if (trimmedValue !== blocklistEntry.value) {
+          const nextItem = {
+            ...item,
+            entries: [{ ...blocklistEntry, value: trimmedValue }],
+          } as ArtifactFormComponentProps['item'];
+
+          validateValues(nextItem);
+          onChange({
+            isValid: isValid(errorsRef.current),
+            item: nextItem,
+          });
+          setValueVisited({ value: true });
+          return;
+        }
+      }
+
       validateValues(item);
       setValueVisited({ value: true });
-    }, [item, validateValues]);
+    }, [blocklistEntry, item, onChange, validateValues]);
 
     const handleOnNameChange = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -493,7 +528,10 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnValueAdd = useCallback(
       (option: string) => {
-        const splitValues = option.split(',').filter((value) => value.trim());
+        const splitValues = option
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean);
         const value = [...blocklistEntry.value, ...splitValues];
 
         const nextItem = {
