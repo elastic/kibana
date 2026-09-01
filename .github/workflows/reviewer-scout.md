@@ -40,6 +40,7 @@ engine:
 # - Reviewer label events activate, including labels added while creating a PR.
 # - Synchronize/reopened PR events activate when the reviewer label is already present.
 # - Synchronize events for merge commits are ignored; only code pushes activate a new review.
+#   Exception: a merge commit is still reviewed when the run it cancelled (same concurrency lane) never completed a review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -100,6 +101,7 @@ network:
 jobs:
   check_reviewable_commit:
     permissions:
+      actions: read
       contents: read
     uses: ./.github/workflows/check-reviewable-commit.yml
 

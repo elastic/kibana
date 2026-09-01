@@ -47,6 +47,7 @@ engine:
 # - ready_for_review activates the first review when a draft is marked ready.
 # - Adding the ci:draft-checks label activates a review; other label events are ignored.
 # - Synchronize events for merge commits are ignored; only code pushes activate a new review.
+#   Exception: a merge commit is still reviewed when the run it cancelled (same concurrency lane) never completed a review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -229,6 +230,7 @@ jobs:
 
   check_reviewable_commit:
     permissions:
+      actions: read
       contents: read
     uses: ./.github/workflows/check-reviewable-commit.yml
 
