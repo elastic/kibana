@@ -1,3 +1,6 @@
 **/__snapshots__/** linguist-generated=true
 
+# Vendored verbatim from the IANA TLD registry; collapse it in diffs.
+x-pack/solutions/security/plugins/security_solution/server/threat_intel/data/iana_tlds.ts linguist-generated=true
+
 .github/workflows/*.lock.yml linguist-generated=true

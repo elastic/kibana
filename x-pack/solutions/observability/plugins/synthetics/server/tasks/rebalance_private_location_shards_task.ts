@@ -14,6 +14,7 @@ import type {
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settings';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
 import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
@@ -86,6 +87,15 @@ export class RebalancePrivateLocationShardsTask {
     try {
       signal.throwIfAborted();
       const soClient = coreStart.savedObjects.createInternalRepository();
+
+      // Live layer on top of the boot-time config kill-switch: lets an already
+      // scheduled task be paused/resumed without a Kibana restart.
+      const dynamicSettings = await getSyntheticsDynamicSettings(soClient);
+      if (dynamicSettings.rebalancePrivateLocationShardsEnabled === false) {
+        this.debugLog('Rebalance private location shards disabled by dynamic setting; skipping.');
+        return { state: taskInstance.state, schedule };
+      }
+
       const scalableLocations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
         isConditionShardedLocation
       );
