@@ -30,7 +30,7 @@ export interface ExtractedIoc {
   port?: number;
 }
 
-type WorkingIoc = ExtractedIoc & { _offset?: number };
+type WorkingIoc = ExtractedIoc & { _offset?: number; _sectionKind?: SectionKind };
 
 export interface ExtractIocsResult {
   /** How many IOCs were found, before the nested-object cap. */
@@ -806,52 +806,25 @@ export const classifySectionSpans = (text: string): readonly SectionSpan[] => {
   return spans;
 };
 
-/**
- * Determine the highest-priority section kind that contains the IOC value,
- * scanning ALL section spans for a string occurrence of the value.
- *
- * Scans section spans for the IOC value string (not just the first extraction offset).
- * Precedence: 'ioc' > 'references' > null (no span / prose).
- */
-const findBestSectionKind = (
-  value: string,
-  spans: readonly SectionSpan[],
-  refangedText: string
-): SectionKind | null => {
-  const needle = value.toLowerCase();
-  let best: SectionKind | null = null;
-  for (const span of spans) {
-    const spanText = refangedText.slice(span.start, span.end).toLowerCase();
-    if (containsAsToken(spanText, needle)) {
-      if (span.kind === 'ioc') return 'ioc'; // highest priority — short-circuit
-      if (best === null) best = span.kind;
+const sectionKindAtOffset = (
+  offset: number | undefined,
+  spans: readonly SectionSpan[]
+): SectionKind | undefined => {
+  if (offset === undefined) return undefined;
+  let low = 0;
+  let high = spans.length - 1;
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const span = spans[middle];
+    if (offset < span.start) {
+      high = middle - 1;
+    } else if (offset >= span.end) {
+      low = middle + 1;
+    } else {
+      return span.kind;
     }
   }
-  return best;
-};
-
-/**
- * Substring match with token boundaries on both ends.
- *
- * A plain `includes` let a value inherit a section's verdict because some *other*
- * value in that section happened to contain it: prose `evil.com` was promoted on
- * the strength of an IOC-section entry for `not-evil.com`, and `/payload` on
- * `/payload-v2`. Requiring a non-identifier character (or the span edge) on both
- * sides makes the match about the whole token.
- */
-const isTokenBoundary = (char: string | undefined): boolean =>
-  char === undefined || !/[a-z0-9._:/@-]/i.test(char);
-
-const containsAsToken = (haystack: string, needle: string): boolean => {
-  let from = 0;
-  for (;;) {
-    const at = haystack.indexOf(needle, from);
-    if (at === -1) return false;
-    if (isTokenBoundary(haystack[at - 1]) && isTokenBoundary(haystack[at + needle.length])) {
-      return true;
-    }
-    from = at + 1;
-  }
+  return undefined;
 };
 
 /**
@@ -909,14 +882,11 @@ const sectionOverrideFor = (
 };
 
 const applySectionOverrides = (
-  iocs: readonly WorkingIoc[],
-  spans: readonly SectionSpan[],
-  refangedText: string
+  iocs: readonly WorkingIoc[]
 ): void => {
-  if (spans.length === 0) return;
   for (const ioc of iocs) {
-    const kind = findBestSectionKind(ioc.value, spans, refangedText);
-    const override = kind === null ? null : sectionOverrideFor(ioc, kind);
+    const override =
+      ioc._sectionKind === undefined ? null : sectionOverrideFor(ioc, ioc._sectionKind);
     if (override) {
       ioc.tier = override.tier;
       ioc.tier_basis = override.basis;
@@ -927,6 +897,7 @@ const applySectionOverrides = (
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
   // Pre-pass: recover defanged IOCs before regex matching.
   const refangedText = refang(text);
+  const sectionSpans = classifySectionSpans(refangedText);
   const seen = new Set<string>();
   const iocByKey = new Map<string, WorkingIoc>();
   const iocs: WorkingIoc[] = [];
@@ -978,7 +949,14 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     )
   );
 
-  const pushIoc = (ioc: WorkingIoc) => {
+  const recordSectionKind = (ioc: WorkingIoc, offset: number | undefined): void => {
+    const occurrenceKind = sectionKindAtOffset(offset, sectionSpans);
+    if (occurrenceKind === 'ioc' || (occurrenceKind === 'references' && !ioc._sectionKind)) {
+      ioc._sectionKind = occurrenceKind;
+    }
+  };
+
+  const pushIoc = (ioc: WorkingIoc): WorkingIoc | undefined => {
     // An over-long value is not a usable indicator and it is actively harmful.
     // `extracted.iocs.value` is a keyword on the reports index, and a keyword term
     // over 32,766 bytes is a hard Elasticsearch error that rejects the whole report
@@ -989,12 +967,18 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     //
     // Dropped rather than truncated: a truncated URL or hash is a different value,
     // and publishing it as an indicator would be worse than publishing nothing.
-    if (ioc.value.length > MAX_IOC_VALUE_LENGTH) return;
+    if (ioc.value.length > MAX_IOC_VALUE_LENGTH) return undefined;
     const dedupKey = iocDedupKey(ioc.type, ioc.value);
-    if (seen.has(dedupKey)) return;
+    const existing = iocByKey.get(dedupKey);
+    if (existing) {
+      recordSectionKind(existing, ioc._offset);
+      return existing;
+    }
+    recordSectionKind(ioc, ioc._offset);
     seen.add(dedupKey);
     iocs.push(ioc);
     iocByKey.set(dedupKey, ioc);
+    return ioc;
   };
 
   // ── PASS 1: emails ────────────────────────────────────────────────────────
@@ -1070,33 +1054,31 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   }
 
   // ── Corroboration signal 2: URL hosts ─────────────────────────────────────
-  const urlHostList: string[] = rawUrls.flatMap((url) => {
+  const urlHostsWithOffsets = rawUrls.flatMap((url, index) => {
     try {
-      return [new URL(url).hostname.toLowerCase()];
+      return [{ host: new URL(url).hostname.toLowerCase(), offset: rawUrlOffsets[index] }];
     } catch {
       return [];
     }
   });
+  const urlHostList = urlHostsWithOffsets.map(({ host }) => host);
   const urlHosts: ReadonlySet<string> = new Set(urlHostList);
 
   // Derive URL host domains as explicit IOCs (like CIDR → bare IP).
   // The URL consumes its span; the host must be derived explicitly so it
   // isn't lost. Run through domain filter pipeline — urlHosts corroboration
   // means ambiguous TLDs (evil.py) correctly pass the gate here.
-  for (let i = 0; i < urlHostList.length; i++) {
-    const host = urlHostList[i];
+  for (const { host, offset } of urlHostsWithOffsets) {
     const result = classifyDomain(host, defangedDomains, urlHosts);
-    const dedupKey = `domain:${host}`;
-    if (result.emit && !seen.has(dedupKey)) {
-      seen.add(dedupKey);
-      iocs.push({
+    if (result.emit) {
+      pushIoc({
         type: 'domain',
         value: host,
         defanged: defangValue('domain', host, defang),
         tier: result.tier,
         tier_heuristic: result.tier,
         tier_basis: result.basis,
-        _offset: rawUrlOffsets[i],
+        _offset: offset,
       });
     }
   }
@@ -1219,54 +1201,35 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           tier = 'uncertain';
           basis = 'uncertain_default';
         }
-        const dedupKey = `ip:${host}`;
-        if (!seen.has(dedupKey)) {
-          seen.add(dedupKey);
-          const ioc: WorkingIoc = {
-            type: 'ip',
-            value: host,
-            defanged: defangValue('ip', host, defang),
-            tier,
-            tier_heuristic: tier,
-            tier_basis: basis,
-            port: portNum,
-            _offset: idx,
-          };
-          iocs.push(ioc);
-          iocByKey.set(dedupKey, ioc);
-        } else {
-          // Already seen (e.g. derived from CIDR pass or atomic pass) — merge port if
-          // the existing entry has no port yet (first socket wins).
-          const existing = iocByKey.get(dedupKey);
-          if (existing && existing.port === undefined) {
-            existing.port = portNum;
-          }
+        const stored = pushIoc({
+          type: 'ip',
+          value: host,
+          defanged: defangValue('ip', host, defang),
+          tier,
+          tier_heuristic: tier,
+          tier_basis: basis,
+          port: portNum,
+          _offset: idx,
+        });
+        if (stored && stored.port === undefined) {
+          stored.port = portNum;
         }
       } else {
         // Domain host — run through domain filter pipeline
         const result = classifyDomain(host, defangedDomains, urlHosts);
         if (result.emit) {
-          const dedupKey = `domain:${host}`;
-          if (!seen.has(dedupKey)) {
-            seen.add(dedupKey);
-            const ioc: WorkingIoc = {
-              type: 'domain',
-              value: host,
-              defanged: defangValue('domain', host, defang),
-              tier: result.tier,
-              tier_heuristic: result.tier,
-              tier_basis: result.basis,
-              port: portNum,
-              _offset: idx,
-            };
-            iocs.push(ioc);
-            iocByKey.set(dedupKey, ioc);
-          } else {
-            // Merge port onto existing domain IOC if not yet set.
-            const existing = iocByKey.get(dedupKey);
-            if (existing && existing.port === undefined) {
-              existing.port = portNum;
-            }
+          const stored = pushIoc({
+            type: 'domain',
+            value: host,
+            defanged: defangValue('domain', host, defang),
+            tier: result.tier,
+            tier_heuristic: result.tier,
+            tier_basis: result.basis,
+            port: portNum,
+            _offset: idx,
+          });
+          if (stored && stored.port === undefined) {
+            stored.port = portNum;
           }
         }
       }
@@ -1279,9 +1242,9 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
   // Hashes
   {
-    const matches = remainderText.match(new RegExp(HASH_PATTERN.source, HASH_PATTERN.flags)) ?? [];
-    for (const raw of matches) {
-      const value = raw.toLowerCase();
+    const pattern = new RegExp(HASH_PATTERN.source, HASH_PATTERN.flags);
+    for (const match of matchesWithOffset(remainderText, pattern)) {
+      const value = match[0].toLowerCase();
       pushIoc({
         type: 'hash',
         value,
@@ -1289,14 +1252,16 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier: 'discriminating',
         tier_heuristic: 'discriminating',
         tier_basis: 'hash_high_entropy',
+        _offset: match.index,
       });
     }
   }
 
   // IPs
   {
-    const matches = remainderText.match(new RegExp(IP_PATTERN.source, IP_PATTERN.flags)) ?? [];
-    for (const raw of matches) {
+    const pattern = new RegExp(IP_PATTERN.source, IP_PATTERN.flags);
+    for (const match of matchesWithOffset(remainderText, pattern)) {
+      const raw = match[0];
       let tier: IocTier;
       let basis: string;
       if (isPrivateIp(raw)) {
@@ -1316,6 +1281,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier,
         tier_heuristic: tier,
         tier_basis: basis,
+        _offset: match.index,
       });
     }
   }
@@ -1343,25 +1309,21 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // Step f — longest-match PSL dedup (reference/denied candidates are exempt).
   const filteredDomains = longestMatchDomainDedup(candidateDomains);
   for (const { domain, tier, basis, offset } of filteredDomains) {
-    const dedupKey = `domain:${domain}`;
-    if (!seen.has(dedupKey)) {
-      seen.add(dedupKey);
-      iocs.push({
-        type: 'domain',
-        value: domain,
-        defanged: defangValue('domain', domain, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: offset,
-      });
-    }
+    pushIoc({
+      type: 'domain',
+      value: domain,
+      defanged: defangValue('domain', domain, defang),
+      tier,
+      tier_heuristic: tier,
+      tier_basis: basis,
+      _offset: offset,
+    });
   }
 
   // ── Section override post-pass ────────────────────────────────────────────
   // Runs only when the input text contains structured ## headings. Ordinary
   // plain text produces no section spans, leaving all tier assignments unchanged.
-  applySectionOverrides(iocs, classifySectionSpans(refangedText), refangedText);
+  applySectionOverrides(iocs);
 
   // Sorted-set fingerprint of the anchor-eligible IOC values in this report.
   // Only discriminating / contextual / uncertain tiers are hashed — reference and
@@ -1383,7 +1345,9 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           )
           .digest('hex');
 
-  const cleanedIocs: ExtractedIoc[] = iocs.map(({ _offset: _, ...rest }) => rest);
+  const cleanedIocs: ExtractedIoc[] = iocs.map(
+    ({ _offset: _offset, _sectionKind: _sectionKind, ...rest }) => rest
+  );
 
   // Highest tier first, so a truncated report keeps its most promotable indicators
   // rather than whichever happened to appear earliest in the text.

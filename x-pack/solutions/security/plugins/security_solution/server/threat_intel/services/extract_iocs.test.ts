@@ -359,12 +359,13 @@ describe('extract_iocs — DROP side (precision filters)', () => {
       expect(domainValues(r)).toContain('malicious.evil.top');
     });
 
-    test('handles a large set of unrelated domains without pairwise suffix scans', () => {
+    test('handles a large structured set without pairwise suffix or section scans', () => {
       const domains = Array.from({ length: 10_000 }, (_, index) => `node${index}.evil${index}.com`);
-      const r = extractIocs({ text: domains.join(' ') });
+      const r = extractIocs({ text: `## IOCs\n${domains.join(' ')}` });
 
       expect(r.count).toBe(domains.length);
       expect(r.truncated).toBe(true);
+      expect(r.iocs[0].tier_basis).toBe('ioc_section');
     });
   });
 });
