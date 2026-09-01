@@ -450,6 +450,22 @@ GET .kibana*/_search
 To use normal RBAC authorization, edit each affected rule to update the API key.
 ====
 
+// Connectors
+[discrete]
+[[breaking-283150]]
+.[Connectors] Email connector now verifies TLS certificates for HTTPS proxies. (8.19.21)
+[%collapsible]
+====
+*Details* +
+{kib} now ships nodemailer 9, which validates the proxy server's TLS certificate when the email connector sends mail through an HTTPS proxy. Earlier versions skipped that check, so a proxy with a self-signed, expired, or hostname-mismatched certificate now causes sending to fail. Hosted and cloud SMTP with public certificate authorities is unaffected. View {kibana-pull}283150[#283150].
+
+*Impact* +
+Self-managed deployments that route email through an HTTPS proxy with a certificate that isn't trusted by default can no longer send email until TLS verification is updated.
+
+*Action* +
+Trust the proxy certificate, or set `xpack.actions.ssl.proxyVerificationMode: none` to restore the previous behavior. Note that `certificate` behaves the same as `full` on the proxy connection: a custom CA or relaxed hostname check does not apply there.
+====
+
 // Data views
 
 [discrete]

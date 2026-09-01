@@ -14,7 +14,7 @@ import {
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import type { GetMetadataListRequestQuery } from '../../../common/api/endpoint';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import {
@@ -41,7 +41,7 @@ export const fetchEndpointMetadata = async (
           'Elastic-Api-Version': '2023-10-31',
         },
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
   ).data;
 };
 
@@ -63,7 +63,7 @@ export const fetchEndpointMetadataList = async (
           ...otherOptions,
         },
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
   ).data;
 };
 

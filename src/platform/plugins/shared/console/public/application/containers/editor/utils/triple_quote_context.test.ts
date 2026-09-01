@@ -61,7 +61,7 @@ describe('getTripleQuoteContext', () => {
 
     expect(
       getTripleQuoteContext(model, { lineNumber: 3, column: 5 }, selectedRequests, parsedRequests)
-    ).toEqual({ insideTripleQuotes: true, insideEsqlQuery: false });
+    ).toEqual({ insideTripleQuotes: true, insideEsqlQuery: false, insideString: true });
   });
 
   it('SHOULD retain ES|QL context for a parser-recovered request inside a query string', () => {
@@ -78,6 +78,6 @@ describe('getTripleQuoteContext', () => {
 
     expect(
       getTripleQuoteContext(model, { lineNumber: 3, column: 5 }, selectedRequests, parsedRequests)
-    ).toEqual({ insideTripleQuotes: true, insideEsqlQuery: true });
+    ).toEqual({ insideTripleQuotes: true, insideEsqlQuery: true, insideString: true });
   });
 });

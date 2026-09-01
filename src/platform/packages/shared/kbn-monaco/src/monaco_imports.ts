@@ -9,6 +9,11 @@
 
 /* eslint-disable @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import {
+  MenuId,
+  MenuRegistry,
+  type MenuItem,
+} from 'monaco-editor/esm/vs/platform/actions/common/actions.js';
 
 import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
 import 'monaco-editor/esm/vs/base/browser/defaultWorkerFactory';
@@ -34,6 +39,7 @@ import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.j
 import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Needed for Search bar functionality
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality
 import 'monaco-editor/esm/vs/editor/contrib/contextmenu/browser/contextmenu.js'; // Needed for enabling custom Monaco context menu
+import 'monaco-editor/esm/vs/editor/contrib/clipboard/browser/clipboard.js'; // Needed for native Cut/Copy/Paste context menu actions (#284086)
 
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
@@ -55,6 +61,46 @@ export {
 } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
 
 import type { CustomLangModuleType } from './types';
+
+const CLIPBOARD_ACTION_IDS = new Set([
+  'editor.action.clipboardCutAction',
+  'editor.action.clipboardCopyAction',
+  'editor.action.clipboardPasteAction',
+]);
+
+/** Returns Monaco's native clipboard actions for the editor context menu. */
+export const getClipboardMenuActions = (): MenuItem[] =>
+  MenuRegistry.getMenuItems(MenuId.EditorContext).filter((menuItem) =>
+    CLIPBOARD_ACTION_IDS.has(menuItem.command?.id ?? '')
+  );
+
+export interface ClipboardContextMenuLabels {
+  cut: string;
+  copy: string;
+  paste: string;
+}
+
+/** Applies translated labels to Monaco's native clipboard context menu actions. */
+export const setClipboardContextMenuLabels = ({
+  cut,
+  copy,
+  paste,
+}: ClipboardContextMenuLabels): void => {
+  const actionLabels = new Map([
+    ['editor.action.clipboardCutAction', cut],
+    ['editor.action.clipboardCopyAction', copy],
+    ['editor.action.clipboardPasteAction', paste],
+  ]);
+
+  for (const menuItem of getClipboardMenuActions()) {
+    if (menuItem.command) {
+      const actionLabel = actionLabels.get(menuItem.command.id);
+      if (actionLabel) {
+        menuItem.command.title = actionLabel;
+      }
+    }
+  }
+};
 
 const languageThemeResolverDefinitions = new Map<
   string,

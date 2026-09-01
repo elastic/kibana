@@ -31,7 +31,10 @@ import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
-import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import {
+  SyncPrivateLocationMonitorsTask,
+  PRIVATE_LOCATIONS_SYNC_TASK_ID,
+} from './tasks/sync_private_locations_monitors_task';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -125,9 +128,16 @@ export class Plugin implements PluginType {
       this.server.spaces = pluginsStart.spaces;
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
-    this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
-      this.logger.error('Failed to start sync private location monitors task', { error: e });
-    });
+    this.syncPrivateLocationMonitorsTask
+      ?.start()
+      .then(() => {
+        // Kick the existing TM sync task when MW definitions change so private-location
+        // package policies refresh without waiting for the periodic interval.
+        pluginsStart.alerting.registerSyncTask(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      })
+      .catch((e) => {
+        this.logger.error('Failed to start sync private location monitors task', { error: e });
+      });
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
