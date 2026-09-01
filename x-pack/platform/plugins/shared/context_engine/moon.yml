@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/content-list-provider'
   - '@kbn/content-list-provider-client'
   - '@kbn/content-management-table-list-view-common'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
