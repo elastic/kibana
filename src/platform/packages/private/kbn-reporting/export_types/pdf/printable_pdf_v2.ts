@@ -19,6 +19,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  getReportColorModeHeaders,
 } from '@kbn/reporting-common';
 import type { RunTaskOpts } from '@kbn/reporting-server';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
@@ -133,6 +134,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
                         request,
                         browserTimezone,
                         layout,
+                        headers: getReportColorModeHeaders(payload.colorMode),
                         urls: urls.map((url) =>
                           typeof url === 'string'
                             ? url

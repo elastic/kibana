@@ -14,6 +14,7 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLink,
   EuiSpacer,
@@ -34,6 +35,28 @@ import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 import { TruncatedTitle } from './truncated_title';
 
 type TableColumn = EuiBasicTableColumn<Job>;
+
+const getReportColorModeDisplay = (
+  colorMode?: string
+): { icon?: 'sun' | 'moon'; label: string } => {
+  if (colorMode === 'light') {
+    return {
+      icon: 'sun',
+      label: i18n.translate('xpack.reporting.exports.colorMode.light', {
+        defaultMessage: 'Light',
+      }),
+    };
+  }
+  if (colorMode === 'dark') {
+    return {
+      icon: 'moon',
+      label: i18n.translate('xpack.reporting.exports.colorMode.dark', {
+        defaultMessage: 'Dark',
+      }),
+    };
+  }
+  return { label: '—' };
+};
 
 interface State {
   page: number;
@@ -220,10 +243,11 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
    */
   private readonly tableColumnWidths = {
     type: '5%',
-    title: '25%',
-    status: '20%',
-    createdAt: '21%',
+    title: '22%',
+    status: '18%',
+    createdAt: '18%',
     content: '7%',
+    colorMode: '8%',
     exportType: '12%',
     actions: '10%',
   };
@@ -333,6 +357,33 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         render: (_status: string, job) => (
           <div data-test-subj="reportJobContent">{prettyPrintJobType(job.jobtype)}</div>
         ),
+        mobileOptions: {
+          show: false,
+        },
+      },
+      {
+        field: 'payload.colorMode',
+        width: tableColumnWidths.colorMode,
+        name: i18n.translate('xpack.reporting.exports.tableColumns.colorMode', {
+          defaultMessage: 'Color mode',
+        }),
+        render: (_colorMode: string | undefined, job) => {
+          const { icon, label } = getReportColorModeDisplay(job.payload.colorMode);
+          return (
+            <div data-test-subj="reportJobColorMode">
+              {icon ? (
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={icon} size="s" aria-hidden={true} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                label
+              )}
+            </div>
+          );
+        },
         mobileOptions: {
           show: false,
         },

@@ -235,5 +235,138 @@ describe('Export Integrations', () => {
         expect(screen.getByText('Test warning')).toBeInTheDocument();
       });
     });
+
+    it('shows the color mode keypad when renderColorModeOption is true', async () => {
+      const user = userEvent.setup();
+      const mockPdfConfigForFlyout = {
+        shareType: 'integration',
+        groupId: 'export',
+        id: 'pdf',
+        config: {
+          icon: 'empty',
+          label: 'PDF',
+          renderColorModeOption: true,
+          generateAssetExport: jest.fn(() => Promise.resolve()),
+        },
+      } as unknown as ExportShareConfig;
+
+      function PdfExportFlyoutRender() {
+        const [isFlyoutVisible, setIsFlyoutVisible] = React.useState(false);
+        let flyout;
+
+        if (isFlyoutVisible) {
+          flyout = (
+            <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-label="Export">
+              <ManagedExportFlyout
+                exportIntegration={mockPdfConfigForFlyout}
+                shareObjectType={mockShareContext.objectType}
+                shareObjectTypeMeta={mockCsvObjectTypeMeta}
+                isDirty={mockShareContext.isDirty}
+                publicAPIEnabled={true}
+                intl={null as any}
+                onCloseFlyout={jest.fn()}
+                onSave={jest.fn()}
+                isSaving={false}
+                sharingData={mockShareContext.sharingData}
+              />
+            </EuiFlyout>
+          );
+        }
+        return (
+          <IntlProvider locale="en">
+            <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show flyout</EuiButton>
+            {flyout}
+          </IntlProvider>
+        );
+      }
+
+      render(<PdfExportFlyoutRender />);
+      await user.click(screen.getByText('Show flyout'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('reportColorModeMenu')).toBeInTheDocument();
+      });
+      expect(
+        screen.getByText('This setting applies to the export, not the current appearance.')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('reportColorModeRecommended')).not.toBeInTheDocument();
+      expect(screen.queryByText('This report will use the light theme.')).not.toBeInTheDocument();
+    });
+
+    it('shows a Recommended badge next to Color mode when print format is on', async () => {
+      const user = userEvent.setup();
+      const mockPdfConfigForFlyout = {
+        shareType: 'integration',
+        groupId: 'export',
+        id: 'pdf',
+        config: {
+          icon: 'empty',
+          label: 'PDF',
+          renderColorModeOption: true,
+          renderLayoutOptionSwitch: true,
+          generateAssetExport: jest.fn(() => Promise.resolve()),
+        },
+      } as unknown as ExportShareConfig;
+
+      function PdfExportFlyoutRender() {
+        const [isFlyoutVisible, setIsFlyoutVisible] = React.useState(false);
+        let flyout;
+
+        if (isFlyoutVisible) {
+          flyout = (
+            <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-label="Export">
+              <ManagedExportFlyout
+                exportIntegration={mockPdfConfigForFlyout}
+                shareObjectType={mockShareContext.objectType}
+                shareObjectTypeMeta={mockCsvObjectTypeMeta}
+                isDirty={mockShareContext.isDirty}
+                publicAPIEnabled={true}
+                intl={null as any}
+                onCloseFlyout={jest.fn()}
+                onSave={jest.fn()}
+                isSaving={false}
+                sharingData={mockShareContext.sharingData}
+              />
+            </EuiFlyout>
+          );
+        }
+        return (
+          <IntlProvider locale="en">
+            <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show flyout</EuiButton>
+            {flyout}
+          </IntlProvider>
+        );
+      }
+
+      render(<PdfExportFlyoutRender />);
+      await user.click(screen.getByText('Show flyout'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('usePrintLayout')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('reportColorModeRecommended')).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId('usePrintLayout'));
+
+      expect(screen.getByTestId('reportColorModeRecommended')).toBeInTheDocument();
+      expect(screen.queryByText('This report will use the light theme.')).not.toBeInTheDocument();
+
+      await user.hover(screen.getByTestId('reportColorModeRecommended'));
+      expect(
+        await screen.findByText('Light is recommended for printed reports.')
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the color mode keypad for CSV exports', async () => {
+      const user = userEvent.setup();
+      render(<CsvExportFlyoutRender />);
+
+      await user.click(screen.getByText('Show flyout'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('exportItemDetailsFlyoutBody')).not.toBe(null);
+      });
+      expect(screen.queryByTestId('reportColorModeMenu')).not.toBeInTheDocument();
+    });
   });
 });

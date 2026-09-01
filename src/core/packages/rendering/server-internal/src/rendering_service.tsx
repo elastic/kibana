@@ -52,6 +52,7 @@ import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 import { isThemeBundled } from './theme';
+import { getReportColorModeOverride } from './report_color_mode';
 
 type RenderOptions =
   | RenderingSetupDeps
@@ -274,6 +275,11 @@ export class RenderingService {
       darkMode = userSettingDarkMode;
     } else {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
+    }
+
+    const reportColorMode = getReportColorModeOverride(request);
+    if (reportColorMode !== undefined) {
+      darkMode = reportColorMode;
     }
 
     const themeStylesheetPaths = (mode: boolean) =>

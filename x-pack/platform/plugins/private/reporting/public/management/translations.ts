@@ -66,7 +66,8 @@ export const SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_LABEL = i18n.translate
 export const SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_DESCRIPTION = i18n.translate(
   'xpack.reporting.scheduledReportingForm.optimizedForDescription',
   {
-    defaultMessage: 'Uses multiple pages, showing at most 2 visualizations per page',
+    defaultMessage:
+      'Uses multiple pages, showing at most 2 visualizations per page. Light color mode is recommended for printing.',
   }
 );
 

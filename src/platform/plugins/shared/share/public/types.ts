@@ -161,6 +161,10 @@ export interface ExportShare<S extends SharingData = SharingData>
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
       /**
+       * When true, the export flyout shows a Light/Dark color mode keypad (PDF/PNG screenshots).
+       */
+      renderColorModeOption?: boolean;
+      /**
        * indicates if the export integration supports generating it exports with absolute time ranges
        */
       supportsAbsoluteTime?: boolean;
@@ -415,6 +419,7 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
 
 export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
+  colorMode?: 'light' | 'dark';
   intl: InjectedIntl;
 }
 

@@ -48,3 +48,9 @@ export function plugin(ctx: PluginInitializerContext) {
 }
 
 export { useShareTypeContext } from './components/context';
+
+export { ColorModeKeyPad } from './components/export_integrations/color_mode_keypad';
+export type {
+  ReportColorMode,
+  ColorModeKeyPadProps,
+} from './components/export_integrations/color_mode_keypad';
