@@ -97,9 +97,9 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
-// Wraps an internal SO repository so that .get() and .bulkGet() calls
-// automatically include the given namespace. All other methods fall through
-// to the original client via the prototype chain.
+// Wraps an internal SO repository so that read calls (get/bulkGet/resolve/
+// bulkResolve) automatically include the given namespace. All other methods
+// fall through to the original client via the prototype chain.
 const withNamespace = (
   client: SavedObjectsClientContract,
   namespace: string
@@ -108,10 +108,20 @@ const withNamespace = (
   wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
   wrapped.bulkGet = (objects, opts) =>
     client.bulkGet(
-      objects.map((o) => ({ ...o, namespace })),
+      objects.map((o) => ({ ...o, namespaces: [namespace] })),
       opts
     );
+  wrapped.resolve = (type, id, opts) => client.resolve(type, id, { ...opts, namespace });
+  wrapped.bulkResolve = (objects, opts) => client.bulkResolve(objects, { ...opts, namespace });
   return wrapped;
+};
+
+// The namespace an internal repository must target to read an item in the given
+// spaces. Undefined means no injection: the default space, an empty list, or the
+// "all spaces" identifier ('*'), which is not a valid single namespace.
+const namespaceForSpaces = (spaces: string[]): string | undefined => {
+  const [firstSpace] = spaces;
+  return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
 };
 
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
@@ -179,15 +189,7 @@ class SmlIndexerImpl implements SmlIndexer {
 
     // Internal repos need an explicit namespace to access non-default spaces;
     // scoped clients handle it themselves and throw if one is passed.
-    const [firstSpace] = spaces;
-    if (clientHasSpacesExtension && firstSpace && firstSpace !== 'default') {
-      contextLogger.warn(
-        `SML indexer: 'clientHasSpacesExtension' is true but space '${firstSpace}' is non-default — ` +
-          `namespace injection will be skipped. Pass an internal repository or set the flag to false.`
-      );
-    }
-    const internalNamespace =
-      !clientHasSpacesExtension && firstSpace && firstSpace !== 'default' ? firstSpace : undefined;
+    const internalNamespace = clientHasSpacesExtension ? undefined : namespaceForSpaces(spaces);
     const wrappedClient = internalNamespace
       ? withNamespace(savedObjectsClient as SavedObjectsClientContract, internalNamespace)
       : (savedObjectsClient as SavedObjectsClientContract);
