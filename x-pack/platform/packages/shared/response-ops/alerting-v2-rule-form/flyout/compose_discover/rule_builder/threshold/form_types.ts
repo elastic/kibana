@@ -264,6 +264,16 @@ export const createDefaultSeverityLevels = (condition: AlertCondition): Severity
 };
 
 /**
+ * Suggest the severity for a newly added multi-severity level: the next level
+ * above the most severe one already used, clamped to the top of the hierarchy.
+ */
+export const nextSeverityLevel = (levels: SeverityLevel[]): AlertEventSeverity => {
+  if (levels.length === 0) return SEVERITY_LEVELS[0];
+  const maxIndex = Math.max(...levels.map((lvl) => SEVERITY_LEVELS.indexOf(lvl.severity)));
+  return SEVERITY_LEVELS[Math.min(maxIndex + 1, SEVERITY_LEVELS.length - 1)];
+};
+
+/**
  * Drop or downgrade severity config that is no longer applicable to the current
  * conditions: severity is cleared for multiple conditions, and multi mode falls
  * back to single mode when the comparator is range-based.

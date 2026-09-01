@@ -130,6 +130,8 @@ describe('SeveritySection', () => {
     fireEvent.click(screen.getByTestId('ruleBuilderAddSeverityLevel'));
     const next = onChange.mock.calls[0][0] as SeverityConfig;
     expect(next.levels).toHaveLength(2);
+    // Defaults to the next level in the hierarchy
+    expect(next.levels[1].severity).toBe('medium');
   });
 
   it('removes a severity level in multi mode', () => {

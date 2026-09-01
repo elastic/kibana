@@ -42,7 +42,7 @@ import {
   getSeverityValidationError,
   isMultiSeveritySupported,
   isSeveritySupported,
-  DEFAULT_SINGLE_SEVERITY_LEVEL,
+  nextSeverityLevel,
 } from './form_types';
 import {
   SEVERITY_LEVEL_OPTIONS,
@@ -123,7 +123,7 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
       ...severity,
       levels: [
         ...severity.levels,
-        { id: generateId(), severity: DEFAULT_SINGLE_SEVERITY_LEVEL, threshold: baseThreshold },
+        { id: generateId(), severity: nextSeverityLevel(severity.levels), threshold: baseThreshold },
       ],
     });
   };

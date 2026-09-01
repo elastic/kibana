@@ -12,6 +12,7 @@ import {
   Comparator,
   compareSeverity,
   getSeverityValidationError,
+  nextSeverityLevel,
   isMultiSeveritySupported,
   isSeveritySupported,
   isStatFieldValid,
@@ -226,6 +227,26 @@ describe('severity helpers', () => {
       expect(compareSeverity('low', 'high')).toBeLessThan(0);
       expect(compareSeverity('critical', 'info')).toBeGreaterThan(0);
       expect(compareSeverity('medium', 'medium')).toBe(0);
+    });
+  });
+
+  describe('nextSeverityLevel', () => {
+    it('returns the next level above the most severe one used', () => {
+      expect(nextSeverityLevel([{ id: 'a', severity: 'low', threshold: 1 }])).toBe('medium');
+      expect(
+        nextSeverityLevel([
+          { id: 'a', severity: 'low', threshold: 1 },
+          { id: 'b', severity: 'medium', threshold: 2 },
+        ])
+      ).toBe('high');
+    });
+
+    it('clamps at the top of the hierarchy', () => {
+      expect(nextSeverityLevel([{ id: 'a', severity: 'critical', threshold: 1 }])).toBe('critical');
+    });
+
+    it('falls back to the lowest level when there are none', () => {
+      expect(nextSeverityLevel([])).toBe('info');
     });
   });
 
