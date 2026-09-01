@@ -9,6 +9,19 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleEvaluator } from './dataset_evaluator';
 import { computeScoreStats, type ScoreStats } from '../score_stats';
 
+/**
+ * Deterministic djb2-style multiplicative hash rendered as 8 hex chars — stable
+ * across runs (the join key for paired A/B) without node:crypto or bitwise
+ * operators, both of which this package forbids.
+ */
+const stableHash = (value: string): string => {
+  let h = 5381;
+  for (let i = 0; i < value.length; i++) {
+    h = (h * 33 + value.charCodeAt(i)) % 0xffffffff;
+  }
+  return h.toString(16).padStart(8, '0');
+};
+
 export type ScoreSink = Map<string, Array<number | null>>;
 
 /**
@@ -18,7 +31,10 @@ export type ScoreSink = Map<string, Array<number | null>>;
  * CI half-width at n=15, build 479); per-example pairing removes example-difficulty
  * variance and is the only readout that can.
  */
-export type PairedScoreSink = Map<string, number | null>;
+export type PairedScoreSink = Map<string, Array<number | null>>;
+
+/** Maps the hashed PAIRED_SCORES keys back to their full input payloads (logged once per run). */
+export const exampleKeyLog = new Map<string, string>();
 
 /**
  * Wraps each evaluator so every observed score is recorded, keyed by evaluator
@@ -39,8 +55,16 @@ export const withScoreCollection = (
       sink.set(evaluator.name, bucket);
       // EvaluatorParams carries no example id (the executor holds it), so key by the
       // input payload — stable and unique per example in this suite's datasets.
-      const exampleKey = JSON.stringify(args.input ?? {});
-      pairedSink.set(`${evaluator.name}::${exampleKey}`, result.score ?? null);
+      // Short hashed key (full input JSON was 400+ chars and ungrepable; the mapping
+      // line in logPairedScores keeps it traceable). Reps are APPENDED, not
+      // overwritten — the first A/B silently kept only the last rep of each example
+      // (n=7 pairs instead of n=21).
+      const inputJson = JSON.stringify(args.input ?? {});
+      const shortKey = `${evaluator.name}::${stableHash(inputJson)}`;
+      const pairedBucket = pairedSink.get(shortKey) ?? [];
+      pairedBucket.push(result.score ?? null);
+      pairedSink.set(shortKey, pairedBucket);
+      exampleKeyLog.set(shortKey, inputJson);
       return result;
     },
   })) as RuleEvaluator[];
@@ -105,8 +129,24 @@ export const logPairedScores = ({
   log: ToolingLog;
 }): void => {
   if (pairedSink.size === 0) return;
-  const payload = JSON.stringify({ dataset: datasetName, scores: Object.fromEntries(pairedSink) });
+  // Per-key mean across reps (nulls dropped; all-null keys stay null).
+  const scores: Record<string, number | null> = {};
+  for (const [key, reps] of pairedSink) {
+    const scored = reps.filter((v): v is number => v !== null);
+    scores[key] = scored.length > 0 ? scored.reduce((a, b) => a + b, 0) / scored.length : null;
+  }
+  const payload = JSON.stringify({ dataset: datasetName, scores });
   for (const line of payload.match(/.{1,8000}/g) ?? [payload]) {
     log.info(`PAIRED_SCORES ${line}`);
+  }
+  // Human-traceable mapping: hashed key -> technique (the stable part of every input).
+  for (const [key, inputJson] of exampleKeyLog) {
+    try {
+      const technique =
+        (JSON.parse(inputJson) as { technique?: string }).technique ?? inputJson.slice(0, 60);
+      log.info(`PAIRED_KEY ${key} -> ${technique}`);
+    } catch {
+      log.info(`PAIRED_KEY ${key} -> ${inputJson.slice(0, 60)}`);
+    }
   }
 };

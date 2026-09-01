@@ -65,6 +65,18 @@ describe('createToolRoutingEvaluator', () => {
     expect(r.score).toBe(1);
   });
 
+  it('scores 0.5 when the required tool ran but a tool call failed', async () => {
+    mockedReader.mockResolvedValue({
+      toolCallIds: ['security.create_detection_rule'],
+      failedToolCallIds: ['security.create_detection_rule'],
+      unavailable: false,
+    });
+    const r = await run({
+      stepExecutions: [{ stepId: 'draft_creation', output: { conversation_id: 'c1' } }],
+    });
+    expect(r.score).toBe(0.5);
+  });
+
   it('scores 0 when tools were called but not the required one', async () => {
     mockedReader.mockResolvedValue({ toolCallIds: ['other.tool'], unavailable: false });
     const r = await run({

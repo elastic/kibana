@@ -37,10 +37,11 @@ export function createToolRoutingEvaluator({
       const result = output as RuleCreationResult | undefined;
       const conversationIds = extractConversationId(result);
 
-      const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
+      const { toolCallIds, failedToolCallIds, unavailable } = await readAgentToolCallsFromTraces({
         traceEsClient,
         conversationIds,
         log,
+        includeFailures: true,
       });
 
       if (unavailable) {
@@ -55,15 +56,28 @@ export function createToolRoutingEvaluator({
       }
 
       const routed = toolCallIds.includes(RULE_CREATION_TOOL_ID);
+      // Sequence scoring: membership alone saturated at 1.000 on every run (490/493/496),
+      // so it ranks nothing. The reader returns failed calls alongside the ordered
+      // sequence; score the shape:
+      //   1.0  tool present and none of the run's tool calls failed
+      //   0.5  tool present but at least one tool call failed (retry-to-success still
+      //        indicates unstable routing, distinct from clean routing)
+      //   0.0  tool never called
+      const failed = failedToolCallIds ?? [];
+      const score = !routed ? 0 : failed.length > 0 ? 0.5 : 1;
       return {
-        score: routed ? 1 : 0,
+        score,
         label: undefined,
-        explanation: routed
-          ? `agent called ${RULE_CREATION_TOOL_ID}`
-          : `agent never called ${RULE_CREATION_TOOL_ID} (saw: ${
+        explanation: !routed
+          ? `agent never called ${RULE_CREATION_TOOL_ID} (saw: ${
               toolCallIds.join(', ') || 'no tools'
-            })`,
-        metadata: { toolCallIds },
+            })`
+          : failed.length > 0
+          ? `agent called ${RULE_CREATION_TOOL_ID} but ${
+              failed.length
+            } tool call(s) failed: ${failed.join(', ')}`
+          : `agent called ${RULE_CREATION_TOOL_ID} cleanly (sequence: ${toolCallIds.join(' -> ')})`,
+        metadata: { toolCallIds, failedToolCallIds: failed },
       };
     },
   };
