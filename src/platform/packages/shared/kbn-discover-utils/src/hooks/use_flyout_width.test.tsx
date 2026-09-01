@@ -11,7 +11,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useFlyoutWidth } from './use_flyout_width';
 
-const STORAGE_KEY = 'unifiedDocViewerTest:flyoutWidth';
+const STORAGE_KEY = 'test:flyoutWidth';
 const DEFAULT_WIDTH = 400;
 const USER_WIDTH = 700;
 const CONTAINER_WIDTH = 550;
