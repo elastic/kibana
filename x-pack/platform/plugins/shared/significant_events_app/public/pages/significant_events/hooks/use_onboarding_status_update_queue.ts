@@ -32,7 +32,18 @@ export function useOnboardingStatusUpdateQueue(
 
     const streamNames = [...queue.current];
 
-    const statuses = await getOnboardingStatuses(streamNames);
+    let statuses: Awaited<ReturnType<typeof getOnboardingStatuses>>;
+    try {
+      statuses = await getOnboardingStatuses(streamNames);
+    } catch (error) {
+      // The request signal is aborted when the component unmounts (e.g. on
+      // navigation). Treat this as an expected cancellation and stop polling
+      // rather than surfacing an unhandled rejection.
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      throw error;
+    }
 
     for (const streamName of streamNames) {
       const statusResult = statuses[streamName];
