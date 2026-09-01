@@ -226,6 +226,45 @@ describe('renderMatrix token axis', () => {
     },
   ];
 
+  it('serializes the saturation verdict so the Overall exclusion is auditable', () => {
+    // Without this the artifact shows a score that silently changed because an
+    // evaluator was dropped, and the reader has no way to see which one.
+    const saturated = {
+      ...matrix,
+      evaluatorSaturation: [
+        {
+          evaluatorName: 'MinExpectedSteps',
+          mean: 0.97,
+          stdev: 0.03,
+          range: 0.09,
+          observations: 20,
+          distinctValues: 5,
+          saturated: true,
+        },
+        {
+          evaluatorName: 'Factuality',
+          mean: 0.35,
+          stdev: 0.12,
+          range: 0.58,
+          observations: 20,
+          distinctValues: 18,
+          saturated: false,
+        },
+      ],
+    };
+
+    const parsed = JSON.parse(renderMatrix(saturated, config).json);
+
+    expect(parsed.evaluatorSaturation).toHaveLength(2);
+    const flagged = parsed.evaluatorSaturation.filter(
+      (entry: { saturated: boolean }) => entry.saturated
+    );
+    expect(flagged.map((entry: { evaluatorName: string }) => entry.evaluatorName)).toEqual([
+      'MinExpectedSteps',
+    ]);
+    expect(flagged[0].range).toBeCloseTo(0.09);
+  });
+
   it('serializes tokenCost into matrix.json', () => {
     const { json } = renderMatrix(buildMatrix(withTokens, tokenConfig), tokenConfig);
     const parsed = JSON.parse(json);

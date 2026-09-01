@@ -182,6 +182,12 @@ export const renderMatrix = (
       composites: matrix.composites ?? [],
       displayColumns,
       overallLabel: matrix.overallLabel,
+      // Which evaluators were judged non-discriminating, and the numbers
+      // behind the verdict. Overall is computed WITHOUT the saturated ones
+      // when the config opts in, so the exclusion has to be auditable from
+      // the artifact alone -- otherwise a reader cannot tell why a score
+      // moved between two runs of the same data.
+      evaluatorSaturation: matrix.evaluatorSaturation ?? [],
       proprietary: matrix.proprietary,
       openSource: matrix.openSource,
       ...(matrix.tokenCost ? { tokenCost: matrix.tokenCost } : {}),
