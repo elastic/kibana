@@ -23,7 +23,6 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
         zIndex: euiTheme.levels.header,
         borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         padding: euiTheme.size.base,
-        overflow: 'hidden',
         '&:after': {
           content: '""',
           position: 'absolute',
@@ -31,7 +30,7 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
-          height: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
+          height: '100%',
           zIndex: -1,
           backgroundColor: euiTheme.components.headerBackground,
         },

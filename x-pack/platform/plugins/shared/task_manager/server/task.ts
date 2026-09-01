@@ -382,6 +382,14 @@ export interface TaskUserScope {
   apiKeyId: string;
   uiamApiKeyId?: string;
   spaceId?: string;
+  /**
+   * True when the credentials were supplied by the caller (a scheduling request already
+   * authenticated with an ES or UIAM API key — not necessarily a human, e.g. a service account)
+   * rather than minted by Task Manager. Task Manager does not own such keys and must never revoke
+   * them: this single flag gates invalidation of BOTH the ES and UIAM credentials at every
+   * grant/invalidate call site. Persisted on the task saved object, so renaming it requires a
+   * model version migration.
+   */
   apiKeyCreatedByUser: boolean;
   /**
    * UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key,
