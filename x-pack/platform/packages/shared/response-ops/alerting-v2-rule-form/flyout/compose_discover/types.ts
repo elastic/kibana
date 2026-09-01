@@ -41,7 +41,6 @@ export interface StepRenderProps {
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
-  ruleId?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
 }
 

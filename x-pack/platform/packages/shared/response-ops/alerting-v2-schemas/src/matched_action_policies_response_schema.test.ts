@@ -13,19 +13,27 @@ import {
 describe('matchActionPoliciesForRuleBodySchema', () => {
   it('accepts a valid rule payload', () => {
     const result = matchActionPoliciesForRuleBodySchema.parse({
-      rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+      rule: { tags: ['cpu'] },
     });
 
     expect(result).toEqual({
-      rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+      rule: { tags: ['cpu'] },
     });
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       matchActionPoliciesForRuleBodySchema.parse({
-        rule: { id: 'rule-1' },
+        rule: { tags: ['cpu'] },
         unknownField: 'x',
+      })
+    ).toThrow();
+  });
+
+  it('rejects rule id and name (strict, no longer supported)', () => {
+    expect(() =>
+      matchActionPoliciesForRuleBodySchema.parse({
+        rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
       })
     ).toThrow();
   });
@@ -33,7 +41,7 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
   it('rejects unknown keys inside rule (strict)', () => {
     expect(() =>
       matchActionPoliciesForRuleBodySchema.parse({
-        rule: { id: 'rule-1', unknownField: 'x' },
+        rule: { unknownField: 'x' },
       })
     ).toThrow();
   });

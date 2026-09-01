@@ -40,7 +40,6 @@ interface Props {
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
-  ruleId?: string;
   builderType?: string;
 }
 
@@ -101,7 +100,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       <>
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
-        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+        <LinkedActionPoliciesStep http={props.services.http} />
         <EuiHorizontalRule margin="m" />
         <NotificationsStep />
       </>
@@ -166,7 +165,6 @@ export const ComposeDiscoverForm = ({
   onRecoveryTypeChange,
   onKindChange,
   isEditing,
-  ruleId,
   builderType,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
@@ -184,7 +182,6 @@ export const ComposeDiscoverForm = ({
     onRecoveryTypeChange,
     onKindChange,
     isEditing,
-    ruleId,
     renderCustomRecovery,
   });
 

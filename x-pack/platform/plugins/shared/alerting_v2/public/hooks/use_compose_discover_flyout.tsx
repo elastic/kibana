@@ -10,7 +10,11 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
-import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import {
+  ComposeDiscoverFlyout,
+  RULE_BUILDER_REGISTRY,
+  resolveRuleNotificationTag,
+} from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -23,6 +27,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { RulesApi } from '../services/rules_api';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
@@ -91,6 +96,7 @@ export const useComposeDiscoverFlyout = ({
       onConfirmSwitch: handleConfirmSwitch,
     });
 
+  const rulesApi = useService(RulesApi);
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
@@ -231,16 +237,41 @@ export const useComposeDiscoverFlyout = ({
         createRuleMutation.mutate(
           { payload },
           {
-            onSuccess: (rule) => {
+            onSuccess: async (rule) => {
               const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length > 0) {
-                setupNotificationsMutation.mutate(
-                  { rule, actions },
-                  { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-                );
-              } else {
+              if (actions.length === 0) {
                 closeAndRedirect();
+                return;
               }
+              let ruleForNotifications = rule;
+              if (!rule.metadata.tags?.length) {
+                const tag = resolveRuleNotificationTag(rule.metadata);
+                try {
+                  ruleForNotifications = await rulesApi.updateRule(rule.id, {
+                    metadata: { tags: [tag] },
+                  });
+                } catch {
+                  notifications.toasts.addWarning({
+                    title: i18n.translate(
+                      'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedTitle',
+                      { defaultMessage: 'Notifications not linked' }
+                    ),
+                    text: i18n.translate(
+                      'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedText',
+                      {
+                        defaultMessage:
+                          'The rule was created but could not be tagged for notification matching. Add a tag to the rule and retry linking notifications.',
+                      }
+                    ),
+                  });
+                  closeAndRedirect();
+                  return;
+                }
+              }
+              setupNotificationsMutation.mutate(
+                { rule: ruleForNotifications, actions },
+                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+              );
             },
           }
         )
