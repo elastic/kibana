@@ -24,6 +24,7 @@ import {
   VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
 } from './constants';
+import { bulkErrorSchema } from './bulk_operation_schema';
 
 /** Primitives */
 
@@ -546,38 +547,60 @@ const rejectEmitNoDataStrategy = {
   path: ['no_data_strategy'],
 };
 
-export const createRuleDataSchema = createRuleDataBaseSchema
-  .refine(isStateTransitionAllowed, {
-    message: 'state_transition is only allowed when kind is "alert".',
-    path: ['state_transition'],
-  })
-  .refine(isSignalUsingStandaloneFormat, {
-    message: 'kind "signal" requires query.format "standalone".',
-    path: ['query', 'format'],
-  })
-  .refine(isSignalQueryBreachOnly, {
-    message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
-    path: ['recovery_strategy'],
-  })
-  .refine(isRecoveryQueryConsistentWithStrategy, {
-    message: 'query.recovery is only allowed when recovery_strategy is "query".',
-    path: ['query', 'recovery'],
-  })
-  .refine(isRecoveryQueryProvidedForStrategy, {
-    message: 'query.recovery is required when recovery_strategy is "query".',
-    path: ['query', 'recovery'],
-  })
-  .refine(isNoDataQueryConsistentWithStrategy, {
-    message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-    path: ['query', 'no_data'],
-  })
-  .refine(isNoDataQueryProvidedForStrategy, {
-    message:
-      'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-    path: ['query', 'no_data'],
-  })
-  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
-  .meta({ id: 'alerting_new_rule' });
+/**
+ * Shared create-rule cross-field refinements. Applied to both the single-create
+ * body and each bulk-create item so the two write paths cannot drift.
+ */
+interface CreateRuleRefineInput {
+  kind?: string;
+  state_transition?: unknown;
+  query?: { format?: string; recovery?: unknown } & QueryWithOptionalNoData;
+  recovery_strategy?: RecoveryStrategy | null;
+  no_data_strategy?: NoDataStrategy | null;
+}
+
+const asCreateRuleRefineInput = (data: unknown): CreateRuleRefineInput =>
+  data as CreateRuleRefineInput;
+
+const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema: T) =>
+  schema
+    .refine((data) => isStateTransitionAllowed(asCreateRuleRefineInput(data)), {
+      message: 'state_transition is only allowed when kind is "alert".',
+      path: ['state_transition'],
+    })
+    .refine((data) => isSignalUsingStandaloneFormat(asCreateRuleRefineInput(data)), {
+      message: 'kind "signal" requires query.format "standalone".',
+      path: ['query', 'format'],
+    })
+    .refine((data) => isSignalQueryBreachOnly(asCreateRuleRefineInput(data)), {
+      message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+      path: ['recovery_strategy'],
+    })
+    .refine((data) => isRecoveryQueryConsistentWithStrategy(asCreateRuleRefineInput(data)), {
+      message: 'query.recovery is only allowed when recovery_strategy is "query".',
+      path: ['query', 'recovery'],
+    })
+    .refine((data) => isRecoveryQueryProvidedForStrategy(asCreateRuleRefineInput(data)), {
+      message: 'query.recovery is required when recovery_strategy is "query".',
+      path: ['query', 'recovery'],
+    })
+    .refine((data) => isNoDataQueryConsistentWithStrategy(asCreateRuleRefineInput(data)), {
+      message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+      path: ['query', 'no_data'],
+    })
+    .refine((data) => isNoDataQueryProvidedForStrategy(asCreateRuleRefineInput(data)), {
+      message:
+        'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+      path: ['query', 'no_data'],
+    })
+    .refine(
+      (data) => isNoDataStrategyNotEmit(asCreateRuleRefineInput(data)),
+      rejectEmitNoDataStrategy
+    );
+
+export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+  id: 'alerting_new_rule',
+});
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
@@ -780,3 +803,62 @@ export const bulkGetRulesResponseSchema = z
   .meta({ id: 'alerting_bulk_get_rules_response' });
 
 export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
+
+/**
+ * A single item in a bulk-create request: the create-rule body plus optional
+ * client-supplied `id` and `enabled` (default true). Disabled rules are
+ * persisted with no executor task.
+ */
+export const bulkCreateRuleItemSchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({
+    id: ruleIdSchema.optional().describe('Client-supplied identifier. Generated when omitted.'),
+    enabled: z
+      .boolean()
+      .default(true)
+      .describe(
+        'Whether the rule is enabled after creation. Disabled rules are persisted with no executor task. Defaults to true.'
+      ),
+  })
+).meta({ id: 'alerting_bulk_create_rule_item' });
+
+export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
+export type BulkCreateRuleItemInput = z.input<typeof bulkCreateRuleItemSchema>;
+
+/**
+ * Request body schema for `POST /api/alerting/v2/rules/_bulk_create`.
+ */
+export const bulkCreateRulesParamsSchema = z
+  .object({
+    rules: z
+      .array(bulkCreateRuleItemSchema)
+      .min(1)
+      .max(MAX_BULK_ITEMS)
+      .describe(`Rule definitions to create. Between 1 and ${MAX_BULK_ITEMS} items.`),
+  })
+  .strict()
+  .refine(
+    (data) => {
+      const ids = data.rules
+        .map((rule) => rule.id)
+        .filter((id): id is string => id != null && id.length > 0);
+      return new Set(ids).size === ids.length;
+    },
+    { message: 'Duplicate rule identifiers in the request.', path: ['rules'] }
+  )
+  .meta({ id: 'alerting_bulk_create_rules_request' });
+
+export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesParamsSchema>;
+
+/**
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
+ * Successfully created rules are returned in `rules`; per-item failures land
+ * in `errors`. HTTP 200 even when some items fail (partial success).
+ */
+export const bulkCreateRulesResponseSchema = z
+  .object({
+    rules: z.array(ruleResponseSchema).describe('Rules that were created successfully.'),
+    errors: z.array(bulkErrorSchema).describe('Per-item errors for rules that were not created.'),
+  })
+  .meta({ id: 'alerting_bulk_create_rules_response' });
+
+export type BulkCreateRulesResponse = z.infer<typeof bulkCreateRulesResponseSchema>;

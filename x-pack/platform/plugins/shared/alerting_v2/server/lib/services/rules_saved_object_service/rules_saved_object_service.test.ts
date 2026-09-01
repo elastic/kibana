@@ -66,6 +66,67 @@ describe('RulesSavedObjectService', () => {
     ({ rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService());
   });
 
+  describe('bulkCreate', () => {
+    const attrs = { metadata: { name: 'rule-a' } } as never;
+
+    it('returns an empty array when given no items', async () => {
+      const result = await rulesSavedObjectService.bulkCreate([]);
+
+      expect(result).toEqual([]);
+      expect(mockSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('creates saved objects with overwrite false and maps successes', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+        ],
+      });
+
+      const result = await rulesSavedObjectService.bulkCreate([{ id: 'rule-1', attrs }]);
+
+      expect(mockSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-1',
+            attributes: attrs,
+          },
+        ],
+        { overwrite: false }
+      );
+      expect(result).toEqual([{ id: 'rule-1', success: true, version: 'WzEsMV0=' }]);
+    });
+
+    it('maps per-item saved object errors', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      } as never);
+
+      const result = await rulesSavedObjectService.bulkCreate([{ id: 'rule-1', attrs }]);
+
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          success: false,
+          error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+        },
+      ]);
+    });
+  });
+
   describe('getTotalScheduledPerMinute', () => {
     it('aggregates enabled rules across all spaces and sums their per-minute frequency', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(

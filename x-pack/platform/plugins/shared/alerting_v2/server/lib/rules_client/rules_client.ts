@@ -10,6 +10,7 @@ import pMap from 'p-map';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
+  bulkCreateRulesParamsSchema,
   createRuleDataSchema,
   isStateTransitionAllowed,
   updateRuleDataSchema,
@@ -19,9 +20,10 @@ import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type {
-  KibanaRequest as CoreKibanaRequest,
-  PluginInitializerContext,
+import {
+  SavedObjectsUtils,
+  type KibanaRequest as CoreKibanaRequest,
+  type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -38,9 +40,11 @@ import {
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../errors/rule_error_messages';
-import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
-import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
-import type { RuleExecutorTaskParams } from '../rule_executor/types';
+import {
+  bulkScheduleRuleExecutorTasks,
+  ensureRuleExecutorTaskScheduled,
+  getRuleExecutorTaskId,
+} from '../rule_executor/schedule';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -63,6 +67,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkOperationError,
   BulkResponse,
   CreateRuleData,
@@ -84,6 +90,7 @@ import {
   ruleRunningError,
   rotationFailedError,
   toBulkError,
+  bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
 } from './utils';
@@ -111,6 +118,32 @@ const toTaskManagerDriftError = (id: string, message: string): BulkOperationErro
   id,
   error: { code: ALERTING_ERROR_CODES.TASK_MANAGER_DRIFT, message },
 });
+
+const toBulkCreateError = (
+  id: string,
+  err: { statusCode: number; message: string }
+): BulkOperationError => ({
+  id,
+  error: {
+    code:
+      err.statusCode === 409
+        ? ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
+        : bulkErrorCodeForStatus(err.statusCode),
+    message: err.statusCode === 409 ? getRuleAlreadyExistsMessage(id) : err.message,
+  },
+});
+
+const toPerItemBoomError = (id: string, err: Boom.Boom): BulkOperationError => {
+  const data = err.data as { code?: string; details?: Record<string, unknown> } | undefined;
+  return {
+    id,
+    error: {
+      code: data?.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+      message: err.message,
+      ...(data?.details ? { details: data.details } : {}),
+    },
+  };
+};
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
@@ -245,6 +278,46 @@ export class RulesClient {
         {
           code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: { interval: updatedEvery, maxScheduledPerMinute },
+        }
+      );
+    }
+  }
+
+  /**
+   * Rejects a bulk create whose enabled rules would push the total number of
+   * rule runs per minute across all spaces past the configured
+   * `xpack.alerting_v2.rules.maxScheduledPerMinute`. Disabled rules are not
+   * counted. Checked once for the whole batch so later items cannot overshoot
+   * after earlier ones were accepted against the same remaining budget.
+   */
+  private async assertBulkScheduleLimitNotExceeded(intervals: string[]): Promise<void> {
+    if (intervals.length === 0) {
+      return;
+    }
+
+    const { maxScheduledPerMinute } = this.config.rules;
+    const addedSchedulesPerMinute = intervals.reduce(
+      (sum, every) => sum + convertEveryToSchedulesPerMinute(every),
+      0
+    );
+
+    if (addedSchedulesPerMinute <= 0) {
+      return;
+    }
+
+    const totalScheduledPerMinute =
+      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
+    const remainingSchedulesPerMinute = Math.max(
+      maxScheduledPerMinute - totalScheduledPerMinute,
+      0
+    );
+
+    if (addedSchedulesPerMinute > remainingSchedulesPerMinute) {
+      throw Boom.badRequest(
+        `Rule schedules would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
+        {
+          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+          details: { maxScheduledPerMinute },
         }
       );
     }
@@ -391,6 +464,169 @@ export class RulesClient {
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
+  }
+
+  @withApm
+  public async bulkCreateRules(params: BulkCreateRulesParams): Promise<BulkCreateRulesResponse> {
+    const parsed = this.parseRuleData(bulkCreateRulesParamsSchema, params, 'create');
+    const { spaceId } = this.getSpaceContext();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const nowIso = new Date().toISOString();
+    const ruleVersion = this.getNextVersion();
+
+    const errors: BulkOperationError[] = [];
+    const prepared: Array<{
+      id: string;
+      enabled: boolean;
+      attrs: RuleSavedObjectAttributes;
+    }> = [];
+
+    for (const item of parsed.rules) {
+      const id = item.id ?? SavedObjectsUtils.generateId();
+      try {
+        this.artifactTypeRegistry.validate(item.artifacts);
+        this.assertScheduleIntervalAllowed(item.schedule.every);
+      } catch (e) {
+        if (Boom.isBoom(e)) {
+          errors.push(toPerItemBoomError(id, e));
+          continue;
+        }
+        throw e;
+      }
+
+      const { enabled } = item;
+      prepared.push({
+        id,
+        enabled,
+        attrs: transformCreateRuleBodyToRuleSoAttributes(item, {
+          enabled,
+          createdBy: userProfileUid,
+          createdAt: nowIso,
+          updatedBy: userProfileUid,
+          updatedAt: nowIso,
+          version: ruleVersion,
+        }),
+      });
+    }
+
+    const enabledPrepared = prepared.filter((item) => item.enabled);
+    await this.assertBulkScheduleLimitNotExceeded(
+      enabledPrepared.map((item) => item.attrs.schedule.every)
+    );
+
+    const scheduledRuleIds = new Set<string>();
+    if (enabledPrepared.length > 0) {
+      try {
+        const scheduledTasks = await bulkScheduleRuleExecutorTasks({
+          services: { taskManager: this.taskManager },
+          input: {
+            items: enabledPrepared.map((item) => ({
+              ruleId: item.id,
+              spaceId,
+              schedule: { interval: item.attrs.schedule.every },
+            })),
+            request: this.request as unknown as CoreKibanaRequest,
+          },
+        });
+        for (const task of scheduledTasks) {
+          const ruleId = task.params.ruleId;
+          if (typeof ruleId === 'string') {
+            scheduledRuleIds.add(ruleId);
+          }
+        }
+        for (const item of enabledPrepared) {
+          if (!scheduledRuleIds.has(item.id)) {
+            errors.push(
+              toTaskManagerDriftError(
+                item.id,
+                `Failed to schedule executor task for rule "${item.id}"; it was not created`
+              )
+            );
+          }
+        }
+      } catch (e) {
+        const driftedRuleIds = enabledPrepared.map((item) => item.id);
+        const message = `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
+          ', '
+        )}]; they were not created: ${errorMessage(e)}`;
+
+        this.logger.error({
+          error: new Error(message),
+          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+        });
+
+        for (const id of driftedRuleIds) {
+          errors.push(toTaskManagerDriftError(id, message));
+        }
+
+        await this.removeExecutorTasks({
+          ruleIds: driftedRuleIds,
+          spaceId,
+        });
+      }
+    }
+
+    const toPersist = prepared.filter((item) => !item.enabled || scheduledRuleIds.has(item.id));
+
+    if (toPersist.length === 0) {
+      return { rules: [], errors };
+    }
+
+    let createResults: Awaited<ReturnType<RulesSavedObjectServiceContract['bulkCreate']>>;
+    try {
+      createResults = await this.rulesSavedObjectService.bulkCreate(
+        toPersist.map((item) => ({ id: item.id, attrs: item.attrs }))
+      );
+    } catch (e) {
+      await this.removeExecutorTasks({
+        ruleIds: toPersist.filter((item) => scheduledRuleIds.has(item.id)).map((item) => item.id),
+        spaceId,
+      });
+      for (const item of toPersist) {
+        errors.push({
+          id: item.id,
+          error: {
+            code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+            message: errorMessage(e),
+          },
+        });
+      }
+      return { rules: [], errors };
+    }
+
+    const rules: RuleResponse[] = [];
+    const createdRules: EventRule[] = [];
+    const failedScheduledIds: string[] = [];
+
+    for (let i = 0; i < createResults.length; i++) {
+      const createResult = createResults[i];
+      const item = toPersist[i];
+
+      if (!createResult.success) {
+        errors.push(toBulkCreateError(createResult.id, createResult.error));
+        if (scheduledRuleIds.has(item.id)) {
+          failedScheduledIds.push(item.id);
+        }
+        continue;
+      }
+
+      const rule = transformRuleSoAttributesToRuleApiResponse(
+        item.id,
+        item.attrs,
+        createResult.version
+      );
+      rules.push(rule);
+      createdRules.push({ ruleId: rule.id, spaceId, rule });
+    }
+
+    await this.removeExecutorTasks({
+      ruleIds: failedScheduledIds,
+      spaceId,
+    });
+
+    this.ruleEventPublisher.emitRuleCreated(this.request, createdRules);
+
+    return { rules, errors };
   }
 
   @withApm
@@ -879,28 +1115,17 @@ export class RulesClient {
     }
 
     if (itemsToUpdate.length > 0) {
-      const tasksToSchedule: Array<{
-        id: string;
-        taskType: string;
-        schedule: { interval: string };
-        params: RuleExecutorTaskParams;
-        state: Record<string, unknown>;
-        scope: string[];
-        enabled: boolean;
-      }> = itemsToUpdate.map((item) => ({
-        id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
-        taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-        schedule: { interval: item.attrs.schedule.every },
-        params: { ruleId: item.id, spaceId },
-        state: {},
-        scope: ['alerting'],
-        enabled: true,
-      }));
-
       try {
-        await this.taskManager.bulkSchedule(tasksToSchedule, {
-          request: this.request as unknown as CoreKibanaRequest,
-          cloneApiKey: true,
+        await bulkScheduleRuleExecutorTasks({
+          services: { taskManager: this.taskManager },
+          input: {
+            items: itemsToUpdate.map((item) => ({
+              ruleId: item.id,
+              spaceId,
+              schedule: { interval: item.attrs.schedule.every },
+            })),
+            request: this.request as unknown as CoreKibanaRequest,
+          },
         });
       } catch (e) {
         const driftedRuleIds = itemsToUpdate.map((item) => item.id);

@@ -33,10 +33,14 @@ import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 
-jest.mock('../rule_executor/schedule', () => ({
-  ensureRuleExecutorTaskScheduled: jest.fn(),
-  getRuleExecutorTaskId: jest.fn(),
-}));
+jest.mock('../rule_executor/schedule', () => {
+  const actual = jest.requireActual('../rule_executor/schedule');
+  return {
+    ...actual,
+    ensureRuleExecutorTaskScheduled: jest.fn(),
+    getRuleExecutorTaskId: jest.fn(),
+  };
+});
 
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 
@@ -96,6 +100,7 @@ describe('RulesClient', () => {
     getRuleExecutorTaskIdMock.mockReturnValue('task:fallback');
 
     taskManager.bulkRemove.mockResolvedValue({ statuses: [] });
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as never);
   });
 
   afterAll(() => {
@@ -288,6 +293,329 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
       });
+    });
+  });
+
+  describe('bulkCreateRules', () => {
+    const mockBulkCreateSuccess = (ids: string[]) => {
+      rulesSavedObjectService.bulkCreate.mockResolvedValueOnce(
+        ids.map((id) => ({ id, success: true as const, version: 'WzEsMV0=' }))
+      );
+    };
+
+    it('creates enabled rules and schedules tasks via bulkSchedule', async () => {
+      const client = createClient();
+      mockBulkCreateSuccess(['rule-a', 'rule-b']);
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      const res = await client.bulkCreateRules({
+        rules: [
+          { ...baseCreateData, id: 'rule-a', metadata: { name: 'rule-a' } },
+          { ...baseCreateData, id: 'rule-b', metadata: { name: 'rule-b' } },
+        ],
+      });
+
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      const scheduledTasks = taskManager.bulkSchedule.mock.calls[0][0];
+      expect(scheduledTasks[0]).not.toHaveProperty('runAt');
+      expect(scheduledTasks[1]).not.toHaveProperty('runAt');
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            enabled: true,
+            params: expect.objectContaining({ ruleId: 'rule-a' }),
+          }),
+          expect.objectContaining({
+            enabled: true,
+            params: expect.objectContaining({ ruleId: 'rule-b' }),
+          }),
+        ],
+        expect.objectContaining({ request, cloneApiKey: true })
+      );
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-a',
+          attrs: expect.objectContaining({
+            enabled: true,
+            metadata: expect.objectContaining({ name: 'rule-a' }),
+          }),
+        }),
+        expect.objectContaining({
+          id: 'rule-b',
+          attrs: expect.objectContaining({ enabled: true }),
+        }),
+      ]);
+      expect(res.rules).toHaveLength(2);
+      expect(res.errors).toEqual([]);
+      expect(res.rules.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
+    });
+
+    it('does not schedule tasks when every rule is disabled', async () => {
+      const client = createClient();
+      mockBulkCreateSuccess(['rule-off']);
+
+      const res = await client.bulkCreateRules({
+        rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
+      });
+
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-off',
+          attrs: expect.objectContaining({ enabled: false }),
+        }),
+      ]);
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0].enabled).toBe(false);
+      expect(res.errors).toEqual([]);
+    });
+
+    it('schedules only the enabled subset of a mixed batch', async () => {
+      const client = createClient();
+      mockBulkCreateSuccess(['rule-on', 'rule-off']);
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      const res = await client.bulkCreateRules({
+        rules: [
+          { ...baseCreateData, id: 'rule-on', enabled: true, metadata: { name: 'on' } },
+          { ...baseCreateData, id: 'rule-off', enabled: false, metadata: { name: 'off' } },
+        ],
+      });
+
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+        [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-on' }) })],
+        expect.anything()
+      );
+      expect(res.rules).toHaveLength(2);
+      expect(res.rules.find((rule) => rule.id === 'rule-on')?.enabled).toBe(true);
+      expect(res.rules.find((rule) => rule.id === 'rule-off')?.enabled).toBe(false);
+    });
+
+    it('does not persist enabled rules when bulkSchedule throws, but still persists disabled rules', async () => {
+      const client = createClient();
+      taskManager.bulkSchedule.mockRejectedValueOnce(new Error('tm down'));
+      mockBulkCreateSuccess(['rule-off']);
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      const res = await client.bulkCreateRules({
+        rules: [
+          { ...baseCreateData, id: 'rule-on', enabled: true, metadata: { name: 'on' } },
+          { ...baseCreateData, id: 'rule-off', enabled: false, metadata: { name: 'off' } },
+        ],
+      });
+
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({ id: 'rule-off' }),
+      ]);
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0].id).toBe('rule-off');
+      expect(res.errors).toEqual([
+        expect.objectContaining({
+          id: 'rule-on',
+          error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }),
+        }),
+      ]);
+    });
+
+    it('maps SO 409 on an enabled rule to RULE_ALREADY_EXISTS and removes the task this call scheduled', async () => {
+      const client = createClient();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+      rulesSavedObjectService.bulkCreate.mockResolvedValueOnce([
+        {
+          id: 'rule-dup',
+          success: false,
+          error: { statusCode: 409, error: 'Conflict', message: 'already exists' },
+        },
+      ]);
+
+      const res = await client.bulkCreateRules({
+        rules: [{ ...baseCreateData, id: 'rule-dup' }],
+      });
+
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-dup']);
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-dup',
+          error: {
+            code: 'RULE_ALREADY_EXISTS',
+            message: 'Rule with id "rule-dup" already exists',
+          },
+        },
+      ]);
+    });
+
+    it('maps SO 409 to RULE_ALREADY_EXISTS and does not remove a task that was not scheduled', async () => {
+      const client = createClient();
+      rulesSavedObjectService.bulkCreate.mockResolvedValueOnce([
+        {
+          id: 'rule-dup',
+          success: false,
+          error: { statusCode: 409, error: 'Conflict', message: 'already exists' },
+        },
+      ]);
+
+      const res = await client.bulkCreateRules({
+        rules: [{ ...baseCreateData, id: 'rule-dup', enabled: false }],
+      });
+
+      expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-dup',
+          error: {
+            code: 'RULE_ALREADY_EXISTS',
+            message: 'Rule with id "rule-dup" already exists',
+          },
+        },
+      ]);
+    });
+
+    it('removes the scheduled task when SO create fails after scheduling', async () => {
+      const client = createClient();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+      rulesSavedObjectService.bulkCreate.mockResolvedValueOnce([
+        {
+          id: 'rule-fail',
+          success: false,
+          error: { statusCode: 500, error: 'Internal', message: 'es down' },
+        },
+      ]);
+
+      const res = await client.bulkCreateRules({
+        rules: [{ ...baseCreateData, id: 'rule-fail' }],
+      });
+
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-fail']);
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-fail',
+          error: { code: 'INTERNAL_SERVER_ERROR', message: 'es down' },
+        },
+      ]);
+    });
+
+    it('checks the schedule limit once against the sum of enabled intervals', async () => {
+      const client = createClient({ maxScheduledPerMinute: 1 });
+      rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(0);
+
+      await expect(
+        client.bulkCreateRules({
+          rules: [
+            { ...baseCreateData, id: 'a', metadata: { name: 'a' } },
+            { ...baseCreateData, id: 'b', metadata: { name: 'b' } },
+          ],
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
+          details: { maxScheduledPerMinute: 1 },
+        },
+      });
+
+      expect(rulesSavedObjectService.getTotalScheduledPerMinute).toHaveBeenCalledTimes(1);
+      expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    });
+
+    it('does not count disabled rules toward the schedule limit', async () => {
+      const client = createClient({ maxScheduledPerMinute: 1 });
+      rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
+      mockBulkCreateSuccess(['rule-off']);
+
+      const res = await client.bulkCreateRules({
+        rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
+      });
+
+      expect(res.rules).toHaveLength(1);
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    });
+
+    it('isolates per-item min-interval failures without failing the batch', async () => {
+      const client = createClient();
+      mockBulkCreateSuccess(['rule-ok']);
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      const res = await client.bulkCreateRules({
+        rules: [
+          {
+            ...baseCreateData,
+            id: 'rule-short',
+            metadata: { name: 'short' },
+            schedule: { every: '5s', lookback: '1m' },
+          },
+          { ...baseCreateData, id: 'rule-ok', metadata: { name: 'ok' } },
+        ],
+      });
+
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0].id).toBe('rule-ok');
+      expect(res.errors).toEqual([
+        expect.objectContaining({
+          id: 'rule-short',
+          error: expect.objectContaining({ code: 'SCHEDULE_INTERVAL_TOO_SHORT' }),
+        }),
+      ]);
+    });
+
+    it('rejects duplicate client-supplied ids for the whole request', async () => {
+      const client = createClient();
+
+      await expect(
+        client.bulkCreateRules({
+          rules: [
+            { ...baseCreateData, id: 'same', metadata: { name: 'a' } },
+            { ...baseCreateData, id: 'same', metadata: { name: 'b' } },
+          ],
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_RULE_DATA' },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('emits ruleCreated only for successfully created rules', async () => {
+      const client = createClient();
+      rulesSavedObjectService.bulkCreate.mockResolvedValueOnce([
+        { id: 'rule-ok', success: true, version: 'v1' },
+        {
+          id: 'rule-dup',
+          success: false,
+          error: { statusCode: 409, error: 'Conflict', message: 'exists' },
+        },
+      ]);
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      await client.bulkCreateRules({
+        rules: [
+          { ...baseCreateData, id: 'rule-ok', metadata: { name: 'ok' } },
+          { ...baseCreateData, id: 'rule-dup', metadata: { name: 'dup' } },
+        ],
+      });
+
+      expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
+        expect.objectContaining({ ruleId: 'rule-ok', spaceId: 'space-1' }),
+      ]);
     });
   });
 
@@ -1868,9 +2196,8 @@ describe('RulesClient', () => {
       expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
         [
           expect.objectContaining({
-            id: 'task:fallback',
-            params: expect.objectContaining({ ruleId: 'rule-1' }),
             enabled: true,
+            params: expect.objectContaining({ ruleId: 'rule-1' }),
           }),
         ],
         expect.objectContaining({ request, cloneApiKey: true })
