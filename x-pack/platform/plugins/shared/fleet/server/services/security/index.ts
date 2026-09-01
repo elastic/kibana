@@ -11,6 +11,7 @@ export { getRouteRequiredAuthz } from './route_required_authz';
 export {
   checkSecurityEnabled,
   checkSuperuser,
+  isDebugAuthorized,
   calculateRouteAuthz,
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,

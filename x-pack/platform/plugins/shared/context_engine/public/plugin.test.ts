@@ -6,7 +6,10 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { ContextEnginePlugin } from './plugin';
+
+const createSetupDeps = () => ({ workflowsExtensions: workflowsExtensionsMock.createSetup() });
 
 describe('ContextEnginePlugin', () => {
   it('resolves Agent Builder via core.plugins.onStart', () => {
@@ -16,7 +19,7 @@ describe('ContextEnginePlugin', () => {
       agentBuilder: { found: false },
     });
 
-    plugin.setup(coreSetup);
+    plugin.setup(coreSetup, createSetupDeps());
 
     expect(coreSetup.plugins.onStart).toHaveBeenCalledWith('agentBuilder');
   });
@@ -28,7 +31,7 @@ describe('ContextEnginePlugin', () => {
       throw new Error('plugin not in dependency map');
     });
 
-    expect(() => plugin.setup(coreSetup)).not.toThrow();
+    expect(() => plugin.setup(coreSetup, createSetupDeps())).not.toThrow();
   });
 
   it('returns an empty start contract', () => {

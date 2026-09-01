@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreWorkerFixtures } from '../core_fixtures';
+import { apiClientFixture } from '../api_client';
 import type { AlertingApiService } from './alerting';
 import { getAlertingApiHelper } from './alerting';
+import type { BackgroundSearchApiService } from './background_search';
+import { getBackgroundSearchApiHelper } from './background_search';
 import type { CasesApiService } from './cases';
 import { getCasesApiHelper } from './cases';
 import type { CoreApiService } from './core';
@@ -33,6 +35,7 @@ import { getMlApiHelper } from './ml';
 
 export interface ApiServicesFixture {
   alerting: AlertingApiService;
+  backgroundSearch: BackgroundSearchApiService;
   cases: CasesApiService;
   dashboard: DashboardApiService;
   dataViews: DataViewsApiService;
@@ -49,14 +52,12 @@ export interface ApiServicesFixture {
 /**
  * This fixture provides a helper to interact with the Kibana APIs like Alerting, Cases, Fleet, Streams, Spaces, etc.
  */
-export const apiServicesFixture = coreWorkerFixtures.extend<
-  {},
-  { apiServices: ApiServicesFixture }
->({
+export const apiServicesFixture = apiClientFixture.extend<{}, { apiServices: ApiServicesFixture }>({
   apiServices: [
-    async ({ kbnClient, esClient, log }, use) => {
+    async ({ kbnClient, esClient, apiClient, log }, use) => {
       const services = {
         alerting: getAlertingApiHelper(log, kbnClient),
+        backgroundSearch: getBackgroundSearchApiHelper(log, apiClient),
         cases: getCasesApiHelper(log, kbnClient),
         dashboard: getDashboardApiHelper(log, kbnClient),
         dataViews: getDataViewsApiHelper(log, kbnClient),

@@ -6,9 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
 import { PROCESSOR_EVENT, ERROR_LOG_LEVEL, OTEL_EVENT_NAME } from '@kbn/apm-types';
+import {
+  esqlAnd,
+  esqlEquals,
+  esqlFunction,
+  esqlOr,
+  esqlString,
+} from '../../../../utils/esql_expressions';
 
 const createBaseTraceContextFilters = ({
   traceId,
@@ -18,18 +25,23 @@ const createBaseTraceContextFilters = ({
   traceId: string;
   spanId?: string;
   transactionId?: string;
-}) => {
-  let queryString = `${TRACE_ID_FIELD} == ?traceId`;
+}): ESQLAstExpression => {
+  const traceFilter = esqlEquals(TRACE_ID_FIELD, traceId);
 
   if (transactionId && spanId) {
-    queryString += ` AND (${TRANSACTION_ID_FIELD} == ?transactionId OR ${SPAN_ID_FIELD} == ?spanId)`;
-  } else if (transactionId) {
-    queryString += ` AND ${TRANSACTION_ID_FIELD} == ?transactionId`;
-  } else if (spanId) {
-    queryString += ` AND ${SPAN_ID_FIELD} == ?spanId`;
+    return esqlAnd([
+      traceFilter,
+      esqlOr([esqlEquals(TRANSACTION_ID_FIELD, transactionId), esqlEquals(SPAN_ID_FIELD, spanId)]),
+    ]);
+  }
+  if (transactionId) {
+    return esqlAnd([traceFilter, esqlEquals(TRANSACTION_ID_FIELD, transactionId)]);
+  }
+  if (spanId) {
+    return esqlAnd([traceFilter, esqlEquals(SPAN_ID_FIELD, spanId)]);
   }
 
-  return queryString;
+  return traceFilter;
 };
 
 export const createTraceContextWhereClause = ({
@@ -40,12 +52,7 @@ export const createTraceContextWhereClause = ({
   traceId: string;
   spanId?: string;
   transactionId?: string;
-}) => {
-  const queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
-  const params = [{ traceId }, { transactionId }, { spanId }];
-
-  return where(queryString, params);
-};
+}): ESQLAstExpression => createBaseTraceContextFilters({ traceId, spanId, transactionId });
 
 export const createTraceContextWhereClauseForErrors = ({
   traceId,
@@ -55,8 +62,8 @@ export const createTraceContextWhereClauseForErrors = ({
   traceId: string;
   spanId?: string;
   transactionId?: string;
-}) => {
-  let queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
+}): ESQLAstExpression => {
+  const traceContext = createBaseTraceContextFilters({ traceId, spanId, transactionId });
 
   const conditions = [
     `${PROCESSOR_EVENT}: "error"`,
@@ -65,9 +72,7 @@ export const createTraceContextWhereClauseForErrors = ({
     `${OTEL_EVENT_NAME}: "error" `,
   ];
 
-  queryString += ` AND  KQL("""${conditions.join(' OR ')}""")`;
+  const kqlFilter = esqlFunction('KQL', [esqlString(conditions.join(' OR '))]);
 
-  const params = [{ traceId }, { transactionId }, { spanId }];
-
-  return where(queryString, params);
+  return esqlAnd([traceContext, kqlFilter]);
 };

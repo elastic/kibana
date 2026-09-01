@@ -38,6 +38,8 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
   - '@kbn/ui-callout'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -50,5 +52,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}

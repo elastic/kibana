@@ -17,6 +17,7 @@ export const DISCOVERIES_DATA_STREAM = `.significant_events-discoveries`;
 export const DETECTIONS_DATA_STREAM = `.significant_events-detections`;
 export const EVENTS_DATA_STREAM = '.significant_events-events';
 export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
+export const SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM = '.significant_events-memories';
 export const FEATURES_TEMP_INDEX_PATTERN = `${FEATURES_TEMP_INDEX_PREFIX}-*`;
 export const DISCOVERIES_TEMP_INDEX_PATTERN = `${DISCOVERIES_TEMP_INDEX_PREFIX}-*`;
 export const DETECTIONS_TEMP_INDEX_PATTERN = `${DETECTIONS_TEMP_INDEX_PREFIX}-*`;

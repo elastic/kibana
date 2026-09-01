@@ -22,6 +22,7 @@ export interface BuildScoreOptions {
   datasetId: string;
   datasetName: string;
   evaluatorName?: string;
+  evaluatorVersion?: string;
   score?: number | null;
   label?: string;
   repetitionIndex?: number;
@@ -42,6 +43,7 @@ export const buildScore = (options: BuildScoreOptions): SeededScore => ({
   },
   evaluator: {
     name: options.evaluatorName ?? 'correctness',
+    ...(options.evaluatorVersion ? { version: options.evaluatorVersion } : {}),
     score: options.score ?? 1,
     label: options.label ?? 'correct',
     explanation: 'seeded by FTR',

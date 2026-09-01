@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getSpaceNPRE, PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import type { ProjectTagsResponse } from '@kbn/cps-utils';
 import { brandSpaceId } from '@kbn/core-spaces-common';
-import type { CpsData } from '../types';
+import type { CpsData, CpsLinkedProject } from '../types';
 
 /**
  * Resolves the CPS scope metadata (routing expression + linked projects) recorded on alert
@@ -22,8 +22,9 @@ import type { CpsData } from '../types';
  *   API key would otherwise raise (see #276771).
  * - `/_project/tags` returns the linked projects visible to the caller (role-filtered). To reflect
  *   the scope the rule execution actually targets (its owner's project visibility), it is called as
- *   the current user. If the rule's API key lacks the privilege the call fails silently, so linked
- *   projects are reported as empty rather than over-reported.
+ *   the current user. If the call fails, linked projects are reported as unresolved (`undefined`)
+ *   rather than as an empty array, so consumers can distinguish "unknown" from "genuinely none in
+ *   scope" (see #285277).
  */
 export const resolveCpsData = async (
   internalUserEsClient: ElasticsearchClient,
@@ -59,28 +60,45 @@ export const resolveCpsData = async (
         throw error;
       });
 
-    const tagsResponse = await currentUserEsClient.transport
-      .request<ProjectTagsResponse>({
+    let linkedProjects: CpsLinkedProject[] | undefined;
+    try {
+      const tagsResponse = await currentUserEsClient.transport.request<ProjectTagsResponse>({
         method: 'GET',
         path: '/_project/tags',
         body: { project_routing: resolvedExpression },
-      })
-      .catch(() => undefined);
-
-    const linkedProjects = tagsResponse?.linked_projects
-      ? Object.values(tagsResponse.linked_projects).map(
-          ({ _id, _alias, _type, _organisation }) => ({
-            id: _id,
-            alias: _alias,
-            type: _type,
-            organization: _organisation,
-          })
-        )
-      : [];
+      });
+      linkedProjects = tagsResponse.linked_projects
+        ? Object.values(tagsResponse.linked_projects).map(
+            ({ _id, _alias, _type, _organisation }) => ({
+              id: _id,
+              alias: _alias,
+              type: _type,
+              organization: _organisation,
+            })
+          )
+        : [];
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number })?.statusCode;
+      if (statusCode === 401 || statusCode === 403) {
+        // The rule's execution principal cannot list linked projects. This typically means the
+        // run fell back to a project-scoped ES API key instead of a cross-project-capable UIAM
+        // key, so the run could not search linked projects either. Leave linked projects
+        // unresolved rather than misreporting an empty scope (see #285277).
+        logger.warn(
+          `The rule execution principal is not authorized to resolve linked projects via /_project/tags for space "${spaceId}" (status ${statusCode}); the rule may be running with a project-scoped API key. Recording linked projects as unresolved.`
+        );
+      } else {
+        logger.warn(
+          `Failed to resolve linked projects via /_project/tags for space "${spaceId}": ${
+            error instanceof Error ? error.message : String(error)
+          }. Recording linked projects as unresolved.`
+        );
+      }
+    }
 
     return { resolvedExpression, linkedProjects };
   } catch (e) {
     logger.warn(`Failed to resolve CPS data: ${e instanceof Error ? e.message : String(e)}`);
-    return { linkedProjects: [] };
+    return {};
   }
 };

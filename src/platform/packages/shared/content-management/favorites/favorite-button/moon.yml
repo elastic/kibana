@@ -16,19 +16,17 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/shared/content-management/favorites/favorite-button
-dependsOn: []
+dependsOn:
+  - '@kbn/ui-favorite-button'
 tags:
   - shared-browser
   - package
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

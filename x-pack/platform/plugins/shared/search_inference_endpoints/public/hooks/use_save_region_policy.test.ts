@@ -11,7 +11,11 @@ import React from 'react';
 import { useSaveRegionPolicy } from './use_save_region_policy';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../../common/types';
-import { REGION_POLICY_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
+import {
+  INFERENCE_ENDPOINTS_QUERY_KEY,
+  REGION_POLICY_QUERY_KEY,
+  ROUTE_VERSIONS,
+} from '../../common/constants';
 
 jest.mock('./use_kibana');
 
@@ -78,6 +82,7 @@ describe('useSaveRegionPolicy', () => {
     mockPut.mockResolvedValue(responseData);
 
     const { queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useSaveRegionPolicy(), {
       wrapper: ({ children }) =>
@@ -94,6 +99,7 @@ describe('useSaveRegionPolicy', () => {
       expect.objectContaining({ title: 'Region preferences saved' })
     );
     expect(queryClient.getQueryData([REGION_POLICY_QUERY_KEY])).toEqual(responseData);
+    expect(invalidateSpy).toHaveBeenCalledWith([INFERENCE_ENDPOINTS_QUERY_KEY]);
   });
 
   it('shows error toast on error', async () => {

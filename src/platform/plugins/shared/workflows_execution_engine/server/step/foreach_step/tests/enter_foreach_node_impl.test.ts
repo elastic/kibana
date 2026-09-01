@@ -161,33 +161,12 @@ describe('EnterForeachNodeImpl', () => {
         });
       });
 
-      it('should treat null as an empty array and skip the loop', async () => {
+      it('should throw an error if expression evaluated to null', async () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue(null);
-        await underTest.run();
-
-        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          total: 0,
-        });
-        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
-        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(
-          node.exitNodeId
-        );
-      });
-
-      it('should treat undefined as an empty array and skip the loop', async () => {
-        (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
-        ).mockReturnValue(undefined);
-        await underTest.run();
-
-        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          total: 0,
-        });
-        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
-        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(
-          node.exitNodeId
+        await expect(underTest.run()).rejects.toThrow(
+          'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
         );
       });
 
@@ -197,7 +176,7 @@ describe('EnterForeachNodeImpl', () => {
         ).mockReturnValue({
           key: 'value',
         });
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object: {"key":"value"}.'
         );
       });
@@ -206,7 +185,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue('{"key": value }');
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
       });
@@ -242,7 +221,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
         ).mockReturnValue(JSON.stringify({ foo: 'bar' }));
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array.'
         );
       });
@@ -251,7 +230,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
         ).mockReturnValue('{"key": value }');
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
       });
@@ -373,7 +352,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not provided', async () => {
       node.configuration.foreach = undefined as any;
 
-      await expect(underTest.run()).rejects.toThrowError(
+      await expect(underTest.run()).rejects.toThrow(
         'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
       );
       expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
@@ -382,7 +361,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not an array', async () => {
       node.configuration.foreach = JSON.stringify({ key: 'value' });
 
-      await expect(underTest.run()).rejects.toThrowError(
+      await expect(underTest.run()).rejects.toThrow(
         'Foreach expression must evaluate to an array. Expression "{"key":"value"}" resolved to object: {"key":"value"}.'
       );
       expect(stepExecutionRuntime.startStep).toHaveBeenCalledTimes(1);

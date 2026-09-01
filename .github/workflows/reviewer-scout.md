@@ -85,6 +85,7 @@ env:
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
   REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none
@@ -153,7 +154,13 @@ Using the imported reviewer instructions:
 
 ## Critical checks
 
-Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings, and prefix each Critical-check finding with a GitHub `> [!IMPORTANT]` alert containing exactly this line (the finding details follow after the alert):
+Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as a level-3 heading:
+
+```md
+### ⚠️ <short fix-oriented title>
+```
+
+Then append a GitHub `> [!IMPORTANT]` alert at the **bottom** of that finding (after the finding details), containing exactly this line:
 
 ```
 > [!IMPORTANT]

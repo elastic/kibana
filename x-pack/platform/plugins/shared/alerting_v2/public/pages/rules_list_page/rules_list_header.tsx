@@ -21,15 +21,31 @@ const getRulesListMenu = ({
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
+  onBuildSequence,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
+  onBuildSequence: () => void;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
+  items: [
+    {
+      id: 'buildSequence',
+      label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
+        defaultMessage: 'Build a sequence',
+      }),
+      iconType: 'branch',
+      tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
+        defaultMessage: 'Chain rules to detect multi-step alert patterns',
+      }),
+      testId: 'createSequenceRuleButton',
+      run: onBuildSequence,
+    },
+  ],
   primaryActionItem: {
     id: 'createRule',
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
@@ -77,6 +93,7 @@ export interface RulesListHeaderProps {
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
+  onBuildSequence: () => void;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }
@@ -91,6 +108,7 @@ export const RulesListHeader = ({
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
+  onBuildSequence,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: RulesListHeaderProps) => {
@@ -104,6 +122,7 @@ export const RulesListHeader = ({
             onCreateRule,
             onCreateEsqlRule,
             onCreateWithAgent,
+            onBuildSequence,
             createWithAgentDisabled,
             createWithAgentTooltipText,
           })
@@ -113,6 +132,7 @@ export const RulesListHeader = ({
       onCreateRule,
       onCreateEsqlRule,
       onCreateWithAgent,
+      onBuildSequence,
       createWithAgentDisabled,
       createWithAgentTooltipText,
     ]

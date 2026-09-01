@@ -21,6 +21,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     agents: {
       register: jest.fn(),
       registerType: jest.fn(),
+      registerAiIndexResolver: jest.fn(),
     },
     tools: {
       register: jest.fn(),
@@ -40,11 +41,8 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
-    management: {
-      createOrUpdateAgent: jest.fn(),
-      deleteAgent: jest.fn(),
-      deletePackageManagedAgent: jest.fn(),
-      getAgent: jest.fn(),
+    conversationTemplates: {
+      register: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
@@ -83,6 +81,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
+    },
+    conversationTemplates: {
+      get: jest.fn(),
+      list: jest.fn(),
     },
   };
 };

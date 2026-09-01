@@ -7,7 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentCreateRequest } from '@kbn/agent-builder-common';
+import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
@@ -19,6 +19,7 @@ import type {
   AgentTypeDefinition,
   AgentRegistry,
   AgentAvailabilityConfig,
+  AiIndexResolver,
 } from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
@@ -60,6 +61,26 @@ export interface AttachmentsSetup {
    * Register an attachment type to be available in agentBuilder.
    */
   registerType(attachmentType: AttachmentTypeDefinition): void;
+}
+
+/**
+ * AgentBuilder conversation-templates service's setup contract.
+ */
+export interface ConversationTemplatesSetup {
+  /**
+   * Register a conversation template.
+   */
+  register(template: ConversationTemplate): void;
+}
+
+/**
+ * AgentBuilder conversation-templates service's start contract.
+ */
+export interface ConversationTemplatesStart {
+  /** Look up a template by id. Resolves to undefined when unknown. */
+  get(id: string): Promise<ConversationTemplate | undefined>;
+  /** List every registered template. Order is not guaranteed. */
+  list(): Promise<ConversationTemplate[]>;
 }
 
 export interface RenderersSetup {
@@ -109,6 +130,11 @@ export interface AgentsSetup {
    * that type inherit at resolution time.
    */
   registerType: (definition: AgentTypeDefinition) => void;
+  /**
+   * Register the resolver used to look up details for the AI indices referenced by
+   * agent configurations.
+   */
+  registerAiIndexResolver: (resolver: AiIndexResolver) => void;
 }
 
 export interface AgentsStart {
@@ -236,6 +262,10 @@ export interface AgentBuilderPluginSetup {
    */
   attachments: AttachmentsSetup;
   /**
+   * Conversation templates setup contract, which can be used to register templates.
+   */
+  conversationTemplates: ConversationTemplatesSetup;
+  /**
    * Renderers setup contract, which can be used to register renderer types.
    */
   renderers: RenderersSetup;
@@ -296,4 +326,8 @@ export interface AgentBuilderPluginStart {
    * Conversations service (read-only), to list and retrieve conversations.
    */
   conversations: ConversationsStart;
+  /**
+   * Conversation templates service, to look up registered templates.
+   */
+  conversationTemplates: ConversationTemplatesStart;
 }

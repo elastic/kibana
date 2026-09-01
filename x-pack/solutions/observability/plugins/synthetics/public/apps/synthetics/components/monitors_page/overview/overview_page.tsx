@@ -21,6 +21,8 @@ import {
 import { getServiceLocations } from '../../../state/service_locations';
 import { isExternalOverviewMonitor } from '../../../state/overview_status';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
+import { useCpsLinkedProjects } from '../../../hooks/use_cps_linked_projects';
+import { shouldRedirectToGettingStarted } from '../hooks/should_redirect_to_getting_started';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewStatus } from '../hooks/use_overview_status';
@@ -67,9 +69,11 @@ export const OverviewPage: React.FC = () => {
     allConfigs,
     loaded: overviewLoaded,
     settled: overviewSettled,
+    error: overviewError,
   } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
+  const { cpsReady, hasLinkedProjects } = useCpsLinkedProjects();
 
   const pageState = useSelector(selectOverviewPageState);
 
@@ -101,11 +105,8 @@ export const OverviewPage: React.FC = () => {
   // holds such monitors, so we don't redirect to Getting Started (and flash the grid)
   // when the only monitors are ping-driven.
   //
-  // `overviewSettled` is true once the status request has completed, success OR failure.
-  // A failed request must still count as settled: the reducer never flips `loaded` on
-  // error (and the `error` flag is cleared by the OverviewStatus toast effect), so gating
-  // on those alone would strand a truly empty deployment on an empty overview whenever the
-  // status request fails.
+  // A failed status fetch must not look like an empty install — that onboarded
+  // users away from CPS linked-project remotes when the first request was origin-only.
   //
   // We suppress the redirect while a monitor filter is active: because `allConfigs` is
   // filtered, an empty result there doesn't prove the deployment has no monitors — a
@@ -117,10 +118,15 @@ export const OverviewPage: React.FC = () => {
   const hasNoMonitors =
     !enablementLoading &&
     monitorsLoaded &&
-    absoluteTotal === 0 &&
-    overviewSettled &&
-    !hasActiveOverviewFilter &&
-    !allConfigs.some(isExternalOverviewMonitor);
+    shouldRedirectToGettingStarted({
+      absoluteTotal,
+      overviewSettled,
+      overviewError: Boolean(overviewError),
+      hasActiveFilter: hasActiveOverviewFilter,
+      hasExternalMonitors: allConfigs.some(isExternalOverviewMonitor),
+      cpsReady,
+      hasLinkedProjects,
+    });
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;

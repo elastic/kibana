@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, markExternalUiamCredential } from '@kbn/core-security-server';
 import {
   callKibanaApi,
   CallKibanaApiResponseTooLargeError,
@@ -79,17 +79,26 @@ const mockSelfResponse = (response: Response) => ({ response });
 function createFakeRequest({
   headers = {},
   isInternalApiRequest = false,
+  externalUiamCredential = false,
 }: {
   headers?: Record<string, string>;
   isInternalApiRequest?: boolean;
+  externalUiamCredential?: boolean;
 } = {}): KibanaRequest {
-  return {
+  const request = {
     headers: {
       authorization: 'ApiKey test-key',
       ...headers,
     },
     isInternalApiRequest,
+    isFakeRequest: true,
   } as unknown as KibanaRequest;
+
+  if (externalUiamCredential) {
+    markExternalUiamCredential(request);
+  }
+
+  return request;
 }
 
 /**
@@ -332,6 +341,32 @@ describe('callKibanaApi', () => {
     expect(mockGetAttestationHeaders).toHaveBeenCalledTimes(1);
     expect(mockGetAttestationHeaders).toHaveBeenCalledWith(
       new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key')
+    );
+  });
+
+  it('does not stamp the attestation for a user-created (external) UIAM credential', async () => {
+    // The receiving Kibana would honor the attestation and attach the UIAM shared secret to its
+    // Elasticsearch calls, and UIAM rejects external keys presented with client authentication.
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest({
+          headers: { authorization: 'ApiKey essu_user_created_key' },
+          externalUiamCredential: true,
+        }),
+        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
+      },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBeUndefined();
+    expect(mockGetAttestationHeaders).not.toHaveBeenCalled();
+    // The credential itself still goes out; only the attestation is withheld.
+    expect(mockAsScoped).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'ApiKey essu_user_created_key' }),
+      })
     );
   });
 

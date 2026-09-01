@@ -24,6 +24,7 @@ export type {
   FetchLike,
   ListToolsResponse,
   Tool,
+  ToolAnnotations,
   ToolProviderMetadata,
   TextPart,
   NonTextPart,

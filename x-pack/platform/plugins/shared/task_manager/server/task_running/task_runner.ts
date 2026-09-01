@@ -46,6 +46,7 @@ import type {
   SuccessfulRunResult,
   TaskDefinition,
   TaskEventLogger,
+  TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
@@ -441,6 +442,7 @@ export class TaskManagerRunner implements TaskRunner {
             spaceId: modifiedContext.taskInstance.userScope?.spaceId,
             userProfileId,
             userName,
+            uiamApiKeyExternal: modifiedContext.taskInstance.userScope?.uiamApiKeyExternal,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
@@ -574,22 +576,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     // mget claim strategy sets the task to `running` during the claim cycle
     // so this update to mark the task as running is unnecessary
-    const { task } = this.instance;
-    // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
-    // so we can diagnose the issue.
-    if (task.startedAt == null) {
-      this.logger.warn(
-        `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
-          `status=${task.status} attempts=${task.attempts} ` +
-          `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
-          `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
-          `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
-          `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
-          `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
-        { tags: [this.taskType, this.id] }
-      );
-    }
-    this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
+    this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
     return true;
   }
 
@@ -851,12 +838,16 @@ export class TaskManagerRunner implements TaskRunner {
     const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
+    const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
+      | TaskTypeGroup
+      | undefined;
 
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+
         try {
           const processedResult = {
             task,
@@ -875,7 +866,12 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                asErr({
+                  ...processedResult,
+                  isExpired: taskHasExpired,
+                  error: taskRunError,
+                  taskTypeGroup,
+                }),
                 taskTiming
               )
             );
@@ -890,7 +886,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                asOk({ ...processedResult, isExpired: taskHasExpired, taskTypeGroup }),
                 taskTiming
               )
             );
@@ -911,6 +907,7 @@ export class TaskManagerRunner implements TaskRunner {
                 result: TaskRunResult.Failed,
                 isExpired: taskHasExpired,
                 error: err,
+                taskTypeGroup,
               }),
               taskTiming
             )
@@ -936,6 +933,7 @@ export class TaskManagerRunner implements TaskRunner {
               result: await this.processResultForRecurringTask(result),
               isExpired: taskHasExpired,
               error,
+              taskTypeGroup,
             }),
             taskTiming
           )

@@ -6,6 +6,7 @@
  */
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -31,15 +32,14 @@ describe('AddDataSearchResults', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(5)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
     const count = screen.getByTestId('addDataSearchResultsCount');
-    expect(count).toHaveTextContent('Showing 8 integrations');
-    // Design: "Showing" stays regular weight, only the count and noun are bold.
-    expect(count.querySelector('strong')).toHaveTextContent('8 integrations');
+    expect(count).toHaveTextContent('Showing 5 integrations');
+    expect(count.querySelector('strong')).toHaveTextContent('5 integrations');
     expect(count.querySelector('strong')).not.toHaveTextContent('Showing');
   });
 
@@ -47,7 +47,7 @@ describe('AddDataSearchResults', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(5)}
         isLoading={false}
         renderCard={renderCard}
       />
@@ -63,12 +63,12 @@ describe('AddDataSearchResults', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(5)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
-    expect(liveRegionTexts()).toContain('Showing 8 integrations');
+    expect(liveRegionTexts()).toContain('Showing 5 integrations');
   });
 
   it('announces the empty state in a live region', () => {
@@ -83,17 +83,178 @@ describe('AddDataSearchResults', () => {
     expect(liveRegionTexts()).toContain('No results for zzz-no-match');
   });
 
-  it('renders every item with no pagination control', () => {
+  it('caps visible results at two rows and paginates the rest', () => {
     renderWithI18n(
       <AddDataSearchResults
-        searchTerm="redis"
+        searchTerm="aws"
         items={makeItems(30)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(30);
-    expect(screen.queryByTestId('addDataSearchResultsShowMore')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
+    expect(screen.getByTestId('card-item-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-item-6')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsPagination')).toBeInTheDocument();
+  });
+
+  it('reports the visible range and the total when results exceed two rows', () => {
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    const count = screen.getByTestId('addDataSearchResultsCount');
+    expect(count).toHaveTextContent('Showing 1-6 of 8 integrations');
+    expect(count.querySelector('strong')).toHaveTextContent('1-6 of 8 integrations');
+    expect(count.querySelector('strong')).not.toHaveTextContent('Showing');
+    expect(liveRegionTexts()).toContain('Showing 1-6 of 8 integrations');
+  });
+
+  it('shows the next slice when the second page is selected', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(2);
+    expect(screen.getByTestId('card-item-6')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-item-0')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 7-8 of 8 integrations'
+    );
+  });
+
+  it('does not write to the url when the page changes', async () => {
+    const user = userEvent.setup();
+    const hrefBefore = window.location.href;
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(window.location.href).toBe(hrefBefore);
+  });
+
+  it('hides pagination when the match count fits in two rows', () => {
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="redis"
+        items={makeItems(6)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
+    expect(screen.queryByTestId('addDataSearchResultsPagination')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 6 integrations'
+    );
+  });
+
+  it('returns to the first page when the search term changes', async () => {
+    const user = userEvent.setup();
+    const view = renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(12)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getByTestId('card-item-6')).toBeInTheDocument();
+
+    view.rerender(
+      <I18nProvider>
+        <AddDataSearchResults
+          searchTerm="azure"
+          items={makeItems(12, 'azure')}
+          isLoading={false}
+          renderCard={renderCard}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('card-azure-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-azure-6')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 1-6 of 12 integrations'
+    );
+  });
+
+  it('returns to the first page when a new term has fewer pages', async () => {
+    const user = userEvent.setup();
+    const view = renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(30)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-2'));
+
+    view.rerender(
+      <I18nProvider>
+        <AddDataSearchResults
+          searchTerm="azure"
+          items={makeItems(8, 'azure')}
+          isLoading={false}
+          renderCard={renderCard}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('card-azure-0')).toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 1-6 of 8 integrations'
+    );
+  });
+
+  it('clamps to the last page when the list shrinks under the same term', async () => {
+    const user = userEvent.setup();
+    const view = renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="aws"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+      />
+    );
+    await user.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getByTestId('card-item-6')).toBeInTheDocument();
+
+    view.rerender(
+      <I18nProvider>
+        <AddDataSearchResults
+          searchTerm="aws"
+          items={makeItems(3)}
+          isLoading={false}
+          renderCard={renderCard}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(3);
+    expect(screen.getByTestId('card-item-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-item-6')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent(
+      'Showing 3 integrations'
+    );
+    expect(screen.queryByTestId('addDataSearchResultsPagination')).not.toBeInTheDocument();
   });
 
   it('renders a loading skeleton', () => {
@@ -135,5 +296,7 @@ describe('AddDataSearchResults', () => {
       />
     );
     expect(screen.getByTestId('addDataSearchResultsEmpty')).toHaveTextContent('zzz-no-match');
+    expect(screen.queryByTestId('addDataSearchResultsPagination')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('addDataSearchResultsCount')).not.toBeInTheDocument();
   });
 });

@@ -6,13 +6,14 @@
  */
 
 import type {
+  SavedObject,
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
   SavedObjectsType,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
-import type { AssetSOObject, SimpleSOAssetType } from '../../../../common';
+import type { AssetSOObject, GetBulkAssetsResponse, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
 import { KibanaSavedObjectType } from '../../../../common/types';
 
@@ -24,31 +25,14 @@ type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
 };
 
-export interface ExternalAssetMetadata {
-  title?: string;
-  description?: string;
-}
-
-export interface GetBulkAssetsOptions {
-  externalAssetEnricher?: (
-    assets: AssetSOObject[]
-  ) => Promise<Record<string, ExternalAssetMetadata>>;
-}
-
-const EXTERNAL_KIBANA_ASSET_TYPES = new Set<string>([
-  KibanaSavedObjectType.workflow,
-  KibanaSavedObjectType.agent,
-]);
-
-export const getKibanaLinkForExternalAsset = (type: KibanaSavedObjectType, id: string): string => {
-  switch (type) {
-    case KibanaSavedObjectType.workflow:
-      return `/app/workflows/${encodeURIComponent(id)}`;
-    case KibanaSavedObjectType.agent:
-      return `/app/agent_builder/agents/${encodeURIComponent(id)}/overview`;
-    default:
-      return '';
-  }
+type AlertingRuleTemplateAttributes = DisplayableSOAssetAttributes & {
+  engine?: 'v1' | 'v2';
+  rule?: {
+    metadata?: {
+      name?: string;
+      description?: string;
+    };
+  };
 };
 
 const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): string => {
@@ -81,41 +65,57 @@ const getAppLinkForESAssetType = (type: string, id: string): string =>
     ? getKibanaLinkForESAsset(type as ElasticsearchAssetType, id)
     : '';
 
+type BulkAssetWithEngine = SimpleSOAssetType & {
+  attributes: SimpleSOAssetType['attributes'] & Pick<AlertingRuleTemplateAttributes, 'engine'>;
+};
+
+type BulkAssetItem = GetBulkAssetsResponse<BulkAssetWithEngine>['items'][number];
+
+const isType = <TAttributes extends DisplayableSOAssetAttributes>(
+  obj: SavedObject<DisplayableSOAssetAttributes>,
+  type: string
+): obj is SavedObject<TAttributes> => obj.type === type;
+
+const toAssetType = (
+  obj: SavedObject<DisplayableSOAssetAttributes>,
+  soType: SavedObjectsType | undefined,
+  appLink: string
+): BulkAssetItem => {
+  let attributes: BulkAssetItem['attributes'] = {
+    title: soType?.management?.getTitle?.(obj) ?? obj.attributes?.title ?? obj.attributes?.name,
+    description: obj.attributes?.description,
+  };
+
+  if (isType<AlertingRuleTemplateAttributes>(obj, KibanaSavedObjectType.alertingRuleTemplate)) {
+    const { engine, rule } = obj.attributes;
+    const ruleMetadata = rule?.metadata;
+    attributes = {
+      ...attributes,
+      title: ruleMetadata?.name ?? attributes.title,
+      description: ruleMetadata?.description ?? attributes.description,
+      ...(engine === 'v1' || engine === 'v2' ? { engine } : {}),
+    };
+  }
+
+  return {
+    id: obj.id,
+    type: obj.type as BulkAssetItem['type'],
+    updatedAt: obj.updated_at,
+    attributes,
+    appLink,
+  };
+};
+
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   soTypeRegistry: ISavedObjectTypeRegistry,
-  assetIds: AssetSOObject[],
-  options?: GetBulkAssetsOptions
+  assetIds: AssetSOObject[]
 ) {
-  const externalAssetIds = assetIds.filter(({ type }) => EXTERNAL_KIBANA_ASSET_TYPES.has(type));
-  const savedObjectAssetIds = assetIds.filter(({ type }) => !EXTERNAL_KIBANA_ASSET_TYPES.has(type));
-
-  const externalMetadata = options?.externalAssetEnricher
-    ? await options.externalAssetEnricher(externalAssetIds)
-    : {};
-
-  const externalAssets: SimpleSOAssetType[] = externalAssetIds.map(({ id, type }) => {
-    const metadata = externalMetadata[id];
-    return {
-      id,
-      type: type as KibanaSavedObjectType,
-      attributes: {
-        title: metadata?.title ?? id,
-        description: metadata?.description,
-      },
-      appLink: getKibanaLinkForExternalAsset(type as KibanaSavedObjectType, id),
-    };
-  });
-
-  if (savedObjectAssetIds.length === 0) {
-    return externalAssets;
-  }
-
   const { resolved_objects: resolvedObjects } =
-    await soClient.bulkResolve<DisplayableSOAssetAttributes>(savedObjectAssetIds);
+    await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
 
-  const res: SimpleSOAssetType[] = resolvedObjects
+  const res: GetBulkAssetsResponse<BulkAssetWithEngine>['items'] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
       (savedObject) =>
@@ -159,22 +159,7 @@ export async function getBulkAssets(
         appLink = getAppLinkForESAssetType(obj.type, obj.id);
       }
 
-      const title =
-        types[obj.type]?.management?.getTitle?.(obj) ??
-        obj.attributes?.title ??
-        obj.attributes?.name;
-
-      return {
-        id: obj.id,
-        type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
-        updatedAt: obj.updated_at,
-        attributes: {
-          title,
-          description: obj.attributes?.description,
-        },
-        appLink,
-      };
+      return toAssetType(obj, types[obj.type], appLink);
     });
-
-  return [...res, ...externalAssets];
+  return res;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from './spaces';
 
 // ---------------------------------------------------------------------------
@@ -90,11 +91,11 @@ export interface ExperimentsListingResult {
 // ---------------------------------------------------------------------------
 
 /**
- * Builds a filter that matches score documents visible in the given space: those
+ * Builds a filter that matches documents visible in the given space: those
  * assigned to it, and in the default space those predating space-awareness.
  */
-export const buildSpaceFilter = (spaceId: string): Record<string, unknown> => {
-  const should: Array<Record<string, unknown>> = [{ terms: { space_ids: [spaceId] } }];
+export const buildSpaceFilter = (spaceId: string): NonNullable<QueryDslQueryContainer> => {
+  const should: Array<NonNullable<QueryDslQueryContainer>> = [{ terms: { space_ids: [spaceId] } }];
   if (spaceId === DEFAULT_SPACE_ID) {
     should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
   }
@@ -132,9 +133,12 @@ export const buildExperimentFilterQuery = (
  */
 export const buildExampleScoresQuery = (
   exampleId: string,
-  options?: { spaceId?: string }
+  options?: { spaceId?: string; datasetId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
+  if (options?.datasetId !== undefined) {
+    must.push({ term: { 'example.dataset.id': options.datasetId } });
+  }
   if (options?.spaceId) {
     must.push(buildSpaceFilter(options.spaceId));
   }

@@ -29,6 +29,7 @@ export class TimelinePage {
   readonly createFromTemplateButton: Locator;
   readonly customTemplatesTab: Locator;
   readonly kqlTextarea: Locator;
+  readonly searchContainer: Locator;
   readonly saveButtonTooltipAnchor: Locator;
   readonly timelineRows: Locator;
   readonly batchActionsButton: Locator;
@@ -56,9 +57,9 @@ export class TimelinePage {
     this.timelinesTable = this.page.testSubj.locator('timelines-table');
     this.createFromTemplateButton = this.page.testSubj.locator('create-from-template');
     this.customTemplatesTab = this.page.testSubj.locator('Custom templates');
-    this.kqlTextarea = this.page.testSubj
-      .locator('timeline-search-or-filter-search-container')
-      .locator('textarea');
+    // Same node as queryInput (`timelineQueryInput` on QueryStringInput).
+    this.kqlTextarea = this.queryInput;
+    this.searchContainer = this.page.testSubj.locator('timeline-search-or-filter-search-container');
     this.saveButtonTooltipAnchor = this.page.locator(
       'span:has([data-test-subj="timeline-modal-save-timeline"])'
     );

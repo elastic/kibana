@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { FavoriteButtonStatus } from '@kbn/favorite-button';
+import type { FavoriteButtonStatus } from '@kbn/ui-favorite-button';
 import { useAddFavorite, useFavorites, useRemoveFavorite } from './favorites_query';
 import { useFavoritesClient } from './favorites_context';
 

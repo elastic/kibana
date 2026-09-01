@@ -334,5 +334,121 @@ export default function (providerContext: FtrProviderContextWithServices) {
           .set('kbn-xsrf', 'xxxx');
       }
     });
+
+    // ── Half A — stale variant cleanup (kibana#283077) ──────────────────────────────────────────
+    //
+    // The sweep previously skipped parents that still had `has_agent_version_conditions: true`,
+    // so a variant for a version that fell out of the bounded set was never deleted even with
+    // zero agents assigned. A stale variant that references a garbage-collected secret causes
+    // fleet-server to crash-loop for the entire deployment.
+    //
+    // These tests write variant documents directly into `.fleet-policies` with a @timestamp 2 hours
+    // in the past (safely past the 1-hour grace window), avoiding the need to wait an hour in CI.
+    // The parent policy's `has_agent_version_conditions: true` flag is set during `before()`.
+
+    it('Half A: deletes a stale out-of-set variant with zero agents once past the grace window', async () => {
+      // 7.17 is always outside the bounded set (bounded set = current major.minor + prev minor +
+      // prev-major's latest minor, all of which are 8.x or 9.x in any Kibana version we run).
+      const staleVariantId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}7.17`;
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+      await es.index({
+        index: '.fleet-policies',
+        id: `${staleVariantId}:1`,
+        document: {
+          policy_id: staleVariantId,
+          policy_base_id: policyId,
+          revision_idx: 1,
+          '@timestamp': twoHoursAgo,
+          data: { id: staleVariantId, revision: 1, inputs: [], agent: { monitoring: {} } },
+        },
+        refresh: 'wait_for',
+      });
+
+      // Confirm the doc is present before the sweep runs.
+      const before = await getFleetPolicies(policyId);
+      expect(before.some((p: any) => p.policy_id === staleVariantId)).to.be(true);
+
+      await waitForTask();
+
+      // The sweep must delete the stale variant: out-of-set, zero agents, past grace window.
+      await retry.tryForTime(30000, async () => {
+        const after = await getFleetPolicies(policyId);
+        expect(after.some((p: any) => p.policy_id === staleVariantId)).to.be(false);
+      });
+    });
+
+    it('Half A negative: preserves an out-of-set variant when at least one agent is enrolled on it', async () => {
+      const staleVariantId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}7.17`;
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+      await es.index({
+        index: '.fleet-policies',
+        id: `${staleVariantId}:1`,
+        document: {
+          policy_id: staleVariantId,
+          policy_base_id: policyId,
+          revision_idx: 1,
+          '@timestamp': twoHoursAgo,
+          data: { id: staleVariantId, revision: 1, inputs: [], agent: { monitoring: {} } },
+        },
+        refresh: 'wait_for',
+      });
+
+      // Create an agent already assigned to the stale variant (simulates a downlevel enrolled agent).
+      // policy_base_id is set so the deploy path can also find it via getAgentAssignedVersionsForPolicies.
+      await createAgentDoc(providerContext, 'agent-stale', staleVariantId, '7.17.0', true, {
+        policy_base_id: policyId,
+      });
+
+      await waitForTask();
+
+      // The variant must NOT be deleted — the pre-delete agent count check blocks deletion.
+      await retry.tryForTime(30000, async () => {
+        const after = await getFleetPolicies(policyId);
+        expect(after.some((p: any) => p.policy_id === staleVariantId)).to.be(true);
+      });
+
+      // Cleanup the stale variant doc so it doesn't interfere with subsequent tests or task runs.
+      await es.deleteByQuery({
+        index: '.fleet-policies',
+        refresh: true,
+        query: { term: { policy_id: staleVariantId } },
+      });
+    });
+
+    // ── Half B — out-of-set agent version gets a variant deployed by Phase 1 ─────────────────────
+    //
+    // When an agent running version 7.17.0 checks in against a policy with has_agent_version_conditions,
+    // Phase 1 of the task detects that the agent needs a 7.17 variant and calls deployPolicies with
+    // agentVersions: ['7.17']. The variant is deployed and the agent is reassigned to it.
+    //
+    // The full Half-B refresh scenario (an existing out-of-set variant getting refreshed by a policy
+    // UPDATE via getAgentAssignedVersionsForPolicies) cannot be exercised via the REST API in this
+    // test environment because the policy has no packages with conditions.agent.version, so any PUT
+    // recomputes has_agent_version_conditions = false and wipes all variant docs. That code path is
+    // covered at the unit level in version_specific_policies.test.ts.
+
+    it('Half B: Phase 1 deploys an out-of-set variant and reassigns the agent to it', async () => {
+      const outOfSetVariantId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}7.17`;
+
+      // Place an agent on the BASE policy. Phase 1 detects this, deploys a 7.17 variant (which is
+      // outside the bounded set of current/prev-minor/prev-major), and reassigns the agent.
+      await createAgentDoc(providerContext, 'agent-old', policyId, '7.17.0', true);
+
+      await waitForTask();
+
+      // The agent must be reassigned to the out-of-set 7.17 variant.
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('agent-old');
+        expect(agent.policy_id).to.be(outOfSetVariantId);
+      });
+
+      // The variant document must exist in .fleet-policies.
+      const fleetPolicies = await getFleetPolicies(policyId);
+      const variantDoc = fleetPolicies.find((p: any) => p.policy_id === outOfSetVariantId);
+      expect(variantDoc).to.not.be(undefined);
+      expect(variantDoc.revision_idx).to.be.greaterThan(0);
+    });
   });
 }
