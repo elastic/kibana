@@ -230,7 +230,7 @@ export const QueryStreamFieldDescriptionFlyout = ({
   }, [description, field, onSave]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutId} maxWidth={500}>
+    <EuiFlyout ownFocus resizable onClose={onClose} aria-labelledby={flyoutId} maxWidth={500}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutId}>{field.name}</h2>

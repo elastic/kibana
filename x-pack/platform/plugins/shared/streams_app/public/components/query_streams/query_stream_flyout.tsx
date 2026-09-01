@@ -140,6 +140,7 @@ export function QueryStreamFlyout({
   return (
     <EuiFlyout
       size="l"
+      resizable
       onClose={onClose}
       aria-labelledby="query-stream-flyout-title"
       data-test-subj="streamsAppQueryStreamFlyout"

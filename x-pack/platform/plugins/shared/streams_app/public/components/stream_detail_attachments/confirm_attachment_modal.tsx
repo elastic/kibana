@@ -95,7 +95,7 @@ export function ConfirmAttachmentModal({
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText>{subtitle}</EuiText>
+        <EuiText size="s">{subtitle}</EuiText>
         <EuiSpacer size="m" />
         <EuiCallOut
           announceOnMount

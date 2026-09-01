@@ -73,8 +73,16 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
             white-space: nowrap;
           `}
         >
-          {data.eps ? <EuiText className={statClassName}>{data.eps}</EuiText> : null}
-          {data.latency ? <EuiText className={statClassName}>{data.latency}</EuiText> : null}
+          {data.eps ? (
+            <EuiText size="s" className={statClassName}>
+              {data.eps}
+            </EuiText>
+          ) : null}
+          {data.latency ? (
+            <EuiText size="s" className={statClassName}>
+              {data.latency}
+            </EuiText>
+          ) : null}
         </div>
       </EuiPanel>
       {/* Pipeline name badge, centered just above the pill. */}
@@ -94,6 +102,7 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
         `}
       >
         <EuiText
+          size="s"
           className={css`
             font-size: 10.5px;
             line-height: 12px;

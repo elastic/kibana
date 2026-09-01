@@ -223,6 +223,7 @@ output.elasticsearch:
         onClose={onClose}
         size="m"
         maxWidth={700}
+        resizable
         aria-labelledby="streamsSettingsFlyoutTitle"
       >
         <EuiFlyoutHeader hasBorder>

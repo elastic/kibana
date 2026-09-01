@@ -123,6 +123,7 @@ export function RetentionColumn({
 
   return (
     <EuiText
+      size="s"
       color="subdued"
       tabIndex={0}
       aria-label={NO_RETENTION_LABEL}

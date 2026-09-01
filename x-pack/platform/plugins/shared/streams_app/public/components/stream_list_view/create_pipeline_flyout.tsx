@@ -329,6 +329,7 @@ function EmptyLeftPanelBody({ onGetSuggestions }: { onGetSuggestions: () => void
     <EuiFlexGroup direction="column" gutterSize="l" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiText
+          size="s"
           textAlign="center"
           className={css`
             h3 {
@@ -687,6 +688,7 @@ export function CreatePipelineFlyout({
   return (
     <EuiFlyout
       size="l"
+      resizable
       onClose={onClose}
       hideCloseButton
       aria-labelledby={titleId}

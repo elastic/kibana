@@ -20,7 +20,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,31 +46,6 @@ import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 const CHART_HEIGHT = 200;
-
-interface AttachedAsset {
-  title: string;
-  type: 'Configuration' | 'Dashboard' | 'Rule' | 'Visualization';
-}
-
-const ATTACHED_ASSETS: AttachedAsset[] = [
-  { title: 'sttream-logs-msql', type: 'Configuration' },
-  { title: 'Revenue Attribution b...', type: 'Dashboard' },
-  { title: 'Customer Behavior In...', type: 'Dashboard' },
-  { title: 'Database Performanc...', type: 'Dashboard' },
-  { title: 'Payment Failures by R...', type: 'Dashboard' },
-  { title: 'Service Health \u2013 Ecom...', type: 'Dashboard' },
-  { title: 'Rule: Log Threshold R...', type: 'Rule' },
-  { title: 'Cluster Overview', type: 'Dashboard' },
-  { title: 'Average Uptime [Audi...', type: 'Visualization' },
-  { title: 'Rule: Log Threshold R...', type: 'Rule' },
-];
-
-const ASSET_TYPE_ICON: Record<AttachedAsset['type'], string> = {
-  Configuration: 'document',
-  Dashboard: 'dashboardApp',
-  Rule: 'bell',
-  Visualization: 'visualizeApp',
-};
 
 interface FailureReason {
   label: string;
@@ -112,8 +86,8 @@ function SectionPanel({
     <EuiPanel hasBorder paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h3>{title}</h3>
+          <EuiTitle size="xs">
+            <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>
         {subtitle ? (
@@ -233,34 +207,17 @@ const PROCESSING_TAB = {
   }),
 };
 
-const METRIC_OPTIONS = [
-  {
-    id: 'documents',
-    label: i18n.translate('xpack.streams.destinationFlyout.metric.documents', {
-      defaultMessage: 'Documents',
-    }),
-  },
-  {
-    id: 'ingestion',
-    label: i18n.translate('xpack.streams.destinationFlyout.metric.ingestion', {
-      defaultMessage: 'Ingestion',
-    }),
-  },
-  {
-    id: 'storage',
-    label: i18n.translate('xpack.streams.destinationFlyout.metric.storage', {
-      defaultMessage: 'Storage',
-    }),
-  },
-];
-
 function AboutPanel() {
   return (
-    <SectionPanel
-      title={i18n.translate('xpack.streams.destinationFlyout.aboutTitle', {
-        defaultMessage: 'About this stream',
-      })}
-    >
+    <EuiPanel hasBorder paddingSize="m">
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.streams.destinationFlyout.aboutTitle', {
+            defaultMessage: 'About this stream',
+          })}
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.streams.destinationFlyout.aboutDescription', {
           defaultMessage:
@@ -273,277 +230,7 @@ function AboutPanel() {
           defaultMessage: 'Read more',
         })}
       </EuiLink>
-    </SectionPanel>
-  );
-}
-
-function AttachedAssetsPanel() {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <SectionPanel
-      title={i18n.translate('xpack.streams.destinationFlyout.attachedAssetsTitle', {
-        defaultMessage: 'Attached assets',
-      })}
-      action={
-        <EuiLink>
-          {i18n.translate('xpack.streams.destinationFlyout.viewAll', {
-            defaultMessage: 'View all ({count})',
-            values: { count: 20 },
-          })}
-        </EuiLink>
-      }
-    >
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <strong>
-              {i18n.translate('xpack.streams.destinationFlyout.assetTitleColumn', {
-                defaultMessage: 'Title',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 120 }}>
-          <EuiText size="xs" color="subdued">
-            <strong>
-              {i18n.translate('xpack.streams.destinationFlyout.assetTypeColumn', {
-                defaultMessage: 'Type',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-      {ATTACHED_ASSETS.map((asset, index) => (
-        <EuiFlexGroup
-          key={`${asset.title}-${index}`}
-          gutterSize="none"
-          responsive={false}
-          alignItems="center"
-          className={css`
-            padding: ${euiTheme.size.xs} 0;
-          `}
-        >
-          <EuiFlexItem
-            className={css`
-              min-width: 0;
-            `}
-          >
-            <EuiLink
-              className={css`
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-              `}
-            >
-              {asset.title}
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 120 }}>
-            <EuiBadge color="hollow" iconType={ASSET_TYPE_ICON[asset.type]}>
-              {asset.type}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-    </SectionPanel>
-  );
-}
-
-function DependencyNode({
-  title,
-  subtitle,
-  meta,
-  icon,
-  health,
-  healthBadge,
-  routingIcon = false,
-  compact = false,
-}: {
-  title: string;
-  subtitle?: string;
-  meta?: string;
-  icon: string;
-  health?: string;
-  healthBadge?: string;
-  routingIcon?: boolean;
-  compact?: boolean;
-}) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-      {routingIcon ? (
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasShadow={false}
-            paddingSize="xs"
-            color="primary"
-            className={css`
-              display: flex;
-            `}
-          >
-            <EuiIcon type="branch" size="s" color="primary" />
-          </EuiPanel>
-        </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiPanel
-          hasShadow={false}
-          hasBorder
-          paddingSize="s"
-          className={css`
-            background-color: ${euiTheme.colors.emptyShade};
-            width: ${compact ? 56 : 200}px;
-          `}
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} />
-            </EuiFlexItem>
-            {!compact ? (
-              <EuiFlexItem
-                className={css`
-                  min-width: 0;
-                `}
-              >
-                <EuiText
-                  size="s"
-                  className={css`
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                  `}
-                >
-                  <strong>{title}</strong>
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-          {subtitle ? (
-            <EuiText size="xs" color="subdued">
-              {subtitle}
-            </EuiText>
-          ) : null}
-          {meta || health || healthBadge ? (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                responsive={false}
-                justifyContent="spaceBetween"
-                wrap={false}
-              >
-                {meta ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {meta}
-                    </EuiText>
-                  </EuiFlexItem>
-                ) : null}
-                {health ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiHealth color="success">{health}</EuiHealth>
-                  </EuiFlexItem>
-                ) : null}
-                {healthBadge ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="success">{healthBadge}</EuiBadge>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </>
-          ) : null}
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function DependencyMapPanel() {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <SectionPanel
-      title={i18n.translate('xpack.streams.destinationFlyout.dependencyMapTitle', {
-        defaultMessage: 'Dependency map',
-      })}
-      action={
-        <EuiLink>
-          {i18n.translate('xpack.streams.destinationFlyout.viewInCanvas', {
-            defaultMessage: 'View in canvas',
-          })}
-        </EuiLink>
-      }
-    >
-      <EuiPanel
-        hasShadow={false}
-        color="subdued"
-        paddingSize="l"
-        className={css`
-          background-image: radial-gradient(${euiTheme.colors.lightShade} 1px, transparent 1px);
-          background-size: 16px 16px;
-          overflow-x: auto;
-        `}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          wrap={false}
-          className={css`
-            width: max-content;
-          `}
-        >
-          <EuiFlexItem grow={false}>
-            <DependencyNode
-              title="AWS CloudWatch"
-              subtitle={i18n.translate('xpack.streams.destinationFlyout.sourceSubtitle', {
-                defaultMessage: 'Logs \u00b7 Push via Firehose',
-              })}
-              meta="11.9k/s"
-              icon="logoAWS"
-              health={i18n.translate('xpack.streams.destinationFlyout.healthy', {
-                defaultMessage: 'Healthy',
-              })}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="sortRight" color="subdued" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="xs"
-              alignItems="center"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {'{{PipelineName}}'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DependencyNode title="" icon="logstashIf" compact />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="sortRight" color="subdued" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DependencyNode
-              title="Destination name"
-              meta={'8.1k eps \u00b7 175ms'}
-              icon="package"
-              routingIcon
-              healthBadge={i18n.translate('xpack.streams.destinationFlyout.good', {
-                defaultMessage: 'Good',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </SectionPanel>
+    </EuiPanel>
   );
 }
 
@@ -666,29 +353,24 @@ function DatasetQualityPanel() {
 function ChartPanel() {
   const { euiTheme } = useEuiTheme();
   const chartBaseTheme = useElasticChartsTheme();
-  const [selectedMetric, setSelectedMetric] = useState('documents');
-
   return (
     <EuiPanel hasBorder paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.streams.destinationFlyout.metricLegend', {
-              defaultMessage: 'Select metric',
-            })}
-            options={METRIC_OPTIONS}
-            idSelected={selectedMetric}
-            onChange={setSelectedMetric}
-            buttonSize="compressed"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType="bell">
-            {i18n.translate('xpack.streams.destinationFlyout.alerts', {
-              defaultMessage: 'Alerts',
-            })}
-          </EuiBadge>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.streams.destinationFlyout.documentsTitle', {
+                defaultMessage: 'Documents',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('xpack.streams.destinationFlyout.forSelectedTimeRange', {
+                defaultMessage: 'For selected time range',
+              })}
+            </p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="arrowDown" iconSide="right" size="s" color="text">
@@ -761,20 +443,6 @@ function ChartPanel() {
           <EuiHealth color={euiTheme.colors.vis.euiColorVis0}>
             {i18n.translate('xpack.streams.destinationFlyout.legendDocuments', {
               defaultMessage: 'Documents',
-            })}
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">
-            {i18n.translate('xpack.streams.destinationFlyout.legendDegraded', {
-              defaultMessage: 'Degraded docs',
-            })}
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">
-            {i18n.translate('xpack.streams.destinationFlyout.legendFailures', {
-              defaultMessage: 'Failures',
             })}
           </EuiHealth>
         </EuiFlexItem>
@@ -1312,6 +980,7 @@ export function DestinationFlyout({
   return (
     <EuiFlyout
       size="l"
+      resizable
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="destinationFlyout"
@@ -1379,43 +1048,37 @@ export function DestinationFlyout({
         {selectedTab === 'processing' ? (
           <ProcessingPanel />
         ) : (
-          <EuiFlexGroup gutterSize="m" alignItems="flexStart">
-          {/* Left lane */}
-          <EuiFlexItem
-            grow={2}
-            className={css`
-              min-width: 0;
-            `}
-          >
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <AboutPanel />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AttachedAssetsPanel />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          // Mirrors the real StreamOverview layout: a fixed-width sidebar holding the
+          // About panel beside a growing main column with the ingest-rate chart and
+          // the dataset-quality card.
+          <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+            {/* Sidebar */}
+            <EuiFlexItem
+              grow={false}
+              className={css`
+                width: 340px;
+                min-width: 0;
+              `}
+            >
+              <AboutPanel />
+            </EuiFlexItem>
 
-          {/* Center lane */}
-          <EuiFlexItem
-            grow={3}
-            className={css`
-              min-width: 0;
-            `}
-          >
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <ChartPanel />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DependencyMapPanel />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DatasetQualityPanel />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+            {/* Main */}
+            <EuiFlexItem
+              grow
+              className={css`
+                min-width: 0;
+              `}
+            >
+              <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <ChartPanel />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DatasetQualityPanel />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         )}
       </EuiFlyoutBody>

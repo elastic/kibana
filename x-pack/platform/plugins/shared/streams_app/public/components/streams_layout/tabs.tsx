@@ -22,6 +22,11 @@ interface StreamsLayoutTabConfig {
    * padding instead of framing the content.
    */
   noPadding?: boolean;
+  /**
+   * When set, the tab is shown but rendered non-interactive with this tooltip.
+   * Used to surface features that are out of scope for the current milestone.
+   */
+  disabledReason?: string;
 }
 
 /** Tab ids in the order they render in the header. */
@@ -41,7 +46,6 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
       defaultMessage: 'Canvas',
     }),
     Component: StreamsCanvas,
-    noPadding: true,
   },
   sources: {
     label: i18n.translate('xpack.streams.streamsLayout.sourcesTab', {
@@ -54,6 +58,9 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
       defaultMessage: 'Pipelines',
     }),
     Component: PipelinesTab,
+    disabledReason: i18n.translate('xpack.streams.streamsLayout.pipelinesTabDisabledTooltip', {
+      defaultMessage: 'Not part of this milestone',
+    }),
   },
   destinations: {
     label: i18n.translate('xpack.streams.streamsLayout.destinationsTab', {

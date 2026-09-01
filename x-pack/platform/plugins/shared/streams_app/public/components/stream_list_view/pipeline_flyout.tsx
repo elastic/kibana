@@ -309,7 +309,13 @@ export function PipelineFlyout({
   }
 
   return (
-    <EuiFlyout size="m" onClose={onClose} aria-labelledby={titleId} data-test-subj="pipelineFlyout">
+    <EuiFlyout
+      size="m"
+      resizable
+      onClose={onClose}
+      aria-labelledby={titleId}
+      data-test-subj="pipelineFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="xs">
           <h4 id={titleId}>

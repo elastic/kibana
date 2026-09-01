@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiI18nNumber, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
+import { EuiI18nNumber, EuiLoadingSpinner, EuiIconTip, EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface IngestionColumnProps {
@@ -14,6 +15,10 @@ interface IngestionColumnProps {
   isLoading: boolean;
   hasError?: boolean;
 }
+
+const monoFont = css`
+  font-family: 'Roboto mono', sans-serif;
+`;
 
 export function IngestionColumn({ rate, isLoading, hasError }: IngestionColumnProps) {
   if (isLoading) return <EuiLoadingSpinner size="s" />;
@@ -34,10 +39,12 @@ export function IngestionColumn({ rate, isLoading, hasError }: IngestionColumnPr
   }
 
   return (
-    <FormattedMessage
-      id="xpack.streams.ingestionColumn.cellValue"
-      defaultMessage="{ingestionRate} docs/s"
-      values={{ ingestionRate: <EuiI18nNumber value={rate} /> }}
-    />
+    <EuiText size="s" className={monoFont}>
+      <FormattedMessage
+        id="xpack.streams.ingestionColumn.cellValue"
+        defaultMessage="{ingestionRate} docs/s"
+        values={{ ingestionRate: <EuiI18nNumber value={rate} /> }}
+      />
+    </EuiText>
   );
 }

@@ -87,7 +87,7 @@ function RoutingNodeContents({
           }
         `}
       >
-        <EuiIcon type="branch" size="m" color="primary" />
+        <EuiIcon type="branch" size="m" color="primary" aria-hidden={true} />
       </div>
       <div
         className={css`
@@ -111,6 +111,7 @@ function RoutingNodeContents({
               `}
             >
               <EuiText
+                size="s"
                 className={css`
                   flex: 1 1 auto;
                   min-width: 0;
@@ -127,6 +128,7 @@ function RoutingNodeContents({
               </EuiText>
               {branch.percentage ? (
                 <EuiText
+                  size="s"
                   className={css`
                     flex-shrink: 0;
                     width: 24px;

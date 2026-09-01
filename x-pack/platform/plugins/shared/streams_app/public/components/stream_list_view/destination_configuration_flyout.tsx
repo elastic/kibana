@@ -64,6 +64,7 @@ export function DestinationConfigurationFlyout({
   return (
     <EuiFlyout
       size="s"
+      resizable
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="destinationConfigurationFlyout"

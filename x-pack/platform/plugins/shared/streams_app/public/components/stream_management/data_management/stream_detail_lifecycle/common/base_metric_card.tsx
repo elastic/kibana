@@ -61,7 +61,7 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
           <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          <EuiText size="m">
+          <EuiText size="s">
             <h2 data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}>
               {metric.data}
             </h2>

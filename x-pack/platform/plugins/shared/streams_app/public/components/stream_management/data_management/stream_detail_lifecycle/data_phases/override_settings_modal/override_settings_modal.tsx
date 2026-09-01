@@ -40,7 +40,7 @@ export function OverrideSettingsModal({ onCancel, onSave }: OverrideSettingsModa
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiText>
+        <EuiText size="s">
           {i18n.translate('xpack.streams.overrideSettingsModal.body', {
             defaultMessage:
               'This stream currently inherits its retention and downsampling settings from an index template. Saving these changes will override these inherited settings and apply only to this stream alone.',

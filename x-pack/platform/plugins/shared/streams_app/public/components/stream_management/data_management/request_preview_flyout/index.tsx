@@ -55,7 +55,7 @@ export const RequestPreviewFlyout = ({
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiText>
+            <EuiText size="s">
               <p>{description}</p>
             </EuiText>
           </EuiFlexItem>

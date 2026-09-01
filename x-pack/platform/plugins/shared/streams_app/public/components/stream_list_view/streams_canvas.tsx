@@ -1508,7 +1508,7 @@ function StreamsCanvasInner() {
                             border-radius: ${euiTheme.border.radius.medium};
                           `}
                         >
-                          <EuiText>
+                          <EuiText size="s">
                             <strong>No results</strong>
                           </EuiText>
                           <EuiText size="xs" color="subdued">

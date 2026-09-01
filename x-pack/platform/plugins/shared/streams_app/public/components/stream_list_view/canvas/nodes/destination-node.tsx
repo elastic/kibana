@@ -159,7 +159,7 @@ function ConfiguredDestinationBody({
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem grow={false}>
-                <EuiText className={metaTextClassName}>{data.meta}</EuiText>
+                <EuiText size="s" className={metaTextClassName}>{data.meta}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -168,7 +168,7 @@ function ConfiguredDestinationBody({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiText className={metaTextClassName}>
+        <EuiText size="s" className={metaTextClassName}>
           {i18n.translate('xpack.streams.streamsCanvas.dataNotFlowingIn', {
             defaultMessage: 'Data not flowing in',
           })}

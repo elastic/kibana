@@ -106,6 +106,7 @@ export const MilestoneBadge = React.memo(() => {
         <EuiFlyout
           onClose={closeFlyout}
           size="s"
+          resizable
           aria-labelledby={flyoutTitleId}
           data-test-subj="chromeNextGlobalHeaderMilestoneFlyout"
         >
@@ -130,6 +131,129 @@ export const MilestoneBadge = React.memo(() => {
                     'This is an early UX prototype. It exists to explore and gather feedback on the interaction design — not to demonstrate a fully working product.',
                 })}
               </p>
+
+              <h3>
+                {i18n.translate('core.ui.chrome.milestone.flyoutValueHeading', {
+                  defaultMessage: 'What V1 delivers',
+                })}
+              </h3>
+              <p>
+                {i18n.translate('core.ui.chrome.milestone.flyoutValueBody', {
+                  defaultMessage:
+                    'Existing Streams users get multi-step processing for the first time and can chain as many Streamlang steps as needed. Anyone sending data through managed inputs (OTLP, PRW, _bulk) can now route, filter, and process data before it hits Elasticsearch. Pipeline telemetry — throughput, error rate, and latency — is visible directly on the canvas.',
+                })}
+              </p>
+
+              <h3>
+                {i18n.translate('core.ui.chrome.milestone.flyoutShipsHeading', {
+                  defaultMessage: 'Ships in V1',
+                })}
+              </h3>
+
+              <h4>
+                {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralHeading', {
+                  defaultMessage: 'General',
+                })}
+              </h4>
+              <ul>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralCanvas', {
+                    defaultMessage:
+                      'Canvas experience: move nodes around, add routing and processing between nodes, drag-to-create, hold-shift-to-select, and more.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralTableFilter', {
+                    defaultMessage: 'Filtering in table mode (boolean, scopes).',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralMapSearch', {
+                    defaultMessage: 'Search and filtering in the streams map.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralImportExport', {
+                    defaultMessage: 'Export and import a stream definition.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralIngestPipelines', {
+                    defaultMessage:
+                      'Ingest pipelines on existing streams folded into the destination node (not the processing layer); they run in Elasticsearch.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate(
+                    'core.ui.chrome.milestone.flyoutShipsGeneralIntegrationProcessing',
+                    {
+                      defaultMessage: 'Built-in integration processing.',
+                    }
+                  )}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralManagedProcessing', {
+                    defaultMessage: 'Managed processing.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralMultiSource', {
+                    defaultMessage: 'Multiple source instances with per-source auth.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsGeneralExistingStreams', {
+                    defaultMessage: 'Existing streams surfaced on the canvas.',
+                  })}
+                </li>
+              </ul>
+
+              <h4>
+                {i18n.translate('core.ui.chrome.milestone.flyoutShipsSourcesHeading', {
+                  defaultMessage: 'Sources: OTLP, Prometheus Remote Write, async _bulk',
+                })}
+              </h4>
+              <ul>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsSourcesFlyout', {
+                    defaultMessage: 'Source flyout: type/nature display.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsSourcesTable', {
+                    defaultMessage: 'Sources table page.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsSourcesManagement', {
+                    defaultMessage:
+                      'Source management UI: add and configure OTLP, PRW, and async _bulk sources.',
+                  })}
+                </li>
+              </ul>
+
+              <h4>
+                {i18n.translate('core.ui.chrome.milestone.flyoutShipsDestinationsHeading', {
+                  defaultMessage: 'Destinations: S3 + local Elasticsearch',
+                })}
+              </h4>
+              <ul>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsDestinationsTable', {
+                    defaultMessage: 'Destinations table page.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsDestinationsPivot', {
+                    defaultMessage: 'Pivot from a table row to a filtered canvas view.',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('core.ui.chrome.milestone.flyoutShipsDestinationsFlyout', {
+                    defaultMessage: 'Destination flyout: type display, quality, and controls.',
+                  })}
+                </li>
+              </ul>
 
               <h3>
                 {i18n.translate('core.ui.chrome.milestone.flyoutExploreHeading', {

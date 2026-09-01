@@ -162,7 +162,7 @@ export const DataLifecycleSummary = ({
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText>
+              <EuiText size="s">
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <h5 data-test-subj="dataLifecycleSummary-title">{title}</h5>

@@ -128,7 +128,7 @@ export function ComponentTemplatePanel({
         },
       }}
       title={
-        <EuiText size="m" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
+        <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
           {i18n.translate('xpack.streams.componentTemplatePanel.title', {
             defaultMessage: 'Component templates',
           })}

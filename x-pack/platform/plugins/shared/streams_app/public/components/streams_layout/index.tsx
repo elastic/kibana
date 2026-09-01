@@ -37,16 +37,30 @@ export function StreamsLayout() {
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
     () =>
-      STREAMS_LAYOUT_TABS.map((tabId) => ({
-        id: tabId,
-        label: streamsLayoutTabs[tabId].label,
-        href: router.link('/new-experience/{tab}', {
-          path: { tab: tabId },
-          query: { rangeFrom, rangeTo },
-        }),
-        isSelected: tab === tabId,
-        'data-test-subj': `streamsLayoutTab-${tabId}`,
-      })),
+      STREAMS_LAYOUT_TABS.map((tabId) => {
+        const { label, disabledReason } = streamsLayoutTabs[tabId];
+
+        if (disabledReason) {
+          return {
+            id: tabId,
+            label,
+            disabled: true,
+            toolTipContent: disabledReason,
+            'data-test-subj': `streamsLayoutTab-${tabId}`,
+          };
+        }
+
+        return {
+          id: tabId,
+          label,
+          href: router.link('/new-experience/{tab}', {
+            path: { tab: tabId },
+            query: { rangeFrom, rangeTo },
+          }),
+          isSelected: tab === tabId,
+          'data-test-subj': `streamsLayoutTab-${tabId}`,
+        };
+      }),
     [tab, router, rangeFrom, rangeTo]
   );
 
@@ -63,17 +77,23 @@ export function StreamsLayout() {
     );
   }
 
-  const { Component, noPadding } = streamsLayoutTabs[tab];
+  const { Component, noPadding, disabledReason } = streamsLayoutTabs[tab];
+
+  // Disabled tabs are shown in the header but not navigable, including via a direct URL.
+  if (disabledReason) {
+    return (
+      <RedirectTo
+        path="/new-experience/{tab}"
+        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+      />
+    );
+  }
 
   return (
     <>
       <StreamsAppHeader
         title={i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {
           defaultMessage: 'Streams',
-        })}
-        description={i18n.translate('xpack.streams.streamsLayout.pageHeaderDescription', {
-          defaultMessage:
-            'Route, process, and manage your data streams from source to destination.',
         })}
         tabs={appHeaderTabs}
       />

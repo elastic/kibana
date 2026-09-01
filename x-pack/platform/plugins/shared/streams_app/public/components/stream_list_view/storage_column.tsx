@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
 
 interface StorageColumnProps {
@@ -14,8 +15,16 @@ interface StorageColumnProps {
   isLoading: boolean;
 }
 
+const monoFont = css`
+  font-family: 'Roboto mono', sans-serif;
+`;
+
 export function StorageColumn({ sizeBytes, isLoading }: StorageColumnProps) {
   if (isLoading) return <EuiLoadingSpinner size="s" />;
 
-  return <span>{formatBytes(sizeBytes)}</span>;
+  return (
+    <EuiText size="s" className={monoFont}>
+      {formatBytes(sizeBytes)}
+    </EuiText>
+  );
 }

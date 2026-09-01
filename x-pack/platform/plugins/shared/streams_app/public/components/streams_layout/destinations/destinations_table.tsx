@@ -23,6 +23,7 @@ import {
   EuiLoadingElastic,
   EuiText,
   EuiThemeProvider,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -155,6 +156,18 @@ export function DestinationsTable() {
 function DestinationsTableContent() {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+
+  const xsFontSize = useEuiFontSize('xs');
+  const gridClassName = css`
+    .euiDataGridHeaderCell__content {
+      font-size: ${xsFontSize.fontSize};
+      line-height: ${xsFontSize.lineHeight};
+    }
+    [data-gridcell-column-id='documentsCount'] .euiDataGridHeaderCell__content {
+      text-align: right;
+      justify-content: flex-end;
+    }
+  `;
 
   const destinations = useDestinationsTableSelector((state) => state.context.items);
   const urlState = useDestinationsTableSelector((state) => state.context.urlState);
@@ -357,6 +370,7 @@ function DestinationsTableContent() {
           <EuiDataGrid
             data-test-subj="streamsDestinationsTable"
             aria-label={TABLE_CAPTION}
+            className={gridClassName}
             columns={columns}
             columnVisibility={{
               visibleColumns,

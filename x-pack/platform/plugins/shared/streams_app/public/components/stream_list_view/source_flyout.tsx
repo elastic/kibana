@@ -500,6 +500,7 @@ export function SourceFlyout({
       size="s"
       type="push"
       pushMinBreakpoint="m"
+      resizable
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="sourceFlyout"

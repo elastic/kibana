@@ -550,6 +550,7 @@ function EmptyRoutingPanel({
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiText
+          size="s"
           textAlign="center"
           className={css`
             h3 {
@@ -2150,6 +2151,7 @@ export function CreateRoutingFlyout({
   return (
     <EuiFlyout
       size="l"
+      resizable
       onClose={handleFlyoutClose}
       aria-labelledby={titleId}
       data-test-subj="createRoutingFlyout"
