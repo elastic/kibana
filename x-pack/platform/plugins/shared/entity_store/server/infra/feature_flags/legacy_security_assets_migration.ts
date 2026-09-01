@@ -15,4 +15,4 @@ import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
  */
 export const isLegacySecurityAssetsMigrationEnabled = (
   featureFlags: FeatureFlagsStart
-): Promise<boolean> => featureFlags.getBooleanValue(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+): Promise<boolean> => featureFlags.getBooleanValue(FF_MIGRATE_LEGACY_SECURITY_ASSETS, true);
