@@ -92,4 +92,72 @@ describe('ContextEngineAnalyticsService', () => {
       expect(logger.debug).toHaveBeenCalled();
     });
   });
+
+  describe('reportKiVerification', () => {
+    it('reports a passed verification', () => {
+      service.reportKiVerification({
+        outcome: 'success',
+        passed: true,
+        verifiersRun: 1,
+        failedVerifierIds: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
+        { outcome: 'success', passed: true, verifiers_run: 1 }
+      );
+    });
+
+    it('reports failing verifier ids on failure', () => {
+      service.reportKiVerification({
+        outcome: 'success',
+        passed: false,
+        verifiersRun: 2,
+        failedVerifierIds: ['verifier-a', 'verifier-b'],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
+        {
+          outcome: 'success',
+          passed: false,
+          verifiers_run: 2,
+          failed_verifier_ids: ['verifier-a', 'verifier-b'],
+        }
+      );
+    });
+
+    it('reports failure and abort outcomes without run fields', () => {
+      service.reportKiVerification({ outcome: 'failure', errorType: 'TypeError' });
+      service.reportKiVerification({ outcome: 'aborted' });
+
+      expect(analytics.reportEvent).toHaveBeenNthCalledWith(
+        1,
+        CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
+        { outcome: 'failure', error_type: 'TypeError' }
+      );
+      expect(analytics.reportEvent).toHaveBeenNthCalledWith(
+        2,
+        CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
+        { outcome: 'aborted' }
+      );
+    });
+
+    it('does not propagate a throwing reportEvent', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('EBT unavailable');
+      });
+
+      expect(() =>
+        service.reportKiVerification({
+          outcome: 'success',
+          passed: false,
+          verifiersRun: 1,
+          failedVerifierIds: ['verifier-a'],
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
 });

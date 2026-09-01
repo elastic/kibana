@@ -55,8 +55,6 @@ describe('DeployAndDetectStep', () => {
 
   describe('chip labels', () => {
     it('shows instance name from session storage when instanceId matches', () => {
-      // Use an agentless service (ec2_metrics) — cloudtrail is an ECF service and is filtered
-      // out of the agentless chip row, so it would not appear here.
       setupMocks({
         serviceStatuses: { 'ec2_metrics__dup-1': 'instantiating' },
         instances: [
@@ -119,7 +117,7 @@ describe('DeployAndDetectStep', () => {
   });
 
   describe('continue button', () => {
-    it('shows continue button when serviceStatuses has entries', () => {
+    it('always shows the continue button and calls onContinue when clicked', () => {
       setupMocks({
         serviceStatuses: { inst_a: 'receiving' },
       });
@@ -132,11 +130,13 @@ describe('DeployAndDetectStep', () => {
       expect(onContinue).toHaveBeenCalledTimes(1);
     });
 
-    it('does not show continue button when serviceStatuses is empty', () => {
+    it('shows continue button even when serviceStatuses is empty (ECF-only flow)', () => {
+      // ECF-only users have no agentless chips; deployment is gated in Step 3.
+      // Step 4 must still offer a way forward.
       setupMocks({ serviceStatuses: {} });
 
       renderStep();
-      expect(screen.queryByTestId('deployAndDetectStep-continueButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('deployAndDetectStep-continueButton')).toBeInTheDocument();
     });
   });
 });

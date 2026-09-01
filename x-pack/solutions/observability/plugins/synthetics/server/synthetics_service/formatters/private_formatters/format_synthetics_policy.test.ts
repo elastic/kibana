@@ -84,6 +84,10 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'bool',
                   value: false,
                 },
+                certificate_error_spki_allowlist: {
+                  type: 'yaml',
+                  value: null,
+                },
                 location_name: {
                   type: 'text',
                   value: 'Test private location 0',
@@ -195,6 +199,29 @@ describe('formatSyntheticsPolicy', () => {
         version: '0.11.4',
       },
       policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
+    });
+  });
+
+  it('formats certificate_error_spki_allowlist as JSON for private policy', () => {
+    const pem = '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----';
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      MonitorTypeEnum.BROWSER,
+      {
+        ...browserConfig,
+        [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [pem],
+      },
+      gParams,
+      testMW
+    );
+
+    const browserStream = formattedPolicy.inputs
+      .find((input) => input.type === 'synthetics/browser')
+      ?.streams.find((stream) => stream.data_stream.dataset === 'browser');
+
+    expect(browserStream?.vars?.certificate_error_spki_allowlist).toEqual({
+      type: 'yaml',
+      value: JSON.stringify([pem]),
     });
   });
 
@@ -540,6 +567,7 @@ const testNewPolicy = {
             screenshots: { type: 'text' },
             synthetics_args: { type: 'text' },
             ignore_https_errors: { type: 'bool' },
+            certificate_error_spki_allowlist: { type: 'yaml' },
             'throttling.config': { type: 'text' },
             'filter_journeys.tags': { type: 'yaml' },
             'filter_journeys.match': { type: 'text' },
@@ -604,6 +632,7 @@ const browserConfig: any = {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
+  certificate_error_spki_allowlist: [],
   throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
   'ssl.certificate_authorities': '',
   'ssl.certificate': '',

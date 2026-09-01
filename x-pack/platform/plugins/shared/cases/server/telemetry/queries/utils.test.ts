@@ -612,7 +612,7 @@ describe('utils', () => {
         savedObjectType: 'test',
       });
 
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           counts: {
             date_range: {
