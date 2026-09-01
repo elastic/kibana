@@ -133,9 +133,9 @@ export function initializeLayoutManager(
   const childrenChanges$ = childrenUnsavedChanges$(children$);
   const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
     for (const { uuid, latestState } of childrenState) {
-    for (const { uuid, latestState } of childrenState) {
-      currentChildState[uuid] = latestState;
-    }
+      for (const { uuid, latestState } of childrenState) {
+        currentChildState[uuid] = latestState;
+      }
       currentChildState[uuid] = latestState;
     }
   });
