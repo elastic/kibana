@@ -36,7 +36,6 @@ describe('getStructuredAnswerPrompt', () => {
       configuration: {
         instructions: '',
       },
-      capabilities: { visualizations: false },
       skills: [],
       actions: [],
       answerActions: [],
@@ -75,7 +74,6 @@ describe('getStructuredAnswerPrompt', () => {
       configuration: {
         instructions: '',
       },
-      capabilities: { visualizations: false },
       skills: [],
       actions: [],
       answerActions: [],

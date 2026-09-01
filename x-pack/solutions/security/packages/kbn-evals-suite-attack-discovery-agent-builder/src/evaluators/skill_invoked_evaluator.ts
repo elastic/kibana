@@ -60,6 +60,7 @@ export const createResponseSkillInvocationEvaluator = (): Evaluator<
 > => ({
   name: SKILL_INVOKED_EVALUATOR_NAME,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, input }) => {
     const expectedSkills = input?.expectedSkills ?? [];
 

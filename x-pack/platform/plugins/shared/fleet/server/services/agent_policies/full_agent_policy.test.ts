@@ -2464,6 +2464,123 @@ describe('getFullAgentPolicy', () => {
       expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
     });
   });
+
+  describe('secret_references reconciliation', () => {
+    const buildPolicyWithSecretRef = (id: string, compiledInputValue: string | null) => ({
+      id: `pp-${id}`,
+      name: `policy-${id}`,
+      namespace: 'default',
+      enabled: true,
+      package: { name: 'test', version: '1.0.0', title: 'Test' },
+      secret_references: [{ id }],
+      inputs: compiledInputValue
+        ? [
+            {
+              id: `input-${id}`,
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: `stream-${id}`,
+                  enabled: true,
+                  compiled_stream: { paths: [`$co.elastic.secret{${id}}`] },
+                  data_stream: { type: 'logs', dataset: 'test' },
+                },
+              ],
+            },
+          ]
+        : [{ id: `input-${id}`, type: 'logfile', enabled: true, streams: [] }],
+      created_at: '',
+      updated_at: '',
+      created_by: '',
+      updated_by: '',
+      revision: 1,
+      policy_id: '',
+      policy_ids: ['agent-policy'],
+    });
+
+    it('prunes a package policy secret reference not present in any compiled input', async () => {
+      mockAgentPolicy({ package_policies: [buildPolicyWithSecretRef('stale-id', null)] });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([]);
+    });
+
+    it('keeps a reference whose placeholder appears in a compiled stream', async () => {
+      mockAgentPolicy({ package_policies: [buildPolicyWithSecretRef('live-id', 'present')] });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'live-id' }]);
+    });
+
+    it('keeps a reference whose placeholder appears only in otelcolConfig', async () => {
+      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableOtelIntegrations: true,
+      } as any);
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            ...buildPolicyWithSecretRef('otel-id', null),
+            inputs: [],
+          },
+        ],
+      });
+
+      mockedGenerateOtelcolConfig.mockReturnValue({
+        receivers: { 'otlp/test': { endpoint: `$co.elastic.secret{otel-id}` } },
+      } as any);
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'otel-id' }]);
+    });
+
+    it('deduplicates an id shared by two package policies', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          buildPolicyWithSecretRef('shared-id', 'present'),
+          buildPolicyWithSecretRef('shared-id', 'present'),
+        ],
+      });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'shared-id' }]);
+    });
+
+    it('keeps every reference when the compiled policy cannot be serialized (fail open)', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          {
+            ...buildPolicyWithSecretRef('safe-id', null),
+            // BigInt in compiled_stream makes JSON.stringify throw
+            inputs: [
+              {
+                id: 'input-1',
+                type: 'logfile',
+                enabled: true,
+                streams: [
+                  {
+                    id: 's1',
+                    enabled: true,
+                    compiled_stream: { val: BigInt(1) as any },
+                    data_stream: { type: 'logs', dataset: 'test' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'safe-id' }]);
+    });
+  });
 });
 
 describe('getFullMonitoringSettings', () => {
@@ -2994,6 +3111,19 @@ ssl.test: 123
     expect(policyOutput).not.toHaveProperty('proxy_headers');
     expect(policyOutput.ssl?.certificate).toBe('my-cert');
     expect(policyOutput.ssl).not.toHaveProperty('key');
+  });
+
+  it('should throw for OTLP outputs because compilation is not yet implemented', () => {
+    expect(() =>
+      transformOutputToFullPolicyOutput({
+        id: 'otlp-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test otlp output',
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+      } as any)
+    ).toThrow('OTLP output "otlp-id" cannot be compiled into an agent policy output');
   });
 });
 

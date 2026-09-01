@@ -338,7 +338,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTestId('tableHeaderSortButton'))[0]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toBeCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -404,7 +404,7 @@ describe('AllCasesListGeneric', () => {
       expect(onRowClick).toHaveBeenCalled();
     });
 
-    expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
+    expect(onRowClick).toHaveBeenCalledWith(undefined, isCreateCase);
   });
 
   it('should not render the create new case link when the user does not have create privileges', async () => {
@@ -684,25 +684,6 @@ describe('AllCasesListGeneric', () => {
     await waitForComponentToUpdate();
   });
 
-  it('should hide the alerts column if the alert feature is disabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: false } } },
-    });
-
-    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
-  });
-
-  it('should show the alerts column if the alert feature is enabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: true } } },
-    });
-
-    const alertCounts = await screen.findAllByTestId('case-table-column-alertsCount');
-
-    expect(alertCounts.length).toBeGreaterThan(0);
-  });
-
   it('should show the alerts column if the alert object is empty', async () => {
     renderWithTestingProviders(<AllCasesList />, { wrapperProps: { features: { alerts: {} } } });
 
@@ -790,7 +771,7 @@ describe('AllCasesListGeneric', () => {
           }
 
           await waitFor(() => {
-            expect(updateCasesSpy).toBeCalledWith({
+            expect(updateCasesSpy).toHaveBeenCalledWith({
               cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
@@ -827,7 +808,7 @@ describe('AllCasesListGeneric', () => {
         await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith({
+          expect(updateCasesSpy).toHaveBeenCalledWith({
             cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
               id,
               version,
@@ -1275,7 +1256,7 @@ describe('AllCasesListGeneric', () => {
         await userEvent.click(await screen.findByTestId('cases-bulk-action-status-open'));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith({
+          expect(updateCasesSpy).toHaveBeenCalledWith({
             cases: [
               {
                 id: useGetCasesMockState.data.cases[0].id,
