@@ -605,13 +605,19 @@ export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIP
       'The extended-field keys whose values changed. Use this field in trigger conditions (e.g. event.changedFields: "priority_as_keyword"). Use a cases.getCase step to read current values.',
   });
 
-export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLES_DESCRIPTION = i18n.translate(
-  'xpack.cases.workflowTriggers.observablesAdded.eventSchema.observables',
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.observablesAdded.eventSchema.observableIds',
   {
     defaultMessage:
-      'The newly-added observables. Each entry has id, typeKey, value, and description.',
+      'IDs of the newly-persisted observables, in insertion order. Use with a cases.getCase step to read values.',
   }
 );
+
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.observablesAdded.eventSchema.observableTypeKeys', {
+    defaultMessage:
+      'Deduplicated, sorted list of type keys for the newly-persisted observables (e.g. "observable-type-ipv4"). Use in trigger conditions: event.observableTypeKeys: "observable-type-ipv4".',
+  });
 
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {

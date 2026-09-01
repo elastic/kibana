@@ -82,7 +82,9 @@ export class CasesEventBus extends EventEmitter {
   }
 
   onObservablesAdded(listener: CasesEventBusListener<'observablesAdded'>) {
-    this.on(OBSERVABLES_ADDED_EVENT, listener);
+    this.on(OBSERVABLES_ADDED_EVENT, (event: CasesEventPayload<'observablesAdded'>) => {
+      this.callListenerIsolated(listener, event);
+    });
   }
 
   emitAlertStatusChanged(request: KibanaRequest, payload: AlertStatusChangedEventPayload) {
@@ -91,17 +93,29 @@ export class CasesEventBus extends EventEmitter {
 
   onAlertStatusChanged(listener: CasesEventBusListener<'alertStatusChanged'>) {
     this.on(ALERT_STATUS_CHANGED_EVENT, (event: CasesEventPayload<'alertStatusChanged'>) => {
-      try {
-        const result = listener(event);
-        if (result instanceof Promise) {
-          // Prevent async listener rejections from becoming unhandled rejections.
-          // The Cases mutation has already completed at this point.
-          result.catch(() => {});
-        }
-      } catch {
-        // Isolate sync exceptions so later subscribers still receive the event.
-      }
+      this.callListenerIsolated(listener, event);
     });
+  }
+
+  /**
+   * Calls a listener in an isolated context so that synchronous exceptions do
+   * not propagate to the emitter and async rejections do not become unhandled
+   * rejections. Later subscribers still receive the event.
+   */
+  private callListenerIsolated<TType extends CasesDomainEventType>(
+    listener: CasesEventBusListener<TType>,
+    event: CasesEventPayload<TType>
+  ): void {
+    try {
+      const result = listener(event);
+      if (result instanceof Promise) {
+        // Prevent async listener rejections from becoming unhandled rejections.
+        // The Cases mutation has already completed at this point.
+        result.catch(() => {});
+      }
+    } catch {
+      // Isolate sync exceptions so later subscribers still receive the event.
+    }
   }
 
   hasAlertStatusChangedListeners(): boolean {

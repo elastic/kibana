@@ -33,7 +33,8 @@ describe('CasesEventBus', () => {
     eventBus.emitObservablesAdded(request, {
       caseId: 'case-1',
       owner: 'securitySolution',
-      observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null }],
+      observableIds: ['obs-1'],
+      observableTypeKeys: ['observable-type-ipv4'],
     });
 
     expect(listener).toHaveBeenCalledWith({
@@ -42,9 +43,53 @@ describe('CasesEventBus', () => {
       payload: {
         caseId: 'case-1',
         owner: 'securitySolution',
-        observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null }],
+        observableIds: ['obs-1'],
+        observableTypeKeys: ['observable-type-ipv4'],
       },
     });
+  });
+
+  it('isolates a throwing onObservablesAdded subscriber so later subscribers still fire', () => {
+    const eventBus = new CasesEventBus();
+    const throwingListener = jest.fn(() => {
+      throw new Error('subscriber error');
+    });
+    const laterListener = jest.fn();
+
+    eventBus.onObservablesAdded(throwingListener);
+    eventBus.onObservablesAdded(laterListener);
+
+    expect(() =>
+      eventBus.emitObservablesAdded(request, {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        observableIds: ['obs-1'],
+        observableTypeKeys: ['observable-type-ipv4'],
+      })
+    ).not.toThrow();
+
+    expect(throwingListener).toHaveBeenCalledTimes(1);
+    expect(laterListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('suppresses async rejections from onObservablesAdded subscribers', async () => {
+    const eventBus = new CasesEventBus();
+    const rejectingListener = jest.fn().mockRejectedValue(new Error('async error'));
+
+    eventBus.onObservablesAdded(rejectingListener);
+
+    // Should not throw synchronously or produce an unhandled rejection
+    expect(() =>
+      eventBus.emitObservablesAdded(request, {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        observableIds: [],
+        observableTypeKeys: [],
+      })
+    ).not.toThrow();
+
+    // Let microtasks settle — the rejection is caught internally
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
   });
 
   it('emits case updated events with updated fields', () => {

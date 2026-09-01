@@ -35,7 +35,7 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
-import { emitObservablesAddedEvent } from './observables_trigger_utils';
+import { emitObservablesAddedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -94,14 +94,20 @@ export const applyObservablesToCase = async (
     MAX_OBSERVABLES_PER_CASE
   );
 
-  const newObservablesCount = finalObservables.length - currentObservables.length;
+  // Use the id-diff as the single source of truth for "what is new".
+  // processObservables preserves existing ids and mints new v4 ids for incoming
+  // ObservablePost entries, so this is exact even under truncation at the cap.
+  const existingIds = new Set(currentObservables.map(({ id }) => id));
+  const newlyAddedObservables = finalObservables.filter(({ id }) => !existingIds.has(id));
 
   // Nothing new was added — skip both the patch write and the user action to
   // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
   // alert being attached multiple times).
-  if (newObservablesCount <= 0) {
+  if (newlyAddedObservables.length === 0) {
     return;
   }
+
+  const newObservablesCount = newlyAddedObservables.length;
 
   const patchedCase = await caseService.patchCase({
     caseId: retrievedCase.id,
@@ -124,14 +130,7 @@ export const applyObservablesToCase = async (
     },
   });
 
-  // Emit the observables-added event for the newly-persisted slice only.
-  // Diff by id: processObservables preserves existing ids and mints new v4 ids
-  // for incoming ObservablePost entries, so this is safe even under truncation.
-  const existingIds = new Set(currentObservables.map(({ id }) => id));
-  const newlyAddedObservables = finalObservables.filter(({ id }) => !existingIds.has(id));
-  if (newlyAddedObservables.length > 0) {
-    emitObservablesAddedEvent(clientArgs, retrievedCase, newlyAddedObservables);
-  }
+  emitObservablesAddedEvent(clientArgs, retrievedCase, newlyAddedObservables);
 
   return {
     ...retrievedCase,
@@ -215,8 +214,6 @@ export const addObservable = async (
       },
     });
 
-    emitObservablesAddedEvent(clientArgs, retrievedCase, [newObservable]);
-
     const res = flattenCaseSavedObject({
       savedObject: {
         ...retrievedCase,
@@ -226,7 +223,12 @@ export const addObservable = async (
       },
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    // Decode before emitting — if the SO fails CaseRt validation, we must not fire
+    // the trigger for a request the API will report as failed. Matches the precedent
+    // in create.ts where decodeOrThrow runs before the emit.
+    const decodedCase = decodeOrThrow(CaseRt)(res);
+    emitObservablesAddedEvent(clientArgs, retrievedCase, [newObservable]);
+    return decodedCase;
   } catch (error) {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   }

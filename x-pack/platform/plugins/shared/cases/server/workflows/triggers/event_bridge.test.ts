@@ -566,7 +566,8 @@ describe('registerCasesWorkflowEventBridge', () => {
     const observablesPayload = {
       caseId: 'case-1',
       owner: 'securitySolution' as const,
-      observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null }],
+      observableIds: ['obs-1'],
+      observableTypeKeys: ['observable-type-ipv4'],
     };
 
     it('forwards observablesAdded events to workflows extensions', async () => {
@@ -580,13 +581,11 @@ describe('registerCasesWorkflowEventBridge', () => {
       );
     });
 
-    it('forwards multiple observables in the payload', async () => {
+    it('forwards multiple observable ids and type keys', async () => {
       const multiPayload = {
         ...observablesPayload,
-        observables: [
-          { id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null },
-          { id: 'obs-2', typeKey: 'hash.md5', value: 'abc123', description: 'auto-extracted' },
-        ],
+        observableIds: ['obs-1', 'obs-2'],
+        observableTypeKeys: ['observable-type-file-hash', 'observable-type-ipv4'],
       };
 
       eventBus.emitObservablesAdded(request, multiPayload);
@@ -594,6 +593,17 @@ describe('registerCasesWorkflowEventBridge', () => {
       await flushMicrotasks();
 
       expect(mockClient.emitEvent).toHaveBeenCalledWith(ObservablesAddedTriggerId, multiPayload);
+    });
+
+    it('does not include value or description in the forwarded payload', async () => {
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[0];
+      expect(payload).not.toHaveProperty('value');
+      expect(payload).not.toHaveProperty('description');
+      expect(payload).not.toHaveProperty('observables');
     });
 
     it('logs a warning when forwarding fails', async () => {

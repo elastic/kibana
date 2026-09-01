@@ -47,21 +47,18 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
- * A single observable contained in an ObservablesAdded event.
- */
-export interface ObservablesAddedEventObservable {
-  readonly id: string;
-  readonly typeKey: string;
-  readonly value: string;
-  readonly description: string | null;
-}
-
-/**
  * Event: observables added
+ *
+ * Observable values are deliberately excluded so that users without Cases read
+ * access cannot observe case data through workflow triggers or through the
+ * trigger-events data stream (which persists every payload).
  */
 export interface ObservablesAddedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
-  readonly observables: ObservablesAddedEventObservable[];
+  /** IDs of the newly-persisted observables, in insertion order. */
+  readonly observableIds: string[];
+  /** Deduplicated, sorted list of type keys for the newly-persisted observables. */
+  readonly observableTypeKeys: string[];
 }
 
 /**

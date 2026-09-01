@@ -7,6 +7,7 @@
 
 import type { Owner } from '../../../common/constants/types';
 import type { Observable } from '../../../common/types/domain';
+import type { ObservablesAddedPayload } from '../../../common/workflows/triggers';
 import type { CasesClientArgs } from '..';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
@@ -16,14 +17,12 @@ export const emitObservablesAddedEvent = (
   theCase: CaseSavedObjectTransformed,
   observables: Observable[]
 ): void => {
-  clientArgs.casesEventBus?.emitObservablesAdded(clientArgs.request, {
+  const payload: ObservablesAddedPayload = {
     caseId: theCase.id,
     owner: theCase.attributes.owner as Owner,
-    observables: observables.map(({ id, typeKey, value, description }) => ({
-      id,
-      typeKey,
-      value,
-      description: description ?? null,
-    })),
-  });
+    // Ids in insertion order; type keys deduplicated and sorted.
+    observableIds: observables.map(({ id }) => id),
+    observableTypeKeys: [...new Set(observables.map(({ typeKey }) => typeKey))].sort(),
+  };
+  clientArgs.casesEventBus?.emitObservablesAdded(clientArgs.request, payload);
 };
