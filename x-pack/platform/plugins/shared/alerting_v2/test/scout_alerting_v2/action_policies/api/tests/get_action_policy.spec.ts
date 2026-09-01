@@ -120,7 +120,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.matcher).toBe(matcher);
+      expect(response.body.matcher).toStrictEqual(matcher);
     }
   );
 
