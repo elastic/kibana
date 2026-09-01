@@ -88,7 +88,6 @@ export const EvaluateRequestBody = lazySchema(() =>
               'otel-genai-events',
               'otel-genai-attributes',
               'claude-code',
-              'agent-builder-tool',
             ])
             .default('elastic-inference'),
         })

@@ -110,40 +110,10 @@ const claudeCode: InstrumentationProfileSpec = {
   },
 };
 
-export const AGENT_BUILDER_TOOL_PROFILE = 'agent-builder-tool';
-
-const agentBuilderTool: InstrumentationProfileSpec = {
-  user_query: {
-    source: 'traces',
-    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-    contentField: 'attributes.gen_ai.tool.call.arguments',
-    select: 'first',
-    parse: 'string',
-  },
-  agent_response: {
-    source: 'traces',
-    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-    contentField: 'attributes.gen_ai.tool.call.result',
-    select: 'last',
-    parse: 'string',
-  },
-  tool_calls: {
-    source: 'traces',
-    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-    fields: {
-      tool_call_id: 'attributes.gen_ai.tool.call.id',
-      tool_id: 'attributes.gen_ai.tool.name',
-      arguments: 'attributes.gen_ai.tool.call.arguments',
-      result: 'attributes.gen_ai.tool.call.result',
-    },
-  },
-};
-
 export const INSTRUMENTATION_PROFILES: Record<InstrumentationProfile, InstrumentationProfileSpec> =
   {
     'otel-genai-events': otelGenAiEvents,
     'elastic-inference': elasticInference,
     'otel-genai-attributes': otelGenAiAttributes,
     'claude-code': claudeCode,
-    [AGENT_BUILDER_TOOL_PROFILE]: agentBuilderTool,
   };

@@ -6,7 +6,6 @@
  */
 
 import { getInstrumentationProfile } from './resolve_instrumentation';
-import { INSTRUMENTATION_PROFILES } from './profiles';
 
 describe('getInstrumentationProfile', () => {
   it('resolves elastic-inference to the current Kibana field paths and filters', () => {
@@ -76,41 +75,5 @@ describe('getInstrumentationProfile', () => {
         result: 'attributes.new_context',
       },
     });
-  });
-
-  it('resolves agent-builder-tool to tool-only traces mapping', () => {
-    const mapping = getInstrumentationProfile('agent-builder-tool');
-
-    expect(mapping.user_query).toEqual({
-      source: 'traces',
-      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-      contentField: 'attributes.gen_ai.tool.call.arguments',
-      select: 'first',
-      parse: 'string',
-    });
-
-    expect(mapping.agent_response).toEqual({
-      source: 'traces',
-      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-      contentField: 'attributes.gen_ai.tool.call.result',
-      select: 'last',
-      parse: 'string',
-    });
-
-    expect(mapping.tool_calls).toEqual({
-      source: 'traces',
-      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-      fields: {
-        tool_call_id: 'attributes.gen_ai.tool.call.id',
-        tool_id: 'attributes.gen_ai.tool.name',
-        arguments: 'attributes.gen_ai.tool.call.arguments',
-        result: 'attributes.gen_ai.tool.call.result',
-      },
-    });
-  });
-
-  it('keeps agent-builder-tool as the last profile key', () => {
-    const profileKeys = Object.keys(INSTRUMENTATION_PROFILES);
-    expect(profileKeys.at(-1)).toBe('agent-builder-tool');
   });
 });

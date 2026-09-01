@@ -31,8 +31,7 @@ export type InstrumentationProfile =
   | 'otel-genai-events'
   | 'elastic-inference'
   | 'otel-genai-attributes'
-  | 'claude-code'
-  | 'agent-builder-tool';
+  | 'claude-code';
 
 export interface EvidenceFilterTerm {
   field: string;

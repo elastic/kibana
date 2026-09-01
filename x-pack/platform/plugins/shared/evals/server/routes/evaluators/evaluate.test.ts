@@ -402,61 +402,6 @@ describe('POST /internal/evals/_evaluate', () => {
     );
   });
 
-  it('uses agent-builder-tool mapping when requested', async () => {
-    const round = {
-      input: { message: '{"query":"status:failed"}' },
-      response: { message: 'Found 2 failed runs.' },
-      steps: [
-        {
-          tool_call_id: 'tool-call-1',
-          tool_id: 'search_runs',
-          arguments: { query: 'status:failed' },
-          result: { count: 2 },
-        },
-      ],
-    };
-    awaitTraceReadyMock.mockResolvedValueOnce(round);
-    const evaluate = jest.fn().mockResolvedValue({
-      scores: [{ name: 'latency', score: 11 }],
-    });
-    const { handler, logger } = setup({
-      evaluatorRegistry: buildEvaluatorRegistry([
-        buildEvaluator({
-          name: 'latency',
-          kind: 'code',
-          evaluate,
-        }),
-      ]),
-    });
-
-    const response = await handler(
-      buildContext() as unknown as Parameters<typeof handler>[0],
-      {
-        body: {
-          subject: {
-            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-            instrumentation: { profile: 'agent-builder-tool' },
-          },
-          evaluators: [{ name: 'latency' }],
-        },
-      } as unknown as Parameters<typeof handler>[1],
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(200);
-    expect(evaluate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        round,
-      })
-    );
-    expect(awaitTraceReadyMock).toHaveBeenCalledWith(
-      expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
-      getInstrumentationProfile('agent-builder-tool'),
-      'agent-builder-tool',
-      logger
-    );
-  });
-
   it('normalizes claude-code instrumentation into an EvidenceRound for evaluator execution', async () => {
     const actualTraceReadiness = jest.requireActual(
       '../../evaluators/trace_readiness'
