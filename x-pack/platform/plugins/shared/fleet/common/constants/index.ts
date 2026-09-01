@@ -35,6 +35,7 @@ export * from './uninstall_token';
 export * from './space_awareness';
 export * from './security_search_ai_lake';
 export * from './cloud_connector';
+export * from './schema_field_limits';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible

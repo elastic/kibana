@@ -175,6 +175,24 @@ describe('AgentPolicyBaseSchema', () => {
   });
 });
 
+describe('schema field length limits', () => {
+  it('rejects a policy name over 255 characters', () => {
+    expect(() => AgentPolicyBaseSchema.name.validate('a'.repeat(256))).toThrow();
+  });
+
+  it('accepts a policy name at exactly 255 characters', () => {
+    expect(() => AgentPolicyBaseSchema.name.validate('a'.repeat(255))).not.toThrow();
+  });
+
+  it('rejects a description over 10 000 characters', () => {
+    expect(() => AgentPolicyBaseSchema.description.validate('a'.repeat(10_001))).toThrow();
+  });
+
+  it('rejects a data_output_id over 50 characters', () => {
+    expect(() => AgentPolicyBaseSchema.data_output_id.validate('a'.repeat(51))).toThrow();
+  });
+});
+
 describe('FullAgentPolicySchema', () => {
   it('support all advanced settings', () => {
     expect(() => {

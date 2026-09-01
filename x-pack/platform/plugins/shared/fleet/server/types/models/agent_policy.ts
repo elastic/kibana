@@ -7,6 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 
+import {
+  FLEET_SCHEMA_ID_MAX_LENGTH,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+  FLEET_SCHEMA_URL_MAX_LENGTH,
+  FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+  FLEET_SCHEMA_CERT_MAX_LENGTH,
+} from '../../../common/constants';
+
 import type { GlobalDataTag } from '../../../common/types';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
@@ -56,11 +64,17 @@ function validateCPU(s: string) {
 }
 
 export const AgentPolicyBaseSchema = {
-  id: schema.maybe(schema.string({ maxLength: 50 })),
-  space_ids: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 100 })),
-  name: schema.string({ minLength: 1, maxLength: 255, validate: validateNonEmptyString }),
+  id: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
+  space_ids: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }), { maxSize: 100 })
+  ),
+  name: schema.string({
+    minLength: 1,
+    maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+    validate: validateNonEmptyString,
+  }),
   namespace: AgentPolicyNamespaceSchema,
-  description: schema.maybe(schema.string({ maxLength: 10000 })),
+  description: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH })),
   is_managed: schema.maybe(schema.boolean()),
   has_fleet_server: schema.maybe(schema.boolean()),
   is_default: schema.maybe(schema.boolean()),
@@ -94,16 +108,16 @@ export const AgentPolicyBaseSchema = {
     ])
   ),
   data_output_id: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
   ),
   monitoring_output_id: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
   ),
   download_source_id: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
   ),
   fleet_server_host_id: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
   ),
   agent_features: schema.maybe(
     schema.arrayOf(
@@ -118,7 +132,7 @@ export const AgentPolicyBaseSchema = {
   overrides: schema.maybe(
     schema.oneOf([
       schema.literal(null),
-      schema.recordOf(schema.string({ maxLength: 255 }), schema.any(), {
+      schema.recordOf(schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }), schema.any(), {
         validate: (val) => {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
@@ -149,7 +163,7 @@ export const AgentPolicyBaseSchema = {
   global_data_tags: schema.maybe(
     schema.arrayOf(
       schema.object({
-        name: schema.string({ maxLength: 255 }),
+        name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
         value: schema.oneOf([schema.string({ maxLength: 1000 }), schema.number()]),
       }),
       {
@@ -188,7 +202,9 @@ export const AgentPolicyBaseSchema = {
   monitoring_http: schema.maybe(
     schema.object({
       enabled: schema.maybe(schema.boolean()),
-      host: schema.maybe(schema.string({ maxLength: 2048, defaultValue: 'localhost' })),
+      host: schema.maybe(
+        schema.string({ maxLength: FLEET_SCHEMA_URL_MAX_LENGTH, defaultValue: 'localhost' })
+      ),
       port: schema.maybe(schema.number({ min: 0, max: 65353, defaultValue: 6791 })),
       buffer: schema.maybe(schema.object({ enabled: schema.boolean({ defaultValue: false }) })),
     })
@@ -197,15 +213,15 @@ export const AgentPolicyBaseSchema = {
     schema.object({
       limit: schema.maybe(
         schema.object({
-          interval: schema.maybe(schema.string({ maxLength: 50 })),
+          interval: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
           burst: schema.maybe(schema.number()),
         })
       ),
       uploader: schema.maybe(
         schema.object({
           max_retries: schema.maybe(schema.number()),
-          init_dur: schema.maybe(schema.string({ maxLength: 50 })),
-          max_dur: schema.maybe(schema.string({ maxLength: 50 })),
+          init_dur: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
+          max_dur: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
         })
       ),
     })
@@ -216,7 +232,7 @@ export const AgentPolicyBaseSchema = {
       schema.arrayOf(
         schema.object({
           version: schema.string({
-            maxLength: 50,
+            maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
             meta: {
               description: 'Target version for automatic agent upgrade',
             },
@@ -281,13 +297,13 @@ function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
 }
 
 const BaseSSLSchema = schema.object({
-  verification_mode: schema.maybe(schema.string({ maxLength: 50 })),
+  verification_mode: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
   certificate_authorities: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: 100000 }), { maxSize: 10 })
+    schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH }), { maxSize: 10 })
   ),
-  certificate: schema.maybe(schema.string({ maxLength: 100000 })),
-  key: schema.maybe(schema.string({ maxLength: 100000 })),
-  renegotiation: schema.maybe(schema.string({ maxLength: 50 })),
+  certificate: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
+  key: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
+  renegotiation: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
 });
 
 const BaseSecretsSchema = schema
@@ -295,7 +311,7 @@ const BaseSecretsSchema = schema
     ssl: schema.maybe(
       schema.object({
         key: schema.object({
-          id: schema.maybe(schema.string({ maxLength: 50 })),
+          id: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
         }),
       })
     ),
@@ -317,14 +333,16 @@ export const AgentPolicySchemaV3 = schema
 
 export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends(
   {
-    min_agent_version: schema.maybe(schema.nullable(schema.string({ maxLength: 50 }))),
+    min_agent_version: schema.maybe(
+      schema.nullable(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }))
+    ),
     package_agent_version_conditions: schema.maybe(
       schema.nullable(
         schema.arrayOf(
           schema.object({
-            name: schema.string({ maxLength: 255 }),
-            title: schema.string({ maxLength: 255 }),
-            version_condition: schema.string({ maxLength: 50 }),
+            name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
+            title: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
+            version_condition: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
           }),
           { maxSize: 1000 }
         )
@@ -363,7 +381,7 @@ export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends(
             ),
           })
         ),
-        cluster_id: schema.maybe(schema.string({ maxLength: 50 })),
+        cluster_id: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
       })
     ),
   },
@@ -374,15 +392,15 @@ export const AgentPolicySchemaV7 = AgentPolicySchemaV6.extends(
   {
     is_preconfigured: schema.maybe(schema.boolean()),
     revision: schema.maybe(schema.number()),
-    schema_version: schema.maybe(schema.string({ maxLength: 50 })),
+    schema_version: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
     status: schema.maybe(
       schema.oneOf([
         schema.literal(agentPolicyStatuses.Active),
         schema.literal(agentPolicyStatuses.Inactive),
       ])
     ),
-    updated_at: schema.maybe(schema.string({ maxLength: 50 })),
-    updated_by: schema.maybe(schema.string({ maxLength: 255 })),
+    updated_at: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
+    updated_by: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })),
   },
   { meta: { id: 'agent_policy_v7' } }
 );
@@ -409,7 +427,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
 
 export const AgentPolicySchema = AgentPolicySchemaV6.extends(
   {
-    id: schema.string({ maxLength: 50 }),
+    id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
     is_managed: schema.maybe(schema.boolean()),
     status: schema.oneOf([
       schema.literal(agentPolicyStatuses.Active),
@@ -417,12 +435,12 @@ export const AgentPolicySchema = AgentPolicySchemaV6.extends(
     ]),
     package_policies: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 1000 }),
+        schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }), { maxSize: 1000 }),
         schema.arrayOf(PackagePolicySchema, { maxSize: 1000 }),
       ])
     ),
-    updated_at: schema.string({ maxLength: 50 }),
-    updated_by: schema.string({ maxLength: 255 }),
+    updated_at: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+    updated_by: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
   },
   { meta: { id: 'agent_policy' } }
 );
@@ -436,7 +454,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
     agents_per_version: schema.maybe(
       schema.arrayOf(
         schema.object({
-          version: schema.string({ maxLength: 50 }),
+          version: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
           count: schema.number(),
         }),
         { maxSize: 1000 }
@@ -448,26 +466,30 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
           'Indicates whether the agent policy has tamper protection enabled. Defaults to `false`.',
       },
     }),
-    version: schema.maybe(schema.string({ maxLength: 50 })),
+    version: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
     is_preconfigured: schema.maybe(schema.boolean()),
-    schema_version: schema.maybe(schema.string({ maxLength: 50 })),
-    min_agent_version: schema.maybe(schema.nullable(schema.string({ maxLength: 50 }))),
+    schema_version: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
+    min_agent_version: schema.maybe(
+      schema.nullable(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }))
+    ),
     package_agent_version_conditions: schema.maybe(
       schema.nullable(
         schema.arrayOf(
           schema.object({
-            name: schema.string({ maxLength: 255 }),
-            title: schema.string({ maxLength: 255 }),
-            version_condition: schema.string({ maxLength: 50 }),
+            name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
+            title: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
+            version_condition: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
           }),
           { maxSize: 1000 }
         )
       )
     ),
-    created_at: schema.maybe(schema.string({ maxLength: 50 })),
+    created_at: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
     package_policies: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 10000 }),
+        schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }), {
+          maxSize: 10000,
+        }),
         schema.arrayOf(PackagePolicyResponseSchema, {
           meta: {
             description:
