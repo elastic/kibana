@@ -22,7 +22,6 @@ describe('useCasesFeatures', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        isAlertsEnabled: true,
         isSyncAlertsEnabled: true,
         isObservablesFeatureEnabled: true,
         isExtractObservablesEnabled: true,
@@ -91,18 +90,15 @@ describe('useCasesFeatures', () => {
   });
 
   it.each([
-    [{ enabled: false }, false, false],
-    [{ enabled: false, all: true }, false, false],
-    [{ enabled: true, all: false }, true, false],
-    [{ enabled: true, all: true }, true, true],
+    [{ all: false }, false],
+    [{ all: true }, true],
   ])(
-    'gates sync alerts on alerts.enabled/all (%j → isAlertsEnabled=%s isSyncAlertsEnabled=%s)',
-    (alerts, isAlertsEnabled, isSyncAlertsEnabled) => {
+    'gates sync alerts on alerts.all (%j → isSyncAlertsEnabled=%s)',
+    (alerts, isSyncAlertsEnabled) => {
       const { result } = renderHook(() => useCasesFeatures(), {
         wrapper: ({ children }) => <TestProviders features={{ alerts }}>{children}</TestProviders>,
       });
 
-      expect(result.current.isAlertsEnabled).toBe(isAlertsEnabled);
       expect(result.current.isSyncAlertsEnabled).toBe(isSyncAlertsEnabled);
     }
   );
@@ -174,7 +170,6 @@ describe('useCasesFeatures', () => {
 
       expect(result.current).toEqual(
         expect.objectContaining({
-          isAlertsEnabled: true,
           isSyncAlertsEnabled: true,
           metricsFeatures: [],
           caseAssignmentAuthorized: expectedResult,

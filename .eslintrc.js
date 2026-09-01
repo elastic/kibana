@@ -1544,12 +1544,11 @@ module.exports = {
         'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
+        'no-new-native-nonconstructor': 'error',
         'no-obj-calls': 'error',
         'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -1564,7 +1563,6 @@ module.exports = {
         'no-useless-computed-key': 'error',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
@@ -1861,12 +1859,11 @@ module.exports = {
         'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
+        'no-new-native-nonconstructor': 'error',
         'no-obj-calls': 'error',
         'no-param-reassign': ['error', { props: true }],
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -1883,7 +1880,6 @@ module.exports = {
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
         'no-void': 'error',
-        'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
@@ -2387,7 +2383,6 @@ module.exports = {
             next: ['return'],
           },
         ],
-        'padded-blocks': ['error', 'always'],
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
@@ -2543,7 +2538,15 @@ module.exports = {
         'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
-        '@typescript-eslint/prefer-ts-expect-error': 'error',
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-check': false,
+            'ts-expect-error': false,
+            'ts-ignore': true,
+            'ts-nocheck': false,
+          },
+        ],
       },
     },
 
@@ -2588,12 +2591,11 @@ module.exports = {
         'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
+        'no-new-native-nonconstructor': 'error',
         'no-obj-calls': 'error',
         'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -2608,7 +2610,6 @@ module.exports = {
         'no-useless-computed-key': 'error',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
@@ -2767,17 +2768,6 @@ module.exports = {
     },
 
     /**
-     * Enterprise Search Prettier override
-     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
-     */
-    {
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
-      },
-    },
-
-    /**
      * Cloud Security Team overrides
      */
     {
@@ -2842,6 +2832,43 @@ module.exports = {
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
+      },
+    },
+    {
+      // @rspack/* packages are pure ESM. Direct value imports work in
+      // production (Node require(esm)) but break any Jest test that loads
+      // them, so the optimizer must go through its rspack_runtime shim, which
+      // loads them natively via createRequire (see rspack_runtime.ts).
+      files: [
+        'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
+        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+      ],
+      rules: {
+        '@typescript-eslint/no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@rspack/core',
+                allowTypeImports: true,
+                message:
+                  'Import the `rspack` runtime value from the optimizer rspack_runtime shim instead (@rspack/core is pure ESM and breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rspack/plugin-react-refresh',
+                allowTypeImports: true,
+                message:
+                  'Load via loadReactRefreshRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rsdoctor/rspack-plugin',
+                allowTypeImports: true,
+                message:
+                  'Load via loadRsdoctorRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+            ],
+          },
+        ],
       },
     },
     {
@@ -3222,7 +3249,6 @@ module.exports.overrides.push({
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',

@@ -77,6 +77,7 @@ const createRequiredTermsEvaluator = ({
 }): Evaluator => ({
   name,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
     const raw = metadata?.[metadataKey];
     const required = Array.isArray(raw)
@@ -115,9 +116,13 @@ function configureExperiment({
 } {
   const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
     const agentId = getStringMeta(metadata, 'agentId');
+    const autoConfirm = getBooleanMeta(metadata, 'autoConfirm');
     const response = await chatClient.converse({
       messages: [{ message: input.question }],
-      options: agentId ? { agentId } : undefined,
+      options: {
+        ...(agentId ? { agentId } : {}),
+        ...(autoConfirm ? { autoConfirm } : {}),
+      },
     });
 
     // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
@@ -163,6 +168,7 @@ function configureExperiment({
     {
       name: 'ExpectedToolCalled',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedToolId = getStringMeta(metadata, 'expectedToolId');
         if (!expectedToolId) return { score: 1 };
@@ -187,6 +193,7 @@ function configureExperiment({
     {
       name: 'ShouldNotCallTool',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const shouldNotCallToolId = getStringMeta(metadata, 'shouldNotCallToolId');
         if (!shouldNotCallToolId) return { score: 1 };
@@ -204,6 +211,7 @@ function configureExperiment({
     {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
@@ -232,6 +240,7 @@ function configureExperiment({
     {
       name: 'DocVersionReleaseDate',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) return { score: 1 };
 
@@ -281,7 +290,7 @@ function configureExperiment({
       latency: createSpanLatencyEvaluator({
         traceEsClient,
         log,
-        spanName: 'Converse',
+        spanNamePattern: 'invoke_agent*',
       }),
     }),
     createSkillInvocationEvaluator({
@@ -292,6 +301,7 @@ function configureExperiment({
     {
       name: 'ExpectedSkillInvocation',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedSkill = getStringMeta(metadata, 'expectedSkill');
         const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');

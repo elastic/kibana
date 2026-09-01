@@ -321,7 +321,13 @@ export class CasesClientFactory {
     return {
       templatesService,
       fieldDefinitionsService,
-      alertsService: new AlertService(esClient, this.logger, alertsClient),
+      alertsService: new AlertService(
+        esClient,
+        this.logger,
+        alertsClient,
+        this.options.casesEventBus,
+        request
+      ),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),

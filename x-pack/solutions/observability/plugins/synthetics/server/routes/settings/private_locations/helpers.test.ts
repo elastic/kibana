@@ -261,6 +261,26 @@ describe('updatePrivateLocationMonitors', () => {
       spaceId: SECOND_SPACE_ID,
     });
   });
+
+  it('throws when a monitor rewrite reports failed configs so the location flag is not persisted', async () => {
+    (syncEditedMonitorBulk as jest.Mock).mockResolvedValueOnce({
+      failedConfigs: {
+        [FIRST_MONITOR_ID]: { config: mockMonitors[0].attributes, error: new Error('fleet') },
+      },
+      errors: [],
+      editedMonitors: [],
+    });
+
+    await expect(
+      updatePrivateLocationMonitors({
+        locationId: LOCATION_ID,
+        newLocationLabel: NEW_LABEL,
+        allPrivateLocations: [],
+        routeContext: {} as RouteContext,
+        monitorsInLocation: [mockMonitors[0]] as any,
+      })
+    ).rejects.toThrow(/failed to update monitors/i);
+  });
 });
 
 describe('isAgentSharding contract mappers', () => {
