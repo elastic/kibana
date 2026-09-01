@@ -104,6 +104,7 @@ export function ServiceMapInvestigateButton({
     <AiButton
       data-test-subj="observabilityAgentBuilderServiceMapInvestigateButton"
       variant="empty"
+      size="s"
       iconType="productAgent"
       onClick={handleClick}
     >
