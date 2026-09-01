@@ -6,6 +6,11 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  getColorPalettesPromptContent,
+  getSharedColorPalettesPromptContent,
+} from './color_palettes';
+import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
 import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
@@ -30,32 +35,40 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) =
 };
 
 /**
- * Compiles vis-author `config.rules` plus `review.critical` and
- * `review.suggestions` for every chart type that has any of them. Prettify
- * uses this so it can detect painted issues and describe the wanted edition;
- * the visualization author still sees only {@link getChartTypeConfigPromptContent}.
+ * Compiles the full vis-author pack for review/prettify: title and number-format
+ * rules, per-chart coloring, `config.rules`, and `review.critical` /
+ * `review.suggestions`. The visualization author still sees only the
+ * per-request slices ({@link getChartTypeConfigPromptContent},
+ * {@link getColorPalettesPromptContent}).
  */
 export const getChartTypeReviewPromptContent = (): string => {
   const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
+    const coloring = getColorPalettesPromptContent(chartType as SupportedChartType, {
+      includeShared: false,
+    });
     const configRules: string[] = prompt.config?.rules ?? [];
     const critical: string[] = prompt.review?.critical ?? [];
     const suggestions: string[] = prompt.review?.suggestions ?? [];
 
-    if (!configRules.length && !critical.length && !suggestions.length) {
+    if (!coloring && !configRules.length && !critical.length && !suggestions.length) {
       return [];
     }
 
     return [
       `### ${chartType}`,
+      coloring,
       ...configRules.map((rule) => `- ${rule}`),
       ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
       ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
     ];
   });
 
-  if (!sections.length) {
-    return '';
-  }
-
-  return ['CHART REVIEW RULES:', ...sections].join('\n');
+  return [
+    'CHART REVIEW RULES:',
+    titleRulesPromptContent,
+    numberFormatRulesPromptContent,
+    '### shared',
+    getSharedColorPalettesPromptContent({ includeMechanics: true }),
+    ...sections,
+  ].join('\n');
 };
