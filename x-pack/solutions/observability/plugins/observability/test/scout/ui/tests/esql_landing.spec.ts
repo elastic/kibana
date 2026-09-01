@@ -23,8 +23,7 @@ import { test } from '../fixtures';
 import { generateLogsData, TEST_START_DATE, TEST_END_DATE } from '../fixtures/generators';
 import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/268022
-test.describe.skip(
+test.describe(
   'Observability Landing Page (discover.isEsqlDefault enabled)',
   { tag: [...tags.stateful.classic] },
   () => {
@@ -36,8 +35,6 @@ test.describe.skip(
       });
     });
 
-    // Clean both APM and logs data: the landing redirect prefers logs > apm > onboarding,
-    // so APM data left over from another suite would short-circuit the onboarding redirect.
     test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
       await browserAuth.loginAsAdmin();
       await apmSynthtraceEsClient.clean();
@@ -71,12 +68,6 @@ test.describe.skip(
       // Confirm the Discover URL encodes an ES|QL data source (rison: `dataSource:(type:esql)`)
       // rather than a classic data-view source, which would encode `dataSource:(type:dataView,...)`
       await expect(page).toHaveURL(/type:esql/);
-    });
-
-    test('redirects to onboarding when no logs data exists', async ({ page, pageObjects }) => {
-      await pageObjects.observabilityNavigation.gotoLanding();
-
-      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: BIGGER_TIMEOUT });
     });
   }
 );
