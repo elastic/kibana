@@ -94,16 +94,25 @@ enabled:
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
-  - src/platform/test/functional/apps/visualize/group4/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
   - src/platform/test/functional/apps/visualize/group7/config.ts
   - src/platform/test/functional/apps/visualize/group8/config.ts
-  - src/platform/test/functional/apps/visualize/group9/config.ts
-  - src/platform/test/functional/apps/visualize/group10/config.ts
-  - src/platform/test/functional/apps/visualize/group11/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
+  # Legacy TSVB editor (metric / gauge / top N / misc). Low churn vs Lens; run daily.
+  - src/platform/test/functional/apps/visualize/group4/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/group9/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/group10/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/group11/config.ts:
+      testChannels: ['ci-batch-daily']
+  # Legacy agg-based Visualize XY / Timelion (post-vislib). Low churn vs Lens; run daily.
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts:
+      testChannels: ['ci-batch-daily']
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
@@ -220,7 +229,11 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group4/config.ts
-  - x-pack/platform/test/functional/apps/lens/group8/config.ts
+  # LogsDB index mode migration scenarios (upgrade in group8, downgrade was already migrated to Scout). Long-running
+  # and covering low-churn code paths, so they run daily instead of on every commit.
+  # See https://github.com/elastic/kibana/issues/282230
+  - x-pack/platform/test/functional/apps/lens/group8/config.ts:
+      testChannels: ['ci-batch-daily']
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
