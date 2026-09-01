@@ -171,7 +171,7 @@ describe('registerConversationRoutes', () => {
       ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
     };
-    const list = jest.fn().mockResolvedValue([conversationWithPermissions]);
+    const list = jest.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
 
     const router = {
       versioned: {
@@ -234,7 +234,13 @@ describe('registerConversationRoutes', () => {
       response
     );
 
-    expect(list).toHaveBeenCalledWith({ agentId: undefined });
+    expect(list).toHaveBeenCalledWith({
+      agentId: undefined,
+      page: undefined,
+      perPage: undefined,
+      sortOrder: undefined,
+      pinned: undefined,
+    });
     expect(result.payload.results[0].origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
@@ -263,7 +269,7 @@ describe('registerConversationRoutes', () => {
       permissions: { rename: true, delete: true, update_access_control: false },
     };
     const get = jest.fn().mockResolvedValue(conversationWithPermissions);
-    const list = jest.fn().mockResolvedValue([conversationWithPermissions]);
+    const list = jest.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
 
     const router = {
       versioned: {
