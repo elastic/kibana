@@ -28,11 +28,14 @@ import { satisfies } from 'semver';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
+// Type-only, so the `types.ts` -> `utils.ts` import below stays erased at
+// compile time and no runtime cycle is introduced.
+import type { TargetingWarning } from './types';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -921,17 +924,26 @@ export const groupAgentPolicyIdsByPackagePolicy = (
 };
 
 /**
- * Resolves the shard to write for a package policy targeted by one or more
- * of the pack's agent policies.
+ * Resolves the single, deterministic shard to write for a package policy
+ * that is targeted by one or more of the pack's agent policies. When every
+ * targeting agent policy carries the same shard (the common case, including
+ * 1:1 targeting), that value is returned unchanged. When they differ, the
+ * chosen rule is the MAXIMUM shard value: it is order-independent (unlike
+ * "first seen"), so repeating the same operation always yields the same
+ * result regardless of array/Map iteration order.
  *
- * When each targeted agent policy has its own dedicated package policy, each
- * entry in `agentPolicyIds` is the sole agent policy for that package policy,
- * so the value passes through unchanged. When multiple agent policies resolve
- * to the same package policy (shared integration), all of their shard values
- * are the same target set and exact delivery is handled by the split path; the
- * first non-default value wins (order-stable for a single-element set, which
- * is the exact-targeting post-split case). Falls back to `DEFAULT_PACK_SHARD`
- * for an empty input or when no agent policy carries an explicit shard.
+ * A shared package policy genuinely can cover several of the pack's agent
+ * policies with different shard values, and the wire has exactly one `shard`
+ * slot per pack block — so a collapse rule is unavoidable here. Widest-wins
+ * is the safe direction: the pack is already delivered to every agent policy
+ * on the shared package policy (see `buildTargetingWarning`), so picking the
+ * maximum keeps the configured rollout percentage of the most permissive
+ * target rather than silently shrinking it.
+ *
+ * The reduce is seeded with `-Infinity` (the identity for `Math.max`) so a
+ * single value — including a negative one — passes through unchanged, keeping
+ * exact parity with the previous per-agent-policy `policyShards[id] ?? 100`
+ * behaviour. An empty input returns `DEFAULT_PACK_SHARD`.
  */
 export const resolveSharedPackagePolicyShard = (
   agentPolicyIds: string[],
@@ -941,14 +953,11 @@ export const resolveSharedPackagePolicyShard = (
     return DEFAULT_PACK_SHARD;
   }
 
-  for (const agentPolicyId of agentPolicyIds) {
-    const shard = policyShards[agentPolicyId];
-    if (shard !== undefined) {
-      return shard;
-    }
-  }
-
-  return DEFAULT_PACK_SHARD;
+  return agentPolicyIds.reduce(
+    (maxShard, agentPolicyId) =>
+      Math.max(maxShard, policyShards[agentPolicyId] ?? DEFAULT_PACK_SHARD),
+    -Infinity
+  );
 };
 
 // ---------------------------------------------------------------------------
@@ -1008,40 +1017,45 @@ export const resolvePackTargetScope = (
   return results;
 };
 
-/** Intent returned by `resolveDedicatedPackagePolicy`. */
-export type DedicatedPackagePolicyIntent =
-  | { action: 'reuse'; packagePolicy: PackagePolicy }
-  | { action: 'create'; name: string; targetAgentPolicyIds: string[] };
-
 /**
- * Finds an existing `osquery_manager` package policy whose `policy_ids`
- * exactly matches `targetAgentPolicyIds` (reuse), or describes one to create
- * with a deterministic name. No Fleet writes are performed here — callers
- * act on the returned intent.
+ * Builds the `targeting_warning` for a pack whose resolved package policies
+ * reach agent policies outside its target set, or `undefined` when targeting
+ * is exact.
  *
- * Naming convention: `osquery-targeted-<sortedIds.join('-')>` so the Fleet
- * integrations list is self-explanatory and the name is idempotent.
+ * Kibana cannot enforce narrower delivery: `osquery_manager` declares
+ * `multiple: false`, so Fleet allows only one osquery package policy per agent
+ * policy and a dedicated "targeted" policy can never be created for an agent
+ * policy that already has one. The warning is therefore the remedy, not a
+ * fallback — it names the agent policies that also receive the pack so the user
+ * can split the integration in Fleet if they need true isolation. See #285994.
+ *
+ * An untargeted agent policy that no longer resolves (deleted between the write
+ * and this lookup) is reported by id rather than dropped: a warning listing
+ * fewer policies than actually receive the pack would understate the blast
+ * radius, which is the opposite of this field's purpose.
  */
-export const resolveDedicatedPackagePolicy = (
-  targetAgentPolicyIds: string[],
-  allPackagePolicies: PackagePolicy[]
-): DedicatedPackagePolicyIntent => {
-  const sortedTarget = [...targetAgentPolicyIds].sort();
-  const targetSet = new Set(sortedTarget);
+export const buildTargetingWarning = async (
+  scopeResults: PackagePolicyScopeResult[],
+  agentPolicyService: AgentPolicyServiceInterface | undefined,
+  soClient: SavedObjectsClientContract
+): Promise<TargetingWarning | undefined> => {
+  const untargetedIds = uniq(
+    scopeResults
+      .filter((result) => result.kind === 'over-broad')
+      .flatMap((result) => result.untargetedAgentPolicyIds)
+  );
 
-  const existing = allPackagePolicies.find((pp) => {
-    if (pp.policy_ids.length !== sortedTarget.length) return false;
-
-    return pp.policy_ids.every((id) => targetSet.has(id));
-  });
-
-  if (existing) {
-    return { action: 'reuse', packagePolicy: existing };
+  if (!untargetedIds.length) {
+    return undefined;
   }
 
+  // `ignoreMissing`: a deleted agent policy must not fail the whole lookup.
+  const agentPolicies = await agentPolicyService?.getByIds(soClient, untargetedIds, {
+    ignoreMissing: true,
+  });
+  const nameById = new Map((agentPolicies ?? []).map((ap) => [ap.id, ap.name]));
+
   return {
-    action: 'create',
-    name: `osquery-targeted-${sortedTarget.join('-')}`,
-    targetAgentPolicyIds: sortedTarget,
+    untargeted_agent_policy_names: untargetedIds.map((id) => nameById.get(id) ?? id),
   };
 };

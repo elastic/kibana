@@ -39,7 +39,7 @@ import {
   policyHasPack,
   removePackFromPolicy,
   makePackKey,
-  resolveDedicatedPackagePolicy,
+  buildTargetingWarning,
   resolvePackTargetScope,
   resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
@@ -488,78 +488,33 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
               const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
 
+              // Over-broad package policies are written as-is: Fleet forbids a
+              // second osquery package policy on an agent policy that already
+              // has one, so narrowing is impossible here. `targeting_warning`
+              // reports the untargeted agent policies instead. See #285994.
               await Promise.all(
-                enableScopeResults.map(async ({ packagePolicy, agentPolicyIds, kind }) => {
-                  if (kind === 'exact') {
-                    return packagePolicyService?.update(
-                      spaceScopedClient,
-                      esClient,
-                      packagePolicy.id,
-                      produce<PackagePolicy>(packagePolicy, (draft) => {
-                        unset(draft, 'id');
-                        if (!has(draft, 'inputs[0].streams')) {
-                          set(draft, 'inputs[0].streams', []);
-                        }
+                enableScopeResults.map(({ packagePolicy, agentPolicyIds }) =>
+                  packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
 
-                        removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                        set(
-                          draft,
-                          `inputs[0].config.osquery.value.packs.${pk}`,
-                          buildFleetPackBlock(agentPolicyIds)
-                        );
-
-                        return draft;
-                      })
-                    );
-                  }
-
-                  // Split: create/reuse a dedicated package policy.
-                  const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
-                  try {
-                    let dedicatedPolicy: PackagePolicy;
-                    if (intent.action === 'reuse') {
-                      dedicatedPolicy = intent.packagePolicy;
-                    } else {
-                      const { id: _id, ...sharedBase } = packagePolicy;
-                      dedicatedPolicy = await packagePolicyService!.create(
-                        spaceScopedClient,
-                        esClient,
-                        {
-                          ...sharedBase,
-                          name: intent.name,
-                          policy_ids: intent.targetAgentPolicyIds,
-                        }
+                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${pk}`,
+                        buildFleetPackBlock(agentPolicyIds)
                       );
-                    }
 
-                    return packagePolicyService?.update(
-                      spaceScopedClient,
-                      esClient,
-                      dedicatedPolicy.id,
-                      produce<PackagePolicy>(dedicatedPolicy, (draft) => {
-                        unset(draft, 'id');
-                        if (!has(draft, 'inputs[0].streams')) {
-                          set(draft, 'inputs[0].streams', []);
-                        }
-
-                        removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                        set(
-                          draft,
-                          `inputs[0].config.osquery.value.packs.${pk}`,
-                          buildFleetPackBlock(agentPolicyIds)
-                        );
-
-                        return draft;
-                      })
-                    );
-                  } catch (splitErr) {
-                    logger.warn(
-                      `update_pack_route: could not create dedicated policy (enable branch) for pack ${
-                        updatedPackSO.id
-                      }: ${(splitErr as Error).message}`
-                    );
-                  }
-                })
+                      return draft;
+                    })
+                  )
+                )
               );
             } else {
               // Remove the pack from EVERY package policy that carries it on
@@ -622,86 +577,36 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             const retargetPk = makePackKey(updatedPackSO.attributes.name, spaceId);
 
+            // Over-broad policies are written as-is — see the enable branch.
             await Promise.all(
-              retargetScopeResults.map(async ({ packagePolicy, agentPolicyIds, kind }) => {
-                if (kind === 'exact') {
-                  return packagePolicyService?.update(
-                    spaceScopedClient,
-                    esClient,
-                    packagePolicy.id,
-                    produce<PackagePolicy>(packagePolicy, (draft) => {
-                      unset(draft, 'id');
-                      if (!has(draft, 'inputs[0].streams')) {
-                        set(draft, 'inputs[0].streams', []);
-                      }
+              retargetScopeResults.map(({ packagePolicy, agentPolicyIds }) =>
+                packagePolicyService?.update(
+                  spaceScopedClient,
+                  esClient,
+                  packagePolicy.id,
+                  produce<PackagePolicy>(packagePolicy, (draft) => {
+                    unset(draft, 'id');
+                    if (!has(draft, 'inputs[0].streams')) {
+                      set(draft, 'inputs[0].streams', []);
+                    }
 
-                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                      }
+                    // Rename cleanup: drop the pack under its previous name so a
+                    // renamed pack doesn't linger under both keys.
+                    if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                    }
 
-                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                      set(
-                        draft,
-                        `inputs[0].config.osquery.value.packs.${retargetPk}`,
-                        buildFleetPackBlock(agentPolicyIds)
-                      );
-
-                      return draft;
-                    })
-                  );
-                }
-
-                // Split path.
-                const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
-                try {
-                  let dedicatedPolicy: PackagePolicy;
-                  if (intent.action === 'reuse') {
-                    dedicatedPolicy = intent.packagePolicy;
-                  } else {
-                    const { id: _id, ...sharedBase } = packagePolicy;
-                    dedicatedPolicy = await packagePolicyService!.create(
-                      spaceScopedClient,
-                      esClient,
-                      {
-                        ...sharedBase,
-                        name: intent.name,
-                        policy_ids: intent.targetAgentPolicyIds,
-                      }
+                    removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                    set(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${retargetPk}`,
+                      buildFleetPackBlock(agentPolicyIds)
                     );
-                  }
 
-                  return packagePolicyService?.update(
-                    spaceScopedClient,
-                    esClient,
-                    dedicatedPolicy.id,
-                    produce<PackagePolicy>(dedicatedPolicy, (draft) => {
-                      unset(draft, 'id');
-                      if (!has(draft, 'inputs[0].streams')) {
-                        set(draft, 'inputs[0].streams', []);
-                      }
-
-                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                      }
-
-                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                      set(
-                        draft,
-                        `inputs[0].config.osquery.value.packs.${retargetPk}`,
-                        buildFleetPackBlock(agentPolicyIds)
-                      );
-
-                      return draft;
-                    })
-                  );
-                } catch (splitErr) {
-                  logger.warn(
-                    `update_pack_route: could not create dedicated policy (retarget branch) for pack ${
-                      updatedPackSO.id
-                    }: ${(splitErr as Error).message}`
-                  );
-                }
-              })
+                    return draft;
+                  })
+                )
+              )
             );
           } else {
             // Edit-only. Write targets are the UNION of the wire scan (repairs
@@ -740,115 +645,55 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             const editPk = makePackKey(updatedPackSO.attributes.name, spaceId);
 
+            // Over-broad policies are written as-is — see the enable branch.
             await Promise.all(
-              editScopeResults.map(async ({ packagePolicy, agentPolicyIds, kind }) => {
+              editScopeResults.map(({ packagePolicy, agentPolicyIds }) => {
                 // Wire-scan-only entries (drift repair) have an empty intersection
-                // with policiesList — write directly with the original intersection
+                // with policiesList — fall back to the original intersection
                 // logic so the shard is preserved from the wire.
                 const effectiveIds =
                   agentPolicyIds.length > 0
                     ? agentPolicyIds
                     : (packagePolicy.policy_ids ?? []).filter((id) => policiesList.includes(id));
 
-                if (kind === 'exact' || agentPolicyIds.length === 0) {
-                  return packagePolicyService?.update(
-                    spaceScopedClient,
-                    esClient,
-                    packagePolicy.id,
-                    produce<PackagePolicy>(packagePolicy, (draft) => {
-                      unset(draft, 'id');
-                      if (!has(draft, 'inputs[0].streams')) {
-                        set(draft, 'inputs[0].streams', []);
-                      }
+                return packagePolicyService?.update(
+                  spaceScopedClient,
+                  esClient,
+                  packagePolicy.id,
+                  produce<PackagePolicy>(packagePolicy, (draft) => {
+                    unset(draft, 'id');
+                    if (!has(draft, 'inputs[0].streams')) {
+                      set(draft, 'inputs[0].streams', []);
+                    }
 
-                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                      }
+                    if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                    }
 
-                      // Read the LEGACY bare key too: `policyHasPack` matches it,
-                      // which is how a pre-space-key block enters this write set in
-                      // the first place. Canonical-only would leave `existingShard`
-                      // undefined and let an empty target intersection fall through
-                      // to DEFAULT_PACK_SHARD, resetting a deliberate 25 to 100 —
-                      // the exact drift this branch exists to repair.
-                      const existingShard = (get(
+                    // Read the LEGACY bare key too: `policyHasPack` matches it,
+                    // which is how a pre-space-key block enters this write set in
+                    // the first place. Canonical-only would leave `existingShard`
+                    // undefined and let an empty target intersection fall through
+                    // to DEFAULT_PACK_SHARD, resetting a deliberate 25 to 100 —
+                    // the exact drift this branch exists to repair.
+                    const existingShard = (get(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${editPk}.shard`
+                    ) ??
+                      get(
                         draft,
-                        `inputs[0].config.osquery.value.packs.${editPk}.shard`
-                      ) ??
-                        get(
-                          draft,
-                          `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
-                        )) as number | undefined;
-                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                      set(
-                        draft,
-                        `inputs[0].config.osquery.value.packs.${editPk}`,
-                        buildFleetPackBlock(effectiveIds, existingShard)
-                      );
-
-                      return draft;
-                    })
-                  );
-                }
-
-                // Split path.
-                const intent = resolveDedicatedPackagePolicy(agentPolicyIds, packagePolicies);
-                try {
-                  let dedicatedPolicy: PackagePolicy;
-                  if (intent.action === 'reuse') {
-                    dedicatedPolicy = intent.packagePolicy;
-                  } else {
-                    const { id: _id, ...sharedBase } = packagePolicy;
-                    dedicatedPolicy = await packagePolicyService!.create(
-                      spaceScopedClient,
-                      esClient,
-                      {
-                        ...sharedBase,
-                        name: intent.name,
-                        policy_ids: intent.targetAgentPolicyIds,
-                      }
+                        `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
+                      )) as number | undefined;
+                    removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                    set(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${editPk}`,
+                      buildFleetPackBlock(effectiveIds, existingShard)
                     );
-                  }
 
-                  return packagePolicyService?.update(
-                    spaceScopedClient,
-                    esClient,
-                    dedicatedPolicy.id,
-                    produce<PackagePolicy>(dedicatedPolicy, (draft) => {
-                      unset(draft, 'id');
-                      if (!has(draft, 'inputs[0].streams')) {
-                        set(draft, 'inputs[0].streams', []);
-                      }
-
-                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                      }
-
-                      const existingShard = (get(
-                        draft,
-                        `inputs[0].config.osquery.value.packs.${editPk}.shard`
-                      ) ??
-                        get(
-                          draft,
-                          `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
-                        )) as number | undefined;
-                      removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                      set(
-                        draft,
-                        `inputs[0].config.osquery.value.packs.${editPk}`,
-                        buildFleetPackBlock(agentPolicyIds, existingShard)
-                      );
-
-                      return draft;
-                    })
-                  );
-                } catch (splitErr) {
-                  logger.warn(
-                    `update_pack_route: could not create dedicated policy (edit-only branch) for pack ${
-                      updatedPackSO.id
-                    }: ${(splitErr as Error).message}`
-                  );
-                }
+                    return draft;
+                  })
+                );
               })
             );
 
@@ -940,28 +785,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           throw err;
         }
 
-        // Detect over-broad package policies and build a targeting warning (group 2).
+        // Detect over-broad package policies and build a targeting warning.
         let targetingWarning: TargetingWarning | undefined;
         if (policiesList.length) {
-          const isGlobalPack = Boolean(effectiveShards?.['*']);
-          if (!isGlobalPack) {
-            const writeTargets = groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies);
-            const scopeResults = resolvePackTargetScope(writeTargets, false);
-            const overBroadResults = scopeResults.filter((r) => r.kind === 'over-broad');
-            if (overBroadResults.length > 0) {
-              const untargetedIds = new Set(
-                overBroadResults.flatMap((r) => r.untargetedAgentPolicyIds)
-              );
-              const untargetedAgentPolicies = await agentPolicyService?.getByIds(
-                spaceScopedClient,
-                [...untargetedIds]
-              );
-              const untargetedNames = (untargetedAgentPolicies ?? [])
-                .filter((ap) => untargetedIds.has(ap.id))
-                .map((ap) => ap.name);
-              targetingWarning = { untargeted_agent_policy_names: untargetedNames };
-            }
-          }
+          const writeTargets = groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies);
+          const scopeResults = resolvePackTargetScope(
+            writeTargets,
+            Boolean(effectiveShards?.['*'])
+          );
+          targetingWarning = await buildTargetingWarning(
+            scopeResults,
+            agentPolicyService,
+            spaceScopedClient
+          );
         }
 
         const responseData = buildResponseData();

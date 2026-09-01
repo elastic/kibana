@@ -2318,7 +2318,7 @@ describe('updatePackRoute', () => {
       expect(Object.keys(writtenPacks)).toHaveLength(1);
     });
 
-    it('grouped write (already-attached agent policies): shared package policy with differing shards resolves deterministically (first-explicit rule)', async () => {
+    it('grouped write (already-attached agent policies): shared package policy with differing shards resolves deterministically (max rule)', async () => {
       const currentSO = {
         ...basePackSO,
         references: [
@@ -2402,10 +2402,11 @@ describe('updatePackRoute', () => {
       const updatedPackagePolicy = packagePolicyUpdate.mock.calls[0][3];
       const writtenPack =
         updatedPackagePolicy.inputs[0].config.osquery.value.packs['default--my-pack'];
-      // Deterministic rule: the shard of the first agent policy in the list (25).
-      // Post-split each package policy targets exactly one agent policy, so this
-      // value is always correct for that policy's agents.
-      expect(writtenPack.shard).toBe(25);
+      // The wire has one `shard` slot per pack block, so a shared package policy
+      // covering two differently-sharded agent policies must collapse to one
+      // value. Widest-wins (max) is order-independent and does not silently
+      // shrink the configured rollout.
+      expect(writtenPack.shard).toBe(75);
     });
 
     it('grouped write (mixed already-attached + newly-added): shared package policy is written once with deterministic shard', async () => {
@@ -3682,9 +3683,9 @@ describe('updatePackRoute', () => {
     });
 
     it('edit-only save preserves a deliberate shard on a SHARED package policy (no reset to 100)', async () => {
-      // `policyShards` is keyed off the pack's own targets, so co-tenants
-      // resolve to DEFAULT_PACK_SHARD and `Math.max` promotes 25 to 100 — the
-      // SO would read 25 while the wire ran on every agent.
+      // `policyShards` is keyed off the pack's own targets, and `agentPolicyIds`
+      // holds only the pack's targets (not the shared policy's co-tenants), so
+      // the max collapse sees just policy-a's explicit 25 and preserves it.
       const currentSO = {
         ...basePackSO,
         references: [{ id: 'policy-a', name: 'policy-a', type: 'ingest-agent-policies' }],
@@ -3771,18 +3772,18 @@ describe('updatePackRoute', () => {
       await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
 
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
-      // Split: a dedicated policy was created for policy-a, then written once.
-      expect(packagePolicyCreate).toHaveBeenCalledTimes(1);
-      expect(packagePolicyCreate.mock.calls[0][2]).toMatchObject({
-        policy_ids: ['policy-a'],
-        name: expect.stringContaining('osquery-targeted-'),
-      });
+      // No dedicated policy: Fleet forbids a second osquery package policy on an
+      // agent policy that already has one, so the shared policy is written.
+      expect(packagePolicyCreate).not.toHaveBeenCalled();
       expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      expect(packagePolicyUpdate.mock.calls[0][2]).toBe('package-policy-shared');
       const writtenBlock =
         packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
           'default--my-pack'
         ];
-      // The pack's own shard survives; policy-b never promotes it to 100.
+      // The pack's own shard survives: `policyShards` is keyed off the pack's
+      // targets, so only policy-a contributes and the max is its explicit 25.
+      // Co-tenant policy-b is not in `agentPolicyIds` and never promotes it to 100.
       expect(writtenBlock.shard).toBe(25);
     });
 
@@ -4094,7 +4095,11 @@ describe('updatePackRoute', () => {
     });
   });
 
-  describe('split-aware write (issue #285994 — shared integration leak prevention)', () => {
+  describe('over-broad shared integration (issue #285994)', () => {
+    // `osquery_manager` declares `multiple: false`, so Fleet permits only ONE
+    // osquery package policy per agent policy — a dedicated "targeted" policy can
+    // never be created. The pack is written to the shared policy and the
+    // over-reach is reported via `targeting_warning`.
     const buildSharedPolicy = (id: string, policyIds: string[]) => ({
       id,
       policy_ids: policyIds,
@@ -4108,7 +4113,7 @@ describe('updatePackRoute', () => {
       ],
     });
 
-    it('retarget: creates dedicated policy and does NOT write to the over-broad shared policy', async () => {
+    it('retarget: writes the shared policy and reports the untargeted agent policy', async () => {
       const currentSO = {
         ...basePackSO,
         references: [
@@ -4164,7 +4169,10 @@ describe('updatePackRoute', () => {
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
           getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-a', name: 'policy-a' },
+              { id: 'policy-b', name: 'policy-b' },
+            ]),
           }),
           getPackagePolicyService: jest.fn().mockReturnValue({
             list: packagePolicyList,
@@ -4191,18 +4199,16 @@ describe('updatePackRoute', () => {
       await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      // A dedicated policy was created for policy-a.
-      expect(packagePolicyCreate).toHaveBeenCalledTimes(1);
-      expect(packagePolicyCreate.mock.calls[0][2]).toMatchObject({
-        policy_ids: ['policy-a'],
-        name: expect.stringContaining('osquery-targeted-'),
-      });
-      // Pack block was written to the dedicated policy only.
+      // Never attempt a dedicated policy: Fleet would always reject it.
+      expect(packagePolicyCreate).not.toHaveBeenCalled();
+      // The pack still reaches policy-a — writing nothing would be a worse
+      // regression than the over-delivery being reported.
       expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
-      expect(packagePolicyUpdate.mock.calls[0][2]).toBe('pp-dedicated-a');
-      // The shared policy was NEVER written to.
-      const allWrittenIds = packagePolicyUpdate.mock.calls.map((c) => c[2]);
-      expect(allWrittenIds).not.toContain('shared-pp-ab');
+      expect(packagePolicyUpdate.mock.calls[0][2]).toBe('shared-pp-ab');
+      // The over-reach onto policy-b is surfaced rather than silently enforced.
+      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toEqual({
+        untargeted_agent_policy_names: ['policy-b'],
+      });
     });
 
     it('global pack (shards.*) is not split even when the policy is shared', async () => {

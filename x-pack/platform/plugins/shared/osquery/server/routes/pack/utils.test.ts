@@ -16,7 +16,7 @@ import {
   groupAgentPolicyIdsByPackagePolicy,
   resolveSharedPackagePolicyShard,
   resolvePackTargetScope,
-  resolveDedicatedPackagePolicy,
+  buildTargetingWarning,
   DEFAULT_PACK_SHARD,
   validatePackScheduleFields,
   validateRruleConfig,
@@ -1750,11 +1750,30 @@ describe('resolveSharedPackagePolicyShard (deterministic shard for a shared pack
     ).toBe(30);
   });
 
-  it('returns the first explicit shard for divergent values (post-split: each write target has exactly one agent policy)', () => {
-    // With split-aware writes each package policy serves exactly one agent policy's
-    // target set, so the first entry is always the only entry.
+  it('passes a single agent policy shard through unchanged', () => {
     expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': 25 })).toBe(25);
     expect(resolveSharedPackagePolicyShard(['agent-b'], { 'agent-b': 75 })).toBe(75);
+  });
+
+  it('resolves differing shards deterministically via the max rule', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 25, 'agent-b': 75 })
+    ).toBe(75);
+  });
+
+  it('is independent of agent-policy-id ordering', () => {
+    const shards = { 'agent-a': 25, 'agent-b': 75 };
+    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], shards)).toBe(
+      resolveSharedPackagePolicyShard(['agent-b', 'agent-a'], shards)
+    );
+  });
+
+  it('mixes explicit and default-shard agent policies using the max rule', () => {
+    // `agent-b` has no explicit shard, so it contributes DEFAULT_PACK_SHARD (100),
+    // which is wider than agent-a's 40 and therefore wins.
+    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 40 })).toBe(
+      DEFAULT_PACK_SHARD
+    );
   });
 
   it('returns DEFAULT_PACK_SHARD when no agent policy in the list has an explicit shard', () => {
@@ -1830,56 +1849,110 @@ describe('resolvePackTargetScope (classify package policies as exact or over-bro
   });
 });
 
-describe('resolveDedicatedPackagePolicy (reuse or describe creation intent)', () => {
+describe('buildTargetingWarning (name the agent policies a pack also reaches)', () => {
   const makePackagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
     ({ id, policy_ids: policyIds } as PackagePolicy);
 
-  it('returns reuse intent when an existing policy exactly matches the target set', () => {
-    const existing = makePackagePolicy('pp-dedicated', ['agent-a']);
-    const result = resolveDedicatedPackagePolicy(['agent-a'], [existing]);
-    expect(result.action).toBe('reuse');
-    if (result.action === 'reuse') {
-      expect(result.packagePolicy).toBe(existing);
-    }
+  const makeScopeResult = (
+    ppId: string,
+    policyIds: string[],
+    agentPolicyIds: string[],
+    untargetedAgentPolicyIds: string[]
+  ) => ({
+    packagePolicy: makePackagePolicy(ppId, policyIds),
+    kind: (untargetedAgentPolicyIds.length > 0 ? 'over-broad' : 'exact') as 'over-broad' | 'exact',
+    agentPolicyIds,
+    untargetedAgentPolicyIds,
   });
 
-  it('returns create intent when no existing policy matches the target set', () => {
-    const unrelated = makePackagePolicy('pp-other', ['agent-b']);
-    const result = resolveDedicatedPackagePolicy(['agent-a'], [unrelated]);
-    expect(result.action).toBe('create');
-    if (result.action === 'create') {
-      expect(result.name).toBe('osquery-targeted-agent-a');
-      expect(result.targetAgentPolicyIds).toEqual(['agent-a']);
-    }
+  const makeAgentPolicyService = (policies: Array<{ id: string; name: string }>) => ({
+    getByIds: jest.fn().mockResolvedValue(policies),
   });
 
-  it('does not reuse a policy that only partially matches', () => {
-    const partial = makePackagePolicy('pp-partial', ['agent-a', 'agent-b']);
-    const result = resolveDedicatedPackagePolicy(['agent-a'], [partial]);
-    expect(result.action).toBe('create');
+  const soClient = {} as never;
+
+  it('returns undefined when every package policy is exactly targeted', async () => {
+    const agentPolicyService = makeAgentPolicyService([]);
+    const result = await buildTargetingWarning(
+      [makeScopeResult('pp-a', ['agent-a'], ['agent-a'], [])],
+      agentPolicyService as never,
+      soClient
+    );
+
+    expect(result).toBeUndefined();
+    expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
   });
 
-  it('sorts target ids when building the create name (idempotent naming)', () => {
-    const result = resolveDedicatedPackagePolicy(['agent-z', 'agent-a'], []);
-    expect(result.action).toBe('create');
-    if (result.action === 'create') {
-      expect(result.name).toBe('osquery-targeted-agent-a-agent-z');
-      expect(result.targetAgentPolicyIds).toEqual(['agent-a', 'agent-z']);
-    }
+  it('names the untargeted agent policies of an over-broad package policy', async () => {
+    const agentPolicyService = makeAgentPolicyService([{ id: 'agent-b', name: 'Agent Policy B' }]);
+    const result = await buildTargetingWarning(
+      [makeScopeResult('pp-shared', ['agent-a', 'agent-b'], ['agent-a'], ['agent-b'])],
+      agentPolicyService as never,
+      soClient
+    );
+
+    expect(result).toEqual({ untargeted_agent_policy_names: ['Agent Policy B'] });
+    expect(agentPolicyService.getByIds).toHaveBeenCalledWith(soClient, ['agent-b'], {
+      ignoreMissing: true,
+    });
   });
 
-  it('reuse matches regardless of the order targetAgentPolicyIds was supplied in', () => {
-    const existing = makePackagePolicy('pp-dedicated', ['agent-a', 'agent-b']);
-    const result = resolveDedicatedPackagePolicy(['agent-b', 'agent-a'], [existing]);
-    expect(result.action).toBe('reuse');
+  it('dedupes an agent policy reported by more than one over-broad package policy', async () => {
+    const agentPolicyService = makeAgentPolicyService([{ id: 'agent-c', name: 'Agent Policy C' }]);
+    const result = await buildTargetingWarning(
+      [
+        makeScopeResult('pp-1', ['agent-a', 'agent-c'], ['agent-a'], ['agent-c']),
+        makeScopeResult('pp-2', ['agent-b', 'agent-c'], ['agent-b'], ['agent-c']),
+      ],
+      agentPolicyService as never,
+      soClient
+    );
+
+    expect(result).toEqual({ untargeted_agent_policy_names: ['Agent Policy C'] });
+    expect(agentPolicyService.getByIds).toHaveBeenCalledWith(soClient, ['agent-c'], {
+      ignoreMissing: true,
+    });
   });
 
-  it('returns create for an empty target set with no empty matching policy', () => {
-    const result = resolveDedicatedPackagePolicy([], []);
-    expect(result.action).toBe('create');
-    if (result.action === 'create') {
-      expect(result.name).toBe('osquery-targeted-');
-      expect(result.targetAgentPolicyIds).toEqual([]);
-    }
+  it('falls back to the raw id when an untargeted agent policy no longer resolves', async () => {
+    // A deleted agent policy must not silently shrink the warning: understating
+    // the blast radius defeats the field's whole purpose.
+    const agentPolicyService = makeAgentPolicyService([{ id: 'agent-b', name: 'Agent Policy B' }]);
+    const result = await buildTargetingWarning(
+      [
+        makeScopeResult(
+          'pp-shared',
+          ['agent-a', 'agent-b', 'agent-gone'],
+          ['agent-a'],
+          ['agent-b', 'agent-gone']
+        ),
+      ],
+      agentPolicyService as never,
+      soClient
+    );
+
+    expect(result).toEqual({
+      untargeted_agent_policy_names: ['Agent Policy B', 'agent-gone'],
+    });
+  });
+
+  it('returns undefined when the agent policy service is unavailable and nothing is over-broad', async () => {
+    expect(
+      await buildTargetingWarning(
+        [makeScopeResult('pp-a', ['agent-a'], ['agent-a'], [])],
+        undefined,
+        soClient
+      )
+    ).toBeUndefined();
+  });
+
+  it('still reports ids when the agent policy service is unavailable', async () => {
+    expect(
+      await buildTargetingWarning(
+        [makeScopeResult('pp-shared', ['agent-a', 'agent-b'], ['agent-a'], ['agent-b'])],
+        undefined,
+        soClient
+      )
+    ).toEqual({ untargeted_agent_policy_names: ['agent-b'] });
   });
 });

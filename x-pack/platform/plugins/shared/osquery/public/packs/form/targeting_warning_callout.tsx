@@ -15,17 +15,43 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
 interface PackagePolicy {
   id: string;
-  policy_ids: string[];
+  policy_ids?: string[];
 }
 
 interface PackagePoliciesResponse {
   items: PackagePolicy[];
 }
 
+interface AgentPoliciesResponse {
+  items: Array<{ id: string; name: string }>;
+}
+
 interface TargetingWarningCalloutProps {
   policyIds: string[];
 }
 
+// Fleet's package-policy list is offset-paginated. Osquery Manager is a limited
+// package (one policy per agent policy), so this is bounded by the number of
+// agent policies; 1000 matches the plugin-wide convention for these lookups.
+const FLEET_LOOKUP_PER_PAGE = 1000;
+
+/**
+ * Warns that a pack targeted at specific agent policies will ALSO reach agent
+ * policies it does not target, because the Osquery Manager integration is
+ * shared across them.
+ *
+ * This over-delivery cannot be prevented from Kibana: `osquery_manager` declares
+ * `multiple: false`, so Fleet allows only one osquery package policy per agent
+ * policy and a narrower "targeted" policy cannot be created. Fleet also compiles
+ * a shared package policy identically into every agent policy that references
+ * it, so there is no per-agent-policy dimension in the pack block to filter on.
+ * The remedy is for the user to give each agent policy its own Osquery Manager
+ * integration policy in Fleet. See https://github.com/elastic/kibana/issues/285994.
+ *
+ * The equivalent server-side check returns `targeting_warning` on the create and
+ * update responses; this component exists to surface the same fact BEFORE the
+ * user saves.
+ */
 const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> = ({
   policyIds,
 }) => {
@@ -37,11 +63,12 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
       http.get('/api/fleet/package_policies', {
         query: {
           kuery: `package_policies.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
+          perPage: FLEET_LOOKUP_PER_PAGE,
         },
       }),
     {
       staleTime: 30_000,
+      enabled: policyIds.length > 0,
     }
   );
 
@@ -51,14 +78,12 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
     const targetSet = new Set(policyIds);
     const untargeted = new Set<string>();
 
-    for (const pp of packagePoliciesData.items) {
-      const ppPolicyIds = pp.policy_ids ?? [];
-      // Check if this package policy covers at least one targeted agent policy
-      const coversTarget = ppPolicyIds.some((id) => targetSet.has(id));
-      if (!coversTarget) continue;
+    for (const packagePolicy of packagePoliciesData.items) {
+      const packagePolicyIds = packagePolicy.policy_ids ?? [];
+      // Only package policies this pack actually writes to can over-deliver.
+      if (!packagePolicyIds.some((id) => targetSet.has(id))) continue;
 
-      // Check if it also covers agent policies outside the target set
-      for (const id of ppPolicyIds) {
+      for (const id of packagePolicyIds) {
         if (!targetSet.has(id)) {
           untargeted.add(id);
         }
@@ -68,14 +93,20 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
     return [...untargeted];
   }, [packagePoliciesData, policyIds]);
 
-  // Fetch names for the untargeted agent policies
-  const { data: agentPoliciesData } = useQuery<{ items: Array<{ id: string; name: string }> }>(
-    ['osquery-agent-policies-for-targeting-warning', untargetedPolicyIds],
+  // `useQuery` keys must be stable: a fresh array each render would refetch on
+  // every keystroke elsewhere in the form.
+  const untargetedIdsKey = useMemo(
+    () => [...untargetedPolicyIds].sort().join(','),
+    [untargetedPolicyIds]
+  );
+
+  const { data: agentPoliciesData } = useQuery<AgentPoliciesResponse>(
+    ['osquery-agent-policies-for-targeting-warning', untargetedIdsKey],
     () =>
       http.get('/api/fleet/agent_policies', {
         query: {
           kuery: untargetedPolicyIds.map((id) => `agent_policies.id:"${id}"`).join(' or '),
-          perPage: 1000,
+          perPage: FLEET_LOOKUP_PER_PAGE,
         },
       }),
     {
@@ -85,10 +116,14 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
   );
 
   const untargetedNames = useMemo(() => {
-    if (!agentPoliciesData?.items) return [];
+    if (!untargetedPolicyIds.length) return [];
 
-    return agentPoliciesData.items.map((ap) => ap.name).filter(Boolean);
-  }, [agentPoliciesData]);
+    const nameById = new Map((agentPoliciesData?.items ?? []).map((ap) => [ap.id, ap.name]));
+
+    // Fall back to the raw id for an agent policy that did not resolve: listing
+    // fewer policies than actually receive the pack would understate the reach.
+    return untargetedPolicyIds.map((id) => nameById.get(id) || id);
+  }, [agentPoliciesData, untargetedPolicyIds]);
 
   const messageValues = useMemo(
     () => ({ count: untargetedNames.length, names: untargetedNames.join(', ') }),
@@ -103,7 +138,7 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
       <div role="status" aria-live="polite" aria-atomic="true">
         <EuiCallOut
           title={i18n.translate('xpack.osquery.pack.form.targetingWarning.title', {
-            defaultMessage: 'Pack may reach additional agent policies',
+            defaultMessage: 'This pack will also run on other agent policies',
           })}
           color="warning"
           iconType="warning"
@@ -111,7 +146,7 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
         >
           <FormattedMessage
             id="xpack.osquery.pack.form.targetingWarning.body"
-            defaultMessage="The Osquery Manager integration is shared with the following agent {count, plural, one {policy} other {policies}} that are not in this pack's target set. Because the integration is shared, this pack will also be delivered to those {count, plural, one {policy} other {policies}}: {names}"
+            defaultMessage="The Osquery Manager integration is shared with {count, plural, one {an agent policy} other {agent policies}} that this pack does not target, and a shared integration delivers the same configuration to every policy that uses it. This pack will therefore also run on: {names}. To limit it to the policies you selected, give each agent policy its own Osquery Manager integration policy in Fleet."
             values={messageValues}
           />
         </EuiCallOut>
