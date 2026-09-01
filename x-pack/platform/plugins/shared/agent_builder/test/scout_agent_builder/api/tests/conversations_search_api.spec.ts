@@ -16,7 +16,6 @@ import {
   createAgentViaKbn,
   deleteAgentViaKbn,
 } from '../../../scout_agent_builder_shared/lib/agents_kbn';
-import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { apiTest } from '../fixtures';
 import {
@@ -102,7 +101,14 @@ apiTest.describe(
     apiTest.afterAll(async ({ kbnClient, esClient }) => {
       await deleteAgentViaKbn(kbnClient, agentId);
       await deleteAgentViaKbn(kbnClient, otherAgentId);
-      await deleteAllConversationsFromEs(esClient);
+      await esClient.deleteByQuery({
+        index: CHAT_CONVERSATIONS_INDEX,
+        query: { terms: { agent_id: [agentId, otherAgentId] } },
+        wait_for_completion: true,
+        refresh: true,
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+      });
     });
 
     const search = (asAdmin: AuthedApiClient, params: Record<string, string>) =>
