@@ -71,7 +71,7 @@ describe('preview has_data_views route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: { hasDataView: true, hasUserDataView: true },
     });
