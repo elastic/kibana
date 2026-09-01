@@ -43,8 +43,7 @@
       "kibanaReact",
       "usageCollection",
       "security",
-      "presentationUtil",
-      "contextEngine"
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "cloud",
