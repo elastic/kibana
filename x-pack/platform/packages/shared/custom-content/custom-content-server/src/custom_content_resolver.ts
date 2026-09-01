@@ -27,7 +27,8 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Corner rounding: var(--cc-radius) for cards and containers, var(--cc-radius-s) for small elements like badges, pills and tags. Use one of these two rather than a literal value.
 - Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.
 - This applies to SVG too. \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a token — var(--cc-vis-N) for data marks, var(--cc-color-*) for chrome like axes and gridlines. For example \`<path fill="var(--cc-vis-0)">\`. Charts are where hardcoded palettes creep in; there is no exception for them.
-- Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.`;
+- Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.
+- Motion durations: var(--cc-motion-fast), var(--cc-motion-normal), var(--cc-motion-slow), with var(--cc-ease) for easing. No arbitrary values like 1.6s or one-off cubic-bezier curves.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
@@ -94,10 +95,12 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 
 function colorSection(): string {
   return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
-- The panel sits on a dashboard beside Lens and Vega charts. It must read as part of that page, not as an embedded document from another product: same type scale, same spacing rhythm, same corner rounding.
+- The panel sits on a dashboard beside Lens and Vega charts: same type scale, same spacing rhythm, same corner rounding.
 - Borders on cards and containers are fine, but every border is var(--cc-color-border). A border is never tinted with a series or accent color to color-code a card. To show which category a card belongs to, color the data itself — the value, a bar, a dot, a small swatch — and leave the card's edge neutral.
 - Do NOT put a border around the panel itself: the dashboard already frames it, and a second frame reads as doubled.
-- No drop shadows, no gradients, and no custom accent colors outside the tokens above.`;
+- Separating cards with a soft shadow instead of a border is fine and often reads better. No custom accent colors outside the tokens above.
+- Default to no motion. Add an animation or transition only where it communicates something — a state change, a value updating — never as decoration, and never looping or infinite: the panel sits among still charts and one that never settles pulls the eye off the data.
+- When you do animate, animate \`opacity\` and \`transform\` only. Animating width, height, margin or top/left shifts the elements around it and costs far more to render.`;
 }
 
 function buildSystemPromptStatic(): string {

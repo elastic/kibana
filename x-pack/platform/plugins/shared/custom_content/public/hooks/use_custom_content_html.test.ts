@@ -59,6 +59,12 @@ const mockEuiTheme = {
   },
   size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
   border: { radius: { medium: '6px', small: '4px' } },
+  animation: {
+    fast: '150ms',
+    normal: '250ms',
+    slow: '350ms',
+    resistance: 'cubic-bezier(.32,.72,0,1)',
+  },
   font: {
     family: 'Inter, sans-serif',
   },

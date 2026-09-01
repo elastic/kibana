@@ -46,14 +46,20 @@ export function injectStyleTag(html: string, style: string): string {
  * point here is only that a panel with no CSS of its own does not render as a bare browser
  * document. Everything is a token, so it tracks the theme without reading it.
  *
- * The body background is the sole `!important`. Generated templates set `background: #0d1117` and
- * similar despite the prompt forbidding it, which renders the whole panel as a dark slab for every
- * light-mode user. Nothing else is locked.
+ * Two rules are `!important`, both because they are ours rather than the template's: the body
+ * background and the reduced-motion guard.
+ *
+ * The guard is enforced here rather than asked for in the prompt because a generated template
+ * cannot be relied on to wrap its own keyframes — and the templates most likely to animate are the
+ * long, complex ones, which are exactly where prompt rules decay first. EUI's own idiom is the
+ * opposite polarity (`euiCanAnimate`, i.e. opt in under `no-preference`), which is the better
+ * pattern when you control the CSS; overriding CSS we did not write needs the opt-out form.
  */
 const BASE_STYLES = `
 body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
 *,*::before,*::after{box-sizing:inherit}
 body{background:var(--cc-color-background)!important}
+@media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 `;
 
 export function buildThemeCss(
@@ -62,7 +68,10 @@ export function buildThemeCss(
 ): string {
   const isDark = colorMode === 'DARK';
   const c = euiTheme.colors;
-  const vars: Array<[string, string]> = [
+  // A token whose theme value is missing is dropped rather than defaulted: a hardcoded fallback here
+  // is a second copy of an EUI value that silently goes stale, which is the drift the tokens exist
+  // to avoid. A dropped token makes `var()` resolve to the property's initial value instead.
+  const vars: Array<[string, string | number | undefined]> = [
     ['--cc-color-text', c.textParagraph],
     ['--cc-color-background', isDark ? c.emptyShade : 'transparent'],
     ['--cc-color-surface', isDark ? c.lightestShade : c.emptyShade],
@@ -82,9 +91,13 @@ export function buildThemeCss(
     ['--cc-space-m', t.size.m],
     ['--cc-space-l', t.size.base],
     ['--cc-space-xl', t.size.l],
-    ['--cc-radius', String(t.border.radius.medium ?? '6px')],
-    ['--cc-radius-s', String(t.border.radius.small ?? '4px')],
-    ['--cc-font-family', t.font.family]
+    ['--cc-radius', t.border.radius.medium],
+    ['--cc-radius-s', t.border.radius.small],
+    ['--cc-font-family', t.font.family],
+    ['--cc-motion-fast', t.animation.fast],
+    ['--cc-motion-normal', t.animation.normal],
+    ['--cc-motion-slow', t.animation.slow],
+    ['--cc-ease', t.animation.resistance]
   );
 
   // This is EUI's own colorblind-safe visualization palette.
@@ -92,7 +105,11 @@ export function buildThemeCss(
     vars.push([`--cc-vis-${index}`, color]);
   });
 
-  return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}${BASE_STYLES}`;
+  const declarations = vars
+    .filter((entry): entry is [string, string | number] => entry[1] != null)
+    .map(([k, v]) => `${k}:${v}`)
+    .join(';');
+  return `:root{${declarations}}${BASE_STYLES}`;
 }
 
 export function applyHtmlTheme(

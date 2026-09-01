@@ -62,6 +62,12 @@ describe('applyHtmlTheme', () => {
     font: {
       family: 'Inter, sans-serif',
     },
+    animation: {
+      fast: '150ms',
+      normal: '250ms',
+      slow: '350ms',
+      resistance: 'cubic-bezier(.32,.72,0,1)',
+    },
   } as unknown as EuiThemeComputed;
 
   // A meta CSP only governs resources fetched after it is parsed, so it must precede the
@@ -84,11 +90,23 @@ describe('applyHtmlTheme', () => {
     expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
   });
 
-  it('locks the body background and nothing else', () => {
+  // Everything else in the baseline is a floor the template can override. These two are not, so
+  // the count is pinned: a third `!important` should be a deliberate decision, not a drive-by.
+  it('locks the body background and the reduced-motion guard, and nothing else', () => {
     const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
 
     expect(result).toContain('body{background:var(--cc-color-background)!important}');
-    expect(result.match(/!important/g)).toHaveLength(1);
+    expect(result).toContain(
+      '@media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}'
+    );
+    expect(result.match(/!important/g)).toHaveLength(3);
+  });
+
+  it('exposes the motion tokens', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('--cc-motion-fast:150ms');
+    expect(result).toContain('--cc-ease:cubic-bezier(.32,.72,0,1)');
   });
 
   it('places the CSP meta before the injected theme style tag', () => {
