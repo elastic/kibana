@@ -54,6 +54,92 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
     ],
   },
   {
+    'data-test-subj': 'searchSideNav-Alerts',
+    id: 'alerts',
+    items: [
+      {
+        'data-test-subj': 'searchSideNav-Inbox',
+        deepLink: {
+          link: 'alertingV2:episodes',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-inbox',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.inbox', {
+          defaultMessage: 'Inbox',
+        }),
+      },
+      {
+        'data-test-subj': 'searchSideNav-RulesV1',
+        deepLink: {
+          link: 'management:triggersActions',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-rules-v1',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.rulesV1', {
+          defaultMessage: 'Rules V1',
+        }),
+      },
+      {
+        'data-test-subj': 'searchSideNav-RulesV2',
+        deepLink: {
+          link: 'alertingV2:rules',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-rules-v2',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.rulesV2', {
+          defaultMessage: 'Rules V2',
+        }),
+      },
+      {
+        'data-test-subj': 'searchSideNav-RuleLibrary',
+        deepLink: {
+          link: 'alertingV2:rule_library',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-rule-library',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.ruleLibrary', {
+          defaultMessage: 'Rule library',
+        }),
+      },
+      {
+        'data-test-subj': 'searchSideNav-ActionPolicies',
+        deepLink: {
+          link: 'alertingV2:action_policies',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-action-policies',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.actionPolicies', {
+          defaultMessage: 'Action policies',
+        }),
+      },
+      {
+        'data-test-subj': 'searchSideNav-ExecutionHistory',
+        deepLink: {
+          link: 'alertingV2:execution_history',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-execution-history',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.executionHistory', {
+          defaultMessage: 'Execution history',
+        }),
+      },
+      {
+        'data-test-subj': 'searchSideNav-MaintenanceWindows',
+        deepLink: {
+          link: 'management:maintenanceWindows',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'alerts-maintenance-windows',
+        name: i18n.translate('xpack.searchNavigation.classicNav.alerts.maintenanceWindows', {
+          defaultMessage: 'Maintenance windows',
+        }),
+      },
+    ],
+    name: i18n.translate('xpack.searchNavigation.classicNav.alertsTitle', {
+      defaultMessage: 'Alerts',
+    }),
+  },
+  {
     'data-test-subj': 'searchSideNav-Build',
     id: 'build',
     items: [

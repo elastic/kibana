@@ -18,6 +18,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -235,6 +236,120 @@ export const mountExecutionHistoryApp = async ({
           </BreadcrumbProvider>
         </QueryClientProvider>
       </Context.Provider>
+    ),
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+export const mountAlertingV2StandaloneApp = async ({
+  params,
+  container,
+  coreStart,
+}: {
+  params: AppMountParameters;
+  container: Container;
+  coreStart: CoreStart;
+}): Promise<AppUnmount> => {
+  const { element, history } = params;
+  const setBreadcrumbs = coreStart.chrome.setBreadcrumbs;
+
+  const observabilitySharedToken = PluginStart('observabilityShared');
+  const PageTemplate = container.isBound(observabilitySharedToken)
+    ? (
+        container.get(observabilitySharedToken) as {
+          navigation: { PageTemplate: React.ComponentType<any> };
+        }
+      ).navigation.PageTemplate
+    : KibanaPageTemplate;
+
+  element.classList.add(APP_WRAPPER_CLASS);
+
+  const queryClient = new QueryClient();
+
+  const data = container.get(PluginStart('data')) as DataPublicPluginStart;
+  const dataViews = container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const expressions = container.get(PluginStart('expressions')) as ExpressionsStart;
+  const uiActions = container.get(PluginStart('uiActions')) as UiActionsStart;
+  const fieldFormats = container.get(PluginStart('fieldFormats')) as FieldFormatsStart;
+  const lens = container.get(PluginStart('lens')) as LensPublicStart;
+  const charts = container.get(PluginStart('charts')) as ChartsPluginStart;
+  const share = container.get(PluginStart('share')) as SharePluginStart;
+  const unifiedDocViewer = container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart;
+  const spaces = container.get(PluginStart('spaces')) as SpacesPluginStart;
+
+  const kibanaReactServices: AlertEpisodesKibanaServices = {
+    ...coreStart,
+    share,
+    data,
+    dataViews,
+    expressions,
+    uiActions,
+    fieldFormats,
+    lens,
+    charts,
+    storage: new Storage(localStorage),
+    toastNotifications: coreStart.notifications.toasts,
+    unifiedDocViewer,
+    spaces,
+  };
+
+  const AlertingV2Router = () => {
+    const [currentPath, setCurrentPath] = React.useState(history.location.pathname);
+
+    React.useEffect(() => {
+      return history.listen((location) => {
+        setCurrentPath(location.pathname);
+      });
+    }, []);
+
+    let subApp: React.ReactElement;
+    let subHistory: AppMountParameters['history'] = history;
+
+    if (currentPath.startsWith('/rules')) {
+      subHistory = history.createSubHistory('/rules');
+      subApp = <RulesApp />;
+    } else if (currentPath.startsWith('/rule-library')) {
+      subHistory = history.createSubHistory('/rule-library');
+      subApp = <RuleLibraryApp />;
+    } else if (currentPath.startsWith('/episodes')) {
+      subHistory = history.createSubHistory('/episodes');
+      subApp = <EpisodesApp />;
+    } else if (currentPath.startsWith('/action-policies')) {
+      subHistory = history.createSubHistory('/action-policies');
+      subApp = <ActionPoliciesApp />;
+    } else if (currentPath.startsWith('/execution-history')) {
+      subHistory = history.createSubHistory('/execution-history');
+      subApp = <ExecutionHistoryApp />;
+    } else {
+      subApp = <EpisodesApp />;
+    }
+
+    return (
+      <Router history={subHistory}>
+        <RedirectAppLinks coreStart={coreStart}>
+          <PageTemplate restrictWidth={false} panelled>
+            {subApp}
+          </PageTemplate>
+        </RedirectAppLinks>
+      </Router>
+    );
+  };
+
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <KibanaContextProvider services={kibanaReactServices}>
+        <Context.Provider value={container}>
+          <QueryClientProvider client={queryClient}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <AlertingV2Router />
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </QueryClientProvider>
+        </Context.Provider>
+      </KibanaContextProvider>
     ),
     element
   );
