@@ -11,16 +11,18 @@ import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, pairwise } from 'rxjs';
+import { BehaviorSubject, filter, map, pairwise, withLatestFrom } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   onStateChange$,
   setState,
   maxSize,
+  pause$,
 }: {
   onStateChange$: Observable<T | undefined>;
   setState: (state: T) => Promise<void>;
   maxSize: number;
+  pause$: BehaviorSubject<boolean>;
 }) {
   const history: jsondiffpatch.Delta[] = [];
   const pointer$ = new BehaviorSubject<number>(-1);
@@ -29,6 +31,8 @@ export function startTrackingHistory<T extends object = {}>({
   let latestState: T | undefined;
   const stateSubscription = onStateChange$
     .pipe(
+      withLatestFrom(pause$),
+      map(([state, paused]) => (paused ? undefined : state)),
       filter((state): state is T => Boolean(state)),
       pairwise()
     )
@@ -87,10 +91,11 @@ export function startTrackingHistory<T extends object = {}>({
 
   const keyDownHandler = (event: KeyboardEvent) => {
     if (
-      event.target instanceof HTMLElement &&
-      ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)
-    ) {
+      pause$.getValue() || // if history is paused, ignore keyboard events, or...
       // if in an input field, do not allow undo/redo to be triggered by keyboard shortcuts
+      (event.target instanceof HTMLElement &&
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName))
+    ) {
       return;
     }
 

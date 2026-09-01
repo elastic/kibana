@@ -14,7 +14,6 @@ import {
   filter,
   map,
   merge,
-  withLatestFrom,
   type Observable,
   type Subject,
 } from 'rxjs';
@@ -47,11 +46,15 @@ export function initializeHistoryManager({
       disableUndoRedo$.next(disableUndoRedo);
     });
 
-  const onStateChange$ = combineLatest([anyStateChange$, dataLoading$]).pipe(
+  const pauseHistory$ = new BehaviorSubject<boolean>(false);
+  const pauseHistorySubscription = combineLatest([hasOverlays$, dataLoading$]).subscribe(
+    ([hasOverlays, dataLoading]) => {
+      pauseHistory$.next(hasOverlays || dataLoading);
+    }
+  );
+  const onStateChange$ = combineLatest([anyStateChange$, pauseHistory$]).pipe(
     debounceTime(0), // flatten anyStateChange + dataLoading event updates
-    withLatestFrom(hasOverlays$),
-    // do not push to history while a child is loading or an editor is open
-    filter(([[, loading], hasOverlays]) => !loading && !hasOverlays),
+    filter(([, paused]) => !paused),
     map(() => {
       const state = getState();
       return {
@@ -66,6 +69,7 @@ export function initializeHistoryManager({
       onStateChange$: merge(initialState$, onStateChange$),
       setState,
       maxSize: 100,
+      pause$: pauseHistory$,
     }
   );
 
@@ -76,6 +80,7 @@ export function initializeHistoryManager({
     },
     cleanup: () => {
       disableUndoRedoSubscription.unsubscribe();
+      pauseHistorySubscription.unsubscribe();
       cleanupHistoryTracking();
     },
   };
