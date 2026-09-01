@@ -126,16 +126,6 @@ const installLegacyTransformsAssets = async (
       return acc;
     }, []);
 
-    // get and save transform refs before installing transforms
-    esReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      packageInstallContext.packageInfo.name,
-      esReferences,
-      {
-        assetsToAdd: transformRefs,
-      }
-    );
-
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
       const content = JSON.parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
       content._meta = getESAssetMetadata({ packageName: packageInstallContext.packageInfo.name });
@@ -155,9 +145,22 @@ const installLegacyTransformsAssets = async (
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
-  }
 
-  if (previousInstalledTransformEsAssets.length > 0) {
+    // Update refs in a single call so that ids present in both assetsToAdd and assetsToRemove
+    // survive. Previously this was done in two separate calls (add first, then remove), which
+    // wiped the newly-added refs on any same-version reinstall because legacy transform ids are
+    // suffixed with the package version and are therefore identical across a force reinstall.
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      packageInstallContext.packageInfo.name,
+      esReferences,
+      {
+        assetsToAdd: transformRefs,
+        assetsToRemove: previousInstalledTransformEsAssets,
+      }
+    );
+  } else if (previousInstalledTransformEsAssets.length > 0) {
+    // Package ships no transforms in this version — prune the stale refs.
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
       packageInstallContext.packageInfo.name,
