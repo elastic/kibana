@@ -13,6 +13,5 @@
     "requiredPlugins": [],
     "optionalPlugins": ["agentBuilder", "spaces", "workflowsExtensions", "workflowsManagement"],
     "requiredBundles": [],
-    "extraPublicDirs": ["common"],
   },
 }

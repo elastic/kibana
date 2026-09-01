@@ -6,10 +6,6 @@
  */
 
 import {
-  alertSnapshotSchema,
-  type AlertSnapshot,
-} from '@kbn/nightshift-investigations-plugin/common';
-import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
@@ -29,7 +25,15 @@ import {
   ALERT_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import type { NightshiftInvestigationsAPIClientRequestParamsOf } from '@kbn/nightshift-investigations-plugin/public';
 import type { TopAlert } from '../../typings/alerts';
+
+type StartInvestigationRequest =
+  NightshiftInvestigationsAPIClientRequestParamsOf<'POST /internal/nightshift/investigations'>['params']['body'];
+type AlertSnapshot = Extract<
+  StartInvestigationRequest,
+  { subject: { type: 'alert' } }
+>['context']['alerts'][number];
 
 export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot | undefined => {
   const start = fields[ALERT_START] ?? fields[TIMESTAMP];
@@ -47,7 +51,7 @@ export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot 
     return;
   }
 
-  const snapshot = {
+  return {
     id: fields[ALERT_UUID],
     rule_id: fields[ALERT_RULE_UUID],
     rule_name: fields[ALERT_RULE_NAME],
@@ -59,8 +63,10 @@ export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot 
     flapping: fields[ALERT_FLAPPING],
     ...(fields[ALERT_URL] ? { url: fields[ALERT_URL] } : {}),
     ...(fields[ALERT_RULE_TAGS] ? { rule_tags: fields[ALERT_RULE_TAGS] } : {}),
-    ...(fields[ALERT_GROUPING] ? { grouping: fields[ALERT_GROUPING] } : {}),
-    ...(fields[ALERT_GROUP] ? { group: fields[ALERT_GROUP] } : {}),
+    ...(fields[ALERT_GROUPING]
+      ? { grouping: fields[ALERT_GROUPING] as Record<string, unknown> }
+      : {}),
+    ...(fields[ALERT_GROUP] ? { group: fields[ALERT_GROUP] as AlertSnapshot['group'] } : {}),
     ...(fields[ALERT_EVALUATION_VALUES] !== undefined ||
     fields[ALERT_EVALUATION_VALUE] !== undefined ||
     fields[ALERT_EVALUATION_THRESHOLD] !== undefined
@@ -74,6 +80,4 @@ export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot 
     ...(fields[ALERT_RULE_PARAMETERS] ? { rule_parameters: fields[ALERT_RULE_PARAMETERS] } : {}),
     ...(fields[ALERT_INDEX_PATTERN] ? { index_pattern: fields[ALERT_INDEX_PATTERN] } : {}),
   };
-  const parsed = alertSnapshotSchema.safeParse(snapshot);
-  return parsed.success ? parsed.data : undefined;
 };

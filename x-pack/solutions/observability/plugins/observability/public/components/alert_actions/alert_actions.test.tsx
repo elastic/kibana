@@ -360,7 +360,7 @@ describe('ObservabilityActions component', () => {
             concurrency_key: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
             context: {
               alerts: [
-                {
+                expect.objectContaining({
                   id: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
                   rule_id: '06f53080-0f91-11ed-9d86-013908b232ef',
                   rule_name: 'Test Alert',
@@ -370,7 +370,7 @@ describe('ObservabilityActions component', () => {
                   status: 'active',
                   start: '2022-07-29T22:51:51.904Z',
                   flapping: false,
-                },
+                }),
               ],
             },
           },
