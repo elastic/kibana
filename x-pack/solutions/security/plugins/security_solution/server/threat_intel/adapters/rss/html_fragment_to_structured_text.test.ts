@@ -58,6 +58,12 @@ describe('htmlFragmentToStructuredText', () => {
     }
   );
 
+  it('removes hidden subtrees while preserving token boundaries', () => {
+    expect(htmlFragmentToStructuredText('<p>left<span hidden>secret.example</span>right</p>')).toBe(
+      'left\nright'
+    );
+  });
+
   it('tolerates malformed fragments and plain text', () => {
     expect(htmlFragmentToStructuredText('<p>unclosed <b>bold')).toBe('unclosed bold');
     expect(htmlFragmentToStructuredText('just plain text with 8.8.8.8')).toBe(

@@ -53,6 +53,7 @@ interface DomNode {
   type: string;
   data?: string;
   name?: string;
+  attribs?: Record<string, string>;
   children?: DomNode[];
 }
 
@@ -71,7 +72,9 @@ const stepNode = (node: DomNode, output: string[], stack: WalkStep[]): void => {
   }
 
   const name = typeof node.name === 'string' ? node.name.toLowerCase() : undefined;
-  if (name === 'br' || (name !== undefined && NON_CONTENT_TAGS.has(name))) {
+  const isHidden =
+    node.attribs !== undefined && Object.prototype.hasOwnProperty.call(node.attribs, 'hidden');
+  if (name === 'br' || isHidden || (name !== undefined && NON_CONTENT_TAGS.has(name))) {
     output.push('\n');
     return;
   }
