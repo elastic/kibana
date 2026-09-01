@@ -10,7 +10,7 @@ import { injectable } from 'inversify';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import { assertBoundedSchema } from './assert_bounded_schema';
+import { assertBoundedSchema } from '../bounded_schema';
 import { assertValidDefinition } from './assert_valid_definition';
 import type { ArtifactTypeDefinition, RuleArtifactLike } from './types';
 

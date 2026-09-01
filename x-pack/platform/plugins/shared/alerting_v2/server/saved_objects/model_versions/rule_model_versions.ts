@@ -10,6 +10,7 @@ import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
+  ruleSavedObjectAttributesSchemaV4,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
@@ -74,6 +75,22 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV3,
+    },
+  },
+  '5': {
+    // Introduce `metadata.builder_fields`, the structured parameters a rule
+    // builder was configured with. Purely additive and optional, so there is
+    // nothing to backfill: rules created before this version keep only their
+    // `builder_type` and stay readable. It is never searched, sorted or
+    // aggregated on, so there is no mappings change either.
+    //
+    // Rolling back to model version 4 is safe: that schema ignores unknown
+    // attributes on read, so a rule carrying builder fields still loads, with
+    // the query it was already storing.
+    changes: [],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV4,
     },
   },
 };
