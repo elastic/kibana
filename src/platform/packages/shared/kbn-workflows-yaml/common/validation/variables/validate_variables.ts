@@ -95,7 +95,7 @@ export function validateVariables(
     }
 
     if (context !== null) {
-      const error = validateVariable(variableItem, context);
+      const error = validateVariable(variableItem, context, options);
       if (error) {
         errors.push(error);
       }
