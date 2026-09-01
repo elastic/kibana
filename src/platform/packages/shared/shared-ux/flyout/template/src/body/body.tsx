@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { ParsedItem, ParsedPart } from '@kbn/ui-react-assembly';
-import type { HeaderTabDescriptor } from '../header/tab';
+import type { FlyoutTabDescriptor } from '../context/tabs_context';
 import type { FlyoutBodyProps } from '../types';
 import { bodyAssembly, flyoutAssembly, partsOf } from '../assembly';
 import {
@@ -35,7 +35,7 @@ const ActiveTabPanel = ({
   bodyTestSubj,
   scrollContainerRef,
 }: {
-  activeTab: HeaderTabDescriptor;
+  activeTab: FlyoutTabDescriptor;
   activePanel: ParsedPart;
   bodyTestSubj: string | undefined;
   scrollContainerRef: (node: HTMLElement | null) => void;
@@ -77,19 +77,19 @@ BaseBody.displayName = 'FlyoutTemplate.Body';
 
 export const Body = Object.assign(BaseBody, { TabPanel });
 
-type BodyZoneProps = FlyoutBodyProps & {
-  /** Pre-parsed body items from the root, to avoid parsing the children twice. */
-  items: ParsedItem[];
-};
-
 /** Internal renderer for the body zone, with optional tab-panel mode. */
-export const BodyZone = ({ items, 'data-test-subj': dataTestSubj }: BodyZoneProps) => {
+export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBodyProps) => {
   const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
   const { tabs, selectedTabId } = useFlyoutTabs();
+  const items = useMemo(
+    () => bodyAssembly.parseChildren(children, { supportsOtherChildren: true }),
+
+    [children]
+  );
   const { scrollContainerRef } = useFlyoutHeaderCollapse();
 
   const tabPanelItems = partsOf(items, TAB_PANEL_PART_NAME);
-  const isTabbedMode = tabPanelItems.length > 0 && tabs.length > 0;
+  const isTabbedMode = tabs.length > 0;
 
   const bodyTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body');
 

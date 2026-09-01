@@ -16,20 +16,17 @@ import type {
   FlyoutHeaderProps,
   FlyoutTemplateProps,
 } from './types';
-import { bodyAssembly, flyoutAssembly, headerAssembly, partsOf } from './assembly';
+import { flyoutAssembly, partsOf } from './assembly';
 import {
   FlyoutHeaderCollapseProvider,
   FlyoutTabsProvider,
   FlyoutTemplateConfigProvider,
 } from './context';
-import type { FlyoutTabsState } from './context';
+import type { FlyoutTabDescriptor, FlyoutTabsState } from './context/tabs_context';
 import { useHeaderCollapse } from './use_header_collapse';
 import { Body, BodyZone, BODY_PART_NAME } from './body/body';
 import { Header, HeaderZone, HEADER_PART_NAME } from './header/header';
 import { Footer, FooterZone, FOOTER_PART_NAME } from './footer/footer';
-import { tabPart, TAB_PART_NAME } from './header/tab';
-import { TAB_PANEL_PART_NAME } from './body/tab_panel';
-import type { HeaderTabDescriptor } from './header/tab/types';
 
 const ZONE_DISPLAY_NAMES: Record<string, string> = {
   [HEADER_PART_NAME]: 'Header',
@@ -51,7 +48,7 @@ const pickZone = (items: ParsedItem[], partName: string): ParsedPart | undefined
 };
 
 const resolveDefaultSelectedTabId = (
-  tabs: HeaderTabDescriptor[],
+  tabs: FlyoutTabDescriptor[],
   defaultId: string | undefined
 ) => {
   if (defaultId !== undefined && tabs.some((tab) => tab.id === defaultId)) {
@@ -81,6 +78,7 @@ const FlyoutTemplateRoot = ({
   outsideClickCloses,
   focusTrapProps,
   closeButtonProps,
+  tabs: tabsProp,
   defaultSelectedTabId,
   selectedTabId: controlledSelectedTabId,
   onTabChange,
@@ -102,6 +100,13 @@ const FlyoutTemplateRoot = ({
     console.warn('[FlyoutTemplate] A <FlyoutTemplate.Body> is required.');
   }
 
+  if (process.env.NODE_ENV !== 'production' && tabsProp?.length && !headerItem) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[FlyoutTemplate] `tabs` is set but no <FlyoutTemplate.Header> is provided. The tab bar cannot render without a header zone.'
+    );
+  }
+
   const headerAttrs = headerItem?.attributes as FlyoutHeaderProps | undefined;
   const bodyAttrs = bodyItem?.attributes as FlyoutBodyProps | undefined;
   const menuTitle = headerAttrs?.title;
@@ -117,59 +122,20 @@ const FlyoutTemplateRoot = ({
   };
   const hasMenuProps = Object.keys(mergedMenuProps).length > 0;
 
-  // Parsed here rather than in `HeaderZone` so tab state lives at this level;
-  // `HeaderZone` renders the same items, so the children are only walked once.
-  const headerItems = useMemo(
-    () => (headerAttrs?.children ? headerAssembly.parseChildren(headerAttrs.children) : []),
-    [headerAttrs?.children]
-  );
-
-  // The header is the sole source of truth for which tabs exist: a tab whose panel is absent is
-  // still rendered, because consumers may supply only the selected panel and mount it on demand.
-  const tabs = useMemo<HeaderTabDescriptor[]>(() => {
-    const tabParts = partsOf(headerItems, TAB_PART_NAME);
-    const descriptors: HeaderTabDescriptor[] = [];
-    for (const [index, part] of tabParts.entries()) {
-      const descriptor = tabPart.resolve(part, undefined);
-      if (!descriptor) continue;
-      descriptors.push({
-        ...descriptor,
+  const tabs = useMemo<FlyoutTabDescriptor[]>(() => {
+    const seen = new Set<string>();
+    return (tabsProp ?? [])
+      .filter((tab) => {
+        if (seen.has(tab.id)) return false;
+        seen.add(tab.id);
+        return true;
+      })
+      .map((tab, index) => ({
+        ...tab,
         tabDomId: `${tabIdPrefix}-${index}`,
         panelDomId: `${tabIdPrefix}-${index}-panel`,
-      });
-    }
-    return descriptors;
-  }, [headerItems, tabIdPrefix]);
-
-  const bodyItems = useMemo(
-    () =>
-      bodyAttrs?.children
-        ? bodyAssembly.parseChildren(bodyAttrs.children, { supportsOtherChildren: true })
-        : [],
-    [bodyAttrs?.children]
-  );
-
-  const panelTabIds = useMemo(
-    () => new Set(partsOf(bodyItems, TAB_PANEL_PART_NAME).map((p) => p.attributes.tabId as string)),
-    [bodyItems]
-  );
-  const hasTabPanels = panelTabIds.size > 0;
-
-  // A panel with no matching tab can never be reached; warn. A tab with no panel may be on-demand.
-  const orphanPanelKey = useMemo(() => {
-    const declaredTabIds = new Set(tabs.map((tab) => tab.id));
-    return [...panelTabIds].filter((panelId) => !declaredTabIds.has(panelId)).join(', ');
-  }, [tabs, panelTabIds]);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'production') return;
-    if (orphanPanelKey) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[FlyoutTemplate] <FlyoutTemplate.Body.TabPanel> with no matching <FlyoutTemplate.Header.Tab>: ${orphanPanelKey}. These panels are not rendered.`
-      );
-    }
-  }, [orphanPanelKey]);
+      }));
+  }, [tabsProp, tabIdPrefix]);
 
   const isControlled = controlledSelectedTabId !== undefined;
 
@@ -204,8 +170,8 @@ const FlyoutTemplateRoot = ({
   );
 
   const tabsContextValue = useMemo<FlyoutTabsState>(
-    () => ({ tabs, selectedTabId, selectTab, hasTabPanels }),
-    [tabs, selectedTabId, selectTab, hasTabPanels]
+    () => ({ tabs, selectedTabId, selectTab }),
+    [tabs, selectedTabId, selectTab]
   );
 
   const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
@@ -239,13 +205,9 @@ const FlyoutTemplateRoot = ({
         <FlyoutTabsProvider value={tabsContextValue}>
           <FlyoutHeaderCollapseProvider value={collapseState}>
             {headerItem && (
-              <HeaderZone
-                {...(headerAttrs as FlyoutHeaderProps)}
-                items={headerItems}
-                flyoutTitleId={flyoutTitleId}
-              />
+              <HeaderZone {...(headerAttrs as FlyoutHeaderProps)} flyoutTitleId={flyoutTitleId} />
             )}
-            {bodyItem && <BodyZone {...(bodyAttrs as FlyoutBodyProps)} items={bodyItems} />}
+            {bodyItem && <BodyZone {...(bodyAttrs as FlyoutBodyProps)} />}
             {footerItem && <FooterZone {...(footerItem.attributes as FlyoutFooterProps)} />}
           </FlyoutHeaderCollapseProvider>
         </FlyoutTabsProvider>

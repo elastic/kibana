@@ -1,6 +1,6 @@
 # Header
 
-The header renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region carrying the tab bar and the full-bleed bottom divider. See [`tab/README.md`](tab/README.md) for the tab bar.
+The header renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region carrying the tab bar and the full-bleed bottom divider. See the package README for the tab bar.
 
 ## Collapse on scroll
 
@@ -19,9 +19,7 @@ The behavior is always active and needs no configuration. It self-disables when 
 Set `collapsed` on the header to render the compact row immediately, independent of scroll position:
 
 ```tsx
-<FlyoutTemplate.Header title="Alert details" collapsed>
-  <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-</FlyoutTemplate.Header>
+<FlyoutTemplate.Header title="Alert details" collapsed />
 ```
 
 The description is never visible in this mode, so there is no reason to declare it. Scroll tracking is skipped entirely, and the header stays compact no matter how far the body scrolls. Wheel forwarding still works.

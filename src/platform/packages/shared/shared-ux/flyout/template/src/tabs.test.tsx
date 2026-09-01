@@ -22,14 +22,16 @@ const renderTemplate = (ui: React.ReactElement) =>
     ),
   });
 
+const TABS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'metadata', label: 'Metadata' },
+];
+
 describe('FlyoutTemplate tabs', () => {
   it('renders a tab bar with correct roles', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -48,11 +50,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('selects the first tab by default (uncontrolled)', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -73,11 +72,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('respects defaultSelectedTabId (uncontrolled)', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" defaultSelectedTabId="metadata">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS} defaultSelectedTabId="metadata">
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -97,11 +93,8 @@ describe('FlyoutTemplate tabs', () => {
   it('switches panel on tab click (uncontrolled)', async () => {
     const user = userEvent.setup();
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -126,13 +119,11 @@ describe('FlyoutTemplate tabs', () => {
       <FlyoutTemplate
         onClose={noop}
         session="never"
+        tabs={TABS}
         selectedTabId="overview"
         onTabChange={onTabChange}
       >
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -155,13 +146,11 @@ describe('FlyoutTemplate tabs', () => {
         <FlyoutTemplate
           onClose={noop}
           session="never"
+          tabs={TABS}
           selectedTabId="metadata"
           onTabChange={onTabChange}
         >
-          <FlyoutTemplate.Header title="Alert">
-            <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-            <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-          </FlyoutTemplate.Header>
+          <FlyoutTemplate.Header title="Alert" />
           <FlyoutTemplate.Body>
             <FlyoutTemplate.Body.TabPanel tabId="overview">
               <span>overview content</span>
@@ -180,10 +169,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('wires a11y ids between tab and panel', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={[{ id: 'overview', label: 'Overview' }]}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -203,20 +190,24 @@ describe('FlyoutTemplate tabs', () => {
   it('keeps tab and panel DOM ids unique across flyout instances', () => {
     renderTemplate(
       <>
-        <FlyoutTemplate onClose={noop} session="never">
-          <FlyoutTemplate.Header title="First">
-            <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          </FlyoutTemplate.Header>
+        <FlyoutTemplate
+          onClose={noop}
+          session="never"
+          tabs={[{ id: 'overview', label: 'Overview' }]}
+        >
+          <FlyoutTemplate.Header title="First" />
           <FlyoutTemplate.Body>
             <FlyoutTemplate.Body.TabPanel tabId="overview">
               first content
             </FlyoutTemplate.Body.TabPanel>
           </FlyoutTemplate.Body>
         </FlyoutTemplate>
-        <FlyoutTemplate onClose={noop} session="never">
-          <FlyoutTemplate.Header title="Second">
-            <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          </FlyoutTemplate.Header>
+        <FlyoutTemplate
+          onClose={noop}
+          session="never"
+          tabs={[{ id: 'overview', label: 'Overview' }]}
+        >
+          <FlyoutTemplate.Header title="Second" />
           <FlyoutTemplate.Body>
             <FlyoutTemplate.Body.TabPanel tabId="overview">
               second content
@@ -236,11 +227,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('falls back to the first tab when selectedTabId is invalid', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" selectedTabId="missing">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="missing">
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             overview content
@@ -257,11 +245,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('falls back to the first tab when defaultSelectedTabId is invalid', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" defaultSelectedTabId="missing">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS} defaultSelectedTabId="missing">
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             overview content
@@ -277,24 +262,27 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('falls back when the uncontrolled selected tab is removed', async () => {
-    const renderFlyout = (includeMetadata: boolean) => (
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          {includeMetadata && <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />}
-        </FlyoutTemplate.Header>
-        <FlyoutTemplate.Body>
-          <FlyoutTemplate.Body.TabPanel tabId="overview">
-            overview content
-          </FlyoutTemplate.Body.TabPanel>
-          {includeMetadata && (
-            <FlyoutTemplate.Body.TabPanel tabId="metadata">
-              metadata content
+    const renderFlyout = (includeMetadata: boolean) => {
+      const tabs = [
+        { id: 'overview', label: 'Overview' },
+        ...(includeMetadata ? [{ id: 'metadata', label: 'Metadata' }] : []),
+      ];
+      return (
+        <FlyoutTemplate onClose={noop} session="never" tabs={tabs}>
+          <FlyoutTemplate.Header title="Alert" />
+          <FlyoutTemplate.Body>
+            <FlyoutTemplate.Body.TabPanel tabId="overview">
+              overview content
             </FlyoutTemplate.Body.TabPanel>
-          )}
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
+            {includeMetadata && (
+              <FlyoutTemplate.Body.TabPanel tabId="metadata">
+                metadata content
+              </FlyoutTemplate.Body.TabPanel>
+            )}
+          </FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      );
+    };
 
     const user = userEvent.setup();
     const { rerender } = renderTemplate(renderFlyout(true));
@@ -305,14 +293,18 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getByText('overview content')).toBeInTheDocument();
   });
 
-  it('deduplicates Header.Tab parts sharing an id, yielding one tab', () => {
+  it('deduplicates tabs sharing an id, yielding one rendered tab', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview duplicate" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={[
+          { id: 'overview', label: 'Overview' },
+          { id: 'overview', label: 'Overview duplicate' },
+          { id: 'metadata', label: 'Metadata' },
+        ]}
+      >
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             overview content
@@ -327,29 +319,25 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
 
-  it('does not render a tab bar when no Body.TabPanel is declared', () => {
+  it('renders a tab bar and empty body when tabs are set but no TabPanel is declared', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <span>plain content</span>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
-    expect(screen.getByText('plain content')).toBeInTheDocument();
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    expect(screen.queryByText('plain content')).not.toBeInTheDocument();
   });
 
   it('renders a tab whose id has no matching panel', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             overview content
@@ -364,11 +352,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('renders an empty body when the selected tab has no panel supplied', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" selectedTabId="metadata">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="metadata">
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             overview content
@@ -384,15 +369,22 @@ describe('FlyoutTemplate tabs', () => {
 
   it('supports a consumer that supplies only the selected panel', async () => {
     const user = userEvent.setup();
+    const allTabs = [
+      { id: 'overview', label: 'Overview' },
+      { id: 'metadata', label: 'Metadata' },
+      { id: 'timeline', label: 'Timeline' },
+    ];
     const OnDemandPanels = () => {
       const [tabId, setTabId] = React.useState('overview');
       return (
-        <FlyoutTemplate onClose={noop} session="never" selectedTabId={tabId} onTabChange={setTabId}>
-          <FlyoutTemplate.Header title="Alert">
-            <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-            <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-            <FlyoutTemplate.Header.Tab id="timeline" label="Timeline" />
-          </FlyoutTemplate.Header>
+        <FlyoutTemplate
+          onClose={noop}
+          session="never"
+          tabs={allTabs}
+          selectedTabId={tabId}
+          onTabChange={setTabId}
+        >
+          <FlyoutTemplate.Header title="Alert" />
           <FlyoutTemplate.Body>
             <FlyoutTemplate.Body.TabPanel tabId={tabId}>
               {`${tabId} content`}
@@ -419,34 +411,10 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getByText('metadata content')).toBeInTheDocument();
   });
 
-  it('does not warn when a tab has no panel supplied', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
-        <FlyoutTemplate.Body>
-          <FlyoutTemplate.Body.TabPanel tabId="overview">
-            overview content
-          </FlyoutTemplate.Body.TabPanel>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    expect(warnSpy).not.toHaveBeenCalled();
-    warnSpy.mockRestore();
-  });
-
   it('keeps the tab bar visible when the header is permanently collapsed', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert" collapsed>
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" collapsed />
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             <span>overview content</span>
@@ -464,10 +432,8 @@ describe('FlyoutTemplate tabs', () => {
 
   it('does not render top-level passthrough body content in tabbed mode', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={[{ id: 'overview', label: 'Overview' }]}>
+        <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
           <span>orphan content</span>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
@@ -495,7 +461,7 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getByText('plain content')).toBeInTheDocument();
   });
 
-  it('renders non-part passthrough content when Body.TabPanel is declared without any Header.Tab', () => {
+  it('renders non-part passthrough content when Body.TabPanel is declared without tabs', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="No tabs" />
@@ -513,35 +479,11 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.queryByText('panel content')).not.toBeInTheDocument();
   });
 
-  it('warns in development about a panel with no matching tab', () => {
+  it('warns in development when tabs are set but no Header is provided', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="No tabs" />
-        <FlyoutTemplate.Body>
-          <FlyoutTemplate.Body.TabPanel tabId="overview">
-            <span>panel content</span>
-          </FlyoutTemplate.Body.TabPanel>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('<FlyoutTemplate.Body.TabPanel> with no matching')
-    );
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('overview'));
-    warnSpy.mockRestore();
-  });
-
-  it('does not warn when every tab and panel is matched', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert">
-          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-        </FlyoutTemplate.Header>
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
             overview content
@@ -550,7 +492,7 @@ describe('FlyoutTemplate tabs', () => {
       </FlyoutTemplate>
     );
 
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('tabs` is set but no'));
     warnSpy.mockRestore();
   });
 });

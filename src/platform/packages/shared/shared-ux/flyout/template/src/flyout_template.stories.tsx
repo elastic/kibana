@@ -327,6 +327,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
         onClose={action('onClose')}
         size="m"
         {...buildFlyoutProps(args)}
+        tabs={visibleTabs.map(({ id, label }) => ({ id, label }))}
         selectedTabId={selectedTabId}
         onTabChange={setSelectedTabId}
       >
@@ -335,11 +336,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
           {...buildTitleIconProps(args)}
           description={args.description ? HEADER_DESCRIPTION : undefined}
           collapsed={args.headerIsCollapsed}
-        >
-          {visibleTabs.map(({ id, label }) => (
-            <FlyoutTemplate.Header.Tab key={id} id={id} label={label} />
-          ))}
-        </FlyoutTemplate.Header>
+        />
 
         <FlyoutTemplate.Body>
           {visibleTabs.map(({ id, label, detail }) => (

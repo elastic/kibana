@@ -21,7 +21,6 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import type { ParsedItem } from '@kbn/ui-react-assembly';
 import { flyoutAssembly } from '../assembly';
 import {
   resolveZoneTestSubj,
@@ -31,7 +30,6 @@ import {
 } from '../context';
 import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
-import { Tab } from './tab';
 
 /** Part name used for identifying the `Header` zone. */
 export const HEADER_PART_NAME = 'header';
@@ -39,10 +37,8 @@ export const HEADER_PART_NAME = 'header';
 const headerPart = flyoutAssembly.definePart({ name: HEADER_PART_NAME });
 
 /** Declarative `FlyoutTemplate.Header`; the root renders the collected attributes. */
-const BaseHeader = headerPart.createComponent<FlyoutHeaderProps>();
-BaseHeader.displayName = 'FlyoutTemplate.Header';
-
-export const Header = Object.assign(BaseHeader, { Tab });
+export const Header = headerPart.createComponent<FlyoutHeaderProps>();
+Header.displayName = 'FlyoutTemplate.Header';
 
 /** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
 const resolveHorizontalPadding = (
@@ -126,12 +122,6 @@ const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) 
 };
 
 type HeaderZoneProps = FlyoutHeaderProps & {
-  /**
-   * `children` already parsed by the root, which needs the tab parts for its own state.
-   * Reusing that parse keeps an unexpected child reported once, rather than once per
-   * part kind that would otherwise go looking for its own children.
-   */
-  items: ParsedItem[];
   flyoutTitleId?: string;
 };
 
@@ -148,7 +138,7 @@ export const HeaderZone = ({
   const { euiTheme } = useEuiTheme();
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
-  const { tabs, selectedTabId, selectTab, hasTabPanels } = useFlyoutTabs();
+  const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
   const {
     isCollapsed: isScrollCollapsed,
     collapsibleRef,
@@ -160,7 +150,7 @@ export const HeaderZone = ({
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
 
   const hasDescription = Boolean(description);
-  const showTabs = tabs.length > 0 && hasTabPanels;
+  const showTabs = tabs.length > 0;
 
   return (
     <KibanaErrorBoundaryProvider>

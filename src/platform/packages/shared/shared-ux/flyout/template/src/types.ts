@@ -10,9 +10,9 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
 
-/** Props for the declarative `FlyoutTemplate.Header.Tab` part. */
-export interface FlyoutHeaderTabProps {
-  /** Stable identifier, used to link the tab to its `Body.TabPanel`. */
+/** Descriptor for a single tab passed to the root `tabs` prop. */
+export interface FlyoutTabProps {
+  /** Stable identifier linking this tab to its `Body.TabPanel`. */
   id: string;
   /** Tab label rendered inside `EuiTab`. */
   label: ReactNode;
@@ -24,7 +24,7 @@ export interface FlyoutHeaderTabProps {
 
 /** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
 export interface FlyoutBodyTabPanelProps {
-  /** Must match the `id` of a `Header.Tab`. */
+  /** Must match the `id` of a root `tabs` entry. */
   tabId: string;
   children?: ReactNode;
   'data-test-subj'?: string;
@@ -35,8 +35,6 @@ export interface FlyoutHeaderProps {
   /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
   'data-test-subj'?: string;
-  /** `Header.Tab` parts. Free-form content is not rendered. */
-  children?: ReactNode;
   /** Icon beside the title; defaults to `info` when `titleTooltip` is set. */
   titleIcon?: EuiIconProps['type'];
   /** Tooltip shown from the title icon. */
@@ -110,6 +108,8 @@ export type FlyoutTemplateProps = Pick<
   'data-test-subj'?: string;
   /** Declarative zone children: `FlyoutTemplate.Header`, `.Body`, `.Footer`. */
   children?: ReactNode;
+  /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
+  tabs?: FlyoutTabProps[];
   /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
   defaultSelectedTabId?: string;
   /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */

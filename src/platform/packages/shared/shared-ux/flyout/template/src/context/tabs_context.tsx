@@ -9,21 +9,24 @@
 
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { HeaderTabDescriptor } from '../header/tab/types';
+import type { FlyoutTabProps } from '../types';
+
+/** `FlyoutTabProps` enriched with generated DOM ids for the tab and its panel. */
+export interface FlyoutTabDescriptor extends FlyoutTabProps {
+  tabDomId: string;
+  panelDomId: string;
+}
 
 export interface FlyoutTabsState {
-  tabs: HeaderTabDescriptor[];
+  tabs: FlyoutTabDescriptor[];
   selectedTabId: string | undefined;
   selectTab: (id: string) => void;
-  /** Whether the body declares at least one `Body.TabPanel`. Gates the tab bar. */
-  hasTabPanels: boolean;
 }
 
 const DEFAULT_TABS_STATE: FlyoutTabsState = {
   tabs: [],
   selectedTabId: undefined,
   selectTab: () => {},
-  hasTabPanels: false,
 };
 
 const FlyoutTabsContext = createContext<FlyoutTabsState>(DEFAULT_TABS_STATE);

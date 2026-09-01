@@ -29,7 +29,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
 
-Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [`src/header/tab/README.md`](src/header/tab/README.md).
+Tab props also live on the root: `tabs` (array of `FlyoutTabProps`), `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
 
 ## Zones
 
@@ -40,9 +40,8 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.
-- `children` — `Header.Tab` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
-**`FlyoutTemplate.Body`** renders `Body.TabPanel` parts plus arbitrary passthrough content inside `EuiFlyoutBody` in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [`src/header/tab/README.md`](src/header/tab/README.md) for tabs.
+**`FlyoutTemplate.Body`** renders `Body.TabPanel` parts plus arbitrary passthrough content inside `EuiFlyoutBody` in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [Tabs](#tabs) below.
 
 **`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
 
@@ -59,6 +58,50 @@ Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`
 - `FlyoutTemplate.Body` is required. Omitting it logs a dev warning. The header and footer are optional.
 - Duplicate zones (e.g. two `FlyoutTemplate.Header` children) log a dev warning and render only the first.
 - The zone components (`Header`, `Body`, `Footer`) and the footer action parts render nothing when used outside a `FlyoutTemplate` root.
+
+## Tabs
+
+Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes `id`, `label`, and optional `disabled`, `prepend`, `append`, and `data-test-subj`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
+
+```tsx
+<FlyoutTemplate
+  onClose={onClose}
+  tabs={[
+    { id: 'overview', label: 'Overview' },
+    { id: 'metadata', label: 'Metadata' },
+  ]}
+  selectedTabId={tabId}
+  onTabChange={setTabId}
+>
+  <FlyoutTemplate.Header title="Alert details" />
+  <FlyoutTemplate.Body>
+    <FlyoutTemplate.Body.TabPanel tabId="overview">…</FlyoutTemplate.Body.TabPanel>
+    <FlyoutTemplate.Body.TabPanel tabId="metadata">…</FlyoutTemplate.Body.TabPanel>
+  </FlyoutTemplate.Body>
+</FlyoutTemplate>
+```
+
+Selection is uncontrolled by default, starting on the first tab; pass `defaultSelectedTabId` to start elsewhere. For controlled selection pass `selectedTabId` and `onTabChange` — `onTabChange` fires on every tab click either way.
+
+For conditional or dynamically-loaded content, supply only the panel for the currently selected tab:
+
+```tsx
+<FlyoutTemplate tabs={tabs} selectedTabId={tabId} onTabChange={setTabId} …>
+  <FlyoutTemplate.Header title="Alert details" />
+  <FlyoutTemplate.Body>
+    <FlyoutTemplate.Body.TabPanel tabId={tabId}>{panelFor(tabId)}</FlyoutTemplate.Body.TabPanel>
+  </FlyoutTemplate.Body>
+</FlyoutTemplate>
+```
+
+**Behaviors:**
+
+- Non-empty `tabs` activates tabbed mode: the bar renders, only the selected panel mounts, and top-level `Body` passthrough content is ignored.
+- A tab whose panel is absent still renders and stays selectable; the body renders empty. This is the on-demand mounting path and is never warned about.
+- A `Body.TabPanel` declared with no matching `tabs` entry silently renders as passthrough content (tabbed mode is off when `tabs` is empty or omitted).
+- Only the selected panel mounts; panel state is discarded on every tab switch. There is no keep-mounted escape hatch.
+- Duplicate ids in `tabs` are silently deduplicated; the first entry with each id wins.
+- Setting `tabs` without a `<FlyoutTemplate.Header>` logs a dev warning: the tab bar cannot render without a header zone.
 
 ## Test subjects
 

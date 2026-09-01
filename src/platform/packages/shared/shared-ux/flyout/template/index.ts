@@ -12,7 +12,7 @@ export { FlyoutTemplate } from './src/flyout_template';
 export type {
   FlyoutTemplateProps,
   FlyoutHeaderProps,
-  FlyoutHeaderTabProps,
+  FlyoutTabProps,
   FlyoutBodyProps,
   FlyoutBodyTabPanelProps,
   FlyoutFooterProps,
