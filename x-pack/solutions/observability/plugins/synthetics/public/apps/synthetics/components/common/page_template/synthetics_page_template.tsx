@@ -30,7 +30,7 @@ export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) =
   );
 
   // The chrome header renders its own back button, so in-page breadcrumbs would duplicate it.
-  const hasChromeBackButton = Boolean(chrome?.next?.isEnabled) && chromeStyle === 'project';
+  const hasChromeBackButton = chromeStyle === 'project';
   const pageHeader =
     hasChromeBackButton && props.pageHeader
       ? { ...props.pageHeader, breadcrumbs: undefined }

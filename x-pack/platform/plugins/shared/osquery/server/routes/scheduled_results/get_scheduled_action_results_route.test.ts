@@ -35,6 +35,7 @@ const createMockScheduledResponse = ({
   successCount = 0,
   errorCount = 0,
   rowsCount = 0,
+  respondedAgents,
   timestamp = '2026-03-11T12:00:00.000Z',
   packId = 'pack-1',
 }: {
@@ -43,6 +44,7 @@ const createMockScheduledResponse = ({
   successCount?: number;
   errorCount?: number;
   rowsCount?: number;
+  respondedAgents?: number;
   timestamp?: string;
   packId?: string;
 } = {}) => ({
@@ -63,12 +65,10 @@ const createMockScheduledResponse = ({
       aggs: {
         responses_by_schedule: {
           rows_count: { value: rowsCount },
-          responses: {
-            buckets: [
-              { key: 'success', doc_count: successCount },
-              { key: 'error', doc_count: errorCount },
-            ],
-          },
+          // Agent cardinality — the shape the DSL actually requests.
+          responded_agents: { value: respondedAgents ?? successCount + errorCount },
+          success_agents: { agents: { value: successCount } },
+          error_agents: { agents: { value: errorCount } },
         },
       },
     },
@@ -389,17 +389,34 @@ describe('getScheduledActionResultsRoute', () => {
   });
 
   describe('aggregation extraction', () => {
-    it('should correctly extract success, failure, and row counts from nested aggregations', async () => {
+    // Degraded shape: missing cardinality sub-aggs must report 0, not `doc_count`.
+    // Current-shape agent counts are covered in `agent_count_regression.test.ts`.
+    it('should report zero agents rather than doc counts when cardinality aggs are absent', async () => {
       const mockSearchFn = jest.fn().mockReturnValue(
-        of(
-          createMockScheduledResponse({
-            total: 5,
-            successCount: 3,
-            errorCount: 2,
-            rowsCount: 150,
-            packId: '',
-          })
-        )
+        of({
+          edges: [],
+          rawResponse: {
+            hits: {
+              total: { value: 5, relation: 'eq' },
+              hits: [{ fields: { '@timestamp': ['2026-03-11T12:00:00.000Z'], pack_id: [''] } }],
+            },
+            aggregations: {
+              aggs: {
+                responses_by_schedule: {
+                  rows_count: { value: 150 },
+                  // Legacy painless-terms shape, no cardinality sub-aggs.
+                  responses: {
+                    buckets: [
+                      { key: 'success', doc_count: 3 },
+                      { key: 'error', doc_count: 2 },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          inspect: { dsl: [] },
+        })
       );
 
       const mockOsqueryContext = {
@@ -422,9 +439,10 @@ describe('getScheduledActionResultsRoute', () => {
         body: expect.objectContaining({
           aggregations: {
             totalRowCount: 150,
-            totalResponded: 5,
-            successful: 3,
-            failed: 2,
+            // Not 5/3/2 — those are document counts.
+            totalResponded: 0,
+            successful: 0,
+            failed: 0,
             pending: 0,
           },
         }),

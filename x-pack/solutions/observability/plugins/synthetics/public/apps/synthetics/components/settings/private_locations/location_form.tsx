@@ -18,6 +18,7 @@ import { SpaceSelector } from '../components/spaces_select';
 import { TagsField } from '../components/tags_field';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
+import { AgentShardingField } from './agent_sharding_field';
 import { PolicyHostsField } from './policy_hosts';
 
 export const LocationForm = ({
@@ -68,6 +69,9 @@ export const LocationForm = ({
         </EuiFormRow>
         <EuiSpacer />
         <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
+        <AgentShardingField
+          isEditingShardedLocation={privateLocationToEdit?.isAgentSharding === true}
+        />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />
