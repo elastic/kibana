@@ -65,12 +65,6 @@ export type ChromeAppHeaderConfig = DistributiveOmit<AppHeaderConfig, 'back'> & 
  * @public
  */
 export interface ChromeNext {
-  /**
-   * Always `true`. Kept so existing `chrome.next.isEnabled` / `useIsNextChrome()` call sites
-   * do not need to change. Require `chrome.getChromeStyle() === 'project'` to know whether the
-   * project shell is rendering.
-   */
-  readonly isEnabled: boolean;
   aiButton: {
     /**
      * Register an AI button rendered in a fixed slot in the Chrome-Next global header.

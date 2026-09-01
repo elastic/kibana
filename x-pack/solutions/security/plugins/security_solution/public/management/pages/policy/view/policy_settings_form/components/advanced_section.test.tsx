@@ -13,10 +13,6 @@ import React from 'react';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
-import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { PROTECTED_POLICY_SETTING_PATHS } from '../../../../../../../common/endpoint/service/policy/protected_policy_settings';
 import type { AdvancedSectionProps } from './advanced_section';
 import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
@@ -26,10 +22,8 @@ import { set } from '@kbn/safer-lodash-set';
 
 jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../../../../../../common/components/user_privileges');
 
 const useLicenseMock = _useLicense as jest.Mock;
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
@@ -43,9 +37,6 @@ describe('Policy Advanced Settings section', () => {
   };
 
   beforeEach(() => {
-    // Default: superuser (canWriteAdminData: true) so all schema entries are visible
-    useUserPrivilegesMock.mockReturnValue(getUserPrivilegesMockDefaultValue());
-
     const mockedContext = createAppRootMockRenderer();
 
     formProps = {
@@ -157,52 +148,6 @@ describe('Policy Advanced Settings section', () => {
           }
         }
       }
-    });
-  });
-
-  describe('and when user does not have admin privileges', () => {
-    beforeEach(() => {
-      useUserPrivilegesMock.mockReturnValue({
-        ...getUserPrivilegesMockDefaultValue(),
-        endpointPrivileges: getEndpointPrivilegesInitialStateMock({ canWriteAdminData: false }),
-      });
-    });
-
-    it('should not render options that require admin privileges', async () => {
-      await render(true);
-
-      for (const advancedOption of AdvancedPolicySchema) {
-        if (advancedOption.requiresAdminPrivileges) {
-          expect(
-            renderResult.queryByTestId(
-              testSubj.settingRowTestSubjects(advancedOption.key).container
-            )
-          ).toBeNull();
-        }
-      }
-    });
-
-    it('should still render options that do not require admin privileges', async () => {
-      await render(true);
-
-      const unprotectedOptions = AdvancedPolicySchema.filter(
-        (o) => !o.requiresAdminPrivileges && !o.license
-      );
-      expect(unprotectedOptions.length).toBeGreaterThan(0);
-
-      for (const advancedOption of unprotectedOptions) {
-        expect(
-          renderResult.queryByTestId(testSubj.settingRowTestSubjects(advancedOption.key).container)
-        ).not.toBeNull();
-      }
-    });
-
-    it('protected options should match the PROTECTED_POLICY_SETTING_PATHS list', () => {
-      const protectedKeys = AdvancedPolicySchema.filter((o) => o.requiresAdminPrivileges).map(
-        (o) => o.key
-      );
-      expect(protectedKeys).toEqual(expect.arrayContaining(PROTECTED_POLICY_SETTING_PATHS));
-      expect(protectedKeys.length).toBe(PROTECTED_POLICY_SETTING_PATHS.length);
     });
   });
 

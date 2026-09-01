@@ -13,6 +13,7 @@ import React from 'react';
 import type { OverlayStart } from '@kbn/core/public';
 import { CoreScopedHistory, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { coreMock, notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,7 +32,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
 });
 
 const space: Space = {
-  id: 'my-space',
+  id: asSpaceId('my-space'),
   name: 'My Space',
   disabledFeatures: [],
 };
@@ -39,7 +40,7 @@ const space: Space = {
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,

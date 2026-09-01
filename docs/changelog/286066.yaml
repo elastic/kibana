@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286066
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix ancestry correlations for alerts created from linked documents

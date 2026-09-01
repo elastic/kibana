@@ -98,6 +98,7 @@ export {
   WatchWorkerAttachment,
   WorkerRunState,
   WorkflowTriggerType,
+  type TimelineEvent,
 } from './impl/schemas';
 
 export {
