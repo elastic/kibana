@@ -4,7 +4,7 @@ description: >
   Tier-1 catalog workflow. Pages organization GitHub Projects v2 via GraphQL (orgCatalog.projects),
   upserts documents into github-intel-projects, and maintains github-intel-sync-state checkpoints.
   Requires a configured .github connector with read:org and read:project scopes.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

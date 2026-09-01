@@ -4,7 +4,7 @@ description: >
   Tier-2 incremental workflow. Org-wide GitHub issue search (activity.searchIssues) for
   issues updated since the last successful run watermark. Upserts github-intel-issues and
   maintains cursor + watermark in github-intel-sync-state. Restricts GitHub search to is:issue.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

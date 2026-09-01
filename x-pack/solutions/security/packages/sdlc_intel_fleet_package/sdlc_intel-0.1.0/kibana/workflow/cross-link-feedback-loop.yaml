@@ -4,7 +4,7 @@ description: >
   Tier-3 feedback-loop workflow. Bidirectionally links Salesforce Cases to SDH GitHub issues:
   (1) Case custom GitHub URL field to SDH issue URL, (2) SDH issue title/body text search for
   CaseNumber. Writes customer_case_links_sdh edges to github-intel-relationships.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - salesforce

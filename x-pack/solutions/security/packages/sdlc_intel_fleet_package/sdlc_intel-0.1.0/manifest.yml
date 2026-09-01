@@ -115,7 +115,33 @@ vars:
     required: false
     show_user: true
 workflows:
-  default_enabled: false
+  # Explicit allowlist. A blanket `default_enabled: false` overrides every
+  # workflow file's own `enabled:` value at install time, so a reinstall silently
+  # disabled ALL ingest while dashboards still rendered stale data.
+  # Only workflows whose connectors exist in this deployment are enabled;
+  # Slack / Salesforce / Drive / SDH stay off until those sources are wired.
+  default_enabled:
+    - agent-coverage-analysis
+    - agent-pr-missing-related-issue
+    - agent-scope-alignment
+    - cross-link-feedback-loop
+    - github-activity-issues
+    - github-activity-pull-requests
+    - github-build-release-calendar
+    - github-build-team-dimension
+    - github-catalog-org-members
+    - github-catalog-project-items
+    - github-catalog-project-views
+    - github-catalog-projects
+    - github-catalog-repos
+    - github-catalog-team-members
+    - github-catalog-teams
+    - github-cross-link-entities
+    - github-enrich-epic-phases
+    - github-enrich-issues-graph
+    - github-enrich-pull-requests-graph
+    - github-normalize-project-items
+    - github-project-epic-phases
   dependencies:
     # Tier-2 depends on Tier-1 catalogs being installed first
     github-activity-issues: [github-catalog-repos]

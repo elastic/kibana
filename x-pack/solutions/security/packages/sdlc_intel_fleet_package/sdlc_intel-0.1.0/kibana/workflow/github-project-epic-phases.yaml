@@ -4,7 +4,7 @@ description: >
   Tier-2 projection workflow. Builds sdlc-epic-phases documents from normalized Epic project
   items in github-intel-project-items. Run github-normalize-project-items first, then
   github-enrich-epic-phases for child tickets and rollup coverage.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github

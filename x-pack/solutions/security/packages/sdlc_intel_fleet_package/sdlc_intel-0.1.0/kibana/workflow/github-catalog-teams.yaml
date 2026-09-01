@@ -4,7 +4,7 @@ description: >
   Tier-1 catalog workflow. Pages organization teams via GitHub GraphQL (orgCatalog.teams),
   upserts documents into github-intel-teams, and maintains github-intel-sync-state checkpoints.
   Requires a configured .github connector with read:org scope.
-enabled: false
+enabled: true
 tags:
   - sdlc
   - github
