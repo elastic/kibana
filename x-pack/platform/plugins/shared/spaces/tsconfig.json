@@ -11,7 +11,16 @@
       "@kbn/core-user-settings-types"
     ]
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_cps_local/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*",
+    "test/scout_cps_local/**/*",
+    "test/scout_initial_solution_setup/**/*",
+    "test/scout_initial_solution_setup_api/**/*",
+    "../../../../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/app-header",
     "@kbn/features-plugin",
@@ -82,6 +91,7 @@
     "@kbn/deeplinks-vectordb",
     "@kbn/deeplinks-workplace-ai",
     "@kbn/core-user-profile-server",
+    "@kbn/core-http-browser",
     "@kbn/ui-callout",
     "@kbn/core-user-profile-common"
   ],
