@@ -1,0 +1,226 @@
+version: "1"
+name: Attack Discovery FP/TP analysis
+description: >
+  Loads a persisted Attack Discovery by ID, runs a minimal corroboration check
+  against its referenced alerts, and classifies the attack as true_positive,
+  false_positive, or inconclusive. Operational failures emit a distinct failure
+  contract with no classification.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+  - fp-tp-analysis
+triggers:
+  - type: manual
+    inputs:
+      type: object
+      additionalProperties: false
+      properties:
+        attack_discovery_id:
+          type: string
+          description: Persisted Attack Discovery document id to analyse.
+        investigation_id:
+          type: string
+          description: Investigation id this analysis is attached to.
+      required:
+        - attack_discovery_id
+        - investigation_id
+consts:
+  configuration_version: "1"
+  workflow_id: system-security-attack-discovery-fp-tp-analysis
+steps:
+  - name: load_attack_discovery
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/attack_discovery/_find?ids={{ inputs.attack_discovery_id }}&per_page=1&include_all_authors=true"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  - name: emit_load_error
+    type: workflow.output
+    status: failed
+    if: "${{ steps.load_attack_discovery.error != null }}"
+    with:
+      status: failed
+      attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+      investigation_id: "{{ inputs.investigation_id }}"
+      error:
+        code: attack_discovery_load_failed
+        message: "${{ steps.load_attack_discovery.error.message | default: 'Failed to load the persisted Attack Discovery.' }}"
+        retryable: true
+
+  - name: emit_not_found
+    type: workflow.output
+    status: failed
+    if: "${{ steps.load_attack_discovery.error == null and steps.load_attack_discovery.output.data[0] == null }}"
+    with:
+      status: failed
+      attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+      investigation_id: "{{ inputs.investigation_id }}"
+      error:
+        code: attack_discovery_not_found
+        message: No persisted Attack Discovery matched attack_discovery_id.
+        retryable: false
+
+  - name: load_referenced_alerts
+    type: elasticsearch.search
+    if: "${{ steps.load_attack_discovery.error == null and steps.load_attack_discovery.output.data[0] != null and steps.load_attack_discovery.output.data[0].alert_ids != null }}"
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      size: 50
+      query:
+        ids:
+          values: "${{ steps.load_attack_discovery.output.data[0].alert_ids }}"
+    on-failure:
+      continue: true
+
+  - name: emit_evidence_failure
+    type: workflow.output
+    status: failed
+    if: "${{ steps.load_attack_discovery.error == null and steps.load_attack_discovery.output.data[0] != null and steps.load_referenced_alerts.error != null }}"
+    with:
+      status: failed
+      attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+      investigation_id: "{{ inputs.investigation_id }}"
+      error:
+        code: evidence_query_failed
+        message: "${{ steps.load_referenced_alerts.error.message | default: 'Failed to query referenced alerts.' }}"
+        retryable: true
+
+  - name: assess
+    type: ai.agent
+    timeout: "10m"
+    create-conversation: true
+    if: "${{ steps.load_attack_discovery.error == null and steps.load_attack_discovery.output.data[0] != null and steps.load_referenced_alerts.error == null }}"
+    with:
+      message: |-
+        Classify the persisted Attack Discovery below as true_positive, false_positive,
+        or inconclusive. Use only this document and the referenced-alert query result.
+        Do not guess when evidence is insufficient: return inconclusive and list caveats.
+        Operational failures are handled outside this step — never classify as
+        false_positive because data is missing.
+
+        attack_discovery_id: {{ inputs.attack_discovery_id }}
+        investigation_id: {{ inputs.investigation_id }}
+
+        Attack Discovery:
+        {{ steps.load_attack_discovery.output.data[0] | json }}
+
+        Referenced alerts query:
+        {{ steps.load_referenced_alerts.output | default: "skipped (no alert ids or step not run)" | json }}
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+          - schema_version
+          - attack_discovery_id
+          - investigation_id
+          - classification
+          - summary
+          - reasoning
+          - corroborating_evidence
+          - caveats
+          - checks
+        properties:
+          schema_version:
+            type: string
+            enum:
+              - "1"
+          attack_discovery_id:
+            type: string
+          investigation_id:
+            type: string
+          classification:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+          summary:
+            type: string
+          reasoning:
+            type: string
+          corroborating_evidence:
+            type: array
+            items:
+              type: object
+              required:
+                - id
+                - source
+                - result
+              properties:
+                id:
+                  type: string
+                source:
+                  type: string
+                result:
+                  type: string
+                  enum:
+                    - supports
+                    - contradicts
+                    - neutral
+                details:
+                  type: string
+          caveats:
+            type: array
+            items:
+              type: string
+          checks:
+            type: array
+            items:
+              type: object
+              required:
+                - id
+                - status
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                    - completed
+                    - skipped
+                    - failed
+                details:
+                  type: string
+    on-failure:
+      continue: true
+
+  - name: emit_assessment_failure
+    type: workflow.output
+    status: failed
+    if: "${{ steps.assess.error != null }}"
+    with:
+      status: failed
+      attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+      investigation_id: "{{ inputs.investigation_id }}"
+      error:
+        code: malformed_model_output
+        message: "${{ steps.assess.error.message | default: 'Assessment step output did not validate against the result contract.' }}"
+        retryable: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    if: "${{ steps.assess.error == null and steps.assess.output != null }}"
+    with:
+      schema_version: "1"
+      attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+      investigation_id: "{{ inputs.investigation_id }}"
+      classification: "{{ steps.assess.output.structured_output.classification }}"
+      summary: "{{ steps.assess.output.structured_output.summary }}"
+      reasoning: "{{ steps.assess.output.structured_output.reasoning }}"
+      corroborating_evidence: "${{ steps.assess.output.structured_output.corroborating_evidence }}"
+      caveats: "${{ steps.assess.output.structured_output.caveats }}"
+      checks: "${{ steps.assess.output.structured_output.checks }}"
+      analysis_metadata:
+        workflow_id: "{{ consts.workflow_id }}"
+        workflow_execution_id: "{{ execution.id }}"
+        configuration_version: "{{ consts.configuration_version }}"
+        completed_at: "{{ execution.startedAt }}"

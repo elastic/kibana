@@ -19,6 +19,7 @@ import {
 } from './discoveries';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import {
+  PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
   PND_RULE_PREVIEW_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW,
@@ -93,6 +94,8 @@ export {
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
 export {
+  PND_ANALYSIS_WORKFLOW_IDS,
+  PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
@@ -154,6 +157,7 @@ export const managedWorkflowDefinitions = [
   PND_RULE_PREVIEW_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
+  PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
   // in start() only when `threatIntelSupplyEnabled` is on.

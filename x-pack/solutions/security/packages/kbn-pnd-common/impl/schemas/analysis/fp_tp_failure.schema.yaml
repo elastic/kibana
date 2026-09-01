@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: PND Attack Discovery FP/TP analysis failure schema
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    FpTpFailureError:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+        - retryable
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Machine-readable failure code (never a classification)
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        retryable:
+          type: boolean
+
+    FpTpFailure:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - attack_discovery_id
+        - investigation_id
+        - error
+      properties:
+        status:
+          type: string
+          enum: [failed]
+        attack_discovery_id:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        investigation_id:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        error:
+          $ref: '#/components/schemas/FpTpFailureError'
+      description: >
+        Operational failure. Must not include a classification field — unavailable
+        data sources, permissions, tool failures, and timeouts never surface as
+        false_positive.

@@ -60,3 +60,14 @@ export { ListSkillsResponse } from './skills/list_skills_route.gen';
 export { ListInvestigationsResponse } from './investigations/list_investigations_route.gen';
 export { GetInvestigationResponse } from './investigations/get_investigation_route.gen';
 export { ListInvestigationProposalsResponse } from './investigations/list_investigation_proposals_route.gen';
+
+export {
+  FpTpAnalysisMetadata,
+  FpTpCheck,
+  FpTpCheckStatus,
+  FpTpClassification,
+  FpTpCorroboratingEvidence,
+  FpTpEvidenceResult,
+  FpTpResult,
+} from './analysis/fp_tp_result.gen';
+export { FpTpFailure, FpTpFailureError } from './analysis/fp_tp_failure.gen';
