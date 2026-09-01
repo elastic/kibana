@@ -23,10 +23,12 @@ import type {
   InvestigationContext,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationSubjectType,
   InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
+  UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
@@ -34,16 +36,19 @@ import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
+  INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
+import type { InvestigationPatch, InvestigationRepository } from '../storage';
+import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
-import { InvalidInvestigationContextError, InvestigationNotFoundError } from './errors';
-import { InvestigationUnavailableError } from './investigation_unavailable_error';
-export {
-  InvalidInvestigationContextError,
+import {
+  InvestigationConflictError,
   InvestigationNotFoundError,
+  InvalidInvestigationContextError,
+  InvestigationSubjectMissingError,
   InvestigationUnavailableError,
-};
+} from './errors';
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -197,6 +202,80 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
+/** Used when persist omitted `error`. */
+const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
+
+const SUPERSEDED_STATUSES = [
+  'pending',
+  'running',
+] as const satisfies ReadonlyArray<InvestigationStatus>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
+  typeof value === 'string' && INVESTIGATION_SUBJECT_TYPES.some((type) => type === value);
+
+const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
+  typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
+
+interface ExecutionInvestigationMetadata {
+  subject?: InvestigationSubject;
+  triggerType: InvestigationTriggerType;
+  concurrencyKey?: string;
+}
+
+const toSubject = ({
+  subjectType,
+  subjectId,
+  subjectSummary,
+}: {
+  subjectType: InvestigationSubjectType;
+  subjectId: string;
+  subjectSummary?: string;
+}): InvestigationSubject => {
+  if (subjectSummary) {
+    return { type: subjectType, id: subjectId, summary: subjectSummary };
+  }
+  return { type: subjectType, id: subjectId };
+};
+
+const parseExecutionInvestigationMetadata = (
+  executionContext: Record<string, unknown> | undefined
+): ExecutionInvestigationMetadata => {
+  const inputs =
+    isRecord(executionContext) && isRecord(executionContext.inputs)
+      ? executionContext.inputs
+      : undefined;
+  const inputContext = inputs && isRecord(inputs.context) ? inputs.context : undefined;
+
+  const rawSource = inputContext?.source;
+  let subject: InvestigationSubject | undefined;
+  if (isSubjectType(rawSource)) {
+    const rawSubjectId = inputContext?.[`${rawSource}_id`];
+    if (typeof rawSubjectId === 'string' && rawSubjectId.length > 0) {
+      const rawSummary = inputContext?.summary;
+      const subjectSummary =
+        typeof rawSummary === 'string' && rawSummary.length > 0 ? rawSummary : undefined;
+      subject = toSubject({
+        subjectType: rawSource,
+        subjectId: rawSubjectId,
+        subjectSummary,
+      });
+    }
+  }
+
+  const rawTriggerType = inputContext?.trigger_type;
+  const triggerType = isTriggerType(rawTriggerType)
+    ? rawTriggerType
+    : DEFAULT_INVESTIGATION_TRIGGER_TYPE;
+
+  const rawConcurrencyKey = inputs?.concurrency_key;
+  const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
+
+  return { subject, triggerType, concurrencyKey };
+};
+
 function recoverSubjectFromInput(
   input: Record<string, unknown> | undefined
 ): InvestigationSubject | undefined {
@@ -235,6 +314,7 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  investigationRepository: InvestigationRepository;
 }
 
 export class NightshiftInvestigationsClient {
@@ -244,6 +324,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly investigationRepository: InvestigationRepository;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -252,6 +333,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.investigationRepository = deps.investigationRepository;
   }
 
   private getSpaceId(): string {
@@ -358,7 +440,156 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
+    await this.ensure(executionId).catch((error) => {
+      this.logger.warn(
+        `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
+      );
+    });
+
     return { investigation_id: executionId };
+  }
+
+  /**
+   * Creates the investigation record for a workflow execution if it does not exist yet.
+   * Called from start() so the id is readable immediately, and by the workflow's
+   * persist_investigation_started step so runs that skipped start() are still tracked. Idempotent so
+   * replays and concurrent calls are safe.
+   */
+  async ensure(investigationId: string): Promise<void> {
+    const existing = await this.investigationRepository.get(investigationId);
+    if (existing) {
+      return;
+    }
+
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+
+    const spaceId = this.getSpaceId();
+    const execution = await this.workflowsManagement.management.getWorkflowExecution(
+      investigationId,
+      spaceId,
+      { includeOutput: false }
+    );
+
+    const belongsToInvestigationWorkflow =
+      execution?.workflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID ||
+      execution?.originManagedWorkflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
+    if (!execution || !belongsToInvestigationWorkflow) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+      execution.context
+    );
+
+    if (!subject) {
+      throw new InvestigationSubjectMissingError(investigationId);
+    }
+
+    if (concurrencyKey) {
+      await this.cancelSupersededInvestigation({ concurrencyKey });
+    }
+
+    try {
+      await this.investigationRepository.create({
+        id: investigationId,
+        attributes: {
+          investigation_id: investigationId,
+          status: 'running',
+          subject_type: subject.type,
+          subject_id: subject.id,
+          ...(subject.summary ? { subject_summary: subject.summary } : {}),
+          trigger_type: triggerType,
+          concurrency_key: concurrencyKey,
+          executed_by: execution.executedBy,
+          created_at: execution.startedAt ?? new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      if (error instanceof InvestigationAlreadyExistsError) {
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private async cancelSupersededInvestigation({
+    concurrencyKey,
+  }: {
+    concurrencyKey: string;
+  }): Promise<void> {
+    const { results } = await this.investigationRepository.find({
+      concurrencyKey,
+      statuses: [...SUPERSEDED_STATUSES],
+      sortField: 'created_at',
+      sortOrder: 'desc',
+      perPage: 1,
+    });
+    const superseded = results[0];
+
+    if (!superseded) {
+      return;
+    }
+
+    try {
+      await this.investigationRepository.update({
+        id: superseded.id,
+        patch: {
+          status: 'cancelled',
+          completed_at: new Date().toISOString(),
+        },
+        version: superseded.version,
+      });
+    } catch (error) {
+      if (error instanceof InvestigationStaleWriteError) {
+        this.logger.warn(
+          `Skipped cancelling superseded investigation "${superseded.id}": it was concurrently modified`
+        );
+        return;
+      }
+      throw error;
+    }
+  }
+
+  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
+    const existing = await this.investigationRepository.get(investigationId);
+    if (!existing) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    const { status, error, ...output } = state;
+
+    if (isTerminalStatus(existing.status)) {
+      if (status === existing.status) {
+        return;
+      }
+      throw InvestigationConflictError.settled(investigationId, existing.status);
+    }
+
+    if (status === 'failed' && error) {
+      this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
+    }
+
+    const patch: InvestigationPatch = {
+      status,
+      ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
+      ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
+      ...output,
+    };
+
+    try {
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch,
+        version: existing.version,
+      });
+    } catch (err) {
+      if (err instanceof InvestigationStaleWriteError) {
+        throw InvestigationConflictError.concurrentlyModified(investigationId);
+      }
+      throw err;
+    }
   }
 
   async get(investigationId: string): Promise<GetInvestigationResponse> {

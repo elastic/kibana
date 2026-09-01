@@ -13,12 +13,21 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import type {
+  FindInvestigationsResult,
+  InvestigationAttributes,
+  InvestigationRecord,
+  InvestigationRepository,
+} from '../storage';
+import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import {
+  InvestigationConflictError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
+  InvestigationSubjectMissingError,
   InvestigationUnavailableError,
-  NightshiftInvestigationsClient,
-} from './investigations_client';
+} from './errors';
+import { NightshiftInvestigationsClient } from './investigations_client';
 
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
@@ -53,35 +62,84 @@ const mockLogger = {
 
 const mockRequest = {} as KibanaRequest;
 
-const makeExecution = (overrides: Record<string, unknown> = {}) => ({
-  workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  status: ExecutionStatus.RUNNING,
-  startedAt: '2024-01-01T00:00:00Z',
-  finishedAt: undefined as string | undefined,
-  context: undefined as Record<string, unknown> | undefined,
-  stepExecutions: undefined as
-    | Array<{ stepId?: string; stepType?: string; startedAt?: string; output: unknown }>
-    | undefined,
-  error: undefined as { message: string } | undefined,
-  ...overrides,
-});
+let repository: jest.Mocked<InvestigationRepository>;
 
-const makeClient = () =>
+const makeClient = (
+  overrides: Partial<ConstructorParameters<typeof NightshiftInvestigationsClient>[0]> = {}
+) =>
   new NightshiftInvestigationsClient({
     request: mockRequest,
     workflowsManagement: mockWorkflowsManagement,
     logger: mockLogger,
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
+    investigationRepository: repository,
+    ...overrides,
   });
+
+const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): InvestigationAttributes => ({
+  investigation_id: 'inv-1',
+  status: 'completed',
+  subject_type: 'alert',
+  subject_id: 'alert-42',
+  trigger_type: 'automatic',
+  concurrency_key: undefined,
+  executed_by: 'test-user',
+  created_at: '2024-01-01T00:00:00Z',
+  completed_at: '2024-01-01T01:00:00Z',
+  summary: 'All clear.',
+  conclusion: 'No issues found.',
+  hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
+  recommendations: [{ title: 'Keep monitoring' }],
+  blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+  trigger_feedback: [],
+  ...overrides,
+});
+
+const makeRecord = (
+  overrides: Partial<InvestigationAttributes> = {},
+  { id = 'inv-1', version = '1' }: { id?: string; version?: string } = {}
+): InvestigationRecord => ({
+  id,
+  version,
+  ...makeAttrs({ investigation_id: id, ...overrides }),
+});
+
+const findResult = (records: InvestigationRecord[]): FindInvestigationsResult => ({
+  results: records,
+  page: 1,
+  size: 20,
+  total: records.length,
+});
+
+const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
+  create: jest.fn().mockResolvedValue(undefined),
+  get: jest.fn().mockResolvedValue(undefined),
+  update: jest.fn().mockResolvedValue(undefined),
+  find: jest.fn().mockResolvedValue(findResult([])),
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
   mockManagement.searchStepExecutions.mockResolvedValue({ results: [], total: 0 });
+  repository = createMockRepository();
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
+  const makeExecution = (overrides: Record<string, unknown> = {}) => ({
+    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+    status: ExecutionStatus.RUNNING,
+    startedAt: '2024-01-01T00:00:00Z',
+    finishedAt: undefined as string | undefined,
+    context: undefined as Record<string, unknown> | undefined,
+    stepExecutions: undefined as
+      | Array<{ stepId?: string; stepType?: string; startedAt?: string; output: unknown }>
+      | undefined,
+    error: undefined as { message: string } | undefined,
+    ...overrides,
+  });
+
   describe('not-found guards', () => {
     it('throws InvestigationNotFoundError when execution is null', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(null);
@@ -972,6 +1030,21 @@ describe('NightshiftInvestigationsClient.start()', () => {
     ],
   };
 
+  beforeEach(() => {
+    mockManagement.getWorkflowExecution.mockImplementation(async (id: string) => {
+      const lastCall = mockManagement.runWorkflow.mock.calls.at(-1);
+      const inputs = lastCall?.[2];
+      return {
+        id,
+        workflowId: WORKFLOW_ID,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2024-01-01T00:00:00Z',
+        executedBy: 'test-user',
+        context: { inputs },
+      };
+    });
+  });
+
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
@@ -1116,6 +1189,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       workflowsManagement: mockWorkflowsManagement,
       logger: mockLogger,
       spaceIdOverride: SPACE_ID,
+      investigationRepository: repository,
     });
 
     await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
@@ -1270,5 +1344,250 @@ describe('NightshiftInvestigationsClient.start()', () => {
       const inputs = mockManagement.runWorkflow.mock.calls[0][2];
       expect(inputs.message).toBe('Checkout latency breach');
     });
+  });
+});
+
+describe('NightshiftInvestigationsClient.update()', () => {
+  beforeEach(() => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
+  });
+
+  it('throws InvestigationNotFoundError when the investigation does not exist', async () => {
+    repository.get.mockResolvedValue(undefined);
+
+    await expect(makeClient().update('inv-missing', { status: 'completed' })).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('is an idempotent no-op when replaying the same terminal status', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'completed' }));
+
+    await expect(
+      makeClient().update('inv-1', { status: 'completed', summary: 'Replayed.' })
+    ).resolves.toBeUndefined();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationConflictError when moving a settled investigation back to running', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'completed' }));
+
+    await expect(makeClient().update('inv-1', { status: 'running' })).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationConflictError when changing one terminal status to another', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'cancelled' }));
+
+    await expect(makeClient().update('inv-1', { status: 'failed' })).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('persists the provided error when status is failed', async () => {
+    await makeClient().update('inv-1', {
+      status: 'failed',
+      error: 'Agent timed out.',
+    });
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-1',
+      patch: expect.objectContaining({ status: 'failed', error: 'Agent timed out.' }),
+      version: '1',
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Agent timed out.'));
+  });
+
+  it('persists a generic error when status is failed and no error is provided', async () => {
+    await makeClient().update('inv-1', { status: 'failed' });
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-1',
+      patch: expect.objectContaining({ status: 'failed', error: 'Investigation failed' }),
+      version: '1',
+    });
+  });
+
+  it('does not persist an error field when status is completed', async () => {
+    await makeClient().update('inv-1', {
+      status: 'completed',
+      summary: 'All clear.',
+    });
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-1',
+      patch: expect.objectContaining({ status: 'completed', summary: 'All clear.' }),
+      version: '1',
+    });
+    const { patch } = repository.update.mock.calls[0][0];
+    expect(patch).not.toHaveProperty('error');
+  });
+
+  it('persists conversation_id and impact', async () => {
+    await makeClient().update('inv-1', {
+      status: 'completed',
+      conversation_id: 'conv-1',
+      impact: { entities: [{ name: 'checkout-service' }] },
+    });
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-1',
+      patch: expect.objectContaining({
+        status: 'completed',
+        conversation_id: 'conv-1',
+        impact: { entities: [{ name: 'checkout-service' }] },
+      }),
+      version: '1',
+    });
+  });
+
+  it('writes with the version it read and maps a concurrent-write conflict to InvestigationConflictError', async () => {
+    repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-1'));
+
+    await expect(makeClient().update('inv-1', { status: 'completed' })).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).toHaveBeenCalledTimes(1);
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-1',
+      patch: expect.objectContaining({ status: 'completed' }),
+      version: '1',
+    });
+  });
+});
+
+describe('NightshiftInvestigationsClient.ensure()', () => {
+  const EXECUTION_ID = 'exec-123';
+
+  const makeEnsureExecution = (overrides: Record<string, unknown> = {}) => ({
+    id: EXECUTION_ID,
+    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+    status: ExecutionStatus.RUNNING,
+    startedAt: '2024-01-01T00:00:00Z',
+    executedBy: 'workflow-user',
+    context: {
+      inputs: {
+        message: 'Investigate this',
+        concurrency_key: 'key-1',
+        context: {
+          source: 'alert',
+          alert_id: 'alert-42',
+          trigger_type: 'automatic',
+        },
+      },
+    },
+    ...overrides,
+  });
+
+  it('is a no-op when the record already exists', async () => {
+    repository.get.mockResolvedValue(makeRecord({}, { id: EXECUTION_ID }));
+
+    await makeClient().ensure(EXECUTION_ID);
+
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('creates the record from the execution document', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+
+    await makeClient().ensure(EXECUTION_ID);
+
+    expect(repository.create).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      attributes: expect.objectContaining({
+        investigation_id: EXECUTION_ID,
+        status: 'running',
+        subject_type: 'alert',
+        subject_id: 'alert-42',
+        trigger_type: 'automatic',
+        concurrency_key: 'key-1',
+        executed_by: 'workflow-user',
+        created_at: '2024-01-01T00:00:00Z',
+      }),
+    });
+  });
+
+  it('cancels a superseded running investigation sharing the concurrency key', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    const superseded = makeRecord(
+      { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
+      { id: 'inv-old' }
+    );
+    repository.find.mockResolvedValue(findResult([superseded]));
+
+    await makeClient().ensure(EXECUTION_ID);
+
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        concurrencyKey: 'key-1',
+        statuses: ['pending', 'running'],
+        sortField: 'created_at',
+        sortOrder: 'desc',
+        perPage: 1,
+      })
+    );
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-old',
+      patch: expect.objectContaining({ status: 'cancelled' }),
+      version: '1',
+    });
+    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
+  });
+
+  it('still creates the record when the superseded cancel loses a write race', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.find.mockResolvedValue(
+      findResult([
+        makeRecord(
+          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
+          { id: 'inv-old' }
+        ),
+      ])
+    );
+    repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-old'));
+
+    await expect(makeClient().ensure(EXECUTION_ID)).resolves.toBeUndefined();
+
+    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-old'));
+  });
+
+  it('throws InvestigationNotFoundError when the execution does not exist', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(makeClient().ensure(EXECUTION_ID)).rejects.toThrow(InvestigationNotFoundError);
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationNotFoundError for an execution of an unrelated workflow', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({ workflowId: 'some-other-workflow', originManagedWorkflowId: undefined })
+    );
+
+    await expect(makeClient().ensure(EXECUTION_ID)).rejects.toThrow(InvestigationNotFoundError);
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationSubjectMissingError for executions without an investigation subject', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({ context: { inputs: { message: 'bare run' } } })
+    );
+
+    await expect(makeClient().ensure(EXECUTION_ID)).rejects.toThrow(
+      InvestigationSubjectMissingError
+    );
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('tolerates a conflict from a concurrent ensure', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.create.mockRejectedValue(new InvestigationAlreadyExistsError(EXECUTION_ID));
+
+    await expect(makeClient().ensure(EXECUTION_ID)).resolves.toBeUndefined();
   });
 });
