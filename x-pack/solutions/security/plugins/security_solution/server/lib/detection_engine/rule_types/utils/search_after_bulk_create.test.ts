@@ -1078,6 +1078,7 @@ describe('searchAfterAndBulkCreate', () => {
         2,
         expect.objectContaining({ size: 15 })
       );
+      expect(sharedParams.ruleExecutionLogger.error).not.toHaveBeenCalled();
     });
 
     test('should return an error when a single event still exceeds the limit', async () => {
@@ -1115,6 +1116,7 @@ describe('searchAfterAndBulkCreate', () => {
         3,
         expect.objectContaining({ size: 1 })
       );
+      expect(sharedParams.ruleExecutionLogger.error).toHaveBeenCalled();
     });
 
     test('should not retry non size limit related errors', async () => {
