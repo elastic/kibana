@@ -20,6 +20,8 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/io-ts-utils'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
+  - '@kbn/router-to-openapispec'
 tags:
   - shared-common
   - package

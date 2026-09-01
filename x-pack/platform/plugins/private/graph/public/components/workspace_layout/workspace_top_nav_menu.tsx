@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Provider, useStore } from 'react-redux-v7';
+import { Provider, useStore } from 'react-redux';
 import type { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import type {
@@ -16,6 +16,7 @@ import type {
 } from '@kbn/inspector-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { GraphState } from '../../state_management';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import type { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import type { AsObservable, SettingsWorkspaceProps } from '../settings';
@@ -43,7 +44,7 @@ interface WorkspaceTopNavMenuProps {
 }
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
-  const store = useStore();
+  const store = useStore<GraphState>();
   const location = useLocation();
   const history = useHistory();
   const allSavingDisabled = props.graphSavePolicy === 'none';
