@@ -81,6 +81,7 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       Compose Discover flyout
     </button>
   ),
+  RULE_BUILDER_REGISTRY: { threshold: {} },
 }));
 
 jest.mock('./rules_data_source', () => ({
@@ -549,9 +550,34 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
-    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('can reopen the ES|QL form after going back to the option picker', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens the threshold builder on top of the create rule options flyout', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('stays on the rules list after creating a rule from the flyout', async () => {
@@ -571,8 +597,25 @@ describe('RulesListPage', () => {
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes both flyouts when the option picker is dismissed after opening the form', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
   });
 
   it('opens the rule creation flow from the split button dropdown', async () => {

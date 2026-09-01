@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -47,15 +47,21 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
+  const createSessionHistoryKey = useMemo(() => Symbol('rulesListCreateRule'), []);
   const {
     flyout,
     confirmationModal,
+    closeFlyout,
     openCreateFlyout,
     openCreateBuilderFlyout,
     openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
-  } = useComposeDiscoverFlyout();
+  } = useComposeDiscoverFlyout({
+    historyKey: createSessionHistoryKey,
+    onCreateSuccess: closeCreateOptionsFlyout,
+    onDismiss: closeCreateOptionsFlyout,
+  });
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
@@ -70,16 +76,19 @@ export const RulesListPage = () => {
   // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
-  const onCreateEsqlRuleFromOptionsFlyout = () => {
+  const closeCreateSession = useCallback(() => {
+    closeFlyout();
     closeCreateOptionsFlyout();
+  }, [closeFlyout, closeCreateOptionsFlyout]);
+
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
     openCreateFlyout();
   };
   const onCreateWithAgentFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
+    closeCreateSession();
     navigateToAgentBuilder();
   };
   const onCreateThresholdRuleFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
     openCreateBuilderFlyout('threshold');
   };
 
@@ -188,7 +197,8 @@ export const RulesListPage = () => {
       </ContentListProvider>
       {isCreateOptionsFlyoutOpen ? (
         <RuleCreateOptionsFlyout
-          onClose={closeCreateOptionsFlyout}
+          historyKey={createSessionHistoryKey}
+          onClose={closeCreateSession}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
