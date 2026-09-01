@@ -40,18 +40,21 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   iacTemplateUrl,
 }) => {
   // The rendered template must cover every policy template the user enabled
-  // in this policy — not just the first enabled input's.
-  const enabledPolicyTemplates = useMemo(
-    () => [
-      ...new Set(
-        newPolicy?.inputs
-          ?.filter((input) => input.enabled)
-          .map((input) => input.policy_template)
-          .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate)) ?? []
-      ),
-    ],
-    [newPolicy?.inputs]
-  );
+  // in this policy, and only the inputs they actually turned on.
+  const enabledPolicyTemplates = useMemo(() => {
+    const byTemplate = new Map<string, string[]>();
+    for (const input of newPolicy?.inputs ?? []) {
+      if (!input.enabled || !input.policy_template || !input.type) {
+        continue;
+      }
+      const enabledInputs = byTemplate.get(input.policy_template) ?? [];
+      if (!enabledInputs.includes(input.type)) {
+        enabledInputs.push(input.type);
+      }
+      byTemplate.set(input.policy_template, enabledInputs);
+    }
+    return Array.from(byTemplate, ([name, enabledInputs]) => ({ name, enabledInputs }));
+  }, [newPolicy?.inputs]);
 
   const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
     useCloudConnectorTemplate({
