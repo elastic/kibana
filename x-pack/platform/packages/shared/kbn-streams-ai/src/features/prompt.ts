@@ -171,27 +171,42 @@ const featuresSchema = {
   required: ['features', 'ignored_features'],
 } as const;
 
+export const MAX_SEARCH_CANDIDATES = 50;
+
 const searchSimilarFeaturesSchema = {
   type: 'object',
   properties: {
-    candidate_id: {
-      type: 'string',
-      description: 'The id you intend to use for the candidate feature.',
-    },
-    title: {
-      type: 'string',
-      description: 'The candidate feature title.',
-    },
-    description: {
-      type: 'string',
-      description: 'The candidate feature description.',
-    },
-    type: {
-      type: 'string',
-      description: 'The candidate feature type.',
+    candidates: {
+      type: 'array',
+      maxItems: MAX_SEARCH_CANDIDATES,
+      items: {
+        type: 'object',
+        properties: {
+          candidate_id: {
+            type: 'string',
+            description: 'The id you intend to use for the candidate feature.',
+          },
+          title: {
+            type: 'string',
+            description: 'The candidate feature title.',
+          },
+          description: {
+            type: 'string',
+            description: 'The candidate feature description.',
+          },
+          type: {
+            type: 'string',
+            description: 'The candidate feature type.',
+          },
+        },
+        required: ['candidate_id', 'title', 'description', 'type'],
+        additionalProperties: false,
+      },
+      description:
+        'Every candidate feature to check in a single call. Results are grouped by candidate_id.',
     },
   },
-  required: ['candidate_id', 'title', 'description', 'type'],
+  required: ['candidates'],
 } as const;
 
 export function createIdentifyFeaturesPrompt({
@@ -224,7 +239,7 @@ export function createIdentifyFeaturesPrompt({
       tools: {
         search_similar_features: {
           description:
-            'Search known features by meaning when a candidate is absent from known_feature_ids. Treat results as possible matches and reuse an id only for the same real-world component.',
+            'Search known features by meaning for one or more candidates absent from known_feature_ids. Pass every such candidate in a single call via the candidates array; results are grouped by candidate_id. Treat results as possible matches and reuse an id only for the same real-world component.',
           schema: searchSimilarFeaturesSchema,
         },
         finalize_features: {

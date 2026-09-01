@@ -35,7 +35,7 @@ export const findSimilarFeatures = async ({
   // Fetch wide then filter: a 5-hit window shared across types can crowd out same-type hits.
   const { hits } = await kiClient.findFeatures(
     streamName,
-    `${args.title} ${args.description}`.trim(),
+    `${args.candidate_id} ${args.title} ${args.description}`.trim(),
     {
       searchMode: 'semantic',
       limit: 20,

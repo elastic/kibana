@@ -23,7 +23,7 @@ import {
 import { withSpan } from '@kbn/apm-utils';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
-import { createIdentifyFeaturesPrompt } from './prompt';
+import { createIdentifyFeaturesPrompt, MAX_SEARCH_CANDIDATES } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
@@ -33,6 +33,7 @@ import { sumTokens } from '../helpers/sum_tokens';
  * validation, which would retry the whole generation and then drop the batch.
  */
 const MAX_EVIDENCE_ITEMS = 5;
+export const MAX_IDENTIFIED_FEATURES_PER_ITERATION = 100;
 
 export interface PreviouslyIdentifiedFeature {
   id: string;
@@ -141,33 +142,30 @@ export async function identifyFeatures({
         search_similar_features: async (toolCall) => {
           if (!searchSimilarFeatures) {
             return {
-              response: {
-                features: [],
-                count: 0,
-                error: 'Semantic feature search is unavailable.',
-              },
+              response: { results: [], error: 'Semantic feature search is unavailable.' },
             };
           }
 
-          try {
-            const features = await searchSimilarFeatures(toolCall.function.arguments);
-            return {
-              response: {
-                features,
-                count: features.length,
-              },
-            };
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.warn(`Failed to search similar features: ${errorMessage}`);
-            return {
-              response: {
-                features: [],
-                count: 0,
-                error: errorMessage,
-              },
-            };
-          }
+          const search = searchSimilarFeatures;
+          const rawCandidates = toolCall.function.arguments?.candidates;
+          const candidates = (Array.isArray(rawCandidates) ? rawCandidates : []).slice(
+            0,
+            MAX_SEARCH_CANDIDATES
+          );
+          const results = await Promise.all(
+            candidates.map(async (candidate) => {
+              try {
+                return { candidate_id: candidate.candidate_id, features: await search(candidate) };
+              } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                logger.warn(
+                  `Failed to search similar features for "${candidate.candidate_id}": ${errorMessage}`
+                );
+                return { candidate_id: candidate.candidate_id, features: [], error: errorMessage };
+              }
+            })
+          );
+          return { response: { results } };
         },
         finalize_features: async () => ({ response: { finalized: true } }),
       },
@@ -216,7 +214,10 @@ export async function identifyFeatures({
   }
 
   return {
-    features: uniqBy(finalizedFeatures, (feature) => feature.id),
+    features: uniqBy(finalizedFeatures, (feature) => feature.id).slice(
+      0,
+      MAX_IDENTIFIED_FEATURES_PER_ITERATION
+    ),
     ignoredFeatures,
     tokensUsed: sumTokens({ added: response.tokens }),
   };

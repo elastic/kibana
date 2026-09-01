@@ -13,7 +13,7 @@ jest.mock('@kbn/inference-prompt-utils', () => ({
 }));
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { identifyFeatures } from './identify_features';
+import { identifyFeatures, MAX_IDENTIFIED_FEATURES_PER_ITERATION } from './identify_features';
 
 const executeAsReasoningAgentMock = executeAsReasoningAgent as jest.MockedFunction<
   typeof executeAsReasoningAgent
@@ -85,10 +85,14 @@ describe('identifyFeatures', () => {
         capturedOptions.toolCallbacks.search_similar_features,
         'search_similar_features',
         {
-          candidate_id: 'okta-sdk',
-          title: 'Okta SDK',
-          description: 'Okta client technology',
-          type: 'technology',
+          candidates: [
+            {
+              candidate_id: 'okta-sdk',
+              title: 'Okta SDK',
+              description: 'Okta client technology',
+              type: 'technology',
+            },
+          ],
         }
       );
       return createReasoningResponse({
@@ -220,15 +224,19 @@ describe('identifyFeatures', () => {
     });
     expect(searchResponse).toEqual({
       response: {
-        features: [
+        results: [
           {
-            id: 'okta',
-            title: 'Okta',
-            description: 'Known Okta feature',
-            confidence: 90,
+            candidate_id: 'okta-sdk',
+            features: [
+              {
+                id: 'okta',
+                title: 'Okta',
+                description: 'Known Okta feature',
+                confidence: 90,
+              },
+            ],
           },
         ],
-        count: 1,
       },
     });
     expect(result.features).toEqual([
@@ -298,6 +306,36 @@ describe('identifyFeatures', () => {
     ]);
   });
 
+  it('caps returned features at MAX_IDENTIFIED_FEATURES_PER_ITERATION', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({
+        features: Array.from({ length: MAX_IDENTIFIED_FEATURES_PER_ITERATION + 1 }, (_, index) => ({
+          id: `feature-${index}`,
+          type: 'technology',
+          subtype: 'library',
+          title: `Feature ${index}`,
+          description: `Feature ${index}`,
+          properties: { name: `feature-${index}` },
+          confidence: 80,
+          evidence: ['evidence'],
+          tags: [],
+        })),
+        ignored_features: [],
+      })
+    );
+
+    const result = await identifyFeatures({
+      streamName: 'logs.test',
+      sampleDocuments: [],
+      inferenceClient,
+      systemPrompt: 'system prompt',
+      logger,
+      signal,
+    });
+
+    expect(result.features).toHaveLength(MAX_IDENTIFIED_FEATURES_PER_ITERATION);
+  });
+
   it('returns a tool error instead of failing when semantic search rejects', async () => {
     const searchSimilarFeatures = jest.fn().mockRejectedValue(new Error('semantic unavailable'));
     let searchResponse: Awaited<ReturnType<ToolCallback>> | undefined;
@@ -308,10 +346,14 @@ describe('identifyFeatures', () => {
         callbacks.search_similar_features,
         'search_similar_features',
         {
-          candidate_id: 'candidate',
-          title: 'Candidate',
-          description: 'Candidate description',
-          type: 'technology',
+          candidates: [
+            {
+              candidate_id: 'candidate',
+              title: 'Candidate',
+              description: 'Candidate description',
+              type: 'technology',
+            },
+          ],
         }
       );
       return emptyReasoningResponse;
@@ -329,13 +371,11 @@ describe('identifyFeatures', () => {
 
     expect(searchResponse).toEqual({
       response: {
-        features: [],
-        count: 0,
-        error: 'semantic unavailable',
+        results: [{ candidate_id: 'candidate', features: [], error: 'semantic unavailable' }],
       },
     });
     expect(logger.warn).toHaveBeenCalledWith(
-      'Failed to search similar features: semantic unavailable'
+      'Failed to search similar features for "candidate": semantic unavailable'
     );
     expect(result.features).toEqual([]);
   });
@@ -349,10 +389,14 @@ describe('identifyFeatures', () => {
         callbacks.search_similar_features,
         'search_similar_features',
         {
-          candidate_id: 'candidate',
-          title: 'Candidate',
-          description: 'Candidate description',
-          type: 'technology',
+          candidates: [
+            {
+              candidate_id: 'candidate',
+              title: 'Candidate',
+              description: 'Candidate description',
+              type: 'technology',
+            },
+          ],
         }
       );
       return emptyReasoningResponse;
@@ -368,11 +412,7 @@ describe('identifyFeatures', () => {
     });
 
     expect(searchResponse).toEqual({
-      response: {
-        features: [],
-        count: 0,
-        error: 'Semantic feature search is unavailable.',
-      },
+      response: { results: [], error: 'Semantic feature search is unavailable.' },
     });
   });
 
