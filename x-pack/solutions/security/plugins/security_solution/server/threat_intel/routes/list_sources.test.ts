@@ -204,7 +204,7 @@ describe('loadSourceForMutation', () => {
   it('allows a space to mutate its own source', async () => {
     const access = await loadSourceForMutationForTest({
       esClient: globalSource('space-a') as never,
-      sourceId: 'space-a:rss:acme',
+      sourceId: 'rss:mandiant-research',
       spaceId: 'space-a',
     });
 
@@ -217,7 +217,7 @@ describe('loadSourceForMutation', () => {
   it("reports another space's source as simply not found", async () => {
     const access = await loadSourceForMutationForTest({
       esClient: globalSource('space-a') as never,
-      sourceId: 'space-a:rss:acme',
+      sourceId: 'rss:mandiant-research',
       spaceId: 'space-b',
     });
 
@@ -246,7 +246,7 @@ describe('loadSourceForMutation', () => {
     await expect(
       loadSourceForMutationForTest({
         esClient: esClient as never,
-        sourceId: 'x',
+        sourceId: 'rss:mandiant-research',
         spaceId: 'default',
       })
     ).rejects.toThrow('boom');

@@ -12,6 +12,7 @@ import {
   SOURCE_BY_ID_API_PATH,
   THREAT_INTEL_SOURCES_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
+  APPROVED_SOURCE_IDS,
 } from '../../../common/threat_intel';
 import {
   buildSpaceFilterTerms,
@@ -22,6 +23,7 @@ import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { redactUrl } from '../adapters/http_client';
 import { THREAT_INTEL_READ_AUTHZ, THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
+import { ensureIndicatorAliasForSpace } from '../setup/indicator_alias';
 import type { RouteRegistrationDeps } from '.';
 
 const listBodySchema = schema.object({
@@ -109,6 +111,9 @@ const loadSourceForMutation = async ({
 }): Promise<
   { allowed: true; space_id?: string; existing?: ThreatIntelSourceDoc } | { allowed: false }
 > => {
+  if (!APPROVED_SOURCE_IDS.has(sourceId)) {
+    return { allowed: false };
+  }
   try {
     const hit = await esClient.get<ThreatIntelSourceDoc>({
       index: THREAT_INTEL_SOURCES_INDEX,
@@ -281,6 +286,7 @@ export const registerListSourcesRoute = ({
         const size = request.body.size ?? 500;
 
         try {
+          await ensureIndicatorAliasForSpace({ esClient, spaceId, logger });
           const [searchResponse, reportStatsByAdapterId] = await Promise.all([
             esClient.search<ThreatIntelSourceDoc>({
               index: THREAT_INTEL_SOURCES_INDEX,
@@ -302,23 +308,22 @@ export const registerListSourcesRoute = ({
             }),
           ]);
 
-          const sources = (searchResponse.hits.hits ?? []).map((hit) => {
-            const base = mapSourceHit(hit);
-            const stats =
-              reportStatsByAdapterId.get(adapterIdForSource(base.adapter_type, base.source_id)) ??
-              emptyStats();
-            return {
-              ...base,
-              report_count: stats.report_count,
-              ...(stats.last_ingested_at ? { last_ingested_at: stats.last_ingested_at } : {}),
-              env_hits_total: stats.env_hits_total,
-            };
-          });
+          const sources = (searchResponse.hits.hits ?? [])
+            .filter((hit) => hit._id && APPROVED_SOURCE_IDS.has(hit._id))
+            .map((hit) => {
+              const base = mapSourceHit(hit);
+              const stats =
+                reportStatsByAdapterId.get(adapterIdForSource(base.adapter_type, base.source_id)) ??
+                emptyStats();
+              return {
+                ...base,
+                report_count: stats.report_count,
+                ...(stats.last_ingested_at ? { last_ingested_at: stats.last_ingested_at } : {}),
+                env_hits_total: stats.env_hits_total,
+              };
+            });
 
-          const total =
-            typeof searchResponse.hits.total === 'number'
-              ? searchResponse.hits.total
-              : searchResponse.hits.total?.value ?? sources.length;
+          const total = sources.length;
 
           return response.ok({ body: { total, sources } });
         } catch (err) {
