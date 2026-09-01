@@ -53,7 +53,7 @@ describe('layer_actions', () => {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../selectors/map_selectors').getMapReady = () => {
+      require('../reducers/non_serializable_instances').getMapReady = () => {
         return true;
       };
 
