@@ -37,66 +37,43 @@ const isoDateStringSchema = schema.string({
   },
 });
 
+const keyword = schema.string({ maxLength: MAX_KEYWORD_LENGTH });
+const optionalKeyword = schema.maybe(keyword);
+const optionalText = schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH }));
+
+const enumOf = <T extends readonly string[]>(options: T) =>
+  schema.string({
+    maxLength: MAX_KEYWORD_LENGTH,
+    validate: (value) => {
+      if (!options.some((v) => v === value)) {
+        return `must be one of: ${options.join(', ')}`;
+      }
+    },
+  });
+
+const opaqueArray = (maxSize: number) =>
+  schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize }));
+
 const investigationAttributesSchemaV1 = schema.object({
-  investigation_id: schema.string({ maxLength: MAX_KEYWORD_LENGTH }),
-  status: schema.string({
-    maxLength: MAX_KEYWORD_LENGTH,
-    validate: (value) => {
-      if (!INVESTIGATION_STATUSES.some((s) => s === value)) {
-        return `must be one of: ${INVESTIGATION_STATUSES.join(', ')}`;
-      }
-    },
-  }),
-  subject_type: schema.string({
-    maxLength: MAX_KEYWORD_LENGTH,
-    validate: (value) => {
-      if (!INVESTIGATION_SUBJECT_TYPES.some((s) => s === value)) {
-        return `must be one of: ${INVESTIGATION_SUBJECT_TYPES.join(', ')}`;
-      }
-    },
-  }),
-  subject_id: schema.string({ maxLength: MAX_KEYWORD_LENGTH }),
-  subject_summary: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
-  trigger_type: schema.string({
-    maxLength: MAX_KEYWORD_LENGTH,
-    validate: (value) => {
-      if (!INVESTIGATION_TRIGGER_TYPES.some((t) => t === value)) {
-        return `must be one of: ${INVESTIGATION_TRIGGER_TYPES.join(', ')}`;
-      }
-    },
-  }),
-  concurrency_key: schema.maybe(schema.string({ maxLength: MAX_KEYWORD_LENGTH })),
+  investigation_id: keyword,
+  status: enumOf(INVESTIGATION_STATUSES),
+  subject_type: enumOf(INVESTIGATION_SUBJECT_TYPES),
+  subject_id: keyword,
+  subject_summary: optionalText,
+  trigger_type: enumOf(INVESTIGATION_TRIGGER_TYPES),
+  concurrency_key: optionalKeyword,
   created_at: isoDateStringSchema,
   completed_at: schema.maybe(isoDateStringSchema),
-  executed_by: schema.maybe(schema.string({ maxLength: MAX_KEYWORD_LENGTH })),
-  error: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
-  summary: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
-  conclusion: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
-  severity: schema.maybe(
-    schema.string({
-      maxLength: MAX_KEYWORD_LENGTH,
-      validate: (value) => {
-        if (!SEVERITY_OPTIONS.some((option) => option === value)) {
-          return `must be one of: ${SEVERITY_OPTIONS.join(', ')}`;
-        }
-      },
-    })
-  ),
-  hypotheses: schema.maybe(
-    schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: MAX_HYPOTHESES })
-  ),
-  recommendations: schema.maybe(
-    schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: MAX_RECOMMENDATIONS })
-  ),
-  blind_spots: schema.maybe(
-    schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: MAX_BLIND_SPOTS })
-  ),
-  trigger_feedback: schema.maybe(
-    schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
-      maxSize: MAX_TRIGGER_FEEDBACK,
-    })
-  ),
-  conversation_id: schema.maybe(schema.string({ maxLength: MAX_KEYWORD_LENGTH })),
+  executed_by: optionalKeyword,
+  error: optionalText,
+  summary: optionalText,
+  conclusion: optionalText,
+  severity: schema.maybe(enumOf(SEVERITY_OPTIONS)),
+  hypotheses: opaqueArray(MAX_HYPOTHESES),
+  recommendations: opaqueArray(MAX_RECOMMENDATIONS),
+  blind_spots: opaqueArray(MAX_BLIND_SPOTS),
+  trigger_feedback: opaqueArray(MAX_TRIGGER_FEEDBACK),
+  conversation_id: optionalKeyword,
   impact: schema.maybe(
     schema.object({
       entities: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
