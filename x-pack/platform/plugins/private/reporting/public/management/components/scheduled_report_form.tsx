@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '@kbn/reporting-public';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -68,6 +69,8 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((tz) => ({
   inputDisplay: tz,
   value: tz,
 })) ?? [{ text: 'UTC', value: 'UTC' }];
+
+const stripSecondsFromDateFormat = (format: string): string => format.replace(/[:.,]?\s*s/gi, '');
 
 export type FormData = Pick<
   ScheduledReport,
@@ -164,6 +167,8 @@ export const ScheduledReportForm = ({
     [http.basePath]
   );
   const { defaultTimezone } = useDefaultTimezone();
+  const rawDateFormat = useUiSetting<string>('dateFormat');
+  const dateFormat = useMemo(() => stripSecondsFromDateFormat(rawDateFormat), [rawDateFormat]);
   const hasCcBcc =
     Boolean(scheduledReport.emailCcRecipients?.length) ||
     Boolean(scheduledReport.emailBccRecipients?.length);
@@ -385,6 +390,7 @@ export const ScheduledReportForm = ({
                     fullWidth: true,
                     showTimeSelect: true,
                     readOnly,
+                    dateFormat,
                     'data-test-subj': 'startDatePicker',
                   },
                 }}
