@@ -55,14 +55,20 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
   // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
   // id already present, while unregistration only removes connectors this app registered.
-  const inMemoryConnectors: Array<{ id: string; secrets?: unknown; isDynamic?: boolean }> = [];
-  const registerDynamicConnector = jest.fn((connector: { id: string; secrets?: unknown }) => {
-    if (inMemoryConnectors.some(({ id }) => id === connector.id)) {
-      return false;
+  const inMemoryConnectors: Array<{
+    id: string;
+    secrets?: Record<string, string>;
+    isDynamic?: boolean;
+  }> = [];
+  const registerDynamicConnector = jest.fn(
+    (connector: { id: string; secrets?: Record<string, string> }) => {
+      if (inMemoryConnectors.some(({ id }) => id === connector.id)) {
+        return false;
+      }
+      inMemoryConnectors.push({ ...connector, isDynamic: true });
+      return true;
     }
-    inMemoryConnectors.push({ ...connector, isDynamic: true });
-    return true;
-  });
+  );
   const unregisterDynamicConnector = jest.fn((connectorId: string) => {
     const index = inMemoryConnectors.findIndex(
       ({ id, isDynamic }) => id === connectorId && isDynamic === true
