@@ -14,7 +14,7 @@ import React, { useMemo } from 'react';
 import type { AppHeaderBack, AppHeaderEditableTitle } from '../types';
 import { toBackTargets } from '../to_back_targets';
 import { BackButton } from '../back_button';
-import { Title, isEditableTitle } from './title';
+import { Title, getNoBackTitleOffset, isEditableTitle } from './title';
 
 export interface TitleAreaProps {
   title?: string | AppHeaderEditableTitle;
@@ -26,14 +26,14 @@ export interface TitleAreaProps {
    */
   placeholder?: ReactNode;
   /**
-   * Discover-specific extra start inset on this wrapper. Does not replace
-   * `Title`'s global no-back `titleOffset`; the two paddings live on different boxes.
+   * Compact headers use a larger no-back title offset so the title clears a rounded
+   * workspace corner. Does not apply when a back button is present.
    */
-  padTitleStart?: boolean;
+  compact?: boolean;
 }
 
 export const TitleArea = React.memo<TitleAreaProps>(
-  ({ title, back, size, placeholder, padTitleStart }) => {
+  ({ title, back, size, placeholder, compact }) => {
     const { euiTheme } = useEuiTheme();
     const backTargets = toBackTargets(back);
     const hasBack = backTargets.length > 0;
@@ -48,20 +48,16 @@ export const TitleArea = React.memo<TitleAreaProps>(
         flex: 0 1 auto;
         min-width: 0;
         max-width: 100%;
-        ${padTitleStart &&
-        css`
-          padding-inline-start: ${euiTheme.size.xs};
-        `}
       `;
 
       // Same inset `Title` applies when there is no back button, so a lone placeholder
       // lines up with where the title text sits.
       const placeholderOffset = css`
-        padding-left: ${euiTheme.size.xs};
+        padding-inline-start: ${getNoBackTitleOffset(euiTheme, compact)};
       `;
 
       return { wrapper, placeholderOffset };
-    }, [euiTheme, padTitleStart]);
+    }, [compact, euiTheme]);
 
     if (!showTitle && !hasBack && !showPlaceholder) {
       return null;
@@ -70,7 +66,9 @@ export const TitleArea = React.memo<TitleAreaProps>(
     return (
       <div css={styles.wrapper}>
         {hasBack && <BackButton targets={backTargets} />}
-        {showTitle && title && <Title title={title} titleOffset={!hasBack} size={size} />}
+        {showTitle && title && (
+          <Title title={title} titleOffset={!hasBack} size={size} compact={compact} />
+        )}
         {showPlaceholder && (
           <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
         )}

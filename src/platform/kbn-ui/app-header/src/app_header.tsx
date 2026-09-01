@@ -42,11 +42,6 @@ export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back'> & {
    */
   titleAppend?: ReactNode;
   borderless?: boolean;
-  /**
-   * Discover-specific extra start inset on the title-area wrapper. Other apps
-   * should omit this; `Title`'s no-back `titleOffset` already applies globally.
-   */
-  padTitleStart?: boolean;
 };
 
 const getPublicAppHeaderViewProps = ({
@@ -65,7 +60,6 @@ const getPublicAppHeaderViewProps = ({
   fallbackMenu,
   titleAppend,
   borderless,
-  padTitleStart,
 }: AppHeaderViewProps): AppHeaderViewProps => {
   const secondaryContent = description ? { description } : metadata ? { metadata } : {};
 
@@ -84,7 +78,6 @@ const getPublicAppHeaderViewProps = ({
     fallbackMenu,
     titleAppend,
     borderless,
-    padTitleStart,
   };
 };
 
@@ -103,7 +96,6 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     sticky,
     spacing,
     borderless,
-    padTitleStart,
     staticItems,
     fallbackMenu,
   }) => {
@@ -148,7 +140,12 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     return (
       <AppHeaderShell
         title={
-          <TitleArea title={title} back={back} size={titleSize} padTitleStart={padTitleStart} />
+          <TitleArea
+            title={title}
+            back={back}
+            size={titleSize}
+            compact={resolvedSpacing === 'compact'}
+          />
         }
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={share} favorite={favorite} />}
