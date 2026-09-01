@@ -52,8 +52,7 @@ const pollUntilTaskHasRun = async (esClient: Client, taskId: string): Promise<vo
 };
 
 // These tests cannot be run on MKI because they rely on the Mock IdP UIAM setup (raw `essu_`
-// org-level key) and on the Task Manager UIAM rollout flags from the `task_manager_uiam`
-// server config set.
+// org-level key) from the local UIAM server config set.
 apiTest.describe(
   '[NON-MKI] Task Manager task scheduled with a user-created (external) UIAM API key',
   { tag: tags.serverless.observability.complete },

@@ -9,12 +9,18 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
-import { deleteTaskManagerTaskSilently, readTaskAttributes, taskDocId } from '../lib/helpers';
+import {
+  deleteTaskManagerTaskSilently,
+  readInvalidationMarkerKeyIds,
+  readTaskAttributes,
+  taskDocId,
+} from '../lib/helpers';
 
 apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.complete }, () => {
   let createdTaskId: string | undefined;
+  let createdTaskKeyIds: string[] = [];
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, esClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
     const scheduleResponse = await apiClient.post('internal/task_manager/schedule', {
@@ -34,15 +40,20 @@ apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.c
     const body = scheduleResponse.body as { id: string };
     expect(body.id).toBeDefined();
     createdTaskId = body.id;
+
+    const taskAttrs = await readTaskAttributes(esClient, taskDocId(createdTaskId));
+    const userScope = taskAttrs.userScope as Record<string, string>;
+    expect(userScope.apiKeyId).toBeDefined();
+    expect(userScope.uiamApiKeyId).toBeDefined();
+    createdTaskKeyIds = [userScope.apiKeyId, userScope.uiamApiKeyId];
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
+  apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     // Safety-net cleanup: remove the task in case a test failed before it got deleted.
     if (createdTaskId) {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       await deleteTaskManagerTaskSilently(apiClient, cookieHeader, createdTaskId);
     }
-    await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
   });
 
   apiTest('scheduled task has both apiKey and uiamApiKey', async ({ esClient }) => {
@@ -53,13 +64,13 @@ apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.c
 
   apiTest(
     'when task is removed, apiKey and uiamApiKey are queued for invalidation',
-    async ({ apiClient, kbnClient, samlAuth }) => {
+    async ({ apiClient, esClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-      const { saved_objects: pendingBefore } = await kbnClient.savedObjects.find({
-        type: 'api_key_to_invalidate',
-      });
-      expect(pendingBefore).toHaveLength(0);
+      const pendingBefore = await readInvalidationMarkerKeyIds(esClient);
+      for (const keyId of createdTaskKeyIds) {
+        expect(pendingBefore).not.toContain(keyId);
+      }
 
       const deleteResponse = await apiClient.delete(
         `internal/task_manager/tasks/${createdTaskId}`,
@@ -68,11 +79,10 @@ apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.c
       expect(deleteResponse).toHaveStatusCode(200);
       createdTaskId = undefined;
 
-      const { saved_objects: pendingAfter } = await kbnClient.savedObjects.find({
-        type: 'api_key_to_invalidate',
-      });
-
-      expect(pendingAfter).toHaveLength(2);
+      const pendingAfter = await readInvalidationMarkerKeyIds(esClient);
+      for (const keyId of createdTaskKeyIds) {
+        expect(pendingAfter).toContain(keyId);
+      }
     }
   );
 });
