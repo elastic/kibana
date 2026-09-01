@@ -32,8 +32,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, network, pageObjects, page }) => {
       await browserAuth.loginAsPrivilegedUser();
-      // Register the drain before goto so it captures the initial-load requests, which
-      // would otherwise bleed into the first test's listener window.
+      const histogramProgressBar = page.testSubj.locator('unifiedHistogramProgressBar');
       let eseCount = 0;
       const drainInitialLoad = page
         .waitForResponse(
@@ -43,11 +42,14 @@ spaceTest.describe(
         )
         .catch(() => {});
       await pageObjects.discover.goto({ queryMode: 'classic' });
+      const progressBarStarted = histogramProgressBar
+        .waitFor({ state: 'visible', timeout: 2_000 })
+        .catch(() => {});
       await drainInitialLoad;
-      // Document completion doesn't imply the Lens chart finished rendering. Wait for
-      // its terminal render state so outstanding chart work can't enter the count window.
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.renderable.waitForRender();
+      await page.testSubj.locator('unifiedHistogramRendered').waitFor({ state: 'visible' });
+      await progressBarStarted;
+      await histogramProgressBar.waitFor({ state: 'hidden', timeout: 30_000 });
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
