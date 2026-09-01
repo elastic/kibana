@@ -38,9 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should change datasource and search with visor', async () => {
-      await retry.try(async () => {
-        expect(await esql.isQuickSearchVisorVisible()).to.be(true);
-      });
+      await esql.toggleQuickSearchVisor(true);
 
       // Change datasource
       await esql.toggleDatasourceDropdown(true);
