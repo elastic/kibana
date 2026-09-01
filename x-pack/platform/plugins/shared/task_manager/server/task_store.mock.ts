@@ -32,6 +32,13 @@ export const taskStoreMock = {
       bulkRemove: jest.fn(),
       get: jest.fn(),
       taskExists: jest.fn().mockResolvedValue(false),
+      // Mirrors the real predicate for a security-enabled deployment; override to simulate
+      // deployments where no keys are granted (e.g. security disabled).
+      willGrantApiKeys: jest
+        .fn()
+        .mockImplementation((options?: Parameters<TaskStore['willGrantApiKeys']>[0]) =>
+          Boolean(options?.request)
+        ),
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
       aggregate: jest.fn(),

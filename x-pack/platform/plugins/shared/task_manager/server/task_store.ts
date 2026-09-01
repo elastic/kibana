@@ -286,12 +286,22 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
+  /**
+   * Whether a scheduling call with these options will grant API keys. Guards on the grant path
+   * (like the ensureScheduled existence pre-check) must use this predicate rather than checking
+   * the request themselves, so they cannot drift from the grant condition in
+   * `grantApiKeysFromRequest`.
+   */
+  public willGrantApiKeys(options?: { request?: KibanaRequest }): boolean {
+    return Boolean(options?.request) && this.getIsSecurityEnabled();
+  }
+
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<Map<string, ApiKeySOFields> | null> {
     const request = options?.request;
-    if (!this.getIsSecurityEnabled() || !request) {
+    if (!this.willGrantApiKeys(options) || !request) {
       return null;
     }
 
@@ -342,7 +352,11 @@ export class TaskStore {
       fields ? this.apiKeyStrategy.getApiKeyIdsForInvalidation(fields) : []
     );
 
-    await this.markApiKeysForInvalidation(targets);
+    // Keys are granted per task type and shared across instances, so several failed tasks can
+    // carry the same key; queue each key once instead of once per task.
+    const uniqueTargets = [...new Map(targets.map((target) => [target.apiKeyId, target])).values()];
+
+    await this.markApiKeysForInvalidation(uniqueTargets);
   }
 
   private async bulkGetDecryptedTaskApiKeys(

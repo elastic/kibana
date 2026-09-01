@@ -4260,6 +4260,36 @@ describe('TaskStore', () => {
       ]);
     });
 
+    test('queues a key shared by several failed tasks for invalidation only once', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+
+      // Keys are granted per task type, so both tasks carry the same key set.
+      const sharedApiKeyFields = {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      };
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', sharedApiKeyFields);
+      apiKeyAndUserScopeMap.set('task2', sharedApiKeyFields);
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Failure'));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow('Failure');
+
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'reportApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
     test('invalidates the granted API key of a task omitted during local preparation', async () => {
       const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
       const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };

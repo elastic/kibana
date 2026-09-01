@@ -379,8 +379,10 @@ export class TaskScheduling {
     // Scheduling grants the API keys before it writes the task, so scheduling an id that already
     // exists mints a key pair that the version conflict below then throws away. Callers treat this
     // as an idempotent "make sure this exists" and call it on a loop, so check first rather than
-    // leaking a key pair per call. Racing callers still land on the conflict path.
-    if (options?.request && (await this.store.taskExists(taskInstance.id))) {
+    // leaking a key pair per call. Racing callers still land on the conflict path. The store's
+    // predicate keeps this guard aligned with the actual grant condition (and skips the lookup
+    // when no key would be granted anyway, e.g. security disabled).
+    if (this.store.willGrantApiKeys(options) && (await this.store.taskExists(taskInstance.id))) {
       return this.updateScheduleOfExistingTask(taskInstance, options);
     }
 

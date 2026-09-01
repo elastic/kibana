@@ -82,6 +82,8 @@ describe('TaskScheduling', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // resetAllMocks wipes the factory default; restore the security-enabled behavior.
+    mockTaskStore.willGrantApiKeys.mockImplementation((options) => Boolean(options?.request));
   });
 
   test('allows scheduling tasks', async () => {
@@ -265,6 +267,23 @@ describe('TaskScheduling', () => {
 
     await taskScheduling.ensureScheduled(task);
 
+    expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
+  });
+
+  test('does not look up the task when the store will not grant API keys despite a request (e.g. security disabled)', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.willGrantApiKeys.mockReturnValue(false);
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    // No key would be granted, so there is no leak to guard against and the lookup is skipped.
     expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
     expect(mockTaskStore.schedule).toHaveBeenCalled();
   });
