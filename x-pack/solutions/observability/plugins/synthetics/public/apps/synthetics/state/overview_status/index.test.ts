@@ -385,6 +385,47 @@ describe('overviewStatusReducer', () => {
       expect(state.status).toBeNull();
       expect(state.allConfigs?.map((config) => config.configId)).toEqual(['up1']);
     });
+
+    it('does not merge a late append from the old filter into already-loaded new results', () => {
+      const pageState = { page: 1, perPage: 20 } as any;
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.get({ pageState, statusFilter: 'up' })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'up1' }), makeMeta({ configId: 'up2' })], {
+            total: 4,
+          })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.get({ pageState, statusFilter: 'up' })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.get({ pageState, statusFilter: 'down' })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'down1' })], { total: 1 })
+        )
+      );
+
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'up3' }), makeMeta({ configId: 'up4' })], {
+            total: 4,
+          })
+        )
+      );
+
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual(['down1']);
+    });
   });
 
   describe('quietFetchOverviewStatusAction', () => {
@@ -460,6 +501,46 @@ describe('overviewStatusReducer', () => {
       expect(refreshed.allConfigs?.find((config) => config.configId === 'mon1')?.name).toBe(
         'updated'
       );
+    });
+
+    it('keeps appended pages when a page-1 refresh completes after the append', () => {
+      const pageState = { page: 1, perPage: 2 } as any;
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.get({ pageState })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            total: 4,
+          })
+        )
+      );
+      state = overviewStatusReducer(state, appendOverviewStatusAction.get({ pageState }));
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon3' }), makeMeta({ configId: 'mon4' })], {
+            total: 4,
+          })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            total: 4,
+          })
+        )
+      );
+
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual([
+        'mon1',
+        'mon2',
+        'mon3',
+        'mon4',
+      ]);
     });
   });
 

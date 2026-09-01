@@ -16,6 +16,23 @@ import {
 } from '../../../state/overview_status';
 import { useOverviewStatus } from './use_overview_status';
 
+const refreshState = { lastRefresh: 1 };
+
+jest.mock('../../../contexts/synthetics_refresh_context', () => {
+  const actual = jest.requireActual('../../../contexts/synthetics_refresh_context');
+  return {
+    ...actual,
+    useSyntheticsRefreshContext: () => ({
+      lastRefresh: refreshState.lastRefresh,
+      refreshApp: jest.fn(),
+      refreshInterval: 60,
+      refreshPaused: false,
+      setRefreshInterval: jest.fn(),
+      setRefreshPaused: jest.fn(),
+    }),
+  };
+});
+
 describe('useOverviewStatus', () => {
   const dispatchMockFn = jest.fn();
 
@@ -108,6 +125,95 @@ describe('useOverviewStatus', () => {
           type: fetchOverviewStatusAction.get.type,
           payload: expect.objectContaining({
             pageState: expect.objectContaining({ query: '"Observability UI"' }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('auto-refresh vs infinite-scroll append', () => {
+    const fortyConfigs = Array.from({ length: 40 }, (_, i) => ({ configId: `m${i}` }));
+
+    const tickRefresh = (rerender: () => void) => {
+      dispatchMockFn.mockClear();
+      refreshState.lastRefresh += 1;
+      rerender();
+    };
+
+    beforeEach(() => {
+      refreshState.lastRefresh = 1;
+    });
+
+    it('does not start a page-1 refresh while an append is in flight', () => {
+      const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
+        wrapper: ({ children }) =>
+          React.createElement(
+            WrappedHelper,
+            {
+              state: {
+                overview: {
+                  ...mockState.overview,
+                  view: 'cardView',
+                  pageState: { ...mockState.overview.pageState, page: 1, perPage: 20 },
+                },
+                overviewStatus: {
+                  ...mockState.overviewStatus,
+                  loaded: true,
+                  loading: true,
+                  allConfigs: fortyConfigs.slice(0, 20),
+                  total: 40,
+                },
+              },
+            },
+            children
+          ),
+      });
+
+      tickRefresh(rerender);
+
+      // Timer refreshes are `silent`. A non-silent quiet fetch can still come from
+      // the pageState effect if the test wrapper rebuilds the store on rerender.
+      expect(dispatchMockFn).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: quietFetchOverviewStatusAction.get.type,
+          payload: expect.objectContaining({ silent: true }),
+        })
+      );
+    });
+
+    it('refreshes the whole accumulated card-view window when more than one page is loaded', () => {
+      const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
+        wrapper: ({ children }) =>
+          React.createElement(
+            WrappedHelper,
+            {
+              state: {
+                overview: {
+                  ...mockState.overview,
+                  view: 'cardView',
+                  pageState: { ...mockState.overview.pageState, page: 1, perPage: 20 },
+                },
+                overviewStatus: {
+                  ...mockState.overviewStatus,
+                  loaded: true,
+                  loading: false,
+                  allConfigs: fortyConfigs,
+                  total: 40,
+                },
+              },
+            },
+            children
+          ),
+      });
+
+      tickRefresh(rerender);
+
+      expect(dispatchMockFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: quietFetchOverviewStatusAction.get.type,
+          payload: expect.objectContaining({
+            silent: true,
+            pageState: expect.objectContaining({ page: 1, perPage: 40 }),
           }),
         })
       );
