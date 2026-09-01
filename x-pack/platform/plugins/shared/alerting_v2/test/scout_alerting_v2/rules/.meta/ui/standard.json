@@ -1,5 +1,5 @@
 {
-  "sha1": "ebe11039955b2596031341d560dc0973249556ff",
+  "sha1": "393ab8ff7a51c1ef3ccb60710a4febfc1462a5e4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -82,6 +82,45 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
         "line": 169,
         "column": 26
+      }
+    },
+    {
+      "id": "9c1881f2135d817-686926d85ee73c5",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder_type opens in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "9c1881f2135d817-03e8d139e7cd81f",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: unparseable query shows confirmation modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 228,
+        "column": 51
+      }
+    },
+    {
+      "id": "9c1881f2135d817-04b710afa6358fd",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: switch toggle shows confirmation modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 264,
+        "column": 21
       }
     },
     {

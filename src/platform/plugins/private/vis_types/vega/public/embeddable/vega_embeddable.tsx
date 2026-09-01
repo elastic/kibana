@@ -17,12 +17,11 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
   HasDrilldowns,
-  SerializedDrilldowns,
 } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { parse } from 'hjson';
-import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasExecutionContext,
   apiIsPresentationContainer,
@@ -44,14 +43,18 @@ import {
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
-  type SerializedTimeRange,
-  type SerializedTitles,
+  type SupportsJsonExport,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
+import {
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+  VEGA_SUPPORTED_TRIGGERS,
+} from '../../common/constants';
+import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaParser } from '../data_model/vega_parser';
@@ -60,18 +63,11 @@ import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_o
 import { getPublishedEsqlQuery, specUsesEsql } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
+import type { VegaByValueState } from '../../server';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
-
-const parseSpec = (specString: string) => {
-  try {
-    return parse(specString, { legacyRoot: false, keepWsc: true });
-  } catch {
-    return undefined;
-  }
-};
 
 /**
  * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
@@ -84,22 +80,17 @@ interface VegaRenderInput {
 }
 
 /**
- * By-value state for the dedicated Dashboard Vega panel. The panel is UI-only: it is not
- * registered as a server embeddable, so it has no runtime schema and is treated as an unmapped
- * panel by the public Dashboard REST API (dropped on read, rejected on write).
+ * By-value state for the dedicated Dashboard Vega panel.
+ *
+ * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
+ * participates in public dashboards-as-code validation and OpenAPI generation.
  */
-export type VegaByValueState = SerializedTitles &
-  SerializedTimeRange &
-  SerializedDrilldowns & {
-    /** The Vega or Vega-Lite specification as an HJSON or JSON string. */
-    spec: string;
-  };
-
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   HasDrilldowns &
   HasEditCapabilities &
   HasInspectorAdapters &
   HasSupportedTriggers &
+  SupportsJsonExport &
   PublishesBlockingError &
   PublishesDataLoading &
   PublishesWritableDescription &
@@ -140,7 +131,14 @@ export const vegaEmbeddableFactory = (
     // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
     const specSubscription = spec$
       .pipe(
-        map(parseSpec),
+        map((spec) => {
+          if (spec.format === 'json') return spec.value;
+          try {
+            return parse(spec.value, { legacyRoot: false, keepWsc: true });
+          } catch {
+            return undefined;
+          }
+        }),
         tap((spec) => {
           usesEsql$.next(spec ? specUsesEsql(spec) : false);
           query$.next(getPublishedEsqlQuery(spec));
@@ -179,7 +177,7 @@ export const vegaEmbeddableFactory = (
         ...titleComparators,
         ...timeRangeComparators,
         ...drilldownsManager.comparators,
-        spec: 'referenceEquality',
+        spec: 'deepEquality',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
@@ -201,7 +199,7 @@ export const vegaEmbeddableFactory = (
       query$,
       projectRoutingOverrides$,
       dataViews$,
-      supportedTriggers: () => [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU],
+      supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
@@ -238,11 +236,9 @@ export const vegaEmbeddableFactory = (
         });
       },
       getInspectorAdapters: () => inspectorAdapters,
-    });
-
-    const getExecutionContext = () => ({
-      ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
-      child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
+      // Only when the flag is on: the public dashboards-as-code schema is registered then, so
+      // exported JSON can be round-tripped through the REST API.
+      supportsJsonExport: core.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
@@ -303,9 +299,14 @@ export const vegaEmbeddableFactory = (
               timeRange,
               query: data.query as Query,
               filters: data.filters,
-              visParams: { spec },
+              visParams: {
+                spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
+              },
               searchSessionId: data.searchSessionId,
-              executionContext: getExecutionContext(),
+              executionContext: {
+                ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
+                child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
+              },
               projectRouting: data.projectRouting,
               isApproximate: data.isApproximate,
               esqlVariables: data.esqlVariables,
@@ -340,13 +341,7 @@ export const vegaEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [renderInput, hideTitle, title, description, rendered] = useBatchedPublishingSubjects(
-          renderInput$,
-          api.hideTitle$,
-          api.title$,
-          api.description$,
-          rendered$
-        );
+        const [renderInput, rendered] = useBatchedPublishingSubjects(renderInput$, rendered$);
         const domNode = useRef<HTMLDivElement>(null);
 
         useEffect(
@@ -366,14 +361,7 @@ export const vegaEmbeddableFactory = (
         }, [rendered]);
 
         return (
-          <div
-            ref={domNode}
-            css={{ width: '100%', height: '100%', display: 'flex' }}
-            data-render-complete={rendered}
-            data-title={hideTitle ? '' : title ?? ''}
-            data-description={description ?? ''}
-            data-shared-item
-          >
+          <div ref={domNode} css={{ width: '100%', height: '100%', display: 'flex' }}>
             {renderInput ? (
               <Suspense fallback={<EuiLoadingChart size="l" />}>
                 <LazyVegaVisComponent

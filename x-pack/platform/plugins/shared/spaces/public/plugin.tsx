@@ -163,6 +163,7 @@ export class SpacesPlugin
         getStartServices: core.getStartServices,
         application: core.application,
         spacesManager: this.spacesManager,
+        initialSolutionSetupEnabled: this.config.initialSolutionSetup?.enabled ?? false,
       });
     }
 
