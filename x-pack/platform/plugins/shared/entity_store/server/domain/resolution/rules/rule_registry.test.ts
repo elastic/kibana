@@ -6,9 +6,9 @@
  */
 
 import {
-  CROWDSTRIKE_SID_PATTERN,
-  ENTRA_GUID_PATTERN,
-  WELL_KNOWN_WINDOWS_SID_PATTERN,
+  ENTRA_GUID_INCLUSION,
+  NT_AUTHORITY_SID_INCLUSION,
+  WINDOWS_NON_PERSON_SID_EXCLUSION,
 } from './rule_registry';
 
 /**
@@ -20,9 +20,9 @@ import {
  */
 describe('RLIKE value gates use Lucene automaton syntax', () => {
   const patterns = [
-    ['well-known Windows SID exclusion', WELL_KNOWN_WINDOWS_SID_PATTERN],
-    ['Entra GUID inclusion', ENTRA_GUID_PATTERN],
-    ['CrowdStrike SID inclusion', CROWDSTRIKE_SID_PATTERN],
+    ['Windows non-person SID exclusion', WINDOWS_NON_PERSON_SID_EXCLUSION],
+    ['Entra GUID inclusion', ENTRA_GUID_INCLUSION],
+    ['NT-authority SID inclusion', NT_AUTHORITY_SID_INCLUSION],
   ] as const;
 
   it.each(patterns)('%s does not use ^ or $ anchors', (_name, pattern) => {
@@ -31,17 +31,17 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
     expect(pattern.includes('$')).toBe(false);
   });
 
-  it('expresses the CrowdStrike SID prefix with an explicit wildcard', () => {
-    expect(CROWDSTRIKE_SID_PATTERN).toBe('S-1-5-.*');
+  it('expresses the NT-authority SID prefix with an explicit wildcard', () => {
+    expect(NT_AUTHORITY_SID_INCLUSION).toBe('S-1-5-.*');
   });
 
   it('matches well-known SIDs as whole strings', () => {
-    expect(WELL_KNOWN_WINDOWS_SID_PATTERN).toBe(
+    expect(WINDOWS_NON_PERSON_SID_EXCLUSION).toBe(
       '(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])'
     );
   });
 
   it('matches a GUID as a whole string', () => {
-    expect(ENTRA_GUID_PATTERN).toBe('[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}');
+    expect(ENTRA_GUID_INCLUSION).toBe('[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}');
   });
 });

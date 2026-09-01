@@ -23,21 +23,24 @@ import {
  * Well-known Windows SIDs that identify the host or a built-in group, not a person.
  * LocalSystem / LocalService / NetworkService plus built-in aliases S-1-5-32-544..554.
  */
-export const WELL_KNOWN_WINDOWS_SID_PATTERN =
+export const WINDOWS_NON_PERSON_SID_EXCLUSION =
   '(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])';
 
 /** Entra ObjectId / AccountObjectId GUID shape. */
-export const ENTRA_GUID_PATTERN = '[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}';
+export const ENTRA_GUID_INCLUSION = '[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}';
 
-/** CrowdStrike `user.id` is polymorphic; only Windows SIDs are safe to bridge to AD. */
-export const CROWDSTRIKE_SID_PATTERN = 'S-1-5-.*';
+/**
+ * NT-authority SID prefix. CrowdStrike `user.id` is polymorphic; only this
+ * shape is safe to bridge to AD.
+ */
+export const NT_AUTHORITY_SID_INCLUSION = 'S-1-5-.*';
 
 /**
  * Cheap UPN shape: at least one character, `@`, at least one character.
  * Lucene automaton syntax (no `^`/`$`); a trailing dot is not required
  * (`jane@CORP` is a real on-prem UPN).
  */
-export const UPN_PATTERN = '[^@]+@[^@]+';
+export const UPN_INCLUSION = '[^@]+@[^@]+';
 
 export type EsqlMatchSpec = {
   /** Empty means every namespace (email rule). */
@@ -85,7 +88,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       field: 'user.id',
       namespaces: ['system', 'windows', 'active_directory'],
       lowercase: false,
-      exclusionPattern: WELL_KNOWN_WINDOWS_SID_PATTERN,
+      exclusionPattern: WINDOWS_NON_PERSON_SID_EXCLUSION,
     },
   },
   {
@@ -98,7 +101,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       field: 'user.id',
       namespaces: ['m365_defender', 'entra_id'],
       lowercase: false,
-      inclusionPattern: ENTRA_GUID_PATTERN,
+      inclusionPattern: ENTRA_GUID_INCLUSION,
     },
   },
   {
@@ -111,7 +114,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       field: 'user.id',
       namespaces: ['crowdstrike', 'active_directory'],
       lowercase: false,
-      inclusionPattern: CROWDSTRIKE_SID_PATTERN,
+      inclusionPattern: NT_AUTHORITY_SID_INCLUSION,
     },
   },
   {
@@ -127,7 +130,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       },
       namespaces: ['microsoft_365', 'entra_id'],
       lowercase: true,
-      inclusionPattern: UPN_PATTERN,
+      inclusionPattern: UPN_INCLUSION,
     },
   },
   {
