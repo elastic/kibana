@@ -11,7 +11,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { PnpmLock } from './pnpm_lock';
-import { snapshotKeyToNameVersion } from './pnpm_lock';
+import { snapshotKeyToNameVersion, toSnapshotKey } from './pnpm_lock';
 
 /**
  * Get the set of all production dependencies for Kibana by starting with the
@@ -34,7 +34,7 @@ export function findProductionDependencies(
     if (version.startsWith('workspace:') || version.startsWith('link:')) {
       continue;
     }
-    const resolvedVersion = pnpmLock.rootDependencies[name];
+    const resolvedVersion = pnpmLock.rootDependencies[name]?.version;
     if (resolvedVersion) {
       // importer records the resolved version, which for `npm:` aliases is itself
       // a `name@version` snapshot key; compose it the same way as child deps.
@@ -71,20 +71,4 @@ export function findProductionDependencies(
   }
 
   return resolved;
-}
-
-/**
- * Compose the snapshot key used to look up a child dependency.
- * - plain: `lodash: 4.18.1` -> `lodash@4.18.1`
- * - peer-suffixed: `ai: 5.0.190(zod@4.4.3)` -> `ai@5.0.190(zod@4.4.3)`
- * - aliased: `ajv: '@redocly/ajv@8.18.1'` -> the value is already the key
- */
-function toSnapshotKey(name: string, value: string): string {
-  // strip peer suffix before deciding whether the value carries its own name@version
-  const paren = value.indexOf('(');
-  const beforePeers = paren === -1 ? value : value.slice(0, paren);
-  const aliasAt = beforePeers.startsWith('@')
-    ? beforePeers.indexOf('@', 1)
-    : beforePeers.indexOf('@');
-  return aliasAt === -1 ? `${name}@${value}` : value;
 }

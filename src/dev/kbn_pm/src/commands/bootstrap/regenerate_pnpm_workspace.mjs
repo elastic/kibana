@@ -30,7 +30,7 @@ const AUTHORED_EQUIVALENTS = new Map([
 ]);
 
 /**
- * Regenerates the fenced blocks of pnpm-workspace.yaml and synthesizes gitignored
+ * Regenerates the fenced blocks of pnpm-workspace.yaml and synthesizes
  * package.json files for packages that only ship a kibana.jsonc (pnpm needs a named
  * package.json per workspace member).
  *
@@ -157,10 +157,9 @@ async function synthesizeMissingPackageJsons(pkgs, log) {
   let written = 0;
   await Promise.all(
     pkgs.map(async (p) => {
-      // Only (re)manage files we generated (kbnGenerated sentinel); leave real ones.
-      if (p.pkg && p.pkg.kbnGenerated !== true) return;
       const path = Path.resolve(p.directory, 'package.json');
       if (await readIfExists(path)) return;
+
       const isXpack = p.normalizedRepoRelativeDir.startsWith(XPACK_DIR + '/');
       await Fsp.writeFile(path, generatedPackageJson(p.id, isXpack));
       written += 1;

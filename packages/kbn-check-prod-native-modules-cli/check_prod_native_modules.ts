@@ -65,7 +65,7 @@ async function checkDependencies(
 
         const entryPath = path.join(currentDir, entry.name);
         if (entry.name.startsWith('@')) {
-          // Handle scoped packages (e.g., @scope/package)
+          // Handle scoped packages (e.g., @elastic/package)
           stack.push(entryPath);
           continue;
         }

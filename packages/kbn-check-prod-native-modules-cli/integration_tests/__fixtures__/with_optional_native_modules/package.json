@@ -2,6 +2,6 @@
   "name": "with-optional-native-modules-project",
   "version": "1.0.0",
   "dependencies": {
-    "package-x": "^2.0.0"
+    "@elastic/package-x": "^2.0.0"
   }
 }

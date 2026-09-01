@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readPnpmLock } from './src/pnpm_lock';
-export type { PnpmLock } from './src/pnpm_lock';
+export {
+  parseLockfile,
+  readPnpmLock,
+  toLockGraph,
+  snapshotKeyToNameVersion,
+  stripPeerSuffix,
+} from './src/pnpm_lock';
+export type { PnpmLock, PnpmLockGraph, PnpmImporterDep } from './src/pnpm_lock';
 export { validateDependencies } from './src/validate_lock';
 export { findProductionDependencies } from './src/find_production_dependencies';

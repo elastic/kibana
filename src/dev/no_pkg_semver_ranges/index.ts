@@ -12,16 +12,12 @@ import { resolve } from 'path';
 
 import { parse as parseYaml } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { parseLockfile, stripPeerSuffix } from '@kbn/yarn-lock-validator';
 
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
 const PNPM_LOCK_PATH = resolve(REPO_ROOT, 'pnpm-lock.yaml');
 const PNPM_WORKSPACE_PATH = resolve(REPO_ROOT, 'pnpm-workspace.yaml');
 const DEPENDENCIES_FIELDS = ['dependencies', 'devDependencies'] as const;
-
-interface ImporterDep {
-  specifier: string;
-  version: string;
-}
 
 export function checkSemverRanges(
   runOptions: {
@@ -127,23 +123,9 @@ export function checkSemverRanges(
   return { totalFixes, fixesPerField };
 }
 
-/**
- * Builds a resolver that, given a package name and the exact specifier range
- * declared in package.json, returns the resolved version recorded for the root
- * importer in pnpm-lock.yaml. Peer suffixes (e.g. `(zod@4.4.3)`) are stripped.
- */
 function makeResolver(pnpmLockContent: string) {
-  const lock = (parseYaml(pnpmLockContent) ?? {}) as {
-    importers?: Record<
-      string,
-      {
-        dependencies?: Record<string, ImporterDep>;
-        devDependencies?: Record<string, ImporterDep>;
-      }
-    >;
-  };
-  const rootImporter = lock.importers?.['.'] ?? {};
-  const rootDeps = { ...rootImporter.dependencies, ...rootImporter.devDependencies };
+  const lock = parseLockfile(pnpmLockContent);
+  const rootDeps = { ...lock.rootDependencies, ...lock.rootDevDependencies };
 
   return (name: string, specifier: string): string | null => {
     const dep = rootDeps[name];
@@ -152,9 +134,4 @@ function makeResolver(pnpmLockContent: string) {
     }
     return stripPeerSuffix(dep.version);
   };
-}
-
-function stripPeerSuffix(version: string): string {
-  const paren = version.indexOf('(');
-  return paren === -1 ? version : version.slice(0, paren);
 }

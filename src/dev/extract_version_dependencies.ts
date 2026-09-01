@@ -13,8 +13,8 @@ import fs from 'fs/promises';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-
-import { parsePnpmLock, type PnpmLockGraph } from './pnpm_lock';
+import type { PnpmLockGraph } from '@kbn/yarn-lock-validator';
+import { parseLockfile, toLockGraph } from '@kbn/yarn-lock-validator';
 
 const options: RunOptions = {
   description:
@@ -79,7 +79,7 @@ export const collectDependencyVersionLines = ({
   pnpmLockContent: string;
 }) => {
   const pkgJson = JSON.parse(rootPackageJsonContent);
-  const graph = parsePnpmLock(pnpmLockContent);
+  const graph = toLockGraph(parseLockfile(pnpmLockContent));
 
   const allRequestedDependencies = {
     ...pkgJson.devDependencies,
