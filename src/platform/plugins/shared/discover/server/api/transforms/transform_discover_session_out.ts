@@ -52,8 +52,8 @@ export const transformDiscoverSessionOut = (
             undefined
           >,
         }),
-        time_restore: tab.attributes.timeRestore ?? false,
-        ...(tab.attributes.timeRange !== undefined && { time_range: tab.attributes.timeRange }),
+        ...(tab.attributes.timeRestore &&
+          tab.attributes.timeRange !== undefined && { time_range: tab.attributes.timeRange }),
         ...(tab.attributes.refreshInterval !== undefined && {
           refresh_interval: tab.attributes.refreshInterval,
         }),

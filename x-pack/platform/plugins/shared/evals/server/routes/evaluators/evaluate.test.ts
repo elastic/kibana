@@ -51,6 +51,7 @@ describe('POST /internal/evals/_evaluate', () => {
     name = 'groundedness',
     version = '1.0.0',
     kind = 'llm',
+    direction = 'maximize',
     evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     }),
@@ -60,6 +61,7 @@ describe('POST /internal/evals/_evaluate', () => {
     kind,
     origin: 'built_in',
     description: `${name} evaluator`,
+    direction,
     evaluate,
   });
 
@@ -894,6 +896,7 @@ describe('POST /internal/evals/_evaluate', () => {
           name: 'groundedness',
           version: '1.0.0',
           kind: 'llm',
+          direction: 'maximize',
         },
         error: { message: 'Error: failed badly' },
       },
@@ -915,6 +918,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const latency = buildEvaluator({
       name: 'latency',
       kind: 'code',
+      direction: 'minimize',
       evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
     });
     const getConnectorById = jest.fn().mockImplementation(async (connectorId: string) => ({
@@ -959,15 +963,59 @@ describe('POST /internal/evals/_evaluate', () => {
         name: 'groundedness',
         version: '1.0.0',
         kind: 'llm',
+        direction: 'maximize',
         model: { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
       },
       {
         name: 'correctness',
         version: '1.0.0',
         kind: 'llm',
+        direction: 'maximize',
         model: { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' },
       },
-      { name: 'latency', version: '1.0.0', kind: 'code' },
+      { name: 'latency', version: '1.0.0', kind: 'code', direction: 'minimize' },
+    ]);
+  });
+
+  it('reports evaluator.direction from the definition so ingest can persist polarity', async () => {
+    const latency = buildEvaluator({
+      name: 'latency',
+      kind: 'code',
+      direction: 'minimize',
+      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
+    });
+    const groundedness = buildEvaluator({
+      name: 'groundedness',
+      kind: 'llm',
+      direction: 'maximize',
+    });
+
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([latency, groundedness]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'latency' }, { name: 'groundedness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(
+      response.payload.results.map(
+        (result: EvaluateResponse['results'][number]) => result.evaluator
+      )
+    ).toEqual([
+      { name: 'latency', version: '1.0.0', kind: 'code', direction: 'minimize' },
+      { name: 'groundedness', version: '1.0.0', kind: 'llm', direction: 'maximize' },
     ]);
   });
 
