@@ -45,6 +45,10 @@ export const normalizedReportSchema = z.object({
   content: z.object({
     title: z.string(),
     body_text: z.string(),
+    // Marks reports whose body_text is the feed title rather than a real body (title-only
+    // entries). Optional so adapters that do not distinguish simply omit it; declared here
+    // so zod object parsing does not strip the marker before it reaches the strict mapping.
+    body_is_title_fallback: z.boolean().optional(),
     language: z.string().default('en'),
     external_references: z
       .array(
