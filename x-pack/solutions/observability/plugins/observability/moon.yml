@@ -182,7 +182,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout-oblt';
 
 export const mockStartInvestigation = async (page: ScoutPage) => {
   await page.route('**/internal/nightshift/investigations', async (route) => {
