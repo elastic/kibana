@@ -210,6 +210,8 @@ async function buildUploadPackageZip({
         `version: ${PACKAGE_VERSION}`,
         `title: ${name}`,
         'description: Upload live-stream probe package',
+        // format_version is a required top-level manifest field on 8.19
+        'format_version: 3.0.0',
         'type: integration',
         'owner:',
         '  github: elastic/fleet',
