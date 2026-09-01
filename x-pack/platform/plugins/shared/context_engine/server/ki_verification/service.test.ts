@@ -40,6 +40,12 @@ describe('KiVerificationService', () => {
     );
   });
 
+  it('throws when the same verifier id appears more than once', async () => {
+    registry.register(makeVerifier('a', { passed: true }));
+
+    await expect(run('a', 'a')).rejects.toThrow('Duplicate verifier id: "a"');
+  });
+
   it('passes when every applicable verifier passes', async () => {
     registry.register(makeVerifier('a', { passed: true }));
     registry.register(makeVerifier('b', { passed: true }));
