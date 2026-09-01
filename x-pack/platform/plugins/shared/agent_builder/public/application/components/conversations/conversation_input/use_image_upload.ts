@@ -10,7 +10,7 @@ import type { ToastInput } from '@kbn/core/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { processImageFile, getUniqueName } from './upload_image';
+import { processImageFile, getUniqueName, rejectIfTooManyImages } from './upload_image';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -70,6 +70,16 @@ export const useImageUpload = ({
       );
       // Also include in-flight names so two simultaneous pastes don't collide
       for (const n of uploadingNames) existingImageNames.add(n);
+
+      if (
+        rejectIfTooManyImages({
+          currentImageCount: existingImageNames.size,
+          addErrorToast,
+          reportEvent: services.analytics.reportEvent,
+        })
+      ) {
+        return undefined;
+      }
 
       const name = getUniqueName(file.name || 'image.png', existingImageNames);
       const controller = new AbortController();

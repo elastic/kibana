@@ -75,7 +75,7 @@ export interface ReportAddToChatClickedParams {
 }
 
 export interface ReportImageUploadRejectedParams {
-  reason: 'too_large' | 'invalid_type';
+  reason: 'too_large' | 'invalid_type' | 'too_many';
   mime_type?: string;
   file_size?: number;
 }
@@ -595,7 +595,7 @@ const IMAGE_UPLOAD_REJECTED_EVENT: AgentBuilderTelemetryEvent = {
     reason: {
       type: 'keyword',
       _meta: {
-        description: 'Why the image was rejected before upload (too_large|invalid_type)',
+        description: 'Why the image was rejected before upload (too_large|invalid_type|too_many)',
         optional: false,
       },
     },

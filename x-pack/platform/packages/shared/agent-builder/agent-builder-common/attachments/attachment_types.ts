@@ -134,6 +134,8 @@ export const CHAT_ATTACHMENT_IMAGES_FILE_KIND = 'chat-attachment-images';
 
 export const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
 
+export const MAX_IMAGES_PER_ROUND = 10;
+
 export const imageAttachmentDataSchema = z.object({
   file_id: z.string().max(1024),
   name: z.string().max(1024),

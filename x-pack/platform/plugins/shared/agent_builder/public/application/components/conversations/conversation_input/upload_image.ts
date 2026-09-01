@@ -12,6 +12,7 @@ import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
   MAX_IMAGE_BYTES,
+  MAX_IMAGES_PER_ROUND,
   SUPPORTED_IMAGE_MIME_TYPES,
 } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -30,6 +31,10 @@ const labels = {
   uploadError: i18n.translate('xpack.agentBuilder.uploadImage.uploadError', {
     defaultMessage: 'Could not upload the image.',
   }),
+  tooMany: i18n.translate('xpack.agentBuilder.uploadImage.tooMany', {
+    defaultMessage: 'You can attach up to {max} images per message.',
+    values: { max: MAX_IMAGES_PER_ROUND },
+  }),
 };
 
 /** Returns a name that is not already in `existingNames`. Appends ` 2`, ` 3`, ... as needed. */
@@ -41,6 +46,25 @@ export const getUniqueName = (originalName: string, existingNames: Set<string>):
   let n = 2;
   while (existingNames.has(`${base} ${n}${ext}`)) n++;
   return `${base} ${n}${ext}`;
+};
+
+/**
+ * Blocks adding another image once `currentImageCount` has reached the per-round limit.
+ * Shows a toast and reports telemetry. Returns whether the image was rejected.
+ */
+export const rejectIfTooManyImages = ({
+  currentImageCount,
+  addErrorToast,
+  reportEvent,
+}: {
+  currentImageCount: number;
+  addErrorToast: (input: ToastInput) => void;
+  reportEvent: AnalyticsServiceStart['reportEvent'];
+}): boolean => {
+  if (currentImageCount < MAX_IMAGES_PER_ROUND) return false;
+  addErrorToast({ title: labels.tooMany });
+  reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, { reason: 'too_many' });
+  return true;
 };
 
 /**

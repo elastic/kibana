@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { getUniqueName, processImageFile } from './upload_image';
+import { getUniqueName, processImageFile, rejectIfTooManyImages } from './upload_image';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
-import { AttachmentType, MAX_IMAGE_BYTES } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGES_PER_ROUND,
+} from '@kbn/agent-builder-common/attachments';
 
 (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap = jest
   .fn()
@@ -32,6 +36,40 @@ describe('getUniqueName', () => {
 
   it('works for files without an extension', () => {
     expect(getUniqueName('image', new Set(['image']))).toBe('image 2');
+  });
+});
+
+describe('rejectIfTooManyImages', () => {
+  it('allows the image when under the limit', () => {
+    const addErrorToast = jest.fn();
+    const reportEvent = jest.fn();
+
+    const rejected = rejectIfTooManyImages({
+      currentImageCount: MAX_IMAGES_PER_ROUND - 1,
+      addErrorToast,
+      reportEvent,
+    });
+
+    expect(rejected).toBe(false);
+    expect(addErrorToast).not.toHaveBeenCalled();
+    expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('blocks the image and reports telemetry once the limit is reached', () => {
+    const addErrorToast = jest.fn();
+    const reportEvent = jest.fn();
+
+    const rejected = rejectIfTooManyImages({
+      currentImageCount: MAX_IMAGES_PER_ROUND,
+      addErrorToast,
+      reportEvent,
+    });
+
+    expect(rejected).toBe(true);
+    expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'too_many',
+    });
   });
 });
 
