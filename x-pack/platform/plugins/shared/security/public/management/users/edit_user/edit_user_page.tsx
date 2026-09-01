@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPageSection,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -23,6 +24,7 @@ import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { AppHeader } from '@kbn/app-header';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -90,6 +92,14 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       <>
         <AppHeader title={username} back={back} spacing="bleed" />
         <EuiSpacer size="l" />
+        <EuiPageSection alignment="center" color="subdued">
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.security.management.users.editUserPage.loadingUserDescription"
+              defaultMessage="Loading…"
+            />
+          </SectionLoading>
+        </EuiPageSection>
       </>
     );
   }

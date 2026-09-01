@@ -56,6 +56,18 @@ describe('UserForm', () => {
     );
   };
 
+  it('renders an avatar when editing an existing user', () => {
+    const { unmount } = renderUserForm({ isNewUser: false });
+    expect(screen.getByTestId('userFormAvatar')).toBeInTheDocument();
+    unmount();
+  });
+
+  it('does not render an avatar when creating a user', () => {
+    const { unmount } = renderUserForm({ isNewUser: true });
+    expect(screen.queryByTestId('userFormAvatar')).not.toBeInTheDocument();
+    unmount();
+  });
+
   it('prevents editing username when disabled', async () => {
     const { unmount } = renderUserForm({ disabled: true });
     const usernameInput = screen.getByTestId<HTMLInputElement>('userFormUserNameInput');

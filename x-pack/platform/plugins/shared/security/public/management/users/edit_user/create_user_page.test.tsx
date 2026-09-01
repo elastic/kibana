@@ -10,7 +10,6 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { CreateUserPage } from './create_user_page';
@@ -49,7 +48,7 @@ describe('CreateUserPage', () => {
     const { findByRole, findByLabelText } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <CreateUserPage />
           </Providers>
         </MockAppHeaderProvider>
@@ -88,7 +87,7 @@ describe('CreateUserPage', () => {
     render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <CreateUserPage />
           </Providers>
         </MockAppHeaderProvider>
@@ -115,7 +114,7 @@ describe('CreateUserPage', () => {
     const { findAllByText, findByRole, findByLabelText } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <CreateUserPage />
           </Providers>
         </MockAppHeaderProvider>

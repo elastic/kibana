@@ -10,7 +10,7 @@ import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -27,14 +27,14 @@ const renderWithIntl = (ui: React.ReactElement) =>
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;
-  let coreStart: CoreStart;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
     history.createHref = (location: LocationDescriptorObject) => {
       return `${location.pathname}${location.search ? '?' + location.search : ''}`;
     };
-    coreStart = coreMock.createStart() as unknown as CoreStart;
+    coreStart = coreMock.createStart();
   });
 
   it('renders the list of users and create button', async () => {
@@ -471,5 +471,41 @@ describe('UsersGridPage', () => {
       expect(screen.getByText('foo')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('createUserButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the create action until the first load settles', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    let resolveUsers: (value: Awaited<ReturnType<typeof apiClientMock.getUsers>>) => void;
+    apiClientMock.getUsers.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUsers = resolve;
+      })
+    );
+
+    renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(screen.queryByTestId('createUserButton')).not.toBeInTheDocument();
+
+    resolveUsers!([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createUserButton')).toBeInTheDocument();
+    });
   });
 });

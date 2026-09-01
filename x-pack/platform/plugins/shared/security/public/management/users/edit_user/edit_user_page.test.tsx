@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { EditUserPage } from './edit_user_page';
@@ -47,6 +46,27 @@ describe('EditUserPage', () => {
     };
   });
 
+  it('keeps the header and shows a loading body while the user is loading', async () => {
+    coreStart.http.get.mockReturnValue(new Promise(() => {}));
+
+    render(
+      coreStart.rendering.addContext(
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
+      )
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        userMock.username
+      );
+      expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+    });
+  });
+
   it('warns when viewing deactivated user', async () => {
     coreStart.http.get.mockResolvedValueOnce({
       ...userMock,
@@ -57,7 +77,7 @@ describe('EditUserPage', () => {
     const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <EditUserPage username={userMock.username} />
           </Providers>
         </MockAppHeaderProvider>
@@ -66,6 +86,7 @@ describe('EditUserPage', () => {
 
     await findByText(/User has been deactivated/i);
     await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    await findByTestId('userFormAvatar');
   });
 
   it('warns when viewing deprecated user', async () => {
@@ -82,7 +103,7 @@ describe('EditUserPage', () => {
     const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <EditUserPage username={userMock.username} />
           </Providers>
         </MockAppHeaderProvider>
@@ -104,7 +125,7 @@ describe('EditUserPage', () => {
     const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <EditUserPage username={userMock.username} />
           </Providers>
         </MockAppHeaderProvider>
@@ -135,7 +156,7 @@ describe('EditUserPage', () => {
     const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <EditUserPage username={userMock.username} />
           </Providers>
         </MockAppHeaderProvider>
@@ -159,7 +180,7 @@ describe('EditUserPage', () => {
     const { findAllByRole, findByTestId } = render(
       coreStart.rendering.addContext(
         <MockAppHeaderProvider>
-          <Providers services={coreStart as unknown as CoreStart} authc={authc} history={history}>
+          <Providers services={coreStart} authc={authc} history={history}>
             <EditUserPage username={userMock.username} />
           </Providers>
         </MockAppHeaderProvider>
