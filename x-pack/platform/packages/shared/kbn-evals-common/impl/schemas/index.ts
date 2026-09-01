@@ -37,3 +37,4 @@ export * from './evaluators/delete_evaluator_route.gen';
 export * from './evaluators/evaluate_route.gen';
 export * from './evaluators/resolve_instrumentation_route.gen';
 export * from './evaluators/validate_route.gen';
+export * from './evaluators/test_evaluator_route.gen';
