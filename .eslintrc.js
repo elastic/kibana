@@ -9,8 +9,11 @@
 
 require('@kbn/swc-register').install();
 
+const Path = require('path');
+
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const { buildFromOxlintConfigFile } = require('eslint-plugin-oxlint');
 
 /**
  * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
@@ -505,12 +508,32 @@ const DEPRECATED_IMPORTS = [
   },
 ];
 
+/**
+ * Rules enforced by oxlint (`.oxlintrc.json`, `node scripts/lint`) are turned off in ESLint so
+ * each rule runs in exactly one linter. Files oxlint ignores keep the full ESLint rule set. A rule
+ * whose ESLint options are stricter than oxlint's implementation must not be enabled in oxlint.
+ *
+ * These must be the first overrides: later, path-specific overrides that configure one of
+ * these rules differently (e.g. stricter options) still win and keep it in ESLint there.
+ */
+const oxlintConfigs = buildFromOxlintConfigFile(Path.resolve(REPO_ROOT, '.oxlintrc.json'));
+const oxlintIgnores = oxlintConfigs.find((config) => config.ignores)?.ignores ?? [];
+const oxlintOverrides = oxlintConfigs
+  .filter((config) => config.rules)
+  .map((config) => ({
+    files: config.files ?? ['**/*.{js,mjs,ts,tsx}'],
+    excludedFiles: oxlintIgnores,
+    rules: config.rules,
+  }));
+
 module.exports = {
   root: true,
 
   extends: ['@kbn/eslint-config'],
 
   overrides: [
+    ...oxlintOverrides,
+
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
