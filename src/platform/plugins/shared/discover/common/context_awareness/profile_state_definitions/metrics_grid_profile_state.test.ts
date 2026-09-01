@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
+import {
+  LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+  ProfileStateRegistry,
+  ProfileStateType,
+} from '../profile_state';
 import { METRICS_STATE_DEF } from './metrics_grid_profile_state';
 
 const KEY = METRICS_STATE_DEF.key;
@@ -28,29 +32,30 @@ describe('METRICS_STATE_DEF', () => {
     expect(METRICS_STATE_DEF.key).toBe('metricsState');
   });
 
-  it('types all fields as Persistent so the host persists them locally across reloads', () => {
+  it('types sort as Url and grid settings as Persistent', () => {
     expect(METRICS_STATE_DEF.descriptor).toEqual({
       counterAggregation: { type: ProfileStateType.Persistent },
       gaugeAggregation: { type: ProfileStateType.Persistent },
       histogramPercentile: { type: ProfileStateType.Persistent },
-      sortField: { type: ProfileStateType.Persistent },
-      sortDirection: { type: ProfileStateType.Persistent },
+      sortField: { type: ProfileStateType.Url },
+      sortDirection: { type: ProfileStateType.Url },
     });
   });
 
-  it('fills in defaults when expanding a partial sort (what the host writes to storage)', () => {
+  it('fills in defaults when expanding a partial sort (what the host writes to the URL)', () => {
     const registry = createRegistry();
 
     const expanded = registry.pickStateByType({
       profileStateMap: { [KEY]: { sortField: 'recency' } },
-      stateTypes: [ProfileStateType.Persistent],
+      stateTypes: [ProfileStateType.Url],
       defaultsHandling: 'expand',
     });
 
-    expect(expanded[KEY]).toMatchObject({ sortField: 'recency', sortDirection: 'asc' });
+    // The sibling default is filled in so a shared link is self-contained.
+    expect(expanded[KEY]).toEqual({ sortField: 'recency', sortDirection: 'asc' });
   });
 
-  it('strips an all-default sort on read so it falls back to the default', () => {
+  it('strips an all-default sort so it does not reach the URL', () => {
     const registry = createRegistry();
 
     const stripped = registry.pickStateByType({
@@ -63,22 +68,46 @@ describe('METRICS_STATE_DEF', () => {
           sortDirection: 'asc',
         },
       },
-      stateTypes: [ProfileStateType.Persistent],
+      stateTypes: [ProfileStateType.Url],
       defaultsHandling: 'strip',
     });
 
     expect(stripped[KEY]).toBeUndefined();
   });
 
-  it('preserves a non-default sort on read (reload persistence)', () => {
+  it('preserves a non-default sort so it reaches the URL', () => {
     const registry = createRegistry();
 
     const stripped = registry.pickStateByType({
       profileStateMap: { [KEY]: { sortField: 'recency', sortDirection: 'desc' } },
-      stateTypes: [ProfileStateType.Persistent],
+      stateTypes: [ProfileStateType.Url],
       defaultsHandling: 'strip',
     });
 
     expect(stripped).toEqual({ [KEY]: { sortField: 'recency', sortDirection: 'desc' } });
+  });
+
+  it('keeps non-default grid settings out of URL state', () => {
+    const registry = createRegistry();
+
+    const urlState = registry.pickStateByType({
+      profileStateMap: { [KEY]: { counterAggregation: 'max', sortField: 'recency' } },
+      stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'strip',
+    });
+
+    expect(urlState).toEqual({ [KEY]: { sortField: 'recency' } });
+  });
+
+  it('still exposes sort to locally persisted state types (reload persistence)', () => {
+    const registry = createRegistry();
+
+    const stripped = registry.pickStateByType({
+      profileStateMap: { [KEY]: { counterAggregation: 'max', sortField: 'recency' } },
+      stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+      defaultsHandling: 'strip',
+    });
+
+    expect(stripped).toEqual({ [KEY]: { counterAggregation: 'max', sortField: 'recency' } });
   });
 });

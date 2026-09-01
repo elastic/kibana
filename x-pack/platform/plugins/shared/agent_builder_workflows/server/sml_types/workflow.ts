@@ -7,7 +7,8 @@
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WORKFLOW_INDEX_NAME, WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { WorkflowProperties } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
@@ -28,7 +29,7 @@ const buildSearchContent = (source: WorkflowProperties): string => {
 };
 
 export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefinition => ({
-  id: WORKFLOW_SML_TYPE,
+  id: WORKFLOW_KI_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -100,7 +101,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       const title = source.name ?? originId;
 
       return {
-        type: WORKFLOW_SML_TYPE,
+        type: WORKFLOW_KI_TYPE,
         title,
         content: buildSearchContent(source),
       };

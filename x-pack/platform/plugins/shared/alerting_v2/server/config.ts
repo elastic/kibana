@@ -81,6 +81,12 @@ const rulesSchema = schema.object({
   run: rulesRunSchema,
 });
 
+const esqlSchema = schema.object({
+  responseFormat: schema.oneOf([schema.literal('json'), schema.literal('arrow')], {
+    defaultValue: 'json',
+  }),
+});
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   invalidateApiKeysTask: schema.object({
@@ -88,7 +94,9 @@ export const configSchema = schema.object({
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
   }),
   rules: rulesSchema,
+  esql: esqlSchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
+export type EsqlConfig = TypeOf<typeof esqlSchema>;

@@ -105,25 +105,37 @@ export const getEcfServiceConfigs = (
     if (!entry?.ecfLogType) continue;
 
     const entryVars = serviceVars[instanceId];
-    const vars = entryVars?.vars ?? {};
-    const trigger = entryVars?.trigger;
+    const enabledInputs = entryVars?.enabledInputs ?? [];
 
-    // Gate each ARN on the selected trigger so stale values from a previous transport
+    // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
-    const bucketArn = trigger === 'aws-s3' ? vars.bucket_arn?.trim() || undefined : undefined;
-    const logGroupArn =
-      trigger === 'aws-cloudwatch' ? vars.log_group_arn?.trim() || undefined : undefined;
+    // Both vars are multi-value; split the comma-joined draft string into individual ARNs
+    // so each can be normalised independently (e.g. log-group `:*` suffix per ARN).
+    const splitArns = (raw: string | undefined): string[] =>
+      raw
+        ? raw
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+    const bucketArns = enabledInputs.includes('aws-s3')
+      ? splitArns(entryVars?.varsByInput?.['aws-s3']?.bucket_arn)
+      : [];
+    const logGroupArns = enabledInputs.includes('aws-cloudwatch')
+      ? splitArns(entryVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
+      : [];
 
     const existing = configsByServiceId.get(serviceId);
     if (existing) {
-      if (bucketArn) existing.bucketArns.push(bucketArn);
-      if (logGroupArn) existing.logGroupArns.push(logGroupArn);
+      existing.bucketArns.push(...bucketArns);
+      existing.logGroupArns.push(...logGroupArns);
     } else {
       configsByServiceId.set(serviceId, {
         serviceId,
         ecfLogType: entry.ecfLogType,
-        bucketArns: bucketArn ? [bucketArn] : [],
-        logGroupArns: logGroupArn ? [logGroupArn] : [],
+        bucketArns,
+        logGroupArns,
       });
     }
   }

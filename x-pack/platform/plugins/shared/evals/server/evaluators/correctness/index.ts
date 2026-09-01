@@ -38,6 +38,7 @@ export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceD
   name: 'correctness',
   version: '1.0.0',
   kind: 'llm',
+  origin: 'built_in',
   description: 'Measures factuality, relevance, and sequence accuracy against expected output.',
   referenceDataSchema,
   evidenceSchema: correctnessEvidenceSchema,

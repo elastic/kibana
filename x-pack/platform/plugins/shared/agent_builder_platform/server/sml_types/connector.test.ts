@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
@@ -64,8 +65,8 @@ describe('connectorSmlType', () => {
   });
 
   describe('id', () => {
-    it('equals connector', () => {
-      expect(connectorSmlType.id).toBe('connector');
+    it('equals CONNECTOR_KI_TYPE', () => {
+      expect(connectorSmlType.id).toBe(CONNECTOR_KI_TYPE);
     });
   });
 
@@ -273,7 +274,6 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'My MCP Connector',
         content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-        discovery_labels: [{ kind: 'shortcut', value: 'connector/My MCP Connector' }],
       });
       expect(result).not.toHaveProperty('permissions');
     });
@@ -369,7 +369,6 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        discovery_labels: [{ kind: 'shortcut', value: 'connector/Basic Connector' }],
       });
     });
   });

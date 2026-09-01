@@ -9,6 +9,7 @@ import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -16,7 +17,6 @@ import {
   extractEsqlFromLens,
 } from '../lens_reference';
 
-const VISUALIZATION_SML_TYPE = 'visualization';
 const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
 
 const getChartType = (attributes: LensAttributes): string => {
@@ -24,7 +24,7 @@ const getChartType = (attributes: LensAttributes): string => {
 };
 
 export const visualizationSmlType: SmlTypeDefinition = {
-  id: VISUALIZATION_SML_TYPE,
+  id: VISUALIZATION_KI_TYPE,
   fetchFrequency: () => '1h',
 
   async *list(context) {
@@ -60,7 +60,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
       const contentParts = [title, description, chartType, esql].filter(Boolean);
 
       return {
-        type: VISUALIZATION_SML_TYPE,
+        type: VISUALIZATION_KI_TYPE,
         title,
         content: contentParts.join('\n'),
       };
@@ -89,7 +89,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
     const lensApiConfig = toLensApiConfig(lensAttributes);
 
     return {
-      type: VISUALIZATION_SML_TYPE,
+      type: VISUALIZATION_KI_TYPE,
       data: {
         query: lensAttributes.title ?? item.origin_id,
         visualization: lensApiConfig as unknown as Record<string, unknown>,

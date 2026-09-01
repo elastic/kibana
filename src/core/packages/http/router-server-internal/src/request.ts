@@ -332,7 +332,13 @@ export class CoreKibanaRequest<
     }
 
     const options = {
-      ...omitBy({ excludeFromRateLimiter: this.isExcludedFromRateLimiter(request) }, isNil),
+      ...omitBy(
+        {
+          excludeFromRateLimiter: this.isExcludedFromRateLimiter(request),
+          httpResponseLogLevel: this.getHttpResponseLogLevel(request),
+        },
+        isNil
+      ),
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -421,6 +427,11 @@ export class CoreKibanaRequest<
   private isExcludedFromRateLimiter(request: RawRequest): boolean | undefined {
     return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.excludeFromRateLimiter;
+  }
+
+  private getHttpResponseLogLevel(request: RawRequest): 'info' | undefined {
+    return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.httpResponseLogLevel;
   }
 }
 

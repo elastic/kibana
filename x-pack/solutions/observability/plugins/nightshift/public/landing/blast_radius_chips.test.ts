@@ -40,6 +40,7 @@ const serviceFeature = (uuid: string, streamName = 'logs.checkout'): Feature => 
 
 const entityEntry = (featureId: string, name: string, streamName = 'logs.checkout') => ({
   type: 'entity' as const,
+  subtype: 'service',
   feature_id: featureId,
   name,
   stream_name: streamName,

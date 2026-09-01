@@ -84,7 +84,8 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  platformCpsEnabled: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -105,7 +106,7 @@ export const initRoutes = (
     isServerless
   );
 
-  registerResolverRoutes(router, getStartServices);
+  registerResolverRoutes(router, getStartServices, platformCpsEnabled);
 
   registerTimelineRoutes(router, config, getStartServices);
 

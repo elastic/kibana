@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
+import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
 
 interface ServicesStepProps {
@@ -106,7 +107,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      <strong>{cat}</strong>
+                      <strong>{getCategoryTitle(cat)}</strong>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
                       {preview}
@@ -150,7 +151,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                   >
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3>{activeCategory}</h3>
+                        <h3>{getCategoryTitle(activeCategory)}</h3>
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

@@ -78,6 +78,7 @@ import type {
   DataGridPaginationMode,
   CustomBulkActions,
   DocMap,
+  SourceDisplayMode,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -533,6 +534,12 @@ interface InternalUnifiedDataTableProps {
    * When true, filter actions on computed columns will be hidden.
    */
   hideFilteringOnComputedColumns?: boolean;
+
+  /**
+   * Set to 'json' to display a JSON representation of the source document
+   * instead of the Summary column. Defualt is summary.
+   */
+  sourceDisplayMode?: SourceDisplayMode;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -624,6 +631,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
+      sourceDisplayMode = 'summary',
     },
     ref
   ) => {
@@ -636,9 +644,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-    const displayedColumns = getDisplayedColumns(columns, dataView);
+    const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
     const showSummaryColumn = getShowSummaryColumn(displayedColumns);
+
     const docMap = useMemo<DocMap>(
       () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
       [rows]
@@ -723,6 +732,11 @@ const InternalUnifiedDataTable = React.forwardRef<
           sortedRows;
     }, [sortedRows, isFilterActive, hasSelectedDocs, isDocSelected]);
 
+    const shouldShowFieldHandler = useMemo(() => {
+      const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+      return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
+    }, [dataView, showMultiFields]);
+
     const valueToStringConverter: ValueToStringConverter = useCallback(
       (rowIndex, columnId, options) => {
         return convertValueToString({
@@ -733,9 +747,20 @@ const InternalUnifiedDataTable = React.forwardRef<
           fieldFormats,
           columnsMeta,
           options,
+          sourceDisplayMode,
+          shouldShowFieldHandler,
+          selectedColumns: columns,
         });
       },
-      [displayedRows, dataView, fieldFormats, columnsMeta]
+      [
+        displayedRows,
+        dataView,
+        fieldFormats,
+        columnsMeta,
+        sourceDisplayMode,
+        shouldShowFieldHandler,
+        columns,
+      ]
     );
 
     const onChangeShowSummaryColumn = useCallback(
@@ -843,6 +868,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         valueToStringConverter,
         componentsTourSteps,
         isPlainRecord,
+        sourceDisplayMode,
         pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
         pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
       }),
@@ -850,6 +876,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         componentsTourSteps,
         dataView,
         isPlainRecord,
+        sourceDisplayMode,
         isPaginationEnabled,
         displayedRows,
         expandedDoc,
@@ -860,11 +887,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         valueToStringConverter,
       ]
     );
-
-    const shouldShowFieldHandler = useMemo(() => {
-      const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-      return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
-    }, [dataView, showMultiFields]);
 
     const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
       storage,
@@ -899,6 +921,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           columnsMeta,
+          sourceDisplayMode,
+          selectedColumns: columns,
         }),
       [
         dataView,
@@ -910,6 +934,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         isPlainRecord,
         dataGridDensity,
         columnsMeta,
+        sourceDisplayMode,
+        columns,
       ]
     );
 
@@ -1052,17 +1078,29 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateRowHeight: onUpdateHeaderRowHeight,
     });
 
-    const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
-      useRowHeight({
-        type: RowHeightType.row,
-        storage,
-        consumer,
-        key: 'dataGridRowHeight',
-        defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
-        configRowHeight,
-        rowHeightState,
-        onUpdateRowHeight,
-      });
+    const {
+      rowHeight,
+      rowHeightLines: rowHeightLinesSetting,
+      lineCountInput,
+      onChangeRowHeight: onChangeRowHeightSetting,
+      onChangeRowHeightLines: onChangeRowHeightLinesSetting,
+    } = useRowHeight({
+      type: RowHeightType.row,
+      storage,
+      consumer,
+      key: 'dataGridRowHeight',
+      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+      configRowHeight,
+      rowHeightState,
+      onUpdateRowHeight,
+    });
+
+    // In JSON mode the source cell renders a variable-height tree: force the body cell height to auto
+    // and hide the "Body cell lines" setting.
+    const isJsonSourceMode = sourceDisplayMode === 'json';
+    const rowHeightLines = isJsonSourceMode ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
+    const onChangeRowHeight = isJsonSourceMode ? undefined : onChangeRowHeightSetting;
+    const onChangeRowHeightLines = isJsonSourceMode ? undefined : onChangeRowHeightLinesSetting;
 
     const euiGridColumns = useMemo(
       () =>
@@ -1095,6 +1133,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           disableCellActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
+          sourceDisplayMode,
         }),
       [
         cellActionsHandling,
@@ -1121,6 +1160,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         sortedColumns,
         disableCellActions,
         hideFilteringOnComputedColumns,
+        sourceDisplayMode,
       ]
     );
 

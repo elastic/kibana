@@ -16,21 +16,6 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/http_api/sml';
 
 /**
- * One entry in {@link SmlEntry.discovery_labels}. `value` is what the autocomplete
- * matches against; `kind` describes how the UI should render the matched label.
- *
- * `kind` is open (free-form keyword at the ES level). The indexer auto-prepends
- * entries with `kind: 'title'` and `kind: 'type'` derived from the entry's title
- * and type fields. Producers can add additional entries with any kind (e.g.
- * 'tagline', 'nickname', 'category', 'synonym') — the UI decides how to render
- * each kind.
- */
-interface DiscoveryLabel {
-  value: string;
-  kind: string;
-}
-
-/**
  * A single Kibana feature privilege required to access an entry
  * (e.g., `saved_object:lens/get`, `action:execute`).
  */
@@ -64,11 +49,6 @@ export interface SmlEntry {
   description?: string;
   /** Free-form labels for filtering and discovery */
   tags?: string[];
-  /**
-   * Categorical / nickname terms that make this record discoverable beyond `type`
-   * and `title`. Each label carries a `kind` so the UI can render it appropriately.
-   */
-  discovery_labels?: DiscoveryLabel[];
   /**
    * Type-specific structured data. Stored as `flattened` so leaves are
    * keyword-searchable for sub-path filtering. SML treats this opaquely;
@@ -212,12 +192,6 @@ export interface SmlDocument {
   description?: string;
   /** Free-form labels */
   tags?: string[];
-  /**
-   * Categorical / nickname terms beyond `type` and `title`.
-   * Nested entries `{ value, kind }`; `value.autocomplete` is the SAYT subfield
-   * that powers the @ menu, and `kind` drives UI badge rendering.
-   */
-  discovery_labels?: DiscoveryLabel[];
   /** Type-specific structured data (`flattened` mapping) */
   extended_attrs?: Record<string, unknown>;
   /** Owner or last-modifier user id */
@@ -266,24 +240,9 @@ export interface SmlSearchResult {
 }
 
 /**
- * One `discovery_labels` nested entry that matched an autocomplete prefix query.
- * Surfaced via `inner_hits`.
- */
-export interface MatchedDiscoveryLabel {
-  value: string;
-  kind: string;
-  /**
-   * The matched span within `value`, wrapped in `<em>...</em>` tags. Present
-   * when ES returned a highlight snippet for this inner hit; absent if not.
-   * Example: typed prefix `"git"` against value `"github"` produces `"<em>git</em>hub"`.
-   */
-  highlighted?: string;
-}
-
-/**
  * An SML autocomplete result — narrower than {@link SmlSearchResult}, tuned for
  * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
- * `extended_attrs`, etc.) and surfaces per-row provenance.
+ * `extended_attrs`, etc.).
  */
 export interface SmlAutocompleteResult {
   id: string;
@@ -294,13 +253,6 @@ export interface SmlAutocompleteResult {
   permissions: SmlPermissions;
   /** Used server-side for space filtering; not exposed in the HTTP response. */
   spaces: string[];
-  /**
-   * The specific `discovery_labels` entries that matched the typed prefix.
-   * `kind` lets the UI render each label appropriately — e.g. for a hit on the
-   * record's title vs. on a producer-supplied tagline, the UI can decide whether
-   * (and how) to surface the matched span.
-   */
-  matched_discovery_labels?: MatchedDiscoveryLabel[];
 }
 
 /**
@@ -471,13 +423,13 @@ export interface SmlService {
   }) => Promise<{ results: SmlSearchResult[] }>;
 
   /**
-   * Autocomplete / typeahead against the SML index. A single nested
-   * `multi_match bool_prefix operator: and` against `discovery_labels.value`
-   * (search_as_you_type) and its `_2gram` / `_3gram` subfields. Returns per-row
-   * provenance for UI badges. Filters by space and permissions the same way
-   * as `search`, and accepts the same per-type `constraints` and caller-supplied
-   * `filters` so a specialized UI picker (e.g. connectors-only or dashboards-only
-   * @ menu) can restrict results without any LLM involvement.
+   * Autocomplete / typeahead against the SML index. A `match_bool_prefix
+   * operator: and` against `title`, combined with a `prefix` clause on `type`
+   * so a "type/title" query matches each half against its own field. Filters by
+   * space and permissions the same way as `search`, and accepts the same
+   * per-type `constraints` and caller-supplied `filters` so a specialized UI
+   * picker (e.g. connectors-only or dashboards-only @ menu) can restrict
+   * results without any LLM involvement.
    */
   autocomplete: (params: {
     query: string;

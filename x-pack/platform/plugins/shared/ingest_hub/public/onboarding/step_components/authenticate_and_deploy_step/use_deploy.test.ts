@@ -10,11 +10,109 @@ import { renderHook, act } from '@testing-library/react';
 import { getRegionFieldName, buildStreamVars, buildPackageInputs, useDeploy } from './use_deploy';
 import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+
+function makeVarDef(
+  name: string,
+  type: RegistryVarsEntry['type'],
+  opts: Partial<RegistryVarsEntry> = {}
+): RegistryVarsEntry {
+  return { name, type, title: name, ...opts } as RegistryVarsEntry;
+}
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
 }));
+
+jest.mock('../../use_aws_service_matrix', () => {
+  const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = jest.requireActual(
+    '../../aws_service_matrix'
+  ) as any;
+  const policyTemplates = (AWS_SERVICES_STATIC as any[])
+    .filter((e: any) => e.packageName === 'aws')
+    .map((e: any) => ({
+      name: e.id,
+      data_streams: [e.id],
+      deployment_modes: { agentless: { enabled: true } },
+    }));
+  // Provide data streams for aws entries with correct input types so deployment input keys
+  // (e.g. 'ec2-aws/metrics') are generated correctly in useDeploy tests.
+  const AWS_INPUT_MAP: Record<string, string[]> = {
+    apigateway_logs: ['aws-s3', 'aws-cloudwatch'],
+    apigateway_metrics: ['aws/metrics'],
+    lambda: ['aws/metrics'],
+    lambda_logs: ['aws-cloudwatch'],
+    ec2_logs: ['aws-s3', 'aws-cloudwatch'],
+    ec2_metrics: ['aws/metrics'],
+    ecs_metrics: ['aws/metrics'],
+    emr_logs: ['aws-s3', 'aws-cloudwatch'],
+    emr_metrics: ['aws/metrics'],
+    awshealth: ['aws/metrics'],
+    cloudwatch_logs: ['aws-cloudwatch'],
+    cloudwatch_metrics: ['aws/metrics'],
+    billing: ['aws/metrics'],
+    usage: ['aws/metrics'],
+    cloudtrail: ['aws-s3', 'aws-cloudwatch'],
+    config: ['cel'],
+    guardduty: ['aws-s3', 'httpjson'],
+    inspector: ['httpjson'],
+    firewall_logs: ['aws-s3', 'aws-cloudwatch'],
+    firewall_metrics: ['aws/metrics'],
+    securityhub_findings: ['httpjson'],
+    securityhub_findings_full_posture: ['httpjson'],
+    securityhub_insights: ['httpjson'],
+    waf: ['aws-s3', 'aws-cloudwatch'],
+    cloudfront_logs: ['aws-s3'],
+    elb_logs: ['aws-s3', 'aws-cloudwatch'],
+    elb_metrics: ['aws/metrics'],
+    natgateway: ['aws/metrics'],
+    route53_public_logs: ['aws-cloudwatch'],
+    route53_resolver_logs: ['aws-s3', 'aws-cloudwatch'],
+    transitgateway: ['aws/metrics'],
+    vpcflow: ['aws-s3', 'aws-cloudwatch'],
+    vpn: ['aws/metrics'],
+    ebs: ['aws/metrics'],
+    s3_daily_storage: ['aws/metrics'],
+    s3_request: ['aws/metrics'],
+    s3access: ['aws-s3'],
+    s3_storage_lens: ['aws/metrics'],
+    dynamodb: ['aws/metrics'],
+    rds: ['aws/metrics'],
+    redshift: ['aws/metrics'],
+    kafka_metrics: ['aws/metrics'],
+    kinesis: ['aws/metrics'],
+    sns: ['aws/metrics'],
+    sqs: ['aws/metrics'],
+  };
+  const dataStreams = (AWS_SERVICES_STATIC as any[])
+    .filter((e: any) => e.packageName === 'aws')
+    .map((e: any) => {
+      const inputList: string[] = AWS_INPUT_MAP[e.id] ?? ['aws-s3'];
+      return {
+        path: e.id,
+        type: inputList[0].includes('metrics') ? 'metrics' : 'logs',
+        streams: inputList.map((input: string) => ({ input, vars: [], enabled: true })),
+      };
+    });
+  const mockPackages = {
+    aws: { policy_templates: policyTemplates, data_streams: dataStreams },
+    aws_bedrock: { policy_templates: [], data_streams: [] },
+    aws_bedrock_agentcore: { policy_templates: [], data_streams: [] },
+    awsfargate: { policy_templates: [], data_streams: [] },
+    aws_mq: { policy_templates: [], data_streams: [] },
+    aws_cloudtrail_otel: { policy_templates: [], data_streams: [] },
+    aws_vpcflow_otel: { policy_templates: [], data_streams: [] },
+    aws_waf_otel: { policy_templates: [], data_streams: [] },
+    aws_logs: { policy_templates: [], data_streams: [] },
+  };
+  const matrix = buildAwsServiceMatrix(mockPackages, AWS_SERVICES_STATIC);
+  const servicesMap = new Map(matrix.map((s: any) => [s.id, s]));
+  return {
+    useAwsServiceMatrix: jest.fn().mockReturnValue({ matrix, isError: false, refetch: jest.fn() }),
+    useAwsServicesMap: jest.fn().mockReturnValue(servicesMap),
+  };
+});
 
 jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
@@ -24,6 +122,7 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
@@ -37,14 +136,15 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'Compute',
+    category: 'compute',
     signalType: 'logs',
     packageName: 'aws',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws-s3'],
     requiredConfig: ['region'],
     identityFederationSupported: true,
     defaultEnabled: false,
+    defaultEnabledInputs: [],
     showInUI: true,
     ...overrides,
   };
@@ -84,16 +184,33 @@ describe('getRegionFieldName', () => {
 describe('buildStreamVars', () => {
   it('passes through non-boolean vars as strings', () => {
     const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: { foo: 'bar' } }, '');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { foo: 'bar' } } },
+      '',
+      'aws-s3'
+    );
     expect(vars.foo).toBe('bar');
   });
 
   it('coerces boolean var names to boolean type', () => {
-    const service = makeService({ requiredConfig: ['region'] });
+    const service = makeService({
+      requiredConfig: ['region'],
+      varDefsByInput: {
+        'aws-s3': {
+          preserve_original_event: makeVarDef('preserve_original_event', 'bool'),
+          collect_s3_logs: makeVarDef('collect_s3_logs', 'bool'),
+        },
+      },
+    });
     const vars = buildStreamVars(
       service,
-      { trigger: 'aws-s3', vars: { preserve_original_event: 'true', collect_s3_logs: 'false' } },
-      ''
+      {
+        enabledInputs: ['aws-s3'],
+        varsByInput: { 'aws-s3': { preserve_original_event: 'true', collect_s3_logs: 'false' } },
+      },
+      '',
+      'aws-s3'
     );
     expect(vars.preserve_original_event).toBe(true);
     expect(vars.collect_s3_logs).toBe(false);
@@ -101,7 +218,12 @@ describe('buildStreamVars', () => {
 
   it('falls back to globalRegion for single-region field when var is absent', () => {
     const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars.region).toBe('us-east-1');
   });
 
@@ -109,37 +231,60 @@ describe('buildStreamVars', () => {
     const service = makeService({ requiredConfig: ['region'] });
     const vars = buildStreamVars(
       service,
-      { trigger: 'aws-s3', vars: { region: 'eu-west-1' } },
-      'us-east-1'
+      { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { region: 'eu-west-1' } } },
+      'us-east-1',
+      'aws-s3'
     );
     expect(vars.region).toBe('eu-west-1');
   });
 
   it('does not emit regions when not explicitly set (optional field, package default applies)', () => {
     const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars).not.toHaveProperty('regions');
   });
 
   it('emits explicitly set regions as a string array (split on comma)', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
+    const service = makeService({
+      requiredConfig: [],
+      optionalConfig: ['regions'],
+      varDefsByInput: {
+        'aws-s3': { regions: makeVarDef('regions', 'text', { multi: true }) },
+      },
+    });
     const vars = buildStreamVars(
       service,
-      { trigger: null, vars: { regions: 'us-east-1,eu-west-1' } },
-      'ap-southeast-1'
+      { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { regions: 'us-east-1,eu-west-1' } } },
+      'ap-southeast-1',
+      'aws-s3'
     );
     expect(vars.regions).toEqual(['us-east-1', 'eu-west-1']);
   });
 
   it('does not emit regions when optionalConfig is absent', () => {
     const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars).not.toHaveProperty('regions');
   });
 
   it('does not emit metrics when not stored in vars', () => {
     const service = makeService({ requiredConfig: [], optionalConfig: ['regions', 'metrics'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars).not.toHaveProperty('metrics');
   });
 });
@@ -156,7 +301,7 @@ describe('buildPackageInputs', () => {
     });
     const inputs = buildPackageInputs(
       [service],
-      { ec2_logs: { trigger: 'aws-s3', vars: {} } },
+      { ec2_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
       'us-east-1'
     );
 
@@ -168,7 +313,11 @@ describe('buildPackageInputs', () => {
 
   it('uses bare inputType as key when no policyTemplate is set', () => {
     const service = makeService({ id: 'ec2_logs', inputs: ['aws-s3'], policyTemplate: undefined });
-    const inputs = buildPackageInputs([service], { ec2_logs: { trigger: 'aws-s3', vars: {} } }, '');
+    const inputs = buildPackageInputs(
+      [service],
+      { ec2_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+      ''
+    );
     expect(inputs['aws-s3']).toBeDefined();
   });
 
@@ -180,7 +329,7 @@ describe('buildPackageInputs', () => {
     });
     const inputs = buildPackageInputs(
       [service],
-      { ec2_metrics: { trigger: null, vars: {} } },
+      { ec2_metrics: { enabledInputs: [], varsByInput: {} } },
       'us-west-2'
     );
     expect(inputs['ec2-aws/metrics']).toBeDefined();
@@ -193,8 +342,8 @@ describe('buildPackageInputs', () => {
     const inputs = buildPackageInputs(
       [service1, service2],
       {
-        ec2_logs: { trigger: 'aws-s3', vars: {} },
-        emr_logs: { trigger: 'aws-s3', vars: {} },
+        ec2_logs: { enabledInputs: ['aws-s3'], varsByInput: {} },
+        emr_logs: { enabledInputs: ['aws-s3'], varsByInput: {} },
       },
       ''
     );
@@ -203,7 +352,7 @@ describe('buildPackageInputs', () => {
     expect(inputs['emr-aws-s3'].streams['aws.emr_logs']).toBeDefined();
   });
 
-  it('falls back to first input type from service when serviceVars has no trigger', () => {
+  it('falls back to first input type from service when enabledInputs is empty', () => {
     const service = makeService({
       id: 'ec2_logs',
       policyTemplate: 'ec2',
@@ -213,7 +362,7 @@ describe('buildPackageInputs', () => {
     expect(inputs['ec2-aws-cloudwatch']).toBeDefined();
   });
 
-  it('defaults to aws-s3 when service has multiple inputs and no trigger is set', () => {
+  it('uses the first manifest input as default when no enabledInputs is set', () => {
     const service = makeService({
       id: 'cloudtrail',
       policyTemplate: 'cloudtrail',
@@ -224,9 +373,28 @@ describe('buildPackageInputs', () => {
     expect(inputs['cloudtrail-aws-cloudwatch']).toBeUndefined();
   });
 
+  it('builds both inputs when two are enabled', () => {
+    const service = makeService({
+      id: 'guardduty',
+      policyTemplate: 'guardduty',
+      inputs: ['httpjson', 'aws-s3'],
+    });
+    const inputs = buildPackageInputs(
+      [service],
+      { guardduty: { enabledInputs: ['httpjson', 'aws-s3'], varsByInput: {} } },
+      ''
+    );
+    expect(inputs['guardduty-httpjson']).toBeDefined();
+    expect(inputs['guardduty-aws-s3']).toBeDefined();
+  });
+
   it('skips services with no resolvable input type', () => {
     const service = makeService({ id: 'no_input', inputs: [] });
-    const inputs = buildPackageInputs([service], { no_input: { trigger: null, vars: {} } }, '');
+    const inputs = buildPackageInputs(
+      [service],
+      { no_input: { enabledInputs: [], varsByInput: {} } },
+      ''
+    );
     expect(Object.keys(inputs)).toHaveLength(0);
   });
 });
@@ -388,6 +556,7 @@ function setupMocks({
       failedInstances: [],
       ...deployAndDetectStep,
     },
+    awsServicesMap: (useAwsServicesMap as jest.Mock)(),
     updateDeployAndDetectStep: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),
@@ -522,7 +691,7 @@ describe('useDeploy', () => {
     );
   });
 
-  it('calls onContinue immediately when no agentless services are selected', async () => {
+  it('calls onContinue immediately when no managed_integration services are selected', async () => {
     setupMocks({ selectedServiceIds: [] });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -603,7 +772,7 @@ describe('useDeploy', () => {
     expect(submittedInputs['lambda-aws/metrics'].enabled).toBe(true);
   });
 
-  it('deploys duplicate instances as separate agentless policy calls', async () => {
+  it('deploys duplicate instances as separate managed_integration policy calls', async () => {
     // Original goes into a bundled group (1 call); duplicate gets its own call (1 call).
     // Total: 2 sendCreateAgentlessPolicy calls.
     const instances = [
@@ -700,7 +869,7 @@ describe('useDeploy', () => {
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
     // ec2_metrics must appear in the call — it must not be silently dropped.
-    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+    expect(submittedInputs['ec2_metrics-aws/metrics'].enabled).toBe(true);
   });
 
   it('does not deploy a deselected service even when it is still in persisted instances', async () => {
@@ -727,15 +896,15 @@ describe('useDeploy', () => {
     // One call — only ec2_metrics; cloudtrail must not appear.
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
-    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+    expect(submittedInputs['ec2_metrics-aws/metrics'].enabled).toBe(true);
     // cloudtrail input must not be included (if it were, it would appear as 'cloudtrail-aws-s3'
     // or similar and would fire a separate call or appear enabled in the single call).
     const hasCloudtrailInput = Object.keys(submittedInputs).some((k) => k.startsWith('cloudtrail'));
     expect(hasCloudtrailInput).toBe(false);
   });
 
-  it('includes non-agentless services as gray instantiating chips without deploying them', async () => {
-    // ec2_metrics is agentless; ec2_logs is cloud_forwarder (per updated service matrix)
+  it('includes non-managed_integration services as gray instantiating chips without deploying them', async () => {
+    // ec2_metrics is managed_integration; ec2_logs is ecf (per updated service matrix)
     setupMocks({ selectedServiceIds: ['ec2_metrics', 'ec2_logs'] });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -751,7 +920,7 @@ describe('useDeploy', () => {
     // Both services appear in the initial status update
     expect(initialUpdate.serviceStatuses.ec2_metrics).toBe('instantiating');
     expect(initialUpdate.serviceStatuses.ec2_logs).toBe('instantiating');
-    // Agentless API only called once (for ec2_metrics; ec2_logs is non-agentless)
+    // Managed integrations API called once (for ec2_metrics; ec2_logs is ecf, non-managed)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
   });

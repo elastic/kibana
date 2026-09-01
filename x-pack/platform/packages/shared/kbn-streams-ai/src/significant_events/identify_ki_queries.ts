@@ -10,6 +10,8 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
@@ -440,6 +442,20 @@ export async function identifyKIQueries({
                     exactDuplicate,
                     error: 'This query already exists for this stream.',
                     hints: undefined,
+                  };
+                }
+
+                // Static over-match - reject before the data probe.
+                const overBroadPredicates = findOverBroadMatchPredicates(rewritten);
+                if (overBroadPredicates.length > 0) {
+                  hasNonIntentFailures = true;
+                  return {
+                    query,
+                    valid: false,
+                    status: 'Failed to add' as const,
+                    failureReason: 'validation_error' as const,
+                    exactDuplicate,
+                    error: renderOverBroadMatchError(overBroadPredicates),
                   };
                 }
 

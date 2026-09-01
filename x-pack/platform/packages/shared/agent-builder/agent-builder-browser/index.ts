@@ -18,6 +18,13 @@ export type { AgentsServiceStartContract } from './agents';
 export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
+  ConversationTemplateTabRenderProps,
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateServiceStartContract,
+} from './templates';
+export { ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
+export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
   BrowserChatEvent,

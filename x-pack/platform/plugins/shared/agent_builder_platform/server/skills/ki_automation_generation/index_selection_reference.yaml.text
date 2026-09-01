@@ -8,7 +8,7 @@ tags:
   - index-selection
   - knowledge-indicators
 consts:
-  target_index: .ai-index-idx-ki-example
+  target_index: ai-index-idx-ki-example
   indices:
     - raw-cases-all
     - raw-articles-all
@@ -41,11 +41,6 @@ steps:
             type: keyword
           attributes:
             type: flattened
-          discovery_labels:
-            type: nested
-            properties:
-              value: { type: search_as_you_type }
-              kind: { type: keyword }
           ingestion_method: { type: keyword }
     on-failure:
       continue: true

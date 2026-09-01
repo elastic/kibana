@@ -55,7 +55,7 @@ interface DeployAndDetectStepProps {
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
+  const { deployAndDetectStep, retryDeploy, awsServicesMap } = useOnboardingFlow();
   const { isDeploying, serviceStatuses, failedInstances, deployErrors } = deployAndDetectStep;
 
   // Read service settings (global region + per-instance vars + instances) from session storage.
@@ -134,7 +134,9 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
   // Whether the agentless section has any content to show
   const hasAgentlessServices = selectedServiceIds.some(
     (id) =>
-      AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
+      awsServicesMap
+        ?.get(id)
+        ?.deploymentMethods.some((dm) => dm.method === 'managed_integration') ?? false
   );
 
   // ── Render ───────────────────────────────────────────────────────────────

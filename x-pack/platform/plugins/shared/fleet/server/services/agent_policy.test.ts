@@ -1091,6 +1091,21 @@ describe('Agent policy', () => {
         })
       );
     });
+
+    it('should not fetch full package policies when deploying asynchronously', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+      });
+
+      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
+      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
+      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {

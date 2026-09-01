@@ -5,107 +5,189 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, useState } from 'react';
 import {
-  EuiButtonGroup,
+  EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import {
-  FIELD_CONFIG,
   REGION_FIELD_NAMES,
   getFlyoutFields,
-  getMandatoryBooleanFields,
+  getRegionFieldName,
+  getRequiredBooleanFields,
   getRequiredTextFields,
-  hasTransportChoice,
+  isAdvancedVar,
+  resolveFieldMeta,
+  toDraft,
+  toTyped,
 } from './field_config';
-import type { TransportType } from './field_config';
 
-const TRANSPORT_OPTIONS = [
-  {
-    id: 'aws-s3' as TransportType,
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.s3', {
-      defaultMessage: 'S3',
-    }),
-  },
-  {
-    id: 'aws-cloudwatch' as TransportType,
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.cloudwatch', {
-      defaultMessage: 'CloudWatch',
-    }),
-  },
-];
+function getInputDisplayLabel(input: string): string {
+  switch (input) {
+    case 'httpjson':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.httpjson', {
+        defaultMessage: 'Collect logs via API',
+      });
+    case 'aws-s3':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.s3', {
+        defaultMessage: 'Collect logs via S3',
+      });
+    case 'aws-cloudwatch':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.cloudwatch', {
+        defaultMessage: 'Collect logs via CloudWatch',
+      });
+    default:
+      return input;
+  }
+}
 
 export interface ServiceFieldsFormProps {
   service: AwsServiceMatrixEntry;
-  draft: Record<string, string>;
-  draftTransport: TransportType | null;
-  onFieldChange: (fieldName: string, value: string) => void;
-  onTransportChange: (transport: TransportType) => void;
-  /** When true, show [S3] / [CloudWatch] prefixes on transport-specific field labels */
-  showTransportPrefix?: boolean;
+  varsByInput: Record<string, Record<string, string>>;
+  enabledInputs: string[];
+  globalRegion: string;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
+  onInputToggle: (input: string, enabled: boolean) => void;
 }
 
-export function ServiceFieldsForm({
+// ECF trigger vars reference a "Collect logs via S3 Bucket" toggle that doesn't exist in
+// this UI. Strip the manifest description so the misleading help text isn't shown.
+const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
+
+function VarField({
   service,
+  activeInput,
+  fieldName,
   draft,
-  draftTransport,
   onFieldChange,
-  onTransportChange,
-  showTransportPrefix = false,
-}: ServiceFieldsFormProps) {
-  const hasTransport = hasTransportChoice(service);
-  const requiredTextFields = getRequiredTextFields(service, draftTransport);
-  const requiredTextFieldSet = new Set(requiredTextFields);
-  const flyoutFields = getFlyoutFields(service, draftTransport);
-  const otherFlyoutFields = flyoutFields.filter(
-    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f) && f !== 'regions'
+  forceShowErrors,
+}: {
+  service: AwsServiceMatrixEntry;
+  activeInput: string;
+  fieldName: string;
+  draft: Record<string, Record<string, string>>;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
+  forceShowErrors?: boolean;
+}) {
+  const meta = resolveFieldMeta(service, activeInput, fieldName);
+  if (!meta) return null;
+  const value = toTyped(draft[activeInput]?.[fieldName], meta);
+  const isRequired = !meta.isBool && (service.requiredConfig ?? []).includes(fieldName);
+  const isEmpty = Array.isArray(value)
+    ? value.length === 0
+    : typeof value === 'string' && !value.trim();
+  const errors =
+    forceShowErrors && isRequired && isEmpty
+      ? [
+          i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.requiredField.error', {
+            defaultMessage: 'This field is required.',
+          }),
+        ]
+      : null;
+  const varDef = ECF_TRIGGER_VARS.has(fieldName)
+    ? { ...meta.def, description: undefined, multi: true, required: true }
+    : meta.def;
+  return (
+    <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
+      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <LazyPackagePolicyInputVarField
+          varDef={varDef}
+          value={value}
+          onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
+          errors={errors}
+          forceShowErrors={forceShowErrors}
+          packageName={service.packageName}
+        />
+      </Suspense>
+    </div>
   );
-  const mandatoryBoolFields = getMandatoryBooleanFields(service, draftTransport);
+}
 
-  const anyRequiredEmpty = requiredTextFields.some((f) => !(draft[f] ?? '').trim());
+function InputVarFields({
+  service,
+  activeInput,
+  varsByInput,
+  globalRegion,
+  onFieldChange,
+}: {
+  service: AwsServiceMatrixEntry;
+  activeInput: string;
+  varsByInput: Record<string, Record<string, string>>;
+  globalRegion: string;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
+}) {
+  const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
-  const getBoolValue = (fieldName: string): boolean => {
-    if (draft[fieldName] !== undefined) return draft[fieldName] === 'true';
-    return FIELD_CONFIG[fieldName]?.defaultValue === true;
+  const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  const regionFieldName = getRegionFieldName(service, activeInput);
+  const regionMeta = allConfigFields.includes(regionFieldName)
+    ? resolveFieldMeta(service, activeInput, regionFieldName)
+    : undefined;
+
+  const requiredTextFields = getRequiredTextFields(service, activeInput);
+  const requiredTextFieldSet = new Set(requiredTextFields);
+  const flyoutFields = getFlyoutFields(service, activeInput);
+  const otherFlyoutFields = flyoutFields.filter(
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
+  );
+  const requiredBoolFields = getRequiredBooleanFields(service, activeInput);
+
+  const isAdvanced = (fieldName: string) => {
+    const meta = resolveFieldMeta(service, activeInput, fieldName);
+    return meta ? isAdvancedVar(meta.def) : false;
   };
 
-  const getFieldLabel = (fieldName: string): string => {
-    const meta = FIELD_CONFIG[fieldName];
-    if (!meta) return fieldName;
-    if (showTransportPrefix && hasTransport && meta.transport === 'aws-s3')
-      return `[S3] ${meta.label}`;
-    if (showTransportPrefix && hasTransport && meta.transport === 'aws-cloudwatch')
-      return `[CloudWatch] ${meta.label}`;
-    return meta.label;
-  };
+  const primaryBoolFields = requiredBoolFields.filter((f) => !isAdvanced(f));
+  const advancedBoolFields = requiredBoolFields.filter(isAdvanced);
+  const primaryOtherFields = otherFlyoutFields.filter((f) => !isAdvanced(f));
+  const advancedOtherFields = otherFlyoutFields.filter(isAdvanced);
+
+  const hasAdvancedOptions = advancedBoolFields.length > 0 || advancedOtherFields.length > 0;
+
+  const draft = varsByInput[activeInput] ?? {};
+  const anyRequiredEmpty = requiredTextFields.some((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
+    const effective = meta ? toTyped(draft[f], meta) : draft[f] ?? '';
+    if (Array.isArray(effective)) return effective.length === 0;
+    return typeof effective === 'string' && !effective.trim();
+  });
 
   return (
     <>
-      {hasTransport && (
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.legend', {
-            defaultMessage: 'Transport type',
-          })}
-          options={TRANSPORT_OPTIONS}
-          idSelected={draftTransport ?? 'aws-s3'}
-          onChange={(id) => onTransportChange(id as TransportType)}
-          buttonSize="compressed"
-          color="primary"
-          data-test-subj="serviceSettingsFlyout-transportToggle"
-        />
+      {regionMeta && (
+        <>
+          <EuiFormRow
+            label={
+              regionMeta.def.title ??
+              i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.region.label', {
+                defaultMessage: 'Region',
+              })
+            }
+          >
+            <EuiFieldText
+              value={globalRegion}
+              disabled
+              data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${regionFieldName}`}
+            />
+          </EuiFormRow>
+          {requiredTextFields.length > 0 && <EuiSpacer size="m" />}
+        </>
       )}
-
       {requiredTextFields.length > 0 && (
         <>
-          <EuiSpacer size="m" />
           {anyRequiredEmpty && (
             <>
               <EuiText size="s" color="danger" data-test-subj="serviceSettingsFlyout-requiredHint">
@@ -119,72 +201,164 @@ export function ServiceFieldsForm({
               <EuiSpacer size="s" />
             </>
           )}
-          {requiredTextFields.map((fieldName) => {
-            const meta = FIELD_CONFIG[fieldName];
-            if (!meta) return null;
-            const value = draft[fieldName] ?? '';
-            const isInvalid = value.trim() === '';
-            return (
-              <EuiFormRow
-                key={fieldName}
-                display="rowCompressed"
-                label={getFieldLabel(fieldName)}
-                isInvalid={isInvalid}
-                error={
-                  isInvalid
-                    ? i18n.translate(
-                        'xpack.ingestHub.serviceSettingsStep.flyout.requiredField.error',
-                        { defaultMessage: 'This field is required.' }
-                      )
-                    : undefined
-                }
-              >
-                <EuiFieldText
-                  compressed
-                  value={value}
-                  onChange={(e) => onFieldChange(fieldName, e.target.value)}
-                  placeholder={meta.placeholder}
-                  isInvalid={isInvalid}
-                  data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}
-                />
-              </EuiFormRow>
-            );
-          })}
+          {requiredTextFields.map((fieldName, i) => (
+            <React.Fragment key={fieldName}>
+              {i > 0 && <EuiSpacer size="m" />}
+              <VarField
+                service={service}
+                activeInput={activeInput}
+                fieldName={fieldName}
+                draft={varsByInput}
+                onFieldChange={onFieldChange}
+                forceShowErrors={anyRequiredEmpty}
+              />
+            </React.Fragment>
+          ))}
         </>
       )}
 
-      {otherFlyoutFields.map((fieldName) => {
-        const meta = FIELD_CONFIG[fieldName];
-        if (!meta) return null;
-        return (
-          <EuiFormRow key={fieldName} label={meta.label} helpText={meta.helpText}>
-            <EuiFieldText
-              value={draft[fieldName] ?? ''}
-              onChange={(e) => onFieldChange(fieldName, e.target.value)}
-              placeholder={meta.placeholder}
-            />
-          </EuiFormRow>
-        );
-      })}
-
-      {mandatoryBoolFields.length > 0 && (
+      {primaryBoolFields.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          {mandatoryBoolFields.map((fieldName) => {
-            const meta = FIELD_CONFIG[fieldName];
-            if (!meta) return null;
-            return (
-              <EuiFormRow key={fieldName} display="rowCompressed" helpText={meta.helpText}>
-                <EuiSwitch
-                  label={meta.label}
-                  checked={getBoolValue(fieldName)}
-                  onChange={(e) => onFieldChange(fieldName, e.target.checked ? 'true' : 'false')}
-                />
-              </EuiFormRow>
-            );
-          })}
+          {primaryBoolFields.map((fieldName, i) => (
+            <React.Fragment key={fieldName}>
+              {i > 0 && <EuiSpacer size="m" />}
+              <VarField
+                service={service}
+                activeInput={activeInput}
+                fieldName={fieldName}
+                draft={varsByInput}
+                onFieldChange={onFieldChange}
+              />
+            </React.Fragment>
+          ))}
         </>
       )}
+
+      {primaryOtherFields.length > 0 && (
+        <>
+          <EuiSpacer size="m" />
+          {primaryOtherFields.map((fieldName, i) => (
+            <React.Fragment key={fieldName}>
+              {i > 0 && <EuiSpacer size="m" />}
+              <VarField
+                service={service}
+                activeInput={activeInput}
+                fieldName={fieldName}
+                draft={varsByInput}
+                onFieldChange={onFieldChange}
+              />
+            </React.Fragment>
+          ))}
+        </>
+      )}
+
+      {hasAdvancedOptions && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
+                onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                flush="left"
+                data-test-subj="serviceSettingsFlyout-advancedToggle"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.serviceSettingsStep.flyout.advancedOptions"
+                  defaultMessage="Advanced options"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {isShowingAdvanced && (
+            <>
+              {advancedBoolFields.map((fieldName, i) => (
+                <React.Fragment key={fieldName}>
+                  {i > 0 && <EuiSpacer size="m" />}
+                  <VarField
+                    service={service}
+                    activeInput={activeInput}
+                    fieldName={fieldName}
+                    draft={varsByInput}
+                    onFieldChange={onFieldChange}
+                  />
+                </React.Fragment>
+              ))}
+              {advancedOtherFields.map((fieldName, i) => (
+                <React.Fragment key={fieldName}>
+                  {(i > 0 || advancedBoolFields.length > 0) && <EuiSpacer size="m" />}
+                  <VarField
+                    service={service}
+                    activeInput={activeInput}
+                    fieldName={fieldName}
+                    draft={varsByInput}
+                    onFieldChange={onFieldChange}
+                  />
+                </React.Fragment>
+              ))}
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+export function ServiceFieldsForm({
+  service,
+  varsByInput,
+  enabledInputs,
+  globalRegion,
+  onFieldChange,
+  onInputToggle,
+}: ServiceFieldsFormProps) {
+  const inputs = service.inputs ?? [];
+  const multiInput = inputs.length > 1;
+
+  if (!multiInput) {
+    // Single input — render vars directly with no toggle.
+    const singleInput = inputs[0] ?? null;
+    return singleInput ? (
+      <InputVarFields
+        service={service}
+        activeInput={singleInput}
+        varsByInput={varsByInput}
+        globalRegion={globalRegion}
+        onFieldChange={onFieldChange}
+      />
+    ) : null;
+  }
+
+  return (
+    <>
+      {inputs.map((input, idx) => {
+        const isEnabled = enabledInputs.includes(input);
+        return (
+          <React.Fragment key={input}>
+            {idx > 0 && <EuiHorizontalRule margin="m" />}
+            <EuiSwitch
+              label={getInputDisplayLabel(input)}
+              checked={isEnabled}
+              onChange={(e) => onInputToggle(input, e.target.checked)}
+              data-test-subj={`serviceSettingsFlyout-inputToggle-${input}`}
+            />
+            {isEnabled && (
+              <>
+                <EuiSpacer size="m" />
+                <InputVarFields
+                  service={service}
+                  activeInput={input}
+                  varsByInput={varsByInput}
+                  globalRegion={globalRegion}
+                  onFieldChange={onFieldChange}
+                />
+              </>
+            )}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 }

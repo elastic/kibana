@@ -8,6 +8,7 @@
 import {
   resolveEntityStoreWriteTargets,
   resolveLatestEntitiesIndexName,
+  resolveHistorySnapshotIndexPatterns,
 } from './resolve_entity_store_indices';
 import {
   getLatestEntitiesIndexName,
@@ -98,5 +99,30 @@ describe('resolveEntityStoreWriteTargets', () => {
     await expect(resolveLatestEntitiesIndexName(esClient, namespace)).resolves.toBe(
       getLatestEntitiesIndexName(namespace)
     );
+  });
+
+  describe('resolveHistorySnapshotIndexPatterns', () => {
+    it('returns neutral and legacy patterns so un-migrated snapshots stay readable', async () => {
+      mockConcrete([]);
+
+      await expect(resolveHistorySnapshotIndexPatterns(esClient, namespace)).resolves.toEqual([
+        `.entities.v2.history.${namespace}.*`,
+        `.entities.v2.history.security_${namespace}.*`,
+      ]);
+    });
+
+    it('returns only the neutral pattern when space security_{namespace} owns the colliding names', async () => {
+      mockConcrete([]);
+      esClient.indices.getAlias.mockImplementation(async ({ name }: { name: string }) => {
+        if (name === `entities-latest-security_${namespace}`) {
+          return { some_index: { aliases: { [name]: {} } } };
+        }
+        throw notFoundError();
+      });
+
+      await expect(resolveHistorySnapshotIndexPatterns(esClient, namespace)).resolves.toEqual([
+        `.entities.v2.history.${namespace}.*`,
+      ]);
+    });
   });
 });

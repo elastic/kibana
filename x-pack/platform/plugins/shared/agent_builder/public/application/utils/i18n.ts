@@ -760,7 +760,7 @@ export const labels = {
           defaultMessage: 'For common local agent (Claude Desktop, Cursor etc) you can use:',
         }),
         remoteUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.remoteUrlsLabel', {
-          defaultMessage: 'Remote URL',
+          defaultMessage: 'Remote URLs',
         }),
         remoteUrlsHelpText: i18n.translate(
           'xpack.agentBuilder.mcpClients.form.remoteUrlsHelpText',

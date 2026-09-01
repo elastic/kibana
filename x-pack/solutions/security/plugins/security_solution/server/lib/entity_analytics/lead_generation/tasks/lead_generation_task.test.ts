@@ -231,7 +231,7 @@ describe('Lead Generation Task', () => {
         inference: {},
       };
 
-      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue({ total: 3 });
+      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue(undefined);
       (updateLeadGenerationConfig as jest.Mock).mockResolvedValue(undefined);
       (resolveChatModel as jest.Mock).mockResolvedValue({});
 

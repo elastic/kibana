@@ -13,7 +13,6 @@ import type { HuntingLead } from './types';
 // This markdown is sent as an AI agent prompt and must remain in English
 // regardless of user locale — intentionally not using i18n here.
 const formatLeadAsMarkdown = (lead: HuntingLead): string => {
-  const entityList = lead.entities.map((e) => `- **${e.type}**: ${e.name}`).join('\n');
   const observationList = lead.observations
     .map((obs) => `- [${obs.severity}] ${obs.type}: ${obs.description}`)
     .join('\n');
@@ -27,8 +26,8 @@ const formatLeadAsMarkdown = (lead: HuntingLead): string => {
 ## Description
 ${lead.description}
 
-## Entities
-${entityList}
+## Entity
+**${lead.entity.type}**: ${lead.entity.name}
 
 ## Observations
 ${observationList}

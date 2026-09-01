@@ -131,7 +131,6 @@
     "@kbn/management-settings-ids",
     "@kbn/server-route-repository",
     "@kbn/ml-string-hash",
-    "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/ci-stats-reporter",
     "@kbn/gen-ai-functional-testing",

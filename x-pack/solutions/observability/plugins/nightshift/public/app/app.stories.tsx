@@ -160,7 +160,7 @@ export const ImpactedServicesPartiallyUnavailable: Story = {
 
 export const EventFlyoutImpactedServicesPartiallyUnavailable: Story = {
   args: {
-    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    initialEntry: `/?eventId=${checkoutEvent.event_id}`,
     scenario: 'populated',
     streamFeaturesScenario: 'partialError',
   },
@@ -176,21 +176,21 @@ export const EventFlyoutImpactedServicesPartiallyUnavailable: Story = {
 
 export const BlastRadiusFilterActive: Story = {
   args: {
-    initialEntry: '/?blastRadius=entity%3Acheckout-api%3Acheckout-api',
+    initialEntry: '/?impactedServices=entity%3Acheckout-api%3Acheckout-api',
     scenario: 'populated',
   },
 };
 
 export const EventNotFound: Story = {
   args: {
-    initialEntry: '/?eventUuid=unknown-event',
+    initialEntry: '/?eventId=unknown-event',
     scenario: 'populated',
   },
 };
 
 export const EventFlyoutOpen: Story = {
   args: {
-    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    initialEntry: `/?eventId=${checkoutEvent.event_id}`,
     scenario: 'populated',
   },
   parameters: {
@@ -205,7 +205,7 @@ export const EventFlyoutOpen: Story = {
 
 export const EventFlyoutDetectionsLoading: Story = {
   args: {
-    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    initialEntry: `/?eventId=${checkoutEvent.event_id}`,
     lifecycleScenario: 'loading',
     scenario: 'populated',
   },
@@ -213,7 +213,7 @@ export const EventFlyoutDetectionsLoading: Story = {
 
 export const EventFlyoutDetectionsError: Story = {
   args: {
-    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    initialEntry: `/?eventId=${checkoutEvent.event_id}`,
     lifecycleScenario: 'error',
     scenario: 'populated',
   },
@@ -221,7 +221,7 @@ export const EventFlyoutDetectionsError: Story = {
 
 export const EventFlyoutWithoutDetections: Story = {
   args: {
-    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    initialEntry: `/?eventId=${checkoutEvent.event_id}`,
     lifecycleScenario: 'empty',
     scenario: 'populated',
   },

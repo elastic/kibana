@@ -16,6 +16,7 @@ import type {
   ConversationAction,
   AgentExecutionMode,
   ConversationRoundAuthor,
+  InteractivityConfig,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
@@ -42,6 +43,8 @@ export const executeAgent$ = ({
   configurationOverrides,
   action,
   executionMode,
+  interactivity,
+  parentExecutionId,
   projectRouting,
 }: {
   agentId: string;
@@ -63,6 +66,8 @@ export const executeAgent$ = ({
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  interactivity?: InteractivityConfig;
+  parentExecutionId?: string;
   projectRouting?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
@@ -75,6 +80,8 @@ export const executeAgent$ = ({
       telemetryMetadata,
       maxContentLength,
       executionMode,
+      interactive: interactivity,
+      parentExecutionId,
       projectRouting,
       agentParams: {
         nextInput,

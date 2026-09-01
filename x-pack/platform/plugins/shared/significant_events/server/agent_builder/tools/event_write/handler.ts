@@ -8,11 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import {
-  type BlastRadiusEntry,
-  type CausalFeature,
   type SignificantEvent,
-  type SignalEntry,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
@@ -25,6 +21,15 @@ import {
   toCompactBulkError,
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import {
+  addsNewDetectionRules,
+  extractRuleUuids,
+  extractRuleUuidsFromEvents,
+  makeIdentity,
+  mergeEpisodeContext,
+  mergeSignalsLatestPerRule,
+  preserveStableNarrative,
+} from './episode_context';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -51,6 +56,9 @@ export interface EventsWriteResult {
   event_id: string;
   status: SignificantEvent['status'];
   written: true;
+  /** Set when the stored title and symptom_hypothesis were preserved because this continuation
+   *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
+  narrative_preserved?: true;
 }
 
 export interface EventsWriteDuplicateResult {
@@ -107,34 +115,6 @@ export type EventsWriteBulkResult =
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
 
-type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
-  Partial<Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius'>>;
-
-const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
-  const uuids = (signals ?? [])
-    .filter((signal): signal is Extract<SignalEntry, { type: 'detection' }> =>
-      Boolean(signal.type === 'detection' && signal.metadata.rule_uuid)
-    )
-    .map((signal) => signal.metadata.rule_uuid as string);
-  return [...new Set(uuids)];
-};
-
-/**
- * Collision-safe (for current stream name and UUID formats) length-prefixed stream-and-rules identity used for duplicate detection.
- * Uses exact-set matching: `['A']` produces a distinct key from `['A', 'B']`.
- * Length prefixes ensure `['a|b']` and `['a', 'b']` cannot collide.
- */
-export const makeIdentity = ({
-  streamNames,
-  ruleUuids,
-}: {
-  streamNames: string[];
-  ruleUuids: string[];
-}): string =>
-  [streamNames.length, ...[...streamNames].sort(), ruleUuids.length, ...[...ruleUuids].sort()].join(
-    '|'
-  );
-
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
  * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
@@ -148,101 +128,14 @@ const shouldSkipAsNoOp = (
 ): boolean => {
   if (latestEvent === undefined) return false;
 
-  const priorRuleUuids = new Set(priorDocs.flatMap((event) => extractRuleUuids(event.signals)));
-  const addsRule = extractRuleUuids(candidate.input.signals).some(
-    (ruleUuid) => !priorRuleUuids.has(ruleUuid)
-  );
+  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
+  const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
   return (
     latestEvent.status === candidate.input.status &&
     latestEvent.severity === candidate.input.severity &&
     !addsRule
   );
-};
-
-const mergeLatestByKey = <T>(
-  batches: Array<{ timestamp: string; values: T[] }>,
-  getKey: (value: T) => string | undefined
-): T[] => {
-  const latest = new Map<string, { timestamp: string; value: T }>();
-
-  for (const { timestamp, values } of batches) {
-    for (const value of values) {
-      const key = getKey(value);
-      if (key === undefined) continue;
-      const existing = latest.get(key);
-      if (existing === undefined || timestamp >= existing.timestamp) {
-        latest.set(key, { timestamp, value });
-      }
-    }
-  }
-
-  return [...latest.values()].map(({ value }) => value);
-};
-
-export const mergeSignalsLatestPerRule = (
-  priorDocs: Array<Pick<SignificantEvent, '@timestamp' | 'signals'>>,
-  submitted: SignalEntry[],
-  submittedTimestamp: string
-): SignalEntry[] =>
-  mergeLatestByKey(
-    [
-      ...priorDocs.map((doc) => ({
-        timestamp: doc['@timestamp'],
-        values: doc.signals ?? [],
-      })),
-      { timestamp: submittedTimestamp, values: submitted },
-    ],
-    (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
-  ).map((signal) =>
-    signal.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH
-      ? signal
-      : { ...signal, description: signal.description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH) }
-  );
-
-export const mergeEpisodeContext = (
-  priorDocs: EpisodeContextSource[],
-  submitted: Omit<EpisodeContextSource, '@timestamp'> & {
-    stream_names: SignificantEvent['stream_names'];
-  },
-  submittedTimestamp: string
-): { streamNames: string[]; causalFeatures: CausalFeature[]; blastRadius: BlastRadiusEntry[] } => {
-  const contexts: EpisodeContextSource[] = [
-    ...priorDocs,
-    { ...submitted, '@timestamp': submittedTimestamp },
-  ];
-
-  const streamNames = new Set(contexts.flatMap((ctx) => ctx.stream_names ?? []));
-  const causal = new Map<string, { timestamp: string; entry: CausalFeature }>();
-  const blast = new Map<string, { timestamp: string; entry: BlastRadiusEntry }>();
-
-  for (const ctx of contexts) {
-    const ts = ctx['@timestamp'];
-    for (const entry of ctx.blast_radius ?? []) {
-      const existing = blast.get(entry.feature_id);
-      if (!existing || ts >= existing.timestamp)
-        blast.set(entry.feature_id, { timestamp: ts, entry });
-    }
-    for (const entry of ctx.causal_features ?? []) {
-      blast.delete(entry.feature_id);
-      const existing = causal.get(entry.feature_id);
-      if (!existing || ts >= existing.timestamp)
-        causal.set(entry.feature_id, { timestamp: ts, entry });
-    }
-  }
-
-  for (const id of causal.keys()) blast.delete(id);
-
-  const byFeatureId = (
-    a: { entry: { feature_id: string } },
-    b: { entry: { feature_id: string } }
-  ) => a.entry.feature_id.localeCompare(b.entry.feature_id);
-
-  return {
-    streamNames: [...streamNames].sort(),
-    causalFeatures: [...causal.values()].sort(byFeatureId).map(({ entry }) => entry),
-    blastRadius: [...blast.values()].sort(byFeatureId).map(({ entry }) => entry),
-  };
 };
 
 type BulkResults = Array<EventsWriteBulkResult | undefined>;
@@ -426,7 +319,7 @@ const resolveDedupSkips = (
   return toWrite;
 };
 
-/** Full ordered history for continuation no-op evaluation and lineage merge. */
+/** Full history for remaining continuation writes (lineage merge). */
 const fetchPriorDocsByEventId = async (
   eventClient: EventClient,
   candidates: WriteCandidate[]
@@ -477,11 +370,31 @@ const buildPendingWrite = (
   // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
   const status = candidate.input.status;
 
+  // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to
+  // prevent identity hijack — the scenario where an unrelated condition's narrative replaces the
+  // original event identity while the old rules are still listed in signals (#1082).
+  const frozenNarrative = isContinuation
+    ? preserveStableNarrative(
+        extractRuleUuids(candidate.input.signals),
+        latestEvent,
+        extractRuleUuidsFromEvents([...priorDocs, latestEvent])
+      )
+    : undefined;
+
   return {
     candidate,
     status,
+    narrativePreserved: frozenNarrative?.narrativePreserved,
     document: {
       ...rest,
+      ...(frozenNarrative
+        ? {
+            title: frozenNarrative.title,
+            ...(frozenNarrative.symptom_hypothesis !== undefined && {
+              symptom_hypothesis: frozenNarrative.symptom_hypothesis,
+            }),
+          }
+        : {}),
       '@timestamp': timestamp,
       event_uuid: candidate.eventUuid,
       event_id: candidate.eventId,
@@ -503,24 +416,30 @@ const applyBulkResults = (
   createResults: BulkResponseItem[],
   results: BulkResults
 ): void => {
-  pendingWrites.forEach(({ candidate, status }, responseIndex) => {
+  pendingWrites.forEach(({ candidate, status, narrativePreserved }, responseIndex) => {
     const detail = createResults[responseIndex];
-    results[candidate.index] = detail.error
-      ? {
-          index: candidate.index,
-          event_id: candidate.eventId,
-          status,
-          written: false,
-          reason: 'bulk_error',
-          error: toCompactBulkError(detail),
-        }
-      : {
-          index: candidate.index,
-          event_uuid: candidate.eventUuid,
-          event_id: candidate.eventId,
-          status,
-          written: true,
-        };
+    if (detail.error) {
+      results[candidate.index] = {
+        index: candidate.index,
+        event_id: candidate.eventId,
+        status,
+        written: false,
+        reason: 'bulk_error',
+        error: toCompactBulkError(detail),
+      };
+    } else {
+      const result: EventsWriteResult = {
+        index: candidate.index,
+        event_uuid: candidate.eventUuid,
+        event_id: candidate.eventId,
+        status,
+        written: true,
+      };
+      if (narrativePreserved) {
+        result.narrative_preserved = true;
+      }
+      results[candidate.index] = result;
+    }
   });
 };
 
@@ -535,10 +454,12 @@ const applyBulkResults = (
  *  - Otherwise write a new event with the caller-supplied status.
  *
  * Snapshot-mode items (`event_id` present):
- *  - Skip the write (unchanged_outcome) when the latest stored version has the same severity and
+ *  - Skip the write (`unchanged_outcome`) when the latest stored version has the same severity and
  *    status, avoiding pure-churn duplicates.
  *  - Otherwise write a new version of the identified event, persisting the caller-supplied status.
- *  - Merge signals and topology with prior versions when history is found.
+ *    Merges signals and topology with prior versions when history is found.
+ *    When no new rule UUIDs are introduced, the stored `title` and `symptom_hypothesis` are
+ *    preserved (`narrative_preserved: true` on the result) to prevent identity hijack.
  */
 export async function eventsWriteBulkHandler({
   eventClient,

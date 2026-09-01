@@ -26,7 +26,7 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: false;
-      reason: 'existing_active_event' | 'bulk_error' | 'duplicate_in_batch';
+      reason: 'existing_active_event' | 'bulk_error' | 'duplicate_in_batch' | 'unchanged_outcome';
       existing_event_id?: string;
     };
 

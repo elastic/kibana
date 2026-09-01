@@ -36,10 +36,10 @@ describe('registerSkills', () => {
 
   it('includes the shared chart type selection guidance', () => {
     expect(skill.content).toContain('Chart Type Guidance');
-    expect(skill.content).toContain('Available chart types:');
+    expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain(
-      "Choose 'mosaic' when visualizing the joint distribution of two categorical dimensions"
+      'Choose for cross-tabulations (e.g. "request methods by status code"'
     );
     expect(skill.content).toContain(
       'provide a new `chartType` when the request changes the chart family'

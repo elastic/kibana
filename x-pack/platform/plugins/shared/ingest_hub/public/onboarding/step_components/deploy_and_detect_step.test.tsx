@@ -18,6 +18,7 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { DeployAndDetectStep } from './deploy_and_detect_step';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
@@ -40,6 +41,7 @@ function setupMocks({
       deployErrors,
       policyIdsByInstance: {},
     },
+    awsServicesMap: AWS_SERVICES_MAP,
     retryDeploy,
   });
   mockUseSessionStorage.mockReturnValue([
@@ -89,8 +91,9 @@ describe('DeployAndDetectStep', () => {
       });
 
       renderStep();
-      // ec2_metrics maps to "AWS EC2" in the real service matrix
-      expect(screen.getByText('AWS EC2')).toBeInTheDocument();
+      // AWS_SERVICES_MAP has no manifest data; name falls back to entry.id ('ec2_metrics').
+      // In production the matrix hook enriches this with the manifest title ('AWS EC2 metrics').
+      expect(screen.getByText('ec2_metrics')).toBeInTheDocument();
     });
 
     it('falls back to the raw instanceId when neither session storage nor service map has a match', () => {

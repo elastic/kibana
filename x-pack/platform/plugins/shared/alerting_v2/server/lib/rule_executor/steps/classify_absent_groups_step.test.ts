@@ -32,6 +32,7 @@ const createPluginConfigAccessor = () => {
       maxScheduledPerMinute: 400,
       run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
     },
+    esql: { responseFormat: 'json' },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 };

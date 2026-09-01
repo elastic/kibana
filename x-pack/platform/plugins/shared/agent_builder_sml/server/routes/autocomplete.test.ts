@@ -78,7 +78,7 @@ describe('registerAutocompleteRoute', () => {
     expect(mockSmlService.autocomplete).not.toHaveBeenCalled();
   });
 
-  it('returns 200 with autocomplete results and per-row provenance when enabled', async () => {
+  it('returns 200 with autocomplete results when enabled', async () => {
     const mockResults: SmlAutocompleteResult[] = [
       {
         id: 'entry-1',
@@ -87,10 +87,6 @@ describe('registerAutocompleteRoute', () => {
         origin: { uri: 'gh-1' },
         spaces: ['test-space'],
         permissions: { kibana: { privileges: [] } },
-        matched_discovery_labels: [
-          { value: 'GitHub Connector', kind: 'title' },
-          { value: 'github', kind: 'tagline' },
-        ],
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
@@ -104,33 +100,10 @@ describe('registerAutocompleteRoute', () => {
             type: 'connector',
             origin: { uri: 'gh-1' },
             title: 'GitHub Connector',
-            matched_discovery_labels: [
-              { value: 'GitHub Connector', kind: 'title' },
-              { value: 'github', kind: 'tagline' },
-            ],
           },
         ],
       },
     });
-  });
-
-  it('returns matched_discovery_labels as [] when absent on the result', async () => {
-    const mockResults: SmlAutocompleteResult[] = [
-      {
-        id: 'entry-2',
-        type: 'dashboard',
-        title: 'Sales Q3',
-        origin: { uri: 'dash-1' },
-        spaces: ['test-space'],
-        permissions: { kibana: { privileges: [] } },
-      },
-    ];
-    mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
-
-    const response = await callHandler({ query: 'sal', size: 5 });
-    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
-    const results = (body as any).results;
-    expect(results[0].matched_discovery_labels).toEqual([]);
   });
 
   it('does not leak server-only fields (permissions, spaces) into the HTTP response', async () => {

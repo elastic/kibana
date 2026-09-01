@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
 import {
   buildNodes,
   buildRows,
-  collectSearchMatches,
   collectExpandableIds,
   type FormatValue,
   type JsonValue,
-  type SearchMatches,
 } from './tree_model';
+import { collectSearchMatches, EMPTY_SEARCH_MATCHES } from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
@@ -45,9 +43,9 @@ export interface JsonTreeViewerProps {
    * Function called for each leaf node to render its value. Used by highlighting.
    */
   formatValue?: FormatValue;
+  /** Optional extra content rendered in the tree's header row, next to the expand/collapse control. */
+  extraHeaderContent?: ReactNode;
 }
-
-const EMPTY_SEARCH_MATCHES: SearchMatches = { containers: new Set(), reveals: new Map() };
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
   json,
@@ -55,8 +53,9 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   onStateChange,
   expandNodesContainingTerm,
   formatValue,
+  extraHeaderContent,
 }: JsonTreeViewerProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
@@ -96,28 +95,32 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 
   return (
     <>
-      {hasControls && (
+      {(hasControls || extraHeaderContent) && (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              buttonRef={expandAllRef}
-              flush="left"
-              iconType={isAllExpanded ? 'fold' : 'unfold'}
-              onClick={isAllExpanded ? collapseAll : expandAll}
-              onKeyDown={onControlKeyDown}
-              size="xs"
-              color="text"
-              data-test-subj="jsonTreeViewerExpandAll"
-            >
-              {isAllExpanded
-                ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
-                    defaultMessage: 'Collapse all',
-                  })
-                : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
-                    defaultMessage: 'Expand all',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {hasControls && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                buttonRef={expandAllRef}
+                flush="left"
+                iconType={isAllExpanded ? 'fold' : 'unfold'}
+                iconSize="s"
+                onClick={isAllExpanded ? collapseAll : expandAll}
+                onKeyDown={onControlKeyDown}
+                size="xs"
+                color="text"
+                data-test-subj="jsonTreeViewerExpandAll"
+              >
+                {isAllExpanded
+                  ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
+                      defaultMessage: 'Collapse all',
+                    })
+                  : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
+                      defaultMessage: 'Expand all',
+                    })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+          {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
         </EuiFlexGroup>
       )}
 

@@ -1364,6 +1364,75 @@ describe('UnifiedDataTable', () => {
     );
   });
 
+  describe('body cell row height in JSON source mode', () => {
+    it(
+      'forces the body cell height to auto in JSON mode, overriding the configured line count',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          sourceDisplayMode: 'json',
+          rowHeightState: 2,
+        });
+
+        expect(getLastEuiDataGridProps().rowHeightsOptions?.defaultHeight).toBe('auto');
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'respects the configured body cell line count in summary mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          sourceDisplayMode: 'summary',
+          rowHeightState: 2,
+        });
+
+        expect(getLastEuiDataGridProps().rowHeightsOptions?.defaultHeight).toEqual({
+          lineCount: 2,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'hides the "Body cell lines" display setting in JSON mode, leaving the header control',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateHeaderRowHeight: jest.fn(),
+          sourceDisplayMode: 'json',
+        });
+
+        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
+        expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'shows the "Body cell lines" display setting in summary mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateHeaderRowHeight: jest.fn(),
+          sourceDisplayMode: 'summary',
+        });
+
+        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
   describe('document comparison', () => {
     const closeSelectedRowsMenu = async () => {
       await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));

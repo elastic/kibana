@@ -79,15 +79,15 @@ const formatEntityLine = (s: ScoredEntityInput): string => {
 };
 
 /**
- * Builds a "Peer context" line for a lead: for each observation type present in
- * the group, how many OTHER candidate entities share it. Returns an empty string
- * when no peers share any of the lead's signals.
+ * Builds a "Peer context" line for a lead: for each observation type the
+ * entity has, how many OTHER candidate entities share it. Returns an empty
+ * string when no peers share any of the lead's signals.
  */
-const formatPeerContext = (group: ScoredEntityInput[], cohort?: CohortContext): string => {
+const formatPeerContext = (entity: ScoredEntityInput, cohort?: CohortContext): string => {
   if (!cohort) return '';
 
-  const groupTypes = new Set(group.flatMap((s) => s.observations.map((o) => o.type)));
-  const peerSignals = [...groupTypes]
+  const entityTypes = new Set(entity.observations.map((o) => o.type));
+  const peerSignals = [...entityTypes]
     .map((type) => ({ type, peers: (cohort.entityCountByObservationType[type] ?? 1) - 1 }))
     .filter(({ peers }) => peers > 0)
     .sort((a, b) => b.peers - a.peers)
@@ -112,9 +112,8 @@ const SHORT_WINDOW_ESCALATION_TYPES = new Set(['risk_escalation_24h', 'risk_esca
  * in the prompt — see the corresponding prompt rule — so the LLM never has
  * to infer or invent one from an unrelated observation's signal strength.
  */
-const formatRiskEscalation = (group: ScoredEntityInput[]): string => {
-  const escalation = group
-    .flatMap((s) => s.observations)
+const formatRiskEscalation = (entity: ScoredEntityInput): string => {
+  const escalation = entity.observations
     .filter((o) => SHORT_WINDOW_ESCALATION_TYPES.has(o.type))
     .sort((a, b) => Number(b.metadata.delta ?? 0) - Number(a.metadata.delta ?? 0))[0];
   if (!escalation) return '';
@@ -130,62 +129,57 @@ const formatRiskEscalation = (group: ScoredEntityInput[]): string => {
   )} (+${Math.round(delta)}) over the last ${window}.`;
 };
 
-const formatLeadsPayload = (groups: ScoredEntityInput[][], cohort?: CohortContext): string => {
-  return groups
-    .map((group, i) => {
-      const entityLines = group.map(formatEntityLine).join('\n');
+const formatLeadsPayload = (
+  entities: ReadonlyArray<ScoredEntityInput>,
+  cohort?: CohortContext
+): string => {
+  return entities
+    .map((entity, i) => {
+      const entityLine = formatEntityLine(entity);
 
-      const obsLines = group
-        .flatMap((s) => {
-          const key = s.entity.id;
-          return s.observations
-            .filter((o) => o.entityId === key)
-            .map((obs) => {
-              const metaEntries = Object.entries(obs.metadata)
-                .filter(([, v]) => v !== undefined && v !== null && v !== '')
-                .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
-                .join(', ');
-              return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
-                obs.type
-              }, signal_strength=${obs.score}/100${metaEntries ? `, ${metaEntries}` : ''})`;
-            });
+      const obsLines = entity.observations
+        .map((obs) => {
+          const metaEntries = Object.entries(obs.metadata)
+            .filter(([, v]) => v !== undefined && v !== null && v !== '')
+            .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
+            .join(', ');
+          return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
+            obs.type
+          }, signal_strength=${obs.score}/100${metaEntries ? `, ${metaEntries}` : ''})`;
         })
         .join('\n');
 
-      const header =
-        group.length > 1
-          ? `### Lead ${i + 1} — Campaign (${group.length} entities)`
-          : `### Lead ${i + 1} — Single entity`;
-      const riskEscalation = formatRiskEscalation(group);
-      const peerContext = formatPeerContext(group, cohort);
-      return [header, entityLines, obsLines, riskEscalation, peerContext]
-        .filter(Boolean)
-        .join('\n');
+      const header = `### Lead ${i + 1}`;
+      const riskEscalation = formatRiskEscalation(entity);
+      const peerContext = formatPeerContext(entity, cohort);
+      return [header, entityLine, obsLines, riskEscalation, peerContext].filter(Boolean).join('\n');
     })
     .join('\n\n');
 };
 
 /**
  * Use an LLM to synthesize content for all leads in a single batch call.
- * Returns results in the same order as the input groups.
+ * Returns results in the same order as the input entities.
  * Throws on failure — the caller should surface the error.
  */
 export const llmSynthesizeBatch = async (
   chatModel: InferenceChatModel,
-  groups: ScoredEntityInput[][],
+  entities: ReadonlyArray<ScoredEntityInput>,
   logger: Logger,
   cohort?: CohortContext
 ): Promise<LlmSynthesisResult[]> => {
-  if (groups.length === 0) return [];
+  if (entities.length === 0) return [];
 
-  const leadsPayload = formatLeadsPayload(groups, cohort);
+  const leadsPayload = formatLeadsPayload(entities, cohort);
   const jsonParser = new JsonOutputParser<LlmSynthesisResult[]>();
   const chain = batchSynthesisPrompt.pipe(chatModel).pipe(jsonParser);
 
-  logger.info(`[LeadGenerationEngine] Invoking LLM for batch synthesis of ${groups.length} leads`);
+  logger.info(
+    `[LeadGenerationEngine] Invoking LLM for batch synthesis of ${entities.length} leads`
+  );
 
   const results = await chain.invoke({
-    lead_count: String(groups.length),
+    lead_count: String(entities.length),
     leads_payload: leadsPayload,
   });
 
@@ -195,11 +189,11 @@ export const llmSynthesizeBatch = async (
     } results returned`
   );
 
-  if (!Array.isArray(results) || results.length !== groups.length) {
+  if (!Array.isArray(results) || results.length !== entities.length) {
     throw new Error(
       `LLM batch synthesis returned ${
         Array.isArray(results) ? results.length : typeof results
-      } items, expected ${groups.length}`
+      } items, expected ${entities.length}`
     );
   }
 

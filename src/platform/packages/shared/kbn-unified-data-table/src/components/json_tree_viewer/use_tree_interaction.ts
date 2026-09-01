@@ -242,9 +242,10 @@ export const useRovingTreeNavigation = (
           break;
         case 'Enter':
         case ' ':
-          // Pager rows activate through their buttons (ArrowRight → button → Enter), like leaf rows;
-          // only node rows toggle straight from the row.
-          if (row.kind === 'node' && row.hasChildren) {
+          if (row.kind === 'pager') {
+            claim();
+            rowRefs.current.get(rowKey(row))?.querySelector<HTMLElement>('button')?.click();
+          } else if (row.kind === 'node' && row.hasChildren) {
             claim();
             toggle(row.node.id);
           }

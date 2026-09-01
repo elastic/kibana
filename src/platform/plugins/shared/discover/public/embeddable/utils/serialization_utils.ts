@@ -107,7 +107,6 @@ export const serializeState = ({
   serializeDynamicActions,
   savedObjectId,
   selectedTabId,
-  embeddableTransformsEnabled,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -117,7 +116,6 @@ export const serializeState = ({
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
-  embeddableTransformsEnabled: boolean;
 }): SearchEmbeddablePanelApiState => {
   const searchSource = savedSearch.searchSource;
   const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
@@ -155,7 +153,7 @@ export const serializeState = ({
       ...(selectedTabId !== undefined && { selectedTabId }),
       savedObjectId,
     };
-    return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByRef(stored) : stored;
+    return fromStoredSearchEmbeddableByRef(stored);
   }
 
   const { title, description, ...titleOptions } = serializeTitles() ?? {};
@@ -176,5 +174,5 @@ export const serializeState = ({
       ...(serializedTitles.description && { description: serializedTitles.description }),
     },
   };
-  return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByValue(stored, []) : stored;
+  return fromStoredSearchEmbeddableByValue(stored, []);
 };

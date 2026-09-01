@@ -30,7 +30,7 @@ export const getAddCustomContentAction = (): ActionDefinition<EmbeddableApiConte
     const panelApi = await embeddable.addNewPanel(
       {
         panelType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-        serializedState: { prompt: '', template: '' },
+        serializedState: { prompt: '', template: undefined },
       },
       { displaySuccessMessage: false }
     );

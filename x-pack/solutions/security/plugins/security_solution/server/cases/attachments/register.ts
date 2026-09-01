@@ -18,11 +18,11 @@ export const registerCaseAttachments = (
   attachmentFramework: CasesServerSetup['attachmentFramework'],
   experimentalFeatures: ExperimentalFeatures
 ): void => {
-  attachmentFramework.registerUnified(getEndpointAttachmentType());
-  attachmentFramework.registerUnified(getEventAttachmentType());
-  attachmentFramework.registerUnified(getIndicatorAttachmentType());
+  attachmentFramework.registerAttachment(getEndpointAttachmentType());
+  attachmentFramework.registerAttachment(getEventAttachmentType());
+  attachmentFramework.registerAttachment(getIndicatorAttachmentType());
   if (experimentalFeatures.entityAttachmentsEnabled) {
-    attachmentFramework.registerUnified(getEntityAttachmentType());
+    attachmentFramework.registerAttachment(getEntityAttachmentType());
   }
-  attachmentFramework.registerUnified(getTimelineAttachmentType());
+  attachmentFramework.registerAttachment(getTimelineAttachmentType());
 };

@@ -157,5 +157,24 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         );
       });
     });
+
+    describe('EVAL IN subqueries', () => {
+      it('accepts a valid IN subquery with no errors', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | EVAL col0 = keywordField IN (FROM other_index | KEEP keywordField)',
+          []
+        );
+      });
+
+      it('validates sources inside IN subqueries', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM index | EVAL col0 = keywordField IN (FROM missing_index)', [
+          'Unknown index "missing_index"',
+        ]);
+      });
+    });
   });
 };

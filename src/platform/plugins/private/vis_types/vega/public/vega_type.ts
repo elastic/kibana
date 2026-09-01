@@ -24,7 +24,7 @@ import { getInfoMessage } from './components/vega_info_message';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
 import type { VisParams } from './vega_fn';
-import { VegaIcon } from './vega_icon';
+import { VegaIcon, vegaTitleInWizard } from './vega_icon';
 
 export const vegaVisType: VisTypeDefinition<VisParams> = {
   name: 'vega',
@@ -36,10 +36,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
   }),
   icon: VegaIcon, // VegaIcon svg is wrapped into EUIIcon
   group: VisGroups.PROMOTED,
-  titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
-    defaultMessage: 'Vega',
-    description: 'Vega is a product name and should not be translated',
-  }),
+  titleInWizard: vegaTitleInWizard,
   visConfig: { defaults: { spec: getDefaultSpec() } },
   editorConfig: {
     optionsTemplate: VegaVisEditorComponent,

@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiTabs,
   EuiText,
   EuiToolTip,
@@ -28,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
@@ -163,6 +163,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
+
+  const handleDateRangeChange = useCallback(
+    ({ from, to }: { from: string; to: string }) => {
+      onDateRangeChange({ dateStart: from, dateEnd: to });
+    },
+    [onDateRangeChange]
+  );
 
   const splitTabs = useMemo(() => {
     if (!tabProps?.tabs?.length) return [];
@@ -396,15 +403,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={dateRange.dateStart}
-              end={dateRange.dateEnd}
-              onTimeChange={({ start, end }) => {
-                onDateRangeChange({ dateStart: start, dateEnd: end });
-              }}
-              showUpdateButton={false}
-              compressed
+            <AlertingDateRangePicker
+              from={dateRange.dateStart}
+              to={dateRange.dateEnd}
+              onChange={handleDateRangeChange}
+              services={services}
               width="auto"
+              data-test-subj="querySandboxDatePicker"
             />
           </EuiFlexItem>
           {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}

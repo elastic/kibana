@@ -7,7 +7,7 @@
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { FIELD_CONFIG } from '../service_settings_step/field_config';
+import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 interface PackageInputEntry {
@@ -16,21 +16,13 @@ interface PackageInputEntry {
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
 
-const BOOLEAN_VAR_NAMES = new Set([
-  'preserve_original_event',
-  'collect_s3_logs',
-  'preserve_duplicate_custom_fields',
-  'collect_esm_metrics',
-  'leaderelection',
-]);
-
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,
-  activeTransport: string | null
+  activeInput: string | null
 ): string {
   const rc = service.requiredConfig ?? [];
-  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
-  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
+  if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
+  if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
   return '';
 }
@@ -38,26 +30,34 @@ export function getRegionFieldName(
 export function buildStreamVars(
   service: AwsServiceMatrixEntry,
   serviceVars: ServiceVars,
-  globalRegion: string
+  globalRegion: string,
+  activeInput: string
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
 
-  for (const [key, value] of Object.entries(serviceVars.vars)) {
-    if (BOOLEAN_VAR_NAMES.has(key)) {
-      result[key] = value === 'true';
-    } else if (FIELD_CONFIG[key]?.multi) {
-      const parts = value
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (parts.length > 0) result[key] = parts;
-    } else {
+  for (const [key, value] of Object.entries(serviceVars.varsByInput[activeInput] ?? {})) {
+    const meta = resolveFieldMeta(service, activeInput, key);
+    if (!meta) {
       result[key] = value;
+      continue;
+    }
+    result[key] = toTyped(value, meta);
+  }
+
+  // Emit manifest defaults for show_user fields belonging to this input not explicitly set.
+  const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  for (const key of allShowUserFields) {
+    if (key in result) continue;
+    const meta = resolveFieldMeta(service, activeInput, key);
+    if (!meta) continue;
+    const typed = toTyped(undefined, meta);
+    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+      result[key] = typed;
     }
   }
 
-  // Backfill singular region field from globalRegion when not explicitly set
-  const regionField = getRegionFieldName(service, serviceVars.trigger);
+  // Backfill region from globalRegion when not explicitly set.
+  const regionField = getRegionFieldName(service, activeInput);
   if (regionField && !result[regionField] && globalRegion) {
     result[regionField] = globalRegion;
   }
@@ -73,20 +73,31 @@ export function buildPackageInputs(
   const inputs: Record<string, PackageInputEntry> = {};
 
   for (const service of services) {
-    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? { trigger: null, vars: {} };
-    const defaultInput = service.inputs?.includes('aws-s3') ? 'aws-s3' : service.inputs?.[0] ?? '';
-    const inputType = serviceVars.trigger ?? defaultInput;
-    if (!inputType) continue;
+    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? {
+      enabledInputs: [],
+      varsByInput: {},
+    };
+    // Fall back to the first manifest input when no explicit selection has been saved.
+    const activeInputs =
+      serviceVars.enabledInputs.length > 0
+        ? serviceVars.enabledInputs
+        : service.defaultEnabledInputs?.length
+        ? service.defaultEnabledInputs
+        : service.inputs?.slice(0, 1) ?? [];
 
-    const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.dataStream ?? service.id}`;
-    const streamVars = buildStreamVars(service, serviceVars, globalRegion);
+    const streamKey = `${service.packageName}.${service.id}`;
 
-    if (!inputs[inputKey]) {
-      inputs[inputKey] = { enabled: true, streams: {} };
+    for (const inputType of activeInputs) {
+      const inputKey = service.policyTemplate
+        ? `${service.policyTemplate}-${inputType}`
+        : inputType;
+      const streamVars = buildStreamVars(service, serviceVars, globalRegion, inputType);
+
+      if (!inputs[inputKey]) {
+        inputs[inputKey] = { enabled: true, streams: {} };
+      }
+      inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
     }
-
-    inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
   }
 
   return inputs;

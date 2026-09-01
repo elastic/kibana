@@ -11,8 +11,8 @@ import React from 'react';
 import { css, Global } from '@emotion/react';
 import { logicalCSS } from '@elastic/eui';
 import type { LayoutAppearance } from '@kbn/ui-chrome-layout';
-import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
-import { APP_FIXED_VIEWPORT_ID, layoutVar } from '@kbn/core-chrome-layout-constants';
+import { GridLayoutGlobalStyles, layoutVar } from '@kbn/ui-chrome-layout';
+import { APP_FIXED_VIEWPORT_ID } from '../../kibana_layout_constants';
 
 const kibanaGlobalLayoutStyles = css`
   :root {

@@ -54,7 +54,7 @@ Use operations[] to:
 3. set_schedule — set execution interval and lookback window
 4. set_query — set the rule's detection query plus recovery and no-data strategies. Fields:
    - query (required): two formats supported:
-     - composed: required "base" (ES|QL string) + "breach: { segment }", optional "recovery: { segment }" (only when recovery_strategy is "query")
+     - composed: required "base" (ES|QL string), optional "breach: { segment }" (omit to treat every row returned by "base" as a breach), optional "recovery: { segment }" (only when recovery_strategy is "query")
      - standalone: required "breach: { query }", optional "recovery: { query }" (only when recovery_strategy is "query") and "no_data: { query }" (only when no_data_strategy is not "none")
    - recovery_strategy (optional): "no_breach" | "query" | "none" — "no_breach" recovers when breach stops, "query" runs a separate recovery query, "none" disables recovery. Signal rules cannot set this.
    - no_data_strategy (optional): "last_known_status" | "recover" | "none" — controls behaviour when no data is present; requires a "no_data" block in standalone queries. Signal rules cannot set this. ("emit" is not currently accepted by the create/update API — do not use it.)

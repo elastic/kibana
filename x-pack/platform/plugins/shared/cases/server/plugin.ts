@@ -307,8 +307,8 @@ export class CasePlugin
 
     return {
       attachmentFramework: {
-        registerUnified: (unifiedAttachmentType) => {
-          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        registerAttachment: (attachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
       config: this.caseConfig,

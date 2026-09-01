@@ -9,9 +9,6 @@
 
 import { Minimatch } from 'minimatch';
 
-// Don't annotate the return type as `Minimatch[]`: the installed
-// @types/minimatch exports `Minimatch` as a value (not a type), and ts-node
-// will reject it. Inference + `ReturnType` keeps the file ts-node-clean.
 const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 

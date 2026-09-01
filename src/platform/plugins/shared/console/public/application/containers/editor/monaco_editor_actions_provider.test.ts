@@ -122,6 +122,7 @@ describe('Editor actions provider', () => {
       getLineMaxColumn: (lineNumber: number) => (lines[lineNumber - 1] ?? '').length + 1,
       getOffsetAt,
       getPositionAt,
+      getValue: () => lines.join('\n'),
       getValueInRange,
       getWordAtPosition,
       getWordUntilPosition,
@@ -206,6 +207,92 @@ describe('Editor actions provider', () => {
       setEditorActionsCssMock,
       '.sampleHighlightedLinesClassName'
     );
+  });
+
+  describe('WHEN auto-indenting comments', () => {
+    const setEditorText = (text: string) => {
+      const lines = text.split('\n');
+      editor.getModel.mockReturnValue(createModel(lines));
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 1,
+        endLineNumber: lines.length,
+      } as monaco.Selection);
+      const parsedRequests = createParser()(text)?.requests;
+      if (!parsedRequests) {
+        throw new Error('Expected Console parser result');
+      }
+      mockGetParsedRequests.mockResolvedValue(parsedRequests);
+    };
+
+    it('SHOULD warn once when a commented request body falls back unchanged', async () => {
+      const text = ['GET _search', '{', '"a": /* keep */ 1', '}'].join('\n');
+      const context = serviceContextMock.create();
+      setEditorText(text);
+
+      await editorActionsProvider.autoIndent(context);
+
+      expect(context.services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(context.services.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        'Some request bodies with comments could not be safely auto-indented.'
+      );
+      expect(editor.executeEdits).toHaveBeenCalledWith('Apply indentations', [
+        expect.objectContaining({ text }),
+      ]);
+    });
+
+    it('SHOULD avoid warning for successfully formatted idempotent comments', async () => {
+      const text = ['GET _search', '{', '  // keep', '  "a": 1', '}'].join('\n');
+      const context = serviceContextMock.create();
+      setEditorText(text);
+
+      await editorActionsProvider.autoIndent(context);
+
+      expect(context.services.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(editor.executeEdits).toHaveBeenCalledWith('Apply indentations', [
+        expect.objectContaining({ text }),
+      ]);
+    });
+
+    it('SHOULD preserve a same-line unclosed block comment without warning', async () => {
+      const text = 'GET _search\n{"a":1} /* todo';
+      const context = serviceContextMock.create();
+      setEditorText(text);
+
+      await editorActionsProvider.autoIndent(context);
+
+      expect(context.services.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(editor.executeEdits).toHaveBeenCalledWith('Apply indentations', [
+        expect.objectContaining({
+          text: ['GET _search', '{', '  "a": 1', '} /* todo'].join('\n'),
+        }),
+      ]);
+    });
+
+    it('SHOULD warn before trimming an unclosed block comment', async () => {
+      const text = 'GET _search\n  {"a":1} /* todo  ';
+      const context = serviceContextMock.create();
+      setEditorText(text);
+
+      await editorActionsProvider.autoIndent(context);
+
+      expect(context.services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(editor.executeEdits).toHaveBeenCalledWith('Apply indentations', [
+        expect.objectContaining({ text }),
+      ]);
+    });
+
+    it('SHOULD avoid warning for comment-free invalid data', async () => {
+      const text = ['GET _search', '{'].join('\n');
+      const context = serviceContextMock.create();
+      setEditorText(text);
+
+      await editorActionsProvider.autoIndent(context);
+
+      expect(context.services.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(editor.executeEdits).toHaveBeenCalledWith('Apply indentations', [
+        expect.objectContaining({ text }),
+      ]);
+    });
   });
 
   describe('WHEN the opening brace key is released', () => {

@@ -91,8 +91,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('ES|QL query should be preserved', async () => {
-          const queryAfter = await discover.getEsqlQueryValue();
-          expect(queryAfter).toStrictEqual(queryBefore);
+          await expect.poll(() => discover.getEsqlQueryValue()).toBe(queryBefore);
         });
       }
     );

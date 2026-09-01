@@ -60,9 +60,20 @@ import {
   getLegacySecurityLatestEntitiesIndexName,
   getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
-import { getLatestIndexTemplateId } from './latest_index_template';
-import { getUpdatesIndexTemplateId } from './updates_index_template';
-import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
+import {
+  getLatestIndexTemplateId,
+  getLegacySecurityLatestIndexTemplateId,
+} from './latest_index_template';
+import {
+  getUpdatesIndexTemplateId,
+  getLegacySecurityUpdatesIndexTemplateId,
+} from './updates_index_template';
+import {
+  getComponentTemplateName,
+  getLegacySecurityComponentTemplateName,
+  getUpdatesComponentTemplateName,
+  getLegacySecurityUpdatesComponentTemplateName,
+} from './component_templates';
 import {
   getUpdatesEntitiesDataStreamName,
   getLegacySecurityUpdatesEntitiesDataStreamName,
@@ -556,18 +567,46 @@ export class AssetManagerClient {
     };
   }
 
+  /**
+   * Resolves a component's installed status by checking the neutral name first, then falling
+   * back to the legacy Security-scoped name. Mirrors the dual-probe pattern used by
+   * {@link getIndexComponents} for concrete indices and data streams.
+   *
+   * Preference: neutral wins when both exist (e.g. after a re-install post-upgrade).
+   * If only legacy exists, the legacy id is reported as installed.
+   * If neither exists, the legacy id is reported as not installed.
+   */
+  private async resolveComponentStatus(
+    resource: EngineComponentResource,
+    neutralId: string,
+    legacyId: string,
+    exists: (id: string) => Promise<boolean>
+  ): Promise<EngineComponentStatus> {
+    const [neutralExists, legacyExists] = await Promise.all([exists(neutralId), exists(legacyId)]);
+    if (neutralExists) {
+      return { id: neutralId, installed: true, resource };
+    } else {
+      return { id: legacyId, installed: legacyExists, resource };
+    }
+  }
+
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
-    const resource = 'index_template';
-    const latestId = getLatestIndexTemplateId(this.namespace);
-    const updatesId = getUpdatesIndexTemplateId(this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: latestId })),
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: updatesId })),
+    const probe = (id: string) =>
+      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: id }));
+    return Promise.all([
+      this.resolveComponentStatus(
+        'index_template',
+        getLatestIndexTemplateId(this.namespace),
+        getLegacySecurityLatestIndexTemplateId(this.namespace),
+        probe
+      ),
+      this.resolveComponentStatus(
+        'index_template',
+        getUpdatesIndexTemplateId(this.namespace),
+        getLegacySecurityUpdatesIndexTemplateId(this.namespace),
+        probe
+      ),
     ]);
-    return [
-      { id: latestId, installed: latestExists, resource },
-      { id: updatesId, installed: updatesExists, resource },
-    ];
   }
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
@@ -608,17 +647,22 @@ export class AssetManagerClient {
   private async getComponentTemplateComponents(
     definition: ManagedEntityDefinition
   ): Promise<EngineComponentStatus[]> {
-    const resource: EngineComponentResource = 'component_template';
-    const latestName = getComponentTemplateName(definition.type, this.namespace);
-    const updatesName = getUpdatesComponentTemplateName(definition.type, this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: latestName })),
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: updatesName })),
+    const probe = (name: string) =>
+      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name }));
+    return Promise.all([
+      this.resolveComponentStatus(
+        'component_template',
+        getComponentTemplateName(definition.type, this.namespace),
+        getLegacySecurityComponentTemplateName(definition.type, this.namespace),
+        probe
+      ),
+      this.resolveComponentStatus(
+        'component_template',
+        getUpdatesComponentTemplateName(definition.type, this.namespace),
+        getLegacySecurityUpdatesComponentTemplateName(definition.type, this.namespace),
+        probe
+      ),
     ]);
-    return [
-      { id: latestName, installed: latestExists, resource },
-      { id: updatesName, installed: updatesExists, resource },
-    ];
   }
 
   private async getIlmPolicyComponents(): Promise<EngineComponentStatus[]> {

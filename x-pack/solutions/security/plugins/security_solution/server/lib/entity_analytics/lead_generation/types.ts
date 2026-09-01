@@ -101,8 +101,8 @@ export interface Lead {
   readonly byline: string;
   /** Detailed description: evidence chain, investigation guide, the "why" */
   readonly description: string;
-  /** Entities involved in this lead */
-  readonly entities: LeadEntity[];
+  /** The entity this lead is about */
+  readonly entity: LeadEntity;
   /** Tags: keywords + MITRE ATT&CK tactics/techniques */
   readonly tags: string[];
   /** Priority score (1–10, 10 = most urgent) — normalized from composite score */

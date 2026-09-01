@@ -123,6 +123,12 @@ paths:
                           name:
                             type: string
                             maxLength: 256
+                          version:
+                            type: string
+                            maxLength: 64
+                            description: >-
+                              The evaluator version that produced the score, so a
+                              run stays reproducible after the definition moves on.
                           score:
                             type: number
                             nullable: true
@@ -141,6 +147,21 @@ paths:
                             type: string
                             maxLength: 256
                             nullable: true
+                          model:
+                            $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                            description: >-
+                              Model this evaluator judged with. When omitted, the
+                              top-level `evaluator_model` is used unless `kind` is
+                              `code`.
+                          kind:
+                            type: string
+                            enum:
+                              - llm
+                              - code
+                            description: >-
+                              Whether the evaluator invoked a model. `code` suppresses
+                              the top-level `evaluator_model` fallback so deterministic
+                              evaluators are not attributed a judge.
                         required:
                           - name
                     required:

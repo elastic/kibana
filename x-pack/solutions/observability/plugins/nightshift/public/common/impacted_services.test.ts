@@ -40,6 +40,7 @@ const mockFeature = (overrides: Partial<Feature> = {}): Feature => ({
 
 const entityEntry = {
   type: 'entity' as const,
+  subtype: 'service',
   feature_id: 'feat-checkout',
   name: 'checkout-api',
   stream_name: 'logs.checkout',
@@ -92,6 +93,7 @@ describe('getImpactedServices', () => {
       blast_radius: [
         {
           type: 'infrastructure',
+          subtype: 'infrastructure',
           feature_id: 'feat-ingress',
           title: 'Ingress controller',
           stream_name: 'logs.checkout',
@@ -117,6 +119,7 @@ describe('getImpactedServices', () => {
           blast_radius: [
             {
               type: 'infrastructure',
+              subtype: 'infrastructure',
               feature_id: 'feat-checkout',
               stream_name: 'logs.checkout',
               title,
@@ -138,6 +141,7 @@ describe('getImpactedServices', () => {
       blast_radius: [
         {
           type: 'dependency',
+          subtype: 'http',
           feature_id: 'feat-edge',
           source: 'checkout-api',
           target: 'payments-api',
@@ -154,6 +158,7 @@ describe('getImpactedServices', () => {
       blast_radius: [
         {
           type: 'infrastructure',
+          subtype: 'infrastructure',
           feature_id: 'feat-nodes',
           title: 'Wolfi Linux nodes',
           stream_name: 'logs.checkout',
@@ -207,12 +212,14 @@ describe('getImpactedServiceStreamNames', () => {
           },
           {
             type: 'infrastructure',
+            subtype: 'infrastructure',
             feature_id: 'feat-nodes',
             title: 'Wolfi Linux nodes',
             stream_name: 'logs.infra',
           },
           {
             type: 'dependency',
+            subtype: 'http',
             feature_id: 'feat-edge',
             source: 'checkout-api',
             target: 'payments-api',

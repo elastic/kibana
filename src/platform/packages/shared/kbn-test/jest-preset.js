@@ -33,9 +33,7 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: !!process.env.CODE_COVERAGE
-    ? [['json', { file: 'jest.json' }]]
-    : ['html', 'text'],
+  coverageReporters: ['html', 'text'],
 
   // An array of file extensions your modules use
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'json', 'node'],

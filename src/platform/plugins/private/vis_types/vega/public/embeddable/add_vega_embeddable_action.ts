@@ -14,13 +14,14 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, VEGA_EMBEDDABLE_TYPE } from '../constants';
 import { getDefaultSpec } from '../default_spec';
+import { VegaPanelIcon } from '../vega_icon';
 import type { VegaByValueState, VegaEmbeddableApi } from './vega_embeddable';
 
 export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
   grouping: [ADD_PANEL_VISUALIZATION_GROUP],
   order: 0,
-  getIconType: () => 'visVega',
+  getIconType: () => VegaPanelIcon,
   getDisplayName: () => 'Vega',
   getDisplayNameTooltip: () =>
     i18n.translate('visTypeVega.dashboard.addPanelActionDescription', {

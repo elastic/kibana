@@ -872,7 +872,7 @@ export function ComposeDiscoverFlyout({
     }
     /*
      * Manual split with an empty alert condition stays composed + empty segment —
-     * the schema rejects that at save; do not coerce to standalone.
+     * the request mapper omits the breach block at save; do not coerce to standalone.
      */
     setSandboxQuery(queryToCommit);
 
