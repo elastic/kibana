@@ -498,16 +498,20 @@ describe('Task Runner Cancel', () => {
 
   function testLogger() {
     expect(logger.debug).toHaveBeenCalledTimes(8);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      labels: {
-        executionId: RULE_EXECUTION_UUID,
-        ruleId: '1',
-        ruleType: 'test',
-        spaceId: 'default',
-        taskInstanceId: '1',
-      },
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`,
       {
@@ -520,7 +524,7 @@ describe('Task Runner Cancel', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       'Aborting any in-progress ES searches for rule type test with id 1',
       {
@@ -533,7 +537,7 @@ describe('Task Runner Cancel', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       `Updating rule task for test rule with id 1 - execution error due to timeout`,
       {
@@ -546,7 +550,7 @@ describe('Task Runner Cancel', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
       {
@@ -559,7 +563,7 @@ describe('Task Runner Cancel', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
       {
@@ -572,7 +576,7 @@ describe('Task Runner Cancel', () => {
         },
       }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       8,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
       {
