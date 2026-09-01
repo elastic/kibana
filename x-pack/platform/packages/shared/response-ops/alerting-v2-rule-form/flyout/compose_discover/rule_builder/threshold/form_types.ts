@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+
 export enum Aggregation {
   COUNT = 'count',
   AVG = 'avg',
@@ -55,6 +57,29 @@ export interface RecoveryConfig {
   conditionOperator: ConditionOperator;
 }
 
+export type SeverityMode = 'single' | 'multi';
+
+/** A single severity level with its own threshold (multi-severity mode). */
+export interface SeverityLevel {
+  id: string;
+  level: AlertEventSeverity;
+  threshold: number;
+}
+
+/**
+ * Optional severity configuration for the alert condition. Severity is only
+ * available for a single alert condition; multi mode additionally requires a
+ * non-range comparator (not `between`/`not_between`). The comparator is always
+ * inherited from the alert condition, so it is not stored here.
+ */
+export interface SeverityConfig {
+  mode: SeverityMode;
+  /** Level applied to all alerts in single mode. */
+  singleLevel: AlertEventSeverity;
+  /** Ordered from least to most severe in multi mode. */
+  levels: SeverityLevel[];
+}
+
 export interface ThresholdFormValues {
   indexPattern: string;
   timeField: string;
@@ -65,6 +90,7 @@ export interface ThresholdFormValues {
   conditionOperator: ConditionOperator;
   groupByFields: string[];
   recovery?: RecoveryConfig;
+  severity?: SeverityConfig;
 }
 
 export const AGGREGATIONS_REQUIRING_FIELD: Aggregation[] = [
@@ -207,6 +233,39 @@ export const DEFAULT_RECOVERY_CONDITION: Omit<RecoveryCondition, 'id'> = {
 
 let idCounter = 0;
 export const generateId = (): string => `_${Date.now()}_${++idCounter}`;
+
+export const DEFAULT_SINGLE_SEVERITY_LEVEL: AlertEventSeverity = 'high';
+
+/** Severity requires exactly one alert condition. */
+export const isSeveritySupported = (alertConditions: AlertCondition[]): boolean =>
+  alertConditions.length === 1;
+
+/** Multi-severity is unsupported for range comparators. */
+export const isMultiSeveritySupported = (comparator: Comparator): boolean =>
+  comparator !== Comparator.BETWEEN && comparator !== Comparator.NOT_BETWEEN;
+
+export const createDefaultSeverityConfig = (): SeverityConfig => ({
+  mode: 'single',
+  singleLevel: DEFAULT_SINGLE_SEVERITY_LEVEL,
+  levels: [],
+});
+
+/**
+ * Drop or downgrade severity config that is no longer applicable to the current
+ * conditions: severity is cleared for multiple conditions, and multi mode falls
+ * back to single mode when the comparator is range-based.
+ */
+export const reconcileSeverity = (
+  severity: SeverityConfig | undefined,
+  alertConditions: AlertCondition[]
+): SeverityConfig | undefined => {
+  if (!severity || !isSeveritySupported(alertConditions)) return undefined;  
+  const [condition] = alertConditions;
+  if (severity.mode === 'multi' && !isMultiSeveritySupported(condition.comparator)) {
+    return { ...severity, mode: 'single' };
+  }
+  return severity;
+};
 
 const FLIPPED_COMPARATOR: Record<Comparator, Comparator> = {
   [Comparator.GT]: Comparator.LTE,

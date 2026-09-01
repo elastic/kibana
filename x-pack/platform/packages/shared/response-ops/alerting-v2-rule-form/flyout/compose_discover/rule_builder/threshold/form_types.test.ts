@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { AlertCondition } from './form_types';
 import {
   Aggregation,
   areAllStatsValid,
   Comparator,
+  isMultiSeveritySupported,
+  isSeveritySupported,
   isStatFieldValid,
   isStatLabelValid,
   nextStatLabel,
   reconcileAlertConditionMetrics,
+  reconcileSeverity,
   shouldSyncConditionMetricOnLabelChange,
 } from './form_types';
 
@@ -93,5 +97,56 @@ describe('reconcileAlertConditionMetrics', () => {
     );
 
     expect(result[0].metric).toBe('count');
+  });
+});
+
+describe('severity helpers', () => {
+  const condition = (comparator: Comparator): AlertCondition => ({
+    id: '1',
+    metric: 'count',
+    comparator,
+    threshold: [100],
+  });
+
+  describe('isSeverityAvailable', () => {
+    it('is true only for a single alert condition', () => {
+      expect(isSeveritySupported([condition(Comparator.GT)])).toBe(true);
+      expect(isSeveritySupported([condition(Comparator.GT), condition(Comparator.LT)])).toBe(false);
+      expect(isSeveritySupported([])).toBe(false);
+    });
+  });
+
+  describe('isMultiSeveritySupported', () => {
+    it('is false for range comparators', () => {
+      expect(isMultiSeveritySupported(Comparator.GT)).toBe(true);
+      expect(isMultiSeveritySupported(Comparator.LTE)).toBe(true);
+      expect(isMultiSeveritySupported(Comparator.BETWEEN)).toBe(false);
+      expect(isMultiSeveritySupported(Comparator.NOT_BETWEEN)).toBe(false);
+    });
+  });
+
+  describe('reconcileSeverity', () => {
+    const severity = { mode: 'multi' as const, singleLevel: 'high' as const, levels: [] };
+
+    it('clears severity for multiple conditions', () => {
+      expect(
+        reconcileSeverity(severity, [condition(Comparator.GT), condition(Comparator.LT)])
+      ).toBeUndefined();
+    });
+
+    it('downgrades multi to single for range comparators', () => {
+      expect(reconcileSeverity(severity, [condition(Comparator.BETWEEN)])).toEqual({
+        ...severity,
+        mode: 'single',
+      });
+    });
+
+    it('keeps a valid multi config unchanged', () => {
+      expect(reconcileSeverity(severity, [condition(Comparator.GT)])).toEqual(severity);
+    });
+
+    it('passes through undefined', () => {
+      expect(reconcileSeverity(undefined, [condition(Comparator.GT)])).toBeUndefined();
+    });
   });
 });
