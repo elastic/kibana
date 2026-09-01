@@ -25,6 +25,42 @@ export const isDestinationStream = (detail: StreamListItem): detail is ClassicSt
   Streams.ClassicStream.Definition.is(detail.stream);
 
 /**
+ * Prototype-only example of an external (non-Elasticsearch) destination.
+ * The `s3` destination type has no backend yet, so this is hardcoded to show
+ * how external destinations render in the table alongside classic streams.
+ */
+const MOCK_S3_UPDATED_AT = '2026-01-01T00:00:00.000Z';
+
+const mockS3StreamDefinition: Streams.ClassicStream.Definition = {
+  type: 'classic',
+  name: 's3-cold-log-archive',
+  description: 'Long-term log archive in Amazon S3 (us-east-1).',
+  updated_at: MOCK_S3_UPDATED_AT,
+  ingest: {
+    lifecycle: { dsl: { data_retention: '365d' } },
+    processing: { steps: [], updated_at: MOCK_S3_UPDATED_AT },
+    settings: {},
+    failure_store: { inherit: {} },
+    classic: {},
+  },
+};
+
+export const MOCK_EXTERNAL_S3_DESTINATION: Destination = {
+  name: 's3-cold-log-archive',
+  type: 's3',
+  description: 'Long-term log archive in Amazon S3 (us-east-1).',
+  tags: ['archive', 'cold-storage'],
+  isManaged: false,
+  isInternal: false,
+  hasDataStream: false,
+  canReadFailureStore: false,
+  retention: { dsl: { data_retention: '365d' } },
+  retentionMs: 365 * 24 * 60 * 60 * 1000,
+  streamDefinition: mockS3StreamDefinition,
+  indexMode: 'standard',
+};
+
+/**
  * Maps a stream (today's only real destination source) to the Destination view
  * model. Fields without a backend yet come from mock metadata.
  */

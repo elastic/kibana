@@ -7,10 +7,12 @@
 
 import type { ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
-import { StreamsCanvas } from '../stream_management/data_management/stream_detail_canvas';
+// Prototype Canvas and Sources views are wired into the new-experience layout
+// so enabling the Canvas feature flag keeps the custom prototype for those tabs.
+import { StreamsCanvas } from '../stream_list_view/streams_canvas';
+import { SourcesTable } from '../stream_list_view/sources_table';
 import { DestinationsTab } from './destinations';
 import { PipelinesTab } from './pipelines';
-import { SourcesTab } from './sources';
 
 interface StreamsLayoutTabConfig {
   label: string;
@@ -45,7 +47,7 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
     label: i18n.translate('xpack.streams.streamsLayout.sourcesTab', {
       defaultMessage: 'Sources',
     }),
-    Component: SourcesTab,
+    Component: SourcesTable,
   },
   pipelines: {
     label: i18n.translate('xpack.streams.streamsLayout.pipelinesTab', {
