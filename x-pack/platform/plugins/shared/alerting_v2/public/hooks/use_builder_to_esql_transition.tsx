@@ -6,7 +6,7 @@
  */
 
 import type { BuilderState, ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
-import { RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { RULE_BUILDER_REGISTRY, fromBuilderFields } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
@@ -14,23 +14,6 @@ import {
   ConfirmBuilderToEsqlModal,
   CONFIRM_BUILDER_TO_ESQL_VARIANT,
 } from '../components/confirm_builder_to_esql_modal';
-
-/**
- * Reconstructs builder form state from `metadata.builder_fields` using the
- * registered `fromFields` adapter, or the fields themselves when the form shape
- * matches the stored shape (no adapter needed).
- */
-const tryRestoreFromBuilderFields = (
-  type: string,
-  builderFields: Record<string, unknown>
-): BuilderState | null => {
-  const definition = RULE_BUILDER_REGISTRY[type];
-  if (!definition) return null;
-  if (definition.fromFields) {
-    return definition.fromFields(builderFields);
-  }
-  return builderFields;
-};
 
 /**
  * Legacy path: reconstructs builder form state by parsing the ES|QL query text.
@@ -46,6 +29,32 @@ const tryParseBuilderState = (
     return definition.parseState(query, recoveryQuery);
   }
   return null;
+};
+
+/**
+ * Recovers the builder form state for a saved rule.
+ *
+ * Rules written since `metadata.builder_fields` was introduced carry the
+ * parameters they were authored with, so they reopen exactly as configured.
+ * Older rules only have the compiled query, which the builder may be able to
+ * parse back — a best-effort path that fails for a query since hand-edited.
+ */
+const recoverBuilderState = (rule: RuleApiResponse, builderType: string): BuilderState | null => {
+  const fromFields = fromBuilderFields(builderType, rule.metadata.builder_fields);
+  if (fromFields !== undefined) {
+    return fromFields;
+  }
+
+  const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
+  if (!query) {
+    return null;
+  }
+
+  return tryParseBuilderState(
+    builderType,
+    query,
+    getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
+  );
 };
 
 interface UseBuilderToEsqlTransitionOptions {
@@ -73,29 +82,7 @@ export const useBuilderToEsqlTransition = ({
       if (!rule.metadata.builder_type) {
         return 'esql';
       }
-
-      // Primary path: restore from stored builder_fields (new rules).
-      if (rule.metadata.builder_fields) {
-        const state = tryRestoreFromBuilderFields(
-          rule.metadata.builder_type,
-          rule.metadata.builder_fields
-        );
-        if (state && typeof state === 'object') {
-          return {
-            builderType: rule.metadata.builder_type,
-            initialBuilderState: state,
-          };
-        }
-      }
-
-      // Legacy path: parse builder state from the ES|QL query text (pre-builder_fields rules).
-      const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
-      const recoveryQuery = rule.query
-        ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
-        : undefined;
-      const state = query
-        ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
-        : null;
+      const state = recoverBuilderState(rule, rule.metadata.builder_type);
       if (state && typeof state === 'object') {
         return {
           builderType: rule.metadata.builder_type,

@@ -8,13 +8,13 @@
 export type {
   RuleBuilderDefinition,
   RuleBuilderStepProps,
-  RuleBuilderCreateOption,
   BuilderState,
   BuilderSubmission,
 } from './types';
 export { getRuleBuilderCreateOptions } from './create_options';
 export type { RuleBuilderCreateOptionItem } from './create_options';
 export { RULE_BUILDER_REGISTRY, registerRuleBuilder } from './registry';
+export { fromBuilderFields, toBuilderSubmission } from './builder_fields';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 export { buildThresholdEsql } from './threshold/build_esql';

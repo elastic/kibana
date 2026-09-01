@@ -15,6 +15,8 @@ export {
   RULE_BUILDER_REGISTRY,
   getRuleBuilderCreateOptions,
   registerRuleBuilder,
+  fromBuilderFields,
+  toBuilderSubmission,
   useBuilderState,
 } from './flyout/compose_discover/rule_builder';
 export type {
@@ -25,6 +27,7 @@ export type {
   RuleBuilderDefinition,
   RuleBuilderStepProps,
 } from './flyout/compose_discover/rule_builder';
+export type { BuilderState, BuilderSubmission } from './flyout/compose_discover/rule_builder';
 
 // Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
 export { QuerySandboxFlyout } from './flyout/compose_discover';

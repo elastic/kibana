@@ -14,3 +14,4 @@ export type {
 export { BuilderTypeRegistry } from './builder_type_registry';
 export type { BuilderTypeRegistryContract } from './builder_type_registry';
 export { assertValidDefinition } from './assert_valid_definition';
+export { registerBuiltinBuilderTypes } from './register_builtin_builder_types';

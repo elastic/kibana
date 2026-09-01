@@ -5,48 +5,33 @@
  * 2.0.
  */
 
-export enum Aggregation {
-  COUNT = 'count',
-  AVG = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  CARDINALITY = 'cardinality',
-  P95 = 'p95',
-  P99 = 'p99',
-}
+import type {
+  ConditionOperator,
+  ThresholdCondition,
+  ThresholdEvaluation,
+  ThresholdStat,
+} from '@kbn/alerting-v2-rule-builders';
+import {
+  AGGREGATIONS_REQUIRING_FIELD as CANONICAL_AGGREGATIONS_REQUIRING_FIELD,
+  Aggregation,
+  Comparator,
+} from '@kbn/alerting-v2-rule-builders';
 
-export enum Comparator {
-  GT = '>',
-  GTE = '>=',
-  LT = '<',
-  LTE = '<=',
-  BETWEEN = 'between',
-  NOT_BETWEEN = 'not_between',
-}
+// Re-exported from the builder package so the form and the server-side query
+// generator cannot drift apart: these are the values persisted in
+// `metadata.builder_fields`.
+export { Aggregation, Comparator };
+export type { ConditionOperator };
 
-export type ConditionOperator = 'AND' | 'OR';
+/**
+ * Form rows carry an `id` that the persisted shape does not: it is a React list
+ * key, stable across reorders and edits, and is stripped on save.
+ */
+export type StatDefinition = ThresholdStat & { id: string };
 
-export interface StatDefinition {
-  id: string;
-  label: string;
-  aggregation: Aggregation;
-  field?: string;
-  filter?: string;
-}
+export type EvaluationDefinition = ThresholdEvaluation & { id: string };
 
-export interface EvaluationDefinition {
-  id: string;
-  label: string;
-  expression: string;
-}
-
-export interface AlertCondition {
-  id: string;
-  metric: string;
-  comparator: Comparator;
-  threshold: number[];
-}
+export type AlertCondition = ThresholdCondition & { id: string };
 
 export type RecoveryCondition = AlertCondition;
 
@@ -67,15 +52,8 @@ export interface ThresholdFormValues {
   recovery?: RecoveryConfig;
 }
 
-export const AGGREGATIONS_REQUIRING_FIELD: Aggregation[] = [
-  Aggregation.AVG,
-  Aggregation.SUM,
-  Aggregation.MIN,
-  Aggregation.MAX,
-  Aggregation.CARDINALITY,
-  Aggregation.P95,
-  Aggregation.P99,
-];
+export const AGGREGATIONS_REQUIRING_FIELD: readonly Aggregation[] =
+  CANONICAL_AGGREGATIONS_REQUIRING_FIELD;
 
 export const deriveStatLabel = (agg: Aggregation, field?: string): string => {
   if (agg === Aggregation.COUNT) return 'count';

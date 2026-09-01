@@ -41,6 +41,7 @@ export interface RuleBuilderCreateOption {
   order?: number;
 }
 
+
 export interface RuleBuilderStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -49,7 +50,6 @@ export interface RuleBuilderStepProps {
 
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
-  createOption: RuleBuilderCreateOption;
   stepTitle: string;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
