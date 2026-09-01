@@ -18,19 +18,9 @@ const newLabel = i18n.translate(
   { defaultMessage: 'New' }
 );
 
-const openWeightsLabel = i18n.translate(
-  'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.openWeights',
-  { defaultMessage: 'Open weights' }
-);
-
 const extendedReasoningLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.extendedReasoning',
   { defaultMessage: 'Extended reasoning' }
-);
-
-const balancedLabel = i18n.translate(
-  'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.balanced',
-  { defaultMessage: 'Balanced' }
 );
 
 const highThroughputLabel = i18n.translate(
@@ -38,14 +28,14 @@ const highThroughputLabel = i18n.translate(
   { defaultMessage: 'High throughput' }
 );
 
+const openWeightsLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.openWeights',
+  { defaultMessage: 'Open weights' }
+);
+
 const extendedReasoningTooltip = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.extendedReasoning.tooltip',
   { defaultMessage: 'Best for complex analysis, ES|QL-heavy dashboards. Higher latency and cost.' }
-);
-
-const balancedTooltip = i18n.translate(
-  'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.balanced.tooltip',
-  { defaultMessage: 'General-purpose agents, tool orchestration, real-time interactions.' }
 );
 
 const highThroughputTooltip = i18n.translate(
@@ -85,18 +75,15 @@ export const ModelNewBadge: React.FC<ModelBadgesProps> = ({ metadata }) => {
   );
 };
 
-/** Capability badges (Extended reasoning, Balanced, High throughput, Open weights). */
+/** Capability badges */
 const ModelCapabilityBadges: React.FC<ModelBadgesProps> = ({ metadata }) => {
   const properties: string[] = metadata?.heuristics?.properties ?? [];
 
   const showExtendedReasoning = properties.includes('capable');
-  const showBalanced = properties.includes('balanced');
   const showHighThroughput = properties.includes('efficient');
   const showOpenWeights = properties.includes('open-weights');
 
-  if (!showExtendedReasoning && !showBalanced && !showHighThroughput && !showOpenWeights) {
-    return null;
-  }
+  if (!showExtendedReasoning && !showHighThroughput && !showOpenWeights) return null;
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap={false}>
@@ -105,15 +92,6 @@ const ModelCapabilityBadges: React.FC<ModelBadgesProps> = ({ metadata }) => {
           <EuiToolTip content={extendedReasoningTooltip}>
             <EuiBadge color="primary" tabIndex={0} data-test-subj="modelBadgeExtendedReasoning">
               {extendedReasoningLabel}
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {showBalanced && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={balancedTooltip}>
-            <EuiBadge color="hollow" tabIndex={0} data-test-subj="modelBadgeBalanced">
-              {balancedLabel}
             </EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
@@ -149,7 +127,7 @@ export const ModelBadgesReveal: React.FC<ModelBadgesProps> = ({ metadata }) => {
 
   const properties: string[] = metadata?.heuristics?.properties ?? [];
   const hasCapabilities = properties.some((p) =>
-    ['capable', 'balanced', 'efficient', 'open-weights'].includes(p)
+    ['capable', 'efficient', 'open-weights'].includes(p)
   );
 
   if (!hasCapabilities) return null;
