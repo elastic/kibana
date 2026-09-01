@@ -51,16 +51,12 @@ export function runWorkflowYamlValidations({
   workflowGraph,
   workflowDefinition,
 }: RunWorkflowYamlValidationsParams): YamlValidationResult[] {
-  const liquidScalarResults =
-    workflowGraph && workflowDefinition
-      ? validateLiquidYamlScalars(
-          yamlString,
-          yamlDocument,
-          model,
-          workflowGraph,
-          workflowDefinition
-        )
-      : validateLiquidYamlScalars(yamlString, yamlDocument, model);
+  const liquidScalarResults = validateLiquidYamlScalars(
+    yamlString,
+    yamlDocument,
+    workflowGraph,
+    workflowDefinition
+  );
 
   const results: YamlValidationResult[] = [
     ...validateStepNameUniqueness(yamlDocument, lineCounter),
@@ -78,7 +74,7 @@ export function runWorkflowYamlValidations({
   }
 
   if (workflowGraph && workflowDefinition) {
-    const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+    const variableItems = collectAllVariables(yamlString, yamlDocument, lineCounter, workflowGraph);
     results.push(
       ...validateTriggerConditions(workflowDefinition, yamlDocument),
       ...validateVariablesInternal(
@@ -86,7 +82,7 @@ export function runWorkflowYamlValidations({
         workflowGraph,
         workflowDefinition,
         yamlDocument,
-        model
+        yamlString
       ),
       ...liquidScalarResults.filter((result) => result.owner === 'variable-validation'),
       ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)

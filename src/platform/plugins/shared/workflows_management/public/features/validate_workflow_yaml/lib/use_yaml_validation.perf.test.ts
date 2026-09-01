@@ -178,12 +178,23 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
 
   if (workflowGraph && workflowDefinition) {
     timings.collectAllVariables = benchmarkSync(() => {
-      collectAllVariables(mockModel, yamlDocument, workflowGraph);
+      collectAllVariables(yamlContent, yamlDocument, lineCounter, workflowGraph);
     }, iterations);
 
-    const variableItems = collectAllVariables(mockModel, yamlDocument, workflowGraph);
+    const variableItems = collectAllVariables(
+      yamlContent,
+      yamlDocument,
+      lineCounter,
+      workflowGraph
+    );
     timings[`validateVariables (${variableItems.length} vars)`] = benchmarkSync(() => {
-      validateVariables(variableItems, workflowGraph, workflowDefinition, yamlDocument, mockModel);
+      validateVariables(
+        variableItems,
+        workflowGraph,
+        workflowDefinition,
+        yamlDocument,
+        yamlContent
+      );
     }, iterations);
 
     timings.validateTriggerConditions = benchmarkSync(() => {
@@ -275,11 +286,17 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
 
     if (workflowGraph && workflowDefinition) {
       start = performance.now();
-      const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+      const variableItems = collectAllVariables(yamlContent, yamlDocument, lc, workflowGraph);
       record('collectAllVariables', performance.now() - start);
 
       start = performance.now();
-      validateVariables(variableItems, workflowGraph, workflowDefinition, yamlDocument, model);
+      validateVariables(
+        variableItems,
+        workflowGraph,
+        workflowDefinition,
+        yamlDocument,
+        yamlContent
+      );
       record('validateVariables', performance.now() - start);
 
       start = performance.now();
