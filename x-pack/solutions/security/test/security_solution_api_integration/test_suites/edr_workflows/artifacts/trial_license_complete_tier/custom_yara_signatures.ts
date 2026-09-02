@@ -6,7 +6,11 @@
  */
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import type { EntryMatch, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntryMatch,
+  ExceptionListItemSchema,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
@@ -17,7 +21,10 @@ import type TestAgent from 'supertest/lib/agent';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
-import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '@kbn/security-solution-plugin/server/lists_integration/endpoint/validators/custom_yara_signatures_validator';
+import {
+  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
+  MAXIMUM_RULE_IDENTIFIER_LENGTH,
+} from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -99,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         info?: string;
         path: string;
-        getBody: () => BodyReturnType;
+        getBody: (rule?: string, osTypes?: OsTypeArray) => BodyReturnType;
       }
 
       beforeEach(async () => {
@@ -123,23 +130,38 @@ export default function ({ getService }: FtrProviderContext) {
           method: 'post',
           info: 'create single item',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () => {
-            return exceptionsGenerator.generateCustomYaraSignatureForCreate({
+          getBody: (rule?: string, osTypes?: OsTypeArray) => {
+            const body = exceptionsGenerator.generateCustomYaraSignatureForCreate({
               tags: [GLOBAL_ARTIFACT_TAG],
+              ...(osTypes ? { os_types: osTypes } : {}),
             });
+
+            if (rule) {
+              (body.entries[0] as EntryMatch).value = rule;
+            }
+
+            return body;
           },
         },
         {
           method: 'put',
           info: 'update single item',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () =>
-            exceptionsGenerator.generateCustomYaraSignatureForUpdate({
+          getBody: (rule?: string, osTypes?: OsTypeArray) => {
+            const body = exceptionsGenerator.generateCustomYaraSignatureForUpdate({
               id: customYaraSignatureData.artifact.id,
               item_id: customYaraSignatureData.artifact.item_id,
               tags: [GLOBAL_ARTIFACT_TAG],
               _version: customYaraSignatureData.artifact._version,
-            }),
+              ...(osTypes ? { os_types: osTypes } : {}),
+            });
+
+            if (rule) {
+              (body.entries[0] as EntryMatch).value = rule;
+            }
+
+            return body;
+          },
         },
       ];
 
@@ -188,6 +210,8 @@ export default function ({ getService }: FtrProviderContext) {
       ];
 
       describe('and user has YARA write + global artifact management privileges', () => {
+        const dummyRuleWithComment = 'rule dummy { condition: false }  // '; // note: divisible by 3
+
         for (const customYaraSignatureApiCall of createUpdateApiCalls) {
           it(`should error on [${customYaraSignatureApiCall.method}] if invalid entry field is used`, async () => {
             const body = customYaraSignatureApiCall.getBody();
@@ -203,7 +227,895 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/expected value to equal \[custom_yara_signature\]/));
           });
 
-          // todo: deeper YARA rules validation is coming soon
+          describe(`YARA rules validation - ${customYaraSignatureApiCall.info}`, () => {
+            describe('Syntax validation', () => {
+              it('accepts valid rules', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: true }
+                    rule rule2 { condition: true }`)
+                  )
+                  .expect(200);
+              });
+
+              it('rejects a rule with invalid syntax', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: cheese }
+                    // rule rule2 { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(
+                      /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 2\] undefined identifier "cheese"/
+                    )
+                  );
+              });
+
+              it('returns total error count, while listed errors are capped', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(
+                      Array.from(
+                        { length: 100 },
+                        (_, i) => `rule r${i} { condition: cheese }`
+                      ).join('\n')
+                    )
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 100 errors found:/)
+                  )
+                  .expect((res: { body: { message: string } }) => {
+                    expect((res.body.message.match(/"cheese"/g) ?? []).length).to.be(64);
+                  });
+              });
+
+              it('rejects a string value that does not contain rules', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(customYaraSignatureApiCall.getBody('// rule rule1 { condition: true }'))
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(
+                      /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: No YARA rules found. Please provide at least one rule/
+                    )
+                  );
+              });
+            });
+
+            describe('Rule identifiers', () => {
+              it('accepts multiple rules with unique identifiers', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: true }
+                    rule rule2 { condition: true }`)
+                  )
+                  .expect(200);
+              });
+
+              it('rejects rules with duplicate identifiers', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: true }
+                    rule rule1 { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(/1 error found: \[line 3\] duplicated identifier "rule1"/)
+                  );
+              });
+
+              it(`accepts a rule with ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters long identifier`, async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                      rule rule1 { condition: true }
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH)} { condition: true }`)
+                  )
+                  .expect(200);
+              });
+
+              it(`rejects a rule with ${
+                MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
+              } characters long identifier`, async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                      rule rule1 { condition: true }
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 1)} { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `1 error found: \\[line 3\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
+                        )}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`
+                      )
+                    )
+                  );
+              });
+
+              it('returns "too long identifier" error for multiple rules with too long identifiers', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                      rule rule1 { condition: true }
+
+                      // all identifiers are only 'a's to make sure the correct line number is reported on whole words
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 3)} { condition: true }
+                      rule rule2 { condition: true }
+
+                      // no space after the identifier intentionally
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 2)}{ condition: true }
+                      rule rule3 { condition: true }
+
+                      // line break after identifier intentionally
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 1)}
+                      { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(anErrorMessageWith(/3 errors found:/))
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `\\[line 5\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 3
+                        )}"`
+                      )
+                    )
+                  )
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `\\[line 9\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 2
+                        )}"`
+                      )
+                    )
+                  )
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `\\[line 13\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
+                        )}"`
+                      )
+                    )
+                  );
+              });
+            });
+
+            describe('Meta fields', () => {
+              describe('meta.arch', () => {
+                it('accepts rules with meta.arch set to "x86" and/or "arm64"', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86" condition: true }
+                      rule rule2 { meta: arch = "arm64" condition: true }
+
+                      // zero or one space after comma is accepted
+                      rule rule3 { meta: arch = "x86,arm64" condition: true }
+                      rule rule4 { meta: arch = "x86, arm64" condition: true }
+
+                      rule rule5 { meta: arch = "arm64,x86" condition: true }
+                      rule rule6 { meta: arch = "arm64, x86" condition: true }
+                      `)
+                    )
+                    .expect(200);
+                });
+
+                it('rejects rules with meta.arch containing invalid values', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "random value" condition: true }
+                      rule rule2 { meta: arch = "arm64 x86" condition: true }
+                      rule rule3 { meta: arch = "x86, cheese" condition: true }
+                      rule rule4 { meta: arch = "" condition: true } // empty string is invalid
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 4 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.arch" value "random value" on rule "rule1", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.arch" value "arm64 x86" on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.arch" value "x86, cheese" on rule "rule3", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 5\] Invalid "meta.arch" value "" on rule "rule4", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with meta.arch containing valid values but invalid format', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "arm64,  x86" condition: true } // too many spaces after comma
+                      rule rule2 { meta: arch = "arm64, x86 " condition: true } // trailing space not allowed
+                      rule rule3 { meta: arch = " arm64, x86" condition: true } // leading space not allowed
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.arch" value "arm64,  x86" on rule "rule1", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.arch" value "arm64, x86 " on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.arch" value " arm64, x86" on rule "rule3", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with duplicate values in meta.arch', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86,x86" condition: true }
+                      rule rule2 { meta: arch = "arm64, arm64" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.arch" value "x86,x86" on rule "rule1", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.arch" value "arm64, arm64" on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with multiple meta.arch fields set', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            arch = "x86"
+                            arch = "arm64"
+                          condition: true
+                         }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.arch" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+
+                it('truncates meta.arch value to 30 characters in error response', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86, arm64                   X" condition: true } // 30 chars
+                      rule rule2 { meta: arch = "x86, arm64                    X" condition: true } // 31 chars
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.arch" value "x86, arm64                   X" on rule "rule1", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.arch" value "x86, arm64                    \.\.\." on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    );
+                });
+              });
+
+              describe('meta.scan_type', () => {
+                it('accepts rules with meta.scan_type set to "Memory"', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "Memory" condition: true }
+                      `)
+                    )
+                    .expect(200);
+                });
+
+                it('rejects rules with meta.scan_type containing invalid values', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "invalid" condition: true }
+                      rule rule2 { meta: scan_type = "memory" condition: true }
+                      rule rule3 { meta: scan_type = "" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.scan_type" value "invalid" on rule "rule1", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.scan_type" value "memory" on rule "rule2", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.scan_type" value "" on rule "rule3", only "Memory" is allowed/
+                      )
+                    );
+                });
+
+                it('rejects rules with meta.scan_type containing valid values but invalid format', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "Memory " condition: true } // trailing space not allowed
+                      rule rule2 { meta: scan_type = " Memory" condition: true } // leading space not allowed
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.scan_type" value "Memory " on rule "rule1", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.scan_type" value " Memory" on rule "rule2", only "Memory" is allowed/
+                      )
+                    );
+                });
+
+                it('truncates meta.scan_type value to 30 characters in error response', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "Memory                       X" condition: true } // 30 chars
+                      rule rule2 { meta: scan_type = "Memory                        X" condition: true } // 31 chars
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.scan_type" value "Memory                       X" on rule "rule1", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.scan_type" value "Memory                        \.\.\." on rule "rule2", only "Memory" is allowed/
+                      )
+                    );
+                });
+
+                it('rejects rules with multiple meta.scan_type fields set', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            scan_type = "Memory"
+                            scan_type = "Whatever"
+                          condition: true
+                         }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.scan_type" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+              });
+
+              describe('meta.os', () => {
+                const matchingRulesAndOsTypes: { rules: string; osTypes: OsTypeArray }[] = [
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = "Windows" condition: false }
+                      `,
+                    osTypes: ['windows'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux" condition: true }
+                      rule rule2 { meta: os = "Linux" condition: false }
+                      `,
+                    osTypes: ['linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "MacOS" condition: true }
+                      rule rule2 { meta: os = "MacOS" condition: false }
+                      `,
+                    osTypes: ['macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows,Linux" condition: true }
+                      rule rule2 { meta: os = "Linux, Windows" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "MacOS, Windows" condition: true }
+                      rule rule2 { meta: os = "Windows,MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux,Windows,MacOS" condition: true }
+                      rule rule2 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux', 'macos'],
+                  },
+                ];
+
+                for (const { rules, osTypes } of matchingRulesAndOsTypes) {
+                  it(`accepts rules with valid meta.os as long as it matches the os_types set to ${osTypes.join(
+                    ', '
+                  )}`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(customYaraSignatureApiCall.getBody(rules, osTypes))
+                      .expect(200);
+                  });
+                }
+
+                it('rejects rules with meta.os containing invalid values', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: os = "invalid" condition: true }
+                      rule rule2 { meta: os = "windows, macos" condition: true }
+                      rule rule3 { meta: os = "Windows,CheeseOS" condition: true }
+                      rule rule4 { meta: os = "" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 4 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.os" value "invalid" on rule "rule1", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.os" value "windows, macos" on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.os" value "Windows,CheeseOS" on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 5\] Invalid "meta.os" value "" on rule "rule4", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with meta.os containing valid values but invalid format', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: os = "Windows,  Linux," condition: true } // only zero or one space after comma is accepted
+                      rule rule2 { meta: os = " Windows,Linux" condition: true } // leading space not allowed
+                      rule rule3 { meta: os = "Windows,Linux " condition: true } // trailing space not allowed
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.os" value "Windows,  Linux," on rule "rule1", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.os" value " Windows,Linux" on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.os" value "Windows,Linux " on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('truncates meta.os value to 30 characters in error response', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: os = "Windows,Linux, MacOS         X" condition: true } // 30 chars
+                      rule rule2 { meta: os = "Windows,Linux, MacOS          X" condition: true } // 31 chars
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.os" value "Windows,Linux, MacOS         X" on rule "rule1", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.os" value "Windows,Linux, MacOS          \.\.\." on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with duplicate values in meta.os', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: os = "Windows,Windows" condition: true }
+                      rule rule2 { meta: os = "Linux, MacOS, Linux" condition: true }
+                      rule rule3 { meta: os = "MacOS, Linux, MacOS" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.os" value "Windows,Windows" on rule "rule1", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.os" value "Linux, MacOS, Linux" on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.os" value "MacOS, Linux, MacOS" on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with multiple meta.os fields set', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            os = "Windows"
+                            os = "Linux"
+                          condition: true
+                         }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.os" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+
+                const nonMatchingRulesAndOsTypes: { rules: string; osTypes: OsTypeArray }[] = [
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux, Windows" condition: true }
+                      rule rule2 { meta: os = "MacOS" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = "MacOS" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux" condition: true }
+                      rule rule2 { meta: os = "Windows" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = "Linux" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux,Windows" condition: true }
+                      rule rule2 { meta: os = "Windows" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux,MacOS" condition: true }
+                      rule rule2 { meta: os = "Windows, MacOS" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux', 'macos'],
+                  },
+                ];
+
+                for (const { rules, osTypes } of nonMatchingRulesAndOsTypes) {
+                  it(`rejects rules with meta.os set to a different value as os_types (${osTypes.join(
+                    ', '
+                  )})`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(customYaraSignatureApiCall.getBody(rules, osTypes))
+                      .expect(400)
+                      .expect(anEndpointArtifactError)
+                      .expect(
+                        anErrorMessageWith(
+                          /Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/
+                        )
+                      )
+                      .expect(
+                        anErrorMessageWith(
+                          new RegExp(
+                            `\\[line 2\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                              ', '
+                            )}" on rule "rule1". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                          )
+                        )
+                      )
+                      .expect(
+                        anErrorMessageWith(
+                          new RegExp(
+                            `\\[line 3\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                              ', '
+                            )}" on rule "rule2". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                          )
+                        )
+                      )
+                      .expect(
+                        anErrorMessageWith(
+                          new RegExp(
+                            `\\[line 4\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                              ', '
+                            )}" on rule "rule3". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                          )
+                        )
+                      );
+                  });
+                }
+              });
+            });
+
+            describe('Module support', () => {
+              describe('Supported modules', () => {
+                const supportedModules: Record<string, string> = {
+                  pe: 'pe.is_pe',
+                  elf: 'elf.type == elf.ET_NONE',
+                  math: 'math.abs(-1) == 1',
+                  time: 'time .now() >= 0',
+                  string: 'string.length("a") == 1',
+                  console: 'console.log("x")',
+                  tests: 'tests.foobar(1) == "foo"',
+                };
+
+                for (const [module, condition] of Object.entries(supportedModules)) {
+                  it(`accepts rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(
+                        customYaraSignatureApiCall.getBody(`
+                          import "${module}"
+                          rule ${module}Check {
+                            condition:
+                              ${condition}
+                            }`)
+                      )
+                      .expect(200);
+                  });
+                }
+              });
+
+              describe('Unsupported modules', () => {
+                const unsupportedModules = [
+                  // built-in but not supported YARA modules
+                  'hash',
+                  'macho',
+                  'dotnet',
+                  'dex',
+                  'magic',
+                  'cuckoo',
+
+                  // user modules
+                  'userModuleWithRandomName',
+                ];
+
+                for (const module of unsupportedModules) {
+                  it(`rejects rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(
+                        customYaraSignatureApiCall.getBody(`
+                          import "${module}"
+                          rule ${module}Check {
+                            condition:
+                              true
+                          }`)
+                      )
+                      .expect(400)
+                      .expect(anEndpointArtifactError)
+                      .expect(anErrorMessageWith(new RegExp(`unknown module "${module}"`)));
+                  });
+                }
+              });
+            });
+          });
+
           it(`should error on [${customYaraSignatureApiCall.method}] if rule value is empty`, async () => {
             const body = customYaraSignatureApiCall.getBody();
 
@@ -220,7 +1132,10 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
             const body = customYaraSignatureApiCall.getBody();
 
-            (body.entries[0] as EntryMatch).value = 'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH);
+            (body.entries[0] as EntryMatch).value =
+              dummyRuleWithComment +
+              'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length);
+
             await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
               customYaraSignatureApiCall.path
             )
@@ -232,9 +1147,10 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should error on [${customYaraSignatureApiCall.method}] if rule value is more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
             const body = customYaraSignatureApiCall.getBody();
 
-            (body.entries[0] as EntryMatch).value = 'a'.repeat(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH + 1
-            );
+            (body.entries[0] as EntryMatch).value =
+              dummyRuleWithComment +
+              'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length + 1);
+
             await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
               customYaraSignatureApiCall.path
             )
@@ -248,9 +1164,12 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is at the byte limit using multi-byte characters`, async () => {
             const body = customYaraSignatureApiCall.getBody();
             const euroSign = '€'; // takes up 3 bytes
-            const valueAtByteLimit = euroSign.repeat(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH / Buffer.byteLength(euroSign)
-            );
+            const valueAtByteLimit =
+              dummyRuleWithComment +
+              euroSign.repeat(
+                (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                  Buffer.byteLength(euroSign)
+              );
 
             expect(Buffer.byteLength(valueAtByteLimit, 'utf8')).to.be(
               MAX_YARA_RULE_CONTENT_BYTE_LENGTH
@@ -269,9 +1188,13 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should error on [${customYaraSignatureApiCall.method}] if rule value exceeds the byte limit using multi-byte characters`, async () => {
             const body = customYaraSignatureApiCall.getBody();
             const euroSign = '€';
-            const valueOverByteLimit = euroSign.repeat(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH / Buffer.byteLength(euroSign) + 1
-            );
+            const valueOverByteLimit =
+              dummyRuleWithComment +
+              euroSign.repeat(
+                (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                  Buffer.byteLength(euroSign)
+              ) +
+              'a'; // plus one byte
 
             expect(Buffer.byteLength(valueOverByteLimit, 'utf8')).to.be.greaterThan(
               MAX_YARA_RULE_CONTENT_BYTE_LENGTH

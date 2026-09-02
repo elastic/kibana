@@ -9,9 +9,10 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS, type Direction } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerCompareExperimentsRoute } from './compare_experiments';
 
@@ -23,6 +24,7 @@ const makeScoreDoc = ({
   evaluatorName = 'Correctness',
   score = 0.8,
   repetitionIndex = 0,
+  direction,
 }: {
   experimentId?: string;
   datasetId?: string;
@@ -31,6 +33,7 @@ const makeScoreDoc = ({
   evaluatorName?: string;
   score?: number | null;
   repetitionIndex?: number;
+  direction?: Direction;
 } = {}) => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   experiment_id: experimentId,
@@ -51,6 +54,7 @@ const makeScoreDoc = ({
     explanation: null,
     metadata: null,
     trace_id: null,
+    ...(direction !== undefined && { direction }),
     model: { id: 'claude-3', family: 'claude', provider: 'anthropic' },
   },
   metadata: {
@@ -72,7 +76,7 @@ describe('GET /internal/evals/experiments/compare', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -113,6 +117,15 @@ describe('GET /internal/evals/experiments/compare', () => {
     await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: expect.arrayContaining([
+          'evaluator.name',
+          'evaluator.score',
+          'evaluator.direction',
+        ]),
+      })
+    );
   });
 
   it('returns 400 without querying when baseline and target are the same', async () => {
@@ -184,8 +197,8 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toEqual([]);
     expect(response.payload.pairing.totalPairs).toBe(0);
-    expect(response.payload.pairing.truncatedA).toBe(false);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(false);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
   });
 
   it('returns comparison results with pairing stats for overlapping datasets', async () => {
@@ -218,11 +231,80 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results[0].datasetId).toBe('ds-shared');
     expect(response.payload.results[0].evaluatorName).toBe('Correctness');
     expect(response.payload.results[0].sampleSize).toBe(2);
+    expect(response.payload.results[0].direction).toBe('maximize');
+    expect(response.payload.results[0].meanTarget).toBeCloseTo(0.4);
+    expect(response.payload.results[0].meanBaseline).toBeCloseTo(0.8);
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
-    expect(response.payload.pairing.truncatedA).toBe(false);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(false);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
+  });
+
+  it('returns direction: minimize for lower-is-better evaluator metadata', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const sharedDataset = {
+      datasetId: 'ds-shared',
+      datasetName: 'Shared',
+      evaluatorName: 'Latency',
+      direction: 'minimize' as const,
+    };
+    evaluationScoreService.search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 150 }) },
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-2', score: 200 }) },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 100 }) },
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-2', score: 120 }) },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toHaveLength(1);
+    expect(response.payload.results[0].evaluatorName).toBe('Latency');
+    expect(response.payload.results[0].direction).toBe('minimize');
+  });
+
+  it('uses metadata over name heuristic for Error handling quality', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const sharedDataset = {
+      datasetId: 'ds-shared',
+      datasetName: 'Shared',
+      evaluatorName: 'Error handling quality',
+      direction: 'maximize' as const,
+    };
+    evaluationScoreService.search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 0.4 }) }],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 0.8 }) }],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results[0].evaluatorName).toBe('Error handling quality');
+    // Name regex would treat "Error" as lower-is-better; metadata must win.
+    expect(response.payload.results[0].direction).toBe('maximize');
   });
 
   it('filters out hits with no _source', async () => {
@@ -272,8 +354,8 @@ describe('GET /internal/evals/experiments/compare', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(response.payload.pairing.truncatedA).toBe(true);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(true);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
   });
 
   it('returns 500 when ES throws', async () => {

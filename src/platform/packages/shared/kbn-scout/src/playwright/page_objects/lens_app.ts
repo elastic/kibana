@@ -28,6 +28,7 @@ export class LensApp {
   readonly saveModal;
   readonly savedObjectTitleInput;
   readonly confirmSaveButton;
+  readonly addToLibraryCheckbox;
   /**
    * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
    * as well as `closeDimensionEditor` here.
@@ -54,6 +55,7 @@ export class LensApp {
     this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.addToLibraryCheckbox = this.page.locator('#add-to-library-checkbox');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -168,6 +170,8 @@ export class LensApp {
         }
       | {
           addToDashboard: 'new';
+          saveAsNew?: boolean;
+          saveToLibrary?: boolean;
         }
       | {
           addToDashboard: 'none';
@@ -185,7 +189,17 @@ export class LensApp {
         .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
         .click();
     } else if (options?.addToDashboard === 'new') {
+      if (options.saveAsNew !== undefined) {
+        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
+      }
       await this.page.locator('#new-dashboard-option').check();
+      if (options.saveToLibrary !== undefined) {
+        if (options.saveToLibrary) {
+          await this.addToLibraryCheckbox.check();
+        } else {
+          await this.addToLibraryCheckbox.uncheck();
+        }
+      }
     } else if (options?.addToDashboard === 'none') {
       await this.page.locator('#add-to-library-option').check();
     }
@@ -282,10 +296,10 @@ export class LensApp {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
-    const operationButton = this.page.testSubj.locator(operationSelector);
-    await operationButton.waitFor({ state: 'visible' });
-    await operationButton.scrollIntoViewIfNeeded();
-    await operationButton.click();
+    const operationLabel = this.page.testSubj.locator(`${operationSelector}-label`);
+    await operationLabel.waitFor({ state: 'visible' });
+    await operationLabel.scrollIntoViewIfNeeded();
+    await operationLabel.click();
     await this.page.waitForFunction(
       (selector) =>
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
@@ -301,6 +315,18 @@ export class LensApp {
       .setSelectedOptions([field], {
         timeout: 10_000,
       });
+    // ComboBox can show the typed option before Lens layer state commits.
+    // data-selected-field is the committed display name and updates only after
+    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
+    // metacharacters are not interpolated into a selector.
+    await this.page.waitForFunction(
+      (expected) =>
+        document
+          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+          ?.getAttribute('data-selected-field') === expected,
+      field,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**

@@ -24,6 +24,7 @@ export const registerDeleteDataViewAsCodeRoute = ({
     .delete({
       path: DELETE_DATA_VIEW_AS_CODE_PATH,
       access: 'internal',
+      enableQueryVersion: true,
       description: 'Delete a data view by id',
       options: {
         availability: {

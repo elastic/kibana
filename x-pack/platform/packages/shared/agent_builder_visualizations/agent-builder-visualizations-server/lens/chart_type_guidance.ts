@@ -10,25 +10,52 @@ import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
   [
-    'Available chart types:',
+    "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:",
     ...Object.entries(chartTypeRegistry).map(
-      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection.description}`
+      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection}`
     ),
-    '',
-    'Guidelines:',
-    ...Object.entries(chartTypeRegistry).map(([, { prompt }]) => `- ${prompt.selection.guideline}`),
-    "- Consider the user's intent and the nature of the data being visualized",
   ].join('\n');
 
 export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const perChartTypeRules = chartTypeRegistry[chartType].prompt.config?.perChartTypeRules;
+  const rules = chartTypeRegistry[chartType].prompt.config?.rules;
 
-  if (!perChartTypeRules?.length) {
+  if (!rules?.length) {
     return '';
   }
 
   return [
     `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...perChartTypeRules.map((rule) => `- ${rule}`),
+    ...rules.map((rule) => `- ${rule}`),
   ].join('\n');
+};
+
+/**
+ * Compiles vis-author `config.rules` plus `review.critical` and
+ * `review.suggestions` for every chart type that has any of them. Prettify
+ * uses this so it can detect painted issues and describe the wanted edition;
+ * the visualization author still sees only {@link getChartTypeConfigPromptContent}.
+ */
+export const getChartTypeReviewPromptContent = (): string => {
+  const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
+    const configRules: string[] = prompt.config?.rules ?? [];
+    const critical: string[] = prompt.review?.critical ?? [];
+    const suggestions: string[] = prompt.review?.suggestions ?? [];
+
+    if (!configRules.length && !critical.length && !suggestions.length) {
+      return [];
+    }
+
+    return [
+      `### ${chartType}`,
+      ...configRules.map((rule) => `- ${rule}`),
+      ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
+      ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
+    ];
+  });
+
+  if (!sections.length) {
+    return '';
+  }
+
+  return ['CHART REVIEW RULES:', ...sections].join('\n');
 };

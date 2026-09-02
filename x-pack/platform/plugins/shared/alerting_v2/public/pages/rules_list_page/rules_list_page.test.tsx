@@ -526,7 +526,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
@@ -547,7 +547,7 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
@@ -563,11 +563,11 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
     fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
 
     expect(mockCreateRuleMutate).toHaveBeenCalledWith(
-      {},
+      { payload: {} },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
@@ -707,7 +707,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone rule');
     });
   });
 

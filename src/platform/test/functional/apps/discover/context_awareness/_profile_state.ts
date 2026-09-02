@@ -173,10 +173,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openProfileStateDocView = async () => {
-    await dataGrid.clickRowToggle({
-      rowIndex: 0,
-      defaultTabId: 'doc_view_profile_state_example',
-    });
+    const profileStateTabId = 'doc_view_profile_state_example';
+
+    if (await dataGrid.isShowingDocViewer()) {
+      await dataGrid.clickDocViewerTab(profileStateTabId);
+    } else {
+      await dataGrid.clickRowToggle({
+        rowIndex: 0,
+        defaultTabId: profileStateTabId,
+      });
+    }
   };
 
   const waitForPersistentProfileStateInStorage = async (expectedValue: string) => {

@@ -114,14 +114,14 @@ export const validateMonitorPrivateLocationSpaces = (
   };
 };
 
-/**
- * Asserts that the current user has bulk_update privileges on the monitor saved object
- * in all the specified spaces. Returns a 403 response if not authorized, or undefined if OK.
- */
-export const assertCanUpdateMonitorInAllSpaces = async (
+type MonitorSavedObjectBulkAction = 'bulk_update' | 'bulk_delete';
+
+/** Asserts that the current user has the requested privileges in all specified spaces. */
+export const assertCanPerformMonitorBulkActionInAllSpaces = async (
   routeContext: RouteContext,
   spaceIds: string[],
-  savedObjectType: string = syntheticsMonitorSavedObjectType
+  savedObjectType: string = syntheticsMonitorSavedObjectType,
+  action: MonitorSavedObjectBulkAction = 'bulk_update'
 ) => {
   const { request, response, server, spaceId } = routeContext;
 
@@ -139,17 +139,23 @@ export const assertCanUpdateMonitorInAllSpaces = async (
     server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
   const { hasAllRequested } = await checkSavedObjectsPrivileges(
-    `saved_object:${savedObjectType}/bulk_update`,
+    `saved_object:${savedObjectType}/${action}`,
     uniqueSpaces
   );
 
   if (!hasAllRequested) {
+    const isDeleteAction = action === 'bulk_delete';
     return response.forbidden({
       body: {
-        message: i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
-          defaultMessage:
-            'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.',
-        }),
+        message: isDeleteAction
+          ? i18n.translate('xpack.synthetics.validation.multiSpaceDeletePermissions', {
+              defaultMessage:
+                'This monitor is shared to spaces where you do not have delete permissions. To delete it, request access to those spaces.',
+            })
+          : i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
+              defaultMessage:
+                'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.',
+            }),
       },
     });
   }

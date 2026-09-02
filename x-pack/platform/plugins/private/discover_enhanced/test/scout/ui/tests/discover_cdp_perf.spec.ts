@@ -12,15 +12,13 @@ import { evaluateDiscoverBundlePluginAssertion } from '../fixtures/discover_bund
 import { testData } from '../fixtures';
 
 /**
- * Extra bundle labels produced only by the unified RSPack build (split chunks + shell).
+ * Shared bundle labels produced by the unified RSPack build (split chunks + shell).
  * In RSPack dist mode, unnamed split chunks are labelled 'rspack-chunk' by
  * getLogicalBundlePluginLabel. In dev mode, named labels like 'plugin-discover' appear.
  * Named lazy split chunks (lazy_*, from dynamic import() magic comments) are handled
  * dynamically in evaluateDiscoverBundlePluginAssertion and do not need to be listed here.
- * [rspack-transition] Remove this allowlist when the legacy webpack optimizer is gone
- * and tests only target RSPack output — see packages/kbn-rspack-optimizer/LEGACY_REMOVAL_CHECKLIST.md
  */
-const RSPACK_ONLY_BUNDLE_LABELS: readonly string[] = [
+const SHARED_BUNDLE_LABELS: readonly string[] = [
   'core',
   'kibana',
   'one_discover_shared_deps',
@@ -52,54 +50,17 @@ function getExpectedDiscoverPluginIds(projectType: string | undefined): string[]
 }
 
 /**
- * [rspack-transition] RSPack unified build loads shared chunks (vendors, shared-plugins, etc.)
- * that inflate totalSize compared to legacy per-plugin bundles, but individual plugin sizes shrink.
- * Returns separate thresholds until the legacy optimizer is removed.
- *
  * In RSPack dist mode, named plugin entry chunks (plugin-discover, etc.) are preloaded
  * during bootstrap and NOT re-fetched during SPA navigation, so only on-demand split
  * chunks with numeric IDs are captured by CDP. Per-plugin size assertions are not
- * meaningful in that mode.
+ * meaningful in that mode, so only total size and bundle count are checked.
  */
-function getBundleSizeLimits() {
-  const isRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
-  return {
-    isRspack,
-    totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.2 * 1024 * 1024,
-    bundleCount: isRspack ? 70 : 100,
-    discoverSize: 650 * 1024,
-    unifiedSearchSize: 450 * 1024,
-  };
-}
+const BUNDLE_SIZE_LIMITS = {
+  totalSize: 3 * 1024 * 1024,
+  bundleCount: 70,
+} as const;
 
-/**
- * Per-plugin size assertions are only meaningful in legacy mode where individual
- * plugin entry bundles are fetched during navigation. In RSPack dist mode,
- * named plugin chunks are preloaded during bootstrap and not re-fetched.
- */
-function assertLegacyPerPluginSizes(
-  plugins: Array<{ name: string; totalSize: number }>,
-  limits: ReturnType<typeof getBundleSizeLimits>
-) {
-  if (limits.isRspack) return { ok: true };
-
-  const discoverSize = plugins.find((p) => p.name === 'discover')?.totalSize ?? Infinity;
-  const unifiedSearchSize = plugins.find((p) => p.name === 'unifiedSearch')?.totalSize ?? Infinity;
-
-  if (discoverSize >= limits.discoverSize) {
-    return { ok: false, detail: `discover size ${discoverSize} >= ${limits.discoverSize}` };
-  }
-  if (unifiedSearchSize >= limits.unifiedSearchSize) {
-    return {
-      ok: false,
-      detail: `unifiedSearch size ${unifiedSearchSize} >= ${limits.unifiedSearchSize}`,
-    };
-  }
-  return { ok: true };
-}
-
-// Failing: See https://github.com/elastic/kibana/issues/242678
-test.describe.skip(
+test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
   { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
@@ -138,40 +99,37 @@ test.describe.skip(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      const currentUrl = page.url();
-      expect(currentUrl).toContain('app/discover#/');
+      await pageObjects.discover.waitUntilTabIsLoaded();
 
       // Ensure all JS bundles are loaded (longer timeout to account for lazy-loaded plugins like aiops)
       await perfTracker.waitForJsLoad(cdp, 5000);
 
       // Collect and validate stats
+      const currentUrl = page.url();
+      expect(currentUrl).toContain('app/discover#/');
       const stats = perfTracker.collectJsBundleStats(currentUrl);
       const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
-      const limits = getBundleSizeLimits();
 
       expect(
         stats.totalSize,
         `Total bundles size loaded on page should not exceed ${(
-          limits.totalSize /
+          BUNDLE_SIZE_LIMITS.totalSize /
           (1024 * 1024)
         ).toFixed(1)} MB`
-      ).toBeLessThan(limits.totalSize);
+      ).toBeLessThan(BUNDLE_SIZE_LIMITS.totalSize);
       expect(
         stats.bundleCount,
-        `Total bundle chunks count loaded on page should not exceed ${limits.bundleCount}`
-      ).toBeLessThan(limits.bundleCount);
+        `Total bundle chunks count loaded on page should not exceed ${BUNDLE_SIZE_LIMITS.bundleCount}`
+      ).toBeLessThan(BUNDLE_SIZE_LIMITS.bundleCount);
 
       const expectedPlugins = getExpectedDiscoverPluginIds(config.projectType);
-      const bundleAssertion = evaluateDiscoverBundlePluginAssertion(
+      // Throws with the offending bundle labels when unexpected plugins were loaded
+      const onlyExpectedBundlesLoaded = evaluateDiscoverBundlePluginAssertion(
         loadedPluginNames,
         expectedPlugins,
-        RSPACK_ONLY_BUNDLE_LABELS
+        SHARED_BUNDLE_LABELS
       );
-      expect(bundleAssertion, 'Unexpected plugins were loaded on page').toStrictEqual({ ok: true });
-      expect(
-        assertLegacyPerPluginSizes(stats.plugins, limits),
-        'Individual plugin bundle sizes exceeded limits'
-      ).toStrictEqual({ ok: true });
+      expect(onlyExpectedBundlesLoaded).toBe(true);
     });
 
     test('measures Performance Metrics before and after Discover load', async ({

@@ -36,6 +36,7 @@ export function createSecuritySkillInvocationEvaluator({
     log,
     config: {
       name: `Skill Invoked (${skillName})`,
+      direction: 'maximize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
 | STATS
