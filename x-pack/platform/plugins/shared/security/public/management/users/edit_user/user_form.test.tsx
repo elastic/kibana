@@ -82,7 +82,15 @@ describe('UserForm', () => {
       isNewUser: false,
       defaultValues: { ...userMock, email: 'alice@example.com' },
     });
-    expect(screen.getByTestId('userFormAvatar')).toHaveTextContent('a');
+    const avatar = screen.getByTestId('userFormAvatar');
+    expect(avatar).toHaveTextContent('a');
+    expect(avatar).toHaveAttribute('aria-label', 'alice@example.com');
+    unmount();
+  });
+
+  it('keeps an accessible name when the avatar has a username', () => {
+    const { unmount } = renderUserForm({ isNewUser: false });
+    expect(screen.getByTestId('userFormAvatar')).toHaveAttribute('aria-label', 'jdoe');
     unmount();
   });
 
