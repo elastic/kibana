@@ -14,6 +14,7 @@ import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { licenseService } from '../../../../common/hooks/use_license';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
@@ -84,12 +85,19 @@ describe('AlertAnalysisWorkflowPage', () => {
   });
 
   const renderComponent = ({
+    canEditRules = true,
+    canReadRules = true,
     canSaveAdvancedSettings = true,
+    isEnterprise = true,
     settingsRequest,
   }: {
+    canEditRules?: boolean;
+    canReadRules?: boolean;
     canSaveAdvancedSettings?: boolean;
+    isEnterprise?: boolean;
     settingsRequest?: jest.Mock;
   } = {}) => {
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(isEnterprise);
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       advancedSettings: { show: true, save: canSaveAdvancedSettings },
@@ -97,7 +105,7 @@ describe('AlertAnalysisWorkflowPage', () => {
     };
     // The page reads rules privileges via useUserPrivileges (not raw capabilities).
     useUserPrivilegesMock.mockReturnValue({
-      rulesPrivileges: { rules: { read: true, edit: true } },
+      rulesPrivileges: { rules: { read: canReadRules, edit: canEditRules } },
     });
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
@@ -142,6 +150,7 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
     useLoadConnectorsMock.mockReturnValue({
       data: [builtInInferenceEndpoint, externalInferenceEndpoint],
       isLoading: false,
@@ -153,8 +162,13 @@ describe('AlertAnalysisWorkflowPage', () => {
     ]);
   });
 
-  it('renders not found without loading data when advanced settings save is unauthorized', async () => {
-    renderComponent({ canSaveAdvancedSettings: false });
+  it.each([
+    { reason: 'the license is below Enterprise', isEnterprise: false },
+    { reason: 'rules read is unauthorized', canReadRules: false },
+    { reason: 'rules edit is unauthorized', canEditRules: false },
+    { reason: 'advanced settings save is unauthorized', canSaveAdvancedSettings: false },
+  ])('renders not found without loading data when $reason', async (overrides) => {
+    renderComponent(overrides);
 
     expect(await screen.findByTestId('notFoundPage')).toBeInTheDocument();
     expect(coreStart.http.fetch).not.toHaveBeenCalled();
