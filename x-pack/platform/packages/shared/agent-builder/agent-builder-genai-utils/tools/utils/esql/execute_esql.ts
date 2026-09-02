@@ -39,12 +39,6 @@ export const executeEsql = async ({
   params,
   limit,
   filter,
-  /**
-   * When true (default), Elasticsearch omits columns whose values are all null
-   * in this response. Pass false when the caller needs the query's full result
-   * schema — e.g. to bind visualization encodings — including columns that
-   * happen to be all-null in the sample.
-   */
   dropNullColumns = true,
   esClient,
 }: {

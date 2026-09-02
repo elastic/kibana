@@ -118,11 +118,6 @@ export interface GenerateEsqlOptions {
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
   sessionId?: string;
-  /**
-   * Forwarded to {@link executeEsql} when `executeQuery` is true. Defaults to
-   * `true`. Pass `false` when callers need the query's full result schema,
-   * including columns that are all-null in the validation sample.
-   */
   dropNullColumns?: boolean;
 }
 

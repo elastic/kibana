@@ -131,9 +131,7 @@ export const createVisualizationGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Resolve the ES|QL query. generateVisualizationEsql already executes it
-  // (dropNullColumns: false), so result columns are available afterwards
-  // without a second execute.
+  // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
     let action: GenerateEsqlAction;
     try {

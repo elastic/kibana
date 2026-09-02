@@ -18,11 +18,7 @@ import { validateQueryTarget } from './validate_query_target';
 export interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
-  /**
-   * Result columns from the validation run, when `generateEsql` executed the
-   * query. Includes columns that were all-null in the sample (`dropNullColumns:
-   * false`) so Lens/Vega can bind encodings to the query's full result schema.
-   */
+  /** Result columns from the validation run, when `generateEsql` executed the query. */
   columns?: EsqlEsqlColumnInfo[];
   /** Populated when no usable query could be resolved. */
   error?: string;
@@ -131,7 +127,6 @@ export const generateVisualizationEsql = async ({
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,
-    // Keep all-null sample columns so config/spec authoring can bind them.
     dropNullColumns: false,
     ...(timeRange ? { timeRange } : {}),
   };
