@@ -17,8 +17,11 @@ Design (validated 2026-08-19/20 across 15 models):
        (PR #286201) — judge /internal/inference/prompt payloads exceed the
        1.6MB default on long trajectories.
   Both run from source via the dev CLI, so no build step is needed on the VM.
-- Judge: fixed EVAL_CONNECTOR_ID=eis-anthropic-claude-4-6-sonnet for ALL
+- Judge: defaults to EVAL_CONNECTOR_ID=eis-anthropic-claude-4-6-sonnet for ALL
   models (comparability; self-judging bias exists in the docs matrix too).
+  Export EVAL_CONNECTOR_ID to override it for judge-panel runs; it is forwarded
+  to every VM. run_model.sh swaps to an alternate judge if the override would
+  self-judge the candidate.
 
 Usage:
   python3 persona_matrix_sweep.py --models all          # full re-sweep
@@ -35,6 +38,7 @@ import shlex
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Mapping, Optional
 from pathlib import Path
 
 SSH_KEY = os.path.expanduser("~/.ssh/azure_eval_farm")
@@ -50,6 +54,12 @@ VM_SIZE = "Standard_D8s_v5"
 # 180 min leaves headroom above the measured worst case without hiding a hang:
 # a genuinely wedged run still dies on the per-request KBN_EVALS_HTTP_TIMEOUT_MS.
 MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATRIX_CONCURRENCY=3"}
+# Vars forwarded to every VM. EVAL_CONNECTOR_ID must stay here: run_model.sh only
+# honours an override it actually receives, and otherwise re-derives its Anthropic
+# default — a judge-panel sweep would then grade with the incumbent judge and still
+# pass its doc-count gate.
+FORWARDED_ENV_VARS = ("EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES", "EVAL_CONNECTOR_ID",
+                      "KBN_EVALS_HTTP_RETRIES")
 GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
@@ -95,6 +105,18 @@ PATCHED_HTTP_HANDLER = (
 HTTP_HANDLER_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/utils/"
     "http_handler_from_kbn_client.ts"
+)
+# Retry policy. The persona-matrix converse call goes through chat_client's
+# withRetry (retry_utils), NOT the http handler above -- patching only the
+# handler leaves the live path untouched and the run still dies on the first
+# EIS 500. Deploy both or the fix is a no-op on the VM.
+PATCHED_RETRY_UTILS = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/utils/retry_utils.ts"
+)
+RETRY_UTILS_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/utils/retry_utils.ts"
 )
 # Dataset. The base image predates the entity_risk_score contract fix, so its
 # pre-flight tool-availability check fails the whole suite before a single
@@ -308,6 +330,7 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_EXECUTOR_CLIENT), ip, EXECUTOR_CLIENT_REMOTE)
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
+    scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
     scp(str(PATCHED_DATASET), ip, DATASET_REMOTE)
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
@@ -345,27 +368,72 @@ def deploy(ip: str) -> None:
     print(f"[deploy] assets + patched evaluator/config on {ip}", flush=True)
 
 
+def build_env_prefix(model: str, environ: Optional[Mapping[str, str]] = None) -> str:
+    """Shell prefix exporting every forwarded var for one model's remote run.
+
+    Forward every per-model var (plus any process-env override) rather than a
+    hardcoded pair: a var added to MODEL_ENV but missing from this list is a
+    silent no-op that looks like a tuning fix and changes nothing. EVAL_CONNECTOR_ID
+    belongs here so judge-panel runs actually reach the VM — without it run_model.sh
+    silently re-derives its own Anthropic default and the sweep answers the wrong
+    question while passing every gate.
+    """
+    environ = os.environ if environ is None else environ
+    model_env = dict([kv.split("=", 1) for kv in MODEL_ENV.get(model, "").split()]) if MODEL_ENV.get(model) else {}
+    prefix = ""
+    for key in sorted({*model_env, *FORWARDED_ENV_VARS}):
+        value = environ.get(key, model_env.get(key, ""))
+        if value:
+            prefix += f"export {key}={shlex.quote(value)} && "
+    return prefix
+
+
+def self_test() -> int:
+    """Offline checks for the pure helpers, run via `--self-test` in the verify
+    manifest. Covers the two defects that made a judge-panel sweep lie: a dropped
+    EVAL_CONNECTOR_ID (graded with the incumbent judge, still passed its gate) and
+    a dead Scout stack reported as `list index out of range`.
+    """
+    failures = []
+
+    def check(name, got, want):
+        if got != want:
+            failures.append(f"{name}: expected {want!r}, got {got!r}")
+
+    m = "eis-anthropic-claude-4-7-opus"
+    env = {"EVAL_REPETITIONS": "3", "EVAL_CONNECTOR_ID": "eis-google-gemini-3-1-pro"}
+    prefix = build_env_prefix(m, env)
+    check("judge forwarded", "export EVAL_CONNECTOR_ID=eis-google-gemini-3-1-pro && " in prefix, True)
+    check("reps forwarded", "export EVAL_REPETITIONS=3 && " in prefix, True)
+    check("no empty exports", "= &&" in prefix, False)
+    check("absent var omitted", "PERSONA_MATRIX_TIMEOUT_MINUTES" in build_env_prefix(m, {}), False)
+    # Per-model defaults still apply, and the process env wins over them.
+    glm = "eis-zai-glm-5-2"
+    check("model default kept", "PERSONA_MATRIX_CONCURRENCY=3" in build_env_prefix(glm, {}), True)
+    check(
+        "env overrides model default",
+        "export PERSONA_MATRIX_TIMEOUT_MINUTES=240 && " in build_env_prefix(
+            glm, {"PERSONA_MATRIX_TIMEOUT_MINUTES": "240"}
+        ),
+        True,
+    )
+    # Shell-quoting: a value with a space must not split into two words.
+    check("value quoted", "'a b'" in build_env_prefix(m, {"EVAL_CONNECTOR_ID": "a b"}), True)
+
+    print(f"self-test: {len(failures)} failure(s)")
+    for f in failures:
+        print(f"  FAIL {f}")
+    return 1 if failures else 0
+
+
 def launch(ip: str, model: str) -> subprocess.Popen:
     log = SWEEP_DIR / model / "run.log"
     log.parent.mkdir(parents=True, exist_ok=True)
-    # Forward EVAL_REPETITIONS when set so determinism runs (e.g. =3) can
-    # multiply repetitions without editing run_model.sh per-run. run_model.sh
-    # defaults it to 1 when absent, preserving the sweep's single-pass behavior.
-    # Per-model defaults from MODEL_ENV; the process env overrides them.
-    model_env = dict([kv.split("=", 1) for kv in MODEL_ENV.get(model, "").split()]) if MODEL_ENV.get(model) else {}
-    # Forward every per-model var (plus any process-env override) rather than a
-    # hardcoded pair: a var added to MODEL_ENV but missing from this list is a
-    # silent no-op that looks like a tuning fix and changes nothing.
-    env_prefix = ""
-    for key in sorted({*model_env, "EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES"}):
-        value = os.environ.get(key, model_env.get(key, ""))
-        if value:
-            env_prefix += f"export {key}={shlex.quote(value)} && "
     return subprocess.Popen(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
          "-o", "LogLevel=ERROR",
          "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=60",
-         "-i", SSH_KEY, f"{SSH_USER}@{ip}", f"{env_prefix}bash /tmp/run_model.sh {model}"],
+         "-i", SSH_KEY, f"{SSH_USER}@{ip}", f"{build_env_prefix(model)}bash /tmp/run_model.sh {model}"],
         stdout=open(log, "w"), stderr=subprocess.STDOUT)
 
 
@@ -443,10 +511,27 @@ def check_golden(model: str, ip: str) -> dict:
         "--data '{\"query\":{\"match_all\":{}}}'"
     )
     try:
-        local = json.loads(ssh(ip, resolve_cmd).splitlines()[-1])
+        raw = ssh(ip, resolve_cmd).strip()
+    except Exception as exc:
+        return {"count": -1, "error": f"ssh failed while reading local scores index: {exc}"}
+    if not raw:
+        # curl -sf prints nothing when the endpoint refuses the connection, so an
+        # empty body means the Scout stack is down (or never booted) rather than
+        # an empty index. Say that, instead of an IndexError from splitlines()[-1]
+        # surfacing as a misleading "cannot read local scores index".
+        return {
+            "count": -1,
+            "error": (
+                "no response from local scores index on "
+                f"{ip}:9220 — Scout ES/Kibana is not reachable (check EVAL_EXIT "
+                "and the stack boot log; the eval likely died before scoring)"
+            ),
+        }
+    try:
+        local = json.loads(raw.splitlines()[-1])
         hits = local["hits"]["hits"]
     except Exception as exc:
-        return {"count": -1, "error": f"cannot read local scores index: {exc}"}
+        return {"count": -1, "error": f"cannot parse local scores index response: {exc}"}
     if not hits:
         # A run that exports straight to golden leaves the VM-local index
         # empty. That is not proof the eval produced nothing, so resolve
@@ -571,7 +656,12 @@ def main() -> int:
     ap.add_argument("--models", default="all")
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--teardown", action="store_true")
+    ap.add_argument("--self-test", action="store_true",
+                    help="offline checks for the pure helpers; no Azure or SSH")
     args = ap.parse_args()
+
+    if args.self_test:
+        return self_test()
 
     if args.status:
         status()
@@ -581,6 +671,43 @@ def main() -> int:
             if vm["name"].startswith("orca-sweep-"):
                 az("vm", "delete", "-g", RG, "-n", vm["name"], "--yes", "--no-wait")
                 print(f"[teardown] deleting {vm['name']}")
+        # `az vm delete` removes ONLY the VM. Its disk, NIC and public IP
+        # survive and keep billing -- disks are the expensive ones, and NICs
+        # pin their public IP so ordering matters (NIC first, then IP).
+        # Observed 2026-09-02: a "successful" teardown left 3 disks, 5 NICs
+        # and 5 public IPs behind, two of them from sweeps days earlier.
+        # --no-wait above means VMs may still be detaching; poll until the
+        # disks actually report Unattached rather than racing them.
+        print("[teardown] waiting for disks to detach...")
+        for _ in range(60):
+            disks = json.loads(az("disk", "list", "-g", RG, "-o", "json"))
+            sweep = [d for d in disks if d["name"].startswith("orca-sweep-")]
+            if not sweep or all(d.get("diskState") == "Unattached" for d in sweep):
+                break
+            time.sleep(5)
+
+        for d in json.loads(az("disk", "list", "-g", RG, "-o", "json")):
+            if d["name"].startswith("orca-sweep-") and d.get("diskState") == "Unattached":
+                az("disk", "delete", "-g", RG, "-n", d["name"], "--yes", "--no-wait")
+                print(f"[teardown] deleting disk {d['name']}")
+
+        for n in json.loads(az("network", "nic", "list", "-g", RG, "-o", "json")):
+            if n["name"].startswith("orca-sweep-") and not n.get("virtualMachine"):
+                az("network", "nic", "delete", "-g", RG, "-n", n["name"])
+                print(f"[teardown] deleting nic {n['name']}")
+
+        for p in json.loads(az("network", "public-ip", "list", "-g", RG, "-o", "json")):
+            if p["name"].startswith("orca-sweep-") and not p.get("ipConfiguration"):
+                az("network", "public-ip", "delete", "-g", RG, "-n", p["name"])
+                print(f"[teardown] deleting public-ip {p['name']}")
+
+        left = {
+            "vms": len(json.loads(az("vm", "list", "-g", RG, "-o", "json"))),
+            "disks": len(json.loads(az("disk", "list", "-g", RG, "-o", "json"))),
+            "nics": len(json.loads(az("network", "nic", "list", "-g", RG, "-o", "json"))),
+            "pubips": len(json.loads(az("network", "public-ip", "list", "-g", RG, "-o", "json"))),
+        }
+        print(f"[teardown] remaining: {left}")
         return
 
     models = MODELS if args.models == "all" else [m.strip() for m in args.models.split(",")]

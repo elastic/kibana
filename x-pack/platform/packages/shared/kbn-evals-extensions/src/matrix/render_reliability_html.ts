@@ -9,6 +9,11 @@ import type { Matrix, MatrixCell, MatrixRow } from './build_matrix';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData } from './trace_types';
 import {
+  judgeAgreementForModel,
+  type JudgeAgreementRow,
+  type JudgeVerdict,
+} from './judge_agreement';
+import {
   intervalsOverlap,
   resolveProbe,
   rowAgreement,
@@ -104,7 +109,50 @@ const reliabilityHtml = (agreement: ReliabilityRow, tied: boolean): string => {
   );
 };
 
-const rowHtml = (row: MatrixRow, agreement: ReliabilityRow, tied: boolean): string => {
+const judgeHtml = (row: JudgeAgreementRow): string => {
+  if (row.status === 'unmeasured') {
+    return '<span class="unmeasured">Unmeasured</span><small>no verdicts</small>';
+  }
+  if (row.status === 'single-judge') {
+    // Never render this as agreement. One judge scoring a model is an absence
+    // of corroboration, and a percentage here would read as its opposite.
+    return `<span class="unmeasured">Single judge</span><small>${esc(
+      row.judges.join(', ')
+    )} · no second opinion</small>`;
+  }
+
+  const agreementPct = `${((row.verdictAgreement ?? 0) * 100).toFixed(1)}%`;
+  const ci = row.interval
+    ? ` <small>95% CI ${(row.interval.low * 100).toFixed(0)}–${(row.interval.high * 100).toFixed(
+        0
+      )}</small>`
+    : '';
+  const bias =
+    row.bias !== undefined && row.biasJudges
+      ? `<small>bias ${row.bias >= 0 ? '+' : ''}${row.bias.toFixed(3)} (${esc(
+          row.biasJudges[0]
+        )} − ${esc(row.biasJudges[1])})</small>`
+      : '';
+  const worst = row.worstEvaluators.length
+    ? `<small>worst: ${row.worstEvaluators
+        .slice(0, 2)
+        .map(
+          (e) =>
+            `${esc(e.evaluator)} ${((e.flips / e.pairs) * 100).toFixed(0)}% [${(
+              e.interval.low * 100
+            ).toFixed(0)}–${(e.interval.high * 100).toFixed(0)}]`
+        )
+        .join(', ')}</small>`
+    : '';
+  return `${agreementPct}${ci}<small>${row.pairs} paired verdicts</small>${bias}${worst}`;
+};
+
+const rowHtml = (
+  row: MatrixRow,
+  agreement: ReliabilityRow,
+  tied: boolean,
+  judge: JudgeAgreementRow
+): string => {
   const tier = row.tier === undefined ? '—' : `Tier ${row.tier}`;
   return `<tr>
     <td class="model">${esc(row.modelLabel)}<small>${esc(row.modelId)}</small></td>
@@ -112,6 +160,7 @@ const rowHtml = (row: MatrixRow, agreement: ReliabilityRow, tied: boolean): stri
       cellValue(row.capability ?? { kind: 'missing' })
     )}<small>deterministic contract evaluators</small></td>
     <td class="metric">${reliabilityHtml(agreement, tied)}</td>
+    <td class="metric">${judgeHtml(judge)}</td>
     <td class="metric">${esc(cellValue(row.judgedQuality ?? { kind: 'missing' }))}<small>${esc(
     tier
   )} · ${row.coverage.covered}/${row.coverage.total} columns</small></td>
@@ -126,12 +175,17 @@ const rowHtml = (row: MatrixRow, agreement: ReliabilityRow, tied: boolean): stri
 export const renderReliabilityHtml = (
   matrix: Matrix,
   traces: MatrixTraceData = {},
-  provenance: MatrixProvenance = {}
+  provenance: MatrixProvenance = {},
+  judgeVerdicts: readonly JudgeVerdict[] = []
 ): string => {
   const cells = reliabilityCellsFromTraces(traces);
   const rows = [...matrix.proprietary, ...matrix.openSource];
   const agreements = new Map(rows.map((row) => [row.modelId, rowAgreement(cells, row.modelId)]));
   const measured = [...agreements.values()].filter((a) => a.status === 'measured');
+  const judgeRows = new Map(
+    rows.map((row) => [row.modelId, judgeAgreementForModel(judgeVerdicts, row.modelId)])
+  );
+  const judgeMeasured = [...judgeRows.values()].filter((j) => j.status === 'measured');
 
   // A row is "tied" when its interval overlaps any other measured row's. With
   // ~27 pairs per model the intervals span roughly 30pp, so two point
@@ -179,8 +233,12 @@ export const renderReliabilityHtml = (
     legacyCells > 0
       ? ` ${legacyCells} of ${cells.length} cells were classified by the legacy example-prefix list because their score documents predate the <code>pathContract</code> field.`
       : ''
-  }${probeCells > 0 ? ` ${probeCells} probe cells are excluded from agreement.` : ''}</div>
-<table><thead><tr><th>Model</th><th>Capability</th><th>Reliability</th><th>Judged quality</th></tr></thead><tbody>${rows
+  }${probeCells > 0 ? ` ${probeCells} probe cells are excluded from agreement.` : ''}${
+    judgeMeasured.length > 0
+      ? ` ${judgeMeasured.length}/${rows.length} models were scored by two judge families; agreement below is verdict-level concordance, not correctness — both judges can agree and both be wrong.`
+      : ''
+  }</div>
+<table><thead><tr><th>Model</th><th>Capability</th><th>Reliability</th><th>Judge agreement</th><th>Judged quality</th></tr></thead><tbody>${rows
     .map((row) =>
       rowHtml(
         row,
@@ -190,10 +248,17 @@ export const renderReliabilityHtml = (
           cells: 0,
           measuredCells: 0,
         },
-        tiedModels.has(row.modelId)
+        tiedModels.has(row.modelId),
+        judgeRows.get(row.modelId) ?? {
+          modelId: row.modelId,
+          status: 'unmeasured',
+          judges: [],
+          pairs: 0,
+          worstEvaluators: [],
+        }
       )
     )
     .join('\n')}</tbody></table>
-<p class="legend"><b>Capability</b> is the mean of deterministic contract evaluators (<code>ExpectedToolCalled</code>, <code>FinalAnswerPresent</code>, <code>MinExpectedSteps</code>, and <code>SkillInvoked</code>). <b>Reliability</b> is pairwise exact agreement of ordered <code>tool_id</code> sequences; provider-generated <code>tool_call_id</code> is never compared. Rates carry a Wilson 95% interval and their pair count, and rows whose intervals overlap are marked tied rather than ordered. <b>Answer similarity</b> is reported separately because path stability barely predicts it (r=0.14 on the pilot corpus). <b>Judged quality</b> is the mean of the remaining maximize-direction evaluators. The three axes are never averaged into a rank.</p>
+<p class="legend"><b>Capability</b> is the mean of deterministic contract evaluators (<code>ExpectedToolCalled</code>, <code>FinalAnswerPresent</code>, <code>MinExpectedSteps</code>, and <code>SkillInvoked</code>). <b>Reliability</b> is pairwise exact agreement of ordered <code>tool_id</code> sequences; provider-generated <code>tool_call_id</code> is never compared. Rates carry a Wilson 95% interval and their pair count, and rows whose intervals overlap are marked tied rather than ordered. <b>Answer similarity</b> is reported separately because path stability barely predicts it (r=0.14 on the pilot corpus). <b>Judge agreement</b> is pass/fail concordance between two judge families on the identical example, repetition, and evaluator; cost and latency instruments are excluded because they are not verdicts. A model scored by one judge reads <i>Single judge</i>, never 100% — an absent second opinion is not consensus. Agreement measures reproducibility, not correctness. <b>Judged quality</b> is the mean of the remaining maximize-direction evaluators. The four axes are never averaged into a rank.</p>
 </div></body></html>`;
 };

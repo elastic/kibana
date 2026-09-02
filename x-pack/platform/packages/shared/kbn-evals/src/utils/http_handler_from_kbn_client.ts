@@ -64,7 +64,13 @@ export function httpHandlerFromKbnClient({
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
 
     const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
-    const retryStatuses = new Set([429, 503, 504]);
+    // 500 belongs here: EIS surfaces transient upstream provider faults as a
+    // Kibana 500 ("Received a server error status code for request from inference
+    // entity id [...] status [500]"), not a 502/503. Observed 2026-09-02: a
+    // provider-side blip failed 21/21 examples on two independent VMs at the same
+    // repetition and discarded two good repetitions with them. These are retryable
+    // by nature — a non-retryable 500 just fails again and costs one extra call.
+    const retryStatuses = new Set([429, 500, 502, 503, 504]);
     // Transport-level deaths, which arrive with no HTTP status at all.
     const RETRYABLE_TRANSPORT_ERRORS =
       /fetch failed|aborted|AbortError|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|EAI_AGAIN|socket hang up|other side closed/i;

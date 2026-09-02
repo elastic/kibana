@@ -135,4 +135,60 @@ describe('renderReliabilityHtml', () => {
     );
     expect(html).toContain('uncommitted changes present');
   });
+
+  describe('judge agreement column', () => {
+    const verdict = (
+      modelId: string,
+      judgeId: string,
+      example: string,
+      evaluator: string,
+      score: number
+    ) => ({ modelId, judgeId, example, repetition: 0, evaluator, score });
+
+    it('renders Unmeasured when no judge verdicts are supplied', () => {
+      const html = renderReliabilityHtml(matrix, {}, {});
+      expect(html).toContain('Judge agreement');
+      expect(html).toContain('no verdicts');
+    });
+
+    it('renders Single judge, never a percentage, for one-judge models', () => {
+      const html = renderReliabilityHtml(matrix, {}, {}, [
+        verdict('measured', 'gemini', 'ex-1', 'Relevance', 1),
+        verdict('measured', 'gemini', 'ex-2', 'Relevance', 1),
+      ]);
+      expect(html).toContain('Single judge');
+      expect(html).toContain('no second opinion');
+      // The regression that matters: a lone judge must not read as consensus.
+      expect(html).not.toContain('100.0%');
+    });
+
+    it('renders agreement with its interval and pair count', () => {
+      const html = renderReliabilityHtml(matrix, {}, {}, [
+        verdict('measured', 'gemini', 'ex-1', 'Relevance', 1),
+        verdict('measured', 'sonnet', 'ex-1', 'Relevance', 1),
+        verdict('measured', 'gemini', 'ex-2', 'Relevance', 1),
+        verdict('measured', 'sonnet', 'ex-2', 'Relevance', 0),
+      ]);
+      expect(html).toContain('50.0%');
+      expect(html).toContain('2 paired verdicts');
+      expect(html).toContain('95% CI');
+    });
+
+    it('names the worst evaluator with its flip interval', () => {
+      const html = renderReliabilityHtml(matrix, {}, {}, [
+        verdict('measured', 'gemini', 'ex-1', 'Relevance', 1),
+        verdict('measured', 'sonnet', 'ex-1', 'Relevance', 0),
+      ]);
+      expect(html).toContain('worst:');
+      expect(html).toContain('Relevance');
+    });
+
+    it('states that agreement is not correctness', () => {
+      const html = renderReliabilityHtml(matrix, {}, {}, [
+        verdict('measured', 'gemini', 'ex-1', 'Relevance', 1),
+        verdict('measured', 'sonnet', 'ex-1', 'Relevance', 1),
+      ]);
+      expect(html).toContain('both judges can agree and both be wrong');
+    });
+  });
 });

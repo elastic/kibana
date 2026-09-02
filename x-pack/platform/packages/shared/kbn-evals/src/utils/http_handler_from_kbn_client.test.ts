@@ -81,6 +81,32 @@ describe('httpHandlerFromKbnClient transport retries', () => {
     await expect(handler2('/api/x', { method: 'POST' })).rejects.toThrow('bad request');
     expect(refused).toHaveBeenCalledTimes(1);
   });
+  it('retries an EIS-shaped 500 and still refuses a 501', async () => {
+    // EIS surfaces transient upstream provider faults as a Kibana 500, not a 503.
+    // On 2026-09-02 this exact shape failed 21/21 examples on two VMs at the same
+    // repetition because 500 was absent from retryStatuses.
+    const ok = { data: {}, status: 200, statusText: 'OK', headers: {} };
+    const eisFault = jest
+      .fn()
+      .mockRejectedValueOnce(
+        makeError(
+          'Received a server error status code for request from inference entity id ' +
+            '[.anthropic-claude-4.7-opus-chat_completion] status [500]. Error message: [Internal error]',
+          500
+        )
+      )
+      .mockResolvedValueOnce(ok);
+    const handler = httpHandlerFromKbnClient({ kbnClient: kbnClient(eisFault), log });
+    await handler('/api/agent_builder/converse', { method: 'POST' });
+    expect(eisFault).toHaveBeenCalledTimes(2);
+
+    // 501 is a real "server will never do this" — must stay terminal so a genuine
+    // bug is not retried into a slow failure.
+    const refused = jest.fn().mockRejectedValue(makeError('not implemented', 501));
+    const handler2 = httpHandlerFromKbnClient({ kbnClient: kbnClient(refused), log });
+    await expect(handler2('/api/x', { method: 'POST' })).rejects.toThrow('not implemented');
+    expect(refused).toHaveBeenCalledTimes(1);
+  });
   it('aborts a hung request and retries it', async () => {
     process.env.KBN_EVALS_HTTP_RETRIES = '1';
     process.env.KBN_EVALS_HTTP_TIMEOUT_MS = '150';
