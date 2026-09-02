@@ -214,6 +214,15 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
       content: <GenAiFieldValue value={conversationId} />,
     });
   }
+  if (toolName) {
+    detailRows.push({
+      id: 'toolName',
+      label: i18n.translate('apmUiShared.genAi.params.toolName', {
+        defaultMessage: 'Tool name',
+      }),
+      content: <GenAiFieldValue value={toolName} />,
+    });
+  }
   if (response.id) {
     detailRows.push({
       id: 'responseId',

@@ -69,41 +69,12 @@ export interface GenAiFields {
   inputMessages: GenAiMessage[];
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
-  toolDefinitions: GenAiToolDefinition[];
+  toolDefinitions?: GenAiToolDefinition[];
   rawToolDefinitions?: unknown;
   toolName?: string;
   toolCallArguments?: unknown;
   toolCallResult?: unknown;
 }
-
-const GEN_AI_TAB_ATTRIBUTE_PATHS = [
-  ATTRIBUTE_GEN_AI_OPERATION_NAME,
-  ATTRIBUTE_GEN_AI_PROVIDER_NAME,
-  ATTRIBUTE_GEN_AI_SYSTEM,
-  ATTRIBUTE_GEN_AI_REQUEST_MODEL,
-  ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE,
-  ATTRIBUTE_GEN_AI_REQUEST_TOP_P,
-  ATTRIBUTE_GEN_AI_REQUEST_TOP_K,
-  ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS,
-  ATTRIBUTE_GEN_AI_REQUEST_SEED,
-  ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
-  ATTRIBUTE_GEN_AI_RESPONSE_ID,
-  ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
-  ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
-  ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
-  ATTRIBUTE_GEN_AI_CONVERSATION_ID,
-  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
-  ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS,
-  ATTRIBUTE_GEN_AI_TOOL_NAME,
-  ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS,
-  ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT,
-] as const;
-
-export const GEN_AI_TAB_ATTRIBUTE_KEYS: ReadonlySet<string> = new Set(
-  GEN_AI_TAB_ATTRIBUTE_PATHS.map((path) => path.replace(/^attributes\./, ''))
-);
 
 const GEN_AI_PATTERN = /(^|\.)gen[_.]ai[._]/;
 
@@ -300,11 +271,12 @@ export function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] {
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
   const rawToolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
+  const nonNullToolDefinitions = Array.isArray(rawToolDefinitionsValue)
+    ? rawToolDefinitionsValue.filter((value) => value != null)
+    : [];
   const rawToolDefinitions =
-    Array.isArray(rawToolDefinitionsValue) &&
-    rawToolDefinitionsValue.length === 1 &&
-    typeof rawToolDefinitionsValue[0] === 'string'
-      ? rawToolDefinitionsValue[0]
+    nonNullToolDefinitions.length === 1 && typeof nonNullToolDefinitions[0] === 'string'
+      ? nonNullToolDefinitions[0]
       : rawToolDefinitionsValue;
   const parsedToolDefinitions = parseToolDefinitionsWithFallback(rawToolDefinitions);
 

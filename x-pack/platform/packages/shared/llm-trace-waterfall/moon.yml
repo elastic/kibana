@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/data-plugin'
   - '@kbn/apm-ui-shared'
+  - '@kbn/key-value-metadata-table'
 tags:
   - shared-browser
   - package

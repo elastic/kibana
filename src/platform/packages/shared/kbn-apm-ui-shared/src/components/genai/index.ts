@@ -13,7 +13,6 @@ export { GenAiTechnicalPreviewBadge } from './technical_preview_badge';
 export {
   hasGenAiData,
   getGenAiFields,
-  GEN_AI_TAB_ATTRIBUTE_KEYS,
   type GenAiFields,
   type GenAiMessage,
   type GenAiToolDefinition,

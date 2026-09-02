@@ -23,11 +23,7 @@ export const getSpanCategory = (span: TraceSpan): SpanCategory => {
   const operation = attrs?.['gen_ai.operation.name'];
   const inferenceKind = attrs?.['elastic.inference.span.kind'];
 
-  if (
-    operation === 'execute_tool' ||
-    inferenceKind === 'TOOL' ||
-    attrs?.['gen_ai.tool.name'] != null
-  ) {
+  if (operation === 'execute_tool' || inferenceKind === 'TOOL') {
     return 'tool';
   }
 
@@ -44,6 +40,10 @@ export const getSpanCategory = (span: TraceSpan): SpanCategory => {
     attrs?.['gen_ai.system'] != null
   ) {
     return 'llm';
+  }
+
+  if (attrs?.['gen_ai.tool.name'] != null) {
+    return 'tool';
   }
 
   if (attrs?.['http.method'] != null || attrs?.['http.request.method'] != null) {

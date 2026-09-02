@@ -107,16 +107,13 @@ export function getChatSpan(span: tracing.ReadableSpan) {
 
   span.attributes[INPUT_VALUE] = JSON.stringify(allInputForDisplay);
 
-  const parsedTools: GenAiToolDefinition[] = span.attributes[
-    GenAISemanticConventions.GenAIToolDefinitions
-  ]
-    ? parseJsonAttr<GenAiToolDefinition[]>(
-        span.attributes[GenAISemanticConventions.GenAIToolDefinitions]
-      ) ?? []
-    : [];
+  const parsedTools = span.attributes[GenAISemanticConventions.GenAIToolDefinitions]
+    ? parseJsonAttr<unknown>(span.attributes[GenAISemanticConventions.GenAIToolDefinitions])
+    : undefined;
+  const toolDefinitions = Array.isArray(parsedTools) ? (parsedTools as GenAiToolDefinition[]) : [];
 
   span.attributes[LLM_TOOLS] = JSON.stringify(
-    parsedTools.map(({ name, description, parameters }) => {
+    toolDefinitions.map(({ name, description, parameters }) => {
       return {
         'tool.name': name,
         'tool.description': description,

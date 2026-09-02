@@ -66,14 +66,6 @@ export const HTTP_ATTRIBUTES_HEADING = i18n.translate('llmTraceWaterfall.httpAtt
   defaultMessage: 'HTTP attributes',
 });
 
-export const ATTRIBUTE_FIELD_COLUMN = i18n.translate('llmTraceWaterfall.attributeFieldColumn', {
-  defaultMessage: 'Field',
-});
-
-export const ATTRIBUTE_VALUE_COLUMN = i18n.translate('llmTraceWaterfall.attributeValueColumn', {
-  defaultMessage: 'Value',
-});
-
 export const NO_ATTRIBUTES = i18n.translate('llmTraceWaterfall.noAttributes', {
   defaultMessage: 'No attributes available for this span.',
 });

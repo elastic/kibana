@@ -113,11 +113,12 @@ describe('SpanDetail', () => {
 
     expect(screen.getByText('GenAI')).toBeInTheDocument();
     expect(screen.getByTestId('mockGenAiTab')).toBeInTheDocument();
-    expect(screen.queryByText('HTTP attributes')).not.toBeInTheDocument();
+    expect(screen.queryByText('http.method')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Attributes'));
 
-    expect(screen.getByText('HTTP attributes')).toBeInTheDocument();
+    expect(screen.getByText('gen_ai.operation.name')).toBeInTheDocument();
+    expect(screen.getByText('http.method')).toBeInTheDocument();
     expect(screen.queryByTestId('mockGenAiTab')).not.toBeInTheDocument();
   });
 
@@ -130,7 +131,7 @@ describe('SpanDetail', () => {
     );
 
     expect(screen.queryByText('GenAI')).not.toBeInTheDocument();
-    expect(screen.getByText('HTTP attributes')).toBeInTheDocument();
+    expect(screen.getByText('http.method')).toBeInTheDocument();
   });
 
   it('handles span with no attributes gracefully', () => {
@@ -152,7 +153,7 @@ describe('SpanDetail', () => {
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('groups leftover gen_ai attributes with the other attributes', () => {
+  it('keeps every raw attribute in the Attributes tab', () => {
     render(
       <SpanDetail
         span={buildSpanNode({
@@ -160,7 +161,9 @@ describe('SpanDetail', () => {
             'gen_ai.operation.name': 'chat',
             'gen_ai.prompt.id': 'alert-summarization',
             'http.method': 'POST',
+            'resource.service.name': 'kibana',
             'custom.flag': true,
+            'custom.payload': { query: 'FROM logs' },
           },
         })}
         onClose={jest.fn()}
@@ -169,14 +172,16 @@ describe('SpanDetail', () => {
 
     fireEvent.click(screen.getByText('Attributes'));
 
-    expect(screen.getByText('HTTP attributes')).toBeInTheDocument();
-    expect(screen.getByText('Other attributes (2)')).toBeInTheDocument();
+    expect(screen.getByText('gen_ai.operation.name')).toBeInTheDocument();
     expect(screen.getByText('gen_ai.prompt.id')).toBeInTheDocument();
+    expect(screen.getByText('http.method')).toBeInTheDocument();
+    expect(screen.getByText('resource.service.name')).toBeInTheDocument();
     expect(screen.getByText('custom.flag')).toBeInTheDocument();
-    expect(screen.queryByText('gen_ai.operation.name')).not.toBeInTheDocument();
+    expect(screen.getByText('custom.payload')).toBeInTheDocument();
+    expect(screen.getByText(/"query": "FROM logs"/)).toBeInTheDocument();
   });
 
-  it('keeps invalid tool definitions in the GenAI tab and out of attributes', () => {
+  it('keeps invalid tool definitions in both GenAI and Attributes tabs', () => {
     render(
       <SpanDetail
         span={buildSpanNode({
@@ -192,7 +197,7 @@ describe('SpanDetail', () => {
 
     expect(screen.getByTestId('mockRawToolDefinitions')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Attributes'));
-    expect(screen.queryByText('gen_ai.tool.definitions')).not.toBeInTheDocument();
+    expect(screen.getByText('gen_ai.tool.definitions')).toBeInTheDocument();
   });
 
   it('keeps legacy tool input and output fields as raw attributes', () => {

@@ -58,6 +58,19 @@ describe('getSpanCategory', () => {
     ).toBe('llm');
   });
 
+  it('prefers an explicit chat operation when tool metadata is also present', () => {
+    expect(
+      getSpanCategory(
+        span({
+          attributes: {
+            'gen_ai.operation.name': 'chat',
+            'gen_ai.tool.name': 'search',
+          },
+        })
+      )
+    ).toBe('llm');
+  });
+
   it('does not treat mere presence of gen_ai.operation.name as llm', () => {
     expect(
       getSpanCategory(

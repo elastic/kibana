@@ -10,7 +10,6 @@
 import {
   getGenAiFields,
   getMessageCopyText,
-  GEN_AI_TAB_ATTRIBUTE_KEYS,
   hasGenAiData,
   parseGenAiMessages,
   parseSystemInstructions,
@@ -451,18 +450,22 @@ describe('tool fields on getGenAiFields', () => {
     expect(fields.rawToolDefinitions).toBe(rawToolDefinitions);
   });
 
+  it.each([
+    [JSON.stringify([{ type: 'function', name: 'search' }])],
+    [JSON.stringify([{ type: 'function', name: 'search' }]), null],
+  ])('extracts tool definitions from fields API arrays', (...rawToolDefinitions) => {
+    const fields = getGenAiFields({
+      'attributes.gen_ai.tool.definitions': rawToolDefinitions,
+    });
+
+    expect(fields.toolDefinitions).toEqual([{ type: 'function', name: 'search' }]);
+    expect(fields.rawToolDefinitions).toBeUndefined();
+  });
+
   it('unwraps system_instructions parts for Agent Builder chat spans', () => {
     const fields = getGenAiFields({
       'gen_ai.system_instructions': JSON.stringify([{ type: 'text', content: 'Be concise.' }]),
     });
     expect(fields.systemInstructions).toBe('Be concise.');
-  });
-});
-
-describe('GEN_AI_TAB_ATTRIBUTE_KEYS', () => {
-  it('contains the bare attribute names consumed by the GenAI tab', () => {
-    expect(GEN_AI_TAB_ATTRIBUTE_KEYS).toContain('gen_ai.operation.name');
-    expect(GEN_AI_TAB_ATTRIBUTE_KEYS).toContain('gen_ai.tool.definitions');
-    expect(GEN_AI_TAB_ATTRIBUTE_KEYS).not.toContain('gen_ai.prompt.id');
   });
 });

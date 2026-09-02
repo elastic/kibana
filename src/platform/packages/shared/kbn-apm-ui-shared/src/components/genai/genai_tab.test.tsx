@@ -180,4 +180,11 @@ describe('GenAiTab', () => {
     expect(screen.getByTestId('genAiToolCallArguments')).toBeInTheDocument();
     expect(screen.getByTestId('genAiToolCallResult')).toBeInTheDocument();
   });
+
+  it('renders a tool name without tool call input or output', () => {
+    renderTab({ toolName: 'platform.core.execute_esql' });
+
+    expect(screen.getByTestId('genAiDetails')).toHaveTextContent('platform.core.execute_esql');
+    expect(screen.queryByTestId('genAiSection-toolCall')).not.toBeInTheDocument();
+  });
 });
