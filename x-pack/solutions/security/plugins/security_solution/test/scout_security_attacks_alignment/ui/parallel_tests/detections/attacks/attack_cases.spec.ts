@@ -202,7 +202,6 @@ spaceTest.describe(
           // Both row actions live in the single leading actions cell.
           await expect(attackCases.attackGridRowActions).toHaveCount(1);
           await expect(attackCases.attackGridShowButtons).toHaveCount(1);
-          await expect(attackCases.removeAttackButtons).toHaveCount(1);
         });
 
         await spaceTest.step(
@@ -257,7 +256,8 @@ spaceTest.describe(
         );
 
         await spaceTest.step('remove the attack, taking its related alerts', async () => {
-          await attackCases.openRemoveAttackPrompt();
+          await attackCases.selectAllAttacks();
+          await attackCases.openBulkRemoveAttacksPrompt();
           await attackCases.confirmRemoveAttack({ withRelatedAlerts: true });
         });
 

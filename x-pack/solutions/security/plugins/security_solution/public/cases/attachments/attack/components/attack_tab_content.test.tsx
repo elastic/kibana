@@ -14,7 +14,7 @@ import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { AttackTabContent } from './attack_tab_content';
 import {
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
-  ATTACK_TAB_BULK_REMOVE_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
   ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
   ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
   ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
@@ -33,8 +33,6 @@ import {
   ATTACK_TAB_TABLE_TEST_ID,
   INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
-  REMOVE_ATTACK_BUTTON_TEST_ID,
-  REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -164,9 +162,6 @@ const cellTexts = (testId: string) => screen.getAllByTestId(testId).map((cell) =
 /** Both row actions are keyed by the attachment saved object id, not the attack document id. */
 const showAttackButton = (savedObjectId: string) =>
   screen.getByTestId(`${SHOW_ATTACK_BUTTON_TEST_ID}-${savedObjectId}`);
-
-const removeAttackButton = (savedObjectId: string) =>
-  screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-${savedObjectId}`);
 
 const investigateInTimelineButton = (savedObjectId: string) =>
   screen.getByTestId(`${INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID}-${savedObjectId}`);
@@ -759,14 +754,6 @@ describe('AttackTabContent', () => {
   });
 
   describe('the row actions control column', () => {
-    const openRemovalPrompt = async () => {
-      await user.click(removeAttackButton('so-1'));
-    };
-
-    const confirmRemoval = async () => {
-      await user.click(screen.getByText('Remove'));
-    };
-
     it('renders every action on every row', () => {
       renderAttachments([
         buildAttachment(),
@@ -776,10 +763,8 @@ describe('AttackTabContent', () => {
       expect(screen.getAllByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID)).toHaveLength(2);
       expect(showAttackButton('so-1')).toBeInTheDocument();
       expect(investigateInTimelineButton('so-1')).toBeInTheDocument();
-      expect(removeAttackButton('so-1')).toBeInTheDocument();
       expect(showAttackButton('so-2')).toBeInTheDocument();
       expect(investigateInTimelineButton('so-2')).toBeInTheDocument();
-      expect(removeAttackButton('so-2')).toBeInTheDocument();
     });
 
     it('leads the row, ahead of the first data column', () => {
@@ -800,12 +785,6 @@ describe('AttackTabContent', () => {
       expect(showAttackButton('so-1')).toBeEnabled();
     });
 
-    it('exposes the remove attack button on each row', () => {
-      renderTab();
-
-      expect(removeAttackButton('so-1')).toBeEnabled();
-    });
-
     it('keeps every action in the keyboard tab order', async () => {
       renderTab();
 
@@ -815,10 +794,6 @@ describe('AttackTabContent', () => {
       await user.tab();
 
       expect(investigateInTimelineButton('so-1')).toHaveFocus();
-
-      await user.tab();
-
-      expect(removeAttackButton('so-1')).toHaveFocus();
     });
 
     it('opens Timeline on the attack when the investigate action is used', async () => {
@@ -851,7 +826,6 @@ describe('AttackTabContent', () => {
         screen.queryByTestId(`${INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID}-so-1`)
       ).not.toBeInTheDocument();
       expect(showAttackButton('so-1')).toBeInTheDocument();
-      expect(removeAttackButton('so-1')).toBeInTheDocument();
     });
 
     it('opens the attack flyout when the show action is activated by keyboard', async () => {
@@ -863,91 +837,6 @@ describe('AttackTabContent', () => {
       expect(mockOpenAttackFlyout).toHaveBeenCalledWith(
         expect.objectContaining({ attackId: 'attack-id-1' })
       );
-    });
-
-    it('opens the removal prompt when the remove action is activated by keyboard', async () => {
-      renderTab();
-
-      removeAttackButton('so-1').focus();
-      await user.keyboard('{Enter}');
-
-      expect(await screen.findByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('offers to remove the related alerts when removing a single attack', async () => {
-      renderTab();
-
-      await openRemovalPrompt();
-
-      expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID)).toBeEnabled();
-    });
-
-    it('keeps the removal prompt open when the case hands the section fresh attachments', async () => {
-      const { rerender } = render(
-        <TestProviders>
-          <AttackTabContent caseData={buildCaseData([buildAttachment()])} />
-        </TestProviders>
-      );
-
-      await openRemovalPrompt();
-
-      expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
-
-      // The case view refetches on its own, so the same attachment arrives again as a new object.
-      // The grid renders its cells from component types: were they rebuilt per render, React would
-      // remount the cell and take the open prompt down with it.
-      rerender(
-        <TestProviders>
-          <AttackTabContent caseData={buildCaseData([buildAttachment()])} />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('removes only the attack attachment when the checkbox is left unchecked', async () => {
-      renderTab();
-
-      await openRemovalPrompt();
-      await confirmRemoval();
-
-      expect(removeAttack).toHaveBeenCalledWith({
-        caseId: 'case-1',
-        attackAttachmentIds: ['so-1'],
-        alertAttachmentIds: [],
-      });
-    });
-
-    it('removes the resolved alert attachments too when the checkbox is checked', async () => {
-      renderTab();
-
-      await openRemovalPrompt();
-      await user.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
-      await confirmRemoval();
-
-      expect(removeAttack).toHaveBeenCalledTimes(1);
-      expect(removeAttack).toHaveBeenCalledWith({
-        caseId: 'case-1',
-        attackAttachmentIds: ['so-1'],
-        alertAttachmentIds: ['so-alert-1', 'so-alert-2'],
-      });
-    });
-
-    it('disables the remove button while a removal is in flight', () => {
-      useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: true });
-
-      renderTab();
-
-      expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeDisabled();
-    });
-
-    it('still offers removal for an attack that could not be resolved', () => {
-      mockFindResult([]);
-
-      renderTab();
-
-      expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeEnabled();
     });
   });
 
@@ -1109,7 +998,7 @@ describe('AttackTabContent', () => {
     };
 
     const openBulkRemovalPrompt = async () => {
-      await user.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
+      await user.click(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID));
     };
 
     const confirmRemoval = async () => {
@@ -1220,7 +1109,7 @@ describe('AttackTabContent', () => {
 
       await user.click(rowCheckbox('so-1'));
 
-      expect(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID)).toBeDisabled();
+      expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID)).toBeDisabled();
     });
   });
 });

@@ -65,12 +65,11 @@ import { AttackTitleLink } from './attack_title_link';
 import { ShowAttackButton } from './show_attack_button';
 import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
 import { InvestigateAttackInTimelineButton } from './investigate_attack_in_timeline_button';
-import { RemoveAttackButton } from './remove_attack_button';
 import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
 import type { SelectedAttack } from './attack_tab_bulk_actions';
 import { AttackTabBulkActions } from './attack_tab_bulk_actions';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
-import type { AttackCaseAttachmentRow, AttackTabColumnId, CaseAttachment } from '../utils';
+import type { AttackCaseAttachmentRow, AttackTabColumnId } from '../utils';
 import {
   ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
   ATTACK_TAB_COLUMN_ID,
@@ -104,10 +103,7 @@ interface AttackRow {
 interface AttackGridCellContextValue {
   areAllRowsSelected: boolean;
   canInvestigateInTimeline: boolean;
-  comments: readonly CaseAttachment[];
   investigateAttackInTimeline: (attack: AttackDiscoveryAlert | undefined) => void;
-  isRemoving: boolean;
-  onRemoveConfirmed: (savedObjectId: string, confirmation: RemoveAttackConfirmation) => void;
   rows: AttackRow[];
   selectedRowCount: number;
   selectedRowIds: ReadonlySet<string>;
@@ -512,14 +508,8 @@ const AttackActionsHeaderCell = () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.act
 AttackActionsHeaderCell.displayName = 'AttackActionsHeaderCell';
 
 const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-  const {
-    canInvestigateInTimeline,
-    comments,
-    investigateAttackInTimeline,
-    isRemoving,
-    onRemoveConfirmed,
-    rows,
-  } = useAttackGridCellContext();
+  const { canInvestigateInTimeline, investigateAttackInTimeline, rows } =
+    useAttackGridCellContext();
 
   const row = rows[rowIndex];
 
@@ -556,18 +546,6 @@ const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
           />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>
-        {/* Removal stays available for an unresolved attack — the attachment can always be taken
-            off the case; only the "also remove its alerts" offer needs the document. */}
-        <RemoveAttackButton
-          id={row.savedObjectId}
-          attackId={row.attachmentId}
-          attackTitle={attackTitle}
-          comments={comments}
-          isDisabled={isRemoving}
-          onConfirm={(confirmation) => onRemoveConfirmed(row.savedObjectId, confirmation)}
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -672,12 +650,6 @@ const AttackTabTable = ({
     useInvestigateAttackInTimeline();
 
   const { id: caseId, comments } = caseData;
-
-  const onRemoveConfirmed = useCallback(
-    (attackAttachmentId: string, { alertAttachmentIds }: RemoveAttackConfirmation) =>
-      removeAttack({ caseId, attackAttachmentIds: [attackAttachmentId], alertAttachmentIds }),
-    [caseId, removeAttack]
-  );
 
   // One `_find` request for every attached attack rather than one per row. Memoized because
   // the array is part of the react-query key.
@@ -830,10 +802,7 @@ const AttackTabTable = ({
     () => ({
       areAllRowsSelected,
       canInvestigateInTimeline,
-      comments,
       investigateAttackInTimeline,
-      isRemoving,
-      onRemoveConfirmed,
       rows,
       selectedRowCount,
       selectedRowIds,
@@ -843,10 +812,7 @@ const AttackTabTable = ({
     [
       areAllRowsSelected,
       canInvestigateInTimeline,
-      comments,
       investigateAttackInTimeline,
-      isRemoving,
-      onRemoveConfirmed,
       rows,
       selectedRowCount,
       selectedRowIds,

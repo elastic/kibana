@@ -16,7 +16,7 @@ import {
   ATTACK_TITLE_TEST_ID,
   ATTACK_ALERT_COUNT_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
-  ATTACK_TAB_BULK_REMOVE_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
   ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
   ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
   ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID,
@@ -27,7 +27,6 @@ import {
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_SELECT_ALL_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
-  REMOVE_ATTACK_BUTTON_TEST_ID,
   REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
@@ -176,7 +175,6 @@ export class AttackCasesPage {
   public readonly attackGridBulkRemoveButton: Locator;
 
   // Case view – attack removal prompt
-  public readonly removeAttackButtons: Locator;
   public readonly removeAttackModal: Locator;
   public readonly removeAttackAlertsCheckbox: Locator;
   public readonly removeAttackConfirmButton: Locator;
@@ -268,12 +266,11 @@ export class AttackCasesPage {
     );
     // The bar is appended to the grid's own toolbar, so it lives inside the grid.
     this.attackGridBulkActions = this.attackGrid.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID);
-    this.attackGridBulkRemoveButton = this.attackGrid.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID);
+    this.attackGridBulkRemoveButton = this.attackGrid.getByTestId(
+      ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID
+    );
 
     // Suffixed with the attachment saved object id, generated server-side — match the prefix.
-    this.removeAttackButtons = this.attackGrid.locator(
-      `[data-test-subj^="${REMOVE_ATTACK_BUTTON_TEST_ID}-"]`
-    );
     this.removeAttackModal = page.testSubj.locator(REMOVE_ATTACK_MODAL_TEST_ID);
     this.removeAttackAlertsCheckbox = page.testSubj.locator(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
     this.removeAttackConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
@@ -476,17 +473,6 @@ export class AttackCasesPage {
     // `dataGridColumnSelectorPopover` on the anchor, which is in the DOM whether it is open or not.
     await this.attackGridColumnSelectorButton.click();
     await toggle.waitFor({ state: 'hidden', timeout: 30_000 });
-  }
-
-  /** Opens the removal prompt for the first row of the Attacks section. */
-  async openRemoveAttackPrompt() {
-    const firstRemoveButton = await this.resolveFirst(
-      this.removeAttackButtons,
-      'No remove attack button found in the attacks section'
-    );
-
-    await firstRemoveButton.click();
-    await this.removeAttackModal.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   /** Ticks the header checkbox, which selects every row the search has left in the grid. */

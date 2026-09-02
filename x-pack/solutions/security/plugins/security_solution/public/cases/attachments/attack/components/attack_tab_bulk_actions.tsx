@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import {
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
-  ATTACK_TAB_BULK_REMOVE_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { APP_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -101,7 +101,7 @@ export const AttackTabBulkActions = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             color="danger"
-            data-test-subj={ATTACK_TAB_BULK_REMOVE_TEST_ID}
+            data-test-subj={ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID}
             iconType="trash"
             isDisabled={isRemoving}
             onClick={openModal}
