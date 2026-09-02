@@ -8,17 +8,17 @@
  */
 
 /**
- * Auto-refresh issues a new search. The inspector request timestamp is the
- * rendered signal that a refetch happened.
+ * Document timestamps follow `dateFormat:tz`.
  */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 
-spaceTest.describe('Discover auto refresh', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('time zone'), { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
+    await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'America/Phoenix' });
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -27,28 +27,26 @@ spaceTest.describe('Discover auto refresh', { tag: tags.deploymentAgnostic }, ()
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterEach(async ({ pageObjects }) => {
-    if (await pageObjects.inspector.panel.isVisible()) {
-      await pageObjects.inspector.close();
-    }
-    await pageObjects.datePicker.pauseAutoRefresh();
-  });
-
   spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.uiSettings.unset('dateFormat:tz');
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('refetches when auto-refresh is enabled', async ({ pageObjects }) => {
-    const { datePicker, discover, inspector } = pageObjects;
+  spaceTest(
+    'shifts the newest document timestamp after switching time zone',
+    async ({ pageObjects }) => {
+      const { datePicker, discover, queryBar } = pageObjects;
 
-    await datePicker.startAutoRefresh(5);
-    await discover.waitUntilTabIsLoaded();
+      await datePicker.setAbsoluteRange({
+        from: 'Sep 19, 2015 @ 06:31:44.000',
+        to: 'Sep 23, 2015 @ 18:31:44.000',
+      });
+      await discover.waitUntilTabIsLoaded();
+      await queryBar.clearQuery();
+      await discover.waitUntilTabIsLoaded();
 
-    await discover.clickAppMenuItem('openInspectorButton');
-    await inspector.openInspectorRequestsView();
-    await inspector.openRequestsStatisticsTab();
-
-    const requestTimestampBefore = await inspector.getRequestTimestamp();
-    await expect(inspector.requests.timestamp).not.toHaveText(requestTimestampBefore);
-  });
+      // Phoenix is UTC-7 relative to the UTC timestamp in the default-range test.
+      expect(await discover.getDocTableIndex(1)).toContain('Sep 22, 2015 @ 16:50:13.253');
+    }
+  );
 });

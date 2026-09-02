@@ -10,7 +10,7 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 
-spaceTest.describe('Discover histogram breakdown', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('histogram breakdown'), { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

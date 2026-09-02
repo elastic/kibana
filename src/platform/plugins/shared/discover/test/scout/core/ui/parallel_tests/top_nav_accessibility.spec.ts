@@ -21,7 +21,7 @@ const focusAndPress = async (page: ScoutPage, testSubj: string) => {
   await page.keyboard.press('Enter');
 };
 
-spaceTest.describe('Discover top nav accessibility', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('top nav accessibility'), { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

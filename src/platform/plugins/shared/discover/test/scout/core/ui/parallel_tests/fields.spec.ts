@@ -15,7 +15,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 
-spaceTest.describe('Discover fields', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('fields'), { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

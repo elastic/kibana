@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../common/ui/fixtures';
 
-spaceTest.describe('Discover histogram', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('histogram'), { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     await discoverScoutSpace.savedObjects.load(testData.LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
