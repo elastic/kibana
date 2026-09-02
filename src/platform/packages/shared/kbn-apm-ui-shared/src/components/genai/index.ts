@@ -8,10 +8,12 @@
  */
 
 export { GenAiTab } from './genai_tab';
+export { GenAiDetailsTable, type GenAiDetailsTableRow } from './genai_details_table';
 export { GenAiTechnicalPreviewBadge } from './technical_preview_badge';
 export {
   hasGenAiData,
   getGenAiFields,
+  GEN_AI_TAB_ATTRIBUTE_KEYS,
   type GenAiFields,
   type GenAiMessage,
   type GenAiToolDefinition,

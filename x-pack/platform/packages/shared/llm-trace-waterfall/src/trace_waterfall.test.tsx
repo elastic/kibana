@@ -39,9 +39,11 @@ const toolSpan = (id = 'tool-1') =>
     },
   });
 
-const searchSpan = (id = 'search-1') => makeSpan({ span_id: id, name: 'esql-retrieval' });
+const searchSpan = (id = 'search-1') =>
+  makeSpan({ span_id: id, name: 'esql-retrieval', attributes: { 'db.system': 'elasticsearch' } });
 
-const httpSpan = (id = 'http-1') => makeSpan({ span_id: id, name: 'POST /api/data' });
+const httpSpan = (id = 'http-1') =>
+  makeSpan({ span_id: id, name: 'POST /api/data', attributes: { 'http.request.method': 'POST' } });
 
 const otherSpan = (id = 'other-1') => makeSpan({ span_id: id, name: 'internal-processing' });
 

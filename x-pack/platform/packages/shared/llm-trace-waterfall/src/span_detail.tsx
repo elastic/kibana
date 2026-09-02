@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import {
   EuiAccordion,
-  EuiBasicTable,
   EuiButtonIcon,
   EuiCopy,
   EuiFlexGroup,
@@ -19,45 +18,24 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  type EuiBasicTableColumn,
+  useEuiTheme,
   type EuiTabbedContentTab,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { GenAiTab, getGenAiFields, hasGenAiData } from '@kbn/apm-ui-shared';
+import { css } from '@emotion/css';
+import { css as emotionCss } from '@emotion/react';
+import {
+  GEN_AI_TAB_ATTRIBUTE_KEYS,
+  GenAiDetailsTable,
+  GenAiTab,
+  getGenAiFields,
+  hasGenAiData,
+  type GenAiDetailsTableRow,
+} from '@kbn/apm-ui-shared';
 import type { SpanNode } from './types';
 import { SPAN_COLORS, getSpanCategory } from './get_span_category';
 import * as i18n from './translations';
 
 const EMPTY_ATTRIBUTES: Record<string, unknown> = {};
-
-/**
- * Attributes already rendered by `GenAiTab`. Every other key — including the
- * remaining `gen_ai.*` ones — falls through to the attributes tab.
- */
-const ATTRIBUTES_RENDERED_BY_GENAI_TAB = new Set([
-  'gen_ai.operation.name',
-  'gen_ai.provider.name',
-  'gen_ai.system',
-  'gen_ai.request.model',
-  'gen_ai.request.temperature',
-  'gen_ai.request.top_p',
-  'gen_ai.request.top_k',
-  'gen_ai.request.max_tokens',
-  'gen_ai.request.seed',
-  'gen_ai.response.model',
-  'gen_ai.response.id',
-  'gen_ai.response.finish_reasons',
-  'gen_ai.usage.input_tokens',
-  'gen_ai.usage.output_tokens',
-  'gen_ai.conversation.id',
-  'gen_ai.input.messages',
-  'gen_ai.output.messages',
-  'gen_ai.system_instructions',
-  'gen_ai.tool.definitions',
-  'gen_ai.tool.name',
-  'gen_ai.tool.call.arguments',
-  'gen_ai.tool.call.result',
-]);
 
 interface AttributeRow {
   field: string;
@@ -79,7 +57,7 @@ const groupAttributes = (attrs: Record<string, unknown>): AttributeGroups => {
   const groups: AttributeGroups = { http: [], other: [], resource: [] };
 
   for (const [field, value] of Object.entries(attrs)) {
-    if (ATTRIBUTES_RENDERED_BY_GENAI_TAB.has(field)) {
+    if (GEN_AI_TAB_ATTRIBUTE_KEYS.has(field)) {
       continue;
     }
     if (
@@ -99,39 +77,15 @@ const groupAttributes = (attrs: Record<string, unknown>): AttributeGroups => {
   return groups;
 };
 
-// Mirrors the GenAI tab's field table: row separators only, no outer borders.
-const attributeTableCss = css`
-  thead {
-    display: none;
-  }
-  tr:first-of-type td {
-    border-top: none;
-  }
-  tr:last-of-type td {
-    border-bottom: none;
-  }
-`;
-
-const attributeValueCss = css`
+const attributeValueCss = emotionCss`
   word-break: break-all;
 `;
 
-const ATTRIBUTE_COLUMNS: Array<EuiBasicTableColumn<AttributeRow>> = [
-  {
-    field: 'field' as const,
-    name: i18n.ATTRIBUTE_FIELD_COLUMN,
-    // Wider than the GenAI field table since these are full dotted attribute keys.
-    width: '240px',
-    render: (field: string) => (
-      <EuiText size="xs">
-        <strong>{field}</strong>
-      </EuiText>
-    ),
-  },
-  {
-    field: 'value' as const,
-    name: i18n.ATTRIBUTE_VALUE_COLUMN,
-    render: (value: string, row: AttributeRow) => (
+const getAttributeDetailsRows = (rows: AttributeRow[]): GenAiDetailsTableRow[] =>
+  rows.map(({ field, value }) => ({
+    id: field,
+    label: field,
+    content: (
       <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
         <EuiFlexItem>
           <EuiText size="s" css={attributeValueCss}>
@@ -141,13 +95,10 @@ const ATTRIBUTE_COLUMNS: Array<EuiBasicTableColumn<AttributeRow>> = [
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={value}>
             {(copy) => (
-              <EuiToolTip
-                content={i18n.getCopyAttributeAriaLabel(row.field)}
-                disableScreenReaderOutput
-              >
+              <EuiToolTip content={i18n.getCopyAttributeAriaLabel(field)} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="copy"
-                  aria-label={i18n.getCopyAttributeAriaLabel(row.field)}
+                  aria-label={i18n.getCopyAttributeAriaLabel(field)}
                   onClick={copy}
                   size="xs"
                   color="text"
@@ -158,8 +109,7 @@ const ATTRIBUTE_COLUMNS: Array<EuiBasicTableColumn<AttributeRow>> = [
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-  },
-];
+  }));
 
 interface AttributeSectionProps {
   id: string;
@@ -180,15 +130,7 @@ const AttributeSection: React.FC<AttributeSectionProps> = ({ id, title, rows }) 
   >
     <EuiSpacer size="s" />
     <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-      <EuiBasicTable
-        itemId="field"
-        tableLayout="auto"
-        compressed
-        items={rows}
-        columns={ATTRIBUTE_COLUMNS}
-        css={attributeTableCss}
-        tableCaption={title}
-      />
+      <GenAiDetailsTable rows={getAttributeDetailsRows(rows)} />
     </EuiPanel>
   </EuiAccordion>
 );
@@ -199,6 +141,7 @@ interface SpanDetailProps {
 }
 
 export const SpanDetail: React.FC<SpanDetailProps> = ({ span, onClose }) => {
+  const { euiTheme } = useEuiTheme();
   const attributes = span.attributes ?? EMPTY_ATTRIBUTES;
   const category = getSpanCategory(span);
   const genAi = useMemo(
@@ -206,6 +149,12 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, onClose }) => {
     [attributes]
   );
   const groups = useMemo(() => groupAttributes(attributes), [attributes]);
+  const tabContentCss = useMemo(
+    () => css`
+      padding: ${euiTheme.size.s} 0;
+    `,
+    [euiTheme.size.s]
+  );
 
   const header = (
     <>
@@ -279,62 +228,67 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, onClose }) => {
     </>
   );
 
-  const hasAttributes =
-    groups.http.length > 0 || groups.other.length > 0 || groups.resource.length > 0;
+  const attributesContent = useMemo(() => {
+    const hasAttributes =
+      groups.http.length > 0 || groups.other.length > 0 || groups.resource.length > 0;
 
-  const attributesContent = hasAttributes ? (
-    <>
-      {groups.http.length > 0 && (
-        <AttributeSection
-          id={`http-${span.span_id}`}
-          title={i18n.HTTP_ATTRIBUTES_HEADING}
-          rows={groups.http}
-        />
-      )}
-      {groups.other.length > 0 && (
-        <>
-          {groups.http.length > 0 && <EuiSpacer size="m" />}
+    return hasAttributes ? (
+      <>
+        {groups.http.length > 0 && (
           <AttributeSection
-            id={`other-${span.span_id}`}
-            title={i18n.getOtherAttributesHeading(groups.other.length)}
-            rows={groups.other}
+            id={`http-${span.span_id}`}
+            title={i18n.HTTP_ATTRIBUTES_HEADING}
+            rows={groups.http}
           />
-        </>
-      )}
-      {groups.resource.length > 0 && (
-        <>
-          {(groups.http.length > 0 || groups.other.length > 0) && <EuiSpacer size="m" />}
-          <AttributeSection
-            id={`resource-${span.span_id}`}
-            title={i18n.getResourceAttributesHeading(groups.resource.length)}
-            rows={groups.resource}
-          />
-        </>
-      )}
-    </>
-  ) : (
-    <EuiText size="s" color="subdued">
-      {i18n.NO_ATTRIBUTES}
-    </EuiText>
-  );
+        )}
+        {groups.other.length > 0 && (
+          <>
+            {groups.http.length > 0 && <EuiSpacer size="m" />}
+            <AttributeSection
+              id={`other-${span.span_id}`}
+              title={i18n.getOtherAttributesHeading(groups.other.length)}
+              rows={groups.other}
+            />
+          </>
+        )}
+        {groups.resource.length > 0 && (
+          <>
+            {(groups.http.length > 0 || groups.other.length > 0) && <EuiSpacer size="m" />}
+            <AttributeSection
+              id={`resource-${span.span_id}`}
+              title={i18n.getResourceAttributesHeading(groups.resource.length)}
+              rows={groups.resource}
+            />
+          </>
+        )}
+      </>
+    ) : (
+      <EuiText size="s" color="subdued">
+        {i18n.NO_ATTRIBUTES}
+      </EuiText>
+    );
+  }, [groups, span.span_id]);
 
-  const tabs: EuiTabbedContentTab[] = [];
-  if (genAi) {
-    tabs.push({
-      id: 'genAi',
-      name: i18n.GENAI_TAB_LABEL,
-      content: (
-        <div style={{ padding: '8px 0' }}>
-          <GenAiTab genAi={genAi} />
-        </div>
-      ),
+  const tabs = useMemo<EuiTabbedContentTab[]>(() => {
+    const items: EuiTabbedContentTab[] = [];
+    if (genAi) {
+      items.push({
+        id: 'genAi',
+        name: i18n.GENAI_TAB_LABEL,
+        content: (
+          <div className={tabContentCss}>
+            <GenAiTab genAi={genAi} />
+          </div>
+        ),
+      });
+    }
+    items.push({
+      id: 'attributes',
+      name: i18n.ATTRIBUTES_TAB_LABEL,
+      content: <div className={tabContentCss}>{attributesContent}</div>,
     });
-  }
-  tabs.push({
-    id: 'attributes',
-    name: i18n.ATTRIBUTES_TAB_LABEL,
-    content: <div style={{ padding: '8px 0' }}>{attributesContent}</div>,
-  });
+    return items;
+  }, [attributesContent, genAi, tabContentCss]);
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="s">

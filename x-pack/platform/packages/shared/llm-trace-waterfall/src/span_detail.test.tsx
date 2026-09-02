@@ -7,34 +7,24 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { GenAiFields } from '@kbn/apm-ui-shared';
 import { SpanDetail } from './span_detail';
 import type { SpanNode } from './types';
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  hasGenAiData: (attrs: Record<string, unknown>) =>
-    Object.keys(attrs).some((key) => key.includes('gen_ai') || key.includes('gen.ai')),
-  getGenAiFields: (attrs: Record<string, unknown>) => ({
-    operationName: attrs['gen_ai.operation.name'],
-    requestModel: attrs['gen_ai.request.model'],
-    requestParams: {},
-    response: {},
-    inputMessages: attrs['gen_ai.input.messages'] ? [{ role: 'user', content: 'hello' }] : [],
-    outputMessages: [],
-    systemInstructions:
-      typeof attrs['gen_ai.system_instructions'] === 'string' ? 'unwrapped system' : undefined,
-    toolDefinitions: attrs['gen_ai.tool.definitions']
-      ? [{ name: 'search', description: 'Search' }]
-      : [],
-    toolName: attrs['gen_ai.tool.name'],
-    toolCallArguments: attrs['gen_ai.tool.call.arguments'],
-    toolCallResult: attrs['gen_ai.tool.call.result'],
-  }),
-  GenAiTab: ({ genAi }: { genAi: { operationName?: string; toolName?: string } }) => (
-    <div data-test-subj="mockGenAiTab">
-      GenAiTab:{genAi.operationName ?? genAi.toolName ?? 'unknown'}
-    </div>
-  ),
-}));
+jest.mock('@kbn/apm-ui-shared', () => {
+  const actual = jest.requireActual('@kbn/apm-ui-shared');
+  return {
+    ...actual,
+    GenAiTab: ({ genAi }: { genAi: GenAiFields }) => (
+      <div data-test-subj="mockGenAiTab">
+        GenAiTab:{genAi.operationName ?? genAi.toolName ?? 'unknown'}
+        {genAi.rawToolDefinitions != null && (
+          <span data-test-subj="mockRawToolDefinitions">Raw tool definitions</span>
+        )}
+      </div>
+    ),
+  };
+});
 
 const buildSpanNode = (overrides: Partial<SpanNode> = {}): SpanNode => ({
   span_id: 'span-1',
@@ -78,9 +68,9 @@ describe('SpanDetail', () => {
           { role: 'user', parts: [{ type: 'text', content: 'hi' }] },
         ]),
         'gen_ai.system_instructions': JSON.stringify([{ type: 'text', content: 'Be helpful' }]),
-        'gen_ai.tool.definitions': JSON.stringify({
-          search: { description: 'Search', schema: {} },
-        }),
+        'gen_ai.tool.definitions': JSON.stringify([
+          { type: 'function', name: 'search', description: 'Search', parameters: {} },
+        ]),
       },
     });
     render(<SpanDetail span={span} onClose={jest.fn()} />);
@@ -184,5 +174,42 @@ describe('SpanDetail', () => {
     expect(screen.getByText('gen_ai.prompt.id')).toBeInTheDocument();
     expect(screen.getByText('custom.flag')).toBeInTheDocument();
     expect(screen.queryByText('gen_ai.operation.name')).not.toBeInTheDocument();
+  });
+
+  it('keeps invalid tool definitions in the GenAI tab and out of attributes', () => {
+    render(
+      <SpanDetail
+        span={buildSpanNode({
+          attributes: {
+            'gen_ai.tool.definitions': JSON.stringify({
+              search: { description: 'Legacy map' },
+            }),
+          },
+        })}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('mockRawToolDefinitions')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Attributes'));
+    expect(screen.queryByText('gen_ai.tool.definitions')).not.toBeInTheDocument();
+  });
+
+  it('keeps legacy tool input and output fields as raw attributes', () => {
+    render(
+      <SpanDetail
+        span={buildSpanNode({
+          attributes: {
+            'tool.parameters': { query: 'FROM logs' },
+            'output.value': { rows: [] },
+          },
+        })}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText('GenAI')).not.toBeInTheDocument();
+    expect(screen.getByText('tool.parameters')).toBeInTheDocument();
+    expect(screen.getByText('output.value')).toBeInTheDocument();
   });
 });

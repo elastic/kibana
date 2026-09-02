@@ -11,9 +11,6 @@ import { css } from '@emotion/css';
 import type { TraceSpan } from './types';
 import { getSpanBadge, getSpanCategory, SPAN_COLORS } from './get_span_category';
 
-export type { SpanCategory } from './get_span_category';
-export { getSpanCategory, SPAN_COLORS };
-
 interface SpanWithDepth extends TraceSpan {
   depth: number;
 }

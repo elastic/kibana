@@ -19,7 +19,6 @@ export const SPAN_COLORS: Record<SpanCategory, string> = {
 
 /** Classifies GenAI spans by operation value before falling back to span metadata. */
 export const getSpanCategory = (span: TraceSpan): SpanCategory => {
-  const name = span.name.toLowerCase();
   const attrs = span.attributes;
   const operation = attrs?.['gen_ai.operation.name'];
   const inferenceKind = attrs?.['elastic.inference.span.kind'];
@@ -27,39 +26,27 @@ export const getSpanCategory = (span: TraceSpan): SpanCategory => {
   if (
     operation === 'execute_tool' ||
     inferenceKind === 'TOOL' ||
-    attrs?.['gen_ai.tool.name'] != null ||
-    name.startsWith('execute_tool') ||
-    name.includes('tool')
+    attrs?.['gen_ai.tool.name'] != null
   ) {
     return 'tool';
   }
 
+  if (operation === 'retrieval' || attrs?.['db.system'] != null) {
+    return 'search';
+  }
+
   if (
-    operation === 'chat' ||
+    typeof operation === 'string' ||
     inferenceKind === 'LLM' ||
-    name.startsWith('chat ') ||
-    name.includes('chat') ||
+    inferenceKind === 'AGENT' ||
+    inferenceKind === 'CHAIN' ||
+    attrs?.['gen_ai.provider.name'] != null ||
     attrs?.['gen_ai.system'] != null
   ) {
     return 'llm';
   }
 
-  if (
-    name.includes('retriev') ||
-    name.includes('search') ||
-    name.includes('esql') ||
-    attrs?.['db.system'] != null
-  ) {
-    return 'search';
-  }
-
-  if (
-    name.startsWith('post') ||
-    name.startsWith('get') ||
-    name.includes('route') ||
-    attrs?.['http.method'] != null ||
-    attrs?.['http.request.method'] != null
-  ) {
+  if (attrs?.['http.method'] != null || attrs?.['http.request.method'] != null) {
     return 'http';
   }
 

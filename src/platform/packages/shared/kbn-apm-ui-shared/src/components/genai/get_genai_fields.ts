@@ -40,9 +40,10 @@ export interface GenAiMessage {
 }
 
 export interface GenAiToolDefinition {
+  type: string;
   name: string;
   description?: string;
-  schema?: unknown;
+  parameters?: unknown;
 }
 
 export interface GenAiFields {
@@ -69,10 +70,40 @@ export interface GenAiFields {
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
   toolDefinitions: GenAiToolDefinition[];
+  rawToolDefinitions?: unknown;
   toolName?: string;
-  toolCallArguments?: string;
-  toolCallResult?: string;
+  toolCallArguments?: unknown;
+  toolCallResult?: unknown;
 }
+
+const GEN_AI_TAB_ATTRIBUTE_PATHS = [
+  ATTRIBUTE_GEN_AI_OPERATION_NAME,
+  ATTRIBUTE_GEN_AI_PROVIDER_NAME,
+  ATTRIBUTE_GEN_AI_SYSTEM,
+  ATTRIBUTE_GEN_AI_REQUEST_MODEL,
+  ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE,
+  ATTRIBUTE_GEN_AI_REQUEST_TOP_P,
+  ATTRIBUTE_GEN_AI_REQUEST_TOP_K,
+  ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS,
+  ATTRIBUTE_GEN_AI_REQUEST_SEED,
+  ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
+  ATTRIBUTE_GEN_AI_RESPONSE_ID,
+  ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
+  ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_CONVERSATION_ID,
+  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
+  ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS,
+  ATTRIBUTE_GEN_AI_TOOL_NAME,
+  ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS,
+  ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT,
+] as const;
+
+export const GEN_AI_TAB_ATTRIBUTE_KEYS: ReadonlySet<string> = new Set(
+  GEN_AI_TAB_ATTRIBUTE_PATHS.map((path) => path.replace(/^attributes\./, ''))
+);
 
 const GEN_AI_PATTERN = /(^|\.)gen[_.]ai[._]/;
 
@@ -182,88 +213,100 @@ export function getMessageCopyText(message: GenAiMessage): string {
   return JSON.stringify(message, null, 2);
 }
 
+function parseJsonValue(raw: unknown): unknown {
+  if (typeof raw !== 'string') return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function stringifyFallback(raw: unknown): string | undefined {
+  if (typeof raw === 'string') return raw;
+  try {
+    return JSON.stringify(raw);
+  } catch {
+    return undefined;
+  }
+}
+
 /** Unwraps structured OTel system instructions into plain text. */
 export function parseSystemInstructions(raw: unknown): string | undefined {
   if (raw == null || raw === '') return undefined;
-  if (typeof raw !== 'string') {
-    try {
-      return parseSystemInstructions(JSON.stringify(raw));
-    } catch {
-      return undefined;
-    }
+
+  const parsed = parseJsonValue(raw);
+  if (Array.isArray(parsed)) {
+    const text = parsed
+      .filter(
+        (part): part is { type: string; content: string } =>
+          part != null &&
+          typeof part === 'object' &&
+          part.type === 'text' &&
+          typeof part.content === 'string'
+      )
+      .map((part) => part.content)
+      .join('\n');
+    return text.length > 0 ? text : stringifyFallback(raw);
+  }
+  if (parsed && typeof parsed === 'object' && 'content' in parsed) {
+    const { content } = parsed;
+    if (typeof content === 'string') return content;
   }
 
-  const trimmed = raw.trim();
-  if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
-    return raw;
-  }
-
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (Array.isArray(parsed)) {
-      const text = parsed
-        .filter(
-          (part): part is { type: string; content: string } =>
-            part != null &&
-            typeof part === 'object' &&
-            part.type === 'text' &&
-            typeof part.content === 'string'
-        )
-        .map((part) => part.content)
-        .join('\n');
-      return text.length > 0 ? text : raw;
-    }
-    if (parsed && typeof parsed === 'object' && typeof parsed.content === 'string') {
-      return parsed.content;
-    }
-  } catch {
-    // keep raw
-  }
-
-  return raw;
+  return stringifyFallback(raw);
 }
 
-/** Parses OTel tool definition maps for display. */
-export function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] {
-  if (raw == null || raw === '') return [];
+interface ParsedToolDefinitions {
+  definitions: GenAiToolDefinition[];
+  raw?: unknown;
+}
 
-  try {
-    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return [];
+function parseToolDefinitionsWithFallback(raw: unknown): ParsedToolDefinitions {
+  if (raw == null || raw === '') return { definitions: [] };
+
+  const parsed = parseJsonValue(raw);
+  if (!Array.isArray(parsed)) return { definitions: [], raw };
+
+  const definitions: GenAiToolDefinition[] = [];
+  for (const value of parsed) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return { definitions: [], raw };
     }
-
-    return Object.entries(parsed as Record<string, unknown>).flatMap(([name, value]) => {
-      if (!value || typeof value !== 'object' || Array.isArray(value)) {
-        return [];
-      }
-      const definition = value as { description?: unknown; schema?: unknown };
-      return [
-        {
-          name,
-          description:
-            typeof definition.description === 'string' ? definition.description : undefined,
-          schema: definition.schema,
-        },
-      ];
+    const { type, name, description, parameters } = value as Record<string, unknown>;
+    if (
+      typeof type !== 'string' ||
+      typeof name !== 'string' ||
+      (description != null && typeof description !== 'string')
+    ) {
+      return { definitions: [], raw };
+    }
+    definitions.push({
+      type,
+      name,
+      description: description ?? undefined,
+      parameters,
     });
-  } catch {
-    return [];
   }
+
+  return { definitions };
 }
 
-function asJsonString(value: unknown): string | undefined {
-  if (value == null) return undefined;
-  if (typeof value === 'string') return value;
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
+/** Parses OTel tool definition arrays for display. */
+export function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] {
+  return parseToolDefinitionsWithFallback(raw).definitions;
 }
 
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
+  const rawToolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
+  const rawToolDefinitions =
+    Array.isArray(rawToolDefinitionsValue) &&
+    rawToolDefinitionsValue.length === 1 &&
+    typeof rawToolDefinitionsValue[0] === 'string'
+      ? rawToolDefinitionsValue[0]
+      : rawToolDefinitionsValue;
+  const parsedToolDefinitions = parseToolDefinitionsWithFallback(rawToolDefinitions);
 
   return {
     operationName: f(ATTRIBUTE_GEN_AI_OPERATION_NAME) as string | undefined,
@@ -293,9 +336,10 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
     ),
     systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
-    toolDefinitions: parseToolDefinitions(f(ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS)),
+    toolDefinitions: parsedToolDefinitions.definitions,
+    rawToolDefinitions: parsedToolDefinitions.raw,
     toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,
-    toolCallArguments: asJsonString(f(ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS)),
-    toolCallResult: asJsonString(f(ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT)),
+    toolCallArguments: f(ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS),
+    toolCallResult: f(ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT),
   };
 }

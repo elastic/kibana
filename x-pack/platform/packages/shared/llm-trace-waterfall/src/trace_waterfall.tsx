@@ -20,13 +20,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  WaterfallItem,
-  LABEL_WIDTH,
-  SPAN_COLORS,
-  getSpanCategory,
-  type SpanCategory,
-} from './waterfall_item';
+import { WaterfallItem, LABEL_WIDTH } from './waterfall_item';
+import { SPAN_COLORS, getSpanCategory, type SpanCategory } from './get_span_category';
 import { SpanDetail } from './span_detail';
 import type { SpanNode, TraceSpan } from './types';
 import * as i18n from './translations';

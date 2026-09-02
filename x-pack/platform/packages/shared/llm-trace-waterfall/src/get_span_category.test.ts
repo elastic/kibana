@@ -47,6 +47,17 @@ describe('getSpanCategory', () => {
     ).toBe('llm');
   });
 
+  it('prefers the explicit chat operation when the span name contains tool', () => {
+    expect(
+      getSpanCategory(
+        span({
+          name: 'chat gpt-4 (tool use)',
+          attributes: { 'gen_ai.operation.name': 'chat' },
+        })
+      )
+    ).toBe('llm');
+  });
+
   it('does not treat mere presence of gen_ai.operation.name as llm', () => {
     expect(
       getSpanCategory(
@@ -58,10 +69,34 @@ describe('getSpanCategory', () => {
     ).toBe('tool');
   });
 
-  it('classifies search and http by name/attributes', () => {
-    expect(getSpanCategory(span({ name: 'esql-retrieval' }))).toBe('search');
-    expect(getSpanCategory(span({ name: 'POST /api/data' }))).toBe('http');
-    expect(getSpanCategory(span({ name: 'internal-processing' }))).toBe('other');
+  it.each(['chat', 'generate_content', 'text_completion', 'embeddings', 'invoke_agent'])(
+    'classifies the %s GenAI operation as llm',
+    (operation) => {
+      expect(getSpanCategory(span({ attributes: { 'gen_ai.operation.name': operation } }))).toBe(
+        'llm'
+      );
+    }
+  );
+
+  it('classifies custom GenAI operations and provider-only spans as llm', () => {
+    expect(
+      getSpanCategory(span({ attributes: { 'gen_ai.operation.name': 'custom_operation' } }))
+    ).toBe('llm');
+    expect(getSpanCategory(span({ attributes: { 'gen_ai.provider.name': 'openai' } }))).toBe('llm');
+  });
+
+  it('classifies retrieval, database, and http spans from attributes', () => {
+    expect(getSpanCategory(span({ attributes: { 'gen_ai.operation.name': 'retrieval' } }))).toBe(
+      'search'
+    );
+    expect(getSpanCategory(span({ attributes: { 'db.system': 'elasticsearch' } }))).toBe('search');
+    expect(getSpanCategory(span({ attributes: { 'http.request.method': 'POST' } }))).toBe('http');
+  });
+
+  it('does not classify spans from their names', () => {
+    expect(getSpanCategory(span({ name: 'execute_tool search' }))).toBe('other');
+    expect(getSpanCategory(span({ name: 'chat gpt-4' }))).toBe('other');
+    expect(getSpanCategory(span({ name: 'POST /api/data' }))).toBe('other');
   });
 });
 

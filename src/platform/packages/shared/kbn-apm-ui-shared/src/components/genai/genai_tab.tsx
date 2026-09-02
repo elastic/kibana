@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { EbtClickAttrsElementOnly } from '@kbn/ebt-click';
@@ -18,51 +16,11 @@ import type { GenAiFields, GenAiToolDefinition } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
 import { GenAiSection } from './genai_section';
-
-interface DetailRow {
-  id: string;
-  label: React.ReactNode;
-  content: React.ReactNode;
-}
-
-// Match Discover's result-panel table style: row separators only, no border on first/last row.
-const detailTableCss = css`
-  thead {
-    display: none;
-  }
-  tr:first-child td {
-    border-top: none;
-  }
-  tr:last-child td {
-    border-bottom: none;
-  }
-`;
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <EuiText size="xs">
-      <strong>{children}</strong>
-    </EuiText>
-  );
-}
-
-const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
-  {
-    field: 'label' as const,
-    name: i18n.translate('apmUiShared.genAi.details.fieldColumnLabel', {
-      defaultMessage: 'Field',
-    }),
-    width: '160px',
-    render: (label: React.ReactNode) => <FieldLabel>{label}</FieldLabel>,
-  },
-  {
-    field: 'content' as const,
-    name: i18n.translate('apmUiShared.genAi.details.valueColumnLabel', {
-      defaultMessage: 'Value',
-    }),
-    render: (content: React.ReactNode) => content,
-  },
-];
+import {
+  GenAiDetailsTable,
+  GenAiFieldLabel,
+  type GenAiDetailsTableRow,
+} from './genai_details_table';
 
 function ToolDefinitionsSection({ tools }: { tools: GenAiToolDefinition[] }) {
   if (tools.length === 0) return null;
@@ -83,16 +41,16 @@ function ToolDefinitionsSection({ tools }: { tools: GenAiToolDefinition[] }) {
             <EuiAccordion
               id={`genAiToolDef-${tool.name}`}
               data-test-subj={`genAiToolDef-${tool.name}`}
-              buttonContent={<FieldLabel>{tool.name}</FieldLabel>}
+              buttonContent={<GenAiFieldLabel>{tool.name}</GenAiFieldLabel>}
               paddingSize="s"
             >
               {tool.description && (
                 <>
                   <GenAiFieldValue value={tool.description} />
-                  {tool.schema != null && <EuiSpacer size="s" />}
+                  {tool.parameters != null && <EuiSpacer size="s" />}
                 </>
               )}
-              {tool.schema != null && <GenAiFieldValue value={tool.schema} />}
+              {tool.parameters != null && <GenAiFieldValue value={tool.parameters} />}
             </EuiAccordion>
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -108,10 +66,10 @@ function ToolCallSection({
   resultJson,
 }: {
   toolName?: string;
-  argumentsJson?: string;
-  resultJson?: string;
+  argumentsJson?: unknown;
+  resultJson?: unknown;
 }) {
-  if (!argumentsJson && !resultJson) return null;
+  if (argumentsJson == null && resultJson == null) return null;
 
   return (
     <>
@@ -129,25 +87,25 @@ function ToolCallSection({
               })
         }
       >
-        {argumentsJson && (
+        {argumentsJson != null && (
           <div data-test-subj="genAiToolCallArguments">
-            <FieldLabel>
+            <GenAiFieldLabel>
               {i18n.translate('apmUiShared.genAi.toolCall.arguments', {
                 defaultMessage: 'Arguments',
               })}
-            </FieldLabel>
+            </GenAiFieldLabel>
             <EuiSpacer size="xs" />
             <GenAiFieldValue value={argumentsJson} />
           </div>
         )}
-        {resultJson && (
+        {resultJson != null && (
           <div data-test-subj="genAiToolCallResult">
-            {argumentsJson && <EuiSpacer size="s" />}
-            <FieldLabel>
+            {argumentsJson != null && <EuiSpacer size="s" />}
+            <GenAiFieldLabel>
               {i18n.translate('apmUiShared.genAi.toolCall.result', {
                 defaultMessage: 'Result',
               })}
-            </FieldLabel>
+            </GenAiFieldLabel>
             <EuiSpacer size="xs" />
             <GenAiFieldValue value={resultJson} />
           </div>
@@ -183,13 +141,14 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
     systemInstructions,
     conversationId,
     toolDefinitions = [],
+    rawToolDefinitions,
     toolName,
     toolCallArguments,
     toolCallResult,
   } = genAi;
 
   // ── Field rows (single flat table — the former Summary fields lead) ───────
-  const detailRows: DetailRow[] = [];
+  const detailRows: GenAiDetailsTableRow[] = [];
 
   if (operationName) {
     detailRows.push({
@@ -278,6 +237,13 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
     .forEach(([key, val]) => {
       detailRows.push({ id: key, label: key, content: <GenAiFieldValue value={val} /> });
     });
+  if (rawToolDefinitions != null) {
+    detailRows.push({
+      id: 'rawToolDefinitions',
+      label: 'gen_ai.tool.definitions',
+      content: <GenAiFieldValue value={rawToolDefinitions} />,
+    });
+  }
 
   const hasConversation =
     inputMessages.length > 0 || outputMessages.length > 0 || !!systemInstructions;
@@ -292,20 +258,7 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
             defaultMessage: 'Details',
           })}
         >
-          {detailsSlot ?? (
-            <EuiBasicTable
-              itemId="id"
-              tableLayout="auto"
-              compressed
-              items={detailRows}
-              columns={DETAIL_COLUMNS}
-              data-test-subj="genAiDetails"
-              css={detailTableCss}
-              tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
-                defaultMessage: 'GenAI details',
-              })}
-            />
-          )}
+          {detailsSlot ?? <GenAiDetailsTable rows={detailRows} />}
         </GenAiSection>
       )}
 

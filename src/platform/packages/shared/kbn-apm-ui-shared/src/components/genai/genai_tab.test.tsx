@@ -151,14 +151,23 @@ describe('GenAiTab', () => {
     renderTab({
       toolDefinitions: [
         {
+          type: 'function',
           name: 'platform.core.execute_esql',
           description: 'Run ES|QL',
-          schema: { type: 'object', properties: { query: { type: 'string' } } },
+          parameters: { type: 'object', properties: { query: { type: 'string' } } },
         },
       ],
     });
     expect(screen.getByTestId('genAiSection-tools')).toBeInTheDocument();
     expect(screen.getByTestId('genAiToolDef-platform.core.execute_esql')).toBeInTheDocument();
+  });
+
+  it('renders invalid tool definitions as a raw details row', () => {
+    renderTab({ rawToolDefinitions: '{"legacy":{"description":"Search"}}' });
+
+    const table = screen.getByTestId('genAiDetails');
+    expect(table).toHaveTextContent('gen_ai.tool.definitions');
+    expect(screen.queryByTestId('genAiSection-tools')).not.toBeInTheDocument();
   });
 
   it('renders tool call arguments and result', () => {
