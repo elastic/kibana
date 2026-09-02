@@ -180,7 +180,6 @@ const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
     schema.object({
       hideNulls: schema.maybe(schema.boolean()),
       wrapLines: schema.maybe(schema.boolean()),
-      defaultRenderedNodes: schema.maybe(schema.number({ min: 10, max: 200 })),
     })
   ),
 });
@@ -191,6 +190,24 @@ const SCHEMA_TAB_V15 = SCHEMA_TAB_V14.extends({
 
 export const SCHEMA_DISCOVER_SESSION_V15 = SCHEMA_DISCOVER_SESSION_V14.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V15, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+const SCHEMA_TAB_ATTRIBUTES_V16 = SCHEMA_TAB_ATTRIBUTES_V15.extends({
+  jsonModeSettings: schema.maybe(
+    schema.object({
+      hideNulls: schema.maybe(schema.boolean()),
+      wrapLines: schema.maybe(schema.boolean()),
+      defaultRenderedNodes: schema.maybe(schema.number({ min: 10, max: 200 })),
+    })
+  ),
+});
+
+const SCHEMA_TAB_V16 = SCHEMA_TAB_V15.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V16,
+});
+
+export const SCHEMA_DISCOVER_SESSION_V16 = SCHEMA_DISCOVER_SESSION_V15.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V16, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
 // Add new model versions here, which automatically registers them
@@ -225,11 +242,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V15,
     },
   },
+  16: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V16.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V16,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V15;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V15;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V16;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V16;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;
