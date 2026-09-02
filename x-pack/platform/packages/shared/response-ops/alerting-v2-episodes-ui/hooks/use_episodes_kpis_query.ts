@@ -16,7 +16,7 @@ import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchFromSources } from '../utils/fetch_from_sources';
+import { fetchFromSource } from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
@@ -97,9 +97,8 @@ export const useEpisodesKpisQuery = ({
           },
           abortSignal: signal,
         }),
-        fetchFromSources(
-          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
-          (source) => source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
+        fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
         ),
       ]);
 

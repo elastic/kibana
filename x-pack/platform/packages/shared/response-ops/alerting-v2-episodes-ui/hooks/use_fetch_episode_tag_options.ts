@@ -11,7 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { fetchEpisodeTagOptions } from '../apis/fetch_episode_tag_options';
-import { fetchFromSources } from '../utils/fetch_from_sources';
+import { fetchFromSource } from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeTagOptions } from '../utils/merge_tag_options';
 import { queryKeys } from '../query_keys';
@@ -37,9 +37,8 @@ export const useFetchEpisodeTagOptions = ({
     queryFn: async ({ signal }) => {
       const [v2Tags, sourceTags] = await Promise.all([
         fetchEpisodeTagOptions({ spaceId, services, timeRange, abortSignal: signal }),
-        fetchFromSources(
-          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
-          (source) => source.fetchTagOptions?.({ services, timeRange, abortSignal: signal })
+        fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.fetchTagOptions?.({ services, timeRange, abortSignal: signal })
         ),
       ]);
 

@@ -12,48 +12,28 @@ export interface EpisodeSourceError {
   error: Error;
 }
 
-export interface FetchFromSourcesResult<T> {
+export interface FetchFromSourceResult<T> {
   results: T[];
   errors: EpisodeSourceError[];
 }
 
-type SourceOutcome<T> =
-  | { status: 'skipped' }
-  | { status: 'fulfilled'; value: T }
-  | { status: 'rejected'; sourceId: string; error: Error };
-
 const toError = (value: unknown): Error =>
   value instanceof Error ? value : new Error(String(value));
 
-export const fetchFromSources = async <T>(
-  sources: readonly EpisodeDataSource[],
+const EMPTY_RESULT: FetchFromSourceResult<never> = { results: [], errors: [] };
+
+export const fetchFromSource = async <T>(
+  source: EpisodeDataSource | undefined,
   run: (source: EpisodeDataSource) => Promise<T> | undefined
-): Promise<FetchFromSourcesResult<T>> => {
-  const settled = await Promise.all(
-    sources.map(async (source): Promise<SourceOutcome<T>> => {
-      const pending = run(source);
-      if (!pending) {
-        return { status: 'skipped' };
-      }
+): Promise<FetchFromSourceResult<T>> => {
+  if (!source) return EMPTY_RESULT;
 
-      try {
-        return { status: 'fulfilled', value: await pending };
-      } catch (error) {
-        return { status: 'rejected', sourceId: source.id, error: toError(error) };
-      }
-    })
-  );
+  const pending = run(source);
+  if (!pending) return EMPTY_RESULT;
 
-  const results: T[] = [];
-  const errors: EpisodeSourceError[] = [];
-
-  for (const outcome of settled) {
-    if (outcome.status === 'fulfilled') {
-      results.push(outcome.value);
-    } else if (outcome.status === 'rejected') {
-      errors.push({ sourceId: outcome.sourceId, error: outcome.error });
-    }
+  try {
+    return { results: [await pending], errors: [] };
+  } catch (error) {
+    return { results: [], errors: [{ sourceId: source.id, error: toError(error) }] };
   }
-
-  return { results, errors };
 };

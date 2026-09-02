@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import useAsync from 'react-use/lib/useAsync';
 import { fetchRulesByIds } from '../apis/fetch_rules_by_ids';
-import { fetchFromSources } from '../utils/fetch_from_sources';
+import { fetchFromSource } from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 
 export interface UseAlertingRulesCacheOptions {
@@ -44,9 +44,8 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
     const unresolvedIds = uncachedIds.filter((id) => !resolvedByV2.has(id));
 
     const { results: sourceRules } = unresolvedIds.length
-      ? await fetchFromSources(
-          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
-          (source) => source.resolveRules?.({ services, ids: unresolvedIds })
+      ? await fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.resolveRules?.({ services, ids: unresolvedIds })
         )
       : { results: [] };
 

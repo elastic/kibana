@@ -19,7 +19,7 @@ import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { mergeEpisodes } from '../utils/merge_episodes';
-import { fetchFromSources, type EpisodeSourceError } from '../utils/fetch_from_sources';
+import { fetchFromSource, type EpisodeSourceError } from '../utils/fetch_from_sources';
 
 interface CombinedEpisodesResult {
   episodes: AlertEpisode[];
@@ -77,17 +77,15 @@ export const useFetchAlertingEpisodesQuery = ({
           sortState,
           timeRange,
         }),
-        fetchFromSources(
-          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
-          (source) =>
-            source.fetchEpisodes({
-              services,
-              abortSignal,
-              pageSize,
-              filterState,
-              sortState,
-              timeRange,
-            })
+        fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.fetchEpisodes({
+            services,
+            abortSignal,
+            pageSize,
+            filterState,
+            sortState,
+            timeRange,
+          })
         ),
       ]);
 
