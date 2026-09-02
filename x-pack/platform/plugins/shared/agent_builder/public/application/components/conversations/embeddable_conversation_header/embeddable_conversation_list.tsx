@@ -18,7 +18,6 @@ import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
-import { useConversationSearch } from '../../../hooks/use_conversation_search';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
 import { useInfiniteScroll } from '../../../hooks/use_infinite_scroll';
@@ -41,41 +40,28 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { conversationTemplatesService } = useAgentBuilderServices();
-  const isSearching = searchValue.trim().length > 0;
-
   const {
-    conversations: listConversations = [],
-    isLoading: isListLoading,
-    hasNextPage: hasNextListPage,
-    fetchNextPage: fetchNextListPage,
-    isFetchingNextPage: isFetchingNextListPage,
-  } = useConversationList({ agentId });
+    conversations: rawConversations,
+    isLoading,
+    isSearching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useConversationList({ agentId, query: searchValue });
 
-  const {
-    conversations: searchResults,
-    isLoading: isSearchLoading,
-    hasNextPage: hasNextSearchPage,
-    fetchNextPage: fetchNextSearchPage,
-    isFetchingNextPage: isFetchingNextSearchPage,
-  } = useConversationSearch({ agentId, query: searchValue });
-
-  const isLoading = isSearching ? isSearchLoading : isListLoading;
-  const hasNextPage = isSearching ? hasNextSearchPage : hasNextListPage;
-  const fetchNextPage = isSearching ? fetchNextSearchPage : fetchNextListPage;
-  const isFetchingNextPage = isSearching ? isFetchingNextSearchPage : isFetchingNextListPage;
   const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
 
   // Recency sort applies only to the unfiltered list — search results are already
   // relevance-ranked, and re-sorting them by recency would discard that ranking.
-  const sortedConversations = useMemo(
+  const conversations = useMemo(
     () =>
-      [...listConversations].sort(
-        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ),
-    [listConversations]
+      isSearching
+        ? rawConversations
+        : [...rawConversations].sort(
+            (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          ),
+    [rawConversations, isSearching]
   );
-
-  const conversations = isSearching ? searchResults : sortedConversations;
 
   const itemStyles = createConversationListItemStyles(euiTheme);
   const activeItemStyles = createActiveConversationListItemStyles(euiTheme);

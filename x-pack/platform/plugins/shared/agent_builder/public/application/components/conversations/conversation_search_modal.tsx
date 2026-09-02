@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { useConversationSearch } from '../../hooks/use_conversation_search';
 import { useInfiniteScroll } from '../../hooks/use_infinite_scroll';
 import {
   createActiveConversationListItemStyles,
@@ -59,7 +58,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   onSelectConversation,
 }) => {
   const [searchValue, setSearchValue] = useState('');
-  const isSearching = searchValue.trim().length > 0;
 
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
@@ -76,15 +74,16 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
     useConversationList({ agentId, pinned: true });
   const isLoadingCached = isLoadingUnpinned || isLoadingPinned;
 
-  // Debounces internally and only issues a request once `searchValue` is non-empty,
+  // Debounces internally and only issues a search request once `searchValue` is non-empty,
   // so the empty-query view above keeps its zero-extra-request property.
   const {
     conversations: searchResults,
     isLoading: isSearchLoading,
+    isSearching,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useConversationSearch({ agentId, query: searchValue });
+  } = useConversationList({ agentId, query: searchValue });
   const sentinelRef = useInfiniteScroll({
     hasNextPage,
     isFetchingNextPage,
