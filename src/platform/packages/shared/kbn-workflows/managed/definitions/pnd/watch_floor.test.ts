@@ -490,6 +490,29 @@ describe('watch_floor.yaml conversation audit trail (A6)', () => {
     });
   });
 
+  /**
+   * Forensic reconstruction reaches the analyst here. The Deep Watch worker returns
+   * `patientZero` and `attackTimeline` alongside its verdict, and the incident
+   * conversation is where an analyst actually reads them — an artifact that is
+   * structurally present but never surfaced is not worth producing.
+   *
+   * Both fields render empty whenever reconstruction was skipped (a false verdict)
+   * or failed under its `continue: true`, so the prompt has to say what empty means
+   * or the model invents a sequence to fill the gap.
+   */
+  describe('open_incident threads the forensic reconstruction into the incident', () => {
+    const message = getStep('open_incident').with?.message ?? '';
+    it('carries patient zero from the investigation worker', () => {
+      expect(message).toContain('{{ steps.investigate.output.patientZero }}');
+    });
+    it('carries the attack timeline from the investigation worker', () => {
+      expect(message).toContain('{{ steps.investigate.output.attackTimeline }}');
+    });
+    it('tells the model what an empty reconstruction means, so it does not infer one', () => {
+      expect(message).toContain('empty when reconstruction did not run');
+    });
+  });
+
   // No plain conversation-append endpoint exists in Agent Builder (the internal conversation routes
   // are `_rename` and `_mark_read`; `sml/_attach` attaches memory entries to an existing round), so
   // the terminal and dismissal records use the documented fallback: a minimal ai.agent turn on the

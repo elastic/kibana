@@ -504,6 +504,17 @@ steps:
             {{ steps.investigate.output.rationale }}
 
 
+            The investigation's forensic reconstruction follows. Both fields are
+            empty when reconstruction did not run or did not complete, in which
+            case rely on the assessment above rather than inferring a sequence.
+
+
+            Patient zero: {{ steps.investigate.output.patientZero }}
+
+
+            Attack timeline: {{ steps.investigate.output.attackTimeline }}
+
+
             Recommend and stage containment and response actions, and explain the reasoning
             behind each. Do not execute anything — a human gate approves containment.
 

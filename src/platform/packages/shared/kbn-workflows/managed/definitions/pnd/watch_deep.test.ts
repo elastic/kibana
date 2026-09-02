@@ -33,6 +33,7 @@ interface ParsedOutput {
 }
 
 interface ParsedJsonSchema {
+  items?: ParsedJsonSchema;
   properties?: Record<string, ParsedJsonSchema>;
   required?: string[];
   type?: string;
@@ -41,13 +42,17 @@ interface ParsedJsonSchema {
 interface ParsedStepWith {
   conversation_id?: string;
   headers?: Record<string, string>;
+  iocs?: string;
   isIncident?: string;
+  attackTimeline?: string;
+  message?: string;
   method?: string;
+  patientZero?: string;
   path?: string;
   proposal?: string;
   query?: { correlationId?: string };
   rationale?: string;
-  reasoning?: { summary?: string };
+  reasoning?: { sections?: Array<{ body?: string; title?: string }>; summary?: string };
   schema?: ParsedJsonSchema;
 }
 
@@ -57,6 +62,8 @@ interface ParsedOnFailure {
 }
 
 interface ParsedStep {
+  condition?: string;
+  'create-conversation'?: boolean;
   else?: ParsedStep[];
   name: string;
   'on-failure'?: ParsedOnFailure;
@@ -67,7 +74,10 @@ interface ParsedStep {
 }
 
 interface ParsedWorkflow {
-  consts?: { watch_policy?: { autonomyLevel?: string; mandate?: string } };
+  consts?: {
+    no_iocs?: unknown[];
+    watch_policy?: { autonomyLevel?: string; mandate?: string };
+  };
   description?: string;
   name?: string;
   outputs?: ParsedOutput[];
@@ -164,6 +174,8 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
     expect(allSteps.map(({ name }) => name)).toEqual([
       'derive_ids',
       'triage_alerts',
+      'reconstruct_if_incident',
+      'reconstruct_attack',
       'record_reasoning',
       'emit_result',
     ]);
@@ -191,6 +203,24 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
 
   it('declares the worker output contract .8 reads', () => {
     expect(parsed.outputs).toEqual([
+      { name: 'isIncident', type: 'boolean' },
+      { name: 'rationale', type: 'string' },
+      { name: 'proposal', type: 'string' },
+      { name: 'patientZero', type: 'string' },
+      { name: 'attackTimeline', type: 'string' },
+      { name: 'iocs', type: 'array' },
+    ]);
+  });
+  /**
+   * FR-007, the highest-blast-radius contract in this change. The Watch Floor's
+   * `assess_investigation` condition reads `steps.investigate.output.isIncident`
+   * from this worker. Forensic reconstruction is additive: the three verdict
+   * outputs keep their exact names, types and ORDER, and `isIncident` stays
+   * first and boolean. This assertion is what makes a reordering or a retype a
+   * test failure rather than a silent Floor breakage.
+   */
+  it('keeps the three verdict outputs first and unchanged, so the Floor contract holds', () => {
+    expect(parsed.outputs?.slice(0, 3)).toEqual([
       { name: 'isIncident', type: 'boolean' },
       { name: 'rationale', type: 'string' },
       { name: 'proposal', type: 'string' },
@@ -253,6 +283,80 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
     });
   });
 
+  /**
+   * Forensic reconstruction. Deep Watch answers "is this real?" in `triage_alerts`;
+   * these two steps answer "what happened, in what order, and what should I pivot
+   * on?" — gated so the answer is only computed for confirmed incidents.
+   */
+  describe('reconstruct_if_incident', () => {
+    const step = () => getStep('reconstruct_if_incident');
+    it('is an if step, so reconstruction is conditional rather than unconditional', () => {
+      expect(step().type).toBe('if');
+    });
+    it('gates on the triage verdict, so a dismissed discovery spends no forensic tokens', () => {
+      expect(step().condition).toBe(
+        'steps.triage_alerts.output.structured_output.isIncident : true'
+      );
+    });
+    it('holds the forensic step, so nothing reconstructs outside the gate', () => {
+      expect(step().steps?.map(({ name }) => name)).toEqual(['reconstruct_attack']);
+    });
+    it('has no else branch, so a false verdict simply skips reconstruction', () => {
+      expect(step().else).toBeUndefined();
+    });
+  });
+  describe('reconstruct_attack', () => {
+    const step = () => getStep('reconstruct_attack');
+    it('is an ai.agent step', () => {
+      expect(step().type).toBe('ai.agent');
+    });
+    it('names the forensic skill rather than the triage skill', () => {
+      expect(step().with?.message).toContain('skill://endpoint-forensic-analysis');
+      expect(step().with?.message).not.toContain('skill://alert-analysis');
+    });
+    it('writes into the same investigation conversation as triage, not a second thread', () => {
+      expect(step().with?.conversation_id).toBe(
+        '{{ steps.derive_ids.output.investigationConversationId }}'
+      );
+    });
+    it('does not create a conversation, because triage_alerts already opened it', () => {
+      expect(step()['create-conversation']).toBe(false);
+    });
+    /**
+     * The load-bearing one. The Watch Floor escalates on
+     * `steps.investigate.output.isIncident`; if a forensic failure could fail this
+     * run, a true positive would surface downstream as "not an incident".
+     * Reconstruction is additive evidence and must never veto the verdict.
+     */
+    it('continues on failure, so a forensic error cannot bury a true-positive verdict', () => {
+      expect(step()['on-failure']?.continue).toBe(true);
+    });
+    it('asks the model for the three reconstruction fields, all required', () => {
+      expect(Object.keys(step().with?.schema?.properties ?? {}).sort()).toEqual([
+        'attackTimeline',
+        'iocs',
+        'patientZero',
+      ]);
+      expect(step().with?.schema?.required?.slice().sort()).toEqual([
+        'attackTimeline',
+        'iocs',
+        'patientZero',
+      ]);
+    });
+    it('asks for IoCs as structured rows rather than prose', () => {
+      const iocs = step().with?.schema?.properties?.iocs;
+      expect(iocs?.type).toBe('array');
+      expect(Object.keys(iocs?.items?.properties ?? {}).sort()).toEqual([
+        'context',
+        'type',
+        'value',
+      ]);
+      expect(iocs?.items?.required?.slice().sort()).toEqual(['type', 'value']);
+    });
+    it('does not name an agent-id, so projectWorkers still skips this unowned step', () => {
+      expect((step() as { 'agent-id'?: string })['agent-id']).toBeUndefined();
+    });
+  });
   describe('record_reasoning', () => {
     it('records the verdict as reasoning through a data.set step', () => {
       expect(getStep('record_reasoning').type).toBe('data.set');
@@ -293,6 +397,35 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
         '{{ steps.triage_alerts.output.structured_output.proposal }}'
       );
     });
+    /**
+     * Every forensic output needs a literal fallback. On the `isIncident: false`
+     * path — and on a forensic step that failed under `continue: true` —
+     * `reconstruct_attack` produced nothing, and an unguarded reference would
+     * render the one substring the platform smoke test forbids.
+     */
+    it('defaults patientZero to a literal, so the skipped path renders empty', () => {
+      expect(step().with?.patientZero).toContain(
+        'steps.reconstruct_attack.output.structured_output.patientZero'
+      );
+      expect(step().with?.patientZero).toContain('default: ""');
+    });
+    it('defaults attackTimeline to a literal, so the skipped path renders empty', () => {
+      expect(step().with?.attackTimeline).toContain(
+        'steps.reconstruct_attack.output.structured_output.attackTimeline'
+      );
+      expect(step().with?.attackTimeline).toContain('default: ""');
+    });
+    /**
+     * Liquid has no array literal: `| default: []` yields no value rather than an
+     * empty array, so the fallback has to come from a const. Same reason and same
+     * shape as `consts.no_rows` in rule_tuning.yaml.
+     */
+    it('falls back to the empty-array const, because Liquid cannot spell []', () => {
+      expect(step().with?.iocs).toBe(
+        '${{ steps.reconstruct_attack.output.structured_output.iocs | default: consts.no_iocs }}'
+      );
+      expect(parsed.consts?.no_iocs).toEqual([]);
+    });
   });
 
   // managed_workflow_definitions.test.ts forbids the substring anywhere in rendered YAML,
@@ -332,5 +465,16 @@ describe('both sides of the relocation bumped their version (kibana-phf4.5)', ()
 describe('kibana-tjil.7 bumped the Deep Watch version', () => {
   it('bumps Deep past the beta-stub version so the worker YAML reaches installed stacks', () => {
     expect(PND_WATCH_DEEP_WORKFLOW.version).toBeGreaterThan(10);
+  });
+});
+
+/**
+ * Forensic reconstruction changed the Deep Watch YAML, so installed stacks need the
+ * bump to receive it — `versionStrategy: 'auto'` only re-applies on an increase. The
+ * Floor's own `>= DEEP` invariant above still has to hold after this bump.
+ */
+describe('forensic reconstruction bumped the Deep Watch version', () => {
+  it('bumps Deep past the triage-only version so the forensic YAML reaches installed stacks', () => {
+    expect(PND_WATCH_DEEP_WORKFLOW.version).toBeGreaterThan(13);
   });
 });

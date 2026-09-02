@@ -3,9 +3,12 @@ name: Deep Watch
 description: >
   Deep Watch. Invokable investigation worker: given an attack discovery
   alert id it triages via the alert-analysis skill and returns
-  isIncident, rationale, and proposal. Still runs standalone from an
-  alert or manual trigger. The orchestrated Attack Discovery lifecycle
-  this watch used to carry now runs on the Watch Floor (ADR-015).
+  isIncident, rationale, and proposal. On a confirmed incident it also
+  reconstructs the attack via the endpoint-forensic-analysis skill and
+  returns patient zero, an attack timeline, and the extracted IoCs.
+  Still runs standalone from an alert or manual trigger. The
+  orchestrated Attack Discovery lifecycle this watch used to carry now
+  runs on the Watch Floor (ADR-015).
 enabled: false
 tags:
   - watch
@@ -34,7 +37,21 @@ outputs:
     type: string
   - name: proposal
     type: string
+  # Forensic reconstruction, additive. Emitted empty on the isIncident: false path,
+  # where `reconstruct_attack` never ran. `outputs` uses the legacy input format,
+  # whose type union is string | number | boolean | choice | array — there is no
+  # `object`, so the timeline is a rendered string rather than a nested structure.
+  - name: patientZero
+    type: string
+  - name: attackTimeline
+    type: string
+  - name: iocs
+    type: array
 consts:
+  # Liquid has no array literal, so `| default: []` yields no value rather than an
+  # empty array. A const is the only way to spell an empty-array fallback — same
+  # reason and same shape as `consts.no_rows` in rule_tuning.yaml.
+  no_iocs: []
   watch_policy:
     settingsVersion: __WATCH_SETTINGS_VERSION__
     # Persisted plumbing only; runtime autonomy is request-time from template values.
@@ -139,6 +156,100 @@ steps:
           - isIncident
           - rationale
           - proposal
+  # Forensic reconstruction, gated on the triage verdict. Deep Watch answers
+  # "is this real?" above; this answers "what happened, in what order, and what
+  # should I pivot on?" — via the read-only endpoint-forensic-analysis skill.
+  #
+  # Gated, not unconditional: running reconstruction on a dismissed discovery
+  # spends tokens on noise and puts cases with no ground truth into the
+  # evaluation record.
+  #
+  # `continue: true` is load-bearing. The Watch Floor reads
+  # `steps.investigate.output.isIncident` to decide whether to escalate; a failed
+  # forensic step must never fail the run out from under a true-positive verdict
+  # and read downstream as "not an incident". Reconstruction is additive
+  # evidence, never a veto.
+  - name: reconstruct_if_incident
+    type: if
+    condition: "steps.triage_alerts.output.structured_output.isIncident : true"
+    steps:
+      # Same derived conversation as triage_alerts, and create-conversation is
+      # false because that step already opened it — the analyst reads one
+      # investigation thread, not two.
+      - name: reconstruct_attack
+        type: ai.agent
+        timeout: "15m"
+        create-conversation: false
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+          metadata:
+            pnd_conversation_kind: investigation
+            pnd_attack_discovery_alert_id: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId }}"
+          message: >
+            Use the
+            [/endpoint-forensic-analysis](skill://endpoint-forensic-analysis)
+            skill to reconstruct this confirmed incident from Elastic Defend
+            telemetry. The triage step already established that this is a real
+            incident — do not re-litigate that verdict, reconstruct what
+            happened.
+            {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
+            Triage assessment:
+            {{ steps.triage_alerts.output.structured_output.rationale }}
+            Alert / event context:
+            {{ event | json }}
+            Establish three things, scoped to the hosts named above:
+            (a) patient zero — the earliest compromised host, with its timestamp
+            and the delivery vector; (b) a chronological attack timeline, as an
+            ordered timestamp-labeled sequence of events, host-scoped, including
+            any lateral movement between named hosts; and (c) the indicators of
+            compromise worth pivoting on.
+            Cite the index and ES|QL query behind each claim. Where telemetry
+            does not support a conclusion, say so rather than inferring it.
+          schema:
+            type: object
+            properties:
+              patientZero:
+                type: string
+                maxLength: 2000
+                description: >
+                  Earliest compromised host, its first-seen timestamp, and the
+                  delivery-vector hypothesis. States plainly when telemetry
+                  cannot establish it.
+              attackTimeline:
+                type: string
+                maxLength: 8000
+                description: >
+                  Chronological, timestamp-labeled, host-scoped sequence of
+                  attacker actions, including lateral movement between hosts.
+              iocs:
+                type: array
+                maxItems: 100
+                description: Indicators worth pivoting on.
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: >
+                        Indicator kind — for example hash, ip, domain, path,
+                        registry_key, or process.
+                    value:
+                      type: string
+                      description: The indicator itself.
+                    context:
+                      type: string
+                      maxLength: 500
+                      description: Where it was observed and why it matters.
+                  required:
+                    - type
+                    - value
+                  additionalProperties: false
+            required:
+              - patientZero
+              - attackTimeline
+              - iocs
   - name: record_reasoning
     type: data.set
     with:
@@ -155,6 +266,14 @@ steps:
             body: >-
               {{ steps.triage_alerts.output.structured_output.proposal
               | default: "n/a" }}
+          - title: Patient zero
+            body: >-
+              {{ steps.reconstruct_attack.output.structured_output.patientZero
+              | default: "Not reconstructed." }}
+          - title: Attack timeline
+            body: >-
+              {{ steps.reconstruct_attack.output.structured_output.attackTimeline
+              | default: "Not reconstructed." }}
 
   - name: emit_result
     type: workflow.output
@@ -163,3 +282,13 @@ steps:
       isIncident: "${{ steps.triage_alerts.output.structured_output.isIncident }}"
       rationale: "{{ steps.triage_alerts.output.structured_output.rationale }}"
       proposal: "{{ steps.triage_alerts.output.structured_output.proposal }}"
+      # Empty on the isIncident: false path, and on a forensic step that failed
+      # under `continue: true`. Every fallback is a literal — an unguarded miss
+      # would render the substring the platform smoke test forbids.
+      patientZero: >-
+        {{ steps.reconstruct_attack.output.structured_output.patientZero
+        | default: "" }}
+      attackTimeline: >-
+        {{ steps.reconstruct_attack.output.structured_output.attackTimeline
+        | default: "" }}
+      iocs: "${{ steps.reconstruct_attack.output.structured_output.iocs | default: consts.no_iocs }}"
