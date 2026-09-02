@@ -21,6 +21,8 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const IDS = ['list-inv-1', 'list-inv-2', 'list-inv-3', 'list-inv-4'];
+    const SEED_CREATED_RANGE =
+      'created_after=2024-06-01T00:00:00Z&created_before=2024-06-05T00:00:00Z';
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ kbnClient, samlAuth }) => {
@@ -84,7 +86,9 @@ apiTest.describe(
     });
 
     apiTest('returns seeded investigations', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader);
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query: SEED_CREATED_RANGE,
+      });
       expect(response).toHaveStatusCode(200);
 
       const ids = response.body.results.map(
@@ -96,7 +100,9 @@ apiTest.describe(
     });
 
     apiTest('each result has list fields without structured output', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader);
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query: SEED_CREATED_RANGE,
+      });
       expect(response).toHaveStatusCode(200);
 
       const inv = response.body.results.find(
@@ -128,7 +134,7 @@ apiTest.describe(
 
     apiTest('reports a pending investigation as created but not started', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'statuses=pending',
+        query: `statuses=pending&${SEED_CREATED_RANGE}`,
       });
       expect(response).toHaveStatusCode(200);
 
