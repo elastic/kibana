@@ -28,18 +28,19 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
     return '';
   },
   getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) => {
-    return i18n.translate('embeddableApi.badge.approximationApplied.displayName', {
-      defaultMessage: 'Approximation applied',
+    return i18n.translate('embeddableApi.badge.approximationApplied.displayNameTooltip', {
+      defaultMessage: 'Panel displays apporximate results.',
     });
   },
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
-    return isApiCompatible(embeddable);
+    if (!isApiCompatible(embeddable)) return false;
+    return embeddable.approximationApplied$.getValue() ?? false;
   },
   couldBecomeCompatible: ({ embeddable }: EmbeddableApiContext) => {
     return isApiCompatible(embeddable);
   },
   getCompatibilityChangesSubject: ({ embeddable }: EmbeddableApiContext) => {
-    return apiPublishesEsqlUsage(embeddable)
+    return isApiCompatible(embeddable)
       ? embeddable.approximationApplied$.pipe(map(() => undefined))
       : undefined;
   },
