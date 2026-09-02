@@ -252,9 +252,7 @@ describe('RulesListPage', () => {
       const banner = screen.getByTestId('centralizedActionPoliciesBanner');
       const searchBar = screen.getByPlaceholderText('Search rules');
       expect(banner).toBeInTheDocument();
-      expect(banner.compareDocumentPosition(searchBar)).toBe(
-        Node.DOCUMENT_POSITION_FOLLOWING
-      );
+      expect(banner.compareDocumentPosition(searchBar)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
     it('renders the banner even when there are no rules (empty phase)', async () => {

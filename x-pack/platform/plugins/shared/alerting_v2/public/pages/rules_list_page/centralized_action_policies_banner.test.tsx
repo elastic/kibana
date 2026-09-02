@@ -71,9 +71,7 @@ describe('CentralizedActionPoliciesBanner', () => {
   it('renders the illustration', () => {
     renderBanner();
 
-    expect(
-      screen.getByAltText('Centralized action policies illustration')
-    ).toBeInTheDocument();
+    expect(screen.getByAltText('Centralized action policies illustration')).toBeInTheDocument();
   });
 
   it('Create action policy CTA has correct href and navigates via SPA', () => {
@@ -138,10 +136,7 @@ describe('CentralizedActionPoliciesBanner', () => {
   });
 
   it('is hidden when the dismissed key is already set in localStorage', () => {
-    window.localStorage.setItem(
-      CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
-      'true'
-    );
+    window.localStorage.setItem(CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY, 'true');
     renderBanner();
 
     expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
