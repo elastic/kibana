@@ -16,8 +16,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
   type EuiComboBoxOptionOption,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
@@ -28,6 +28,8 @@ import {
 import { ConversationAccessModeSelect } from './conversation_access_mode_select';
 import { ConversationParticipantsList } from './conversation_participants_list';
 import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
+
+const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
 
 /**
  * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
@@ -41,7 +43,9 @@ const hiddenOptionIndicatorCss = css`
   }
 `;
 
-const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
+const currentMembersLabelStyle = ({ euiTheme }: UseEuiTheme) => css`
+  row-gap: ${euiTheme.size.s};
+`;
 
 interface UserSearchOptionProps {
   profile: UserProfileWithAvatar;
@@ -102,7 +106,6 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
   members,
   userSearch,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
   const suggestedProfileByUid = new Map(
@@ -142,13 +145,7 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       {editableHeader}
 
       <EuiSpacer size="l" />
-      <EuiFormRow
-        label={currentMembersLabel}
-        fullWidth
-        css={css`
-          row-gap: ${euiTheme.size.s};
-        `}
-      >
+      <EuiFormRow label={currentMembersLabel} fullWidth css={currentMembersLabelStyle}>
         <EuiComboBox<string>
           compressed
           fullWidth
