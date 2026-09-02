@@ -98,6 +98,7 @@ describe('setupDependencies', () => {
     collectQueueMetrics: false,
     hitlExternalResume: { enabled: true },
     syncExecution: { enabled: false, maxDurationMs: 60_000 },
+    syncLogDrain: { enabled: false, intervalMs: 500, maxQueue: 20000, maxBatch: 4000 },
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;

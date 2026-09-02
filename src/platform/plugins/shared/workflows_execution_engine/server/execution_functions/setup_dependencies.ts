@@ -45,6 +45,7 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
+import type { SyncLogDrain } from '../workflow_event_logger/sync_log_drain';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function setupDependencies({
@@ -58,6 +59,7 @@ export async function setupDependencies({
   workflowExecution: workflowExecutionOverride,
   workflowExecutionRepository: workflowExecutionRepositoryOverride,
   stepExecutionRepository: stepExecutionRepositoryOverride,
+  syncLogDrain,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -69,6 +71,10 @@ export async function setupDependencies({
   workflowExecution?: EsWorkflowExecution;
   workflowExecutionRepository?: WorkflowExecutionPersistence;
   stepExecutionRepository?: StepExecutionPersistence;
+  /** When provided, all per-execution loggers route their `flushEvents`
+   *  calls to this drain instead of writing to ES inline. Pass only for
+   *  synchronous workflow executions. */
+  syncLogDrain?: SyncLogDrain;
 }) {
   const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
@@ -183,7 +189,8 @@ export async function setupDependencies({
   const workflowEventLoggerService = new WorkflowEventLoggerService(
     dependencies.coreStart.dataStreams,
     logger,
-    config.logging.console
+    config.logging.console,
+    syncLogDrain
   );
 
   const workflowLogger = workflowEventLoggerService.createLogger({
