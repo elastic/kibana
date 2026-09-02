@@ -45,6 +45,7 @@ interface Props {
   builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
   remoteClusters?: Cluster[];
+  isDataFederationEnabled?: boolean;
   canUseRemoteIndices?: boolean;
   canUseRemoteClusters?: boolean;
   isDarkMode?: boolean;
@@ -89,6 +90,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       remoteClusters,
       license,
       builtinESPrivileges,
+      isDataFederationEnabled,
       canUseRemoteIndices,
       canUseRemoteClusters,
       buildFlavor,
@@ -274,44 +276,48 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           </>
         )}
 
-        <EuiSpacer />
-        <EuiSpacer />
+        {isDataFederationEnabled && (
+          <>
+            <EuiSpacer />
+            <EuiSpacer />
 
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesTitle"
-              defaultMessage="Data source privileges"
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesTitle"
+                  defaultMessage="Data source privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesDescription"
+                  defaultMessage="Control access to ES|QL data sources. "
+                />
+                <EuiLink
+                  className="editRole__learnMore"
+                  href={ElasticsearchPrivileges.dataSourceDocLink}
+                  target={'_blank'}
+                >
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesLearnMoreLinkText"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              </p>
+            </EuiText>
+            <DataSourcePrivileges
+              role={role}
+              indexPatterns={indexPatterns}
+              validator={validator}
+              onChange={onChange}
+              onAdd={this.addDataSourcePrivilege}
+              editable={editable}
             />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesDescription"
-              defaultMessage="Control access to ES|QL data sources. "
-            />
-            <EuiLink
-              className="editRole__learnMore"
-              href={ElasticsearchPrivileges.dataSourceDocLink}
-              target={'_blank'}
-            >
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesLearnMoreLinkText"
-                defaultMessage="Learn more"
-              />
-            </EuiLink>
-          </p>
-        </EuiText>
-        <DataSourcePrivileges
-          role={role}
-          indexPatterns={indexPatterns}
-          validator={validator}
-          onChange={onChange}
-          onAdd={this.addDataSourcePrivilege}
-          editable={editable}
-        />
+          </>
+        )}
       </Fragment>
     );
   };

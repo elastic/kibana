@@ -67,6 +67,18 @@ test('it renders index privileges section', () => {
   expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
 });
 
+test('it does not render data source privileges section by default', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('DataSourcePrivileges')).toHaveLength(0);
+});
+
+test('it renders data source privileges section when `isDataFederationEnabled` is enabled', () => {
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges {...getProps()} isDataFederationEnabled />
+  );
+  expect(wrapper.find('DataSourcePrivileges')).toHaveLength(1);
+});
+
 test('it does not render remote index privileges section by default', () => {
   const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
   expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
