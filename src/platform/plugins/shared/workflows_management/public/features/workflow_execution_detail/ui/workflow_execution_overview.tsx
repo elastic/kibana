@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -34,6 +42,10 @@ interface WorkflowExecutionOverviewProps {
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  alertRule?: {
+    name: string;
+    href: string;
+  };
 }
 
 const formatExecutionDate = (date: string) => {
@@ -68,6 +80,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    alertRule,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -204,6 +217,45 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
+                {alertRule && (
+                  <>
+                    <EuiFlexItem
+                      grow={false}
+                      css={css`
+                        width: ${euiTheme.border.width.thin};
+                        background-color: ${euiTheme.colors.lightShade};
+                        align-self: stretch;
+                        margin-right: ${euiTheme.size.base};
+                      `}
+                    />
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="column" gutterSize="xs">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            {i18n.translate(
+                              'workflowsManagement.executionOverview.alertRuleLabel',
+                              {
+                                defaultMessage: 'Alert rule',
+                              }
+                            )}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">
+                            <EuiLink
+                              href={alertRule.href}
+                              target="_blank"
+                              external
+                              data-test-subj="workflowExecutionAlertRuleLink"
+                            >
+                              <strong>{alertRule.name}</strong>
+                            </EuiLink>
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </>
+                )}
               </EuiFlexGroup>
             </div>
           </EuiFlexItem>

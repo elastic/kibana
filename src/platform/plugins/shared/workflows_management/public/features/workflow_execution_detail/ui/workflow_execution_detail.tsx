@@ -27,6 +27,7 @@ import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
+  getAlertRuleLinkInfo,
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
@@ -348,6 +349,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               waitingStepExecutionId={waitingStepExecutionId}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
+              alertRule={workflowExecution ? getAlertRuleLinkInfo(workflowExecution) : undefined}
             />
           }
           minFlexPanelSize={200}

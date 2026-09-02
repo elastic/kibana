@@ -23,6 +23,46 @@ export interface TriggerContextFromExecution {
   input: JsonValue;
 }
 
+export interface AlertRuleExecutionInfo {
+  id: string;
+  name: string;
+  ruleUrl?: string;
+}
+
+export function getAlertRuleLinkInfo(
+  workflowExecution: WorkflowExecutionDto
+): AlertRuleExecutionInfo | undefined {
+  const triggerContext = buildTriggerContextFromExecution(
+    workflowExecution.context as Record<string, unknown> | undefined | null,
+    workflowExecution.triggeredBy
+  );
+  if (
+    triggerContext?.triggerType !== 'alert' ||
+    !triggerContext.input ||
+    typeof triggerContext.input !== 'object' ||
+    Array.isArray(triggerContext.input)
+  ) {
+    return undefined;
+  }
+
+  const event = triggerContext.input as Record<string, unknown>;
+  const rule = event.rule;
+  if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+    return undefined;
+  }
+
+  const { id, name } = rule as Record<string, unknown>;
+  if (typeof id !== 'string' || typeof name !== 'string') {
+    return undefined;
+  }
+
+  return {
+    id,
+    name,
+    ...(typeof event.ruleUrl === 'string' ? { ruleUrl: event.ruleUrl } : {}),
+  };
+}
+
 export function buildTriggerContextFromExecution(
   executionContext: Record<string, unknown> | undefined | null,
   triggeredBy?: string

@@ -10,3 +10,6 @@ export const ConditionMetAlertInstanceId = 'query matched';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 export const ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS = 100;
+
+export const ESQL_RESULTS_MAX_ROWS_PER_EXECUTION = 100;
+export const ESQL_RESULTS_MAX_BYTES_PER_EXECUTION = 256 * 1024;

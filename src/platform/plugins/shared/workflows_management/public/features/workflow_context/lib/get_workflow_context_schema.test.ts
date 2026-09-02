@@ -14,6 +14,26 @@ import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
+  it('should expose dynamic ES|QL result fields for alert-triggered workflows', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'ESQL alert results',
+      enabled: true,
+      triggers: [{ type: 'alert' }],
+      steps: [{ name: 'process_result', type: 'console' }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    expect(
+      getSchemaAtPath(contextSchema, 'event.alerts[0].kibana.alert.esql.results').schema
+    ).toBeInstanceOf(z.ZodArray);
+    expect(
+      getSchemaAtPath(contextSchema, 'event.alerts[0].kibana.alert.esql.results[0].host_name')
+        .schema
+    ).toBeInstanceOf(z.ZodUnion);
+  });
+
   it('should handle nested object inputs for variable validation', () => {
     const workflow: WorkflowYaml = {
       version: '1',

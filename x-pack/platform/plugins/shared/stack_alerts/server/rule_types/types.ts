@@ -19,4 +19,8 @@ export interface RegisterRuleTypesParams {
 export type StackAlertType = Omit<StackAlert, 'kibana.alert.evaluation.threshold'> & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.threshold'?: string | number | null;
+  'kibana.alert.esql.results'?: Array<Record<string, string | null>>;
+  'kibana.alert.esql.results_total_count'?: number;
+  'kibana.alert.esql.results_stored_count'?: number;
+  'kibana.alert.esql.results_truncated'?: boolean;
 };
