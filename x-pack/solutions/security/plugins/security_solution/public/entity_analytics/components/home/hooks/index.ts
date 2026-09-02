@@ -7,4 +7,8 @@
 
 export { useHighCriticalCount } from './use_high_critical_count';
 export { useNeedsAttentionEntries } from './use_needs_attention_entries';
-export { useHcEntitiesWithOpenAlerts } from './use_hc_entities_with_open_alerts';
+export { useEntitiesWithAlertsCount } from './use_hc_entities_with_open_alerts';
+export { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
+export { useHiddenRiskCount } from './use_hidden_risk_count';
+export { useWatchlistedCount } from './use_watchlisted_count';
+export { useNewEntityCount } from './use_new_entity_count';

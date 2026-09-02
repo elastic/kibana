@@ -16,7 +16,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { buildEntitiesWithAlertsCountQuery } from '../queries/hc_open_alerts_lookup_query';
+import { buildHiddenRiskCountQuery } from '../queries/tile_hidden_risk_query';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -32,7 +32,7 @@ const esqlSearch = async (
   return result.rawResponse as unknown as ESQLSearchResponse;
 };
 
-export const useEntitiesWithAlertsCount = ({
+export const useHiddenRiskCount = ({
   spaceId,
   skip,
 }: {
@@ -55,7 +55,7 @@ export const useEntitiesWithAlertsCount = ({
 
   const query = useMemo(() => {
     if (!euidApi || !resolvedIndex?.indexName) return null;
-    return buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName);
+    return buildHiddenRiskCountQuery(euidApi.euid, resolvedIndex.indexName);
   }, [euidApi, resolvedIndex?.indexName]);
 
   const {
@@ -64,7 +64,7 @@ export const useEntitiesWithAlertsCount = ({
     isRefetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
-    ['entitiesWithAlertsCount', query],
+    ['hiddenRiskCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
       const raw = await esqlSearch(data.search, query, signal!);
@@ -94,8 +94,8 @@ export const useEntitiesWithAlertsCount = ({
 
   useErrorToast(
     i18n.translate(
-      'xpack.securitySolution.entityAnalytics.home.entitiesWithAlerts.queryError',
-      { defaultMessage: 'There was an error loading entities with alerts count' }
+      'xpack.securitySolution.entityAnalytics.home.hiddenRisk.queryError',
+      { defaultMessage: 'There was an error loading hidden risk count' }
     ),
     filteredError
   );
