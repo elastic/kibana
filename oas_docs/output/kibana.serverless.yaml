@@ -37291,7 +37291,6 @@ paths:
           name: searchAfter
           required: false
           schema:
-            maxLength: 1000
             type: string
         - description: When true, opens a new point-in-time for pagination
           in: query
@@ -37304,7 +37303,6 @@ paths:
           name: pitId
           required: false
           schema:
-            maxLength: 500
             type: string
         - description: Duration to keep the point-in-time alive, for example, `1m`
           in: query
@@ -37750,14 +37748,12 @@ paths:
                     maxItems: 10000
                     type: array
                   nextSearchAfter:
-                    maxLength: 1000
                     type: string
                   page:
                     type: number
                   perPage:
                     type: number
                   pit:
-                    maxLength: 500
                     type: string
                   statusSummary:
                     additionalProperties:
