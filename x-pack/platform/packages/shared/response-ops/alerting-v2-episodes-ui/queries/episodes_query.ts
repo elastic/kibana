@@ -12,7 +12,43 @@ import {
   buildEpisodesBaseQuery,
   type EpisodesFilterState,
 } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode as BaseAlertEpisode } from '@kbn/alerting-v2-schemas';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
+
+export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
+
+/**
+ * Extension of the base AlertEpisode type with client-only capability flags
+ * used to differentiate classic alert rows from v2 episode rows.
+ * These fields are never set by the v2 pipeline.
+ */
+export interface AlertEpisode extends BaseAlertEpisode {
+  /**
+   * Whether the row supports v2 episode actions (ack, assign, snooze). Classic
+   * alert rows set this to `false`; v2 episodes default to `true`.
+   */
+  supports_actions?: boolean;
+  /**
+   * Whether the row supports the v2 episode timeline/events flyout. Classic
+   * alert rows set this to `false` (they use a simpler fields flyout);
+   * v2 episodes default to `true`.
+   */
+  supports_timeline?: boolean;
+  /**
+   * Rule name embedded from the classic alert document. Used as a display fallback
+   * when the rules API cannot resolve the name (e.g. due to RBAC restrictions).
+   * V2 episodes never set this — they always resolve via the rules cache.
+   */
+  'rule.name'?: string;
+}
+
+/** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
+export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
+  episode.supports_actions !== false;
+
+/** V2 episodes leave `supports_timeline` unset; classic rows set it to `false`. */
+export const episodeSupportsTimeline = (episode: AlertEpisode): boolean =>
+  episode.supports_timeline !== false;
 
 /**
  * Builds an ES|QL query that computes six KPI counts in a single STATS pass.
