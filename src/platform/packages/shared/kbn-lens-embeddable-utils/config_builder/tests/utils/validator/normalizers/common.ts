@@ -974,12 +974,12 @@ export interface CommonNormalizerArgs {
   /**
    * Optional per-chart dataType inference. When provided and returns a value,
    * it overrides the generic blanket coercions in `normalizeDataTypes` (form-based)
-   * and `normalizeESQLMeta` (text-based). The datasource argument is which column
-   * map is being normalized — remapped IDs are shared, but the correct type is not.
+   * and `normalizeESQLMeta` (text-based). `isTextBased` is which column map is
+   * being normalized — remapped IDs are shared, but the correct type is not.
    */
   inferColumnDataType?: (
     newColumnId: string,
-    datasource: NormalizedDatasource
+    options: { isTextBased: boolean }
   ) => DataType | undefined;
 }
 
@@ -1266,7 +1266,10 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               ...column,
               columnId,
             };
-            normalizeESQLMeta(updatedColumn, inferColumnDataType?.(columnId, 'textBased'));
+            normalizeESQLMeta(
+              updatedColumn,
+              inferColumnDataType?.(columnId, { isTextBased: true })
+            );
             normalizeColumnLabel(updatedColumn, { isTextBased: true });
             return updatedColumn;
           });
@@ -1413,7 +1416,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
 
               normalizeColumnReferences(col, columnIdMap);
-              normalizeDataTypes(col, inferColumnDataType?.(columnId, 'formBased'));
+              normalizeDataTypes(col, inferColumnDataType?.(columnId, { isTextBased: false }));
 
               // Canonicalize terms `params` empty defaults the transform never round-trips
               if (isTermsColumn(col)) {

@@ -474,9 +474,9 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
 
 function inferColumnDataType(
   newColumnId: string,
-  datasource: NormalizedDatasource
+  { isTextBased }: { isTextBased: boolean }
 ): DataType | undefined {
-  if (datasource !== 'textBased') {
+  if (!isTextBased) {
     return;
   }
   if (

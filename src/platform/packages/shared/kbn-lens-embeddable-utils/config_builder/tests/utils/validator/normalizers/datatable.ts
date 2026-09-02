@@ -23,7 +23,7 @@ import {
 import type { LensAttributes } from '../../../../types';
 import { mergeNormalizers } from './normalize';
 import type { AttributesNormalizer, NormalizerConfig } from './normalize';
-import type { IdRemapping, NormalizedDatasource } from './common';
+import type { IdRemapping } from './common';
 import {
   DEFAULT_LAYER_ID,
   getColorMappingNormalizer,
@@ -311,9 +311,9 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   // are always string. Bucket dates must not be forced to string on the form-based path.
   const inferColumnDataType = (
     newColumnId: string,
-    datasource: NormalizedDatasource
+    { isTextBased }: { isTextBased: boolean }
   ): DataType | undefined => {
-    if (datasource === 'textBased') {
+    if (isTextBased) {
       if (isSplitMetricColumnId(newColumnId)) {
         return;
       }
