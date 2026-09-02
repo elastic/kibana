@@ -580,7 +580,7 @@ describe('AdditionalSettingsStep', () => {
       ).toHaveTextContent(description);
     });
 
-    it('keeps the plain select placeholders', async () => {
+    it('says which fields take a value of the user own making', async () => {
       const { getByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.csv"
@@ -594,7 +594,7 @@ describe('AdditionalSettingsStep', () => {
 
       expect(
         within(getByTestId('datasetWizardSettingsDelimiter')).getByRole('combobox')
-      ).toHaveAttribute('placeholder', 'Select delimiter');
+      ).toHaveAttribute('placeholder', 'Select or enter a delimiter');
       expect(
         within(getByTestId('datasetWizardSettingsMode')).getByRole('combobox')
       ).toHaveAttribute('placeholder', 'Select quote mode');

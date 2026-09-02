@@ -358,7 +358,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsPartitionPathPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathPlaceholder', {
-      defaultMessage: 'Select partition path',
+      defaultMessage: 'Select or enter a partition path',
     }),
 
   settingsHivePartitioningEnabled: () =>
@@ -384,7 +384,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsDelimiterPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterPlaceholder', {
-      defaultMessage: 'Select delimiter',
+      defaultMessage: 'Select or enter a delimiter',
     }),
 
   settingsDelimiterOptionComma: () =>
@@ -475,7 +475,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsNullValuePlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsNullValuePlaceholder', {
-      defaultMessage: 'Select null value',
+      defaultMessage: 'Select or enter a null value',
     }),
 
   settingsEncodingLabel: () =>
@@ -491,7 +491,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsEncodingPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingPlaceholder', {
-      defaultMessage: 'Select encoding',
+      defaultMessage: 'Select or enter an encoding',
     }),
 
   settingsQuoteLabel: () =>
@@ -567,7 +567,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsDatetimeFormatPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDatetimeFormatPlaceholder', {
-      defaultMessage: 'Select datetime format',
+      defaultMessage: 'Select or enter a datetime format',
     }),
 
   settingsMultiValueSyntaxLabel: () =>
