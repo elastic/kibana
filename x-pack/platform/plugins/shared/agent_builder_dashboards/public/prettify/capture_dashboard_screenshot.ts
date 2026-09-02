@@ -17,6 +17,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { FilesStart } from '@kbn/files-plugin/public';
+import { i18n } from '@kbn/i18n';
 // @ts-expect-error this module has no exported types
 import domtoimage from 'dom-to-image-more';
 
@@ -150,7 +151,10 @@ export const captureDashboardScreenshot = async ({
     return {
       id: uuidv4(),
       type: AttachmentType.image,
-      description: 'Dashboard screenshot',
+      description: i18n.translate(
+        'xpack.agentBuilderDashboards.prettifyDashboard.screenshotDescription',
+        { defaultMessage: 'Dashboard screenshot' }
+      ),
       data: { file_id: file.id, name, mime_type: mimeType },
     };
   } finally {
