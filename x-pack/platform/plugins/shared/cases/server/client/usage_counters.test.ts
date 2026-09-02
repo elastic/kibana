@@ -130,10 +130,20 @@ describe('incrementCasesClientCounter', () => {
     });
   });
 
-  it('does not emit anything for a non-positive amount', () => {
+  it('does not emit anything for an empty bucket', () => {
     incrementCasesClientCounter(clientArgs, 'create_case_with_template', 0);
 
     expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(clientArgs.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns and emits nothing for a negative amount', () => {
+    incrementCasesClientCounter(clientArgs, 'create_case_with_template', -1);
+
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+      'Skipped cases client counter "create_case_with_template": incrementBy must not be negative (received -1).'
+    );
   });
 
   it('does not throw if usageCounter is undefined', () => {

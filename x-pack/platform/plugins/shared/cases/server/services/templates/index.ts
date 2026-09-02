@@ -544,10 +544,11 @@ export class TemplatesService {
   /**
    * Adds `caseCount` uses to a template's running tally, defaulting to a single use.
    *
-   * The tally is cumulative and never decreases: clearing a template from a case, or deleting the
-   * case, leaves it untouched. It is also a read-then-write rather than an atomic increment, so
-   * concurrent callers can overwrite each other — treat it as an approximate popularity signal,
-   * not an exact count.
+   * The tally counts uses, not distinct cases: a case that loses this template and gets it again
+   * adds a second use. It is cumulative and never decreases, so clearing a template from a case, or
+   * deleting the case, leaves it untouched. It is also a read-then-write rather than an atomic
+   * increment, so concurrent callers can overwrite each other. Treat it as an approximate
+   * popularity signal, not an exact count.
    */
   async incrementUsageStats(templateId: string, caseCount: number = 1): Promise<void> {
     const template = await this._getTemplate(templateId);

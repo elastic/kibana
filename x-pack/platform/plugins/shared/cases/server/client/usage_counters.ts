@@ -17,21 +17,30 @@ export const CREATE_CASE_WITHOUT_TEMPLATE_COUNTER = 'create_case_without_templat
 export const APPLY_TEMPLATE_COUNTER = 'apply_template';
 export const CLEAR_TEMPLATE_COUNTER = 'clear_template';
 
-type CasesClientCounterArgs = Pick<CasesClientArgs, 'usageCounter' | 'clientSource'>;
+type CasesClientCounterArgs = Pick<CasesClientArgs, 'usageCounter' | 'clientSource' | 'logger'>;
 
 /**
  * Increments a cases client counter tagged with the calling source.
  *
  * `incrementCounter` already defaults `incrementBy` to 1, so it is omitted when unspecified to keep
  * the emitted payload identical to what the wrapper below has always produced. A non-positive count
- * emits nothing, so bulk callers can pass a computed bucket size unconditionally.
+ * emits nothing, so bulk callers can pass a computed bucket size unconditionally. Zero is a normal
+ * empty bucket, but a negative count can only come from a miscomputed bucket, so it is logged.
  */
 export const incrementCasesClientCounter = (
-  { usageCounter, clientSource }: CasesClientCounterArgs,
+  { usageCounter, clientSource, logger }: CasesClientCounterArgs,
   counterName: string,
   incrementBy?: number
 ): void => {
-  if (incrementBy != null && incrementBy <= 0) {
+  if (incrementBy != null && incrementBy < 0) {
+    logger.warn(
+      `Skipped cases client counter "${counterName}": incrementBy must not be negative (received ${incrementBy}).`
+    );
+
+    return;
+  }
+
+  if (incrementBy === 0) {
     return;
   }
 
