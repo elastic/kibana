@@ -61,7 +61,7 @@ export const RulesListContainer = () => {
   }, [docTitle, setBreadcrumbs]);
 
   const rulesListTabs = useMemo(() => {
-    if (mode === RULES_PAGE_MODE.v1WithV2Tabs) {
+    if (mode === RULES_PAGE_MODE.v1AndV2Tabs) {
       return getRulesPageHeaderTabs({
         selectedTab: RULES_PAGE_TAB_IDS.v1,
         prepend: http.basePath.prepend,
@@ -69,7 +69,7 @@ export const RulesListContainer = () => {
       });
     }
 
-    if (mode === RULES_PAGE_MODE.v2) {
+    if (mode === RULES_PAGE_MODE.noTabs) {
       return [];
     }
 
@@ -78,7 +78,7 @@ export const RulesListContainer = () => {
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
     const extraItems: NonNullable<AppMenuConfig['items']> =
-      mode !== RULES_PAGE_MODE.v1Classic && authorizedToReadAnyRules
+      mode !== RULES_PAGE_MODE.v1Tabs && authorizedToReadAnyRules
         ? [
             {
               id: 'rulesLogs',

@@ -75,7 +75,7 @@ export const LogsListContainer = () => {
   );
 
   const heading =
-    mode !== RULES_PAGE_MODE.v1Classic ? (
+    mode !== RULES_PAGE_MODE.v1Tabs ? (
       <LogsListHeader
         backHref={rulesListHref}
         canShowSettings={canShowSettings}
