@@ -23,6 +23,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
+  TextBasedLayerColumn,
   TextBasedPersistedState,
   ValueFormatConfig,
   RangeIndexPatternColumn,
@@ -59,8 +60,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.formBased.currentIndexPatternId',
   // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
   'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
-  // TODO: check missing ES|QL column properties stripped out in transforms
-  'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
@@ -424,6 +423,24 @@ function normalizeDataTypes(col: GenericIndexPatternColumn, inferred?: DataType)
   } else if (isBucketed && (dataType === 'ip' || dataType === 'boolean')) {
     col.dataType = 'string';
   }
+}
+
+/**
+ * `meta` cannot round-trip the actual data type — API→SO reconstructs `{ type }` from chart role.
+ * `esType` / `field` / `sourceParams` are never produced. Align original `meta` to that guess:
+ * keep `'number'` and `'date'`, coerce everything else (including absent) to `'string'`.
+ * Same `inferColumnDataType` override as form-based `normalizeDataTypes`.
+ */
+function normalizeESQLMeta(column: TextBasedLayerColumn, inferred?: DataType) {
+  if (inferred === 'number' || inferred === 'string' || inferred === 'date') {
+    column.meta = { type: inferred };
+    return;
+  }
+
+  const rawType = column.meta?.type;
+  column.meta = {
+    type: rawType === 'number' || rawType === 'date' ? rawType : 'string',
+  };
 }
 
 const normalizeReferences = <T extends LensAttributes>(
@@ -949,15 +966,21 @@ const normalizeColumnLabel = (
     col.label = '';
   }
 };
+export type NormalizedDatasource = 'formBased' | 'textBased';
 
 export interface CommonNormalizerArgs {
   layerRemapping: IdRemapping;
   columnRemapping: IdRemapping;
   /**
    * Optional per-chart dataType inference. When provided and returns a value,
-   * it overrides the generic blanket coercions in `normalizeDataTypes`.
+   * it overrides the generic blanket coercions in `normalizeDataTypes` (form-based)
+   * and `normalizeESQLMeta` (text-based). The datasource argument is which column
+   * map is being normalized — remapped IDs are shared, but the correct type is not.
    */
-  inferColumnDataType?: (newColumnId: string) => DataType | undefined;
+  inferColumnDataType?: (
+    newColumnId: string,
+    datasource: NormalizedDatasource
+  ) => DataType | undefined;
 }
 
 // Stored filters carry `field`/ or deprecated `indexRefName` extensions that are absent from the base `FilterMeta`
@@ -1238,12 +1261,14 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       textBased: normalizeDatasourceState(attributes.state.datasourceStates.textBased, (ds) => {
         for (const layer of Object.values(ds.layers)) {
           layer.columns = layer.columns.map((column) => {
-            const remapped = {
+            const columnId = columnIdMap.get(column.columnId) ?? column.columnId;
+            const updatedColumn = {
               ...column,
-              columnId: columnIdMap.get(column.columnId) ?? column.columnId,
+              columnId,
             };
-            normalizeColumnLabel(remapped, { isTextBased: true });
-            return remapped;
+            normalizeESQLMeta(updatedColumn, inferColumnDataType?.(columnId, 'textBased'));
+            normalizeColumnLabel(updatedColumn, { isTextBased: true });
+            return updatedColumn;
           });
 
           // For non-datatable charts, 'inMetricDimension' is runtime-only state set by the
@@ -1388,7 +1413,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
 
               normalizeColumnReferences(col, columnIdMap);
-              normalizeDataTypes(col, inferColumnDataType?.(columnId));
+              normalizeDataTypes(col, inferColumnDataType?.(columnId, 'formBased'));
 
               // Canonicalize terms `params` empty defaults the transform never round-trips
               if (isTermsColumn(col)) {
@@ -1423,8 +1448,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               normalizeLastValueShowArrayValues(col);
 
               // Strip empty `format.params` / empty-string `suffix`; canonicalize per format id
-              normalizeFormatParams(col);
-            }
+              normalizeFormatParams(col);            }
           }
           return ds;
         }

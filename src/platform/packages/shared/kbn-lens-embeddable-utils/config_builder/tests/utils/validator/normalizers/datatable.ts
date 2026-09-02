@@ -23,7 +23,7 @@ import {
 import type { LensAttributes } from '../../../../types';
 import { mergeNormalizers } from './normalize';
 import type { AttributesNormalizer, NormalizerConfig } from './normalize';
-import type { IdRemapping } from './common';
+import type { IdRemapping, NormalizedDatasource } from './common';
 import {
   DEFAULT_LAYER_ID,
   getColorMappingNormalizer,
@@ -305,11 +305,29 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     })
   );
 
-  // For DSL datatable, we infer the DSL metric column dataType from the color config.
-  // 'last_value' operation type can produce a number or a string, so we need to infer the dataType from the color config.
+  // Form-based: only last_value metrics need color to pick number vs string; other ops
+  // have a fixed dataType and fall through to `normalizeDataTypes`.
+  // Text-based: `getValueColumn` uses the same color hint for metrics/rows, and splits
+  // are always string. Bucket dates must not be forced to string on the form-based path.
+  const inferColumnDataType = (
+    newColumnId: string,
+    datasource: NormalizedDatasource
+  ): DataType | undefined => {
+    if (datasource === 'textBased') {
+      if (isSplitMetricColumnId(newColumnId)) {
+        return;
+      }
+      const visCol = visColumnByNewId.get(newColumnId);
+      const color = visCol ? buildColorProps(visCol).color : undefined;
+      if (isMetricColumnId(newColumnId)) {
+        return inferDatatypeFromColor(color, 'number');
+      }
+      if (isRowColumnId(newColumnId)) {
+        return inferDatatypeFromColor(color, 'string');
+      }
+      return;
+    }
 
-  // Every other DSL operation type produces a fixed dataType regardless of color, so we let the common fallback handle them.
-  const inferColumnDataType = (newColumnId: string): DataType | undefined => {
     if (!isMetricColumnId(newColumnId)) {
       return;
     }

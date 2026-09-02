@@ -9,6 +9,7 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
 
@@ -23,7 +24,7 @@ import {
 } from '../../../../transforms/charts/metric/defaults';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
-import type { IdRemapping } from './common';
+import type { IdRemapping, NormalizedDatasource } from './common';
 import {
   DEFAULT_LAYER_ID,
   getCommonNormalizer,
@@ -248,8 +249,7 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     return attributes;
   },
   ignore: [
-    // ES|QL column display format (`params`) is not preserved through the API round-trip,
-    // consistent with the already-ignored `meta` / `inMetricDimension` text-based fields.
+    // ES|QL column display format (`params`) is not preserved through the API round-trip.
     'state.datasourceStates.textBased.layers.*.columns.*.params',
     // Runtime-only ES|QL fields not produced by the transform.
     'state.datasourceStates.textBased.initialContext',
@@ -472,6 +472,27 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
   },
 };
 
+function inferColumnDataType(
+  newColumnId: string,
+  datasource: NormalizedDatasource
+): DataType | undefined {
+  if (datasource !== 'textBased') {
+    return;
+  }
+  if (
+    newColumnId === 'metric_accessor_breakdown' ||
+    newColumnId === `${ACCESSOR}_breakdown_trendline`
+  ) {
+    return 'string';
+  }
+  if (newColumnId === 'x_date_histogram') {
+    return 'date';
+  }
+  if (canonicalMetricColumns.has(newColumnId)) {
+    return 'number';
+  }
+}
+
 export const normalizeMetric = mergeNormalizers([
   getCommonNormalizer<MetricAttributes>(({ state: { visualization } }) => ({
     layerRemapping: [
@@ -479,6 +500,7 @@ export const normalizeMetric = mergeNormalizers([
       [visualization.trendlineLayerId, TRENDLINE_LAYER_ID],
     ],
     columnRemapping: getColumnRemapping(visualization),
+    inferColumnDataType,
   })),
   getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
   alignIds,
