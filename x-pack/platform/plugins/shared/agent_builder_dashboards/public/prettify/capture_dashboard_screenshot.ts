@@ -45,13 +45,17 @@ const isDashboardRendered = (dashboardApi: DashboardApi, grid: HTMLElement): boo
   return renderedPanels >= expectedPanels && pendingVisualizations === 0;
 };
 
-const waitForPanelsToRender = (dashboardApi: DashboardApi, grid: HTMLElement): Promise<number> =>
-  firstValueFrom(
+const waitForPanelsToRender = async (
+  dashboardApi: DashboardApi,
+  grid: HTMLElement
+): Promise<void> => {
+  await firstValueFrom(
     interval(RENDER_POLL_MS).pipe(
       first(() => isDashboardRendered(dashboardApi, grid)),
       timeout(CAPTURE_TIMEOUT_MS)
     )
   );
+};
 
 // Panels inside collapsed sections are not rendered, so expand them for the capture.
 const expandCollapsedSections = (dashboardApi: DashboardApi): (() => void) => {
