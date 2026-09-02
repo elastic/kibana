@@ -490,13 +490,9 @@ export const buildRiskScoreBucket =
 export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
   entityType: EntityType
 ): { type: 'keyword'; script: { source: string } } => {
-  // The fallback resolves which entity an alert refers to. It does not decide whether to create
-  // one, and store membership is checked separately by the `inStoreScores` filter in the
-  // maintainer's score_base_entities step. Applying `postAggFilter` here would gate on `idpGate`,
-  // which no alert can satisfy: the detection engine rewrites `event.kind` to `signal`, so
-  // IdP-namespace users would resolve to no EUID and never get scored. The ES|QL scoring queries
-  // compute entity_id without that gate too.
-  const evalScript = euid.painless.getEuidEvaluation(entityType, { applyPostAggFilter: false });
+  // Store membership is checked separately, by the `inStoreScores` filter in the maintainer's
+  // score_base_entities step, so this only has to resolve the alert to an entity.
+  const evalScript = euid.painless.getEuidEvaluation(entityType);
   const typePrefix = `${entityType}:`;
 
   const source = [

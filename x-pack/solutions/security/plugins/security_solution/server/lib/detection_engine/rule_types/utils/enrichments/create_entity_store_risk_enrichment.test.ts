@@ -360,14 +360,14 @@ describe('createEntityStoreEnrichment', () => {
       expect(enriched._source[ALERT_ENTITY_ID]).toEqual(['host:not-in-store']);
     });
 
-    it('resolves the EUID without the postAggFilter creation gate', async () => {
-      // Alerts carry event.kind: signal, which no arm of postAggFilter accepts. Gating here would
-      // strand IdP-namespace entities: no stamp, and no risk or asset-criticality enrichment.
+    it('resolves the EUID without opting into the creation gate', async () => {
+      // Enrichment asks which existing entity an alert refers to, so it must not pass
+      // `applyPostAggFilter: true`. Doing so would strand IdP-namespace entities: alerts carry
+      // `event.kind: signal`, which no arm of postAggFilter accepts, so they would get no stamp
+      // and no risk or asset-criticality enrichment.
       await runHostEnrichment([createAlert('1', { host: { name: 'server1' } })]);
 
-      expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', expect.any(Object), {
-        applyPostAggFilter: false,
-      });
+      expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', expect.any(Object));
     });
   });
 });

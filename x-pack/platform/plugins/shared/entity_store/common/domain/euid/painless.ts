@@ -109,7 +109,7 @@ export function getEuidPainlessEvaluation(
   entityType: EntityType,
   options?: EuidGateOptions
 ): string {
-  const { applyPostAggFilter = true } = options ?? {};
+  const { applyPostAggFilter = false } = options ?? {};
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;

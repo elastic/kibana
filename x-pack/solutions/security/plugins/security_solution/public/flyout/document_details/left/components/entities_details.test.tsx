@@ -200,7 +200,7 @@ describe('<EntitiesDetails />', () => {
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('with entity store v2, renders host panel but omits user panel when store has no entity records and fields API omits user.*', () => {
+  it('with entity store v2, renders both panels from ECS when the store has no entity records and the fields API omits user.*', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -231,9 +231,12 @@ describe('<EntitiesDetails />', () => {
         user: { name: ['fields-api-missing-but-ecs-has-user'] },
       },
     } as DocumentDetailsContext;
-    const { queryByText, getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
+    const { queryByText, getByTestId } = renderEntitiesDetails(contextValue);
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
-    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    // The fields API omits user.*, but the ECS document carries user.name, so the EUID resolves
+    // and the panel renders off the document. Entity resolution does not apply postAggFilter, so a
+    // user without host.id is no longer dropped for failing the creation gate.
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
   });
 

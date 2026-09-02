@@ -39,6 +39,20 @@ import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_even
 
 const RETRY_ON_CONFLICT = 3;
 
+/**
+ * CRUD writes entities, so it is held to the same admission rule as the extraction pipeline.
+ *
+ * `getEuidFromObject` defaults to resolution semantics and skips `postAggFilter`, because its other
+ * callers are asking which existing entity a document refers to. Here the question is the opposite
+ * one: may this document put an entity in the store. That is exactly what `postAggFilter` decides,
+ * so it has to apply.
+ *
+ * Without it this API becomes a way around the definition. A payload carrying no `event.kind:
+ * asset` could mint an IdP-namespace user that extraction would refuse to create, and nothing in
+ * the incoming telemetry would ever maintain it.
+ */
+const CRUD_ADMISSION_GATE = { applyPostAggFilter: true } as const;
+
 interface CRUDClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -288,7 +302,7 @@ export class CRUDClient {
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     await this.assertInstalled();
-    const generatedId = getEuidFromObject(entityType, doc);
+    const generatedId = getEuidFromObject(entityType, doc, CRUD_ADMISSION_GATE);
     const valid = validateAndTransformDoc(
       'update',
       entityType,
@@ -340,7 +354,7 @@ export class CRUDClient {
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
-      const generatedId = getEuidFromObject(entityType, doc);
+      const generatedId = getEuidFromObject(entityType, doc, CRUD_ADMISSION_GATE);
       const valid = validateAndTransformDoc(
         'update',
         entityType,
@@ -403,7 +417,7 @@ export class CRUDClient {
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
     await this.assertInstalled();
-    const id = getEuidFromObject(entityType, doc);
+    const id = getEuidFromObject(entityType, doc, CRUD_ADMISSION_GATE);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }

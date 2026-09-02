@@ -64,7 +64,9 @@ import { applyFieldEvaluations, getSourceMatchSpec } from './field_evaluations';
  * @param entityType - The entity type ('host', 'user', 'service', 'generic')
  * @param doc - Source document or entity store record. May be flattened, nested, or an ES hit.
  * @returns A KQL filter string, or `undefined` if the document lacks sufficient identity
- *   information or fails the entity's pipeline gate.
+ *   information or fails the entity's `documentsFilter`. `postAggFilter` is not applied: this
+ *   resolves which entity a document refers to, it does not admit one into the store. See
+ *   {@link EuidGateOptions}.
  */
 export function getEuidKqlFilterBasedOnDocument(
   entityType: EntityType,

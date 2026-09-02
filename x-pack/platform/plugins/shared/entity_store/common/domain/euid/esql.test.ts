@@ -125,13 +125,15 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       );
     });
 
-    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
+    it('builds a filter for a doc that fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
+      // `postAggFilter` decides whether a document may create an entity. This builder answers
+      // which entity a document refers to, so it does not apply it.
       expect(
         getEuidEsqlFilterBasedOnDocument('user', {
           user: { id: 'user-id-42' },
           event: { module: 'o365' },
         })
-      ).toBeUndefined();
+      ).toContain('user.id == "user-id-42"');
     });
 
     it('returns undefined when no user id fields are present', () => {
