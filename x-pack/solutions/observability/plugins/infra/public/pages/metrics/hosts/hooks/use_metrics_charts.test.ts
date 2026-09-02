@@ -13,9 +13,8 @@ import { useMetricsCharts } from './use_metrics_charts';
 describe('useMetricsCharts', () => {
   it('should return an array of charts with breakdown config', async () => {
     const { result } = renderHook(() => useMetricsCharts({ indexPattern: 'metrics-*' }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(result.current).toHaveLength(11);
+    await waitFor(() => expect(result.current).toHaveLength(11));
 
     result.current.forEach((chart) => {
       const seriesLayer = chart.layers.find((layer) => layer.type === 'series') as LensSeriesLayer;
@@ -28,7 +27,6 @@ describe('useMetricsCharts', () => {
 
   it('should return an array of charts with correct order', async () => {
     const { result } = renderHook(() => useMetricsCharts({ indexPattern: 'metrics-*' }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = [
       'cpuUsage',
@@ -44,7 +42,7 @@ describe('useMetricsCharts', () => {
       'tx',
     ];
 
-    expect(result.current).toHaveLength(expectedOrder.length);
+    await waitFor(() => expect(result.current).toHaveLength(expectedOrder.length));
 
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);
