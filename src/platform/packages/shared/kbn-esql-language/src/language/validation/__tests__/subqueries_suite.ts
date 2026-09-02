@@ -346,5 +346,25 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         ]);
       });
     });
+
+    describe('STATS / INLINE STATS IN subqueries', () => {
+      it('validates sources inside STATS IN subqueries', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | STATS COUNT(*) WHERE keywordField IN (FROM missing_index)',
+          ['Unknown index "missing_index"']
+        );
+      });
+
+      it('validates commands inside INLINE STATS IN subqueries', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | INLINE STATS COUNT(*) WHERE keywordField IN (FROM other_index | KEEP missingField)',
+          ['Unknown column "missingField"']
+        );
+      });
+    });
   });
 };

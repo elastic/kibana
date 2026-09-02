@@ -1807,13 +1807,13 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@72.0.1":
-  version "72.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-72.0.1.tgz#4c528c901b349b4720a379f56b5fbed5d1443614"
-  integrity sha512-+MZ0HvY4iop5T0eATek98PG8AQLL5S20SOp3k8cOkwGBFD83F6ctdXJCgDNgM93NOPHQSq3v4i/vvtKoLDP+NQ==
+"@elastic/charts@73.0.0":
+  version "73.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-73.0.0.tgz#6a7d569ccc08b7ac192832b4a7f78f8bdf39dd4d"
+  integrity sha512-EKciZkUxAIKkrlm2SSNBQ+nVMPlf5HTon9ovgfCte+fd0IZel+SIIRSwhoxMZ9GYA4fttp1c7DJ8Z0uJXarnYw==
   dependencies:
     "@popperjs/core" "^2.11.8"
-    "@reduxjs/toolkit" "1.9.7"
+    "@reduxjs/toolkit" "2.12.0"
     bezier-easing "^2.1.0"
     chroma-js "^2.4.2"
     classnames "^2.2.6"
@@ -1823,12 +1823,11 @@
     d3-interpolate "^3.0.1"
     d3-scale "^3.3.0"
     d3-shape "^2.0.0"
-    immer "^9.0.21"
+    immer "11.1.8"
     luxon "^1.25.0"
     prop-types "^15.7.2"
     re-reselect "^4.0.1"
-    react-redux "^8.1.3"
-    redux "^4.2.1"
+    react-redux "9.2.0"
     ts-debounce "^4.0.0"
     utility-types "^3.10.0"
     uuid "^14.0.0"
@@ -4259,6 +4258,10 @@
   uid ""
 
 "@kbn/agent-builder-sml-plugin@link:x-pack/platform/plugins/shared/agent_builder_sml":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-sml-test-types-plugin@link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types":
   version "0.0.0"
   uid ""
 
@@ -7767,6 +7770,10 @@
   uid ""
 
 "@kbn/ml-common-types@link:x-pack/platform/packages/shared/ml/common-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-cps-common@link:x-pack/platform/packages/shared/ml/ml-cps-common":
   version "0.0.0"
   uid ""
 
@@ -12310,16 +12317,6 @@
   resolved "https://registry.yarnpkg.com/@redux-saga/types/-/types-1.2.1.tgz#9403f51c17cae37edf870c6bc0c81c1ece5ccef8"
   integrity sha512-1dgmkh+3so0+LlBWRhGA33ua4MYr7tUOj+a9Si28vUi0IUFNbff1T3sgpeDJI/LaC75bBYnQ0A3wXjn0OrRNBA==
 
-"@reduxjs/toolkit@1.9.7", "@reduxjs/toolkit@npm:@reduxjs/toolkit@1.9.7":
-  version "1.9.7"
-  resolved "https://registry.npmjs.org/@reduxjs/toolkit/-/toolkit-1.9.7.tgz"
-  integrity sha512-t7v8ZPxhhKgOKtU+uyJT13lu4vL7az5aFi4IdoDs/eS548edn2M8Ik9h8fxgvMjGoAUVFSt6ZC1P5cWmQ014QQ==
-  dependencies:
-    immer "^9.0.21"
-    redux "^4.2.1"
-    redux-thunk "^2.4.2"
-    reselect "^4.1.8"
-
 "@reduxjs/toolkit@2.12.0":
   version "2.12.0"
   resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-2.12.0.tgz#e62787503a38561e04bb8f39e29ca8db689590f9"
@@ -13424,11 +13421,6 @@
   integrity sha512-PyRA9sm1Yayuj5OIoJ1hGt2YISX45w9WcFbh6ddT0Z/0yaFxOtGLInr4jUfU1EAFVs0Yfyfev4RNwBlUaHdlDQ==
   dependencies:
     defer-to-connect "^2.0.0"
-
-"@tabby_ai/hijri-converter@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@tabby_ai/hijri-converter/-/hijri-converter-1.0.5.tgz#b664994892348a402ae7529e648c819eee39208b"
-  integrity sha512-r5bClKrcIusDoo049dSL8CawnHR6mRdDwhlQuIgZRNty68q0x8k3Lf1BtPAMxRf/GgnHBnIO4ujd3+GQdLWzxQ==
 
 "@tanstack/match-sorter-utils@^8.7.0":
   version "8.7.0"
@@ -19259,11 +19251,6 @@ data-view-byte-offset@^1.0.0:
     es-errors "^1.3.0"
     is-data-view "^1.0.1"
 
-date-fns-jalali@4.1.0-0:
-  version "4.1.0-0"
-  resolved "https://registry.yarnpkg.com/date-fns-jalali/-/date-fns-jalali-4.1.0-0.tgz#9c7fb286004fab267a300d3e9f1ada9f10b4b6b0"
-  integrity sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==
-
 date-fns@^1.30.1:
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
@@ -19943,10 +19930,10 @@ domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@3.4.11:
-  version "3.4.11"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.11.tgz#29c8ba496475f279ef4015784068452fb14a0680"
-  integrity sha512-zhlUV12GsaRzMsf9q5M254YhA4+VuF0fG+QFqu6aYpoGlKtz+w8//jBcGVYBgQkR5GHjUomejY84AV+/uPbWdw==
+dompurify@3.4.14:
+  version "3.4.14"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.14.tgz#a789edb2c7bcdb69a93713a34edb7e0a5245d8c9"
+  integrity sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -23158,7 +23145,7 @@ immer@11.1.8, immer@^11.0.0:
   resolved "https://registry.yarnpkg.com/immer/-/immer-11.1.8.tgz#08a6426f7019dbce8d6dff8c4a43bb25c550a575"
   integrity sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==
 
-immer@^9.0.21, "immer@npm:immer@9.0.21":
+immer@^9.0.21:
   version "9.0.21"
   resolved "https://registry.npmjs.org/immer/-/immer-9.0.21.tgz"
   integrity sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==
@@ -29084,10 +29071,10 @@ qified@^0.10.1:
   dependencies:
     hookified "^2.1.1"
 
-qs@6.15.3, qs@^6.12.3, qs@^6.14.0, qs@^6.14.1, qs@^6.15.2, qs@^6.9.7, qs@~6.14.0, qs@~6.14.1, qs@~6.15.1:
-  version "6.15.3"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.15.3.tgz#76852132a58ed5c7c0ef67e4441b9bb5d6061b3b"
-  integrity sha512-O9gl3zCl5h5blw1KGUzQKhA5oUXSl8rwUIM5o0S3nCXMliSvy5Dzx7/DJcI+SwgICv+IneSZwhBh1oSyEHA71A==
+qs@6.16.0, qs@^6.12.3, qs@^6.14.0, qs@^6.14.1, qs@^6.15.2, qs@^6.9.7, qs@~6.14.0, qs@~6.14.1, qs@~6.15.1:
+  version "6.16.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.16.0.tgz#c22c723a28a920f3aacdce8289fabd43eccb79fd"
+  integrity sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==
   dependencies:
     es-define-property "^1.0.1"
     side-channel "^1.1.1"
@@ -29310,15 +29297,13 @@ react-clientside-effect@^1.2.6:
   dependencies:
     "@babel/runtime" "^7.12.13"
 
-react-day-picker@9.14.0:
-  version "9.14.0"
-  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-9.14.0.tgz#b2975b48366d0c3a180520e1a4063b5a7d6c5a57"
-  integrity sha512-tBaoDWjPwe0M5pGrum4H0SR6Lyk+BO9oHnp9JbKpGKW2mlraNPgP9BMfsg5pWpwrssARmeqk7YBl2oXutZTaHA==
+react-day-picker@10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-10.0.1.tgz#8498e3f0ace2e9d03c209a5458c451a377c2d85c"
+  integrity sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==
   dependencies:
     "@date-fns/tz" "^1.4.1"
-    "@tabby_ai/hijri-converter" "1.0.5"
     date-fns "^4.1.0"
-    date-fns-jalali "4.1.0-0"
 
 react-diff-view@3.3.1:
   version "3.3.1"
@@ -29548,18 +29533,6 @@ react-redux@9.2.0, react-redux@^9.2.0:
   dependencies:
     "@types/use-sync-external-store" "^0.0.6"
     use-sync-external-store "^1.4.0"
-
-react-redux@^8.1.3, "react-redux@npm:react-redux@7.2.8":
-  version "7.2.8"
-  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.2.8.tgz#a894068315e65de5b1b68899f9c6ee0923dd28de"
-  integrity sha512-6+uDjhs3PSIclqoCk0kd6iX74gzrGc3W5zcAjbrFgEdIjRSQObdIwfx80unTkVUYvbQ95Y8Av3OvFHq1w5EOUw==
-  dependencies:
-    "@babel/runtime" "^7.15.4"
-    "@types/react-redux" "^7.1.20"
-    hoist-non-react-statics "^3.3.2"
-    loose-envify "^1.4.0"
-    prop-types "^15.7.2"
-    react-is "^17.0.2"
 
 react-refresh@0.18.0:
   version "0.18.0"
