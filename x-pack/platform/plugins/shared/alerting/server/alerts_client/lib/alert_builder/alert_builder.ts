@@ -33,7 +33,7 @@ import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
 import type { LegacyAlertsClient } from '../../legacy_alerts_client';
-import { getAlertIdsOverMaxLimit } from '../../../lib/flapping/optimize_task_state_for_flapping';
+import { getRecoveredAlertIdsToStopTracking } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
 interface AlertBuilderOpts<
   State extends AlertInstanceState,
@@ -258,15 +258,19 @@ export class AlertBuilder<
   }
 
   private buildRecoveredAlerts(): Array<Alert & AlertData> {
-    const { rawRecoveredAlerts } = this.legacyAlertsClient.getRawAlertInstancesForState();
+    const { rawActiveAlerts, rawRecoveredAlerts } =
+      this.legacyAlertsClient.getRawAlertInstancesForState();
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
     const trackedRecoveredAlerts =
       this.legacyAlertsClient.getProcessedAlerts('trackedRecoveredAlerts');
-    // Recovered alerts dropped from task state by the max-alerts cap still need
-    // tracked: false in AAD. They can retain true values in flapping_history and
-    // would otherwise match the tracked query forever.
-    const droppedByMaxAlertLimit = new Set(
-      getAlertIdsOverMaxLimit(trackedRecoveredAlerts, this.legacyAlertsClient.getMaxAlertLimit())
+    // Any recovered alert that optimizeTaskStateForFlapping will drop from task
+    // state must be written tracked: false now. Otherwise the AAD query keeps
+    // returning it and nothing will persist it again.
+    const stopTrackingIds = new Set(
+      getRecoveredAlertIdsToStopTracking(
+        trackedRecoveredAlerts,
+        this.legacyAlertsClient.getMaxAlertLimit()
+      )
     );
 
     const recoveredAlertsToIndex = [];
@@ -296,10 +300,31 @@ export class AlertBuilder<
               rule: this.rule,
             });
         recoveredAlertsToIndex.push(
-          droppedByMaxAlertLimit.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
+          stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
         );
       }
     }
+
+    const keepUuids = new Set<string>();
+    for (const raw of values(rawActiveAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    for (const raw of values(rawRecoveredAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    // Tracked AAD docs that are not in this run's working set will never be
+    // rebuilt. Flip them to false so they stop matching the tracked query.
+    for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
+      if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
+        continue;
+      }
+      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+    }
+
     return recoveredAlertsToIndex;
   }
 

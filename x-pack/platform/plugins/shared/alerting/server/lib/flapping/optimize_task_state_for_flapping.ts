@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { keys, map } from 'lodash';
+import { map } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { Alert } from '../../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../../types';
@@ -29,22 +29,52 @@ export function optimizeTaskStateForFlapping<
       } ${alertIdsOverMaxLimit.length > 1 ? 'alerts' : 'alert'}.`
     );
   }
-  for (const id of alertIdsOverMaxLimit) {
+
+  for (const id of getRecoveredAlertIdsToStopTracking(recoveredAlerts, maxAlerts)) {
     delete recoveredAlerts[id];
   }
+  return recoveredAlerts;
+}
 
-  for (const id of keys(recoveredAlerts)) {
-    const alert = recoveredAlerts[id];
-    // this is also a space saving effort that will only remove recovered alerts if they are not flapping
-    // and if the flapping array does not contain any state changes
-    const flapping = alert.getFlapping();
-    const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
-    const numStateChanges = flappingHistory.filter((f) => f).length;
-    if (!flapping && numStateChanges === 0) {
-      delete recoveredAlerts[id];
+export function shouldKeepTrackingRecovered({
+  flapping,
+  flappingHistory,
+}: {
+  flapping?: boolean;
+  flappingHistory?: boolean[];
+}): boolean {
+  const numStateChanges = (flappingHistory || []).filter((f) => f).length;
+  return flapping === true || numStateChanges > 0;
+}
+
+interface RecoveredAlertTrackingFields {
+  getFlappingHistory: () => boolean[] | undefined;
+  getFlapping?: () => boolean | undefined;
+}
+
+export function getRecoveredAlertIdsToStopTracking(
+  trackedRecoveredAlerts: Record<string, RecoveredAlertTrackingFields>,
+  maxAlerts: number
+): string[] {
+  const overMaxIds = getAlertIdsOverMaxLimit(trackedRecoveredAlerts, maxAlerts);
+  const overMax = new Set(overMaxIds);
+  const ids = [...overMaxIds];
+
+  for (const [id, alert] of Object.entries(trackedRecoveredAlerts)) {
+    if (overMax.has(id)) {
+      continue;
+    }
+    if (
+      !shouldKeepTrackingRecovered({
+        flapping: alert.getFlapping?.(),
+        flappingHistory: alert.getFlappingHistory(),
+      })
+    ) {
+      ids.push(id);
     }
   }
-  return recoveredAlerts;
+
+  return ids;
 }
 
 export function getAlertIdsOverMaxLimit(

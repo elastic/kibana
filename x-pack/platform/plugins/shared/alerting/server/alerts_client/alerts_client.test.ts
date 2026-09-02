@@ -1473,6 +1473,109 @@ describe('Alerts Client', () => {
           });
         });
 
+        test('should set tracked to false on newly recovered alerts that will not be kept in task state', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: {
+                    ...fetchedAlert1,
+                    [ALERT_FLAPPING_HISTORY]: [false, false, false],
+                  },
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, enabled: false },
+            activeAlertsFromState: {
+              '1': {
+                ...trackedAlert1Raw,
+                meta: {
+                  ...trackedAlert1Raw.meta,
+                  flapping: false,
+                  flappingHistory: [false, false, false],
+                },
+              },
+            },
+          });
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          const recoveredDocs = bulkBody.filter((item) => item[ALERT_STATUS] === 'recovered');
+          expect(recoveredDocs).toHaveLength(1);
+          expect(recoveredDocs[0][ALERT_TRACKED]).toEqual(false);
+        });
+
+        test('should set tracked to false on tracked AAD docs that are not in the working set', async () => {
+          const orphanAlert = {
+            ...fetchedAlert1,
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_INSTANCE_ID]: 'orphan',
+            [ALERT_UUID]: 'orphan-uuid',
+            [ALERT_TRACKED]: true,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'orphan-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: orphanAlert,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          const orphanDoc = bulkBody.find((item) => item[ALERT_UUID] === 'orphan-uuid');
+          expect(orphanDoc).toEqual(expect.objectContaining({ [ALERT_TRACKED]: false }));
+        });
+
         test('should use startedAt time if provided', async () => {
           clusterClient.search.mockResolvedValue({
             took: 10,

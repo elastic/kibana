@@ -23,6 +23,7 @@ import { get, omit } from 'lodash';
 import type { RuleAlertData } from '../../../types';
 import type { AlertRule } from '../../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
+import { shouldKeepTrackingRecovered } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
@@ -60,7 +61,10 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
     // not get returned for summary alerts.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
-    [ALERT_TRACKED]: shouldKeepTracking(legacyRawAlert),
+    [ALERT_TRACKED]: shouldKeepTrackingRecovered({
+      flapping: legacyRawAlert.meta?.flapping,
+      flappingHistory: legacyRawAlert.meta?.flappingHistory,
+    }),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };
 
@@ -87,11 +91,4 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   return deepmerge.all([expandedAlert, refreshableAlertFields, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
-};
-
-const shouldKeepTracking = (legacyRawAlert: RawAlertInstance): boolean => {
-  const flapping = legacyRawAlert.meta?.flapping;
-  const flappingHistory: boolean[] = legacyRawAlert.meta?.flappingHistory || [];
-  const numStateChanges = flappingHistory.filter((f) => f).length;
-  return flapping === true || numStateChanges > 0;
 };
