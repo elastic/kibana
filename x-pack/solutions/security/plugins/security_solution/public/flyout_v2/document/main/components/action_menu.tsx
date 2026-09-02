@@ -90,7 +90,7 @@ const ACTION_ICONS_BY_ID = {
   [EXPLORE_ACTION_ID]: 'external',
   [INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
   [ISOLATE_HOST_ACTION_ID]: 'lock',
-  [OSQUERY_ACTION_ID]: 'console',
+  [OSQUERY_ACTION_ID]: 'commandLine',
   [RESPOND_ACTION_ID]: 'bolt',
   [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
   [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
