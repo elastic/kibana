@@ -67,6 +67,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
     jobIds,
+    projectRouting,
     categoryQualityWarnings,
     sourceConfiguration: { sourceId: logViewId },
   } = useLogEntryCategoriesModuleContext();
@@ -219,6 +220,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
       logViewReference={{ type: 'log-view-reference', logViewId }}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
+      projectRouting={projectRouting}
     >
       <LogsPageTemplate
         hasData={logViewStatus?.index !== 'missing'}
