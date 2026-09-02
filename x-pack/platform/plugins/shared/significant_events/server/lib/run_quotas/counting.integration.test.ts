@@ -10,6 +10,15 @@ import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus, ExecutionStatusValues } from '@kbn/workflows';
+import {
+  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows-management-plugin/common';
 import { countRunQuotaWorkflowExecutions, RUN_QUOTA_WORKFLOW_IDS_BY_GROUP } from './counting';
 
@@ -121,22 +130,28 @@ describe('run quota workflow execution display counting', () => {
 
   it('maps every counted workflow id into its display group', async () => {
     await indexDocuments(
-      Object.values(RUN_QUOTA_WORKFLOW_IDS_BY_GROUP).flatMap((workflowIds) =>
-        workflowIds.map((workflowId) => ({
-          workflowId,
-          isTestRun: false,
-          status: ExecutionStatus.RUNNING,
-        }))
-      )
+      [
+        SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+      ].map((workflowId) => ({
+        workflowId,
+        isTestRun: false,
+        status: ExecutionStatus.RUNNING,
+      }))
     );
 
     const counts = await countRunQuotaWorkflowExecutions({ esClient, window });
 
     expect(counts).toEqual({
-      detection: RUN_QUOTA_WORKFLOW_IDS_BY_GROUP.detection.length,
-      investigation: RUN_QUOTA_WORKFLOW_IDS_BY_GROUP.investigation.length,
-      ki_extraction: RUN_QUOTA_WORKFLOW_IDS_BY_GROUP.ki_extraction.length,
-      memory: RUN_QUOTA_WORKFLOW_IDS_BY_GROUP.memory.length,
+      detection: 1,
+      investigation: 1,
+      ki_extraction: 1,
+      memory: 4,
     });
   });
 });

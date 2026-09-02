@@ -12,6 +12,7 @@ import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/continuous_onboar
 import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
 import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowStep {
   name: string;
@@ -50,6 +51,12 @@ const definitions = {
 const flattenSteps = (steps: WorkflowStep[]): WorkflowStep[] =>
   steps.flatMap((step) => [step, ...(step.steps ? flattenSteps(step.steps) : [])]);
 
+const quotaSteps = Object.values(definitions).flatMap((definition) =>
+  flattenSteps(definition.steps).filter(
+    (step) => step.type === 'kibana.request' && step.with?.path?.includes('/run_quotas/')
+  )
+);
+
 const findStep = (definition: WorkflowDefinition, name: string): WorkflowStep => {
   const step = flattenSteps(definition.steps).find((candidate) => candidate.name === name);
   if (!step) {
@@ -66,23 +73,32 @@ const findInput = (
     .flatMap((trigger) => trigger.inputs ?? [])
     .find((input) => input.name === name);
 
-describe('Significant Events run quota workflow invariants', () => {
-  it('gives every gate scheduled provenance, a timeout, and fail-open behavior', () => {
-    const quotaSteps = Object.values(definitions).flatMap((definition) =>
-      flattenSteps(definition.steps).filter(
-        (step) => step.type === 'kibana.request' && step.with?.path?.includes('/run_quotas/')
-      )
-    );
+const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown =>
+  createWorkflowLiquidEngine().evalValueSync(expression.slice(3, -2).trim(), context);
 
+const evaluateStepCondition = (step: WorkflowStep, context: Record<string, unknown>): unknown => {
+  if (!step.condition) {
+    throw new Error(`Missing condition for workflow step ${step.name}`);
+  }
+  return evaluateExpression(step.condition, context);
+};
+
+describe('Significant Events run quota workflow invariants', () => {
+  it('runs gates only for workers propagated from scheduled drivers', () => {
     expect(quotaSteps.map(({ name }) => name).sort()).toEqual(
       ['check_budget', 'check_budget', 'reserve_investigation_budget'].sort()
     );
     for (const step of quotaSteps) {
-      expect(step.if).toMatch(/== "scheduled"/);
+      expect(step.if).toBe('${{ inputs.rootTriggeredBy == "scheduled" }}');
+      expect(step.with?.path).toMatch(/^\/s\/\{\{ workflow\.spaceId \}\}\//);
+    }
+  });
+
+  it('continues after a gate timeout or request failure without retrying', () => {
+    for (const step of quotaSteps) {
       expect(step.timeout).toBe('10s');
       expect(step['on-failure']).toEqual({ continue: true });
       expect(step['on-failure']).not.toHaveProperty('retry');
-      expect(step.with?.path).toMatch(/^\/s\/\{\{ workflow\.spaceId \}\}\//);
     }
   });
 
@@ -115,7 +131,10 @@ describe('Significant Events run quota workflow invariants', () => {
   });
 
   it('returns normal no-work outputs on an explicit worker denial', () => {
-    expect(findStep(definitions.discovery, 'exit_if_budget_denied')).toEqual(
+    const discoveryDenial = findStep(definitions.discovery, 'exit_if_budget_denied');
+    const onboardingDenial = findStep(definitions.onboarding, 'exit_if_budget_denied');
+
+    expect(discoveryDenial).toEqual(
       expect.objectContaining({
         condition: '${{ steps.check_budget.output.allowed == false }}',
         steps: [
@@ -130,6 +149,7 @@ describe('Significant Events run quota workflow invariants', () => {
         ],
       })
     );
+    expect(onboardingDenial.condition).toBe('${{ steps.check_budget.output.allowed == false }}');
     expect(findStep(definitions.onboarding, 'output_budget_denied')).toEqual(
       expect.objectContaining({
         status: 'cancelled',
@@ -147,6 +167,10 @@ describe('Significant Events run quota workflow invariants', () => {
         },
       })
     );
+
+    const failedGateContext = { steps: { check_budget: {} } };
+    expect(evaluateStepCondition(discoveryDenial, failedGateContext)).toBe(false);
+    expect(evaluateStepCondition(onboardingDenial, failedGateContext)).toBe(false);
   });
 
   it('fails open only after the per-event reservation gate', () => {
@@ -157,6 +181,11 @@ describe('Significant Events run quota workflow invariants', () => {
     expect(grantGuard.condition).toBe(
       '${{ steps.reserve_investigation_budget.output.granted != false }}'
     );
+    expect(
+      evaluateStepCondition(grantGuard, {
+        steps: { reserve_investigation_budget: {} },
+      })
+    ).toBe(true);
     expect(grantGuard.steps?.[0]).toEqual(
       expect.objectContaining({
         name: 'trigger_investigation',

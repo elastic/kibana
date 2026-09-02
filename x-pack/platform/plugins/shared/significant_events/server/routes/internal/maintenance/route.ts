@@ -60,7 +60,7 @@ const resumeRoute = createServerRoute({
     summary: 'Resume Significant Events activity',
     description:
       'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled. ' +
-      'Deployment-wide (same privilege model as Pause): space-scoped streams.manage gates the call.',
+      'Deployment-wide: space-scoped streams.manage gates the call. Restoring continuous knowledge indicator extraction while its run cap is active also requires streams.manage in every space.',
   },
   security: {
     authz: {
@@ -113,16 +113,13 @@ const resumeRoute = createServerRoute({
       if (!continuousKiOnboardingWorkflowService) {
         throw new Error('Workflows management is required to cap continuous KI onboarding');
       }
-    }
-
-    const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
-    const summary = await maintenanceService.resume({ request, updatedBy });
-    if (shouldReconcileContinuousKi) {
-      await continuousKiOnboardingWorkflowService?.ensureCappedContinuousKiScheduled({
+      await continuousKiOnboardingWorkflowService.ensureCappedContinuousKiScheduled({
         request,
       });
     }
-    return summary;
+
+    const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
+    return maintenanceService.resume({ request, updatedBy });
   },
 });
 

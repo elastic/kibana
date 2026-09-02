@@ -5,12 +5,42 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { significantEventsApiTest as apiTest, getStreamsUsers } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
+const MANAGED_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
+
+const readRunQuotaSnapshot = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>
+) => {
+  const [limitsResponse, statusResponse] = await Promise.all([
+    apiClient.get(RUN_QUOTAS_ENDPOINT, {
+      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    }),
+    apiClient.get(`${RUN_QUOTAS_ENDPOINT}/_status`, {
+      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    }),
+  ]);
+  expect(limitsResponse).toHaveStatusCode(200);
+  expect(statusResponse).toHaveStatusCode(200);
+
+  return {
+    enabled: statusResponse.body.enabled as boolean,
+    limits: Object.fromEntries(
+      limitsResponse.body.groups
+        .filter(({ group }: { group: string }) =>
+          MANAGED_GROUPS.includes(group as (typeof MANAGED_GROUPS)[number])
+        )
+        .map(({ group, limit }: { group: string; limit: unknown }) => [group, limit])
+    ),
+  };
+};
 
 apiTest.describe(
   'Significant Events run quota authorization',
@@ -34,6 +64,14 @@ apiTest.describe(
 
         expect(limitsResponse).toHaveStatusCode(200);
         expect(statusResponse).toHaveStatusCode(200);
+        const detection = limitsResponse.body.groups.find(
+          ({ group }: { group: string }) => group === 'detection'
+        );
+        expect(detection.group).toBe('detection');
+        expect(typeof detection.limit.enabled).toBe('boolean');
+        expect(typeof detection.limit.max).toBe('number');
+        expect(typeof detection.used).toBe('number');
+        expect(typeof detection.counted).toBe('number');
         expect(statusResponse.body.canManageLimits).toBe(false);
       }
     );
@@ -122,17 +160,23 @@ apiTest.describe(
       'redacts enforcement ownership for a one-space reader',
       async ({ apiClient, samlAuth }) => {
         const admin = await samlAuth.asStreamsAdmin();
+        const original = await readRunQuotaSnapshot(apiClient, admin.cookieHeader);
 
-        const enableResponse = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
-          headers: { ...COMMON_API_HEADERS, ...admin.cookieHeader },
-          body: {
-            enabled: true,
-            limits: { ki_extraction: { enabled: false, max: 0 } },
-          },
-          responseType: 'json',
-        });
-        expect(enableResponse).toHaveStatusCode(200);
+        if (!original.enabled) {
+          const enableResponse = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
+            headers: { ...COMMON_API_HEADERS, ...admin.cookieHeader },
+            body: {
+              enabled: true,
+              limits: { ki_extraction: { enabled: false, max: 0 } },
+            },
+            responseType: 'json',
+          });
+          if (enableResponse.statusCode !== 200) {
+            throw new Error(`Failed to enable run quotas: HTTP ${enableResponse.statusCode}`);
+          }
+        }
 
+        let restoreStatusCode = 200;
         try {
           const reader = await samlAuth.asStreamsReadOnly();
           const statusResponse = await apiClient.get(`${RUN_QUOTAS_ENDPOINT}/_status`, {
@@ -145,13 +189,17 @@ apiTest.describe(
           expect('enabledBy' in statusResponse.body).toBe(false);
           expect('enabledAt' in statusResponse.body).toBe(false);
         } finally {
-          const cleanupAdmin = await samlAuth.asStreamsAdmin();
-          await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
-            headers: { ...COMMON_API_HEADERS, ...cleanupAdmin.cookieHeader },
-            body: { enabled: false },
-            responseType: 'json',
-          });
+          if (!original.enabled) {
+            const cleanupAdmin = await samlAuth.asStreamsAdmin();
+            const cleanupResponse = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
+              headers: { ...COMMON_API_HEADERS, ...cleanupAdmin.cookieHeader },
+              body: original,
+              responseType: 'json',
+            });
+            restoreStatusCode = cleanupResponse.statusCode;
+          }
         }
+        expect(restoreStatusCode).toBe(200);
       }
     );
   }

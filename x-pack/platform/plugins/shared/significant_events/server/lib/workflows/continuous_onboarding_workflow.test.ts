@@ -156,7 +156,7 @@ describe('continuous KI onboarding scheduler reconciliation', () => {
     return { managementApi, service };
   };
 
-  it('refreshes the schedule API key and verifies the workflow postcondition', async () => {
+  it('issues an enabled update so the scheduler refreshes the schedule credentials', async () => {
     const { managementApi, service } = createService();
 
     await service.ensureCappedContinuousKiScheduled({ request: {} as never });

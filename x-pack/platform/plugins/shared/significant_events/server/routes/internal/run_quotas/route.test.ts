@@ -33,18 +33,25 @@ const statusRoute = internalRunQuotaRoutes['GET /internal/significant_events/run
 const makeServer = ({
   repository,
   canManage,
+  displayCount = 0,
+  displayCountError,
 }: {
   repository: ReturnType<typeof createInMemoryRunQuotaRepository>['client'];
   canManage: boolean;
+  displayCount?: number;
+  displayCountError?: Error;
 }) => {
   const globally = jest.fn().mockResolvedValue({ hasAllRequested: canManage });
+  const count = displayCountError
+    ? jest.fn().mockRejectedValue(displayCountError)
+    : jest.fn().mockResolvedValue({ count: displayCount });
   return {
     server: {
       core: {
         elasticsearch: {
           client: {
             asInternalUser: {
-              count: jest.fn().mockResolvedValue({ count: 0 }),
+              count,
             },
           },
         },
@@ -77,13 +84,13 @@ const baseHandlerParams = (server: SignificantEventsServer) => ({
 
 describe('run quota route authorization matrix', () => {
   it.each([
-    [getRoute, STREAMS_API_PRIVILEGES.read],
-    [putRoute, STREAMS_API_PRIVILEGES.manage],
-    [enforcementRoute, STREAMS_API_PRIVILEGES.manage],
-    [consumeRoute, STREAMS_API_PRIVILEGES.manage],
-    [reserveRoute, STREAMS_API_PRIVILEGES.manage],
-    [statusRoute, STREAMS_API_PRIVILEGES.read],
-  ])('declares the required Streams privilege', (route, requiredPrivilege) => {
+    ['read quotas', getRoute, STREAMS_API_PRIVILEGES.read],
+    ['update quotas', putRoute, STREAMS_API_PRIVILEGES.manage],
+    ['toggle enforcement', enforcementRoute, STREAMS_API_PRIVILEGES.manage],
+    ['consume worker quota', consumeRoute, STREAMS_API_PRIVILEGES.manage],
+    ['reserve investigation quota', reserveRoute, STREAMS_API_PRIVILEGES.manage],
+    ['read enforcement status', statusRoute, STREAMS_API_PRIVILEGES.read],
+  ])('%s declares the required Streams privilege', (_, route, requiredPrivilege) => {
     expect(route.security.authz).toEqual({
       requiredPrivileges: [requiredPrivilege],
     });
@@ -206,6 +213,66 @@ describe('run quota continuous KI reconciliation', () => {
 
     expect(ensureCappedContinuousKiScheduled).not.toHaveBeenCalled();
   });
+
+  it('does not enable enforcement when capped KI reconciliation fails', async () => {
+    const repository = createInMemoryRunQuotaRepository();
+    const { server } = makeServer({ repository: repository.client, canManage: true });
+
+    await expect(
+      enforcementRoute.handler({
+        ...baseHandlerParams(server),
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          globalUiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
+        }),
+        continuousKiOnboardingWorkflowService: {
+          ensureCappedContinuousKiScheduled: jest
+            .fn()
+            .mockRejectedValue(new Error('reconciliation failed')),
+        },
+        params: {
+          body: {
+            enabled: true,
+            limits: { ki_extraction: cappedKiLimit },
+          },
+        },
+      } as never)
+    ).rejects.toThrow('reconciliation failed');
+
+    expect((await readRunQuotaSettings(repository.client)).enforcementEnabled).toBe(false);
+  });
+
+  it('keeps KI unlimited when capped KI reconciliation fails', async () => {
+    const repository = createInMemoryRunQuotaRepository();
+    const unlimitedKiLimit = { enabled: false, max: 0 } as const;
+    await mutateRunQuotaSettings(repository.client, () => ({
+      enforcementEnabled: true,
+      limits: { ki_extraction: unlimitedKiLimit },
+    }));
+    const { server } = makeServer({ repository: repository.client, canManage: true });
+
+    await expect(
+      putRoute.handler({
+        ...baseHandlerParams(server),
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          globalUiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
+        }),
+        continuousKiOnboardingWorkflowService: {
+          ensureCappedContinuousKiScheduled: jest
+            .fn()
+            .mockRejectedValue(new Error('reconciliation failed')),
+        },
+        params: {
+          body: { limits: { ki_extraction: cappedKiLimit } },
+        },
+      } as never)
+    ).rejects.toThrow('reconciliation failed');
+
+    expect((await readRunQuotaSettings(repository.client)).limits.ki_extraction).toEqual(
+      unlimitedKiLimit
+    );
+  });
 });
 
 describe('run quota read routes', () => {
@@ -223,7 +290,11 @@ describe('run quota read routes', () => {
         allowedInvestigationKeys: [],
       }
     );
-    const { server } = makeServer({ repository: repository.client, canManage: false });
+    const { server } = makeServer({
+      repository: repository.client,
+      canManage: false,
+      displayCount: 37,
+    });
 
     const response = await getRoute.handler({
       ...baseHandlerParams(server),
@@ -233,10 +304,32 @@ describe('run quota read routes', () => {
     expect(response.groups).toContainEqual(
       expect.objectContaining({
         group: 'investigation',
-        used: 0,
+        used: 37,
         counted: 31,
         criticalOverrideCount: 1,
       })
+    );
+  });
+
+  it('fails the read rather than returning incomplete display counts', async () => {
+    const repository = createInMemoryRunQuotaRepository();
+    const { server } = makeServer({
+      repository: repository.client,
+      canManage: false,
+      displayCountError: new Error('Elasticsearch unavailable'),
+    });
+    const warn = jest.fn();
+
+    await expect(
+      getRoute.handler({
+        ...baseHandlerParams(server),
+        logger: { warn },
+        params: {},
+      } as never)
+    ).rejects.toThrow('Elasticsearch unavailable');
+
+    expect(warn).toHaveBeenCalledWith(
+      'Failed to read workflow execution counts for run quotas: Elasticsearch unavailable'
     );
   });
 

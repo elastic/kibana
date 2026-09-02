@@ -23,9 +23,16 @@ const route =
     'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings'
   ];
 
-const createHandlerParams = ({ canManage }: { canManage: boolean }) => {
+const createHandlerParams = ({
+  canManage,
+  previousEnabled = false,
+}: {
+  canManage: boolean;
+  previousEnabled?: boolean;
+}) => {
   const repository = createInMemoryRunQuotaRepository();
   const setMany = jest.fn().mockResolvedValue(undefined);
+  const ensureWorkflow = jest.fn().mockResolvedValue(undefined);
   const ensureCappedContinuousKiScheduled = jest.fn().mockResolvedValue(undefined);
   const globally = jest.fn().mockResolvedValue({ hasAllRequested: canManage });
   const server = {
@@ -43,7 +50,9 @@ const createHandlerParams = ({ canManage }: { canManage: boolean }) => {
   } as unknown as SignificantEventsServer;
 
   return {
+    ensureWorkflow,
     ensureCappedContinuousKiScheduled,
+    globally,
     repository,
     setMany,
     params: {
@@ -58,12 +67,13 @@ const createHandlerParams = ({ canManage }: { canManage: boolean }) => {
         licensing: {},
         globalUiSettingsClient: {
           getAll: jest.fn().mockResolvedValue({
-            [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: false,
+            [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: previousEnabled,
           }),
           setMany,
         },
       }),
       continuousKiOnboardingWorkflowService: {
+        ensureWorkflow,
         ensureCappedContinuousKiScheduled,
       },
       maintenanceService: {},
@@ -102,5 +112,69 @@ describe('continuous KI settings run quota reconciliation', () => {
     });
     expect(setMany).not.toHaveBeenCalled();
     expect(ensureCappedContinuousKiScheduled).not.toHaveBeenCalled();
+  });
+
+  it('uses ordinary space-scoped reconciliation while enforcement is off', async () => {
+    const { params, globally, ensureWorkflow, ensureCappedContinuousKiScheduled } =
+      createHandlerParams({ canManage: false });
+
+    await expect(route.handler(params as never)).resolves.toEqual({ success: true });
+
+    expect(globally).not.toHaveBeenCalled();
+    expect(ensureWorkflow).toHaveBeenCalledWith({
+      enabled: true,
+      request: expect.anything(),
+    });
+    expect(ensureCappedContinuousKiScheduled).not.toHaveBeenCalled();
+  });
+
+  it('uses ordinary space-scoped reconciliation while the KI limit is unlimited', async () => {
+    const { params, repository, globally, ensureWorkflow, ensureCappedContinuousKiScheduled } =
+      createHandlerParams({ canManage: false });
+    await mutateRunQuotaSettings(repository.client, () => ({
+      enforcementEnabled: true,
+      limits: { ki_extraction: { enabled: false, max: 0 } },
+    }));
+
+    await expect(route.handler(params as never)).resolves.toEqual({ success: true });
+
+    expect(globally).not.toHaveBeenCalled();
+    expect(ensureWorkflow).toHaveBeenCalledWith({
+      enabled: true,
+      request: expect.anything(),
+    });
+    expect(ensureCappedContinuousKiScheduled).not.toHaveBeenCalled();
+  });
+
+  it('does not reconcile an already-enabled continuous KI setting', async () => {
+    const { params, repository, globally, ensureWorkflow, ensureCappedContinuousKiScheduled } =
+      createHandlerParams({ canManage: false, previousEnabled: true });
+    await mutateRunQuotaSettings(repository.client, () => ({
+      enforcementEnabled: true,
+      limits: { ki_extraction: { enabled: true, max: 100 } },
+    }));
+
+    await expect(route.handler(params as never)).resolves.toEqual({ success: true });
+
+    expect(globally).not.toHaveBeenCalled();
+    expect(ensureWorkflow).not.toHaveBeenCalled();
+    expect(ensureCappedContinuousKiScheduled).not.toHaveBeenCalled();
+  });
+
+  it('rolls back the setting when capped schedule reconciliation fails', async () => {
+    const { params, repository, setMany, ensureCappedContinuousKiScheduled } = createHandlerParams({
+      canManage: true,
+    });
+    await mutateRunQuotaSettings(repository.client, () => ({
+      enforcementEnabled: true,
+      limits: { ki_extraction: { enabled: true, max: 100 } },
+    }));
+    ensureCappedContinuousKiScheduled.mockRejectedValue(new Error('reconciliation failed'));
+
+    await expect(route.handler(params as never)).rejects.toThrow('reconciliation failed');
+
+    expect(setMany).toHaveBeenLastCalledWith({
+      [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: false,
+    });
   });
 });

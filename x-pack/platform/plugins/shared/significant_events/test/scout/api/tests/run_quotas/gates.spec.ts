@@ -19,6 +19,14 @@ const EVENTS_DATA_STREAM = '.significant_events-events';
 const SPACE_ID = 'default';
 const DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
 const SCHEDULED_REVIEW_WORKFLOW_ID = `system-significant-events-scheduled-review-${SPACE_ID}`;
+const KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
+const CONTINUOUS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-continuous-onboarding';
+const MANAGED_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
+
+interface RunQuotaState {
+  enabled: boolean;
+  limits: Record<string, { enabled: boolean; max: number }>;
+}
 
 apiTest.describe(
   'Significant Events run quota managed gates',
@@ -26,6 +34,7 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
     let seedEsClient: EsClient;
+    let originalState: RunQuotaState;
     const executionIds = new Set<string>();
     const stepExecutionIds = new Set<string>();
     const eventIds = new Set<string>();
@@ -35,12 +44,46 @@ apiTest.describe(
       seedEsClient = await createSystemIndicesEsClient(esClient, config);
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
+    apiTest.beforeEach(async ({ apiClient }) => {
+      const [limitsResponse, statusResponse] = await Promise.all([
+        apiClient.get(RUN_QUOTAS_ENDPOINT, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        }),
+        apiClient.get(`${RUN_QUOTAS_ENDPOINT}/_status`, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        }),
+      ]);
+      expect(limitsResponse).toHaveStatusCode(200);
+      expect(statusResponse).toHaveStatusCode(200);
+      originalState = {
+        enabled: statusResponse.body.enabled,
+        limits: Object.fromEntries(
+          limitsResponse.body.groups
+            .filter(({ group }: { group: string }) =>
+              MANAGED_GROUPS.includes(group as (typeof MANAGED_GROUPS)[number])
+            )
+            .map(
+              ({ group, limit }: { group: string; limit: { enabled: boolean; max: number } }) => [
+                group,
+                limit,
+              ]
+            )
+        ),
+      };
+    });
+
+    apiTest.afterEach(async ({ apiClient }) => {
+      const response = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: { enabled: false },
+        body: originalState,
         responseType: 'json',
       });
+      expect(response).toHaveStatusCode(200);
+    });
+
+    apiTest.afterAll(async () => {
       await Promise.all([
         ...[...executionIds].map((id) =>
           seedEsClient.delete({ index: EXECUTIONS_INDEX, id }, { ignore: [404] })
@@ -114,6 +157,38 @@ apiTest.describe(
       return { parentId, childId, taskRunAt };
     };
 
+    const seedKiChain = async ({
+      prefix,
+      streamName,
+      taskRunAt = new Date().toISOString(),
+    }: {
+      prefix: string;
+      streamName: string;
+      taskRunAt?: string;
+    }) => {
+      const parentId = `${prefix}-parent`;
+      const childId = `${prefix}-child`;
+      await indexExecution({
+        id: parentId,
+        workflowId: CONTINUOUS_KI_ONBOARDING_WORKFLOW_ID,
+        spaceId: SPACE_ID,
+        status: 'running',
+        triggeredBy: 'scheduled',
+        taskRunAt,
+      });
+      await indexExecution({
+        id: childId,
+        workflowId: KI_ONBOARDING_WORKFLOW_ID,
+        spaceId: SPACE_ID,
+        status: 'running',
+        context: {
+          parentWorkflowExecutionId: parentId,
+          inputs: { streamName },
+        },
+      });
+      return { childId, taskRunAt };
+    };
+
     const readGroup = async (apiClient: ApiClientFixture, group: string) => {
       const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -155,6 +230,50 @@ apiTest.describe(
         taskRunAt: first.taskRunAt,
       });
       const denial = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_consume?group=detection`, {
+        headers: quotaHeaders(denied.childId),
+        body: { executionId: denied.childId },
+        responseType: 'json',
+      });
+      expect(denial).toHaveStatusCode(200);
+      expect(denial.body.allowed).toBe(false);
+    });
+
+    apiTest('enforces KI extraction through a managed execution chain', async ({ apiClient }) => {
+      const prefix = `scout-ki-${randomUUID()}`;
+      const before = await readGroup(apiClient, 'ki_extraction');
+      const enable = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          enabled: true,
+          limits: {
+            ki_extraction: { enabled: true, max: before.counted + 1 },
+          },
+        },
+        responseType: 'json',
+      });
+      expect(enable).toHaveStatusCode(200);
+
+      const first = await seedKiChain({
+        prefix,
+        streamName: `logs.scout-${randomUUID()}`,
+      });
+      const firstConsume = await apiClient.post(
+        `${RUN_QUOTAS_ENDPOINT}/_consume?group=ki_extraction`,
+        {
+          headers: quotaHeaders(first.childId),
+          body: { executionId: first.childId },
+          responseType: 'json',
+        }
+      );
+      expect(firstConsume).toHaveStatusCode(200);
+      expect(firstConsume.body.allowed).toBe(true);
+
+      const denied = await seedKiChain({
+        prefix: `${prefix}-denied`,
+        streamName: `logs.scout-${randomUUID()}`,
+        taskRunAt: first.taskRunAt,
+      });
+      const denial = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_consume?group=ki_extraction`, {
         headers: quotaHeaders(denied.childId),
         body: { executionId: denied.childId },
         responseType: 'json',
