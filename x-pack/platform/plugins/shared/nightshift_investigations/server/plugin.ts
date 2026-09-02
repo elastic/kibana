@@ -155,7 +155,11 @@ export class NightshiftInvestigationsPlugin
       isAvailable: (request) =>
         isInvestigationAvailable({
           request,
+          agentBuilder: this.agentBuilder,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
         }),
     };
   }
@@ -172,6 +176,15 @@ export class NightshiftInvestigationsPlugin
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
+      isAvailable: () =>
+        isInvestigationAvailable({
+          request,
+          agentBuilder: this.agentBuilder,
+          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
+        }),
     });
   };
 

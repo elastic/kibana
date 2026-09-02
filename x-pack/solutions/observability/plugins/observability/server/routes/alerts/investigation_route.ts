@@ -35,9 +35,6 @@ const investigateRoute = createObservabilityServerRoute({
     if (!nightshiftInvestigations) {
       throw serverUnavailable('Investigations are unavailable');
     }
-    if (!(await nightshiftInvestigations.isAvailable(request))) {
-      throw serverUnavailable('No investigation connector is available');
-    }
 
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
     const rulesClient = await ruleRegistry.alerting.getRulesClientWithRequest(request);
