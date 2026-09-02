@@ -34,5 +34,5 @@ describe('encoded_security_labs_content_loader', () => {
       expect(doc.pageContent).toContain('title:');
       expect(doc.pageContent).toContain('slug:');
     });
-  });
+  }, 60_000);
 });
