@@ -155,6 +155,7 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
     "@kbn/zod",
     "@kbn/cps",
     "@kbn/cps-utils",
