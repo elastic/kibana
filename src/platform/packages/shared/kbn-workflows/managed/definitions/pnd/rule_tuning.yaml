@@ -147,6 +147,7 @@ steps:
                 type: string
               exception_entries:
                 type: array
+                minItems: 1
                 items:
                   type: object
                   properties:
