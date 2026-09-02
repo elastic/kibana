@@ -225,6 +225,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
         ? { runtime_mappings: datafeedConfig?.runtime_mappings }
         : {}),
+      ...(datafeedConfig?.project_routing
+        ? { project_routing: datafeedConfig.project_routing }
+        : {}),
       size: 0,
       _source: false,
     };

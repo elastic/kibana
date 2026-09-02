@@ -11,7 +11,10 @@ import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { MlApi } from '../ml_api_service';
 
-export function resultsServiceProvider(mlApi: MlApi): {
+export function resultsServiceProvider(
+  mlApi: MlApi,
+  isMlCpsEnabled: boolean
+): {
   getScoresByBucket(
     jobIds: string[],
     earliestMs: number,

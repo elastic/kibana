@@ -14,7 +14,7 @@ import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
  */
-export function resultsServiceProvider(mlApi) {
+export function resultsServiceProvider(mlApi, isMlCpsEnabled) {
   return {
     // Obtains the maximum bucket anomaly scores by job ID and time.
     // Pass an empty array or ['*'] to search over all job IDs.
@@ -289,7 +289,7 @@ export function resultsServiceProvider(mlApi) {
                 : {}),
             },
             ...(indicesOptions ?? {}),
-            ...(projectRouting ? { project_routing: projectRouting } : {}),
+            ...(isMlCpsEnabled && projectRouting ? { project_routing: projectRouting } : {}),
           })
           .then((resp) => {
             const dataByTimeBucket = get(resp, ['aggregations', 'eventRate', 'buckets'], []);

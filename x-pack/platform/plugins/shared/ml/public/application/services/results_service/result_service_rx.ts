@@ -66,7 +66,7 @@ export interface ScheduledEventsByBucket extends ResultResponse {
   events: Record<string, any>;
 }
 
-export function resultsServiceRxProvider(mlApi: MlApi) {
+export function resultsServiceRxProvider(mlApi: MlApi, isMlCpsEnabled: boolean) {
   return {
     getMetricData(
       index: string,
@@ -155,7 +155,9 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
         ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
           ? { runtime_mappings: datafeedConfig?.runtime_mappings }
           : {}),
-        ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
+        ...(isMlCpsEnabled && projectRouting !== undefined
+          ? { project_routing: projectRouting }
+          : {}),
       };
 
       if (shouldCriteria.length > 0) {
