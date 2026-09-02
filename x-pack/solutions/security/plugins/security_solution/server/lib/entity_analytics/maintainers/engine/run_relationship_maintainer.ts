@@ -215,7 +215,7 @@ async function runIntegration(
     updated: 0,
     notFound: 0,
     errors: 0,
-    droppedTargets: 0,
+    targetIdsNotInStore: 0,
     relationshipTypeApplied: {},
   };
   let totalMetadataResult: WriteRelationshipMetadatasResult = {
@@ -301,7 +301,7 @@ async function runIntegration(
           updated: totalWriteResult.updated + pageWrite.updated,
           notFound: totalWriteResult.notFound + pageWrite.notFound,
           errors: totalWriteResult.errors + pageWrite.errors,
-          droppedTargets: totalWriteResult.droppedTargets + pageWrite.droppedTargets,
+          targetIdsNotInStore: totalWriteResult.targetIdsNotInStore + pageWrite.targetIdsNotInStore,
           relationshipTypeApplied: mergeRelTypeApplied(
             totalWriteResult.relationshipTypeApplied,
             pageWrite.relationshipTypeApplied
@@ -456,7 +456,7 @@ export const runRelationshipMaintainer = async ({
    */
   totalMetadataDocsFailed: number;
   /** Count of target EUIDs pruned because they don't exist in the entity store. */
-  totalDroppedTargets: number;
+  totalTargetIdsNotInStore: number;
   /** Total composite-agg pagination passes across all integrations. */
   totalIterations: number;
   /** True if any integration hit MAX_ITERATIONS and stopped early. */
@@ -490,7 +490,7 @@ export const runRelationshipMaintainer = async ({
   let totalWriteErrors = 0;
   let totalMetadataDocsApplied = 0;
   let totalMetadataDocsFailed = 0;
-  let totalDroppedTargets = 0;
+  let totalTargetIdsNotInStore = 0;
   let totalIterations = 0;
   let truncated = false;
 
@@ -528,6 +528,7 @@ export const runRelationshipMaintainer = async ({
       `${logPrefix} Integration complete: ` +
         `outcome=${outcome} slices=${iterations} records=${recordsCount} ` +
         `written=${write.updated} notFound=${write.notFound} errors=${write.errors} ` +
+        `targetIdsNotInStore=${write.targetIdsNotInStore} ` +
         `truncated=${integrationTruncated} durationMs=${durationMs}`
     );
 
@@ -555,7 +556,7 @@ export const runRelationshipMaintainer = async ({
     totalWriteErrors += write.errors;
     totalMetadataDocsApplied += metadata.docsApplied;
     totalMetadataDocsFailed += metadata.docsFailed;
-    totalDroppedTargets += write.droppedTargets;
+    totalTargetIdsNotInStore += write.targetIdsNotInStore;
 
     if (telemetryCollector) {
       telemetryCollector.sources.push({
@@ -579,7 +580,7 @@ export const runRelationshipMaintainer = async ({
     totalWriteErrors,
     totalMetadataDocsApplied,
     totalMetadataDocsFailed,
-    totalDroppedTargets,
+    totalTargetIdsNotInStore,
     totalIterations,
     truncated,
     lastRunTimestamp: runStartTimestamp,

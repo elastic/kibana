@@ -57,6 +57,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
         proposed: result.totalRecords, // engine has no distinct proposal phase; echo qualified
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
+        targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
         metadataDocsFailed: result.totalMetadataDocsFailed,
@@ -66,7 +67,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `[communicates_with] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
+      `[communicates_with] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
     );
     return result;
   },
