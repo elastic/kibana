@@ -171,6 +171,33 @@ describe('RuleSummaryFlyout', () => {
       expect(props.onDelete).toHaveBeenCalledWith(baseRule);
     });
 
+    it('renders the actions in grouped order separated by dividers', () => {
+      renderFlyout({ onUpdateApiKey: jest.fn() });
+      openMenu();
+
+      const expectedOrder = [
+        'viewRuleDetails-rule-1',
+        'editRule-rule-1',
+        'cloneRule-rule-1',
+        'runRule-rule-1',
+        'toggleEnabledRule-rule-1',
+        'updateRuleApiKey-rule-1',
+        'deleteRule-rule-1',
+      ];
+      const items = expectedOrder.map((testId) => screen.getByTestId(testId));
+
+      // Items appear in the expected document order.
+      for (let i = 1; i < items.length; i++) {
+        expect(
+          items[i - 1].compareDocumentPosition(items[i]) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      }
+
+      // Three dividers separate the four groups (read / edit-clone / run-disable-apiKey / delete).
+      const panel = items[0].closest('.euiContextMenuPanel');
+      expect(panel?.querySelectorAll('hr')).toHaveLength(3);
+    });
+
     it('omits the update API key action when onUpdateApiKey is not provided', () => {
       renderFlyout();
       openMenu();
