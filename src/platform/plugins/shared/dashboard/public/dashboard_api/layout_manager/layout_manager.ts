@@ -100,7 +100,7 @@ export function initializeLayoutManager(
     initialPanels,
     initialPinnedPanels
   );
-  let currentChildState = initialChildState;
+  let currentChildState = cloneDeep(initialChildState);
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
