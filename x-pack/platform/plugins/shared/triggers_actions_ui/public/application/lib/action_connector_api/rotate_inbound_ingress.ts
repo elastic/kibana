@@ -6,34 +6,11 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
-import type { ActionConnector, ActionConnectorProps } from '../../../types';
-import { rewriteConnectorSecrets } from './rewrite_connector_secrets';
 
-const rewriteBodyRes: RewriteRequestCase<
-  ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>
-> = ({
-  connector_type_id: actionTypeId,
-  is_preconfigured: isPreconfigured,
-  is_deprecated: isDeprecated,
-  is_missing_secrets: isMissingSecrets,
-  is_system_action: isSystemAction,
-  is_connector_type_deprecated: isConnectorTypeDeprecated,
-  auth_mode: authMode,
-  secrets,
-  ...res
-}) => ({
-  ...res,
-  actionTypeId,
-  isPreconfigured,
-  isDeprecated,
-  isMissingSecrets,
-  isSystemAction,
-  isConnectorTypeDeprecated,
-  ...(authMode !== undefined ? { authMode } : {}),
-  secrets: rewriteConnectorSecrets(secrets ?? {}),
-});
+export interface RotateInboundIngressResult {
+  ingestToken: string;
+}
 
 export async function rotateInboundIngress({
   http,
@@ -41,9 +18,12 @@ export async function rotateInboundIngress({
 }: {
   http: HttpSetup;
   id: string;
-}): Promise<ActionConnector> {
-  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
+}): Promise<RotateInboundIngressResult> {
+  const res = await http.post<{ ingest_token?: string }>(
     `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_rotate_ingress`
   );
-  return rewriteBodyRes(res) as ActionConnector;
+  if (typeof res.ingest_token !== 'string' || res.ingest_token.length === 0) {
+    throw new Error('Rotate did not return an ingest token.');
+  }
+  return { ingestToken: res.ingest_token };
 }

@@ -45,15 +45,7 @@ describe('InboundIngressCredentials', () => {
 
   it('rotates the ingest token after confirmation', async () => {
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
-      id: 'sales-ingress',
-      connector_type_id: '.inboundWebhook',
-      name: 'Sales ingress',
-      is_preconfigured: false,
-      is_deprecated: false,
-      is_system_action: false,
-      is_connector_type_deprecated: false,
-      config: { ingestTokenHash: 'b'.repeat(64) },
-      secrets: { ingest_token: 'rotated-token' },
+      ingest_token: 'rotated-token',
     });
 
     const connector = createMockActionConnector({
@@ -62,15 +54,8 @@ describe('InboundIngressCredentials', () => {
       config: { ingestTokenHash: 'a'.repeat(64) },
       secrets: {},
     });
-    const onConnectorUpdated = jest.fn();
 
-    appMockRenderer.render(
-      <InboundIngressCredentials
-        connector={connector}
-        allowRotate
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
+    appMockRenderer.render(<InboundIngressCredentials connector={connector} allowRotate />);
 
     await userEvent.click(screen.getByTestId('inbound-ingress-rotate-btn'));
     await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -82,6 +67,5 @@ describe('InboundIngressCredentials', () => {
     expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
       '/internal/actions/connector/sales-ingress/_rotate_ingress'
     );
-    expect(onConnectorUpdated).toHaveBeenCalled();
   });
 });

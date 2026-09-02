@@ -129,8 +129,8 @@ describe('Inbound events HTTP API', () => {
         }
       });
 
-    const rotated = rotateRes.body as ConnectorHttpBody;
-    const newToken = rotated.secrets?.ingest_token;
+    const rotated = rotateRes.body as { ingest_token?: string };
+    const newToken = rotated.ingest_token;
     expect(newToken).toEqual(expect.any(String));
     expect(newToken).not.toBe(ingestToken);
 

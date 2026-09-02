@@ -56,15 +56,7 @@ describe('rotateInboundIngressRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({
       body: {
-        id: '1',
-        connector_type_id: '.inboundWebhook',
-        name: 'sales-ingress',
-        config: { ingestTokenHash: 'a'.repeat(64) },
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_system_action: false,
-        is_connector_type_deprecated: false,
-        secrets: { ingest_token: 'new-token' },
+        ingest_token: 'new-token',
       },
     });
 

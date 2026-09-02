@@ -24,7 +24,7 @@ import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadInboundConnector } from './load_inbound_connector';
-import { sanitizeSpokeHttpHeaders } from './spoke_http';
+import { validateSpokeHttpHeaders } from './spoke_http';
 
 export type IngestInboundEventResult =
   | { status: 'forbidden'; body: string }
@@ -184,7 +184,7 @@ export async function ingestInboundEvent({
     const result = parsed.data;
 
     if (result.type === 'http') {
-      const spokeHeaders = sanitizeSpokeHttpHeaders(result.httpResponse.headers);
+      const spokeHeaders = validateSpokeHttpHeaders(result.httpResponse.headers);
       if (spokeHeaders === 'invalid') {
         logInboundIngressOutcome(logger, {
           ...baseLog,

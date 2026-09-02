@@ -12,13 +12,13 @@ const SPOKE_HTTP_ALLOWED_HEADERS = new Set(['content-type', 'cache-control']);
  * Allowlists spoke HTTP headers. Unknown names (including `Location` / `Set-Cookie`)
  * fail closed rather than being stripped silently.
  */
-export const sanitizeSpokeHttpHeaders = (
+export const validateSpokeHttpHeaders = (
   headers: Record<string, string> | undefined
 ): Record<string, string> | undefined | 'invalid' => {
   if (headers === undefined) {
     return undefined;
   }
-  const sanitized: Record<string, string> = {};
+  const validated: Record<string, string> = {};
   for (const [key, value] of Object.entries(headers)) {
     if (key.length === 0 || typeof value !== 'string') {
       return 'invalid';
@@ -27,7 +27,7 @@ export const sanitizeSpokeHttpHeaders = (
     if (!SPOKE_HTTP_ALLOWED_HEADERS.has(name)) {
       return 'invalid';
     }
-    sanitized[name] = value;
+    validated[name] = value;
   }
-  return sanitized;
+  return validated;
 };

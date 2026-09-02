@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { IRouter } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ILicenseState } from '../../../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { connectorResponseWithMintedSecretsSchemaV1 } from '../../../../common/routes/connector/response';
-import { transformConnectorResponseV1 } from '../common_transforms';
 import type { RotateInboundIngressParamsV1 } from '../../../../common/routes/connector/apis/rotate_inbound_ingress';
-import { rotateInboundIngressParamsSchemaV1 } from '../../../../common/routes/connector/apis/rotate_inbound_ingress';
+import {
+  rotateInboundIngressParamsSchemaV1,
+  rotateInboundIngressResponseSchemaV1,
+} from '../../../../common/routes/connector/apis/rotate_inbound_ingress';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { errorHandler } from '../error_handler';
 
@@ -39,17 +41,17 @@ export const rotateInboundIngressRoute = (
         response: {
           200: {
             description: i18n.translate(
-              'xpack.actions.rotateInboundIngress.response200Description',
+              'xpack.actions.rotateInboundIngress.successResponseDescription',
               {
                 defaultMessage:
-                  'Indicates a successful call. The new ingest token is returned once in secrets.ingest_token.',
+                  'Indicates a successful call. The new ingest token is returned once as ingest_token.',
               }
             ),
-            body: () => connectorResponseWithMintedSecretsSchemaV1,
+            body: () => rotateInboundIngressResponseSchemaV1,
           },
           400: {
             description: i18n.translate(
-              'xpack.actions.rotateInboundIngress.response400Description',
+              'xpack.actions.rotateInboundIngress.badRequestResponseDescription',
               {
                 defaultMessage: 'The connector does not use inbound ingest credentials.',
               }
@@ -57,7 +59,7 @@ export const rotateInboundIngressRoute = (
           },
           403: {
             description: i18n.translate(
-              'xpack.actions.rotateInboundIngress.response403Description',
+              'xpack.actions.rotateInboundIngress.forbiddenResponseDescription',
               {
                 defaultMessage: 'Indicates that this call is forbidden.',
               }
@@ -71,9 +73,18 @@ export const rotateInboundIngressRoute = (
         try {
           const actionsClient = (await context.actions).getActionsClient();
           const { id }: RotateInboundIngressParamsV1 = req.params;
+          const connector = await actionsClient.rotateInboundIngress({ id });
+          const ingestToken = connector.secrets?.ingestToken;
+          if (ingestToken === undefined) {
+            throw Boom.badImplementation(
+              i18n.translate('xpack.actions.rotateInboundIngress.missingMintedToken', {
+                defaultMessage: 'Rotate did not return an ingest token.',
+              })
+            );
+          }
 
           return res.ok({
-            body: transformConnectorResponseV1(await actionsClient.rotateInboundIngress({ id })),
+            body: { ingest_token: ingestToken },
           });
         } catch (error) {
           return errorHandler(res, error);

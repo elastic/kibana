@@ -58,6 +58,9 @@ export function inboundEventsRoute({
       description:
         'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A spoke HTTP ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
       options: {
+        // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
+        // Auth is the ingest token (Bearer, or `token` query if Authorization is
+        // absent); missing or invalid tokens 404.
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
         availability: {

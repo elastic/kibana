@@ -17,6 +17,17 @@ export const SPOKE_HTTP_STATUS_MAX = 599;
  * Rejects functions, class instances, Map/Error, Buffer, and similar.
  */
 export const isJsonSerializableSpokeBody = (value: unknown): boolean => {
+  try {
+    if (JSON.stringify(value) === undefined) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+  return isPlainJsonStructure(value);
+};
+
+const isPlainJsonStructure = (value: unknown): boolean => {
   if (value === null) {
     return true;
   }
@@ -25,7 +36,7 @@ export const isJsonSerializableSpokeBody = (value: unknown): boolean => {
     return true;
   }
   if (Array.isArray(value)) {
-    return value.every(isJsonSerializableSpokeBody);
+    return value.every(isPlainJsonStructure);
   }
   if (valueType !== 'object') {
     return false;
@@ -34,7 +45,7 @@ export const isJsonSerializableSpokeBody = (value: unknown): boolean => {
   if (proto !== Object.prototype && proto !== null) {
     return false;
   }
-  return Object.values(value as Record<string, unknown>).every(isJsonSerializableSpokeBody);
+  return Object.values(value as Record<string, unknown>).every(isPlainJsonStructure);
 };
 
 const jsonSerializableSpokeBodySchema = z

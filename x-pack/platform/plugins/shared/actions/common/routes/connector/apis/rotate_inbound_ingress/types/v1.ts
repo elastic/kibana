@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { rotateInboundIngressParamsSchemaV1 } from '..';
+import type { rotateInboundIngressParamsSchemaV1, rotateInboundIngressResponseSchemaV1 } from '..';
 
 export type RotateInboundIngressParams = TypeOf<typeof rotateInboundIngressParamsSchemaV1>;
+export type RotateInboundIngressResponse = TypeOf<typeof rotateInboundIngressResponseSchemaV1>;

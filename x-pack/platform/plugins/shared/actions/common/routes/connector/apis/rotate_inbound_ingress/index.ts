@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-export { rotateInboundIngressParamsSchema } from './schemas/latest';
-export type { RotateInboundIngressParams } from './types/latest';
+export {
+  rotateInboundIngressParamsSchema,
+  rotateInboundIngressResponseSchema,
+} from './schemas/latest';
+export type { RotateInboundIngressParams, RotateInboundIngressResponse } from './types/latest';
 
-export { rotateInboundIngressParamsSchema as rotateInboundIngressParamsSchemaV1 } from './schemas/v1';
-export type { RotateInboundIngressParams as RotateInboundIngressParamsV1 } from './types/v1';
+export {
+  rotateInboundIngressParamsSchema as rotateInboundIngressParamsSchemaV1,
+  rotateInboundIngressResponseSchema as rotateInboundIngressResponseSchemaV1,
+} from './schemas/v1';
+export type {
+  RotateInboundIngressParams as RotateInboundIngressParamsV1,
+  RotateInboundIngressResponse as RotateInboundIngressResponseV1,
+} from './types/v1';

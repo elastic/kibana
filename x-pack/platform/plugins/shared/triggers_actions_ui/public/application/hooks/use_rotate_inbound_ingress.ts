@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ActionConnector } from '../../types';
+import { useMutation } from '@kbn/react-query';
 import { rotateInboundIngress } from '../lib/action_connector_api';
+import type { RotateInboundIngressResult } from '../lib/action_connector_api/rotate_inbound_ingress';
 import { useKibana } from '../../common/lib/kibana';
 
 interface UseRotateInboundIngressReturnValue {
   isLoading: boolean;
-  rotateIngress: (id: string) => Promise<ActionConnector | undefined>;
+  rotateIngress: (id: string) => Promise<RotateInboundIngressResult | undefined>;
 }
 
 export const useRotateInboundIngress = (): UseRotateInboundIngressReturnValue => {
@@ -22,57 +23,46 @@ export const useRotateInboundIngress = (): UseRotateInboundIngressReturnValue =>
     notifications: { toasts },
   } = useKibana().services;
 
-  const [isLoading, setIsLoading] = useState(false);
-  const abortCtrlRef = useRef(new AbortController());
-  const isMounted = useRef(false);
+  const mutation = useMutation({
+    mutationFn: (id: string) => rotateInboundIngress({ http, id }),
+    onSuccess: () => {
+      toasts.addSuccess(
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.inboundIngress.rotateSuccessNotificationText',
+          {
+            defaultMessage: 'Ingest token rotated',
+          }
+        )
+      );
+    },
+    onError: (error: { name?: string; body?: { message?: string } }) => {
+      if (error.name === 'AbortError') {
+        return;
+      }
+      toasts.addDanger(
+        error.body?.message ??
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.inboundIngress.rotateErrorNotificationText',
+            { defaultMessage: 'Cannot rotate the ingest token.' }
+          )
+      );
+    },
+  });
 
+  const { mutateAsync, isLoading } = mutation;
   const rotateIngress = useCallback(
     async (id: string) => {
-      setIsLoading(true);
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-
       try {
-        const res = await rotateInboundIngress({ http, id });
-
-        if (isMounted.current) {
-          setIsLoading(false);
-          toasts.addSuccess(
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.inboundIngress.rotateSuccessNotificationText',
-              {
-                defaultMessage: 'Ingest token rotated',
-              }
-            )
-          );
-        }
-
-        return res;
-      } catch (error) {
-        if (isMounted.current) {
-          setIsLoading(false);
-          if (error.name !== 'AbortError') {
-            toasts.addDanger(
-              error.body?.message ??
-                i18n.translate(
-                  'xpack.triggersActionsUI.sections.inboundIngress.rotateErrorNotificationText',
-                  { defaultMessage: 'Cannot rotate the ingest token.' }
-                )
-            );
-          }
-        }
+        return await mutateAsync(id);
+      } catch {
+        return undefined;
       }
     },
-    [http, toasts]
+    [mutateAsync]
   );
 
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-      abortCtrlRef.current.abort();
-    };
-  }, []);
-
-  return { isLoading, rotateIngress };
+  return {
+    isLoading,
+    rotateIngress,
+  };
 };

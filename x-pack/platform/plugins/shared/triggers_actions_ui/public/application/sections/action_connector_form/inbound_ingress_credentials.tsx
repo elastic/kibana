@@ -70,13 +70,11 @@ const CopyableField: React.FC<CopyableFieldProps> = ({
 export interface InboundIngressCredentialsProps {
   connector: ActionConnector;
   allowRotate?: boolean;
-  onConnectorUpdated?: (connector: ActionConnector) => void;
 }
 
 const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProps> = ({
   connector,
   allowRotate = false,
-  onConnectorUpdated,
 }) => {
   const webhookUrl = useInboundEventsUrl(connector.actionTypeId, connector.id);
   const initialToken = getInboundIngestToken(connector);
@@ -91,12 +89,8 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
     if (!rotated) {
       return;
     }
-    const nextToken = getInboundIngestToken(rotated);
-    if (nextToken !== undefined) {
-      setIngestToken(nextToken);
-    }
-    onConnectorUpdated?.(rotated);
-  }, [connector.id, onConnectorUpdated, rotateIngress]);
+    setIngestToken(rotated.ingestToken);
+  }, [connector.id, rotateIngress]);
 
   return (
     <div data-test-subj="inbound-ingress-credentials">

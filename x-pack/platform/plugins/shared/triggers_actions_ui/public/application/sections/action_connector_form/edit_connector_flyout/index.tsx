@@ -255,10 +255,9 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
       <InboundIngressCredentials
         connector={connector}
         allowRotate={canSave && !connector.isPreconfigured}
-        onConnectorUpdated={onConnectorUpdated}
       />
     );
-  }, [canSave, connector, onConnectorUpdated]);
+  }, [canSave, connector]);
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);

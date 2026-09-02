@@ -72,7 +72,7 @@ A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token 
 
 ## Rotate
 
-Invalidates the current token immediately and returns a new `secrets.ingest_token` once. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl.
+Invalidates the current token immediately and returns `{ "ingest_token": "<token>" }` once. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl.
 
 ```bash
 curl -u elastic:changeme -X POST \

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { sanitizeSpokeHttpHeaders } from './spoke_http';
+import { validateSpokeHttpHeaders } from './spoke_http';
 
-describe('sanitizeSpokeHttpHeaders', () => {
+describe('validateSpokeHttpHeaders', () => {
   it('allows content-type and cache-control', () => {
     expect(
-      sanitizeSpokeHttpHeaders({
+      validateSpokeHttpHeaders({
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
       })
@@ -21,7 +21,7 @@ describe('sanitizeSpokeHttpHeaders', () => {
   });
 
   it('rejects Location and Set-Cookie', () => {
-    expect(sanitizeSpokeHttpHeaders({ Location: 'https://evil.example' })).toBe('invalid');
-    expect(sanitizeSpokeHttpHeaders({ 'Set-Cookie': 'a=b' })).toBe('invalid');
+    expect(validateSpokeHttpHeaders({ Location: 'https://evil.example' })).toBe('invalid');
+    expect(validateSpokeHttpHeaders({ 'Set-Cookie': 'a=b' })).toBe('invalid');
   });
 });

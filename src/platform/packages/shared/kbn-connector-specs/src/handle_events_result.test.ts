@@ -30,6 +30,12 @@ describe('isJsonSerializableSpokeBody', () => {
     expect(isJsonSerializableSpokeBody({ fn: () => 1 })).toBe(false);
     expect(isJsonSerializableSpokeBody(Buffer.from('x'))).toBe(false);
   });
+
+  it('rejects cyclic objects without throwing', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    expect(isJsonSerializableSpokeBody(cyclic)).toBe(false);
+  });
 });
 
 describe('parseHandleEventsResult', () => {
@@ -61,45 +67,46 @@ describe('parseHandleEventsResult', () => {
     ).toMatchObject({ ok: true, data: { type: 'http' } });
   });
 
-  it('rejects an unknown discriminant or missing httpResponse', () => {
-    const unknownType = parseHandleEventsResult({ type: 'drop' });
-    expect(unknownType).toMatchObject({ ok: false });
-    if (unknownType.ok) {
-      throw new Error('expected parse failure');
-    }
-    expect(unknownType.message.length).toBeGreaterThan(0);
-
-    const missingHttp = parseHandleEventsResult({ type: 'http', status: 200, body: {} });
-    expect(missingHttp).toMatchObject({ ok: false });
-    if (missingHttp.ok) {
-      throw new Error('expected parse failure');
-    }
-    expect(missingHttp.message).toMatch(/httpResponse/i);
+  it('rejects an unknown discriminant', () => {
+    expect(parseHandleEventsResult({ type: 'drop' })).toEqual(
+      expect.objectContaining({ ok: false, message: expect.any(String) })
+    );
   });
 
-  it('rejects out-of-range status and non-JSON bodies', () => {
-    const lowStatus = parseHandleEventsResult({
-      type: 'http',
-      httpResponse: { status: 99 },
-    });
-    expect(lowStatus).toMatchObject({ ok: false });
-    if (lowStatus.ok) {
-      throw new Error('expected parse failure');
-    }
-    expect(lowStatus.message).toMatch(/status/i);
+  it('rejects a missing httpResponse', () => {
+    expect(parseHandleEventsResult({ type: 'http', status: 200, body: {} })).toEqual(
+      expect.objectContaining({ ok: false, message: expect.stringMatching(/httpResponse/i) })
+    );
+  });
 
+  it('rejects a status below the allowed range', () => {
+    expect(
+      parseHandleEventsResult({
+        type: 'http',
+        httpResponse: { status: 99 },
+      })
+    ).toEqual(expect.objectContaining({ ok: false, message: expect.stringMatching(/status/i) }));
+  });
+
+  it('rejects a status above the allowed range', () => {
     expect(
       parseHandleEventsResult({
         type: 'http',
         httpResponse: { status: SPOKE_HTTP_STATUS_MAX + 1, body: { challenge: 'abc' } },
       }).ok
     ).toBe(false);
+  });
+
+  it('rejects a function HTTP body', () => {
     expect(
       parseHandleEventsResult({
         type: 'http',
         httpResponse: { status: 200, body: () => 'nope' },
       }).ok
     ).toBe(false);
+  });
+
+  it('rejects a Buffer HTTP body', () => {
     expect(
       parseHandleEventsResult({
         type: 'http',
