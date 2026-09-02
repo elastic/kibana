@@ -16,9 +16,12 @@ import type { PostTransformsPreviewRequestSchema } from '../../../../../server/r
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
 import { getErrorMessage } from '../../../../../common/utils/errors';
 
-import { useToastNotifications } from '../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../app_dependencies';
 import { useGetTransformsPreview } from '../../../hooks';
-import { isProjectScopedSourceIndexUnavailableError } from '../../../hooks/use_transform_config_data';
+import {
+  isLinkedProjectScopedSourceIndexUnavailableError,
+  isProjectScopedSourceIndexUnavailableError,
+} from '../../../hooks/use_transform_config_data';
 import { useToastNotificationText } from '../../../components';
 
 import {
@@ -58,17 +61,21 @@ export const getRetentionPolicyHelpText = ({
 
 export const shouldSuppressPreviewErrorToast = ({
   error,
+  originProjectId,
   projectRouting,
 }: {
   error: unknown;
+  originProjectId?: string;
   projectRouting?: PostTransformsPreviewRequestSchema['source']['project_routing'];
 }): boolean =>
-  projectRouting !== PROJECT_ROUTING.ORIGIN &&
-  isProjectScopedSourceIndexUnavailableError(error, projectRouting);
+  originProjectId !== undefined &&
+  isLinkedProjectScopedSourceIndexUnavailableError(error, projectRouting, originProjectId);
 
 export const EditTransformRetentionPolicy: FC = () => {
+  const { cps } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const getToastNotificationText = useToastNotificationText();
+  const cpsManager = cps?.cpsManager;
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
   const formSections = useFormSections();
@@ -114,15 +121,53 @@ export const EditTransformRetentionPolicy: FC = () => {
       });
     };
 
-    const shouldSuppressErrorToast = shouldSuppressPreviewErrorToast({
-      error: transformsPreviewError,
-      projectRouting: config.source.project_routing,
-    });
-    setIsSourceIndexUnavailable(shouldSuppressErrorToast);
+    const projectRouting = config.source.project_routing;
+    const isProjectScopedSourceIndexError = isProjectScopedSourceIndexUnavailableError(
+      transformsPreviewError,
+      projectRouting
+    );
 
-    if (!shouldSuppressErrorToast) {
+    if (!isProjectScopedSourceIndexError || projectRouting === PROJECT_ROUTING.ORIGIN) {
+      setIsSourceIndexUnavailable(false);
       addPreviewErrorToast();
+      return;
     }
+
+    setIsSourceIndexUnavailable(false);
+
+    if (!cpsManager) {
+      addPreviewErrorToast();
+      return;
+    }
+
+    let isMounted = true;
+
+    void cpsManager
+      .fetchProjects(PROJECT_ROUTING.ORIGIN)
+      .then((projectsData) => {
+        const shouldSuppressErrorToast = shouldSuppressPreviewErrorToast({
+          error: transformsPreviewError,
+          originProjectId: projectsData?.origin?._id,
+          projectRouting,
+        });
+
+        if (isMounted) {
+          setIsSourceIndexUnavailable(shouldSuppressErrorToast);
+        }
+
+        if (isMounted && !shouldSuppressErrorToast) {
+          addPreviewErrorToast();
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          addPreviewErrorToast();
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transformsPreviewError]);
 
