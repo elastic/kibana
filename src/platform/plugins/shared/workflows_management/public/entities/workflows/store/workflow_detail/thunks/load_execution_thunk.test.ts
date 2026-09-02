@@ -117,7 +117,7 @@ describe('loadExecutionThunk', () => {
     );
   });
 
-  it('should set stepExecutionsTruncatedCount when total exceeds the returned page', async () => {
+  it('should store stepExecutionsTotal when total exceeds the returned page', async () => {
     const pageResults = [{ id: 's1', stepId: 's1', status: ExecutionStatus.COMPLETED }];
     mockGetExecution.mockResolvedValue(mockExecution);
     mockGetExecutionSteps.mockResolvedValue({
@@ -132,16 +132,18 @@ describe('loadExecutionThunk', () => {
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toMatchObject({
       stepExecutions: pageResults,
-      stepExecutionsTruncatedCount: 1,
     });
+    expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
+    expect(store.getState().detail.stepExecutionsTotal).toBe(2);
   });
 
-  it('should omit stepExecutionsTruncatedCount when the page is complete', async () => {
+  it('should set stepExecutionsTotal to the page total when the page is complete', async () => {
     mockGetExecution.mockResolvedValue(mockExecution);
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
     expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
+    expect(store.getState().detail.stepExecutionsTotal).toBe(0);
   });
 
   it('should skip a completed poll batch and fetch the next page', async () => {

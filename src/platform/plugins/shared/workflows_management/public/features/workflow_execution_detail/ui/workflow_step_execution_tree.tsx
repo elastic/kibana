@@ -173,6 +173,8 @@ function convertTreeToEuiTreeViewItems(
 
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
+  /** Paginated steps-list `total`; empty truncated state when this is > 0 and no rows loaded. */
+  stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -186,6 +188,7 @@ const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSi
 export const WorkflowStepExecutionTree = ({
   error,
   execution,
+  stepExecutionsTotal = 0,
   definition,
   onStepExecutionClick,
   selectedId,
@@ -237,11 +240,8 @@ export const WorkflowStepExecutionTree = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (
-    (execution.stepExecutionsTruncatedCount ?? 0) > 0 &&
-    execution.stepExecutions.length === 0
-  ) {
-    const truncatedCount = execution.stepExecutionsTruncatedCount ?? 0;
+  } else if (stepExecutionsTotal > 0 && execution.stepExecutions.length === 0) {
+    const omittedCount = stepExecutionsTotal;
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -260,7 +260,7 @@ export const WorkflowStepExecutionTree = ({
             <FormattedMessage
               id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeDescription"
               defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
-              values={{ count: truncatedCount }}
+              values={{ count: omittedCount }}
             />
           </EuiText>
         }

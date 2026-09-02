@@ -251,7 +251,6 @@ describe('getWorkflowExecution', () => {
       expect(result?.stepExecutions).toHaveLength(2);
       expect(result?.concurrencyGroupKey).toBe('streams-ki-onboarding-my-stream');
       expect(result).not.toHaveProperty('billable');
-      expect(result).not.toHaveProperty('stepExecutionsTruncatedCount');
     });
 
     it('should include workflow document version when present on the execution', async () => {
@@ -288,7 +287,7 @@ describe('getWorkflowExecution', () => {
       expect(result?.version).toBeUndefined();
     });
 
-    it('should include stepExecutionsTruncatedCount when there are more step ids than the mget cap', async () => {
+    it('should load only the first 100 step ids when there are more than the mget cap', async () => {
       const manyIds = Array.from({ length: 101 }, (_, index) => `s${index}`);
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
@@ -309,10 +308,9 @@ describe('getWorkflowExecution', () => {
       expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
       expect(mockStepDataClient.getByIds.mock.calls[0][0]).toHaveLength(100);
       expect(result?.stepExecutions).toHaveLength(100);
-      expect(result?.stepExecutionsTruncatedCount).toBe(1);
     });
 
-    it('should return empty steps without truncatedCount when search fallback hits a size abort', async () => {
+    it('should return empty steps when search fallback hits a size abort', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, stepExecutionIds: undefined },
@@ -332,12 +330,11 @@ describe('getWorkflowExecution', () => {
       });
 
       expect(result?.stepExecutions).toEqual([]);
-      expect(result).not.toHaveProperty('stepExecutionsTruncatedCount');
       expect(mockLogger.warn).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('should return the execution with empty steps and truncatedCount when no step documents could be loaded', async () => {
+    it('should return the execution with empty steps when no step documents could be loaded', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
       );
@@ -357,7 +354,6 @@ describe('getWorkflowExecution', () => {
       expect(result?.id).toBe('exec-1');
       expect(result?.status).toBe('completed');
       expect(result?.stepExecutions).toEqual([]);
-      expect(result?.stepExecutionsTruncatedCount).toBe(2);
       expect(mockLogger.warn).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
@@ -378,7 +374,6 @@ describe('getWorkflowExecution', () => {
       expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
       expect(mockStepDataClient.search).not.toHaveBeenCalled();
       expect(result?.stepExecutions).toEqual([]);
-      expect(result).not.toHaveProperty('stepExecutionsTruncatedCount');
     });
 
     it('should log a warn and rethrow when the execution document mget exceeds the response size', async () => {

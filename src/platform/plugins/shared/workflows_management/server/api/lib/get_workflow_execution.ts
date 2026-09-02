@@ -81,17 +81,7 @@ export const getWorkflowExecution = async ({
       }
     }
 
-    const truncatedCount = omitStepExecutions
-      ? 0
-      : (doc.stepExecutionIds?.length ?? 0) - stepExecutions.length;
-
-    return transformToWorkflowExecutionDetailDto(
-      workflowExecutionId,
-      doc,
-      stepExecutions,
-      logger,
-      truncatedCount > 0 ? truncatedCount : undefined
-    );
+    return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
     if (isMaximumResponseSizeExceededError(error)) {
       logger.warn(
@@ -108,8 +98,7 @@ function transformToWorkflowExecutionDetailDto(
   id: string,
   workflowExecution: EsWorkflowExecution,
   stepExecutions: EsWorkflowStepExecution[],
-  logger: Logger,
-  stepExecutionsTruncatedCount?: number
+  logger: Logger
 ): WorkflowExecutionDto {
   const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
@@ -128,7 +117,6 @@ function transformToWorkflowExecutionDetailDto(
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
     stepExecutions,
-    ...(stepExecutionsTruncatedCount !== undefined ? { stepExecutionsTruncatedCount } : {}),
     executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
     triggeredBy: workflowExecution.triggeredBy,
     yaml,

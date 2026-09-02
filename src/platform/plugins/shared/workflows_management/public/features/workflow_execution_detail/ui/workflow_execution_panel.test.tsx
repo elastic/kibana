@@ -144,6 +144,7 @@ describe('WorkflowExecutionPanel', () => {
 
     it('should show a truncation warning with the omitted step count', () => {
       renderComponent({
+        stepExecutionsTotal: 13,
         execution: {
           ...mockExecution,
           stepExecutions: [
@@ -161,7 +162,6 @@ describe('WorkflowExecutionPanel', () => {
               stepExecutionIndex: 0,
             },
           ],
-          stepExecutionsTruncatedCount: 12,
         },
       });
       expect(
@@ -172,14 +172,15 @@ describe('WorkflowExecutionPanel', () => {
 
     it('should not show a truncation warning when the step list is empty', () => {
       renderComponent({
-        execution: { ...mockExecution, stepExecutionsTruncatedCount: 12 },
+        execution: { ...mockExecution },
+        stepExecutionsTotal: 12,
       });
       expect(
         screen.queryByTestId('workflowExecutionStepExecutionsTruncatedCallout')
       ).not.toBeInTheDocument();
     });
 
-    it('should not show a truncation warning when stepExecutionsTruncatedCount is absent', () => {
+    it('should not show a truncation warning when the page is complete', () => {
       renderComponent();
       expect(
         screen.queryByTestId('workflowExecutionStepExecutionsTruncatedCallout')

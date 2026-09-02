@@ -119,6 +119,10 @@ export const selectSchema = createSelector(selectDetail, (detail) => detail.sche
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
 export const selectExecution = createSelector(selectDetail, (detail) => detail.execution);
+export const selectStepExecutionsTotal = createSelector(
+  selectDetail,
+  (detail) => detail.stepExecutionsTotal
+);
 export const selectStepExecutions = createSelector(
   selectExecution,
   (execution) => execution?.stepExecutions

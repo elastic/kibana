@@ -304,11 +304,6 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
-  /**
-   * How many step executions were omitted because the Elasticsearch `_mget`
-   * response exceeded Kibana's size budget. Omitted when the step list is complete.
-   */
-  stepExecutionsTruncatedCount?: number;
   duration: number | null;
   executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
@@ -327,7 +322,7 @@ export interface WorkflowExecutionDto {
 
 export type WorkflowExecutionListItemDto = Omit<
   WorkflowExecutionDto,
-  'stepExecutions' | 'stepExecutionsTruncatedCount' | 'yaml' | 'workflowDefinition'
+  'stepExecutions' | 'yaml' | 'workflowDefinition'
 > & {
   tags?: string[];
   managed?: boolean;

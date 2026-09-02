@@ -15,7 +15,7 @@ import { loadExecutionStepPages } from './load_execution_step_pages';
 import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { _setComputedExecution, setExecution } from '../slice';
+import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
 import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
@@ -38,7 +38,7 @@ export const loadExecutionThunk = createAsyncThunk<
       const cachedSteps = previousExecution?.id === id ? previousExecution.stepExecutions : [];
       const cachedTotal =
         previousExecution?.id === id
-          ? cachedSteps.length + (previousExecution.stepExecutionsTruncatedCount ?? 0)
+          ? Math.max(getState().detail.stepExecutionsTotal, cachedSteps.length)
           : 0;
 
       const [execution, stepsPage] = await Promise.all([
@@ -54,13 +54,12 @@ export const loadExecutionThunk = createAsyncThunk<
           maxSteps: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
         }),
       ]);
-      const truncatedCount = stepsPage.total - stepsPage.steps.length;
       const response: WorkflowExecutionDto = {
         ...execution,
         stepExecutions: stepsPage.steps,
-        ...(truncatedCount > 0 ? { stepExecutionsTruncatedCount: truncatedCount } : {}),
       };
       dispatch(setExecution(response));
+      dispatch(setStepExecutionsTotal(stepsPage.total));
 
       if (id !== previousExecution?.id) {
         // avoid recomputing derived data if the execution is the same

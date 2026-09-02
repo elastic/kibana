@@ -254,13 +254,13 @@ describe('WorkflowStepExecutionTree', () => {
       const execution = createMockExecution({
         status: ExecutionStatus.COMPLETED,
         stepExecutions: [],
-        stepExecutionsTruncatedCount: 1842,
       });
 
       render(
         <TestWrapper>
           <WorkflowStepExecutionTree
             execution={execution}
+            stepExecutionsTotal={1842}
             definition={createMockDefinition()}
             error={null}
             onStepExecutionClick={mockOnStepExecutionClick}
@@ -283,13 +283,13 @@ describe('WorkflowStepExecutionTree', () => {
       const execution = createMockExecution({
         status: ExecutionStatus.RUNNING,
         stepExecutions: [],
-        stepExecutionsTruncatedCount: 50,
       });
 
       render(
         <TestWrapper>
           <WorkflowStepExecutionTree
             execution={execution}
+            stepExecutionsTotal={50}
             definition={createMockDefinition({
               steps: [{ name: 'step-1', type: 'action', with: { message: 'test' } }],
             })}
