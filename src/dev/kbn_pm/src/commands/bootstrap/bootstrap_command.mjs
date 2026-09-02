@@ -11,7 +11,7 @@ import { run } from '../../lib/spawn.mjs';
 import { moonRun } from '../../lib/moon.mjs';
 import External from '../../lib/external_packages.js';
 
-import { pnpmInstallDeps } from './pnpm.mjs';
+import { pnpmInstallDeps, ensurePnpmAvailable } from './pnpm.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -57,6 +57,9 @@ export const command = {
     id: 'total',
   },
   async run({ args, log, time }) {
+    // verify pnpm is available before doing any expensive work, since we spawn it later
+    ensurePnpmAvailable(log);
+
     const offline = args.getBooleanValue('offline') ?? false;
     if (offline) {
       process.env.CI_STATS_DISABLED = 'true';

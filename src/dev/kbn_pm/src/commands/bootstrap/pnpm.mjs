@@ -8,14 +8,44 @@
  */
 
 import Path from 'path';
+import ChildProcess from 'child_process';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { isDirectory } from '../../lib/fs.mjs';
 import { cleanPaths } from '../../lib/clean.mjs';
+import { dedent } from '../../lib/indent.mjs';
 import { run } from '../../lib/spawn.mjs';
 
 export async function areNodeModulesPresent() {
   return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
+}
+
+/**
+ * Fail fast with an actionable message when pnpm isn't on the PATH. The version
+ * is pinned via package.json "packageManager", which corepack (and pnpm itself)
+ * read to enforce the exact version, so enabling corepack is all a developer needs.
+ *
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
+ */
+export function ensurePnpmAvailable(log) {
+  const { error, status } = ChildProcess.spawnSync('pnpm', ['--version'], { encoding: 'utf8' });
+  if (!error && status === 0) {
+    return;
+  }
+
+  log.error(
+    dedent`
+      pnpm is required to bootstrap Kibana but wasn't found on your PATH.
+
+      Kibana pins pnpm via package.json "packageManager" and runs it through corepack
+      (bundled with Node.js). Enable it once with:
+
+        corepack enable
+
+      then re-run 'yarn kbn bootstrap' — corepack fetches the pinned pnpm automatically.
+    `
+  );
+  process.exit(1);
 }
 
 /**
