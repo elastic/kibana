@@ -5,7 +5,7 @@ set -euo pipefail
 is_pipeline_upload=false
 if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-}" == *"Upload Pipeline"* ]]; then
   is_pipeline_upload=true
-  cat << EOF | buildkite-agent annotate --context "ctx-gobld-metrics" --style "info"
+  cat << EOF | buildkite-agent annotate --context "ctx-gobld-metrics" --style "info" || true
 <details>
 
 <summary>Agent information from gobld</summary>
