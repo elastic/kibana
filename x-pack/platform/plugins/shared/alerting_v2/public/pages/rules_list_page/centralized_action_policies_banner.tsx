@@ -26,7 +26,7 @@ const DESCRIPTION = i18n.translate(
   'xpack.alertingV2.rulesList.centralizedActionPoliciesBanner.description',
   {
     defaultMessage:
-      'Action Policies let you manage notification channels in one place and reuse them across multiple rules.',
+      'Action policies let you manage notification channels in one place and reuse them across multiple rules.',
   }
 );
 const CREATE_CTA_LABEL = i18n.translate(
