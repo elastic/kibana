@@ -25,6 +25,13 @@ export interface K8sEntity {
   'k8s.daemonset.name': string | string[] | null;
   'k8s.node.name': string | string[] | null;
   'service.name': string | string[] | null;
+  'fields.cluster': string | string[] | null;
+  'kubernetes.container.image': string | string[] | null;
+  // --- container status (newestValue, always scalar) ---
+  'kubernetes.container.status.phase': string | null;
+  'kubernetes.container.status.ready': boolean | null;
+  'kubernetes.container.status.reason': string | null;
+  'kubernetes.container.status.restarts': number | null;
   // --- lifecycle (newestValue / oldestValue, always scalar) ---
   'entity.lifecycle.first_seen': string | null;
   'entity.lifecycle.last_seen': string | null;

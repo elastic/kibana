@@ -13,6 +13,8 @@
 // replicaset names are unique within a namespace but not across namespaces.
 // Expected distinct values: 11.
 // entity.name stores the bare replicaset name; the EUID carries the namespace prefix.
+//
+// Supports both OTel (`k8s.*`) and metricbeat (`kubernetes.*`) field paths.
 
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
@@ -30,24 +32,67 @@ export const k8sReplicaSetEntityDefinition: EntityDefinitionWithoutId = {
     euidRanking: {
       branches: [
         {
+          when: {
+            and: [
+              isNotEmptyCondition('k8s.namespace.name'),
+              isNotEmptyCondition('k8s.replicaset.name'),
+            ],
+          },
           ranking: [
             [{ field: 'k8s.namespace.name' }, { sep: '/' }, { field: 'k8s.replicaset.name' }],
+          ],
+        },
+        {
+          ranking: [
+            [
+              { field: 'kubernetes.namespace' },
+              { sep: '/' },
+              { field: 'kubernetes.replicaset.name' },
+            ],
           ],
         },
       ],
     },
     documentsFilter: {
-      and: [isNotEmptyCondition('k8s.namespace.name'), isNotEmptyCondition('k8s.replicaset.name')],
+      or: [
+        {
+          and: [
+            isNotEmptyCondition('k8s.namespace.name'),
+            isNotEmptyCondition('k8s.replicaset.name'),
+          ],
+        },
+        {
+          and: [
+            isNotEmptyCondition('kubernetes.namespace'),
+            isNotEmptyCondition('kubernetes.replicaset.name'),
+          ],
+        },
+      ],
     },
   },
   indexPatterns: [],
   entityTypeFallback: 'Kubernetes ReplicaSet',
-  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
+  fieldEvaluations: [
+    ENTITY_SOURCE_FIELD_EVALUATION,
+    {
+      destination: 'k8s.namespace.name',
+      sources: [{ field: 'k8s.namespace.name' }, { field: 'kubernetes.namespace' }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+    {
+      destination: 'k8s.replicaset.name',
+      sources: [{ field: 'k8s.replicaset.name' }, { field: 'kubernetes.replicaset.name' }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+  ],
   fields: [
     newestValue({ destination: 'entity.name', source: 'k8s.replicaset.name' }),
     collect({ source: 'k8s.replicaset.name' }),
     collect({ source: 'k8s.namespace.name' }),
     collect({ source: 'k8s.deployment.name' }),
+    collect({ source: 'fields.cluster' }),
     collect({ source: 'service.name' }),
     ...getCommonFieldDescriptions('entity'),
     ...getEntityFieldsDescriptions(),

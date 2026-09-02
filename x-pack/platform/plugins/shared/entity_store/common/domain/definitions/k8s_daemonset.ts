@@ -13,6 +13,8 @@
 // daemonset names are unique within a namespace but not across namespaces.
 // Expected distinct values: 1 (kindnet in kube-system).
 // entity.name stores the bare daemonset name; the EUID carries the namespace prefix.
+//
+// Supports both OTel (`k8s.*`) and metricbeat (`kubernetes.*`) field paths.
 
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
@@ -30,24 +32,67 @@ export const k8sDaemonSetEntityDefinition: EntityDefinitionWithoutId = {
     euidRanking: {
       branches: [
         {
+          when: {
+            and: [
+              isNotEmptyCondition('k8s.namespace.name'),
+              isNotEmptyCondition('k8s.daemonset.name'),
+            ],
+          },
           ranking: [
             [{ field: 'k8s.namespace.name' }, { sep: '/' }, { field: 'k8s.daemonset.name' }],
+          ],
+        },
+        {
+          ranking: [
+            [
+              { field: 'kubernetes.namespace' },
+              { sep: '/' },
+              { field: 'kubernetes.daemonset.name' },
+            ],
           ],
         },
       ],
     },
     documentsFilter: {
-      and: [isNotEmptyCondition('k8s.namespace.name'), isNotEmptyCondition('k8s.daemonset.name')],
+      or: [
+        {
+          and: [
+            isNotEmptyCondition('k8s.namespace.name'),
+            isNotEmptyCondition('k8s.daemonset.name'),
+          ],
+        },
+        {
+          and: [
+            isNotEmptyCondition('kubernetes.namespace'),
+            isNotEmptyCondition('kubernetes.daemonset.name'),
+          ],
+        },
+      ],
     },
   },
   indexPatterns: [],
   entityTypeFallback: 'Kubernetes DaemonSet',
-  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
+  fieldEvaluations: [
+    ENTITY_SOURCE_FIELD_EVALUATION,
+    {
+      destination: 'k8s.namespace.name',
+      sources: [{ field: 'k8s.namespace.name' }, { field: 'kubernetes.namespace' }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+    {
+      destination: 'k8s.daemonset.name',
+      sources: [{ field: 'k8s.daemonset.name' }, { field: 'kubernetes.daemonset.name' }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+  ],
   fields: [
     newestValue({ destination: 'entity.name', source: 'k8s.daemonset.name' }),
     collect({ source: 'k8s.daemonset.name' }),
     collect({ source: 'k8s.namespace.name' }),
     collect({ source: 'k8s.node.name' }),
+    collect({ source: 'fields.cluster' }),
     collect({ source: 'service.name' }),
     ...getCommonFieldDescriptions('entity'),
     ...getEntityFieldsDescriptions(),

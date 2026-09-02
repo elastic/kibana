@@ -13,6 +13,10 @@
 // deployment names are unique within a namespace but not across namespaces.
 // Expected distinct values: 11.
 // entity.name stores the bare deployment name; the EUID carries the namespace prefix.
+//
+// Supports both OTel (`k8s.*`) and metricbeat (`kubernetes.*`) field paths.
+// Metricbeat uses `kubernetes.namespace` (not `kubernetes.namespace.name`) and
+// `kubernetes.deployment.name` for the deployment name.
 
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
@@ -30,24 +34,67 @@ export const k8sDeploymentEntityDefinition: EntityDefinitionWithoutId = {
     euidRanking: {
       branches: [
         {
+          when: {
+            and: [
+              isNotEmptyCondition('k8s.namespace.name'),
+              isNotEmptyCondition('k8s.deployment.name'),
+            ],
+          },
           ranking: [
             [{ field: 'k8s.namespace.name' }, { sep: '/' }, { field: 'k8s.deployment.name' }],
+          ],
+        },
+        {
+          ranking: [
+            [
+              { field: 'kubernetes.namespace' },
+              { sep: '/' },
+              { field: 'kubernetes.deployment.name' },
+            ],
           ],
         },
       ],
     },
     documentsFilter: {
-      and: [isNotEmptyCondition('k8s.namespace.name'), isNotEmptyCondition('k8s.deployment.name')],
+      or: [
+        {
+          and: [
+            isNotEmptyCondition('k8s.namespace.name'),
+            isNotEmptyCondition('k8s.deployment.name'),
+          ],
+        },
+        {
+          and: [
+            isNotEmptyCondition('kubernetes.namespace'),
+            isNotEmptyCondition('kubernetes.deployment.name'),
+          ],
+        },
+      ],
     },
   },
   indexPatterns: [],
   entityTypeFallback: 'Kubernetes Deployment',
-  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
+  fieldEvaluations: [
+    ENTITY_SOURCE_FIELD_EVALUATION,
+    {
+      destination: 'k8s.namespace.name',
+      sources: [{ field: 'k8s.namespace.name' }, { field: 'kubernetes.namespace' }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+    {
+      destination: 'k8s.deployment.name',
+      sources: [{ field: 'k8s.deployment.name' }, { field: 'kubernetes.deployment.name' }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+  ],
   fields: [
     newestValue({ destination: 'entity.name', source: 'k8s.deployment.name' }),
     collect({ source: 'k8s.deployment.name' }),
     collect({ source: 'k8s.namespace.name' }),
     collect({ source: 'k8s.replicaset.name' }),
+    collect({ source: 'fields.cluster' }),
     collect({ source: 'service.name' }),
     ...getCommonFieldDescriptions('entity'),
     ...getEntityFieldsDescriptions(),

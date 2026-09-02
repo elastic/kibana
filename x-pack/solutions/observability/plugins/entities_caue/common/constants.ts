@@ -30,4 +30,4 @@ export type K8sEntityType = (typeof K8S_ENTITY_TYPES)[number];
 
 export const K8S_ENTITIES_QUERY = `FROM ${ENTITIES_LATEST_INDEX}
 | WHERE entity.EngineMetadata.Type IN ("k8s.pod", "k8s.container", "k8s.deployment", "k8s.replicaset", "k8s.namespace", "k8s.node", "k8s.daemonset")
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, k8s.namespace.name, k8s.pod.uid, k8s.replicaset.name, k8s.deployment.name, k8s.daemonset.name, k8s.node.name, service.name, entity.lifecycle.first_seen, entity.lifecycle.last_seen`;
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, k8s.namespace.name, k8s.pod.uid, k8s.replicaset.name, k8s.deployment.name, k8s.daemonset.name, k8s.node.name, service.name, fields.cluster, kubernetes.container.image, kubernetes.container.status.phase, kubernetes.container.status.ready, kubernetes.container.status.reason, kubernetes.container.status.restarts, entity.lifecycle.first_seen, entity.lifecycle.last_seen`;
