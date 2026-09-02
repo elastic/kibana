@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, EuiIconProps } from '@elastic/eui';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
@@ -35,6 +35,13 @@ export const ALERT_STATUS_ACTION_IDS = {
   markAsAcknowledged: 'acknowledge',
   markAsOpen: 'open',
 } as const;
+
+/** Shared status-dot colour map — keyed on the action item `key`, not `data-test-subj`. */
+export const ALERT_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> = {
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  'close-alert-with-reason': 'subdued',
+};
 
 export interface BulkActionsProps {
   eventIds: string[];

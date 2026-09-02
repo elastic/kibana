@@ -11,29 +11,29 @@ import userEvent from '@testing-library/user-event';
 import { EventsTableBulkActionMenu } from './events_table_bulk_action_menu';
 
 describe('EventsTableBulkActionMenu', () => {
-  it('renders the singular case action with the other bulk actions', async () => {
+  it('injects icons for known action keys even when the items carry no icon', async () => {
     const onAddToCase = jest.fn();
 
     render(
       <EventsTableBulkActionMenu
         items={[
+          // No icon supplied — component must supply 'timeline'
           {
-            key: 'add-to-timeline',
+            key: 'add-bulk-to-timeline',
             name: 'Add to timeline',
             'data-test-subj': 'add-to-timeline',
-            icon: 'timeline',
           },
+          // No icon supplied — component must supply 'workflow'
           {
             key: 'run-document-workflow-action',
             name: 'Run workflow',
             'data-test-subj': 'run-document-workflow-action',
-            icon: 'workflow',
           },
+          // No icon supplied — component must supply 'briefcase'
           {
             key: 'attach-case',
             name: 'Add to case',
             'data-test-subj': 'attach-case',
-            icon: 'briefcase',
             onClick: onAddToCase,
           },
         ]}
@@ -58,20 +58,63 @@ describe('EventsTableBulkActionMenu', () => {
     expect(onAddToCase).toHaveBeenCalledTimes(1);
   });
 
-  it('leaves an individual case action in the initial panel', () => {
+  it('decorates alert-status items with colored dot icons', () => {
     render(
       <EventsTableBulkActionMenu
         items={[
+          { key: 'open', name: 'Mark as open', 'data-test-subj': 'open-alert-status' },
           {
-            key: 'attach-case',
-            name: 'Add to case',
-            'data-test-subj': 'attach-case',
+            key: 'acknowledge',
+            name: 'Mark as acknowledged',
+            'data-test-subj': 'acknowledged-alert-status',
+          },
+          {
+            key: 'close-alert-with-reason',
+            name: 'Close',
+            'data-test-subj': 'alert-close-context-menu-item',
           },
         ]}
         panels={[]}
       />
     );
 
-    expect(screen.getByTestId('attach-case')).toBeInTheDocument();
+    // Status items get dot icons
+    expect(
+      screen.getByTestId('open-alert-status').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('acknowledged-alert-status').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alert-close-context-menu-item')
+        .querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+
+    // Dot icons are not overwritten by withActionIcons (no entry in ACTION_ICONS_BY_ID)
+    expect(
+      screen.getByTestId('open-alert-status').querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeInTheDocument();
+  });
+
+  it('leaves an item with an unknown key icon-free', () => {
+    render(
+      <EventsTableBulkActionMenu
+        items={[
+          {
+            key: 'some-custom-action',
+            name: 'Custom',
+            'data-test-subj': 'custom-action',
+          },
+        ]}
+        panels={[]}
+      />
+    );
+
+    expect(screen.getByTestId('custom-action')).toBeInTheDocument();
+    // No icon element should be present
+    expect(
+      screen.getByTestId('custom-action').querySelector('[data-euiicon-type]')
+    ).not.toBeInTheDocument();
   });
 });
