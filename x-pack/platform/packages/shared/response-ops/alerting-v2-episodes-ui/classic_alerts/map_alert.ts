@@ -150,7 +150,7 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
  * dimension, so the histogram can break down v1 rows by the same field. Fields
  * without a v1 equivalent (assignee) resolve to `null`.
  */
-const resolveBreakdownValue = (
+const resolveHistogramBreakdownValue = (
   source: ClassicAlertSource,
   episode: HistogramEpisodeRow,
   breakdownField: string
@@ -185,8 +185,8 @@ export const mapClassicAlertToHistogramRow = (
     'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
   };
 
-  if (breakdownField && breakdownField !== 'episode.status') {
-    row[breakdownField] = resolveBreakdownValue(source, row, breakdownField);
+  if (breakdownField) {
+    row[breakdownField] = resolveHistogramBreakdownValue(source, row, breakdownField);
   }
 
   return row;

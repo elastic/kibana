@@ -71,5 +71,5 @@ export const createClassicEpisodeSource = ({
   fetchTagOptions: ({ services, timeRange, abortSignal }) =>
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
-  resolveRules: ({ services, ids }) => resolveClassicRules({ http: services.http, ids }),
+  resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
 });

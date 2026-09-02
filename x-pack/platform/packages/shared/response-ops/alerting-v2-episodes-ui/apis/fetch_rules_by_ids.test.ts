@@ -57,7 +57,7 @@ describe('fetchRulesByIds', () => {
     });
   });
 
-  it('returns the rules the v2 API resolved, leaving unresolved ids to the sources', async () => {
+  it('returns only the rules resolved by the v2 API', async () => {
     const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
     mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
 

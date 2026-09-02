@@ -16,7 +16,9 @@ describe('resolveClassicRules', () => {
   });
 
   it('returns an empty array without calling the API when no ids are provided', async () => {
-    await expect(resolveClassicRules({ http: mockHttp, ids: [] })).resolves.toEqual([]);
+    await expect(resolveClassicRules({ ids: [], services: { http: mockHttp } })).resolves.toEqual(
+      []
+    );
     expect(mockHttp.post).not.toHaveBeenCalled();
   });
 
@@ -25,7 +27,10 @@ describe('resolveClassicRules', () => {
       data: [{ id: 'classic-rule', name: 'Classic Rule' }],
     });
 
-    const result = await resolveClassicRules({ http: mockHttp, ids: ['classic-rule'] });
+    const result = await resolveClassicRules({
+      ids: ['classic-rule'],
+      services: { http: mockHttp },
+    });
 
     expect(mockHttp.post).toHaveBeenCalledWith(
       '/internal/alerting/rules/_find',
@@ -39,8 +44,8 @@ describe('resolveClassicRules', () => {
   it('returns an empty array when the classic find API fails', async () => {
     mockHttp.post.mockRejectedValueOnce(new Error('classic unavailable'));
 
-    await expect(resolveClassicRules({ http: mockHttp, ids: ['classic-rule'] })).resolves.toEqual(
-      []
-    );
+    await expect(
+      resolveClassicRules({ ids: ['classic-rule'], services: { http: mockHttp } })
+    ).resolves.toEqual([]);
   });
 });

@@ -35,13 +35,13 @@ const adaptClassicRule = (rule: ClassicFindRulesResponse['data'][number]): RuleR
   } as unknown as RuleResponse);
 
 export interface ResolveClassicRulesParams {
-  http: HttpStart;
   ids: string[];
+  services: { http: HttpStart };
 }
 
 export const resolveClassicRules = async ({
-  http,
   ids,
+  services: { http },
 }: ResolveClassicRulesParams): Promise<RuleResponse[]> => {
   if (ids.length === 0) {
     return [];

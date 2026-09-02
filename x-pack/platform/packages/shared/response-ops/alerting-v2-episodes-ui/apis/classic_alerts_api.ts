@@ -50,6 +50,47 @@ export interface ClassicAlertsKpisRow {
 /** Raw `kibana.alert.*` fields (plus `_index` / `_id`) of a single classic alert. */
 export type ClassicAlertFields = Record<string, unknown>;
 
+/** Base options shared by all RAC-backed classic alert fetch functions. */
+interface BaseRacOptions {
+  ruleTypeIds: string[];
+}
+
+export interface FetchClassicAlertsAsEpisodesOptions extends BaseRacOptions {
+  pageSize: number;
+  timeRange?: TimeRange | null;
+  filterState?: EpisodesFilterState;
+  sortState?: EpisodesSortState;
+  abortSignal?: AbortSignal;
+  services: { http: HttpStart };
+}
+
+export interface FetchClassicAlertsKpisOptions extends BaseRacOptions {
+  timeRange?: TimeRange | null;
+  filterState?: EpisodesFilterState;
+  abortSignal?: AbortSignal;
+  services: { http: HttpStart };
+}
+
+export interface FetchClassicAlertsHistogramOptions extends BaseRacOptions {
+  timeRange?: TimeRange | null;
+  filterState?: EpisodesFilterState;
+  breakdownField?: string;
+  abortSignal?: AbortSignal;
+  services: { http: HttpStart };
+}
+
+export interface FetchClassicAlertsTagsOptions extends BaseRacOptions {
+  timeRange?: TimeRange | null;
+  abortSignal?: AbortSignal;
+  services: { http: HttpStart };
+}
+
+export interface FetchClassicAlertByIdOptions extends BaseRacOptions {
+  id: string;
+  abortSignal?: AbortSignal;
+  services: { http: HttpStart };
+}
+
 /** Body accepted by the authorized RAC alerts find route (`POST /internal/rac/alerts/find`). */
 interface RacFindBody {
   rule_type_ids: string[];
@@ -110,20 +151,6 @@ const findClassicAlerts = <TAggs = undefined>(
     signal: abortSignal,
   });
 
-/** Rule type IDs the caller considers classic, used to resolve the alert indices to read. */
-interface ClassicRuleTypeIdsOption {
-  ruleTypeIds: string[];
-}
-
-export interface FetchClassicAlertsAsEpisodesOptions extends ClassicRuleTypeIdsOption {
-  pageSize: number;
-  timeRange?: TimeRange | null;
-  filterState?: EpisodesFilterState;
-  sortState?: EpisodesSortState;
-  abortSignal?: AbortSignal;
-  services: { http: HttpStart };
-}
-
 /**
  * Reads classic observability + stack alerts (RBAC enforced by the RAC alerts
  * API) reshaped into the v2 `AlertEpisode` row shape, so they can be merged into
@@ -156,13 +183,6 @@ export const fetchClassicAlertsAsEpisodes = async ({
   );
 };
 
-export interface FetchClassicAlertsKpisOptions extends ClassicRuleTypeIdsOption {
-  timeRange?: TimeRange | null;
-  filterState?: EpisodesFilterState;
-  abortSignal?: AbortSignal;
-  services: { http: HttpStart };
-}
-
 /** Computes the classic alert KPI counts (RBAC enforced by the RAC alerts API). */
 export const fetchClassicAlertsKpis = async ({
   ruleTypeIds,
@@ -193,14 +213,6 @@ export const fetchClassicAlertsKpis = async ({
     snoozed: (aggs?.muted.doc_count ?? 0) + (aggs?.snoozed.doc_count ?? 0),
   };
 };
-
-export interface FetchClassicAlertsHistogramOptions extends ClassicRuleTypeIdsOption {
-  timeRange?: TimeRange | null;
-  filterState?: EpisodesFilterState;
-  breakdownField?: string;
-  abortSignal?: AbortSignal;
-  services: { http: HttpStart };
-}
 
 /** Returns classic alert histogram rows (RBAC enforced by the RAC alerts API). */
 export const fetchClassicAlertsHistogram = async ({
@@ -235,12 +247,6 @@ export const fetchClassicAlertsHistogram = async ({
   );
 };
 
-export interface FetchClassicAlertsTagsOptions extends ClassicRuleTypeIdsOption {
-  timeRange?: TimeRange | null;
-  abortSignal?: AbortSignal;
-  services: { http: HttpStart };
-}
-
 /** Returns distinct classic alert rule tags (RBAC enforced by the RAC alerts API). */
 export const fetchClassicAlertsTags = async ({
   ruleTypeIds,
@@ -270,12 +276,6 @@ export const fetchClassicAlertsTags = async ({
     .map((bucket) => bucket.key)
     .filter((key): key is string => typeof key === 'string');
 };
-
-export interface FetchClassicAlertByIdOptions extends ClassicRuleTypeIdsOption {
-  id: string;
-  abortSignal?: AbortSignal;
-  services: { http: HttpStart };
-}
 
 /**
  * Reads a single classic alert document by its alert uuid (RBAC enforced by
