@@ -11,7 +11,7 @@ import {
   collectUniqueTags,
   getServerRunFlagsFromTags,
   getTestTagsForTarget,
-  isDiscoverableScoutTest,
+  isScoutTestFile,
 } from './tag_utils';
 
 describe('getTestTagsForTarget', () => {
@@ -114,7 +114,7 @@ describe('collectUniqueTags', () => {
     ];
     expect(collectUniqueTags(tests)).toEqual([]);
     expect(
-      isDiscoverableScoutTest({
+      isScoutTestFile({
         expectedStatus: 'passed',
         location: { file: 'test/scout/foo/ui/parallel_tests/global.setup.ts' },
       })

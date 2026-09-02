@@ -36,7 +36,7 @@ const isScoutHookFile = (filePath: string | undefined): boolean => {
 };
 
 /** Runnable Scout tests, including those registered from a shared factory instead of a `*.spec.ts`. */
-export const isDiscoverableScoutTest = (test: {
+export const isScoutTestFile = (test: {
   expectedStatus?: string;
   location?: { file?: string };
 }): boolean => {
@@ -53,7 +53,7 @@ export const collectUniqueTags = (
 ): string[] => {
   const tagSet = new Set<string>();
   for (const test of tests) {
-    if (isDiscoverableScoutTest(test) && test.tags) {
+    if (isScoutTestFile(test) && test.tags) {
       for (const testTag of test.tags) {
         tagSet.add(testTag);
       }
