@@ -75,7 +75,7 @@ export const AnalyzeGraph: FC = () => {
 
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
   const databaseDocumentTimestamp = useMemo(() => {
-    const value = dataAsNestedObject.timestamp;
+    const value = dataAsNestedObject?.timestamp;
     const ms = value ? Date.parse(String(value)) : NaN;
     return Number.isFinite(ms) ? ms : undefined;
   }, [dataAsNestedObject]);
