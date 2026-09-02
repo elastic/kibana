@@ -24,7 +24,7 @@ export interface FlyoutTabProps {
 
 /** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
 export interface FlyoutBodyTabPanelProps {
-  /** Must match the `id` of a root `tabs` entry. */
+  /** The `id` of the root `tabs` entry this panel belongs to. Non-matching ids are silently ignored in tabbed mode. */
   tabId: string;
   children?: ReactNode;
   'data-test-subj'?: string;
