@@ -173,6 +173,22 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
     });
 
+    it('steps from an expanded collection into its copy button with ArrowRight', async () => {
+      render(<JsonTreeViewer json={{ user: { city: 'Berlin' } }} />);
+
+      const userRow = screen.getByTestId(rowTestId('user'));
+      userRow.focus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(rowTestId('user.city'))).toBeVisible();
+      expect(userRow).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('user'))).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(userRow).toHaveFocus();
+    });
+
     it('steps from a pager row into its first button with ArrowRight', async () => {
       // 12 fields capped at 10 renders a "Show 2 more of 12 fields" pager row.
       const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));

@@ -508,7 +508,11 @@ const NodeLabel = memo(function NodeLabel({
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
-        {showActions && <SubtreeCopyButton node={node} />}
+        {showActions && (
+          <span className="jsonTreeViewerRowActions" css={styles.actions}>
+            <SubtreeCopyButton node={node} />
+          </span>
+        )}
       </span>
     );
   }
@@ -525,7 +529,11 @@ const NodeLabel = memo(function NodeLabel({
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
-      {showActions && <SubtreeCopyButton node={node} />}
+      {showActions && (
+        <span className="jsonTreeViewerRowActions" css={styles.actions}>
+          <SubtreeCopyButton node={node} />
+        </span>
+      )}
     </span>
   );
 });
