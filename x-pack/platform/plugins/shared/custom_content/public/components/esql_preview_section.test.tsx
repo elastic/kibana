@@ -117,6 +117,19 @@ describe('EsqlPreviewSection', () => {
     expect(cell.textContent).toBe(`${'x'.repeat(120)}…`);
   });
 
+  it('keeps the full column name in the header title', () => {
+    const name = 'a_very_long_column_name_that_will_not_fit_in_its_share_of_the_table';
+    const esqlData = {
+      columns: [{ name, type: 'keyword' }],
+      values: [['v']],
+      all_columns: [],
+    } as unknown as EsqlDataResult;
+
+    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+
+    expect(screen.getByRole('columnheader')).toHaveAttribute('title', name);
+  });
+
   it('joins a multivalue cell rather than rendering it as a bare array', () => {
     const esqlData = {
       columns: [{ name: 'tactics', type: 'keyword' }],

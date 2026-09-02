@@ -48,13 +48,18 @@ const MAX_PREVIEW_ROWS = 5;
  */
 const MAX_PREVIEW_CELL_CHARS = 120;
 
-// Fixed layout gives every column an equal share, so one long column cannot starve the rest; the
-// cell rules keep a row one line tall. The untruncated value stays available as the cell's title.
+// Fixed layout gives every column an equal share, so one long column cannot starve the rest.
+// Values are clipped to one line — they are only a sample of the shape — but names are what the
+// template references as row["name"], so headers wrap rather than hide behind a hover.
 const previewTableCss = css({
-  'td, th': {
+  td: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+  th: {
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
   },
 });
 
@@ -212,7 +217,9 @@ export const EsqlPreviewSection = ({
           <EuiTable tableLayout="fixed" compressed css={previewTableCss}>
             <EuiTableHeader>
               {columns.map((col) => (
-                <EuiTableHeaderCell key={col.name}>{col.name}</EuiTableHeaderCell>
+                <EuiTableHeaderCell key={col.name} title={col.name}>
+                  {col.name}
+                </EuiTableHeaderCell>
               ))}
             </EuiTableHeader>
             <EuiTableBody>
