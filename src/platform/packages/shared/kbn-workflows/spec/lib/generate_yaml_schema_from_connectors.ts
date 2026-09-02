@@ -166,6 +166,34 @@ function hasNoRequiredFields(schema: z.ZodType): boolean {
   );
 }
 
+/**
+ * Widens top-level array fields of a connector params schema to also accept a string, so that
+ * Liquid template expressions like `"${{ event.messages }}"` are not flagged as errors in the
+ * YAML editor when used in place of an array value. Only the editor-facing JSON schema is
+ * affected — runtime step handlers always receive already-resolved values validated by the
+ * original strict Zod schemas.
+ *
+ * Only the direct children of the params schema (not nested objects) are widened, to avoid
+ * disturbing deeply nested schemas such as the ES API's MappingTypeMapping.
+ */
+function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
+  if (!(paramsSchema instanceof z.ZodObject)) {
+    return paramsSchema;
+  }
+  const newShape: Record<string, z.ZodType> = {};
+  for (const [key, value] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
+    const inner = value instanceof z.ZodOptional ? value.unwrap() : null;
+    if (inner instanceof z.ZodArray) {
+      newShape[key] = z.optional(z.union([z.string(), inner]));
+    } else if (value instanceof z.ZodArray) {
+      newShape[key] = z.union([z.string(), value]);
+    } else {
+      newShape[key] = value;
+    }
+  }
+  return z.object(newShape);
+}
+
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
@@ -179,11 +207,13 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? connectorId : connectorId.optional();
   }
 
+  const templateAwareParamsSchema = withTemplateStringSupport(connector.paramsSchema);
+
   // If all params are optional (or there are none), `with` itself should be optional so users
   // don't have to write an empty `with: {}` block for steps that need no inputs.
   const withSchema = hasNoRequiredFields(connector.paramsSchema)
-    ? connector.paramsSchema.optional()
-    : connector.paramsSchema;
+    ? templateAwareParamsSchema.optional()
+    : templateAwareParamsSchema;
 
   return BaseConnectorStepSchema.extend({
     type: connector.description
