@@ -52,7 +52,7 @@ Published page: https://www.elastic.co/docs/reference/kibana/advanced-settings
 | `uiSettings.register()` or `scope: 'namespace'` (default) | `docs/reference/advanced-settings-space.yml` | `advanced-settings.md` → **Change the space-specific setting** |
 | `uiSettings.registerGlobal()` or `scope: 'global'` | `docs/reference/advanced-settings-global.yml` | **Change the global settings** (`serverless: unavailable` on that heading) |
 
-For `serverless: ga` vs `serverless: unavailable`, check `src/platform/packages/shared/serverless/settings/common/index.ts`. Also grep the project files in that folder. Those files use ID constants from `src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts`, not the YAML key. If the ID is on any list, write `serverless: ga`. If it is not, write `serverless: unavailable`.
+For `serverless: ga` vs `serverless: unavailable`, check `src/platform/packages/shared/serverless/settings/common/index.ts`. If the ID is there, write `serverless: ga`. If the ID is only in a project file, nest `observability`, `security`, or `elasticsearch` under `serverless`. Those files use ID constants from `src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts`, not the YAML key. If the ID is on none of the lists, write `serverless: unavailable`.
 
 Place the entry in the YAML `group` that matches the `category` string used in the UI. Current space-settings groups include:
 
