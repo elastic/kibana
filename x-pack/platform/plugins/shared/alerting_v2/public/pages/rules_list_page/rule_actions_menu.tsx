@@ -58,8 +58,8 @@ export const RuleActionsMenu = ({
 }: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Each action is built once and then arranged into either a flat list (rules list kebab) or
-  // separated groups (flyout footer). `null` entries are filtered out before rendering.
+  // Each action is built once and then arranged into separated groups below. `null` entries
+  // (unavailable or write-gated actions) are filtered out before rendering.
   const viewDetailsItem = detailsHref ? (
     <EuiContextMenuItem
       key="viewDetails"
@@ -110,7 +110,7 @@ export const RuleActionsMenu = ({
         data-test-subj={`runRule-${rule.id}`}
       >
         {i18n.translate('xpack.alertingV2.rulesList.action.run', {
-          defaultMessage: 'Run rule',
+          defaultMessage: 'Run',
         })}
       </EuiContextMenuItem>
     ) : null;
@@ -126,7 +126,7 @@ export const RuleActionsMenu = ({
       data-test-subj={`editRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.edit', {
-        defaultMessage: 'Edit rule',
+        defaultMessage: 'Edit',
       })}
     </EuiContextMenuItem>
   ) : null;
@@ -142,7 +142,7 @@ export const RuleActionsMenu = ({
       data-test-subj={`cloneRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.clone', {
-        defaultMessage: 'Clone rule',
+        defaultMessage: 'Clone',
       })}
     </EuiContextMenuItem>
   ) : null;
@@ -205,7 +205,7 @@ export const RuleActionsMenu = ({
     >
       <EuiTextColor color="danger">
         {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-          defaultMessage: 'Delete rule',
+          defaultMessage: 'Delete',
         })}
       </EuiTextColor>
     </EuiContextMenuItem>
