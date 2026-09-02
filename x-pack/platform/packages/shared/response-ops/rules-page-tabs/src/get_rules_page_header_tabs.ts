@@ -15,9 +15,7 @@ export interface GetRulesPageHeaderTabsParams {
   selectedTab: RulesPageTabId;
   /** `http.basePath.prepend` */
   prepend: (path: string) => string;
-  /** @default true */
   showV1Tab?: boolean;
-  /** @default true */
   showV2Tab?: boolean;
 }
 
@@ -25,8 +23,7 @@ export interface GetRulesPageHeaderTabsParams {
  * Header tabs shared by the v1 (`triggers_actions_ui`) and v2 (`alerting_v2`)
  * Rules pages so the two apps present as a single tabbed page. Each tab is a plain cross-app
  * `href` (no `onClick`) — `AppHeaderTab.onClick` receives no event and cannot `preventDefault`,
- * so combining both would double-navigate. Both pages are Stack Management apps wrapped in
- * `RedirectAppLinks`, so an `href` still resolves to an SPA navigation.
+ * so combining both would double-navigate.
  */
 export const getRulesPageHeaderTabs = ({
   selectedTab,
