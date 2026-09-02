@@ -78,18 +78,23 @@ describe('persona_matrix.config.json column wiring', () => {
 describe('persona_matrix.config.json extra-suite branch pins', () => {
   const branchByColumn = new Map(config.columns.map((column) => [column.id, column.branch]));
 
-  it('reads attack discovery from the branch its runs were exported on', () => {
-    expect(branchByColumn.get('attack-discovery')).toBe(
-      'patrykkopycinski:feat/attack-discovery-agent-builder-evals'
-    );
+  it('unions main with the branch attack discovery runs were first exported on', () => {
+    // Sweep runs export on main; the historical rows live on the feature
+    // branch. Pinning only the feature branch filters every new run out, so
+    // the column reads the union.
+    expect(branchByColumn.get('attack-discovery')).toStrictEqual([
+      'main',
+      'patrykkopycinski:feat/attack-discovery-agent-builder-evals',
+    ]);
   });
 
   it('unions every branch that holds migrations runs for a distinct model', () => {
     // Golden migrations data is split across branches by model: the weekly
     // branch holds six models, 4.6-sonnet has a newer run on the endpoint
-    // branch, and 4.5-sonnet only ever ran here. Pinning one branch blanks
-    // the others' cells, so the column reads the union.
+    // branch, and 4.5-sonnet only ever ran here. Sweep runs add main. Pinning
+    // one branch blanks the others' cells, so the column reads the union.
     const expected = [
+      'main',
       'elastic:fix/weekly-evals-matrix',
       'elastic:feat/siem-migrations-invoke-endpoint',
       'feat/evals-extensions-matrix-v3',
