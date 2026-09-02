@@ -25,6 +25,7 @@ export interface RecordsFetchResponse {
   esqlQueryColumns?: DatatableColumn[];
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  approximationApplied?: boolean;
 }
 
 export interface SidebarToggleState {
