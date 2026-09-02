@@ -159,7 +159,7 @@ describe('getCaseMetrics', () => {
       clientArgs
     );
 
-    expect(mockServices.services.alertsService.executeAggregations).toBeCalledTimes(1);
+    expect(mockServices.services.alertsService.executeAggregations).toHaveBeenCalledTimes(1);
   });
 });
 

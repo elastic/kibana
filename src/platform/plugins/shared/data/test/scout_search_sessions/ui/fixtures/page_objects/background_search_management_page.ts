@@ -30,8 +30,8 @@ export class BackgroundSearchManagementPage {
     return this.table.getByTestId('searchSessionsRow');
   }
 
-  async expectRowCount(count: number, timeout = 30_000) {
-    await expect(this.rows()).toHaveCount(count, { timeout });
+  async expectRowCount(count: number) {
+    await expect(this.rows()).toHaveCount(count);
   }
 
   async waitForRowStatus(targetStatus: string) {
@@ -53,12 +53,30 @@ export class BackgroundSearchManagementPage {
     return this.table.getByTestId('sessionManagementExpiresCol').innerText();
   }
 
+  /** How many searches the background search row groups. */
+  async getRowSearchesCount(): Promise<number> {
+    const text = await this.table.getByTestId('sessionManagementNumSearchesCol').innerText();
+    return Number(text.trim());
+  }
+
+  /** The app URL the background search row restores into. */
+  async getRowRestoreUrl(): Promise<string> {
+    const href = await this.table.getByTestId('sessionManagementNameLink').getAttribute('href');
+    if (!href) {
+      throw new Error('Background search row has no restore URL');
+    }
+    return href;
+  }
+
   async renameRow(newName: string) {
     await this.table.getByTestId('sessionManagementActionsCol').click();
     await this.page.testSubj.click('sessionManagementPopoverAction-rename');
     const input = this.page.testSubj.locator('editNameInput');
     await input.fill(newName);
     await this.page.testSubj.click('confirmEditName');
+    // The rename modal's overlay mask swallows pointer events until it unmounts, so anything
+    // clicked next races its removal. Waiting on the input covers the whole modal.
+    await input.waitFor({ state: 'hidden' });
   }
 
   async viewRow() {
