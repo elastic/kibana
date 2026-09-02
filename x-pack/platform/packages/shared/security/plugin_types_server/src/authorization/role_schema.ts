@@ -23,6 +23,7 @@ const dataSourcePrivilegesEntrySchema = schema.object(
           description:
             'A list of data source names or wildcard patterns to which the permissions in this entry apply.',
         },
+        maxLength: 1000,
       }),
       { minSize: 1, maxSize: 100 }
     ),
@@ -64,6 +65,7 @@ const globalPrivilegeEntrySchema = schema.object(
                   description:
                     'A list of application names that the role can manage at the global privilege scope.',
                 },
+                maxLength: 100,
               }),
               { maxSize: 1000 }
             ),
@@ -81,6 +83,7 @@ const globalPrivilegeEntrySchema = schema.object(
                   description:
                     'A list of application names whose user profile data the role can write at the global privilege scope.',
                 },
+                maxLength: 100,
               }),
               { maxSize: 1000 }
             ),
