@@ -77,6 +77,7 @@ import {
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
+import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
@@ -339,6 +340,31 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     registerActions(plugins);
+
+    plugins.navigation.registerNavigationSection({
+      kind: 'linkList',
+      id: 'dashboardRecentlyViewed',
+      target: 'dashboards',
+      title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
+        defaultMessage: 'Recently viewed',
+      }),
+      viewAll: {
+        href: core.application.getUrlForApp(DASHBOARD_APP_ID, {
+          path: `#${LANDING_PAGE_PATH}`,
+        }),
+      },
+      items$: getDashboardRecentlyAccessedService()
+        .get$()
+        .pipe(
+          map((items) =>
+            items.slice(0, 5).map((item) => ({
+              id: item.id,
+              href: core.http.basePath.prepend(item.link),
+              label: item.label,
+            }))
+          )
+        ),
+    });
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
       const { searchAction } = await import('./dashboard_client');

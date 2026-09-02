@@ -18,6 +18,7 @@ import type {
   NavigationTreeDefinition,
   CloudLinks,
   SolutionId,
+  ProjectNavigationSection,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
@@ -59,6 +60,9 @@ export class ProjectNavigationService {
     undefined
   );
   private readonly customizeNavigationHandler$ = new BehaviorSubject<(() => void) | null>(null);
+  private readonly registeredSections$ = new BehaviorSubject<readonly ProjectNavigationSection[]>(
+    []
+  );
 
   constructor(private isServerless: boolean) {}
 
@@ -232,11 +236,30 @@ export class ProjectNavigationService {
       registerCustomizeNavigationHandler: (handler: () => void) => {
         this.customizeNavigationHandler$.next(handler);
       },
+      registerNavigationSection: (section: ProjectNavigationSection) => {
+        if (
+          this.registeredSections$.getValue().some((registered) => registered.id === section.id)
+        ) {
+          logger.error(`Duplicate navigation id "${section.id}".`);
+          return;
+        }
+        if (
+          this.registeredSections$
+            .getValue()
+            .some((registered) => registered.target === section.target)
+        ) {
+          logger.error(`A second linkList on target "${section.target}" is not implemented.`);
+          return;
+        }
+        this.registeredSections$.next([...this.registeredSections$.getValue(), section]);
+      },
+      getRegisteredNavigationSections$: () => this.registeredSections$.asObservable(),
     };
   }
 
   public stop() {
     this.stop$.next();
     this.stop$.complete();
+    this.registeredSections$.next([]);
   }
 }

@@ -1016,3 +1016,32 @@ describe('getActiveSolutionNavId$()', () => {
     expect(activeId).toBe('oblt');
   });
 });
+
+describe('registerNavigationSection', () => {
+  it('registers a linkList and rejects a second list on the same target', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.registerNavigationSection({
+      kind: 'linkList',
+      id: 'dashboardRecentlyViewed',
+      target: 'dashboards',
+      title: 'Recently viewed',
+      items$: of([]),
+    });
+
+    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationSections$());
+    expect(afterFirst).toHaveLength(1);
+
+    projectNavigation.registerNavigationSection({
+      kind: 'linkList',
+      id: 'dashboardFavorites',
+      target: 'dashboards',
+      title: 'Favorites',
+      items$: of([]),
+    });
+
+    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationSections$());
+    expect(afterSecond).toHaveLength(1);
+    expect(afterSecond[0].id).toBe('dashboardRecentlyViewed');
+  });
+});
