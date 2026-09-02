@@ -56,6 +56,8 @@ import {
   useHiddenRiskCount,
   useWatchlistedCount,
   useNewEntityCount,
+  useRiskMoversCount,
+  useNewlyHighCriticalCount,
 } from '../components/home/hooks';
 import { SignalCards } from '../components/home/facelift/v5/signal_cards';
 import type { ActiveFilter, SignalCardData } from '../components/home/facelift/v5/data';
@@ -222,6 +224,10 @@ const EntityAnalyticsHomePageContent = () => {
     useWatchlistedCount({ spaceId: resolvedSpaceId });
   const { count: newEntityCount, isLoading: newEntityLoading } =
     useNewEntityCount({ spaceId: resolvedSpaceId });
+  const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
+    useRiskMoversCount({ spaceId: resolvedSpaceId });
+  const { count: newlyHCCount, entityIds: newlyHCEntityIds, isLoading: newlyHCLoading } =
+    useNewlyHighCriticalCount({ spaceId: resolvedSpaceId });
 
   const handleFilterForCard = useCallback(
     (cardId: ActiveFilter['cardId']) => {
@@ -241,10 +247,14 @@ const EntityAnalyticsHomePageContent = () => {
         return anomaliesEntityIds.length > 0 ? { terms: { 'entity.id': anomaliesEntityIds } } : null;
       case 'hiddenRisk':
         return hiddenRiskEntityIds.length > 0 ? { terms: { 'entity.id': hiddenRiskEntityIds } } : null;
+      case 'riskMovers':
+        return riskMoversEntityIds.length > 0 ? { terms: { 'entity.id': riskMoversEntityIds } } : null;
+      case 'newlyHighCritical':
+        return newlyHCEntityIds.length > 0 ? { terms: { 'entity.id': newlyHCEntityIds } } : null;
       default:
         return getCardEntityFilter(activeFilter.cardId);
     }
-  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, hiddenRiskEntityIds]);
+  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, hiddenRiskEntityIds, riskMoversEntityIds, newlyHCEntityIds]);
 
   const signalCards = useMemo((): SignalCardData[] => [
     {
@@ -264,14 +274,14 @@ const EntityAnalyticsHomePageContent = () => {
     {
       id: 'riskMovers',
       title: 'Risk movers',
-      value: 0,
+      value: riskMoversLoading ? 0 : riskMoversCount,
       description: 'Entities whose risk score rose ≥10 points vs yesterday',
       filterLabel: 'Risk movers',
     },
     {
       id: 'newlyHighCritical',
       title: 'Newly high/critical',
-      value: 0,
+      value: newlyHCLoading ? 0 : newlyHCCount,
       description: 'Entities that crossed into High or Critical risk since yesterday',
       filterLabel: 'Newly high/critical',
     },
@@ -299,6 +309,8 @@ const EntityAnalyticsHomePageContent = () => {
   ], [
     alertsCount, alertsLoading,
     anomaliesCount, anomaliesLoading,
+    riskMoversCount, riskMoversLoading,
+    newlyHCCount, newlyHCLoading,
     hiddenRiskCount, hiddenRiskLoading,
     watchlistedCount, watchlistedLoading,
     newEntityCount, newEntityLoading,
