@@ -633,17 +633,37 @@ export const promqlLabelMatcherDefinitions: PromQLFunctionDefinition[] = [
 
 (async function main() {
   const allFunctionDefinitions = [
-    ...pkgFunctionDefs.map((fn) => ({
-      ...fn,
-      description: functionDocs[fn.name]?.description ?? '',
-      examples: functionDocs[fn.name]?.examples ?? [],
-    })),
-    ...pkgOperatorDefs.map((op) => ({
-      ...op,
-      type: 'operator' as const,
-      description: operatorDocs[op.name]?.description ?? '',
-      examples: operatorDocs[op.name]?.examples ?? [],
-    })),
+    ...pkgFunctionDefs.map((fn) => {
+      const docs = functionDocs[fn.name];
+      return {
+        ...fn,
+        description: docs?.description ?? '',
+        examples: docs?.examples ?? [],
+        signatures: fn.signatures.map((sig) => ({
+          ...sig,
+          params: sig.params.map((param) => ({
+            ...param,
+            description: docs?.params?.[param.name] ?? param.description,
+          })),
+        })),
+      };
+    }),
+    ...pkgOperatorDefs.map((op) => {
+      const docs = operatorDocs[op.name];
+      return {
+        ...op,
+        type: 'operator' as const,
+        description: docs?.description ?? '',
+        examples: docs?.examples ?? [],
+        signatures: op.signatures.map((sig) => ({
+          ...sig,
+          params: sig.params.map((param) => ({
+            ...param,
+            description: docs?.params?.[param.name] ?? param.description,
+          })),
+        })),
+      };
+    }),
   ];
 
   const functionNames = allFunctionDefinitions.map((def) => def.name.toUpperCase());

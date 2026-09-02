@@ -48,6 +48,8 @@ ${commandDefinitions
   const tsContent = `
 // This file is auto-generated. Do not edit it manually.
 
+import type { ElasticsearchCommandDefinition } from '@kbn/esql-language';
+
 export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = ${JSON.stringify(
     commandsMetadata,
     null,
