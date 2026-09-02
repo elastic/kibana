@@ -65,6 +65,14 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
     []
   );
 
+  const viewLabel = useMemo(
+    () =>
+      i18n.translate('xpack.osquery.packList.rowActions.viewLabel', {
+        defaultMessage: 'View pack',
+      }),
+    []
+  );
+
   const duplicateLabel = useMemo(
     () =>
       i18n.translate('xpack.osquery.packList.rowActions.duplicateLabel', {
@@ -86,6 +94,7 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
       itemName={item.name}
       actionsAriaLabel={actionsAriaLabel}
       editLabel={editLabel}
+      viewLabel={viewLabel}
       duplicateLabel={duplicateLabel}
       deleteLabel={deleteLabel}
       deleteModalConfig={DELETE_MODAL_CONFIG}

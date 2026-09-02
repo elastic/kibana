@@ -66,6 +66,35 @@ describe('RowActionsMenu', () => {
     expect(screen.queryByText('Delete')).not.toBeInTheDocument();
   });
 
+  it('shows viewLabel instead of editLabel when canWrite is false and viewLabel is provided', () => {
+    renderWithIntl(
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false, viewLabel: 'View' })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('View')).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Duplicate')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+  });
+
+  it('shows editLabel (not viewLabel) when canWrite is true', () => {
+    renderWithIntl(
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true, viewLabel: 'View' })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.queryByText('View')).not.toBeInTheDocument();
+  });
+
+  it('falls back to editLabel when canWrite is false and viewLabel is omitted', () => {
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+  });
+
   it('hides delete but shows duplicate when isReadOnly is true', () => {
     renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isReadOnly: true }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));

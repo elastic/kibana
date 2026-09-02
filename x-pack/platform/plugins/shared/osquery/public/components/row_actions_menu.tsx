@@ -32,6 +32,7 @@ interface RowActionsMenuProps {
   itemName: string;
   actionsAriaLabel: string;
   editLabel: string;
+  viewLabel?: string;
   duplicateLabel: string;
   deleteLabel: string;
   deleteModalConfig: DeleteModalConfig;
@@ -53,6 +54,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
   itemName,
   actionsAriaLabel,
   editLabel,
+  viewLabel,
   duplicateLabel,
   deleteLabel,
   deleteModalConfig,
@@ -100,9 +102,10 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
   }, [onDelete, handleCloseDeleteModal]);
 
   const menuItems = useMemo(() => {
+    const openLabel = !canWrite && viewLabel ? viewLabel : editLabel;
     const items = [
       <EuiContextMenuItem key="edit" icon="pencil" onClick={handleEditClick}>
-        {editLabel}
+        {openLabel}
       </EuiContextMenuItem>,
     ];
 
@@ -130,6 +133,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
     canWrite,
     isReadOnly,
     editLabel,
+    viewLabel,
     duplicateLabel,
     deleteLabel,
   ]);

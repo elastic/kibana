@@ -72,6 +72,14 @@ const SavedQueryRowActionsComponent: React.FC<SavedQueryRowActionsProps> = ({ it
     []
   );
 
+  const viewLabel = useMemo(
+    () =>
+      i18n.translate('xpack.osquery.savedQueryList.rowActions.viewLabel', {
+        defaultMessage: 'View query',
+      }),
+    []
+  );
+
   const duplicateLabel = useMemo(
     () =>
       i18n.translate('xpack.osquery.savedQueryList.rowActions.duplicateLabel', {
@@ -93,6 +101,7 @@ const SavedQueryRowActionsComponent: React.FC<SavedQueryRowActionsProps> = ({ it
       itemName={item.id}
       actionsAriaLabel={actionsAriaLabel}
       editLabel={editLabel}
+      viewLabel={viewLabel}
       duplicateLabel={duplicateLabel}
       deleteLabel={deleteLabel}
       deleteModalConfig={DELETE_MODAL_CONFIG}
