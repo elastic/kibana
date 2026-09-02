@@ -77,5 +77,32 @@ spaceTest.describe(
         expect(failedRequest.failure()).not.toBeNull();
       }
     );
+
+    spaceTest('cancels search when clicking the cancel button', async ({ page, pageObjects }) => {
+      // Set up listeners before opening the dashboard to avoid race conditions
+      const esqlRequestPromise = page.waitForRequest(
+        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+      );
+
+      // Open dashboard WITHOUT waiting for render
+      await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
+
+      // Wait for the map to initiate the ES|QL search (stalled by error_query)
+      await esqlRequestPromise;
+
+      const esqlAbortedPromise = page.waitForEvent(
+        'requestfailed',
+        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+      );
+
+      // Click cancel button - this should abort the pending request
+      const cancelButton = page.testSubj.locator('queryCancelButton');
+      await cancelButton.waitFor({ state: 'visible' });
+      await cancelButton.click();
+
+      // Verify the in-flight request was aborted
+      const failedRequest = await esqlAbortedPromise;
+      expect(failedRequest.failure()).not.toBeNull();
+    });
   }
 );
