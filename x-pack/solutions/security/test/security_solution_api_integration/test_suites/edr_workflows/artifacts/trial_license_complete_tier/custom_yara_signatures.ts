@@ -1549,7 +1549,7 @@ export default function ({ getService }: FtrProviderContext) {
                     severity: 'error',
                     line: 1,
                     message:
-                      '"meta.os" value "Linux" is different from "os_types" value "windows" on rule "rule1", Set meta.os to the same OSes (using "Windows", "Linux" and/or "MacOS") or drop the meta.os field',
+                      '"meta.os" value "Linux" is different from "os_types" value "windows" on rule "rule1". Set meta.os to the same OSes (using "Windows", "Linux" and/or "MacOS") or drop the meta.os field',
                   },
                 ],
                 error_count: 1,
