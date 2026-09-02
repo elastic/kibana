@@ -98,7 +98,7 @@ For conditional or dynamically-loaded content, supply only the panel for the cur
 
 - Non-empty `tabs` activates tabbed mode: the bar renders, only the selected panel mounts, and top-level `Body` passthrough content is ignored.
 - A tab whose panel is absent still renders and stays selectable; the body renders empty. This is the on-demand mounting path and is never warned about.
-- A `Body.TabPanel` declared with no matching `tabs` entry silently renders as passthrough content (tabbed mode is off when `tabs` is empty or omitted).
+- A `Body.TabPanel` declared when `tabs` is empty or omitted is silently ignored — tabbed mode is off and only passthrough children render.
 - Only the selected panel mounts; panel state is discarded on every tab switch. There is no keep-mounted escape hatch.
 - Duplicate ids in `tabs` are silently deduplicated; the first entry with each id wins.
 - Setting `tabs` without a `<FlyoutTemplate.Header>` logs a dev warning: the tab bar cannot render without a header zone.
