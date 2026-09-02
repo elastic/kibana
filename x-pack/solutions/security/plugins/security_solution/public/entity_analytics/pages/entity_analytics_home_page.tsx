@@ -51,7 +51,12 @@ import {
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 import { NeedsAttentionPanel } from '../components/home/facelift/v1/needs_attention_panel';
+import {
+  AttentionSignalCard,
+  AttentionSignalGrid,
+} from '../components/home/facelift/v1/attention_signal_card';
 import { useNeedsAttentionEntries } from '../components/home/use_needs_attention_entries';
+import { useHcEntitiesWithOpenAlerts } from '../components/home/use_hc_entities_with_open_alerts';
 import type { ActiveFilter, FaceliftIdentity } from '../components/home/facelift/v1/data';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -200,6 +205,9 @@ const EntityAnalyticsHomePageContent = () => {
     spaceId: resolvedSpaceId,
     watchlistId: selectedWatchlistId,
   });
+
+  const { count: hcWithOpenAlertsCount, isLoading: hcWithOpenAlertsLoading } =
+    useHcEntitiesWithOpenAlerts({ spaceId: resolvedSpaceId });
 
   const handleSelectIdentity = useCallback((identity: FaceliftIdentity) => {
     setActiveFilter((prev) =>
@@ -351,6 +359,16 @@ const EntityAnalyticsHomePageContent = () => {
             />
           </EuiFlexItem>
         )}
+
+        <EuiFlexItem grow={false}>
+          <AttentionSignalGrid>
+            <AttentionSignalCard
+              title={'H/C entities with open alerts'}
+              count={hcWithOpenAlertsCount}
+              isLoading={hcWithOpenAlertsLoading}
+            />
+          </AttentionSignalGrid>
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <NeedsAttentionPanel
