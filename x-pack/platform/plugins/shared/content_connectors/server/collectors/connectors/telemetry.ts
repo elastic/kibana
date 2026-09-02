@@ -8,8 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { collectConnectorStats } from '@kbn/search-connectors';
-import type { ConnectorStats } from '../../../common/types/connector_stats';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ConnectorStats } from '../../../common/types/connector_stats';
 
 interface Telemetry {
   connectors: ConnectorStats[];
