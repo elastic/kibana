@@ -12,9 +12,9 @@ import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { getColorPalettesPromptContent } from './color_palettes';
 import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
 
-const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
+const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined, query: string): string => {
   if (!columns || columns.length === 0) {
-    return 'No column information is available; infer fields from the ES|QL query.';
+    return `No column information is available; infer fields from the ES|QL query: ${query}`;
   }
 
   return columns.map((column) => `- "${column.name}" (${column.type})`).join('\n');
@@ -37,8 +37,6 @@ export const createGenerateConfigPrompt = ({
   existingConfig?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
-  const esqlQueryJson = JSON.stringify(esqlQuery);
-
   const segments = [
     `You are a Kibana Lens visualization configuration expert. Generate a valid configuration for a ${chartType} visualization based on the provided schema and ES|QL query.
 
@@ -60,7 +58,7 @@ ${existingConfig}
 
 Columns available in the data (reference these EXACT names):
 <columns>
-${formatColumns(columns)}
+${formatColumns(columns, esqlQuery)}
 </columns>`,
     titleRulesPromptContent,
     numberFormatRulesPromptContent,
