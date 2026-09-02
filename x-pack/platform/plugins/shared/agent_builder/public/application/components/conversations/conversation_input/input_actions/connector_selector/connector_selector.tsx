@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
@@ -37,7 +38,7 @@ import {
 import { InputPopoverButton } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
-import { ModelBadgesReveal, ModelNewBadge } from './model_badges';
+import { ModelBadgesReveal, ModelRetirementIcon } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -96,7 +97,8 @@ const ConnectorPopoverButton: React.FC<{
   onClick: () => void;
   disabled: boolean;
   selectedConnectorName?: string;
-}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
+  isRetiring?: boolean;
+}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName, isRetiring }) => {
   const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
@@ -112,7 +114,16 @@ const ConnectorPopoverButton: React.FC<{
         detail: 'connector',
       })}
     >
-      {connectorDisplayName}
+      {isRetiring ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="warning" size="s" color="warning" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{connectorDisplayName}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        connectorDisplayName
+      )}
     </InputPopoverButton>
   );
 };
@@ -257,7 +268,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       prepend: <ConnectorIcon connectorName={connector.name} />,
       append: (
         <>
-          <ModelNewBadge metadata={connector.metadata} />
+          <ModelRetirementIcon metadata={connector.metadata} />
           <ModelBadgesReveal metadata={connector.metadata} />
           {connector.id === defaultConnectorId && <DefaultConnectorBadge />}
         </>
@@ -309,6 +320,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
   });
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
+  const eolDate = selectedConnector?.metadata?.heuristics?.end_of_life_date;
+  const isRetiring = !!eolDate && Date.parse(eolDate) - Date.now() <= 60 * 24 * 60 * 60 * 1000;
 
   // Track the previously-observed default so we can detect admin-initiated changes.
   // Seeded with the current value on first render and updated on every effect run
@@ -379,6 +392,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onClick={togglePopover}
           disabled={isLoading || connectors.length === 0 || defaultConnectorOnly}
           selectedConnectorName={selectedConnector?.name}
+          isRetiring={isRetiring}
         />
       }
       isOpen={isPopoverOpen}

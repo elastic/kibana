@@ -11,12 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import React, { useState } from 'react';
 
-const NEW_BADGE_WINDOW_DAYS = 90;
-
-const newLabel = i18n.translate(
-  'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.new',
-  { defaultMessage: 'New' }
-);
+const RETIREMENT_WARNING_DAYS = 60;
 
 const extendedReasoningLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.extendedReasoning',
@@ -53,25 +48,41 @@ const modelCapabilitiesAriaLabel = i18n.translate(
   { defaultMessage: 'View model capabilities' }
 );
 
-const isRecentRelease = (releaseDate: string | undefined): boolean => {
-  if (!releaseDate) return false;
-  const parsed = Date.parse(releaseDate);
-  if (isNaN(parsed)) return false;
-  const ageMs = Date.now() - parsed;
-  return ageMs >= 0 && ageMs <= NEW_BADGE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+const retirementWarningTooltip = (endOfLifeDate: string): string => {
+  const formatted = new Date(endOfLifeDate).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+  return i18n.translate(
+    'xpack.agentBuilder.conversationInput.connectorSelector.modelBadge.retirement.tooltip',
+    {
+      defaultMessage: 'Retiring {date} — select a different model to avoid disruption.',
+      values: { date: formatted },
+    }
+  );
 };
 
 interface ModelBadgesProps {
   metadata?: EisInferenceEndpointMetadata;
 }
 
-/** Always-visible "New" badge for recently released models. */
-export const ModelNewBadge: React.FC<ModelBadgesProps> = ({ metadata }) => {
-  if (!isRecentRelease(metadata?.heuristics?.release_date)) return null;
+/** Warning icon with tooltip for models retiring within 60 days. */
+export const ModelRetirementIcon: React.FC<ModelBadgesProps> = ({ metadata }) => {
+  const endOfLifeDate = metadata?.heuristics?.end_of_life_date;
+  if (!endOfLifeDate) return null;
+  const msUntilEol = Date.parse(endOfLifeDate) - Date.now();
+  if (msUntilEol > RETIREMENT_WARNING_DAYS * 24 * 60 * 60 * 1000) return null;
   return (
-    <EuiBadge color="success" data-test-subj="modelBadgeNew">
-      {newLabel}
-    </EuiBadge>
+    <EuiToolTip content={retirementWarningTooltip(endOfLifeDate)}>
+      <EuiIcon
+        type="warning"
+        size="s"
+        color="warning"
+        tabIndex={0}
+        aria-label={retirementWarningTooltip(endOfLifeDate)}
+        data-test-subj="modelBadgeRetirement"
+      />
+    </EuiToolTip>
   );
 };
 
