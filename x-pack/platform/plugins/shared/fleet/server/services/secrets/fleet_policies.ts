@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { SO_SEARCH_LIMIT, AGENT_POLICY_INDEX } from '../../../common';
 import { appContextService } from '../app_context';
@@ -50,7 +51,7 @@ export async function findFleetPoliciesUsingSecrets(opts: {
 
   try {
     const referencedIds = new Set<string>();
-    let searchAfter: unknown[] | undefined;
+    let searchAfter: SortResults | undefined;
 
     do {
       const res = await esClient.search<{
@@ -97,7 +98,7 @@ export async function findFleetPoliciesUsingSecrets(opts: {
 
       if (hits.length === SO_SEARCH_LIMIT) {
         const last = hits[hits.length - 1];
-        searchAfter = last.sort as unknown[];
+        searchAfter = last.sort as SortResults;
       } else {
         searchAfter = undefined;
       }

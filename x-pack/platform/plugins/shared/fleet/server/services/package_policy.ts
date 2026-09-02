@@ -1571,6 +1571,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
+      asyncDeploy?: boolean;
     },
     context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
