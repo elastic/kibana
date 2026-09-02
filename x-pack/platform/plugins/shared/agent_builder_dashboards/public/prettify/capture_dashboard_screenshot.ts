@@ -102,12 +102,8 @@ const renderGrid = async (
 
 export const SCREENSHOT_PREVIEW_STORAGE_KEY = 'agentBuilderDashboards.previewDashboardScreenshot';
 
-// Dev-only: run localStorage.setItem('agentBuilderDashboards.previewDashboardScreenshot', 'true')
-// in the browser console to see each captured screenshot in a click-to-dismiss overlay.
+// TODO: Remove before merging.
 const maybePreviewScreenshot = (blob: Blob): void => {
-  if (localStorage.getItem(SCREENSHOT_PREVIEW_STORAGE_KEY) !== 'true') {
-    return;
-  }
   const url = URL.createObjectURL(blob);
   const overlay = document.createElement('div');
   overlay.setAttribute('data-test-subj', 'dashboardScreenshotPreview');
