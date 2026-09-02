@@ -69,6 +69,8 @@ export async function findSharedTarballs() {
  * Filename yarn classic uses inside the offline mirror: package name with
  * "/" replaced by "-" (scoped packages), followed by the version.
  * e.g. @elastic/kibana-d3-color@2.0.1 -> @elastic-kibana-d3-color-2.0.1.tgz
+ * npm package names contain at most one "/" (scope separator), so a single
+ * replace is sufficient.
  * @param {SharedTarball} tarball
  */
 function mirrorFilename({ name, version }) {
@@ -77,6 +79,9 @@ function mirrorFilename({ name, version }) {
 
 /**
  * Verify a buffer against an SSRI integrity string (e.g. "sha512-<b64> sha1-<b64>").
+ * Simplification vs full SSRI semantics (which prefer the strongest algorithm):
+ * the first supported entry decides. yarn.lock integrity fields are single
+ * sha512 (or "sha1 sha512") values, where any match is sufficient.
  * @param {Buffer} buffer
  * @param {string} integrity
  */
@@ -128,6 +133,14 @@ export async function prefetchSharedTarballs(log) {
   await Fsp.mkdir(MIRROR_DIR, { recursive: true });
   const mirrorReal = await Fsp.realpath(MIRROR_DIR);
 
+  // clean up staging leftovers from a previous crashed run (files are written
+  // as .<name>.tgz.prefetch-<pid> and renamed into place on success)
+  for (const entry of await Fsp.readdir(mirrorReal)) {
+    if (/\.prefetch-\d+$/.test(entry)) {
+      await Fsp.rm(Path.resolve(mirrorReal, entry), { force: true });
+    }
+  }
+
   /** @type {SharedTarball[]} */
   const missing = [];
   for (const tarball of shared) {
@@ -135,7 +148,10 @@ export async function prefetchSharedTarballs(log) {
     const existing = await Fsp.readFile(dest).catch(() => null);
     if (existing && isValid(existing, tarball.integrity)) continue;
     if (existing !== null) {
+      // remove the corrupt file so the main install refetches it even if the
+      // prefetch below bails out (e.g. transient network failure)
       log.warning(`mirror tarball is corrupt, refetching: ${Path.basename(dest)}`);
+      await Fsp.rm(dest, { force: true });
     }
     missing.push(tarball);
   }
@@ -149,6 +165,21 @@ export async function prefetchSharedTarballs(log) {
       .map((t) => `${t.name}@${t.version}`)
       .join(', ')}`
   );
+
+  // guard: the temp package.json below keys dependencies by package name, so
+  // two shared tarballs with the same name at different versions would
+  // silently drop one and quietly reintroduce the fetch race for it
+  const namesSeen = new Set();
+  for (const { name, version } of missing) {
+    if (namesSeen.has(name)) {
+      throw new Error(
+        `multiple shared tarball versions for "${name}" (e.g. ${version}); ` +
+          'prefetch_shared_tarballs.mjs needs to be extended to fetch same-name ' +
+          'packages in separate temp installs'
+      );
+    }
+    namesSeen.add(name);
+  }
 
   const tmpDir = await Fsp.mkdtemp(Path.resolve(Os.tmpdir(), 'kbn-mirror-prefetch-'));
   try {
@@ -172,17 +203,29 @@ export async function prefetchSharedTarballs(log) {
       `yarn-offline-mirror "${tmpMirror}"\nignore-scripts true\n`
     );
 
-    await run(
-      'yarn',
-      ['install', '--non-interactive', '--no-lockfile', '--ignore-engines', '--ignore-optional'],
-      { cwd: tmpDir }
-    );
+    try {
+      await run(
+        'yarn',
+        ['install', '--non-interactive', '--no-lockfile', '--ignore-engines', '--ignore-optional'],
+        { cwd: tmpDir }
+      );
+    } catch (error) {
+      // best-effort: a transient network/registry failure here should not
+      // block bootstrap — the main install fetches the same tarballs and the
+      // race this prefetch defuses is rare. Corrupt mirror files were already
+      // removed above, so the main install will refetch them.
+      log.warning(`prefetch install failed, continuing with regular install: ${error.message}`);
+      return;
+    }
 
     for (const tarball of missing) {
       const filename = mirrorFilename(tarball);
       const src = Path.resolve(tmpMirror, filename);
       const buffer = await Fsp.readFile(src);
       if (!isValid(buffer, tarball.integrity)) {
+        // intentionally hard-fails bootstrap: the registry served content that
+        // differs from what yarn.lock records — a supply-chain signal, and the
+        // main install would fail on the same mismatch anyway
         throw new Error(
           `prefetched tarball for ${tarball.name}@${tarball.version} does not match the integrity recorded in yarn.lock`
         );
