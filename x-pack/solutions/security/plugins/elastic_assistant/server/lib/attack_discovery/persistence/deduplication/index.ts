@@ -8,12 +8,14 @@
 import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryGenerationSource } from '@kbn/attack-discovery-schedules-common';
 import { deduplicateAttackDiscoveries as deduplicateAttackDiscoveriesShared } from '@kbn/attack-discovery-schedules-common';
 
 interface DeduplicateAttackDiscoveriesParams {
   attackDiscoveries: AttackDiscoveries;
   connectorId: string;
   esClient: ElasticsearchClient;
+  generationSource?: AttackDiscoveryGenerationSource;
   indexPattern: string;
   logger: Logger;
   ownerInfo: {

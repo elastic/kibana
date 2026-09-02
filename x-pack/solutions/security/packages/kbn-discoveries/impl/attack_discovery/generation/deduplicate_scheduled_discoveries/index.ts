@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AttackDiscoveryGenerationSource } from '@kbn/attack-discovery-schedules-common';
 import {
   deduplicateAttackDiscoveries,
   getScheduledIndexPattern,
@@ -24,6 +25,7 @@ export interface DeduplicateScheduledDiscoveriesParams {
   /** The persist step handover, in workflow (snake_case) shape. */
   discoveriesToPersist: unknown[];
   esClient: ElasticsearchClient;
+  generationSource?: AttackDiscoveryGenerationSource;
   logger: Logger;
   replacements: Replacements | undefined;
   /** The trusted in-process rule id (schedule owner). */
@@ -48,6 +50,7 @@ export const deduplicateScheduledDiscoveries = async ({
   connectorId,
   discoveriesToPersist,
   esClient,
+  generationSource,
   logger,
   replacements,
   ruleId,
@@ -67,6 +70,7 @@ export const deduplicateScheduledDiscoveries = async ({
       computeSha256Hash,
       connectorId,
       esClient,
+      generationSource,
       indexPattern: getScheduledIndexPattern(spaceId),
       logger,
       ownerInfo: { id: ruleId, isSchedule: true },

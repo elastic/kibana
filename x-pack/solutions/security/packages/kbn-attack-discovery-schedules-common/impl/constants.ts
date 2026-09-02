@@ -11,6 +11,9 @@ import { attackDiscoveryAlertFieldMap } from './fields/field_map';
 
 export const SECURITY_APP_PATH = `/app/security` as const;
 
+export const WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE = 'watch_floor_ad_worker' as const;
+export type AttackDiscoveryGenerationSource = typeof WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE;
+
 export const ATTACK_DISCOVERY_ALERTS_CONTEXT = 'security.attack.discovery' as const;
 
 export const ATTACK_DISCOVERY_ALERTS_AAD_CONFIG: IRuleTypeAlerts<AttackDiscoveryAlertDocument> = {

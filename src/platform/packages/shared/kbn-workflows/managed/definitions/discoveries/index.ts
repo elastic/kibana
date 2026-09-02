@@ -74,7 +74,7 @@ export const ATTACK_DISCOVERY_VALIDATE_WORKFLOW = {
   id: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 3,
+  version: 4,
   yaml: VALIDATE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

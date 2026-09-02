@@ -56,6 +56,10 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
    */
   generation_uuid: z.string(),
   /**
+   * Optional producer identity so independent writers to the shared Attack Discovery index do not deduplicate against each other
+   */
+  generation_source: z.literal('watch_floor_ad_worker').optional(),
+  /**
    * Replacements enable anonymization of data sent to the LLM.
    */
   replacements: Replacements.optional(),

@@ -11,6 +11,8 @@ import { ALERT_URL } from '@kbn/rule-data-utils';
 import { generateAttackDiscoveryAlertHash, transformToBaseAlertDocument } from '.';
 import { mockAttackDiscoveries } from '../../__mocks__/mock_attack_discoveries';
 import { mockCreateAttackDiscoveryAlertsParams } from '../../__mocks__/mock_create_attack_discovery_alerts_params';
+import type { AttackDiscoveryGenerationSource } from '../../constants';
+import { WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE } from '../../constants';
 import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -18,6 +20,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
 } from '../../fields/field_names';
 
 describe('Transform attack discoveries to alert documents', () => {
@@ -186,6 +189,38 @@ describe('Transform attack discoveries to alert documents', () => {
         'http://jest.com/test/s/very-nice-space/app/security/attack_discovery?id=test-alert-id&timestamp=2023-10-12T10%3A00%3A00.000Z'
       );
     });
+
+    it('omits generation_source when no generation source is supplied', () => {
+      const baseAlertDocument = transformToBaseAlertDocument({
+        alertDocId,
+        alertInstanceId,
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        spaceId,
+      });
+
+      expect(
+        Object.prototype.hasOwnProperty.call(
+          baseAlertDocument,
+          ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE
+        )
+      ).toBe(false);
+    });
+
+    it('sets generation_source when a generation source is supplied', () => {
+      const baseAlertDocument = transformToBaseAlertDocument({
+        alertDocId,
+        alertInstanceId,
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+        spaceId,
+      });
+
+      expect(baseAlertDocument[ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]).toBe(
+        WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE
+      );
+    });
   });
 
   describe('generateAttackDiscoveryAlertHash', () => {
@@ -201,6 +236,10 @@ describe('Transform attack discoveries to alert documents', () => {
 
     beforeEach(() => {
       computeSha256Hash.mockClear();
+    });
+
+    it('exports watch_floor_ad_worker as the worker generation source constant', () => {
+      expect(WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE).toBe('watch_floor_ad_worker');
     });
 
     it('generates a deterministic hash for the same attack discovery and space', () => {
@@ -321,6 +360,94 @@ describe('Transform attack discoveries to alert documents', () => {
       });
 
       expect(result).toBe('expected-hash-value');
+    });
+
+    it('returns a hardcoded SHA-256 digest for a fixed input with no generation source', () => {
+      const { createHash } = jest.requireActual<typeof import('crypto')>('crypto');
+      const realSha256 = (input: string): string =>
+        createHash('sha256').update(input).digest('hex');
+      const attackDiscovery = { ...mockAttackDiscoveries[0], alertIds: ['alert-b', 'alert-a'] };
+
+      const result = generateAttackDiscoveryAlertHash({
+        attackDiscovery,
+        computeSha256Hash: realSha256,
+        connectorId: 'connector-1',
+        ownerId: 'owner-1',
+        replacements: undefined,
+        spaceId: 'space-1',
+      });
+
+      expect(result).toBe('88d7e4570f2f3754e49f6b6afb45cea382e460329842663805a3b08dbc15e0a1');
+    });
+
+    it('changes the hash when a generation source is supplied', () => {
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: mockAttackDiscoveries[0],
+      });
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: mockAttackDiscoveries[0],
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+      });
+
+      const [call1Input] = computeSha256Hash.mock.calls[0];
+      const [call2Input] = computeSha256Hash.mock.calls[1];
+      expect(call1Input).not.toBe(call2Input);
+    });
+
+    it('returns a stable hash for the same generation source', () => {
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: mockAttackDiscoveries[0],
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+      });
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: mockAttackDiscoveries[0],
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+      });
+
+      const [call1Input] = computeSha256Hash.mock.calls[0];
+      const [call2Input] = computeSha256Hash.mock.calls[1];
+      expect(call1Input).toBe(call2Input);
+    });
+
+    it('generates different hashes for different generation sources', () => {
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: mockAttackDiscoveries[0],
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+      });
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: mockAttackDiscoveries[0],
+        generationSource: 'other_generation_source' as AttackDiscoveryGenerationSource,
+      });
+
+      const [call1Input] = computeSha256Hash.mock.calls[0];
+      const [call2Input] = computeSha256Hash.mock.calls[1];
+      expect(call1Input).not.toBe(call2Input);
+    });
+
+    it('is not affected by alertIds order when a generation source is set', () => {
+      const attackDiscoveryA = { ...mockAttackDiscoveries[0], alertIds: ['b', 'a', 'c'] };
+      const attackDiscoveryB = { ...mockAttackDiscoveries[0], alertIds: ['c', 'b', 'a'] };
+
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: attackDiscoveryA,
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+      });
+      generateAttackDiscoveryAlertHash({
+        ...defaultProps,
+        attackDiscovery: attackDiscoveryB,
+        generationSource: WATCH_FLOOR_AD_WORKER_GENERATION_SOURCE,
+      });
+
+      const [call1Input] = computeSha256Hash.mock.calls[0];
+      const [call2Input] = computeSha256Hash.mock.calls[1];
+      expect(call1Input).toBe(call2Input);
     });
   });
 });

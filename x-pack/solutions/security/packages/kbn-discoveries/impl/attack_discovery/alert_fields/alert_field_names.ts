@@ -30,6 +30,8 @@ export const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements' as const;
 export const ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS =
   'kibana.alert.attack_discovery.mitre_attack_tactics' as const;
+export const ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE =
+  'kibana.alert.attack_discovery.generation_source' as const;
 export const ALERT_ATTACK_DISCOVERY_REPLACEMENTS =
   'kibana.alert.attack_discovery.replacements' as const;
 export const ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID =

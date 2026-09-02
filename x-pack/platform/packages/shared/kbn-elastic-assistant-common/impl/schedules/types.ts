@@ -9,6 +9,7 @@ import type { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import type { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
 import type {
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_USERS,
 } from './field_names';
@@ -50,4 +51,5 @@ export type AttackDiscoveryAlertDocument = Omit<
     name: string;
   }>;
   [ALERT_WORKFLOW_STATUS_UPDATED_AT]?: string;
+  [ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]?: string;
 };

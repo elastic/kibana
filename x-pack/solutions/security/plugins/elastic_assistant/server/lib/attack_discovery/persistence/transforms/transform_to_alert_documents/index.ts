@@ -40,6 +40,7 @@ import {
   generateAttackDiscoveryAlertHash as generateHashFromShared,
   transformToBaseAlertDocument,
 } from '@kbn/attack-discovery-schedules-common';
+import type { AttackDiscoveryGenerationSource } from '@kbn/attack-discovery-schedules-common';
 
 export { transformToBaseAlertDocument };
 
@@ -49,12 +50,14 @@ const computeSha256Hash = (input: string): string =>
 export const generateAttackDiscoveryAlertHash = ({
   attackDiscovery,
   connectorId,
+  generationSource,
   ownerId,
   replacements,
   spaceId,
 }: {
   attackDiscovery: AttackDiscovery;
   connectorId: string;
+  generationSource?: AttackDiscoveryGenerationSource;
   ownerId: string;
   replacements: Replacements | undefined;
   spaceId: string;
@@ -63,6 +66,7 @@ export const generateAttackDiscoveryAlertHash = ({
     attackDiscovery,
     computeSha256Hash,
     connectorId,
+    generationSource,
     ownerId,
     replacements,
     spaceId,

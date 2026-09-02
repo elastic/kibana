@@ -22,6 +22,7 @@ export const PersistDiscoveriesInputSchema = z.object({
   connector_name: z.string().optional(),
   enable_field_rendering: z.boolean().optional().default(true),
   generation_uuid: z.string(),
+  generation_source: z.enum(['watch_floor_ad_worker']).optional(),
   replacements: z.record(z.string(), z.string()).optional(),
   /**
    * The execution source. When 'scheduled', persistence is skipped because the

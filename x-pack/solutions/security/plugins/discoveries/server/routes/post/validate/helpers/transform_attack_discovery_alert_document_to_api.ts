@@ -139,6 +139,9 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       defaultValue: undefined,
     }),
     generation_uuid: (doc[ALERT_RULE_EXECUTION_UUID] as string) ?? '',
+    ...(doc['kibana.alert.attack_discovery.generation_source'] === 'watch_floor_ad_worker'
+      ? { generation_source: 'watch_floor_ad_worker' as const }
+      : {}),
     id,
     mitre_attack_tactics: doc[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS] as string[] | undefined,
     replacements: replacements

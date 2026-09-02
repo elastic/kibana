@@ -61,6 +61,11 @@ components:
         generation_uuid:
           description: The generation ID of the run that created the attack discovery
           type: string
+        generation_source:
+          description: Optional producer identity so independent writers to the shared Attack Discovery index do not deduplicate against each other
+          enum:
+            - watch_floor_ad_worker
+          type: string
         id:
           description: The unique ID of the attack discovery
           type: string
