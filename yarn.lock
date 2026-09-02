@@ -25585,11 +25585,6 @@ meriyah@^6.1.4:
   resolved "https://registry.yarnpkg.com/meriyah/-/meriyah-6.1.4.tgz#2d49a8934fbcd9205c20564579c3560d9b1e077b"
   integrity sha512-Sz8FzjzI0kN13GK/6MVEsVzMZEPvOhnmmI1lU5+/1cGOiK3QUahntrNNtdVeihrO7t9JpoH75iMNXg6R6uWflQ==
 
-meta-png@1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/meta-png/-/meta-png-1.0.6.tgz#34d78a403cc1c809978d3e9f89485a2700daafce"
-  integrity sha512-eQtEi5E9axqwqA/sDK1dyhX9kYHCUe2m+45aQ3JHrozjGPs+/ab+hdhPp7A3GUNW+ZAbavrsg5xQ4r5jkGDX+A==
-
 methods@^1.1.2, methods@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
@@ -30673,7 +30668,7 @@ shallowequal@^1.1.0:
   resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-1.1.0.tgz#188d521de95b9087404fd4dcb68b13df0ae4e7f8"
   integrity sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==
 
-sharp@0.32.1, sharp@0.35.2:
+sharp@0.35.2:
   version "0.35.2"
   resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.35.2.tgz#4437256b654557e2b48279d1e67f086e7872d06a"
   integrity sha512-FVtFjtBCMiJS6yb5CX7Sop45WFMpeGw6oRKuJnXYgf/f1ms/D7LE/ZUSNxnW7rZ/dbslQWYkoqFHGPaDBtaK4w==
