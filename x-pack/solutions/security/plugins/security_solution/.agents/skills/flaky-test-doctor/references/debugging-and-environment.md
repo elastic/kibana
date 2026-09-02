@@ -51,7 +51,7 @@ cy.request('POST', '/api/security/some-endpoint', data);
 
 ## Environment Tag Combinations
 
-Positive tags include a suite. Skip tags remove one, even when a positive tag is also present.
+`@ess`, `@serverless`, and `@serverlessQA` opt a test **into** a pipeline. `@skipIn*` opts it **out**. If both are present, the skip wins: `@serverless` + `@skipInServerless` does not run in any serverless suite.
 
 | Tags | Runs in | Does not run in |
 |------|---------|-----------------|
