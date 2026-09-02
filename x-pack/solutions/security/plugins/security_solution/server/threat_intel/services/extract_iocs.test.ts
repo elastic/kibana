@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 import { classifySectionSpans, extractIocs, type ExtractedIoc, type IocTier } from './extract_iocs';
 
 /** Helper: extract IOC values of a specific type from the result. */
@@ -204,6 +205,30 @@ describe('extract_iocs — refang pre-pass and value normalization', () => {
       expect(r1.ioc_set_hash).not.toBeNull();
       expect(r1.ioc_set_hash).toEqual(r2.ioc_set_hash);
     });
+  });
+});
+
+// Downstream consumers (promote, reports index) read `defanged`. Cover the field
+// itself so a regression in `defangValue` or the default `defang` flag is visible.
+describe('extract_iocs — defang output field', () => {
+  test('domain value is defanged by default', () => {
+    const r = extractIocs({ text: 'C2 at evil.com' });
+    const ioc = r.iocs.find((i) => i.value === 'evil.com');
+    expect(ioc?.defanged).toBe('evil[.]com');
+  });
+
+  test('defang: false leaves value intact', () => {
+    const r = extractIocs({ text: 'C2 at evil.com', defang: false });
+    const ioc = r.iocs.find((i) => i.value === 'evil.com');
+    expect(ioc?.defanged).toBe('evil.com');
+  });
+
+  test('URL scheme separator is defanged', () => {
+    const r = extractIocs({ text: 'payload at https://evil.example/payload' });
+    const ioc = r.iocs.find((i) => i.type === 'url');
+    // `defangValue` brackets the scheme separator (`https[:]//`), it does not rewrite
+    // the scheme to hxxps. Refang accepts hxxps on input; output uses the bracket form.
+    expect(ioc?.defanged).toBe('https[:]//evil.example/payload');
   });
 });
 
@@ -1810,12 +1835,21 @@ describe('extract_iocs — mapping coverage guard', () => {
 // it. `body_text` accepts 5,000,000 characters and the URL pattern stops only at
 // whitespace, so one no-whitespace URL was enough to produce it.
 describe('extract_iocs — over-long values', () => {
+  test('drops a URL that exceeds MAX_IOC_VALUE_LENGTH', () => {
+    // `MAX_IOC_VALUE_LENGTH` mirrors `MAX_URL_LENGTH` in extract_iocs.ts.
+    const overlong = `https://evil.example/${'a'.repeat(MAX_URL_LENGTH)}`;
+    expect(overlong.length).toBeGreaterThan(MAX_URL_LENGTH);
+    const r = extractIocs({ text: `payload at ${overlong}` });
+
+    expect(urlValues(r)).toHaveLength(0);
+  });
+
   test('drops a URL longer than the indicator bound', () => {
     const huge = `https://evil.test/${'a'.repeat(5000)}`;
     const r = extractIocs({ text: `payload at ${huge} here` });
 
     expect(urlValues(r)).not.toContain(huge);
-    expect(r.iocs.every((ioc) => ioc.value.length <= 2048)).toBe(true);
+    expect(r.iocs.every((ioc) => ioc.value.length <= MAX_URL_LENGTH)).toBe(true);
   });
 
   // Dropping the URL should not lose the host, which is a short, usable indicator
@@ -1829,8 +1863,9 @@ describe('extract_iocs — over-long values', () => {
   });
 
   test('keeps a URL at the bound', () => {
-    const atBound = `https://evil.test/${'a'.repeat(2048 - 'https://evil.test/'.length)}`;
-    expect(atBound.length).toBe(2048);
+    const prefix = 'https://evil.test/';
+    const atBound = `${prefix}${'a'.repeat(MAX_URL_LENGTH - prefix.length)}`;
+    expect(atBound.length).toBe(MAX_URL_LENGTH);
     const r = extractIocs({ text: `payload at ${atBound} here` });
 
     expect(urlValues(r)).toContain(atBound);
