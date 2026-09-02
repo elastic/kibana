@@ -46,9 +46,13 @@ const mockUseGetRuleTypesPermissions = jest.fn(() => ({
   authorizedToReadRuleForAlert: (): boolean => true,
   authorizedToCreateAnyRules: false,
 }));
+const mockUseInvestigationAvailability = jest.fn(() => true);
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
   useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+}));
+jest.mock('../../hooks/use_investigation_availability', () => ({
+  useInvestigationAvailability: () => mockUseInvestigationAvailability(),
 }));
 
 const refresh = jest.fn();
@@ -117,6 +121,20 @@ describe('buildAlertSnapshot', () => {
       })
     ).toBeUndefined();
   });
+
+  it('omits malformed optional grouping fields', () => {
+    const snapshot = buildAlertSnapshot({
+      ...parsedAlert,
+      fields: {
+        ...parsedAlert.fields,
+        'kibana.alert.grouping': [],
+        'kibana.alert.group': [{ field: 'host.name', value: 42 }],
+      },
+    });
+
+    expect(snapshot).not.toHaveProperty('grouping');
+    expect(snapshot).not.toHaveProperty('group');
+  });
 });
 
 const { ObservabilityAIAssistantContextualInsight } =
@@ -170,6 +188,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 describe('ObservabilityActions component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseInvestigationAvailability.mockReturnValue(true);
     getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
     mockTelemetryClient.reportAlertAddedToCase.mockClear();
     mockUseGetRuleTypesPermissions.mockReturnValue({
@@ -327,6 +346,16 @@ describe('ObservabilityActions component', () => {
       withInvestigations: true,
       canWriteAgentBuilder: false,
     });
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
+      0
+    );
+  });
+
+  it('hides the investigate action when no investigation connector is available', async () => {
+    mockUseInvestigationAvailability.mockReturnValue(false);
+    const wrapper = await setup('nothing', { withInvestigations: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
     expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(

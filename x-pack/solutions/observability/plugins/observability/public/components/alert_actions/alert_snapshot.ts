@@ -35,8 +35,19 @@ type AlertSnapshot = Extract<
   { subject: { type: 'alert' } }
 >['context']['alerts'][number];
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isAlertGroup = (value: unknown): value is NonNullable<AlertSnapshot['group']> =>
+  Array.isArray(value) &&
+  value.every(
+    (group) => isRecord(group) && typeof group.field === 'string' && typeof group.value === 'string'
+  );
+
 export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot | undefined => {
   const start = fields[ALERT_START] ?? fields[TIMESTAMP];
+  const grouping = fields[ALERT_GROUPING];
+  const group = fields[ALERT_GROUP];
   if (
     !fields[ALERT_UUID] ||
     !fields[ALERT_RULE_UUID] ||
@@ -63,10 +74,8 @@ export const buildAlertSnapshot = ({ fields, reason }: TopAlert): AlertSnapshot 
     flapping: fields[ALERT_FLAPPING],
     ...(fields[ALERT_URL] ? { url: fields[ALERT_URL] } : {}),
     ...(fields[ALERT_RULE_TAGS] ? { rule_tags: fields[ALERT_RULE_TAGS] } : {}),
-    ...(fields[ALERT_GROUPING]
-      ? { grouping: fields[ALERT_GROUPING] as Record<string, unknown> }
-      : {}),
-    ...(fields[ALERT_GROUP] ? { group: fields[ALERT_GROUP] as AlertSnapshot['group'] } : {}),
+    ...(isRecord(grouping) ? { grouping } : {}),
+    ...(isAlertGroup(group) ? { group } : {}),
     ...(fields[ALERT_EVALUATION_VALUES] !== undefined ||
     fields[ALERT_EVALUATION_VALUE] !== undefined ||
     fields[ALERT_EVALUATION_THRESHOLD] !== undefined

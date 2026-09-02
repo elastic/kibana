@@ -11,7 +11,13 @@
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
     "requiredPlugins": [],
-    "optionalPlugins": ["agentBuilder", "spaces", "workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": [
+      "agentBuilder",
+      "searchInferenceEndpoints",
+      "spaces",
+      "workflowsExtensions",
+      "workflowsManagement",
+    ],
     "requiredBundles": [],
   },
 }

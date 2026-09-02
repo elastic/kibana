@@ -49,6 +49,7 @@ import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
 import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
+import { useInvestigationAvailability } from '../../../hooks/use_investigation_availability';
 import { buildAlertSnapshot } from '../../../components/alert_actions/alert_snapshot';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
@@ -104,11 +105,16 @@ export function HeaderActions({
     nightshiftInvestigations,
   } = services;
   const alertSnapshot = alert ? buildAlertSnapshot(alert) : undefined;
-  const showInvestigateAction = Boolean(
+  const canStartInvestigation = Boolean(
     nightshiftInvestigations &&
       services.application.capabilities.agentBuilder?.write === true &&
       alertSnapshot
   );
+  const isInvestigationAvailable = useInvestigationAvailability({
+    enabled: canStartInvestigation,
+    skipAlertsQueryContext: true,
+  });
+  const showInvestigateAction = Boolean(canStartInvestigation && isInvestigationAvailable);
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -124,6 +130,7 @@ export function HeaderActions({
   const canAddToCase = Boolean(casesPermissions?.read && casesPermissions?.createComment);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isInvestigating, setIsInvestigating] = useState(false);
   const [isRuleSnoozeModalOpen, setRuleSnoozeModalOpen] = useState<boolean>(false);
   const [isAlertSnoozeFormOpen, setIsAlertSnoozeFormOpen] = useState<boolean>(false);
 
@@ -181,6 +188,7 @@ export function HeaderActions({
   const handleInvestigate = async () => {
     if (!nightshiftInvestigations || !alertSnapshot) return;
 
+    setIsInvestigating(true);
     setIsPopoverOpen(false);
     try {
       await nightshiftInvestigations.investigationsClient.fetch(
@@ -208,6 +216,8 @@ export function HeaderActions({
         }),
         text: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      setIsInvestigating(false);
     }
   };
 
@@ -284,6 +294,7 @@ export function HeaderActions({
                         color="text"
                         iconType="inspect"
                         onClick={handleInvestigate}
+                        disabled={isInvestigating}
                         data-test-subj="alertDetailsInvestigate"
                       >
                         <EuiText size="s">

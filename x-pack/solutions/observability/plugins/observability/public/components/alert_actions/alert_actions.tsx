@@ -29,6 +29,7 @@ import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
+import { useInvestigationAvailability } from '../../hooks/use_investigation_availability';
 import { buildAlertSnapshot } from './alert_snapshot';
 
 export function AlertActions(
@@ -117,11 +118,15 @@ export function AlertActions(
 
   const [isInvestigating, setIsInvestigating] = useState(false);
   const alertSnapshot = buildAlertSnapshot(observabilityAlert);
-  const showInvestigateAction = Boolean(
+  const canStartInvestigation = Boolean(
     nightshiftInvestigations &&
       application.capabilities.agentBuilder?.write === true &&
       alertSnapshot
   );
+  const isInvestigationAvailable = useInvestigationAvailability({
+    enabled: canStartInvestigation,
+  });
+  const showInvestigateAction = Boolean(canStartInvestigation && isInvestigationAvailable);
 
   const handleInvestigate = async () => {
     if (!nightshiftInvestigations || !alertSnapshot) return;

@@ -49,6 +49,7 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -107,7 +108,11 @@ export class NightshiftInvestigationsPlugin
 
       registerRoutes({
         repository: nightshiftInvestigationsRouteRepository,
-        dependencies: { getInvestigationsClient, getTriggerEmitter },
+        dependencies: {
+          getInvestigationsClient,
+          getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+          getTriggerEmitter,
+        },
         core,
         logger: this.logger,
         runDevModeChecks: false,
@@ -126,6 +131,7 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
