@@ -88,7 +88,6 @@ function getColumns(openPipeline, clonePipeline) {
 
 function PipelinesTableUi({
   clonePipeline,
-  createPipeline,
   isReadOnly,
   isSelectable,
   message,
@@ -164,20 +163,6 @@ function PipelinesTableUi({
       },
     ],
     toolsLeft: deleteButton,
-    toolsRight: (
-      <EuiButton
-        isDisabled={isReadOnly}
-        key="btnAdd"
-        fill
-        onClick={createPipeline}
-        data-test-subj="btnAdd"
-      >
-        <FormattedMessage
-          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
-          defaultMessage="Create pipeline"
-        />
-      </EuiButton>
-    ),
   };
 
   const columns = getColumns(openPipeline, clonePipeline);

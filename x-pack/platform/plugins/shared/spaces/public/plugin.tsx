@@ -17,11 +17,10 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 
 import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
-import { initContextSwitcher } from './context_switcher';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
-import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
+import { initSpacesChromeControl } from './spaces_chrome_control';
 import { SpacesManager } from './spaces_manager';
 import type { SpacesApi } from './types';
 import { getUiApi } from './ui_api';
@@ -163,6 +162,7 @@ export class SpacesPlugin
         getStartServices: core.getStartServices,
         application: core.application,
         spacesManager: this.spacesManager,
+        initialSolutionSetupEnabled: this.config.initialSolutionSetup?.enabled ?? false,
       });
     }
 
@@ -182,15 +182,11 @@ export class SpacesPlugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    // Only skip spaces navigation if serverless and only one space is allowed
-    if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
-    }
-
-    initContextSwitcher(
+    initSpacesChromeControl(
       this.spacesManager,
       core,
-      this.config.allowSolutionVisibility,
+      this.config,
+      this.eventTracker,
       plugins.cloud,
       this.isServerless
     );

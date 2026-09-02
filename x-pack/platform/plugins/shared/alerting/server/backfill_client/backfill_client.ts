@@ -108,7 +108,7 @@ export class BackfillClient {
     opts.taskManagerSetup.registerTaskDefinitions({
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },

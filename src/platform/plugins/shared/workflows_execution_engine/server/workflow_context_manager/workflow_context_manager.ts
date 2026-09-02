@@ -513,6 +513,11 @@ export class WorkflowContextManager {
         ...(contextOverride.workflow || {}),
       };
 
+      stepContext.variables = {
+        ...stepContext.variables,
+        ...(contextOverride.variables || {}),
+      };
+
       if (!stepContext.foreach) {
         stepContext.foreach = contextOverride.foreach;
       }
