@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import Boom from '@hapi/boom';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -1699,11 +1700,12 @@ describe('bulkCreate', () => {
       await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
 
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        1
       );
     });
 
-    it('increments stats once per unique template ID', async () => {
+    it('adds one use per case, in a single call per template', async () => {
       const caseSOWithTemplate1 = {
         ...caseSO,
         id: 'case-1',
@@ -1730,12 +1732,16 @@ describe('bulkCreate', () => {
         casesClient
       );
 
+      // Two cases share tmpl-1, so it gains two uses from one call — the tally counts cases, while
+      // the call is still deduped per template to keep the writes down.
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(2);
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        2
       );
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-2'
+        'tmpl-2',
+        1
       );
     });
 
@@ -1845,6 +1851,119 @@ describe('bulkCreate', () => {
         false
       );
       expect(flagOffClientArgs.services.templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Template usage counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
+    const casesClient = createCasesClientMock();
+    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+    const caseSOWithTemplate = (id: string, templateId: string) => ({
+      ...caseSO,
+      id,
+      attributes: { ...caseSO.attributes, template: { id: templateId, version: 1 } },
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('counts created cases, not distinct templates', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSOWithTemplate('case-1', 'tmpl-1'),
+          caseSOWithTemplate('case-2', 'tmpl-1'),
+          { ...caseSO, id: 'case-3' },
+        ],
+      });
+
+      await bulkCreate(
+        { cases: [getCases()[0], getCases()[0], getCases()[0]] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not emit a counter for an empty bucket', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'create_case_with_template' })
+      );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    it('attributes counters to the calling source', async () => {
+      const connectorArgs = {
+        ...createCasesClientMockArgs(),
+        usageCounter,
+        clientSource: 'connector' as const,
+      };
+      connectorArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate('case-1', 'tmpl-1')],
+      });
+
+      await bulkCreate({ cases: getCases() }, connectorArgs, casesClient);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.connector',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not count a bulk create that failed', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockRejectedValueOnce(
+        new Error('bulk create failed')
+      );
+
+      await expect(bulkCreate({ cases: getCases() }, clientArgs, casesClient)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+
+    // The realistic partial failure is a resolved response carrying an error entry, which is a
+    // different branch from a rejected write — nothing may be counted, not even the cases that
+    // did persist.
+    it('does not count a bulk create whose saved object write partially failed', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSOWithTemplate('case-1', 'tmpl-1'),
+          {
+            type: 'cases',
+            id: 'case-2',
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await expect(bulkCreate({ cases: getCases() }, clientArgs, casesClient)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 

@@ -180,6 +180,7 @@ export {
   type ConversationRound,
   type ConversationRoundFeedback,
   type FeedbackChipId,
+  getConversationRoundAuthorDisplayName,
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
