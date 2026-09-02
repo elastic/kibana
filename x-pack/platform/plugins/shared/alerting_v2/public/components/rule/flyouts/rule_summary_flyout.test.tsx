@@ -28,41 +28,6 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
-  RuleActionsMenu: ({
-    rule,
-    onEdit,
-    onClone,
-    onDelete,
-    onToggleEnabled,
-    onRun,
-    onUpdateApiKey,
-  }: any) => (
-    <div data-test-subj={`ruleActionsMenu-${rule.id}`}>
-      <button data-test-subj="mockEdit" onClick={() => onEdit(rule)}>
-        Edit
-      </button>
-      <button data-test-subj="mockClone" onClick={() => onClone(rule)}>
-        Clone
-      </button>
-      <button data-test-subj="mockDelete" onClick={() => onDelete(rule)}>
-        Delete
-      </button>
-      <button data-test-subj="mockToggleEnabled" onClick={() => onToggleEnabled(rule)}>
-        Toggle
-      </button>
-      <button data-test-subj="mockRun" onClick={() => onRun(rule)}>
-        Run
-      </button>
-      {onUpdateApiKey ? (
-        <button data-test-subj="mockUpdateApiKey" onClick={() => onUpdateApiKey(rule)}>
-          Update API key
-        </button>
-      ) : null}
-    </div>
-  ),
-}));
-
 jest.mock('../../rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
   RuleTitleWithBadges: ({ variant }: { variant?: string }) => (
@@ -96,7 +61,6 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
     rule: baseRule,
     onClose: jest.fn(),
     onEdit: jest.fn(),
-    onQuickEdit: jest.fn(),
     onClone: jest.fn(),
     onDelete: jest.fn(),
     onToggleEnabled: jest.fn(),
@@ -126,12 +90,6 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('mockRuleHeaderDescription')).toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
     expect(screen.getByTestId('mockRuleMetadata')).toBeInTheDocument();
-  });
-
-  it('passes the rule to the actions menu via context', () => {
-    renderFlyout();
-
-    expect(screen.getByTestId('ruleActionsMenu-rule-1')).toBeInTheDocument();
   });
 
   it('calls onClose when the close icon button is clicked', () => {
@@ -172,55 +130,14 @@ describe('RuleSummaryFlyout', () => {
     );
   });
 
-  it('calls onQuickEdit with the rule when the pencil icon is clicked', () => {
-    const { props } = renderFlyout();
-
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutQuickEditButton'));
-
-    expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
-  });
-
-  it('hides the quick edit and actions menu when canWrite is false', () => {
-    renderFlyout({ canWrite: false });
-
-    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('ruleActionsMenu-rule-1')).not.toBeInTheDocument();
-    // Read-only affordances remain available.
-    expect(screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
-  });
-
-  it('forwards action callbacks to the RuleActionsMenu with the rule', () => {
-    const { props } = renderFlyout();
-
-    fireEvent.click(screen.getByTestId('mockEdit'));
-    expect(props.onEdit).toHaveBeenCalledWith(baseRule);
-
-    fireEvent.click(screen.getByTestId('mockClone'));
-    expect(props.onClone).toHaveBeenCalledWith(baseRule);
-
-    fireEvent.click(screen.getByTestId('mockDelete'));
-    expect(props.onDelete).toHaveBeenCalledWith(baseRule);
-
-    fireEvent.click(screen.getByTestId('mockToggleEnabled'));
-    expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
-
-    fireEvent.click(screen.getByTestId('mockRun'));
-    expect(props.onRun).toHaveBeenCalledWith(baseRule);
-  });
-
-  it('forwards onUpdateApiKey to the RuleActionsMenu when provided', () => {
-    const onUpdateApiKey = jest.fn();
-    renderFlyout({ onUpdateApiKey });
-
-    fireEvent.click(screen.getByTestId('mockUpdateApiKey'));
-    expect(onUpdateApiKey).toHaveBeenCalledWith(baseRule);
-  });
-
-  it('omits the update API key action when onUpdateApiKey is not provided', () => {
+  it('does not render any rule actions in the header', () => {
     renderFlyout();
 
-    expect(screen.queryByTestId('mockUpdateApiKey')).not.toBeInTheDocument();
+    // Header actions were moved to the footer Take action menu.
+    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    // The close control remains in the header.
+    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
   });
 
   describe('Agent Builder auto-attach', () => {

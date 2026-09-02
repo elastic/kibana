@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { paths } from '../../../constants';
-import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { RuleProvider } from '../../rule_details/rule_context';
 import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/rule_summary_header';
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
@@ -98,40 +97,6 @@ export const RuleSummaryFlyout = ({
             responsive={false}
             alignItems="center"
           >
-            {canWrite && onQuickEdit && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
-                    defaultMessage: 'Edit rule',
-                  })}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="pencil"
-                    color="text"
-                    onClick={() => onQuickEdit(rule)}
-                    aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
-                      defaultMessage: 'Edit rule',
-                    })}
-                    data-test-subj="ruleSummaryFlyoutQuickEditButton"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {canWrite && (
-              <EuiFlexItem grow={false}>
-                <RuleActionsMenu
-                  rule={rule}
-                  canWrite={canWrite}
-                  onEdit={onEdit}
-                  onClone={onClone}
-                  onDelete={onDelete}
-                  onToggleEnabled={onToggleEnabled}
-                  onRun={onRun}
-                  onUpdateApiKey={onUpdateApiKey}
-                />
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.close', {
