@@ -14,7 +14,7 @@ spaceTest.describe(
   {
     tag: [
       '@local-stateful-classic',
-      'local-serverless-security_complete',
+      '`@local-serverless-security_complete`',
       '@local-serverless-security_ease',
     ],
   },
