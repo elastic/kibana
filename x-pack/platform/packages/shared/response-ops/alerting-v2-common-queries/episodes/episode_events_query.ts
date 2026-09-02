@@ -17,6 +17,7 @@ export interface EpisodeEventRow {
   'rule.id': string;
   group_hash: string;
   severity?: string | null;
+  source?: string | null;
   data?: string | Record<string, unknown> | null;
 }
 
@@ -27,22 +28,46 @@ export const ALERT_EPISODE_EVENT_FIELDS = [
   'rule.id',
   'group_hash',
   'severity',
+  'source',
   'data',
 ] as const;
+
+export interface BuildEpisodeEventsQueryOptions {
+  /** Inclusive `@timestamp` window. Omitted by the details-page timeline. */
+  timeRange?: {
+    start: string;
+    end: string;
+  };
+  /** Restrict to a single episode lifecycle status. */
+  status?: AlertEpisodeStatus;
+}
 
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
 export const buildEpisodeEventsQuery = (
   spaceId: string,
-  episodeId: string
+  episodeId: string,
+  { timeRange, status }: BuildEpisodeEventsQueryOptions = {}
 ): TypedEsqlQuery<EpisodeEventRow> => {
   // prettier-ignore
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`
+    .where`type == "alert"`
+    .where`episode.id == ${episodeId}`;
+
+  if (timeRange) {
+    query.where`@timestamp >= ${timeRange.start}`;
+    query.where`@timestamp <= ${timeRange.end}`;
+  }
+
+  if (status) {
+    query.where`episode.status == ${status}`;
+  }
+
+  // prettier-ignore
   return asTypedEsqlQuery<EpisodeEventRow>(
-    esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
-      .where`space_id == ${spaceId}`
-      .where`type == "alert"`
-      .where`episode.id == ${episodeId}`
+    query
       .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
       .sort([DEFAULT_TIME_FIELD, 'ASC'])
       .keep(...ALERT_EPISODE_EVENT_FIELDS)
