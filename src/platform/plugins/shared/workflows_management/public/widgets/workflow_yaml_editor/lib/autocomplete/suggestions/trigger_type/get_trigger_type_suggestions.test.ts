@@ -193,30 +193,31 @@ describe('get_trigger_type_suggestions', () => {
       });
 
       it('should pass requiresConnectorId for connector-event triggers', () => {
+        const connectorEventTriggerId = 'example.connector_event';
         mockGetTriggerDefinitions.mockReturnValue([
           mockTrigger({
-            id: 'inboundWebhook.received',
-            title: 'Inbound webhook received',
-            description: 'Emitted when an inbound webhook receives a request.',
+            id: connectorEventTriggerId,
+            title: 'Example connector event',
+            description: 'Emitted when an example connector receives an event.',
             stability: 'tech_preview',
             requiresConnectorId: true,
           }),
         ]);
         mockGetTriggerDefinition.mockImplementation((id) =>
-          id === 'inboundWebhook.received'
+          id === connectorEventTriggerId
             ? mockTrigger({
-                id: 'inboundWebhook.received',
-                title: 'Inbound webhook received',
-                description: 'Emitted when an inbound webhook receives a request.',
+                id: connectorEventTriggerId,
+                title: 'Example connector event',
+                description: 'Emitted when an example connector receives an event.',
                 stability: 'tech_preview',
                 requiresConnectorId: true,
               })
             : undefined
         );
 
-        getTriggerTypeSuggestions('inboundWebhook', mockRange);
+        getTriggerTypeSuggestions('example.connector', mockRange);
 
-        expect(generateTriggerSnippet).toHaveBeenCalledWith('inboundWebhook.received', {
+        expect(generateTriggerSnippet).toHaveBeenCalledWith(connectorEventTriggerId, {
           defaultCondition: undefined,
           requiresConnectorId: true,
         });

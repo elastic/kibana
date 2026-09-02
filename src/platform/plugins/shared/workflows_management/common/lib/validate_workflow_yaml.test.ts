@@ -373,7 +373,7 @@ steps:
   });
 
   describe('connector-id on requiresConnectorId triggers', () => {
-    const connectorEventTriggerId = 'inboundWebhook.received';
+    const connectorEventTriggerId = 'example.connector_event';
     const schemaRequiringConnectorId = getWorkflowZodSchema({}, [
       { id: connectorEventTriggerId, requiresConnectorId: true },
     ]);

@@ -115,7 +115,7 @@ steps:
       yamlDocument,
       'custom.trigger',
       undefined,
-      defaultCondition
+      { defaultCondition }
     );
 
     expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
@@ -133,18 +133,18 @@ steps:
     const inputYaml = `triggers:\n  - type: alert\n`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
+    const connectorEventTriggerId = 'example.connector_event';
 
     insertTriggerSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'inboundWebhook.received',
+      connectorEventTriggerId,
       undefined,
-      undefined,
-      true
+      { requiresConnectorId: true }
     );
 
     expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
-      'inboundWebhook.received',
+      connectorEventTriggerId,
       expect.objectContaining({
         full: true,
         requiresConnectorId: true,

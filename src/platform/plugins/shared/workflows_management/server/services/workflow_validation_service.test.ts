@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import type { WorkflowValidationDeps } from './types';
 import { WorkflowValidationService } from './workflow_validation_service';
 
 const makeDeps = (
-  listedTriggers: Array<{ id: string; requiresConnectorId?: boolean }> = []
+  listedTriggers: CustomTriggerSchemaConfig[] = []
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -118,15 +119,16 @@ describe('WorkflowValidationService', () => {
     });
 
     it('fails save when a requiresConnectorId trigger is missing connector-id', async () => {
-      const { deps } = makeDeps([{ id: 'inboundWebhook.received', requiresConnectorId: true }]);
+      const connectorEventTriggerId = 'example.connector_event';
+      const { deps } = makeDeps([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
       const service = new WorkflowValidationService(deps);
       const request = {} as any;
 
       const yaml = [
-        'name: inbound',
+        'name: connector-event',
         'enabled: true',
         'triggers:',
-        '  - type: inboundWebhook.received',
+        `  - type: ${connectorEventTriggerId}`,
         'steps:',
         '  - name: step-one',
         '    type: console',
@@ -143,15 +145,16 @@ describe('WorkflowValidationService', () => {
     });
 
     it('accepts a requiresConnectorId trigger when connector-id is present', async () => {
-      const { deps } = makeDeps([{ id: 'inboundWebhook.received', requiresConnectorId: true }]);
+      const connectorEventTriggerId = 'example.connector_event';
+      const { deps } = makeDeps([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
       const service = new WorkflowValidationService(deps);
       const request = {} as any;
 
       const yaml = [
-        'name: inbound',
+        'name: connector-event',
         'enabled: true',
         'triggers:',
-        '  - type: inboundWebhook.received',
+        `  - type: ${connectorEventTriggerId}`,
         '    connector-id: webhook-1',
         'steps:',
         '  - name: step-one',

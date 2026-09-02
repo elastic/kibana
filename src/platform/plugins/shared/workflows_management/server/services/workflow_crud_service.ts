@@ -18,12 +18,13 @@ import {
   OCC_CONFLICT_STATUS_CODE,
   OccWriter,
 } from '@kbn/occ';
-import type {
-  CreateWorkflowCommand,
-  EsWorkflow,
-  UpdatedWorkflowResponseDto,
-  WorkflowDetailDto,
-  WorkflowYaml,
+import {
+  type CreateWorkflowCommand,
+  type EsWorkflow,
+  toCustomTriggerSchemaConfigs,
+  type UpdatedWorkflowResponseDto,
+  type WorkflowDetailDto,
+  type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
@@ -337,11 +338,8 @@ export class WorkflowCrudService {
     request?: KibanaRequest;
     yaml: string;
   }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
-    const registeredTriggers =
-      this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => ({
-        id: t.id,
-        requiresConnectorId: t.requiresConnectorId,
-      })) ?? [];
+    const allTriggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const registeredTriggers = toCustomTriggerSchemaConfigs(allTriggerDefinitions);
     let zodSchema: z.ZodType;
     if (params.lightweightValidation) {
       zodSchema = getWorkflowZodSchema({}, registeredTriggers, { lightweight: true });
@@ -354,9 +352,7 @@ export class WorkflowCrudService {
     } else {
       zodSchema = getWorkflowZodSchema({}, registeredTriggers);
     }
-    const triggerDefinitions = params.lightweightValidation
-      ? undefined
-      : this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const triggerDefinitions = params.lightweightValidation ? undefined : allTriggerDefinitions;
 
     return prepareWorkflowDocumentFromYaml({
       id: params.id,

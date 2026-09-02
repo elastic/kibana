@@ -15,7 +15,7 @@ import { isTriggerType } from '@kbn/workflows';
 const CUSTOM_TRIGGER_CONDITION_COMMENT =
   'Filter the subscription by using KQL, use event.* to target event properties';
 
-const CONNECTOR_ID_PLACEHOLDER = '# Enter connector id here';
+const CONNECTOR_ID_COMMENT = 'Id of the connector instance this trigger is bound to';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
@@ -87,7 +87,7 @@ export function generateTriggerSnippet(
     default:
       // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {
-        ...(requiresConnectorId ? { 'connector-id': CONNECTOR_ID_PLACEHOLDER } : {}),
+        ...(requiresConnectorId ? { 'connector-id': '' } : {}),
         on: { condition: defaultCondition ?? '' },
       };
       break;
@@ -118,6 +118,10 @@ export function generateTriggerSnippet(
       /(on:\n)(\s+)(condition:)/,
       `$1$2# ${CUSTOM_TRIGGER_CONDITION_COMMENT}\n$2$3`
     );
+  }
+
+  if (requiresConnectorId && result.includes('connector-id:')) {
+    result = result.replace(/(^|\n)(\s*)(connector-id:)/, `$1$2# ${CONNECTOR_ID_COMMENT}\n$2$3`);
   }
 
   return result;

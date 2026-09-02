@@ -651,14 +651,10 @@ export const WorkflowYAMLEditor = ({
       }
       if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
         const triggerDefinition = triggerSchemas.getTriggerDefinition(action.id);
-        insertTriggerSnippet(
-          model,
-          yamlDocumentCurrent,
-          action.id,
-          editor,
-          triggerDefinition?.snippets?.condition,
-          triggerDefinition?.requiresConnectorId
-        );
+        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor, {
+          defaultCondition: triggerDefinition?.snippets?.condition,
+          requiresConnectorId: triggerDefinition?.requiresConnectorId,
+        });
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
