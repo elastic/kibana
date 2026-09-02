@@ -445,13 +445,13 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
 }
 
 // Stamps each column's ES|QL Control Variable using the layer's query as the source of truth.
-// A genuine Identifier Control (`??field`) appears as a query parameter
+// A genuine Identifier Control (`??field`) appears as a `??` query parameter.
 // This mirrors the render-time mapping in `mapVariableToColumn` (`@kbn/esql-utils`).
 function reconstructESQLControlVariables(
   columns: TextBasedLayerColumn[],
   esql: string
 ): TextBasedLayerColumn[] {
-  const identifierVariables = new Set(getESQLIdentifierVariables(esql));
+  const identifierVariables = new Set(getESQLIdentifierVariables(esql).filter(Boolean));
   if (identifierVariables.size === 0) {
     return columns;
   }
@@ -460,7 +460,7 @@ function reconstructESQLControlVariables(
       return column;
     }
     const variable = column.fieldName.slice(VariableNamePrefix.IDENTIFIER.length);
-    return identifierVariables.has(variable) ? { ...column, variable } : column;
+    return variable && identifierVariables.has(variable) ? { ...column, variable } : column;
   });
 }
 
