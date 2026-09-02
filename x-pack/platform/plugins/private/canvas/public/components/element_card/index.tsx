@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ElementCard } from './element_card';
+export { ElementCard, ElementCardWrapper } from './element_card';

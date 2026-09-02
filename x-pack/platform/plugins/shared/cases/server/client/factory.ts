@@ -54,10 +54,8 @@ import {
 import { AuthorizationAuditLogger } from '../authorization';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
-import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
-import type { CasesServices } from './types';
+import type { CasesServices, CasesClientSource } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
@@ -67,6 +65,7 @@ import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
   CasesAnalyticsV2WriterContract,
+  CasesAttachmentsV2WriterContract,
 } from '../cases_analytics_v2';
 
 interface CasesClientFactoryArgs {
@@ -80,8 +79,6 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
@@ -105,6 +102,13 @@ interface CasesClientFactoryArgs {
    * user-actions SO service to mirror writes to `.cases-activity`.
    */
   analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getAttachmentsWriter()`.
+   * Same lifetime + semantics as `analyticsV2Writer`; consumed by the
+   * AttachmentService for create / patch / delete mirrors and by the
+   * CasesService for cascade-on-case-delete.
+   */
+  analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
   /**
    * Stable callback returned by `CasesAnalyticsV2Service.getDataViewRefresher()`.
    * Always resolvable — when v2 is disabled, defaults to
@@ -149,10 +153,12 @@ export class CasesClientFactory {
     request,
     scopedClusterClient,
     savedObjectsService,
+    clientSource,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    clientSource: CasesClientSource;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -205,8 +211,6 @@ export class CasesClientFactory {
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
@@ -218,6 +222,7 @@ export class CasesClientFactory {
       casesEventBus: this.options.casesEventBus,
       request,
       closeReasonValidator: boundCloseReasonValidator,
+      clientSource,
     });
   }
 
@@ -250,6 +255,7 @@ export class CasesClientFactory {
       log: this.logger,
       unsecuredSavedObjectsClient,
       config: this.options.config,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const spaceId =
@@ -267,16 +273,21 @@ export class CasesClientFactory {
         savedObjectsClient: unsecuredSavedObjectsClient,
       });
 
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
+    });
+
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
       namespace,
       refreshAnalyticsV2DataView,
-    });
-
-    const fieldDefinitionsService = new FieldDefinitionsService({
-      unsecuredSavedObjectsClient,
+      getFieldDefinitionsForOwner: (owner) =>
+        fieldDefinitionsService
+          .getFieldDefinitions(owner)
+          .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
     const caseService = new CasesService({
@@ -285,6 +296,7 @@ export class CasesClientFactory {
       attachmentService,
       analyticsV2Writer: this.options.analyticsV2Writer,
       analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const licensingService = new LicensingService(
@@ -309,7 +321,13 @@ export class CasesClientFactory {
     return {
       templatesService,
       fieldDefinitionsService,
-      alertsService: new AlertService(esClient, this.logger, alertsClient),
+      alertsService: new AlertService(
+        esClient,
+        this.logger,
+        alertsClient,
+        this.options.casesEventBus,
+        request
+      ),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),

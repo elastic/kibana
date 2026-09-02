@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { EditConnectorProps } from '.';
@@ -451,6 +451,26 @@ describe('EditConnector ', () => {
     expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
   });
 
+  it('shows a header divider when there is no header but an edit action renders (icon variant)', async () => {
+    renderWithTestingProviders(<EditConnector {...defaultProps} showHeader={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connector-edit-button')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('separator')).toBeInTheDocument();
+  });
+
+  it('does not show a header divider when there is no header and no edit action renders (icon variant)', async () => {
+    const props = { ...defaultProps, isLoading: true };
+
+    renderWithTestingProviders(<EditConnector {...props} showHeader={false} />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+  });
+
   it('should show the correct connector name on the push button', async () => {
     const props = {
       ...defaultProps,
@@ -468,5 +488,121 @@ describe('EditConnector ', () => {
     renderWithTestingProviders(<EditConnector {...props} />);
 
     expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
+  });
+
+  describe('actionsVariant="outlined" (redesigned case view sidebar)', () => {
+    const outlinedProps: EditConnectorProps = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: { ...defaultProps.caseData.connector, id: 'servicenow-1' },
+      },
+      showHeader: false,
+      actionsVariant: 'outlined',
+    };
+
+    it('does not render its own "Connectors" header, since the accordion section already has one', () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      expect(screen.queryByTestId('connector-edit-header')).not.toBeInTheDocument();
+    });
+
+    it('does not render a stray divider above the content when there is no header row', () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+    });
+
+    it('shows a preview with an edit button rather than the form right away', () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      expect(screen.getByTestId('connector-edit-button')).toBeInTheDocument();
+      expect(screen.getByTestId('connector-edit-button')).toHaveTextContent('Edit');
+      expect(screen.queryByTestId('caseConnectors')).not.toBeInTheDocument();
+    });
+
+    it('shows the edit and push buttons side by side, both in the outlined style', async () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      const actions = within(await screen.findByTestId('connector-outlined-actions'));
+      const editButton = actions.getByTestId('connector-edit-button');
+      const pushButton = actions.getByTestId('push-to-external-service');
+
+      expect(editButton).toHaveClass('euiButton');
+      expect(editButton).not.toHaveClass('euiButtonIcon');
+      expect(pushButton).toHaveClass('euiButton');
+      expect(pushButton).not.toHaveClass('euiButtonEmpty');
+    });
+
+    it('hides the edit button while the form is open, keeping only cancel/save', async () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      await user.click(screen.getByTestId('connector-edit-button'));
+
+      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('push-to-external-service')).not.toBeInTheDocument();
+      expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
+      expect(screen.getByTestId('edit-connectors-cancel')).toBeInTheDocument();
+    });
+
+    it('calls onSubmit when changing connector and saving', async () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      await user.click(screen.getByTestId('connector-edit-button'));
+      await user.click(screen.getByTestId('dropdown-connectors'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+      await user.click(screen.getByTestId('edit-connectors-submit'));
+
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({
+          fields: {
+            additionalFields: null,
+            incidentTypes: null,
+            severityCode: null,
+          },
+          id: 'resilient-2',
+          name: 'My Resilient connector',
+          type: '.resilient',
+        })
+      );
+    });
+
+    it('resets to the initial connector when cancel is clicked', async () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />);
+
+      await user.click(screen.getByTestId('connector-edit-button'));
+      await user.click(screen.getByTestId('dropdown-connectors'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+      await user.click(screen.getByTestId('edit-connectors-cancel'));
+
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('does not show the edit button when no connector is selected', () => {
+      renderWithTestingProviders(
+        <EditConnector {...outlinedProps} caseData={defaultProps.caseData} />
+      );
+
+      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+    });
+
+    it('shows the actions permission message when the user does not have access to case connectors', () => {
+      renderWithTestingProviders(<EditConnector {...outlinedProps} />, {
+        wrapperProps: { permissions: noConnectorsCasePermission() },
+      });
+
+      expect(screen.getByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
+      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+    });
   });
 });

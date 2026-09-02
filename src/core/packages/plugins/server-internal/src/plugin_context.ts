@@ -384,6 +384,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
@@ -424,6 +425,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts,
     },
     userProfile: deps.userProfile,
     injection: {

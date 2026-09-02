@@ -16,6 +16,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   description:
     'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
   run: async ({
     esClient,
@@ -24,11 +25,11 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
-    logger.info('Starting accesses maintainer run');
+    logger.info('[accesses_frequently_and_infrequently] Starting run');
 
     const collector: RelationshipMaintainerTelemetryCollector = {
       sources: [],
@@ -43,13 +44,11 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
-      abortController,
+      maintainerName: 'accesses_frequently_and_infrequently',
+      signal,
       telemetryCollector: collector,
     });
 
-    logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
-    );
     telemetry.report({
       iterations: result.totalIterations,
       truncated: result.truncated,
@@ -59,6 +58,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
         proposed: result.totalRecords, // engine has no distinct proposal phase; echo qualified
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
+        targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
       },
@@ -72,7 +72,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[accesses_frequently_and_infrequently] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
     return result;
   },

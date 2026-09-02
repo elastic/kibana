@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ALERTS_API_ALL,
@@ -15,10 +16,7 @@ import {
 } from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DETECTION_ENGINE_SIGNALS_STATUS_URL,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
@@ -31,11 +29,25 @@ import {
   updateAlertsWorkflowStatus,
 } from '../common/operations/update_alerts_workflow_status';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
+import {
+  buildRuntimeMappingsFromFieldTypes,
+  MAX_RUNTIME_FIELDS_PER_REQUEST,
+} from './bulk_close_runtime_mappings';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  prefetchAllPreviousStatusesByIds,
+  prefetchPreviousStatusesByQuery,
+  collectStatusTransitions,
+  type FoundHit,
+  type PreviousStatus,
+} from '../common/operations/prefetch_previous_statuses';
+import { emitAlertStatusChangedWithCap } from '../../../../workflows/triggers/emit_status_changed';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  sender: ITelemetryEventsSender
+  sender: ITelemetryEventsSender,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -66,7 +78,6 @@ export const setSignalsStatusRoute = (
         const esClient = core.elasticsearch.client.asCurrentUser;
         const siemClient = securitySolution?.getAppClient();
         const siemResponse = buildSiemResponse(response);
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         const closingReason = await validateClosingReason({
           core,
@@ -81,6 +92,7 @@ export const setSignalsStatusRoute = (
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+        const alertsIndex = siemClient.getAlertsIndex();
         const user = core.security.authc.getCurrentUser();
 
         const clusterId = sender.getClusterID();
@@ -110,28 +122,120 @@ export const setSignalsStatusRoute = (
 
         try {
           if ('signal_ids' in request.body) {
+            const signalIds = request.body.signal_ids;
+            let changingIds: string[] = [];
+            let changingStatuses: PreviousStatus[] = [];
+            if (eventBus) {
+              try {
+                // Fetch all IDs in chunks so requests larger than MAX_ALERTS_PER_TRIGGER
+                // don't silently suppress the trigger when the first chunk is all no-ops.
+                const { hits } = await prefetchAllPreviousStatusesByIds(
+                  esClient,
+                  alertsIndex,
+                  signalIds
+                );
+                ({ ids: changingIds, previousStatuses: changingStatuses } =
+                  collectStatusTransitions(hits, status));
+              } catch (err) {
+                logger.warn(
+                  `Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`
+                );
+              }
+            }
+
             // Use common operation for "by IDs" case
             const body = await updateAlertsWorkflowStatus({
               context,
-              index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-              ids: request.body.signal_ids,
+              index: alertsIndex,
+              ids: signalIds,
               status,
               reason,
             });
 
+            if (eventBus) {
+              emitAlertStatusChangedWithCap(
+                eventBus,
+                request,
+                status,
+                changingIds,
+                changingStatuses,
+                logger
+              );
+            }
+
             return response.ok({ body });
           } else {
-            const { conflicts, query } = request.body;
+            const { conflicts, query: rawQuery, runtime_fields: runtimeFields } = request.body;
+
+            // The schema documents this cap as `maxProperties`, but the
+            // generated Zod schema doesn't carry it — enforce it here so one
+            // request can't schedule unbounded runtime-script work on the
+            // `_update_by_query`.
+            const runtimeFieldCount = runtimeFields ? Object.keys(runtimeFields).length : 0;
+            if (runtimeFieldCount > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `runtime_fields is limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldCount}`,
+              });
+            }
+
+            // The schema validates `query` only as an open object (the route
+            // is intentionally permissive about DSL shape); narrow it to the
+            // ES DSL type once at the boundary so internal helpers stay
+            // strictly typed against `QueryDslQueryContainer`.
+            const query = rawQuery as estypes.QueryDslQueryContainer;
+
+            // Build runtime_mappings purely from the caller-supplied
+            // `runtime_fields` map. For each entry, the server defines a
+            // runtime field of the requested type whose script reads the
+            // field's value out of the alert document's `_source` — which
+            // is otherwise not directly queryable — and attaches the
+            // result to the underlying `_update_by_query`.
+            const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
+
+            let prefetchedHits: FoundHit[] = [];
+            let truncated = false;
+            if (eventBus) {
+              try {
+                ({ hits: prefetchedHits, truncated } = await prefetchPreviousStatusesByQuery(
+                  esClient,
+                  alertsIndex,
+                  query,
+                  runtimeMappings,
+                  status
+                ));
+              } catch (err) {
+                logger.warn(`Failed to pre-fetch alert IDs for workflow trigger: ${err}`);
+              }
+            }
 
             const body = await updateSignalsStatusByQuery(
               status,
               query,
               { conflicts: conflicts ?? 'abort' },
-              spaceId,
+              alertsIndex,
               esClient,
               user,
-              reason
+              reason,
+              runtimeMappings
             );
+
+            // Post-filter: excludeStatus pre-filters modern docs at ES level, but legacy
+            // docs (signal.status only) and status-less docs may still appear. Drop both
+            // the remaining no-ops and the status-less docs the update script never
+            // mutates; docs with an unrecognized non-null status are kept since they do
+            // transition. No cap is applied here — the by-query prefetch already returns
+            // at most MAX_ALERTS_PER_TRIGGER hits, and `truncated` reports the overflow.
+            const { ids: changingIds, previousStatuses: changingStatuses } =
+              collectStatusTransitions(prefetchedHits, status);
+            if (changingIds.length > 0 || truncated) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: changingIds,
+                status,
+                previousStatuses: changingStatuses,
+                truncated,
+              });
+            }
 
             return response.ok({ body });
           }
@@ -148,21 +252,37 @@ export const setSignalsStatusRoute = (
 };
 
 /**
- * Please avoid using `updateSignalsStatusByQuery` when possible, use the common handler with "by IDs" instead.
+ * Please avoid using `updateSignalsStatusByQuery` when possible, use the
+ * common handler with "by IDs" instead.
  *
- * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
+ * This method calls `updateByQuery` with `refresh: true` which is expensive on
+ * serverless.
+ *
+ * When `runtimeMappings` are provided, they are attached to the `_update_by_query`
+ * request alongside the filter. ES evaluates the runtime scripts in the
+ * query's filter context against each candidate alert.
+ *
+ * `runtime_mappings` is a valid top-level field on the `_update_by_query`
+ * request, but it isn't typed on
+ * `UpdateByQueryRequest` in the JS client (yet). We widen the request type
+ * inline rather than suppressing the type error.
  */
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
-  query: object | undefined,
+  query: estypes.QueryDslQueryContainer,
   options: { conflicts: 'abort' | 'proceed' },
-  spaceId: string,
+  index: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
-  reason?: string
-) =>
-  esClient.updateByQuery({
-    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+  reason?: string,
+  runtimeMappings?: estypes.MappingRuntimeFields
+) => {
+  const hasRuntimeMappings = runtimeMappings != null && Object.keys(runtimeMappings).length > 0;
+
+  const request: estypes.UpdateByQueryRequest & {
+    runtime_mappings?: estypes.MappingRuntimeFields;
+  } = {
+    index,
     conflicts: options.conflicts,
     refresh: true,
     script: getUpdateAlertsWorkflowStatusScript(status, user, reason),
@@ -172,4 +292,8 @@ const updateSignalsStatusByQuery = async (
       },
     },
     ignore_unavailable: true,
-  });
+    ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+  };
+
+  return esClient.updateByQuery(request);
+};

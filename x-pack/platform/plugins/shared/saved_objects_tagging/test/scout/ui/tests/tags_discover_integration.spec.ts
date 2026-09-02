@@ -51,7 +51,6 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.DISCOVER);
     await kbnClient.savedObjects.cleanStandardList();
   });
 

@@ -17,6 +17,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -52,6 +53,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -93,6 +97,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -116,6 +121,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -151,6 +157,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -188,6 +197,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -211,6 +221,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -246,6 +257,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -287,6 +301,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -310,6 +325,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -345,6 +361,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -382,15 +401,14 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
 }
 `;
 
-exports[
-  `RenderingService preboot() render() renders "core" page for unauthenticated requests 1`
-] = `
+exports[`RenderingService preboot() render() renders "core" page for unauthenticated requests 1`] = `
 Object {
   "anonymousStatusPage": false,
   "apmConfig": Object {
@@ -407,6 +425,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -442,6 +461,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -479,6 +501,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -502,6 +525,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -537,6 +561,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -578,15 +605,14 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
 }
 `;
 
-exports[
-  `RenderingService preboot() render() renders "core" with excluded global user settings 1`
-] = `
+exports[`RenderingService preboot() render() renders "core" with excluded global user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
   "apmConfig": Object {
@@ -603,6 +629,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -638,6 +665,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -675,6 +705,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -698,6 +729,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -733,6 +765,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -770,6 +805,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -793,6 +829,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -828,6 +865,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -865,6 +905,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -888,6 +929,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -923,6 +965,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -960,6 +1005,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -988,6 +1034,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1023,6 +1070,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1064,6 +1114,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1087,6 +1138,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1124,6 +1176,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1161,6 +1216,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1189,6 +1245,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1224,6 +1281,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1265,6 +1325,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1293,6 +1354,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1328,6 +1390,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1365,6 +1430,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1388,6 +1454,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1423,6 +1490,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1460,6 +1530,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1488,6 +1559,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1523,6 +1595,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1564,6 +1639,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1592,6 +1668,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1627,6 +1704,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1664,6 +1744,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1692,6 +1773,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1727,6 +1809,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1764,6 +1849,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1792,6 +1878,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1829,6 +1916,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1866,6 +1956,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1894,6 +1985,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1931,6 +2023,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1968,6 +2063,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,

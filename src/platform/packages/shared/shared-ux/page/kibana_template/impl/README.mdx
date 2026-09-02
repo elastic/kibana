@@ -25,7 +25,7 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
     pageTitle: 'Dashboards',
     description: "You don't have any dashboards yet.",
     rightSideItems: [
-      <EuiButton fill iconType="plusInCircleFilled">
+      <EuiButton fill iconType="plusCircle">
         Create new dashboard
       </EuiButton>,
     ],
@@ -50,7 +50,7 @@ You can also provide a custom empty prompt to replace the pre-built one. You'll 
     title={<h1>No data</h1>}
     body="You have no data. Would you like some of ours?"
     actions={[
-      <EuiButton fill iconType="plusInCircleFilled">
+      <EuiButton fill iconType="plusCircle">
         Get sample data
       </EuiButton>,
     ]}
@@ -75,7 +75,7 @@ When passing both a `pageHeader` configuration and `isEmptyState`, the component
     title={<h2>No data</h2>}
     body="You have no data. Would you like some of ours?"
     actions={[
-      <EuiButton fill iconType="plusInCircleFilled">
+      <EuiButton fill iconType="plusCircle">
         Get sample data
       </EuiButton>,
     ]}
@@ -186,7 +186,7 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
       description: 'Already have data? Import it directly.',
       buttonText: 'Import data',
       href: '/app/management/data/import',
-      icon: 'importAction',
+      icon: 'download',
     },
   },
 };

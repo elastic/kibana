@@ -9,8 +9,20 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "evals"],
-    "requiredPlugins": ["features", "encryptedSavedObjects", "inference"],
-    "optionalPlugins": ["management"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredPlugins": [
+      "features",
+      "encryptedSavedObjects",
+      "inference",
+      "lens",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "management",
+      "spaces",
+      "security",
+      "workflowsExtensions",
+      "workflowsManagement"
+    ],
+    "requiredBundles": ["kibanaReact", "data", "spaces", "workflowsExtensions"]
   }
 }

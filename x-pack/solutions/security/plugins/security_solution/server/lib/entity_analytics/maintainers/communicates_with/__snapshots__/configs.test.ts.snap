@@ -42,31 +42,12 @@ TRUE, _euid_branch_1_formula, NULL))
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots azure_auditlogs: targets-per-actor ES|QL is locked 1`] = `
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM logs-azure.auditlogs-__namespace__
-| WHERE azure.auditlogs.properties.initiated_by.user.userPrincipalName IS NOT NULL
-    AND (
-      (\`azure.auditlogs.properties.target_resources.0.type\` == \\"User\\" AND \`azure.auditlogs.properties.target_resources.0.user_principal_name\` IS NOT NULL)
-      OR
-      (\`azure.auditlogs.properties.target_resources.0.type\` == \\"Device\\" AND \`azure.auditlogs.properties.target_resources.0.display_name\` IS NOT NULL)
-    )
-| EVAL actorUserId = CONCAT(\\"user:\\", azure.auditlogs.properties.initiated_by.user.userPrincipalName, \\"@entra_id\\")
-| EVAL targetEntityId = CASE(
-    \`azure.auditlogs.properties.target_resources.0.type\` == \\"User\\", CONCAT(\\"user:\\", \`azure.auditlogs.properties.target_resources.0.user_principal_name\`, \\"@entra_id\\"),
-    \`azure.auditlogs.properties.target_resources.0.type\` == \\"Device\\", CONCAT(\\"host:\\", \`azure.auditlogs.properties.target_resources.0.display_name\`),
-    NULL
-  )
-| WHERE actorUserId != \\"user:@entra_id\\"
-    AND targetEntityId IS NOT NULL AND targetEntityId != \\"\\" AND targetEntityId != \\"host:\\" AND targetEntityId != \\"user:@entra_id\\"
-| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
-| LIMIT 3500"
-`;
-
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots jamf_pro: targets-per-actor ES|QL is locked 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-FROM logs-jamf_pro.events-__namespace__
-| WHERE user.name IS NOT NULL
+FROM logs-endpoint.events.security-__namespace__
+| WHERE event.action == \\"log_on\\"
+    AND process.Ext.session_info.logon_type IN (\\"RemoteInteractive\\", \\"Interactive\\", \\"Network\\")
+    AND event.outcome == \\"success\\"
     AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
     AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
@@ -111,12 +92,13 @@ TRUE, _euid_branch_1_formula, NULL))
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots okta: targets-per-actor ES|QL is locked 1`] = `
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots jamf_pro: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM logs-okta.system-__namespace__
-| WHERE event.action IN (\\"user.lifecycle.create\\", \\"user.lifecycle.activate\\", \\"user.lifecycle.deactivate\\", \\"user.lifecycle.suspend\\", \\"user.lifecycle.unsuspend\\", \\"group.user_membership.add\\", \\"group.user_membership.remove\\", \\"application.user_membership.add\\", \\"application.user_membership.remove\\", \\"application.user_membership.change_username\\")
-    AND user.target.email IS NOT NULL
+FROM logs-jamf_pro.events-__namespace__
+| WHERE event.action == \\"UserLogin\\"
+    AND user.name IS NOT NULL
     AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -146,10 +128,49 @@ FROM logs-okta.system-__namespace__
  actorUserId = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
 TRUE, _euid_branch_1_formula, NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"user:\\", user.target.email, \\"@okta\\")
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ targetEntityId = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
-    AND targetEntityId != \\"user:@okta\\"
+| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
+| LIMIT 3500"
+`;
+
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-system.auth-__namespace__
+| WHERE (MV_CONTAINS(TO_STRING(event.category), \\"authentication\\") OR MV_CONTAINS(TO_STRING(event.category), \\"session\\"))
+    AND event.action == \\"ssh_login\\"
+    AND event.outcome == \\"success\\"
+    AND ((\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\") AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\"))
+| EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
+| WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
+| EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
+| MV_EXPAND targetEntityId
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
+| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
+| LIMIT 3500"
+`;
+
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-system.security-__namespace__
+| WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")
+    AND event.code IN (\\"4624\\", \\"4648\\")
+    AND winlog.logon.type IN (\\"Interactive\\", \\"RemoteInteractive\\", \\"CachedInteractive\\")
+    AND event.outcome == \\"success\\"
+    AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
+    AND ((\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\") AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\"))
+| EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
+| WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
+| EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
+| MV_EXPAND targetEntityId
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS communicates_with = VALUES(targetEntityId) BY actorUserId
 | LIMIT 3500"
 `;

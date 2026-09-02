@@ -242,7 +242,7 @@ describe('unsavedChangesManager', () => {
   });
 
   describe('approximation changes', () => {
-    it('should detect isApproximate changes as unsaved changes', (done) => {
+    it('should detect esql_approximation changes as unsaved changes', (done) => {
       const approximationChanges$ = new BehaviorSubject<
         Partial<Pick<DashboardState, 'esql_approximation'>>
       >({});

@@ -17,7 +17,7 @@ import {
 import moment from 'moment';
 import type { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import {
   getShortTimeStamp,
   parseTimestamp,
@@ -128,6 +128,7 @@ export const MonitorStatusCol = ({
                   )}
                 >
                   <EuiText
+                    tabIndex={0}
                     size="xs"
                     color="danger"
                     className="eui-textNoWrap"

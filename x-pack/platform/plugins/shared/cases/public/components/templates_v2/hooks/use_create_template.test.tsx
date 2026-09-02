@@ -22,6 +22,7 @@ describe('useCreateTemplate', () => {
   const showSuccessToast = jest.fn();
 
   const templateInput = {
+    name: 'New Template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: test_field\n    type: keyword',
   };

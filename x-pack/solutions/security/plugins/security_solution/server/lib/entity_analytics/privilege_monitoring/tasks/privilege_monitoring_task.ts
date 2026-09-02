@@ -21,7 +21,7 @@ import type {
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
@@ -239,7 +239,7 @@ const runPrivilegeMonitoringTask = async ({
       config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
     const request = kibanaRequestFactory({
       headers: {},
-      spaceId: asSpaceId(state.namespace),
+      spaceId: brandSpaceId(state.namespace),
     });
     const soClient = core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],

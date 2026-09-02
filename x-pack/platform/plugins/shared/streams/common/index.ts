@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { QUERY_STATUSES } from './queries';
-export type { Query, QueryStatus } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
@@ -14,28 +12,10 @@ export type {
 } from './ingest_processor_suggestions';
 
 export {
-  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
-} from './feature_flags';
-
-export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
   STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
-  MIN_EXTRACTION_INTERVAL_HOURS,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
-  DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-  MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-  MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
-  MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-  MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-  MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   FAILURE_STORE_SELECTOR,
 } from './constants';
 
@@ -55,12 +35,6 @@ export {
 } from './pattern_extraction_helpers';
 
 export {
-  SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  SIGNIFICANT_EVENT_SML_TYPE,
-  type SignificantEventAttachment,
-  type PendingSignificantEventAttachment,
-} from './significant_event_attachment';
-export {
   type StreamsAppLocation,
   type StreamsAppLocationParams,
   getStreamsLocation,
@@ -68,10 +42,3 @@ export {
 
 export type { StreamSummary } from './stream_summary';
 export type { PaginatedResponse } from './pagination';
-
-export { SIGNIFICANT_EVENTS_REQUIRED_PLUGINS } from './significant_events_availability';
-export type {
-  SignificantEventsRequiredPlugin,
-  SignificantEventsUnavailableReason,
-  SignificantEventsAvailabilityResponse,
-} from './significant_events_availability';

@@ -30,17 +30,18 @@ import {
   type SecuredFeature,
 } from '@kbn/security-role-management-model';
 import { FeatureTableCell } from '@kbn/security-ui-components';
-import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
 import { SpaceColumnHeader } from './space_column_header';
-import { ALL_SPACES_ID } from '../../../../../../../common/constants';
+import type { DisplaySpace } from '../display_space';
+import { isAllSpacesEntry } from '../display_space';
 
 export interface PrivilegeSummaryTableProps {
   role: Role;
-  spaces: Space[];
+  spaces: DisplaySpace[];
   kibanaPrivileges: KibanaPrivileges;
   canCustomizeSubFeaturePrivileges: boolean;
   spacesApiUi: SpacesApiUi;
@@ -197,7 +198,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
             }`}
           >
             {showPrivilege({
-              allSpacesSelected: props.spaces.some((space) => space.id === ALL_SPACES_ID),
+              allSpacesSelected: props.spaces.some(isAllSpacesEntry),
               primaryFeature: primary,
               globalPrimaryFeature: globalPrivilege?.[record.featureId]?.primary,
             })}{' '}

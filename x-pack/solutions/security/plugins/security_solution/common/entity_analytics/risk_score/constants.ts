@@ -16,4 +16,3 @@ export const RISK_SCORE_ENTITY_CALCULATION_URL =
 export const RISK_SCORE_ENTITY_CALCULATION_V2_URL =
   `${INTERNAL_RISK_SCORE_URL}/calculation/entity_v2` as const;
 export const RISK_SCORE_HISTORY_URL = `${PUBLIC_RISK_SCORE_URL}/history` as const;
-export const RISK_SCORE_HISTORY_PAGE_SIZE_MAX = 1000 as const;

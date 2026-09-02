@@ -30,6 +30,10 @@ jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
 jest.mock('../hooks/use_alert_snooze_state');
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
+  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+}));
+
 jest.mock('@kbn/response-ops-alert-snooze', () => ({
   useAlertSnooze: jest.fn(),
   AlertSnoozePanelInline: jest.fn(({ onApply, onBack }) => (
@@ -157,7 +161,7 @@ describe('Header Actions', () => {
 
       mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 
-      const { getByTestId } = render(
+      const { getByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
           alertIndex={'alert-index'}
@@ -173,6 +177,7 @@ describe('Header Actions', () => {
         />
       );
 
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([
@@ -193,7 +198,7 @@ describe('Header Actions', () => {
     it('should NOT offer an "Add to case" button without cases privileges', async () => {
       mockCases.helpers.canUseCases = jest.fn().mockReturnValue(noCasesPermissions());
 
-      const { queryByTestId } = render(
+      const { queryByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
           alertIndex={'alert-index'}
@@ -209,6 +214,7 @@ describe('Header Actions', () => {
         />
       );
 
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       expect(queryByTestId(`add-to-cases-button-${mockRuleTypeId}`)).not.toBeInTheDocument();
     });
 

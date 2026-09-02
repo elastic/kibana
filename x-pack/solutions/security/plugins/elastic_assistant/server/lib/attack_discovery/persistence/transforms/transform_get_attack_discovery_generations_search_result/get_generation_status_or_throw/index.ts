@@ -16,9 +16,19 @@ import {
 export const getGenerationStatusOrThrow = ({
   executionUuid,
   eventActions,
+  ignoreDismissed = false,
 }: {
   eventActions: string[];
   executionUuid: string;
+  /**
+   * When `true`, a `generation-dismissed` event does NOT short-circuit to the
+   * `dismissed` status; instead the underlying terminal status (`succeeded` /
+   * `failed` / `canceled` / `started`) is returned. Dismissal is only a signal
+   * to hide a generation from the recent-generations list, so callers that
+   * display a single generation's actual outcome (e.g. the workflow execution
+   * details flyout) pass `true`.
+   */
+  ignoreDismissed?: boolean;
 }): 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed' => {
   if (!eventActions.includes(ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED)) {
     throw new Error(
@@ -26,7 +36,10 @@ export const getGenerationStatusOrThrow = ({
     );
   }
 
-  if (eventActions.includes(ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED)) {
+  if (
+    !ignoreDismissed &&
+    eventActions.includes(ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED)
+  ) {
     return 'dismissed';
   }
 

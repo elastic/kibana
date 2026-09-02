@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
-import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
+import { useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux-v7';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
   ConfigKey,
-  isRemoteSyntheticsMonitor,
+  isExternalSyntheticsMonitor,
   type Ping,
 } from '../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
+import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 import { useSelectedLocation } from './use_selected_location';
 import { useSelectedMonitor } from './use_selected_monitor';
 
@@ -28,12 +29,15 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const dispatch = useDispatch();
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { remoteName } = useGetUrlParams();
+  const { monitorId: routeMonitorId } = useParams<{ monitorId: string }>();
   const isRemote = Boolean(remoteName);
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
 
-  const monitorId = params?.monitorId ?? monitor?.id;
+  // URL id is enough to query remotes — waiting for the synthesized monitor
+  // left the details page spinning when the ES probe returned empty.
+  const monitorId = params?.monitorId ?? monitor?.id ?? routeMonitorId;
   const locationLabel = location?.label;
 
   const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);
@@ -46,11 +50,12 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
 
   const latestPingId = latestPing?.monitor.id;
 
-  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; remote
-  // monitors don't expose it (their `monitor.id` already equals the ping's
-  // monitor.id), so the equality check above is sufficient for remote.
+  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; external
+  // monitors (remote CCS and local Heartbeat/Agent) don't expose it — their
+  // `monitor.id` already equals the ping's monitor.id — so the equality check
+  // above is sufficient for them.
   const customHeartbeatId =
-    monitor && !isRemoteSyntheticsMonitor(monitor)
+    monitor && !isExternalSyntheticsMonitor(monitor)
       ? monitor[ConfigKey.CUSTOM_HEARTBEAT_ID]
       : undefined;
   const isIdSame = latestPingId === monitorId || latestPingId === customHeartbeatId;
@@ -83,15 +88,19 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
 };
 
 /**
- * Client-side CCS variant of the SO-backed `getLatestTestRun` route. Mirrors
- * the same filter set (monitor.id + optional locationLabel + summary exists)
- * but targets `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`. Used only by the
- * remote branch of {@link useMonitorLatestPing}.
+ * Remote (CCS) variant of the latest-ping lookup. Calls the same SO-backed
+ * `LATEST_TEST_RUN` route as the local branch but forwards `remoteName` so the
+ * route targets `${remoteName}:synthetics-*` via Cross-Cluster Search. Going
+ * through the route (instead of a client-side ES search) gives us the route's
+ * escalating `@timestamp` fallback (now-1d → now-1w → now-30d) so the query
+ * prunes frozen-tier shards, and the `searchExcludedDataTiers` exclusion that
+ * `SyntheticsEsClient` applies server-side. Used only by the remote branch of
+ * {@link useMonitorLatestPing}, and deliberately kept out of Redux so it never
+ * depends on state populated by the local route.
  *
- * Loading semantics: while we wait for `useSelectedMonitor` to resolve the
- * remote monitor (and therefore `monitorId`), `loaded` stays `false` so the
- * page wrapper keeps showing the loading spinner instead of flashing the
- * "initial test run pending" empty state.
+ * Loading semantics: `monitorId` comes from the route (or the synthesized
+ * monitor). The probe must not wait on `useSelectedMonitor` — that hook's
+ * remote path also needs pings, and an empty/failing probe would spin forever.
  */
 const useRemoteMonitorLatestPing = ({
   monitorId,
@@ -105,32 +114,25 @@ const useRemoteMonitorLatestPing = ({
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const canQuery = Boolean(remoteName && monitorId);
-  const index = canQuery ? getSyntheticsCcsIndex(remoteName) : '';
 
-  const { data, loading } = useSyntheticsEsSearch(
-    {
-      index,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'monitor.id': monitorId } },
-            ...(locationLabel ? [{ term: { 'observer.geo.name': locationLabel } }] : []),
-            { exists: { field: 'summary' } },
-          ],
-        },
-      },
-      sort: [{ '@timestamp': 'desc' as const }],
-    },
-    [lastRefresh, monitorId, locationLabel, remoteName],
-    { name: 'getRemoteMonitorLatestPing' }
-  );
+  const fetchRemoteLatestPing = useCallback(() => {
+    if (!canQuery || !monitorId) {
+      return Promise.resolve(undefined);
+    }
+    return fetchLatestTestRun({ monitorId, locationLabel, remoteName });
+  }, [canQuery, monitorId, locationLabel, remoteName]);
 
-  const latestPing = data?.hits?.hits?.[0]?._source as Ping | undefined;
+  // `lastRefresh` re-triggers the fetch on each refresh tick (parity with the
+  // local branch); passing the callback by reference keeps it out of the body.
+  const { data, status } = useFetcher(fetchRemoteLatestPing, [fetchRemoteLatestPing, lastRefresh]);
+
+  const isLoading = status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
 
   return {
-    latestPing: canQuery ? latestPing : undefined,
-    loading: canQuery ? Boolean(loading) : Boolean(remoteName),
-    loaded: canQuery ? !loading : false,
+    latestPing: canQuery ? data?.ping : undefined,
+    loading: canQuery ? isLoading : Boolean(remoteName),
+    // `loaded` once the fetch settles (success or failure): an unreachable
+    // remote cluster surfaces as the empty state, not a perpetual spinner.
+    loaded: canQuery ? !isLoading : false,
   };
 };

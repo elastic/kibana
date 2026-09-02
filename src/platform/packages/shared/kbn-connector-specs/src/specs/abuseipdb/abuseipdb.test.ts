@@ -36,6 +36,7 @@ describe('AbuseIPDBConnector', () => {
             isp: 'Google LLC',
             countryCode: 'US',
             totalReports: 0,
+            lastReportedAt: null,
           },
         },
       };
@@ -59,6 +60,40 @@ describe('AbuseIPDBConnector', () => {
         isp: 'Google LLC',
         countryCode: 'US',
         totalReports: 0,
+        lastReportedAt: null,
+      });
+    });
+
+    it('should accept IPv6 addresses', async () => {
+      expect(
+        AbuseIPDBConnector.actions.checkIp.input.safeParse({
+          ipAddress: '2001:4860:4860::8888',
+        }).success
+      ).toBe(true);
+
+      mockClient.get.mockResolvedValue({
+        data: {
+          data: {
+            ipAddress: '2001:4860:4860::8888',
+            abuseConfidenceScore: 0,
+            usageType: 'Data Center/Web Hosting/Transit',
+            isp: 'Google LLC',
+            countryCode: 'US',
+            totalReports: 0,
+            lastReportedAt: null,
+          },
+        },
+      });
+
+      await AbuseIPDBConnector.actions.checkIp.handler(mockContext, {
+        ipAddress: '2001:4860:4860::8888',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
+        params: {
+          ipAddress: '2001:4860:4860::8888',
+          maxAgeInDays: 90,
+        },
       });
     });
 
@@ -72,12 +107,13 @@ describe('AbuseIPDBConnector', () => {
             isp: 'Example ISP',
             countryCode: 'US',
             totalReports: 10,
+            lastReportedAt: '2024-01-01T00:00:00+00:00',
           },
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      await AbuseIPDBConnector.actions.checkIp.handler(mockContext, {
+      const result = await AbuseIPDBConnector.actions.checkIp.handler(mockContext, {
         ipAddress: '1.2.3.4',
       });
 
@@ -87,6 +123,7 @@ describe('AbuseIPDBConnector', () => {
           maxAgeInDays: 90,
         },
       });
+      expect(result.lastReportedAt).toBe('2024-01-01T00:00:00+00:00');
     });
   });
 
@@ -121,6 +158,41 @@ describe('AbuseIPDBConnector', () => {
         ipAddress: '1.2.3.4',
         abuseConfidenceScore: 100,
       });
+      const body = mockClient.post.mock.calls[0][1] as URLSearchParams;
+      expect(body.get('comment')).toBe('Malicious activity detected');
+    });
+
+    it('should omit comment from the request body when unset', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { data: { ipAddress: '1.2.3.4', abuseConfidenceScore: 50 } },
+      });
+
+      await AbuseIPDBConnector.actions.reportIp.handler(mockContext, {
+        ip: '1.2.3.4',
+        categories: [18],
+      });
+
+      const body = mockClient.post.mock.calls[0][1] as URLSearchParams;
+      expect(body.has('comment')).toBe(false);
+    });
+
+    it('should reject an empty comment string at the schema boundary', () => {
+      expect(() =>
+        AbuseIPDBConnector.actions.reportIp.input.parse({
+          ip: '1.2.3.4',
+          categories: [18],
+          comment: '',
+        })
+      ).toThrow();
+    });
+
+    it('should accept IPv6 addresses at the schema boundary', () => {
+      expect(
+        AbuseIPDBConnector.actions.reportIp.input.safeParse({
+          ip: '2001:4860:4860::8888',
+          categories: [18],
+        }).success
+      ).toBe(true);
     });
   });
 
@@ -138,6 +210,8 @@ describe('AbuseIPDBConnector', () => {
             usageType: 'Data Center',
             isp: 'Google LLC',
             domain: 'google.com',
+            totalReports: 0,
+            lastReportedAt: null,
           },
         },
       };
@@ -150,6 +224,7 @@ describe('AbuseIPDBConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
         params: {
           ipAddress: '8.8.8.8',
+          maxAgeInDays: 90,
           verbose: true,
         },
       });
@@ -163,6 +238,49 @@ describe('AbuseIPDBConnector', () => {
         usageType: 'Data Center',
         isp: 'Google LLC',
         domain: 'google.com',
+        totalReports: 0,
+        lastReportedAt: null,
+      });
+    });
+
+    it('should accept IPv6 addresses at the schema boundary', () => {
+      expect(
+        AbuseIPDBConnector.actions.getIpInfo.input.safeParse({
+          ipAddress: '2001:4860:4860::8888',
+        }).success
+      ).toBe(true);
+    });
+
+    it('should pass through an explicit maxAgeInDays', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          data: {
+            ipAddress: '8.8.8.8',
+            isPublic: true,
+            ipVersion: 4,
+            isWhitelisted: false,
+            abuseConfidenceScore: 0,
+            countryCode: 'US',
+            usageType: 'Data Center',
+            isp: 'Google LLC',
+            domain: 'google.com',
+            totalReports: 0,
+            lastReportedAt: null,
+          },
+        },
+      });
+
+      await AbuseIPDBConnector.actions.getIpInfo.handler(mockContext, {
+        ipAddress: '8.8.8.8',
+        maxAgeInDays: 30,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
+        params: {
+          ipAddress: '8.8.8.8',
+          maxAgeInDays: 30,
+          verbose: true,
+        },
       });
     });
   });
@@ -199,7 +317,81 @@ describe('AbuseIPDBConnector', () => {
     });
   });
 
+  describe('getBlacklist action', () => {
+    it('should GET /blacklist with confidenceMinimum and limit', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          meta: { generatedAt: '2024-06-01T00:00:00+00:00' },
+          data: [
+            {
+              ipAddress: '203.0.113.10',
+              countryCode: 'US',
+              abuseConfidenceScore: 100,
+              lastReportedAt: '2024-05-31T12:00:00+00:00',
+            },
+          ],
+        },
+      });
+
+      const result = await AbuseIPDBConnector.actions.getBlacklist.handler(mockContext, {
+        confidenceMinimum: 90,
+        limit: 25,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/blacklist', {
+        params: {
+          confidenceMinimum: 90,
+          limit: 25,
+        },
+      });
+      expect(result).toEqual({
+        generatedAt: '2024-06-01T00:00:00+00:00',
+        ips: [
+          {
+            ipAddress: '203.0.113.10',
+            countryCode: 'US',
+            abuseConfidenceScore: 100,
+            lastReportedAt: '2024-05-31T12:00:00+00:00',
+          },
+        ],
+      });
+    });
+
+    it('should default confidenceMinimum to 100 and limit to 10 when unset', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { meta: {}, data: [] },
+      });
+
+      const result = await AbuseIPDBConnector.actions.getBlacklist.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/blacklist', {
+        params: {
+          confidenceMinimum: 100,
+          limit: 10,
+        },
+      });
+      expect(result).toEqual({ generatedAt: null, ips: [] });
+    });
+
+    it('should coerce workflow string inputs for confidenceMinimum and limit', () => {
+      const parsed = AbuseIPDBConnector.actions.getBlacklist.input.safeParse({
+        confidenceMinimum: '90',
+        limit: '10',
+      });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data).toEqual({ confidenceMinimum: 90, limit: 10 });
+      }
+    });
+  });
+
   describe('test handler', () => {
+    const testSpec = AbuseIPDBConnector.test;
+
+    it('should be opted in for the Test tab', () => {
+      expect(testSpec.enabled).toBe(true);
+    });
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -211,30 +403,17 @@ describe('AbuseIPDBConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!AbuseIPDBConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await AbuseIPDBConnector.test.handler(mockContext);
+      await expect(testSpec.handler(mockContext)).resolves.toEqual({});
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
         params: { ipAddress: '8.8.8.8' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to AbuseIPDB API',
-      });
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw when API is not accessible', async () => {
       mockClient.get.mockRejectedValue(new Error('Network error'));
 
-      if (!AbuseIPDBConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await AbuseIPDBConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Network error');
     });
   });
 });

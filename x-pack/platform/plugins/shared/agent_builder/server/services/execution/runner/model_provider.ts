@@ -37,14 +37,21 @@ export interface CreateModelProviderOpts {
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
 }
 
 export type CreateModelProviderFactoryFn = (
-  opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'telemetryMetadata'>
+  opts: Omit<
+    CreateModelProviderOpts,
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+  >
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'telemetryMetadata'>
+  opts: Pick<
+    CreateModelProviderOpts,
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+  >
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
@@ -75,6 +82,7 @@ export const createModelProvider = ({
   searchInferenceEndpoints,
   logger,
   telemetryMetadata,
+  maxContentLength,
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {
@@ -115,8 +123,6 @@ export const createModelProvider = ({
 
     return connectorId;
   });
-
-  getFastModelConnectorId().catch(() => undefined);
 
   const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
     const { effortLevel = EffortLevels.medium } = opts;
@@ -171,6 +177,7 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
+        ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
     });
 
@@ -193,10 +200,21 @@ export const createModelProvider = ({
     };
   };
 
+  const hasFastModel = memoizeAsync(async () => {
+    const [fastConnectorId, resolvedDefaultConnectorId] = await Promise.all([
+      getFastModelConnectorId(),
+      getDefaultConnectorId(),
+    ]);
+    // getFastModelConnectorId falls back to the default connector when no recommended fast endpoint
+    // is configured, so a distinct id means a genuinely dedicated (cheaper) fast model exists.
+    return fastConnectorId !== resolvedDefaultConnectorId;
+  });
+
   return {
     selectModel: async (opts) => getModelById(await selectModelId(opts)),
     getDefaultModel: async () => getModelById(await getDefaultConnectorId()),
     getModelById: ({ connectorId }) => getModelById(connectorId),
+    hasFastModel,
     getUsageStats,
   };
 };

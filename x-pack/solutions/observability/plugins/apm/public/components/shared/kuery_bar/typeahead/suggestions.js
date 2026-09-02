@@ -6,11 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import { tint } from 'polished';
+import { transparentize } from 'polished';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import styled from '@emotion/styled';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
 import Suggestion from './suggestion';
 
 const List = styled.ul`
@@ -19,7 +19,7 @@ const List = styled.ul`
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
   box-shadow: 0
     ${({ theme }) =>
-      `${theme.euiTheme.size.xs} ${theme.euiTheme.size.xl} ${tint(
+      `${theme.euiTheme.size.xs} ${theme.euiTheme.size.xl} ${transparentize(
         0.9,
         theme.euiTheme.colors.fullShade
       )}`};

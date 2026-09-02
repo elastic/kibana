@@ -275,60 +275,6 @@ import type {
   EntityDetailsHighlightsRequestBodyInput,
   EntityDetailsHighlightsResponse,
 } from './entity_analytics/entity_details/highlights.gen';
-import type {
-  InitEntityStoreRequestBodyInput,
-  InitEntityStoreResponse,
-} from './entity_analytics/entity_store/enable.gen';
-import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
-import type {
-  DeleteEntityEngineRequestQueryInput,
-  DeleteEntityEngineRequestParamsInput,
-  DeleteEntityEngineResponse,
-  DeleteEntityEnginesRequestQueryInput,
-  DeleteEntityEnginesResponse,
-} from './entity_analytics/entity_store/engine/delete.gen';
-import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
-import type {
-  GetEntityEngineRequestParamsInput,
-  GetEntityEngineResponse,
-} from './entity_analytics/entity_store/engine/get.gen';
-import type {
-  InitEntityEngineRequestParamsInput,
-  InitEntityEngineRequestBodyInput,
-  InitEntityEngineResponse,
-} from './entity_analytics/entity_store/engine/init.gen';
-import type { ListEntityEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
-import type {
-  StartEntityEngineRequestParamsInput,
-  StartEntityEngineResponse,
-} from './entity_analytics/entity_store/engine/start.gen';
-import type {
-  StopEntityEngineRequestParamsInput,
-  StopEntityEngineResponse,
-} from './entity_analytics/entity_store/engine/stop.gen';
-import type {
-  DeleteSingleEntityRequestParamsInput,
-  DeleteSingleEntityRequestBodyInput,
-  DeleteSingleEntityResponse,
-} from './entity_analytics/entity_store/entities/delete_entity.gen';
-import type {
-  ListEntitiesRequestQueryInput,
-  ListEntitiesResponse,
-} from './entity_analytics/entity_store/entities/list_entities.gen';
-import type {
-  UpsertEntitiesBulkRequestQueryInput,
-  UpsertEntitiesBulkRequestBodyInput,
-} from './entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
-import type {
-  UpsertEntityRequestQueryInput,
-  UpsertEntityRequestParamsInput,
-  UpsertEntityRequestBodyInput,
-  UpsertEntityResponse,
-} from './entity_analytics/entity_store/entities/upsert_entity.gen';
-import type {
-  GetEntityStoreStatusRequestQueryInput,
-  GetEntityStoreStatusResponse,
-} from './entity_analytics/entity_store/status.gen';
 import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type {
   CreatePrivilegesImportIndexRequestBodyInput,
@@ -655,21 +601,6 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
-   */
-  async applyEntityEngineDataviewIndices() {
-    this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
-    return this.kbnClient
-      .request<ApplyEntityEngineDataviewIndicesResponse>({
-        path: '/api/entity_store/engines/apply_dataview_indices',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
     * **Deprecated in 9.4.0.** Use the Entity Store APIs to check privileges for managing asset criticality.
 
     */
@@ -909,6 +840,12 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Create a new entity source configuration.
+
+    */
   async createEntitySource(props: CreateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
     return this.kbnClient
@@ -922,6 +859,12 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Create an index for Privileges Monitoring import.
+
+    */
   async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
     return this.kbnClient
@@ -936,8 +879,11 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
+
+    */
   async createPrivMonUser(props: CreatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
     return this.kbnClient
@@ -1211,34 +1157,12 @@ Delete the asset criticality record for a specific entity.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async deleteEntityEngine(props: DeleteEntityEngineProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngine`);
-    return this.kbnClient
-      .request<DeleteEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async deleteEntityEngines(props: DeleteEntityEnginesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
-    return this.kbnClient
-      .request<DeleteEntityEnginesResponse>({
-        path: '/api/entity_store/engines',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
+Delete an entity source configuration.
 
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
+    */
   async deleteEntitySource(props: DeleteEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
     return this.kbnClient
@@ -1252,7 +1176,7 @@ Delete the asset criticality record for a specific entity.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+   * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
@@ -1290,8 +1214,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Removes a privileged user from monitoring by their document ID.
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+Removes a privileged user from monitoring by their document ID.
+
+    */
   async deletePrivMonUser(props: DeletePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
     return this.kbnClient
@@ -1345,24 +1272,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Delete a single entity in Entity Store.
-The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
-
-    */
-  async deleteSingleEntity(props: DeleteSingleEntityProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
-    return this.kbnClient
-      .request<DeleteSingleEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Delete one or more Timelines or Timeline templates.
    */
   async deleteTimelines(props: DeleteTimelinesProps) {
@@ -1410,7 +1319,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   async disableMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
@@ -1692,28 +1601,13 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
-   */
-  async entityStoreGetPrivileges() {
-    this.log.info(`${new Date().toISOString()} Calling API EntityStoreGetPrivileges`);
-    return this.kbnClient
-      .request<EntityStoreGetPrivilegesResponse>({
-        path: '/internal/entity_store/privileges',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
     * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
 - Exception lists
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
@@ -2079,20 +1973,11 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the engine descriptor for a specific entity type, including its configuration and current status.
-   */
-  async getEntityEngine(props: GetEntityEngineProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
-    return this.kbnClient
-      .request<GetEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Get an entity source configuration by ID.
+
+    */
   async getEntitySource(props: GetEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntitySource`);
     return this.kbnClient
@@ -2102,23 +1987,6 @@ finishes and then call this operation once.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
-   */
-  async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
-    return this.kbnClient
-      .request<GetEntityStoreStatusResponse>({
-        path: '/api/entity_store/status',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2478,7 +2346,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
@@ -2514,37 +2382,13 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Initialize a single entity engine for the specified entity type.
-   */
-  async initEntityEngine(props: InitEntityEngineProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
-    return this.kbnClient
-      .request<InitEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Initialize the entire Entity Store, creating engines for all or specified entity types.
-   */
-  async initEntityStore(props: InitEntityStoreProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
-    return this.kbnClient
-      .request<InitEntityStoreResponse>({
-        path: '/api/entity_store/enable',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
+    * Run one or more Security Solution initialization flows for the current space.
+Each flow provisions a specific set of assets, for example list indices,
+security data views, prebuilt detection rules, endpoint protection, AI prompts,
+or detection rule monitoring assets. Only the requested flows are run, and the
+response reports a result for each one.
+
+    */
   async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
     return this.kbnClient
@@ -2559,7 +2403,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   * **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
    */
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
@@ -2704,37 +2548,11 @@ Each row will match up to 10,000 entities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * List entities records, paging, sorting and filtering as needed.
-   */
-  async listEntities(props: ListEntitiesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
-    return this.kbnClient
-      .request<ListEntitiesResponse>({
-        path: '/api/entity_store/entities/list',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Get a list of all installed entity engines and their current status.
-   */
-  async listEntityEngines() {
-    this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
-    return this.kbnClient
-      .request<ListEntityEnginesResponse>({
-        path: '/api/entity_store/engines',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
+List all entity source configurations.
+
+    */
   async listEntitySources(props: ListEntitySourcesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListEntitySources`);
     return this.kbnClient
@@ -2750,8 +2568,11 @@ Each row will match up to 10,000 entities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
+
+    */
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -2948,8 +2769,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
+
+    */
   async privmonBulkUploadUsersCsv(props: PrivmonBulkUploadUsersCSVProps) {
     this.log.info(`${new Date().toISOString()} Calling API PrivmonBulkUploadUsersCSV`);
     return this.kbnClient
@@ -2964,7 +2788,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   * **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
    */
   async privMonHealth() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
@@ -2979,8 +2803,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Check if the current user has all required permissions for Privilege Monitoring
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Check if the current user has all required permissions for Privilege Monitoring.
+
+    */
   async privMonPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
     return this.kbnClient
@@ -3311,7 +3138,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   * **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
    */
   async scheduleMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
@@ -3373,6 +3200,12 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Search Indices for Privileges Monitoring import.
+
+    */
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -3599,21 +3432,6 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Start a previously stopped entity engine, resuming transform processing for the given entity type.
-   */
-  async startEntityEngine(props: StartEntityEngineProps) {
-    this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
-    return this.kbnClient
-      .request<StartEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Starts a SIEM rules migration using the migration id provided
    */
   async startRuleMigration(props: StartRuleMigrationProps) {
@@ -3642,21 +3460,6 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Stop a running entity engine, pausing transform processing for the given entity type.
-   */
-  async stopEntityEngine(props: StopEntityEngineProps) {
-    this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
-    return this.kbnClient
-      .request<StopEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
       })
@@ -3761,6 +3564,12 @@ remain on the watchlist.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Update an entity source configuration.
+
+    */
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient
@@ -3775,8 +3584,11 @@ remain on the watchlist.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates the details of an existing monitored privileged user by their document ID.
-   */
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+Updates the details of an existing monitored privileged user by their document ID.
+
+    */
   async updatePrivMonUser(props: UpdatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
     return this.kbnClient
@@ -3960,47 +3772,6 @@ Each row will match up to 10,000 entities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Update or create many entities in Entity Store.
-If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
-The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
-
-    */
-  async upsertEntitiesBulk(props: UpsertEntitiesBulkProps) {
-    this.log.info(`${new Date().toISOString()} Calling API UpsertEntitiesBulk`);
-    return this.kbnClient
-      .request({
-        path: '/api/entity_store/entities/bulk',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'PUT',
-        body: props.body,
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Update or create an entity in Entity Store.
-If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
-> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
-> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
-
-    */
-  async upsertEntity(props: UpsertEntityProps) {
-    this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
-    return this.kbnClient
-      .request<UpsertEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'PUT',
-        body: props.body,
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -4103,13 +3874,6 @@ export interface DeleteAssetCriticalityRecordProps {
 export interface DeleteDashboardMigrationProps {
   params: DeleteDashboardMigrationRequestParamsInput;
 }
-export interface DeleteEntityEngineProps {
-  query: DeleteEntityEngineRequestQueryInput;
-  params: DeleteEntityEngineRequestParamsInput;
-}
-export interface DeleteEntityEnginesProps {
-  query: DeleteEntityEnginesRequestQueryInput;
-}
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;
 }
@@ -4127,10 +3891,6 @@ export interface DeleteRuleProps {
 }
 export interface DeleteRuleMigrationProps {
   params: DeleteRuleMigrationRequestParamsInput;
-}
-export interface DeleteSingleEntityProps {
-  params: DeleteSingleEntityRequestParamsInput;
-  body: DeleteSingleEntityRequestBodyInput;
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
@@ -4241,14 +4001,8 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
-export interface GetEntityEngineProps {
-  params: GetEntityEngineRequestParamsInput;
-}
 export interface GetEntitySourceProps {
   params: GetEntitySourceRequestParamsInput;
-}
-export interface GetEntityStoreStatusProps {
-  query: GetEntityStoreStatusRequestQueryInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
@@ -4304,13 +4058,6 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
-export interface InitEntityEngineProps {
-  params: InitEntityEngineRequestParamsInput;
-  body: InitEntityEngineRequestBodyInput;
-}
-export interface InitEntityStoreProps {
-  body: InitEntityStoreRequestBodyInput;
-}
 export interface InitializeSecuritySolutionProps {
   body: InitializeSecuritySolutionRequestBodyInput;
 }
@@ -4327,9 +4074,6 @@ export interface InstallPrepackedTimelinesProps {
 }
 export interface InternalUploadAssetCriticalityV2CsvProps {
   attachment: FormData;
-}
-export interface ListEntitiesProps {
-  query: ListEntitiesRequestQueryInput;
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
@@ -4453,18 +4197,12 @@ export interface StartDashboardsMigrationProps {
   params: StartDashboardsMigrationRequestParamsInput;
   body: StartDashboardsMigrationRequestBodyInput;
 }
-export interface StartEntityEngineProps {
-  params: StartEntityEngineRequestParamsInput;
-}
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
 }
 export interface StopDashboardsMigrationProps {
   params: StopDashboardsMigrationRequestParamsInput;
-}
-export interface StopEntityEngineProps {
-  params: StopEntityEngineRequestParamsInput;
 }
 export interface StopRuleMigrationProps {
   params: StopRuleMigrationRequestParamsInput;
@@ -4527,15 +4265,6 @@ export interface UploadWatchlistCsvProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
-}
-export interface UpsertEntitiesBulkProps {
-  query: UpsertEntitiesBulkRequestQueryInput;
-  body: UpsertEntitiesBulkRequestBodyInput;
-}
-export interface UpsertEntityProps {
-  query: UpsertEntityRequestQueryInput;
-  params: UpsertEntityRequestParamsInput;
-  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

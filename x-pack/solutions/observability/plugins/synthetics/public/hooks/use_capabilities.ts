@@ -15,16 +15,18 @@ export const useCanEditSynthetics = () => {
   return !!useKibana().services?.application?.capabilities.uptime.save;
 };
 
+export const useCanUsePublicLocationsPermission = (): boolean =>
+  !!(useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true);
+
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
-  const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
   const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
   if (!publicLocations) {
     return true;
   }
 
-  return !!canUsePublicLocations;
+  return canUsePublicLocations;
 };
 
 export const useCanReadSyntheticsIndex = () => {

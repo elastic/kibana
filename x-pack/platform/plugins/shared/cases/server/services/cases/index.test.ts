@@ -27,7 +27,6 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsBulkResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -39,7 +38,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
-import { V2_NOOP_ACTIVITY_WRITER, V2_NOOP_WRITER } from '../../cases_analytics_v2';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_WRITER,
+} from '../../cases_analytics_v2';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
@@ -175,6 +178,7 @@ describe('CasesService', () => {
     log: mockLogger,
     unsecuredSavedObjectsClient,
     config: {} as ConfigType,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
   });
 
   let service: CasesService;
@@ -189,6 +193,7 @@ describe('CasesService', () => {
       // keep every hook a tight no-op.
       analyticsV2Writer: V2_NOOP_WRITER,
       analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   });
 
@@ -1225,7 +1230,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1236,7 +1241,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.connector).toMatchInlineSnapshot(`
           Object {
@@ -1293,7 +1298,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1301,7 +1306,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
         expect(res.saved_objects[2].attributes.severity).toEqual(CaseSeverity.HIGH);
@@ -1326,7 +1331,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1334,7 +1339,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
         expect(res.saved_objects[2].attributes.status).toEqual(CaseStatuses.closed);
@@ -1349,7 +1354,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1357,7 +1362,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
@@ -1951,7 +1956,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.connector.id).toMatchInlineSnapshot(`"1"`);
         expect(
@@ -1988,7 +1993,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
@@ -2016,7 +2021,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
@@ -2034,7 +2039,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
@@ -3653,6 +3658,93 @@ describe('CasesService', () => {
         ]);
       });
     });
+
+    describe('searchCasesGroupedByID stats', () => {
+      const namespaces = ['default'];
+
+      const mockSearch = () => {
+        const searchMock = jest.fn().mockResolvedValue({
+          hits: { hits: [], total: { value: 0 } },
+          aggregations: {
+            statuses: {
+              buckets: [
+                { key: '0', doc_count: 2 },
+                { key: '10', doc_count: 3 },
+                { key: '20', doc_count: 5 },
+              ],
+            },
+            mttr: { value: 360 },
+          },
+        });
+        // The SO mock doesn't include `search` by default, so wire it up here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = searchMock;
+        jest
+          .spyOn(attachmentService.getter, 'getCaseAttatchmentStats')
+          .mockResolvedValue(new Map());
+        return searchMock;
+      };
+
+      it('does not run a stats query when statsOptions is not provided', async () => {
+        const searchMock = mockSearch();
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'anything' },
+          namespaces,
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(1);
+        expect(result.searchStats).toBeUndefined();
+      });
+
+      it('computes status counts and mttr with the same search query as the case list', async () => {
+        const searchMock = mockSearch();
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'my search term' },
+          namespaces,
+          statsOptions: {},
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(2);
+
+        const statsCall = searchMock.mock.calls.find(([args]) => args.size === 0)?.[0];
+        expect(statsCall).toBeDefined();
+        expect(statsCall.aggs).toEqual({
+          statuses: {
+            terms: { field: 'cases.status', size: 3, order: { _key: 'asc' } },
+          },
+          mttr: { avg: { field: 'cases.duration' } },
+        });
+        // The stats query carries the same free-text search clause as the list query.
+        const listCall = searchMock.mock.calls.find(([args]) => args.size !== 0)?.[0];
+        expect(statsCall.query).toEqual(listCall.query);
+
+        expect(result.searchStats).toEqual({
+          statusStats: { open: 2, 'in-progress': 3, closed: 5 },
+          mttr: 360,
+        });
+      });
+
+      it('returns zero counts and null mttr when the stats query matches nothing', async () => {
+        const searchMock = mockSearch();
+        searchMock.mockResolvedValue({
+          hits: { hits: [], total: { value: 0 } },
+          aggregations: { statuses: { buckets: [] }, mttr: { value: null } },
+        });
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'nothing matches' },
+          namespaces,
+          statsOptions: {},
+        });
+
+        expect(result.searchStats).toEqual({
+          statusStats: { open: 0, 'in-progress': 0, closed: 0 },
+          mttr: null,
+        });
+      });
+    });
   });
 
   describe('cases-analytics v2 writer integration', () => {
@@ -3672,14 +3764,23 @@ describe('CasesService', () => {
         bulkDeleteActionsByCaseIds: jest.fn(),
         bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
       };
+      const analyticsV2AttachmentsWriter = {
+        upsertAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
+        bulkUpsertAttachments: jest.fn(),
+        bulkDeleteAttachments: jest.fn(),
+        bulkDeleteAttachmentsByCaseIds: jest.fn(),
+        bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+      };
       const svc = new CasesService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
         attachmentService,
         analyticsV2Writer,
         analyticsV2ActivityWriter,
+        analyticsV2AttachmentsWriter,
       });
-      return { svc, analyticsV2Writer, analyticsV2ActivityWriter };
+      return { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter };
     };
 
     describe('bulkDeleteCaseEntities', () => {

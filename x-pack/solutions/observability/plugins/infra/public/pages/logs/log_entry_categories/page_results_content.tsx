@@ -18,7 +18,11 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import type { TimeRange } from '../../../../common/time/time_range';
-import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
+import {
+  CategoryJobNoticesSection,
+  JobStoppedCallout,
+} from '../../../components/logging/log_analysis_job_status';
+import { JobProjectScopes } from '../../../components/logging/log_analysis_project_scope';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
@@ -64,6 +68,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
     jobIds,
+    projectRouting,
     categoryQualityWarnings,
     sourceConfiguration: { sourceId: logViewId },
   } = useLogEntryCategoriesModuleContext();
@@ -163,6 +168,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     [hasResults, setupStatus]
   );
 
+  const stoppedJobNames = useMemo(
+    () => (hasStoppedJobs ? [moduleDescriptor.moduleName] : []),
+    [hasStoppedJobs, moduleDescriptor.moduleName]
+  );
+
   useEffect(() => {
     getTopLogEntryCategories();
   }, [
@@ -211,6 +221,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
       logViewReference={{ type: 'log-view-reference', logViewId }}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
+      projectRouting={projectRouting}
     >
       <LogsPageTemplate
         hasData={logViewStatus?.index !== 'missing'}
@@ -229,14 +240,19 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <DatasetsSelector
-                  availableDatasets={logEntryCategoryDatasets}
-                  isLoading={isLoadingLogEntryCategoryDatasets}
-                  onChangeDatasetSelection={setCategoryQueryDatasets}
-                  selectedDatasets={categoryQueryDatasets}
-                />
-              </EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <JobProjectScopes jobs={[{ projectRouting }]} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <DatasetsSelector
+                    availableDatasets={logEntryCategoryDatasets}
+                    isLoading={isLoadingLogEntryCategoryDatasets}
+                    onChangeDatasetSelection={setCategoryQueryDatasets}
+                    selectedDatasets={categoryQueryDatasets}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
                   start={selectedTimeRange.startTime}
@@ -251,11 +267,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <MLJobsAwaitingNodeWarning jobIds={Object.values(jobIds)} />
+            <JobStoppedCallout stoppedJobNames={stoppedJobNames} />
             <CategoryJobNoticesSection
               hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
               hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
               moduleName={moduleDescriptor.moduleName}
               onRecreateMlJobForReconfiguration={onOpenSetup}

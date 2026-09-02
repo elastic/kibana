@@ -201,6 +201,7 @@ const createBroaderSurfaceContainer = () => {
   const stepIoService = {
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseReadPins: jest.fn(),
     releaseTransientlyRehydratedOutputs: jest.fn(),
     getStepInput: jest.fn().mockReturnValue(undefined),
     getStepOutput: jest.fn(

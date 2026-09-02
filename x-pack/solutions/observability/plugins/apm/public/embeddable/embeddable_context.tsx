@@ -12,14 +12,9 @@ import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect, useMemo, useRef } from 'react';
 import {
-  UNSAFE_LocationContext as ReactRouterLocationContext,
-  UNSAFE_NavigationContext as ReactRouterNavigationContext,
-  UNSAFE_RouteContext as ReactRouterRouteContext,
-} from 'react-router-dom-v5-compat';
-import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../../common/cps_feature_flag';
+} from '@kbn/apm-shared/public';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { apmRouter } from '../components/routing/apm_route_config';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
@@ -32,31 +27,6 @@ import { getDateRange } from '../context/url_params_context/helpers';
 import { setApmInternalServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import type { EmbeddableDeps } from './types';
-
-/**
- * Resets the React Router v6 context so that nested `<Router>` components
- * (via `CompatRouter` inside `@kbn/shared-ux-router`) do not trigger the
- * v6 invariant "You cannot render a <Router> inside another <Router>".
- *
- * This is necessary because embeddables may be rendered inside pages that
- * already have a v6 router context (e.g. APM alert details via `CompatRouter`),
- * while the embeddable needs its own isolated in-memory router for URL state.
- */
-function ScopedRouterProvider({ children }: { children: React.ReactElement }) {
-  return (
-    <ReactRouterRouteContext.Provider value={{ outlet: null, matches: [], isDataRoute: false }}>
-      <ReactRouterNavigationContext.Provider
-        value={null as unknown as React.ContextType<typeof ReactRouterNavigationContext>}
-      >
-        <ReactRouterLocationContext.Provider
-          value={null as unknown as React.ContextType<typeof ReactRouterLocationContext>}
-        >
-          {children}
-        </ReactRouterLocationContext.Provider>
-      </ReactRouterNavigationContext.Provider>
-    </ReactRouterRouteContext.Provider>
-  );
-}
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -120,7 +90,7 @@ export function ApmEmbeddableContext({
     lens: deps.pluginsStart.lens,
     uiActions: deps.pluginsStart.uiActions,
     observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,
-    share: deps.pluginsSetup.share,
+    share: deps.pluginsStart.share,
     kibanaEnvironment: deps.kibanaEnvironment,
     observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
     licensing: deps.pluginsStart.licensing,
@@ -131,9 +101,11 @@ export function ApmEmbeddableContext({
     OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
   );
-  const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
-  const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
-  setApmInternalServices({ callApmApi, cpsManager });
+  useMemo(() => {
+    const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
+    const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
+    setApmInternalServices({ callApmApi, cpsManager });
+  }, [deps.coreStart, deps.pluginsStart.cps?.cpsManager, isCpsEnabled]);
 
   return (
     <I18nProvider>
@@ -147,23 +119,21 @@ export function ApmEmbeddableContext({
             telemetry: deps.telemetry,
           }}
         >
-          <ScopedRouterProvider>
-            <RouterProvider router={apmRouter as any} history={history.current}>
-              <TimeRangeMetadataContextProvider
-                uiSettings={deps.coreStart.uiSettings}
-                start={resolvedStart ?? rangeFrom}
-                end={resolvedEnd ?? rangeTo}
-                kuery={kuery}
-                useSpanName={false}
-              >
-                <LicenseProvider>
-                  <ApmIndexSettingsContextProvider>
-                    <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-                  </ApmIndexSettingsContextProvider>
-                </LicenseProvider>
-              </TimeRangeMetadataContextProvider>
-            </RouterProvider>
-          </ScopedRouterProvider>
+          <RouterProvider router={apmRouter as any} history={history.current}>
+            <TimeRangeMetadataContextProvider
+              uiSettings={deps.coreStart.uiSettings}
+              start={resolvedStart ?? rangeFrom}
+              end={resolvedEnd ?? rangeTo}
+              kuery={kuery}
+              useSpanName={false}
+            >
+              <LicenseProvider>
+                <ApmIndexSettingsContextProvider>
+                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                </ApmIndexSettingsContextProvider>
+              </LicenseProvider>
+            </TimeRangeMetadataContextProvider>
+          </RouterProvider>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>
     </I18nProvider>

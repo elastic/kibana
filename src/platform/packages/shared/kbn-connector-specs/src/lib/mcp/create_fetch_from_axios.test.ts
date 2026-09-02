@@ -219,6 +219,49 @@ describe('createFetchFromAxios', () => {
 
       expect(mockRequest).toHaveBeenCalledTimes(2);
     });
+
+    it('keys gates by Mcp-Session-Id so concurrent sessions do not unblock each other', async () => {
+      // Session A initializes and gets its SSE channel open.
+      mockRequest
+        .mockResolvedValueOnce(
+          makeAxiosResponse({ status: 202, data: null, headers: { 'mcp-session-id': 'A' } })
+        ) // POST init (session A)
+        .mockResolvedValueOnce(
+          makeAxiosResponse({ status: 202, data: null, headers: { 'mcp-session-id': 'B' } })
+        ) // POST init (session B)
+        .mockResolvedValueOnce(makeAxiosResponse({ data: makeNodeStream() })) // GET SSE (session A)
+        .mockResolvedValueOnce(makeAxiosResponse({ data: Buffer.from('{}') })); // POST tool-call (session B), once unblocked
+
+      await fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'A' },
+      }); // creates gate for A
+
+      await fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'B' },
+      }); // creates a separate gate for B
+
+      // Session B's tool-call POST is gated on B's own SSE channel, so it hasn't
+      // dispatched to axios yet.
+      const sessionBToolCall = fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'B' },
+      });
+      expect(mockRequest).toHaveBeenCalledTimes(2);
+
+      // Session A's GET opens — this must NOT unblock session B.
+      await fetch('https://example.com/mcp', {
+        method: 'GET',
+        headers: { 'mcp-session-id': 'A' },
+      });
+      expect(mockRequest).toHaveBeenCalledTimes(3);
+
+      // Session B is still gated until its own timeout/GET.
+      jest.advanceTimersByTime(5000);
+      await sessionBToolCall;
+      expect(mockRequest).toHaveBeenCalledTimes(4);
+    });
   });
 
   describe('header normalization', () => {

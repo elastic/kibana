@@ -206,6 +206,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     data,
     dataViews,
     dataViewEditor,
+    notifications: { toasts },
 
     unifiedSearch: {
       ui: { SearchBar },
@@ -636,7 +637,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
         </EuiCallOut>
       ) : (
         <DataViewSelectPopover
-          dependencies={{ dataViews, dataViewEditor }}
+          dependencies={{ dataViews, dataViewEditor, toasts }}
           dataView={dataView}
           metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
           onSelectDataView={onSelectDataView}

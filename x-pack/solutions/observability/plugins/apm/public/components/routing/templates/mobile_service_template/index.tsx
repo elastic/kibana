@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
@@ -21,28 +21,34 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { MobileSearchBar } from '../../../app/mobile/search_bar';
-import { ServiceIcons } from '../../../shared/service_icons';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
-import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
+import { useAnalyzeDataMenuItem } from '../apm_service_template/use_analyze_data_menu_item';
+import { useServiceIconBadges } from '../apm_service_template/use_service_icon_badges';
 
-type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key:
-    | 'overview'
-    | 'transactions'
-    | 'dependencies'
-    | 'errors-and-crashes'
-    | 'service-map'
-    | 'logs'
-    | 'alerts'
-    | 'dashboards';
+type TabKey =
+  | 'overview'
+  | 'transactions'
+  | 'dependencies'
+  | 'errors-and-crashes'
+  | 'logs'
+  | 'alerts'
+  | 'dashboards';
+
+type Tab = AppHeaderTab & {
+  key: TabKey;
   hidden?: boolean;
+  isTechnicalPreview?: boolean;
 };
+
+const technicalPreviewTooltip = i18n.translate('xpack.apm.technicalPreviewBadgeDescription', {
+  defaultMessage:
+    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+});
 
 interface Props {
   title: string;
   children: React.ReactChild;
-  selectedTabKey: Tab['key'];
+  selectedTabKey: TabKey;
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
   customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
@@ -83,6 +89,22 @@ function TemplateWithContext({
   const tabs = useTabs({ selectedTabKey });
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
 
+  const headerBadges = useServiceIconBadges({
+    serviceName,
+    environment,
+    start,
+    end,
+  });
+
+  const analyzeDataMenuItem = useAnalyzeDataMenuItem();
+
+  const pageMenu = useMemo<AppMenuConfig | undefined>(() => {
+    if (!analyzeDataMenuItem) {
+      return undefined;
+    }
+    return { primaryActionItem: analyzeDataMenuItem };
+  }, [analyzeDataMenuItem]);
+
   const servicesLink = router.link('/services', {
     query: { ...query },
   });
@@ -97,12 +119,9 @@ function TemplateWithContext({
       },
       ...(selectedTab
         ? [
+            // No href on the current entity — Chrome Next Back would self-link.
             {
               title: serviceName,
-              href: router.link('/mobile-services/{serviceName}', {
-                path: { serviceName },
-                query,
-              }),
             },
             {
               title: selectedTab.label,
@@ -111,7 +130,7 @@ function TemplateWithContext({
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceName, servicesLink],
+    [selectedTab, serviceName, servicesLink],
     {
       omitRootOnServerless: true,
     }
@@ -132,33 +151,17 @@ function TemplateWithContext({
             )}
           </>
         }
-        pageHeader={{
+        header={{
+          title: serviceName,
+          back: {
+            href: servicesLink,
+            label: i18n.translate('xpack.apm.mobileServiceDetails.backToInventory', {
+              defaultMessage: 'Service inventory',
+            }),
+          },
+          badges: headerBadges,
           tabs,
-          pageTitle: (
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="l">
-                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <ServiceIcons
-                      serviceName={serviceName}
-                      environment={environment}
-                      start={start}
-                      end={end}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <AnalyzeDataButton />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          menu: pageMenu,
         }}
       >
         <ServiceAnomalyTimeseriesContextProvider>
@@ -169,7 +172,7 @@ function TemplateWithContext({
   );
 }
 
-function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
+function useTabs({ selectedTabKey }: { selectedTabKey: TabKey }): AppHeaderTab[] {
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
@@ -186,6 +189,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
   const tabs: Tab[] = [
     {
       key: 'overview',
+      id: 'overview',
       href: router.link('/mobile-services/{serviceName}/overview', {
         path: { serviceName },
         query,
@@ -196,6 +200,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     },
     {
       key: 'transactions',
+      id: 'transactions',
       href: router.link('/mobile-services/{serviceName}/transactions', {
         path: { serviceName },
         query,
@@ -206,6 +211,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     },
     {
       key: 'dependencies',
+      id: 'dependencies',
       href: router.link('/mobile-services/{serviceName}/dependencies', {
         path: { serviceName },
         query,
@@ -216,6 +222,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     },
     {
       key: 'errors-and-crashes',
+      id: 'errors-and-crashes',
       href: router.link('/mobile-services/{serviceName}/errors-and-crashes', {
         path: { serviceName },
         query,
@@ -225,17 +232,8 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       }),
     },
     {
-      key: 'service-map',
-      href: router.link('/mobile-services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
-        defaultMessage: 'Service map',
-      }),
-    },
-    {
       key: 'logs',
+      id: 'logs',
       href: router.link('/mobile-services/{serviceName}/logs', {
         path: { serviceName },
         query,
@@ -243,10 +241,11 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: <TechnicalPreviewBadge icon="flask" />,
+      isTechnicalPreview: true,
     },
     {
       key: 'alerts',
+      id: 'alerts',
       href: router.link('/mobile-services/{serviceName}/alerts', {
         path: { serviceName },
         query,
@@ -258,11 +257,12 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     },
     {
       key: 'dashboards',
+      id: 'dashboards',
       href: router.link('/mobile-services/{serviceName}/dashboards', {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="flask" />,
+      isTechnicalPreview: true,
       label: i18n.translate('xpack.apm.mobileServiceDetails.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),
@@ -271,11 +271,19 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, append }) => ({
+    .map(({ href, key, id, label, isTechnicalPreview }) => ({
+      id,
       href,
       label,
-      append,
       isSelected: key === selectedTabKey,
       'data-test-subj': `${key}Tab`,
+      ...(isTechnicalPreview
+        ? {
+            badge: {
+              iconType: 'flask',
+              tooltip: technicalPreviewTooltip,
+            },
+          }
+        : {}),
     }));
 }

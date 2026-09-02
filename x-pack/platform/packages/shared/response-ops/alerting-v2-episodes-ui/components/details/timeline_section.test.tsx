@@ -10,8 +10,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '../../queries/episode_events_query';
-import type { EpisodeActionHistoryEntry } from '../../queries/episode_actions_history_query';
+import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
@@ -100,16 +100,24 @@ beforeEach(() => {
 });
 
 describe('AlertEpisodeTimelineSection', () => {
-  it('shows a spinner while loading actions', () => {
+  it('shows a skeleton while loading actions', () => {
     mockActions([], true);
     renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeTimelineSectionLoading')
+        .querySelector('.euiSkeletonCircle')
+    ).not.toBeNull();
   });
 
-  it('shows a spinner while loading events', () => {
+  it('shows a skeleton while loading events', () => {
     mockEvents(mockEventRows, true);
     renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeTimelineSectionLoading')
+        .querySelector('.euiSkeletonCircle')
+    ).not.toBeNull();
   });
 
   it('shows empty prompt when there are no events and no actions', () => {

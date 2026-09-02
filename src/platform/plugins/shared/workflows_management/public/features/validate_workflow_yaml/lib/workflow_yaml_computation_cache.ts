@@ -13,7 +13,7 @@ import { performComputation } from '../../../entities/workflows/store/workflow_d
 const MAX_CACHE_ENTRIES = 32;
 const IDLE_COMPUTATION_TIMEOUT_MS = 500;
 
-/** Preview validation only — not used by the live workflow editor (`useYamlValidation`). */
+/** Shared async YAML computation cache used by change-history preview validation. */
 const computationCache = new Map<string, ComputedData>();
 
 const touchCacheEntry = (yamlString: string, computed: ComputedData): void => {

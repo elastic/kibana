@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('apis', () => {
     // load new platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/management'));
-    loadTestFile(require.resolve('../../apis/painless_lab'));
     loadTestFile(require.resolve('../../apis/intercepts'));
     loadTestFile(require.resolve('../../apis/streams'));
   });

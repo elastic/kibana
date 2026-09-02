@@ -28,10 +28,11 @@ import {
   useUIExtension,
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
+  useIsAgentlessQueryParam,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
-  useGetOnePackagePolicy,
+  useGetOnePackagePolicyQuery,
 } from '../../../../integrations/hooks';
 import {
   Loading,
@@ -59,6 +60,7 @@ import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../ser
 import {
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
+  inferVarGroupSelections,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
 import { useMultipleAgentPolicies } from '../../../hooks';
@@ -81,15 +83,23 @@ export const EditPackagePolicyPage = memo(() => {
     params: { packagePolicyId, policyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
-  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
+  // Parse the 'from' query parameter to determine navigation after save
+  const { search } = useLocation();
+  const qs = new URLSearchParams(search);
+
+  // Detect-before-read: the route only carries `packagePolicyId`, shared between agentless and
+  // agent-based policies. Agentless surfaces append this hint so we can read/write through the
+  // agentless API without first reading the package policy.
+  const isAgentless = useIsAgentlessQueryParam();
+
+  // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
+  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API.
+  const packagePolicy = useGetOnePackagePolicyQuery(packagePolicyId, { enabled: !isAgentless });
   const extensionView = useUIExtension(
     packagePolicy.data?.item?.package?.name ?? '',
     'package-policy-edit'
   );
 
-  // Parse the 'from' query parameter to determine navigation after save
-  const { search } = useLocation();
-  const qs = new URLSearchParams(search);
   const fromQs = qs.get('from');
   let from: EditPackagePolicyFrom | undefined;
   if (fromQs === 'installed-integrations') {
@@ -101,6 +111,7 @@ export const EditPackagePolicyPage = memo(() => {
       packagePolicyId={packagePolicyId}
       policyId={policyId}
       from={from}
+      isAgentless={isAgentless}
       // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
@@ -115,7 +126,8 @@ export const EditPackagePolicyForm = memo<{
   forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
   policyId?: string;
-}>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit' }) => {
+  isAgentless?: boolean;
+}>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit', isAgentless = false }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -144,15 +156,25 @@ export const EditPackagePolicyForm = memo<{
     validationResults,
   } = usePackagePolicyWithRelatedData(packagePolicyId, {
     forceUpgrade,
+    isAgentless,
   });
 
   const hasAgentlessAgentPolicy = useMemo(
     () =>
-      existingAgentPolicies.length === 1
+      // When editing through the agentless API we don't fetch an agent policy, so the hint is
+      // authoritative. Otherwise fall back to inspecting the loaded agent policy (legacy path).
+      isAgentless ||
+      (existingAgentPolicies.length === 1
         ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
           getAgentlessStatusForPackage(packageInfo).isAgentless
-        : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, getAgentlessStatusForPackage]
+        : false),
+    [
+      isAgentless,
+      existingAgentPolicies,
+      isAgentlessAgentPolicy,
+      packageInfo,
+      getAgentlessStatusForPackage,
+    ]
   );
 
   // Derive var_group_selections from policy for edit mode
@@ -163,8 +185,13 @@ export const EditPackagePolicyForm = memo<{
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
+    // The policy predates the package's var_groups: prefer inferring the selection
+    // from its populated vars over the first-visible-option default, so an existing
+    // configuration (e.g. direct access keys) is not presented as a different one
+    const defaults = computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+    const inferred = inferVarGroupSelections(varGroups, packagePolicy.vars);
+    return inferred ? { ...defaults, ...inferred } : defaults;
+  }, [packagePolicy.var_group_selections, packagePolicy.vars, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -380,7 +407,8 @@ export const EditPackagePolicyForm = memo<{
           ilmPolicyRef.current,
           packageInfo,
           notifications,
-          packageInfo.title ?? packageInfo.name
+          packageInfo.title ?? packageInfo.name,
+          namespaceCustomizationEnabledRef.current
         );
       }
       setIsEdited(false);

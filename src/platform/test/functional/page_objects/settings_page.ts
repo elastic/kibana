@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -225,16 +226,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
+    // EuiButton renders its disabled state as the native `disabled` attribute rather than a
+    // class, and a disabled button never fires its onClick, so the element has to be probed
+    // directly: a click sent to it is dropped without throwing.
     await this.retry.waitFor('active save button', async () => {
-      return (
-        (
-          await this.find.allByCssSelector(
-            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
-          )
-        ).length === 1
-      );
+      return await (await this.getSaveIndexPatternButton()).isEnabled();
     });
-    return await this.testSubjects.find('saveIndexPatternButton');
+    return await this.getSaveIndexPatternButton();
   }
 
   async clickEditIndexButton() {
@@ -245,12 +243,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    await this.testSubjects.click('moreActionsButton');
+    if (!(await this.testSubjects.exists('deleteIndexPatternButton'))) {
+      await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+    }
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
   async getIndexPageHeading() {
-    return await this.testSubjects.getVisibleText('indexPatternTitle');
+    return await this.testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   async getManagedTag() {
@@ -359,8 +359,14 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(true);
-    await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(false);
+    // Center the option in the popover's scroll list so the click clears an edge-pinned option.
+    const optionToClear = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToClear.scrollIntoView({ block: 'center' });
+    await optionToClear.click();
+    await this.retry.waitFor(
+      'option to be unchecked',
+      async () => !(await this.isOptionChecked(option))
+    );
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -371,8 +377,11 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(false);
-    await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(true);
+    // Center the option in the popover's scroll list so the click toggles an edge-pinned option.
+    const optionToSelect = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToSelect.scrollIntoView({ block: 'center' });
+    await optionToSelect.click();
+    await this.retry.waitFor('option to be checked', async () => this.isOptionChecked(option));
 
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
@@ -501,11 +510,22 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
-  async addCustomDataViewId(value: string) {
+  // `toggleAdvancedSetting` flips the section between shown and hidden, so calling it
+  // unconditionally would collapse the section again when the form is filled a second time.
+  async showAdvancedSettings() {
+    if (await this.testSubjects.exists('advancedSettings')) {
+      return;
+    }
     await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.existOrFail('advancedSettings');
+  }
+
+  async addCustomDataViewId(value: string) {
+    await this.showAdvancedSettings();
     const customDataViewIdInput = await (
       await this.testSubjects.find('savedObjectIdField')
     ).findByTagName('input');
+    await customDataViewIdInput.clearValueWithKeyboard();
     await customDataViewIdInput.type(value);
   }
 
@@ -538,9 +558,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async allowHiddenClick() {
-    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.showAdvancedSettings();
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');
-    await (await allowHiddenField.findByTagName('button')).click();
+    const allowHiddenToggle = await allowHiddenField.findByTagName('button');
+    // The toggle is a switch, so re-clicking it on a second fill would turn allow-hidden back off.
+    if ((await allowHiddenToggle.getAttribute('aria-checked')) === 'true') {
+      return;
+    }
+    await allowHiddenToggle.click();
   }
 
   async createIndexPattern(
@@ -552,7 +577,12 @@ export class SettingsPageObject extends FtrService {
     dataViewName?: string,
     allowHidden?: boolean
   ) {
+    let hasSubmittedTheForm = false;
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // The save was accepted and the editor flyout closed: the data view was created.
+        return;
+      }
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
 
@@ -560,7 +590,9 @@ export class SettingsPageObject extends FtrService {
       const flyOut = await this.testSubjects.exists('createAnyway');
       if (flyOut) {
         await this.testSubjects.click('createAnyway');
-      } else {
+      } else if (!(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // On a retry the flyout may already be open; re-clicking the list-page
+        // button here would be intercepted by the flyout's success callout.
         await this.clickAddNewIndexPatternButton();
       }
 
@@ -599,6 +631,13 @@ export class SettingsPageObject extends FtrService {
       );
 
       await (await this.getSaveDataViewButtonActive()).click();
+      hasSubmittedTheForm = true;
+
+      // The Save click can be swallowed when it races the async CCS source
+      // resolution re-render, leaving the flyout open with nothing submitted.
+      // Confirm the flyout closed inside this retry.try so a swallowed click
+      // re-runs fill→save, rather than the URL loop below dead-polling forever.
+      await this.testSubjects.missingOrFail('indexPatternEditorFlyout', { timeout: 30000 });
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -745,6 +784,9 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
@@ -1086,8 +1128,27 @@ export class SettingsPageObject extends FtrService {
     }
 
     if (activeTab) {
+      // The flyout slides in with an entrance animation; a tab click issued before it settles can
+      // miss the moving target and leave the default Syntax tab selected, so wait for it to stop.
+      await this.waitForScriptedFieldHelpFlyoutToSettle();
       await this.testSubjects.click(activeTab);
+      await this.testSubjects.existOrFail('runScriptButton');
     }
+  }
+
+  private async waitForScriptedFieldHelpFlyoutToSettle() {
+    let previousPosition = await (
+      await this.testSubjects.find('scriptedFieldsHelpFlyout')
+    ).getPosition();
+    await this.retry.waitFor('scripted fields help flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('scriptedFieldsHelpFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
   }
 
   async closeScriptedFieldHelp() {

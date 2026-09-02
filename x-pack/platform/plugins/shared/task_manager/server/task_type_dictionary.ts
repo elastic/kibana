@@ -7,7 +7,13 @@
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import type { TaskDefinition, TaskRunCreatorFunction, TaskPriority, TaskCost } from './task';
+import type {
+  TaskDefinition,
+  TaskRunCreatorFunction,
+  TaskPriority,
+  TaskCost,
+  TaskTypeGroup,
+} from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
@@ -21,6 +27,9 @@ export const REMOVED_TYPES: string[] = [
   // deprecated in https://github.com/elastic/kibana/pull/121442
   'alerting:siem.signals',
 
+  // Significant Events Alerting v1 rule type removed in https://github.com/elastic/kibana/pull/278464
+  'alerting:streams.rules.esql',
+
   'search_sessions_monitor',
   'search_sessions_cleanup',
   'search_sessions_expire',
@@ -33,6 +42,7 @@ export const REMOVED_TYPES: string[] = [
 
   // Legacy SML crawler task types
   'agent_builder:sml_crawler',
+  'agent_context_layer:sml_crawler',
 
   // removed in https://github.com/elastic/kibana/pull/250218
   'logs-data-telemetry',
@@ -45,6 +55,9 @@ export const REMOVED_TYPES: string[] = [
   'streams_onboarding',
   'streams_features_identification',
   'streams_significant_events_queries_generation',
+
+  // Legacy streams description generation task replaced by the synchronous suggestion API
+  'streams_description_generation',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [
@@ -72,9 +85,10 @@ export interface TaskRegisterDefinition {
    */
   timeout?: string;
   /**
-   * An optional definition of task priority. Tasks will be sorted by priority prior to claiming
-   * so high priority tasks will always be claimed before normal priority, which will always be
-   * claimed before low priority
+   * An optional definition of task priority, describing what the task is for. Tasks are sorted
+   * by priority descending prior to claiming, so `UserInteractive` is claimed before `Standard`,
+   * which is claimed before `Deferrable`, which is claimed before `Maintenance`.
+   * Defaults to `TaskPriority.Standard` when omitted.
    */
   priority?: TaskPriority;
   /**
@@ -113,6 +127,7 @@ export interface TaskRegisterDefinition {
   >;
 
   paramsSchema?: ObjectType;
+  taskTypeGroup?: TaskTypeGroup;
 }
 
 /**

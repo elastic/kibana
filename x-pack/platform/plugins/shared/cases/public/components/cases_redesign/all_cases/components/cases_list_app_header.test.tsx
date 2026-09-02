@@ -11,6 +11,7 @@ import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-heade
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
+import { KibanaServices } from '../../../../common/lib/kibana';
 import { CasesListAppHeader } from './cases_list_app_header';
 
 jest.mock('../../../../common/navigation/hooks');
@@ -81,5 +82,73 @@ describe('CasesListAppHeader', () => {
 
     expect(screen.queryByTestId('createNewCaseBtn')).not.toBeInTheDocument();
     expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
+  });
+
+  describe('templates button', () => {
+    let getConfigSpy: jest.SpyInstance;
+
+    afterEach(() => {
+      getConfigSpy?.mockRestore();
+    });
+
+    it('does not display the templates button when the templates feature flag is disabled', async () => {
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: {
+          permissions: buildCasesPermissions({ manageTemplates: true, settings: false }),
+        },
+      });
+
+      expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
+    });
+
+    it('displays the templates button when the feature flag is enabled and the user has manageTemplates permission', async () => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: true }) },
+      });
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('cases-templates-button')).toBeInTheDocument();
+    });
+
+    it('does not display the templates button when the user lacks manageTemplates permission', () => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: false }) },
+      });
+
+      expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
+    });
+
+    it('displays the templates button even when the user lacks settings permission', async () => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: {
+          permissions: buildCasesPermissions({ settings: false, manageTemplates: true }),
+        },
+      });
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('cases-templates-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('configure-case-button')).not.toBeInTheDocument();
+    });
   });
 });

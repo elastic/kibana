@@ -22,6 +22,8 @@ interface MitreAttackChainProps {
   selectedTactic?: string | null;
   showLabels?: boolean;
   triggeredTactics: readonly string[];
+  showPersistentFirstTacticBadge?: boolean;
+  alignLastDotToEnd?: boolean;
 }
 
 export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
@@ -30,6 +32,8 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
   selectedTactic,
   showLabels = false,
   triggeredTactics,
+  showPersistentFirstTacticBadge = false,
+  alignLastDotToEnd = false,
 }) => {
   const triggeredSet = useMemo(() => new Set(triggeredTactics), [triggeredTactics]);
 
@@ -44,12 +48,15 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
   // when no tactic is selected (the selected tactic's chip is already visible).
   // Falls back to `null` when no tactic has anomalies.
   const firstActiveTactic = useMemo<string | null>(() => {
+    if (showPersistentFirstTacticBadge && anomalyCountByTactic && tacticNames.length > 0) {
+      return tacticNames[0];
+    }
     if (!anomalyCountByTactic) return null;
     for (const t of tacticNames) {
       if ((anomalyCountByTactic[t] ?? 0) > 0) return t;
     }
     return null;
-  }, [anomalyCountByTactic]);
+  }, [anomalyCountByTactic, showPersistentFirstTacticBadge]);
 
   const [hoveredTactic, setHoveredTactic] = useState<string | null>(null);
   const handleHoverChange = useCallback((tactic: string, isHovered: boolean) => {
@@ -76,19 +83,28 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
         {tacticNames.map((tactic, index) => {
           const isDetected = triggeredSet.has(tactic);
           const isClickable = !!onSelectTactic && isDetected;
+          const isLastTactic = index === tacticNames.length - 1;
+          const alignDotToEnd = alignLastDotToEnd && isLastTactic;
           return (
             <EuiFlexItem
               key={tactic}
-              grow
+              grow={!alignDotToEnd}
               css={css`
                 min-width: 0;
+                ${alignDotToEnd
+                  ? `
+                  flex: 0 0 8px;
+                  min-width: 8px;
+                `
+                  : ''}
               `}
             >
               <MitreTacticDot
                 tactic={tactic}
                 detected={isDetected}
                 showLabel={showLabels}
-                isLast={index === tacticNames.length - 1}
+                isLast={isLastTactic}
+                alignDotToEnd={alignDotToEnd}
                 anomalyCount={anomalyCountByTactic?.[tactic]}
                 isSelected={selectedTactic === tactic}
                 isClickable={isClickable}

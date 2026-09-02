@@ -22,6 +22,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     tools,
     functionCalling,
     temperature,
+    reasoning,
     modelName,
     logger,
     abortSignal,
@@ -41,6 +42,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       tools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
+      reasoning,
       modelName,
     });
 
@@ -59,7 +61,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     }).pipe(
       handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
+      emitTokenCountEstimateIfMissing({ request, logger }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },

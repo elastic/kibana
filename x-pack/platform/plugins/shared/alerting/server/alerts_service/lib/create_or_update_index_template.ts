@@ -15,6 +15,11 @@ import { isEmpty } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
+import {
+  getTotalFieldsLimitFromSettings,
+  getTotalFieldsLimitSettings,
+  TOTAL_FIELDS_LIMIT_SETTING,
+} from './total_fields_limit_settings';
 
 interface GetIndexTemplateOpts {
   componentTemplateRefs: string[];
@@ -70,8 +75,7 @@ export const getIndexTemplate = ({
               'index.lifecycle': indexLifecycle,
             }),
         'index.mapping.ignore_malformed': true,
-        'index.mapping.total_fields.limit': totalFieldsLimit,
-        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+        ...getTotalFieldsLimitSettings(totalFieldsLimit),
       },
       mappings: {
         dynamic: false,
@@ -107,6 +111,28 @@ interface CreateOrUpdateIndexTemplateOpts {
  * conflicts. Simulate should return an empty mapping if a template
  * conflicts with an already installed template.
  */
+const getExistingTemplateFieldsLimit = async (
+  esClient: ElasticsearchClient,
+  name: string,
+  logger: Logger
+): Promise<number | undefined> => {
+  try {
+    const response = await retryTransientEsErrors(
+      () => esClient.indices.getIndexTemplate({ name }),
+      { logger }
+    );
+    const existingTemplate = (response?.index_templates ?? []).find(
+      (indexTemplate) => indexTemplate.name === name
+    );
+    return getTotalFieldsLimitFromSettings(existingTemplate?.index_template?.template?.settings);
+  } catch (err) {
+    if (err?.statusCode === 404) {
+      return undefined;
+    }
+    throw err;
+  }
+};
+
 export const createOrUpdateIndexTemplate = async ({
   logger,
   esClient,
@@ -114,11 +140,41 @@ export const createOrUpdateIndexTemplate = async ({
 }: CreateOrUpdateIndexTemplateOpts) => {
   logger.debug(`Installing index template ${template.name}`);
 
+  let templateToInstall = template;
+  try {
+    // Never lower a total_fields.limit that is already higher than the configured value;
+    // a higher limit may have been set manually or by a previous, higher configuration.
+    const existingLimit = await getExistingTemplateFieldsLimit(esClient, template.name, logger);
+    const templateLimit = getTotalFieldsLimitFromSettings(template.template?.settings);
+    if (
+      existingLimit !== undefined &&
+      templateLimit !== undefined &&
+      existingLimit > templateLimit
+    ) {
+      logger.debug(
+        `Preserving existing total_fields.limit of ${existingLimit} for index template ${template.name} instead of lowering it to ${templateLimit}`
+      );
+      templateToInstall = {
+        ...template,
+        template: {
+          ...template.template,
+          settings: {
+            ...template.template?.settings,
+            [TOTAL_FIELDS_LIMIT_SETTING]: existingLimit,
+          },
+        },
+      };
+    }
+  } catch (err) {
+    logger.error(`Error fetching existing index template ${template.name} - ${err.message}`, err);
+    throw err;
+  }
+
   let mappings: MappingTypeMapping = {};
   try {
     // Simulate the index template to proactively identify any issues with the mapping
     const simulateResponse = await retryTransientEsErrors(
-      () => esClient.indices.simulateTemplate(template),
+      () => esClient.indices.simulateTemplate(templateToInstall),
       { logger }
     );
     mappings = simulateResponse.template.mappings;
@@ -137,7 +193,7 @@ export const createOrUpdateIndexTemplate = async ({
   }
 
   try {
-    await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(template), {
+    await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(templateToInstall), {
       logger,
     });
   } catch (err) {

@@ -87,7 +87,7 @@ export const useChartLayersFromEsql = ({
         value: col.name,
         compactValues: true,
         seriesColor: color,
-        ...(unit ? getLensMetricFormat(unit) : {}),
+        ...getLensMetricFormat(unit ?? undefined),
       }));
 
     const hasDimensions = queryInfo.dimensions.length > 0;

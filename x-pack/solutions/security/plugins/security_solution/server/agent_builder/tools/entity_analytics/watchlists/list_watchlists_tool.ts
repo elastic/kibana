@@ -16,6 +16,7 @@ import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlis
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 
 const schema = z.object({
   nameContains: z
@@ -60,6 +61,13 @@ Use this tool when the user asks to discover or enumerate watchlists, for exampl
 Do NOT use this tool to find out which watchlists a specific entity belongs to â€” that information is already available on a single entity's profile via \`security.get_entity\` (\`entity.attributes.watchlists\`).`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'List Watchlists',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -69,6 +77,14 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
       logger.debug(
         `${SECURITY_LIST_WATCHLISTS_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
+
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_LIST_WATCHLISTS_TOOL_ID,
+        spaceId,
+        actionType: 'read',
+      });
+      telemetryTracker.recordResultCount(0);
 
       try {
         const [, startPlugins] = await core.getStartServices();
@@ -82,6 +98,7 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
           action: 'read watchlists',
         });
         if (!accessResult.allowed) {
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -109,6 +126,7 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
           updatedAt: w.updatedAt,
         }));
 
+        telemetryTracker.recordResultCount(watchlists.length);
         return {
           results: [
             {
@@ -123,6 +141,7 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -132,6 +151,8 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
             },
           ],
         };
+      } finally {
+        await telemetryTracker.report();
       }
     },
   };

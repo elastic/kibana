@@ -12,7 +12,8 @@ import { flow } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-
+import { ZodError } from '@kbn/zod';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../kibana_services';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
@@ -60,13 +61,17 @@ export function transformPanelsOut(
         containerReferences,
         isDashboardAppRequest
       );
-    } catch (e) {
+    } catch (err) {
+      let message = err.message;
+      if (err instanceof ZodError) {
+        message = stringifyZodError(err);
+      }
       warnings.push({
         type: 'dropped_panel',
         panel_type: panel.type,
         panel_config: panel.embeddableConfig,
         panel_references: panelReferences,
-        message: `Unable to transform panel config. Error: ${e.message}`,
+        message: `Unable to transform panel config. Error: ${message}`,
       });
       return;
     }
@@ -117,18 +122,11 @@ function transformPanel(
 
   const transforms = embeddableService?.getTransforms(transformType);
   let transformedPanelConfig =
-    transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+    transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences, undefined) ??
     defaultTransform(embeddableConfig);
 
   if (transforms?.schema) {
-    transformedPanelConfig = transforms.schema.validate(
-      transformedPanelConfig,
-      undefined,
-      undefined,
-      {
-        stripUnknownKeys: true,
-      }
-    );
+    transformedPanelConfig = transforms.schema.parse(transformedPanelConfig);
   }
 
   return {

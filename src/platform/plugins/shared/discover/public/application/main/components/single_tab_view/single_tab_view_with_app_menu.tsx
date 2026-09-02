@@ -20,13 +20,13 @@ export interface SingleTabViewWithAppMenuProps extends SingleTabViewProps {
 
 export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
   const { chrome } = useDiscoverServices();
-  const topNavMenuItems = useTopNavMenuItems();
+  const { topNavMenuItems, shareAction } = useTopNavMenuItems();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
 
   return (
     <>
       {isChromeNextProjectHeader ? (
-        <ChromeAppHeader menu={topNavMenuItems} />
+        <ChromeAppHeader menu={topNavMenuItems} share={shareAction} />
       ) : (
         topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />
       )}

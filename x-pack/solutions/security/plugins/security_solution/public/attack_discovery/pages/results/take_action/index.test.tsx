@@ -89,6 +89,14 @@ jest.mock(
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
+jest.mock('../use_attack_discovery_attachment', () => ({
+  useAttackDiscoveryAttachment: jest.fn(() => jest.fn()),
+}));
+
+jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => ({
+  useReportAddToChat: jest.fn(() => jest.fn()),
+}));
+
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 

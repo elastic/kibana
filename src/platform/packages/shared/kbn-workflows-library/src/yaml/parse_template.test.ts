@@ -120,8 +120,8 @@ template-metadata:
   install:
     someFutureInstallKey: hello
     form:
-      - name: api-key
-        inputType: text
+      - name: choice
+        inputType: select
         someFutureFieldKey: hello
         options:
           - value: a
@@ -145,8 +145,109 @@ template-metadata:
     expect(result.metadata.slug).toBe('future-install');
     expect(result.metadata.install).not.toHaveProperty('someFutureInstallKey');
     expect(result.metadata.install?.form[0]).not.toHaveProperty('someFutureFieldKey');
-    expect(result.metadata.install?.form[0].options?.[0]).not.toHaveProperty('someFutureOptionKey');
-    expect(result.metadata.install?.form[0]).toMatchObject({ name: 'api-key', inputType: 'text' });
+    expect(result.metadata.install?.form[0]).toMatchObject({ name: 'choice', inputType: 'select' });
+    const field = result.metadata.install?.form[0];
+    const options = field?.inputType === 'select' ? field.options : undefined;
+    expect(options?.[0]).not.toHaveProperty('someFutureOptionKey');
+    expect(options?.[0]).toMatchObject({ value: 'a', label: 'A' });
+  });
+
+  it('should parse `select` (with options) and `esIndex` install fields', () => {
+    const raw = `
+template-metadata:
+  slug: multi-field
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Multi field"
+  description: "Has select and esIndex install fields."
+  categories: [utility]
+  install:
+    form:
+      - name: region
+        inputType: select
+        options:
+          - value: us
+            label: US
+      - name: source-index
+        inputType: esIndex
+`;
+    const result = parseTemplateYaml(raw);
+    expect(result.metadata.install?.form).toHaveLength(2);
+    expect(result.metadata.install?.form[0]).toMatchObject({ name: 'region', inputType: 'select' });
+    expect(result.metadata.install?.form[1]).toMatchObject({
+      name: 'source-index',
+      inputType: 'esIndex',
+    });
+  });
+
+  it('should throw `invalid-metadata` when a `connector` field has no `connectorType`', () => {
+    const raw = `
+template-metadata:
+  slug: connector-no-type
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Connector without type"
+  description: "Connector field is missing connectorType."
+  categories: [utility]
+  install:
+    form:
+      - name: my-connector
+        inputType: connector
+`;
+    expect.assertions(2);
+    try {
+      parseTemplateYaml(raw);
+    } catch (err) {
+      expect(err).toBeInstanceOf(TemplateParseError);
+      expect((err as TemplateParseError).reason).toBe('invalid-metadata');
+    }
+  });
+
+  it('should throw `invalid-metadata` when `connectorType` is set on a non-connector field', () => {
+    const raw = `
+template-metadata:
+  slug: text-with-connector-type
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Text with connectorType"
+  description: "connectorType is only allowed on connector fields."
+  categories: [utility]
+  install:
+    form:
+      - name: some-text
+        inputType: text
+        connectorType: .slack
+`;
+    expect.assertions(2);
+    try {
+      parseTemplateYaml(raw);
+    } catch (err) {
+      expect(err).toBeInstanceOf(TemplateParseError);
+      expect((err as TemplateParseError).reason).toBe('invalid-metadata');
+    }
+  });
+
+  it('should throw `invalid-metadata` when a `select` field has no `options`', () => {
+    const raw = `
+template-metadata:
+  slug: select-no-options
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Select without options"
+  description: "Select field is missing options."
+  categories: [utility]
+  install:
+    form:
+      - name: choose
+        inputType: select
+`;
+    expect.assertions(2);
+    try {
+      parseTemplateYaml(raw);
+    } catch (err) {
+      expect(err).toBeInstanceOf(TemplateParseError);
+      expect((err as TemplateParseError).reason).toBe('invalid-metadata');
+    }
   });
 
   it('should throw `invalid-yaml` when the YAML is malformed', () => {

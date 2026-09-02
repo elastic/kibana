@@ -60,6 +60,9 @@ const buildHit = (alertIds: string[]): DataTableRecord =>
     },
   } as unknown as DataTableRecord);
 
+const renderSection = (hit: DataTableRecord) =>
+  render(<InsightsSection hit={hit} onShowEntities={jest.fn()} onShowCorrelations={jest.fn()} />);
+
 describe('InsightsSection (v2)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,31 +70,26 @@ describe('InsightsSection (v2)', () => {
   });
 
   it('renders the insights section with the correct test id', () => {
-    render(<InsightsSection hit={buildHit(['a', 'b'])} />);
+    renderSection(buildHit(['a', 'b']));
 
     expect(screen.getByTestId(INSIGHTS_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders the section title', () => {
-    render(<InsightsSection hit={buildHit(['a', 'b'])} />);
+    renderSection(buildHit(['a', 'b']));
 
     expect(screen.getByText('Insights')).toBeInTheDocument();
   });
 
-  it('renders EntitiesOverview', () => {
-    render(<InsightsSection hit={buildHit(['a', 'b'])} />);
+  it('renders EntitiesOverview and CorrelationsOverview', () => {
+    renderSection(buildHit(['a', 'b']));
 
     expect(screen.getByTestId('entities-overview')).toBeInTheDocument();
-  });
-
-  it('renders CorrelationsOverview', () => {
-    render(<InsightsSection hit={buildHit(['a', 'b'])} />);
-
     expect(screen.getByTestId('correlations-overview')).toBeInTheDocument();
   });
 
   it('calls useExpandSection with default collapsed', () => {
-    render(<InsightsSection hit={buildHit(['a', 'b'])} />);
+    renderSection(buildHit(['a', 'b']));
 
     expect(mockedUseExpandSection).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'insights', defaultValue: false })
@@ -100,7 +98,13 @@ describe('InsightsSection (v2)', () => {
 
   it('forwards onShowEntities to EntitiesOverview', () => {
     const onShowEntities = jest.fn();
-    render(<InsightsSection hit={buildHit(['a'])} onShowEntities={onShowEntities} />);
+    render(
+      <InsightsSection
+        hit={buildHit(['a'])}
+        onShowEntities={onShowEntities}
+        onShowCorrelations={jest.fn()}
+      />
+    );
 
     expect(mockedEntitiesOverview).toHaveBeenCalledWith(
       expect.objectContaining({ onShowEntities }),
@@ -110,7 +114,13 @@ describe('InsightsSection (v2)', () => {
 
   it('forwards onShowCorrelations to CorrelationsOverview', () => {
     const onShowCorrelations = jest.fn();
-    render(<InsightsSection hit={buildHit(['a'])} onShowCorrelations={onShowCorrelations} />);
+    render(
+      <InsightsSection
+        hit={buildHit(['a'])}
+        onShowEntities={jest.fn()}
+        onShowCorrelations={onShowCorrelations}
+      />
+    );
 
     expect(mockedCorrelationsOverview).toHaveBeenCalledWith(
       expect.objectContaining({ onShowCorrelations }),

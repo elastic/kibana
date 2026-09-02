@@ -117,6 +117,9 @@ export const StopColorPicker: FC<Props> = (props) => {
             onChangeInput({ ...colorStop, color: newColor });
           }}
           isInvalid={!areValidFields.color}
+          aria-label={i18n.translate('xpack.canvas.stopColorPicker.colorAriaLabel', {
+            defaultMessage: 'Select stop color',
+          })}
         />
       </EuiFlexItem>
 

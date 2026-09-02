@@ -16,6 +16,7 @@ import type { Rule } from '../../../../types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
@@ -46,7 +47,7 @@ const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAcces
 function renderWithIntl(ui: React.ReactElement) {
   return render(
     <IntlProvider locale="en" messages={{}}>
-      {ui}
+      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
     </IntlProvider>
   );
 }

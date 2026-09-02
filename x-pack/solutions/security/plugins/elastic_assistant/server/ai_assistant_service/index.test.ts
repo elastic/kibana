@@ -29,6 +29,7 @@ import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
@@ -111,6 +112,7 @@ describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;
   let assistantServiceOpts: AIAssistantServiceOpts;
   let ml: MlPluginSetup;
+  let adhocAttackDiscoveryDataClient: jest.Mocked<IRuleDataClient>;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -129,6 +131,9 @@ describe('AI Assistant Service', () => {
     ml.trainedModelsProvider = jest.fn().mockImplementation(() => ({
       getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
     }));
+    adhocAttackDiscoveryDataClient = {
+      getWriter: jest.fn().mockResolvedValue({}),
+    } as unknown as jest.Mocked<IRuleDataClient>;
     assistantServiceOpts = {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -149,6 +154,7 @@ describe('AI Assistant Service', () => {
         uninstallSecurityLabs: jest.fn(),
         getSecurityLabsStatus: jest.fn(),
       }),
+      adhocAttackDiscoveryDataClient,
     };
   });
 
@@ -666,6 +672,83 @@ describe('AI Assistant Service', () => {
       );
       expect(logger.warn).toHaveBeenCalledWith(
         `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId \"test\" - Retry failed with errors: Failure during installation of create or update .kibana-elastic-ai-assistant-index-template-conversations index template. No mappings would be generated for .kibana-elastic-ai-assistant-index-template-conversations, possibly due to failed/misconfigured bootstrapping`
+      );
+    });
+    test('should eagerly create the ad-hoc Attack Discovery index for the default space', async () => {
+      assistantService = new AIAssistantService(assistantServiceOpts);
+
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+
+      await assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: DEFAULT_NAMESPACE_STRING,
+        currentUser: mockUser1,
+        licensing,
+      });
+
+      await retryUntil(
+        'space resources initialized',
+        async () =>
+          (await getSpaceResourcesInitialized(assistantService, DEFAULT_NAMESPACE_STRING)) === true
+      );
+
+      expect(adhocAttackDiscoveryDataClient.getWriter).toHaveBeenCalledWith({
+        namespace: DEFAULT_NAMESPACE_STRING,
+      });
+    });
+
+    test('should not eagerly create the ad-hoc Attack Discovery index for non-default spaces', async () => {
+      assistantService = new AIAssistantService(assistantServiceOpts);
+
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+
+      await assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: 'test-space',
+        currentUser: mockUser1,
+        licensing,
+      });
+
+      await retryUntil(
+        'space resources initialized',
+        async () => (await getSpaceResourcesInitialized(assistantService, 'test-space')) === true
+      );
+
+      expect(adhocAttackDiscoveryDataClient.getWriter).not.toHaveBeenCalled();
+    });
+
+    test('should swallow errors when eagerly creating the ad-hoc Attack Discovery index', async () => {
+      adhocAttackDiscoveryDataClient.getWriter.mockRejectedValue(
+        new Error('RuleDataWriteDisabledError')
+      );
+      assistantService = new AIAssistantService(assistantServiceOpts);
+
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+
+      await assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: DEFAULT_NAMESPACE_STRING,
+        currentUser: mockUser1,
+        licensing,
+      });
+
+      await retryUntil(
+        'space resources initialized',
+        async () =>
+          (await getSpaceResourcesInitialized(assistantService, DEFAULT_NAMESPACE_STRING)) === true
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Unable to pre-create ad-hoc Attack Discovery index for space "${DEFAULT_NAMESPACE_STRING}": RuleDataWriteDisabledError`
       );
     });
   });

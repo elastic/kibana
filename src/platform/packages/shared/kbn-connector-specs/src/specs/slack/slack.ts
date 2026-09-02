@@ -202,7 +202,8 @@ export const Slack: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
   },
 
   auth: {
@@ -233,6 +234,30 @@ export const Slack: ConnectorSpec = {
           tokenType: 'Bearer',
         },
       },
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.label', {
+            defaultMessage: 'Bot Token',
+          }),
+          meta: {
+            token: {
+              sensitive: true,
+              label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.token.label', {
+                defaultMessage: 'Slack Bot Token',
+              }),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.slack.auth.bearer.token.helpText',
+                {
+                  defaultMessage:
+                    'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
+                }
+              ),
+            },
+          },
+        },
+      },
     ],
   },
 
@@ -243,10 +268,20 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
+        if (ctx.secrets?.authType === 'bearer') {
+          throw new Error(
+            i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
+              defaultMessage:
+                'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
+            })
+          );
+        }
+
         const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
 
         const queryParts: string[] = [typedInput.query];
@@ -331,6 +366,7 @@ export const Slack: ConnectorSpec = {
 
     listChannels: {
       isTool: true,
+      scope: 'read',
       description:
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
@@ -388,6 +424,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
@@ -466,6 +503,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.history
     getConversationHistory: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
       input: SlackGetConversationHistoryInputSchema,
@@ -542,6 +580,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.info
     getConversationInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
       input: SlackGetConversationInfoInputSchema,
@@ -583,6 +622,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.lookupByEmail
     lookupUserByEmail: {
       isTool: true,
+      scope: 'read',
       description:
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
       input: SlackLookupUserByEmailInputSchema,
@@ -617,6 +657,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.list
     listUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
       input: SlackListUsersInputSchema,
@@ -694,6 +735,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.conversations
     listUserConversations: {
       isTool: true,
+      scope: 'read',
       description:
         'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
       input: SlackListUserConversationsInputSchema,
@@ -753,6 +795,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/auth.test
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
       input: SlackWhoAmIInputSchema,
@@ -797,6 +840,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/files.info
     getFileInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
       input: SlackGetFileInfoInputSchema,
@@ -831,6 +875,7 @@ export const Slack: ConnectorSpec = {
     // Classic-paginated: uses `page`/`pages`, not cursor-based pagination.
     listFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextPage from the previous response to fetch the next page.',
       input: SlackListFilesInputSchema,
@@ -905,6 +950,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.create
     createConversation: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
@@ -957,6 +1003,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
       isTool: false,
+      scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
@@ -1008,8 +1055,9 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,
+      scope: 'write',
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
+        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -1073,39 +1121,25 @@ export const Slack: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
-
-      try {
-        // Test connection by calling auth.test which validates the token
-        const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
-
-        if (!response.data.ok) {
-          return {
-            ok: false,
-            message: formatSlackApiErrorMessage({
-              action: 'test',
-              responseData: response.data,
-              responseHeaders: response.headers,
-            }),
-          };
-        }
-
-        const teamName = response.data.team || 'Unknown';
-        return {
-          ok: true,
-          message: i18n.translate('core.kibanaConnectorSpecs.slack.test.successMessage', {
-            defaultMessage: 'Successfully connected to Slack workspace: {teamName}',
-            values: { teamName },
-          }),
-        };
-      } catch (error) {
-        const err = error as { message?: string };
-        return { ok: false, message: err.message ?? 'Unknown error' };
+      // Test connection by calling auth.test which validates the token
+      const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
+      if (!response.data.ok) {
+        throw new Error(
+          formatSlackApiErrorMessage({
+            action: 'test',
+            responseData: response.data,
+            responseHeaders: response.headers,
+          })
+        );
       }
+      return {};
     },
+    enabled: true,
   },
 
   skill: [
     'Use whoAmI before any write or "as me" action to confirm the authenticated workspace/user. It is also the cheapest way to translate the implicit "me" to a concrete user_id for listUserConversations or message attribution.',
+    'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',

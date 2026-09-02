@@ -35,7 +35,7 @@ const SolutionOptions: Record<
     ),
   },
   vectordb: {
-    iconType: 'logoElasticsearch',
+    iconType: 'logoVectorDB',
     label: (
       <FormattedMessage id="xpack.spaces.spaceSolutionBadge.vectordb" defaultMessage="VectorDB" />
     ),

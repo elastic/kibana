@@ -887,17 +887,28 @@ router.post(
   handler
 );
 
-// EDGE: Function returning unbounded schema
+// EDGE: Function returning an unbounded schema, used by a route -> flagged.
 function createStringSchema() {
   return schema.string(); // $ Alert
 }
+router.post(
+  { path: '/api/edge/factory-fn', validate: { body: schema.object({ id: createStringSchema() }) } },
+  handler
+);
 
-// EDGE: Class method returning unbounded zod schema
+// EDGE: Class method returning an unbounded zod schema, used by a route -> flagged.
 class SchemaBuilder {
   buildString() {
     return z.string(); // $ Alert
   }
 }
+router.post(
+  {
+    path: '/api/edge/factory-method',
+    validate: { body: z.object({ id: new SchemaBuilder().buildString() }) },
+  },
+  handler
+);
 
 // =============================================================================
 // @kbn/zod/v4 import: BAD - should be flagged
@@ -1137,53 +1148,61 @@ router.post(
 );
 
 // =============================================================================
-// NON-EXCLUDED CONTEXTS: These look like non-route usage but SHOULD still fire.
-// Response schemas, common/ schemas, and schemas in route files must stay flagged
-// because they often coexist with request payload schemas in the same file.
+// REACHABILITY BOUNDARY: a string is flagged only when it reaches a route's
+// request validation. Response schemas — even in the same route/file as request
+// schemas — are NOT flagged; a schema reached only through a shared const,
+// export, or helper function IS flagged via its route usage.
 // =============================================================================
 
-// BAD: Response schema in a route file — still flagged (same file as request schemas)
+// Same versioned route: the request body is flagged, the response body is NOT.
 router.versioned
   .post({
-    path: '/api/edge/response-schema',
+    path: '/api/edge/request-and-response',
     access: 'internal',
   })
-  .addVersion(
-    {
-      version: '1',
-      validate: {
-        request: {
-          body: schema.object({
-            query: schema.string({ maxLength: 256 }),
-          }),
-        },
-        response: {
-          200: {
-            body: () =>
-              schema.object({
-                result: schema.string(), // $ Alert
-              }),
-          },
+  .addVersion({
+    version: '1',
+    validate: {
+      request: {
+        body: schema.object({
+          query: schema.string(), // $ Alert
+        }),
+      },
+      response: {
+        200: {
+          body: () =>
+            schema.object({
+              result: schema.string(), // response schema -> NOT flagged
+            }),
         },
       },
+      handler,
     },
-    handler
-  );
+  });
 
-// BAD: Shared schema in a "common" module — still flagged (used by routes)
+// Shared schema consumed by a route -> flagged via the route usage.
 const sharedCommonSchema = schema.object({
   name: schema.string(), // $ Alert
   tag: schema.string(), // $ Alert
 });
+router.post({ path: '/api/edge/shared', validate: { body: sharedCommonSchema } }, handler);
 
-// BAD: Schema exported for use in routes — still flagged
+// Exported schema consumed by a route -> flagged.
 export const routeBodySchema = z.object({
   description: z.string(), // $ Alert
 });
+router.post({ path: '/api/edge/exported', validate: { body: routeBodySchema } }, handler);
 
-// BAD: Schema in a helper function used by route handlers — still flagged
+// Helper function returning a schema, used by a route -> flagged (function-return flow).
 function buildRouteSchema() {
   return schema.object({
     filter: schema.string(), // $ Alert
   });
 }
+router.post({ path: '/api/edge/helper', validate: { body: buildRouteSchema() } }, handler);
+
+// Schema defined but never reached by a route -> NOT flagged.
+const neverUsedSchema = schema.object({
+  unused: schema.string(), // not reached by a route -> NOT flagged
+});
+void neverUsedSchema;

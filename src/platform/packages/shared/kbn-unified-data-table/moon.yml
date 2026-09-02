@@ -52,6 +52,8 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/css-utils'
   - '@kbn/code-editor-mock'
+  - '@kbn/ui-callout'
+  - '@kbn/safer-lodash-set'
 tags:
   - shared-browser
   - package

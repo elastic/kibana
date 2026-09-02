@@ -116,7 +116,7 @@ function ViewToggle({
     },
     {
       id: 'yaml',
-      iconType: 'editorCodeBlock',
+      iconType: 'code',
       label: i18n.translate('workflowsUi.bottomBar.editorViewYaml', { defaultMessage: 'YAML' }),
     },
   ];
@@ -308,6 +308,7 @@ export function WorkflowDetailBottomBar({
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [compact, setCompact] = useState(false);
+  const hasTools = Boolean(toolsSlot) || Boolean(toolsMenuItems?.length);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -411,19 +412,21 @@ export function WorkflowDetailBottomBar({
               </>
             ) : null}
 
-            {compact ? (
+            {hasTools && compact ? (
               <EuiFlexItem grow={false}>
                 <CompactToolsMenu toolsMenuItems={toolsMenuItems} toolsSlot={toolsSlot} />
               </EuiFlexItem>
-            ) : (
+            ) : hasTools ? (
               <EuiFlexItem grow={false}>{toolsSlot}</EuiFlexItem>
-            )}
+            ) : null}
 
             {showViewToggle ? (
               <>
-                <EuiFlexItem grow={false}>
-                  <VerticalDivider />
-                </EuiFlexItem>
+                {hasTools ? (
+                  <EuiFlexItem grow={false}>
+                    <VerticalDivider />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
                 </EuiFlexItem>

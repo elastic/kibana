@@ -52,6 +52,10 @@ const defaultProps = {
   userProfiles: new Map(),
   disableActions: false,
   selectedFields: [],
+  isSelected: false,
+  hasSelection: false,
+  isSelectable: true,
+  onSelectionChange: jest.fn(),
 };
 
 describe('CaseListItem', () => {
@@ -238,11 +242,133 @@ describe('CaseListItem', () => {
     expect(mockNavigateToCaseView).toHaveBeenCalledWith({ detailName: mockCase.id });
   });
 
+  it('navigates to case view when the title is clicked', async () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('cases-list-item-title'));
+
+    expect(mockNavigateToCaseView).toHaveBeenCalledWith({ detailName: mockCase.id });
+  });
+
   it('does not navigate when the action button is clicked', async () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
     await userEvent.click(screen.getByTestId('mock-action-column'));
 
     expect(mockNavigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('renders a checkbox when selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toBeInTheDocument();
+  });
+
+  it('does not render a checkbox when not selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} isSelectable={false} />);
+
+    expect(screen.queryByTestId(`cases-list-item-checkbox-${mockCase.id}`)).not.toBeInTheDocument();
+  });
+
+  it('shows the checkbox when hasSelection is true', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} hasSelection={true} />);
+
+    expect(screen.getByTestId('cases-list-item-checkbox-wrapper')).toBeInTheDocument();
+  });
+
+  it('calls onSelectionChange when checkbox is clicked', async () => {
+    const onSelectionChange = jest.fn();
+
+    renderWithTestingProviders(
+      <CaseListItem {...defaultProps} onSelectionChange={onSelectionChange} />
+    );
+
+    await userEvent.click(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`));
+
+    expect(onSelectionChange).toHaveBeenCalledWith(mockCase, true);
+  });
+
+  it('calls onSelectionChange with false when unchecking a selected case', async () => {
+    const onSelectionChange = jest.fn();
+
+    renderWithTestingProviders(
+      <CaseListItem
+        {...defaultProps}
+        isSelected={true}
+        hasSelection={true}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`));
+
+    expect(onSelectionChange).toHaveBeenCalledWith(mockCase, false);
+  });
+
+  it('does not call onSelectionChange when the card link is clicked', async () => {
+    const onSelectionChange = jest.fn();
+
+    renderWithTestingProviders(
+      <CaseListItem {...defaultProps} onSelectionChange={onSelectionChange} />
+    );
+
+    await userEvent.click(screen.getByTestId('cases-list-item-title'));
+
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
+  it('does not navigate when the checkbox is clicked', async () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`));
+
+    expect(mockNavigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('renders the checkbox outside the stretched link', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const checkbox = screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`);
+
+    expect(link.contains(checkbox)).toBe(false);
+  });
+
+  it('uses distinct aria labels for title and meta links', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    expect(screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`)).toHaveAttribute(
+      'aria-label',
+      `click to visit case with title ${mockCase.title}`
+    );
+    expect(screen.getByTestId(`cases-list-item-meta-clickable-${mockCase.id}`)).toHaveAttribute(
+      'aria-label',
+      `View case details for ${mockCase.title}`
+    );
+  });
+
+  it('renders metadata outside the title row so it is not shifted by the checkbox', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    const titleLink = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const metaLink = screen.getByTestId(`cases-list-item-meta-clickable-${mockCase.id}`);
+
+    expect(titleLink.contains(screen.getByTestId('cases-list-item-reporter'))).toBe(false);
+    expect(metaLink.contains(screen.getByTestId('cases-list-item-reporter'))).toBe(true);
+  });
+
+  it('includes checkbox in tab order when selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toHaveAttribute(
+      'tabindex',
+      '0'
+    );
+  });
+
+  it('removes checkbox from tab order when not selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} isSelectable={false} />);
+
+    expect(screen.queryByTestId(`cases-list-item-checkbox-${mockCase.id}`)).not.toBeInTheDocument();
   });
 });

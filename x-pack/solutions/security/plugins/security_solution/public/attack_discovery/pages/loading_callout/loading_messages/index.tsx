@@ -29,10 +29,14 @@ interface Props {
   alertsContextCount: number | null;
   connectorName?: string;
   discoveries?: number;
+  duplicatesDroppedCount?: number;
   end?: string | null;
+  generatedCount?: number;
   generationEndTime?: string;
+  hallucinationsFilteredCount?: number;
   loadingMessage?: string;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  persistedCount?: number;
   reason?: string;
   start?: string | null;
   status?: 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed';
@@ -42,10 +46,14 @@ const LoadingMessagesComponent: React.FC<Props> = ({
   alertsContextCount,
   connectorName,
   discoveries,
+  duplicatesDroppedCount,
   end,
+  generatedCount,
   generationEndTime,
+  hallucinationsFilteredCount,
   localStorageAttackDiscoveryMaxAlerts,
   loadingMessage,
+  persistedCount,
   reason,
   start,
   status,
@@ -94,7 +102,11 @@ const LoadingMessagesComponent: React.FC<Props> = ({
         connectorName,
         dateFormat,
         discoveries,
+        duplicatesDroppedCount,
+        generatedCount,
         generationEndTime,
+        hallucinationsFilteredCount,
+        persistedCount,
       });
     }
 
@@ -129,10 +141,14 @@ const LoadingMessagesComponent: React.FC<Props> = ({
     connectorName,
     dateFormat,
     discoveries,
+    duplicatesDroppedCount,
     formattedEnd,
     formattedStart,
+    generatedCount,
     generationEndTime,
+    hallucinationsFilteredCount,
     loadingMessage,
+    persistedCount,
     status,
   ]);
 

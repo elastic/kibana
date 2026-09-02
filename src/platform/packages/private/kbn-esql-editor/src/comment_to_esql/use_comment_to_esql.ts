@@ -47,6 +47,7 @@ interface UseCommentToEsqlParams {
   // "Generating..." decoration during the LLM call. Populated by useGhostLineHint.
   clearGhostHintRef?: MutableRefObject<() => void>;
   telemetryService?: ESQLEditorTelemetryService;
+  onAfterInsert?: () => void;
 }
 
 export const useCommentToEsql = ({
@@ -57,6 +58,7 @@ export const useCommentToEsql = ({
   isEnabled,
   clearGhostHintRef,
   telemetryService,
+  onAfterInsert,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -415,6 +417,7 @@ export const useCommentToEsql = ({
         currentCommentLine,
         result.content
       );
+      onAfterInsert?.();
 
       const replacedLineNumber =
         result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
@@ -431,17 +434,18 @@ export const useCommentToEsql = ({
       clearGeneratingDecoration();
     }
   }, [
+    isEnabled,
     editorRef,
     editorModel,
-    cleanup,
-    clearCommentAnchor,
-    showGeneratingDecoration,
-    clearGeneratingDecoration,
     clearGhostHintRef,
+    showGeneratingDecoration,
+    cleanup,
     generateESQL,
-    showReview,
-    isEnabled,
     trackCommentResult,
+    clearCommentAnchor,
+    onAfterInsert,
+    showReview,
+    clearGeneratingDecoration,
   ]);
 
   return {

@@ -1,0 +1,11 @@
+spec_id: .trello
+name: "Trello (testing)"
+auth_type: api_key_query
+enabled: true
+secrets:
+  key:
+    vault: secret/ent-search-team/connectors-sources/trello
+    field: api_key
+  token:
+    vault: secret/ent-search-team/connectors-sources/trello
+    field: token

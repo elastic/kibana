@@ -7,4 +7,8 @@
 
 export const ENRICHMENT_URL_STATE_KEY = 'pageState';
 
+export const CANVAS_URL_STATE_KEY = 'canvasState';
+
+export const TABLE_URL_STATE_KEY = 'table';
+
 export const CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX = 'streams:custom-samples__';

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import {
-  EuiCallOut,
   EuiConfirmModal,
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { mainTranslations } from './main_i18n';
 
@@ -63,15 +63,12 @@ export const ConfirmDeleteDataSetsModal = ({
         {error ? (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnDangerCallout
               title={mainTranslations.confirmDeleteDataSets.errorTitle}
-              color="danger"
-              iconType="warning"
               size="s"
               announceOnMount
-            >
-              <p>{error}</p>
-            </EuiCallOut>
+              text={error}
+            />
           </>
         ) : null}
       </EuiConfirmModal>

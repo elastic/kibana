@@ -1,0 +1,33 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        externalResumeInputRequestExample:
+          description: 'Example external input payload for a waitForInput step'
+          value:
+            severity: high
+            description: Escalated from Slack triage
+responses:
+  200:
+    description: 'An HTML confirmation page confirming that the input was received and the workflow execution was resumed.'
+    content:
+      text/html:
+        schema:
+          type: string
+        examples:
+          externalResumeInputSuccessExample:
+            description: 'Success page confirming the input was received'
+            value: '<!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d '{"severity":"high"}'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}
+      Content-Type: application/json
+
+      {"severity":"high"}

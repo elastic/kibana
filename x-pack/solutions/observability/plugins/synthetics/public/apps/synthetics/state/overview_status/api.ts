@@ -28,6 +28,7 @@ export function toStatusOverviewQueryArgs(
     remoteNames: pageState.remoteNames,
     monitorQueryIds: pageState.monitorQueryIds,
     showFromAllSpaces: pageState.showFromAllSpaces,
+    includeHeartbeatMonitors: pageState.includeHeartbeatMonitors,
     searchFields: [],
     useLogicalAndFor: pageState.useLogicalAndFor,
     // The overview always scopes status by the page-level date picker. The

@@ -10,6 +10,7 @@ import type { DetectionMetrics } from './types';
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
 import {
   getInitialAiCreatedRulesUsage,
+  getInitialChangesHistoryUsage,
   getInitialEventLogUsage,
   getInitialRuleCustomizationStatus,
   getInitialRuleDeprecatedStatus,
@@ -37,6 +38,7 @@ export const getInitialDetectionMetrics = (): DetectionMetrics => ({
     elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
     ai_created_rules: getInitialAiCreatedRulesUsage(),
     spaces_usage: getInitialSpacesUsage(),
+    changes_history_usage: getInitialChangesHistoryUsage(),
   },
   legacy_siem_signals: getInitialLegacySiemSignalsUsage(),
 });

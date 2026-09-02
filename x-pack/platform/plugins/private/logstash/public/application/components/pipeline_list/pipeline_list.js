@@ -9,14 +9,19 @@ import React from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageSection,
-  EuiPageHeader,
-  EuiSpacer,
 } from '@elastic/eui';
 
+import {
+  PipelineAppHeader,
+  logstashPipelinesListTitle,
+  logstashPipelinesListDescription,
+  createPipelineButtonLabel,
+} from '../pipeline_app_header';
 import { InfoAlerts } from './info_alerts';
 import { PipelinesTable } from './pipelines_table';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
@@ -66,6 +71,16 @@ class PipelineListUi extends React.Component {
           id="xpack.logstash.pipelineList.noPipelinesDescription"
           defaultMessage="There are no pipelines defined."
         />
+      }
+      actions={
+        <EuiButton
+          fill
+          isDisabled={this.props.isReadOnly}
+          onClick={this.props.createPipeline}
+          data-test-subj="btnAdd"
+        >
+          {createPipelineButtonLabel}
+        </EuiButton>
       }
     />
   );
@@ -171,6 +186,7 @@ class PipelineListUi extends React.Component {
     const { isForbidden, isLoading } = this.state;
     return isForbidden && !isLoading ? (
       <EuiCallOut
+        announceOnMount
         color="danger"
         iconType="cross"
         title={
@@ -287,30 +303,45 @@ class PipelineListUi extends React.Component {
   onSelectionChange = (selection) => this.setState({ selection });
 
   render() {
-    const { clonePipeline, createPipeline, isReadOnly, openPipeline, isServerless } = this.props;
-    const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
+    const { clonePipeline, createPipeline, history, isReadOnly, openPipeline, isServerless } =
+      this.props;
+    const {
+      isForbidden,
+      isLoading,
+      isSelectable,
+      message,
+      pipelines,
+      selection,
+      showConfirmDeleteModal,
+    } = this.state;
+
+    const showCreateInHeader = !isLoading && !isForbidden && pipelines.length > 0;
+    const createPath = '/pipeline/new-pipeline';
+    const menu = showCreateInHeader
+      ? {
+          primaryActionItem: {
+            id: 'createPipeline',
+            label: createPipelineButtonLabel,
+            iconType: 'plusCircle',
+            testId: 'btnAdd',
+            disableButton: isReadOnly,
+            href: history.createHref({ pathname: createPath }),
+            run: () => createPipeline(),
+          },
+        }
+      : undefined;
+
     return (
-      <EuiPageSection data-test-subj="pipelineList">
-        <EuiPageHeader
-          pageTitle={
-            <FormattedMessage
-              id="xpack.logstash.pipelineList.head"
-              defaultMessage="Logstash pipelines"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.logstash.pipelineList.subhead"
-              defaultMessage="Manage logstash event processing and see the result visually"
-            />
-          }
-          bottomBorder
+      <EuiPageSection paddingSize="none" data-test-subj="pipelineList">
+        <PipelineAppHeader
+          title={logstashPipelinesListTitle}
+          description={logstashPipelinesListDescription}
+          history={history}
+          menu={menu}
         />
-        <EuiSpacer size="l" />
         {this.renderNoPermissionCallOut()}
         <PipelinesTable
           clonePipeline={clonePipeline}
-          createPipeline={createPipeline}
           isReadOnly={isReadOnly}
           isSelectable={isSelectable}
           message={message}

@@ -12,7 +12,7 @@ import {
   type ManagementSettingsTabs,
   AssistantSpaceIdProvider,
 } from '@kbn/elastic-assistant';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';

@@ -11,6 +11,8 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_OUTPUT_DIR = '/tmp/pr-context';
+const DEFAULT_GRAPHQL_ATTEMPTS = 3;
+const DEFAULT_GRAPHQL_RETRY_DELAY_MS = 1000;
 
 const parseRepo = (repoFullName) => {
   const [owner, repo] = repoFullName.split('/');
@@ -27,6 +29,34 @@ const writeJson = ({ outputDir, filename, value }) => {
 
 const writeText = ({ outputDir, filename, value }) => {
   fs.writeFileSync(path.join(outputDir, filename), value);
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const graphqlWithRetry = async ({
+  github,
+  query,
+  variables,
+  attempts = DEFAULT_GRAPHQL_ATTEMPTS,
+  retryDelayMs = DEFAULT_GRAPHQL_RETRY_DELAY_MS,
+}) => {
+  let lastError;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await github.graphql(query, variables);
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === attempts) {
+        break;
+      }
+
+      await sleep(retryDelayMs * attempt);
+    }
+  }
+
+  throw lastError;
 };
 
 const getBotAwareLogin = (author) => {
@@ -205,10 +235,14 @@ const reviewThreadCommentsQuery = `
 `;
 
 const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
-  const result = await github.graphql(metadataQuery, {
-    owner,
-    repo,
-    number: pullNumber,
+  const result = await graphqlWithRetry({
+    github,
+    query: metadataQuery,
+    variables: {
+      owner,
+      repo,
+      number: pullNumber,
+    },
   });
   const pullRequest = result.repository.pullRequest;
   const author = pullRequest.author;
@@ -252,20 +286,28 @@ const fetchReviewThreadComments = async ({ github, threadId }) => {
   const comments = [];
   let cursor = '';
 
-  while (true) {
-    const result = await github.graphql(reviewThreadCommentsQuery, {
-      threadId,
-      cursor,
-    });
-    const page = result.node.comments;
+  try {
+    while (true) {
+      const result = await graphqlWithRetry({
+        github,
+        query: reviewThreadCommentsQuery,
+        variables: {
+          threadId,
+          cursor,
+        },
+      });
+      const page = result.node.comments;
 
-    comments.push(...page.nodes);
+      comments.push(...page.nodes);
 
-    if (!page.pageInfo.hasNextPage) {
-      break;
+      if (!page.pageInfo.hasNextPage) {
+        break;
+      }
+
+      cursor = page.pageInfo.endCursor ?? '';
     }
-
-    cursor = page.pageInfo.endCursor ?? '';
+  } catch {
+    return [];
   }
 
   return comments;
@@ -276,11 +318,15 @@ const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
   let cursor = '';
 
   while (true) {
-    const result = await github.graphql(reviewThreadsQuery, {
-      owner,
-      repo,
-      number: pullNumber,
-      cursor,
+    const result = await graphqlWithRetry({
+      github,
+      query: reviewThreadsQuery,
+      variables: {
+        owner,
+        repo,
+        number: pullNumber,
+        cursor,
+      },
     });
     const page = result.repository.pullRequest.reviewThreads;
 
@@ -353,11 +399,15 @@ const reviewThreadToComments = ({ repoFullName, pullNumber, thread }) =>
   }));
 
 const getReviewComments = async ({ github, owner, repo, repoFullName, pullNumber }) => {
-  const threads = await fetchReviewThreads({ github, owner, repo, pullNumber });
+  try {
+    const threads = await fetchReviewThreads({ github, owner, repo, pullNumber });
 
-  return threads
-    .flatMap((thread) => reviewThreadToComments({ repoFullName, pullNumber, thread }))
-    .sort((left, right) => left.id - right.id);
+    return threads
+      .flatMap((thread) => reviewThreadToComments({ repoFullName, pullNumber, thread }))
+      .sort((left, right) => left.id - right.id);
+  } catch {
+    return [];
+  }
 };
 
 const prefetchPrContext = async ({
@@ -380,7 +430,7 @@ const prefetchPrContext = async ({
 
   core.info(`Fetching PR context for ${repoFullName}#${pullNumber}`);
 
-  const [metadata, filesWithPatch, issueComments, reviewComments, reviews] = await Promise.all([
+  const [metadata, filesWithPatch, issueComments, reviews] = await Promise.all([
     getPrMetadata({ github, owner, repo, pullNumber }),
     github.paginate(github.rest.pulls.listFiles, {
       owner,
@@ -394,7 +444,6 @@ const prefetchPrContext = async ({
       issue_number: pullNumber,
       per_page: 100,
     }),
-    getReviewComments({ github, owner, repo, repoFullName, pullNumber }),
     github.paginate(github.rest.pulls.listReviews, {
       owner,
       repo,
@@ -402,6 +451,14 @@ const prefetchPrContext = async ({
       per_page: 100,
     }),
   ]);
+
+  const reviewComments = await getReviewComments({
+    github,
+    owner,
+    repo,
+    repoFullName,
+    pullNumber,
+  });
 
   writeJson({ outputDir, filename: 'pr-metadata.json', value: metadata });
   writeJson({ outputDir, filename: 'pr-files.json', value: filesWithPatch.map(withoutPatch) });
@@ -417,6 +474,7 @@ module.exports = {
   buildPrDiffFromFiles,
   getPrMetadata,
   getReviewComments,
+  graphqlWithRetry,
   prefetchPrContext,
   reviewThreadToComments,
   withoutPatch,

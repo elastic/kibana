@@ -10,7 +10,7 @@
 import { EuiEmptyPrompt, EuiFocusTrap, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { stringify as stringifyYaml } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LayoutDirection, transformWorkflowToGraph, type WorkflowYaml } from '@kbn/workflows';
@@ -24,7 +24,6 @@ import {
   selectEditorWorkflowDefinition,
   selectEditorWorkflowLookup,
   selectEditorYaml,
-  selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
@@ -87,7 +86,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const isYamlValid = useSelector(selectIsYamlSyntaxValid) ?? true;
   const editorYaml = useSelector(selectEditorYaml) ?? '';
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
-  const highlightedStepId = useSelector(selectHighlightedStepId);
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
@@ -216,7 +214,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         selectedStepId={selectedStepId}
         onStepSelect={handleStepSelect}
         colorMode={toColorMode(colorMode)}
-        focusStepId={highlightedStepId}
         direction={direction}
         renderStepIcon={renderStepIcon}
         onStepRun={handleStepRun}

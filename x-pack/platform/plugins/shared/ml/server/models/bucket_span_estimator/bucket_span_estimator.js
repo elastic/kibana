@@ -15,7 +15,6 @@ import { PolledDataChecker } from './polled_data_checker';
 
 export function estimateBucketSpanFactory(client) {
   const { asCurrentUser, asInternalUser } = client;
-
   class BucketSpanEstimator {
     constructor(
       {
@@ -28,6 +27,7 @@ export function estimateBucketSpanFactory(client) {
         splitField,
         runtimeMappings,
         indicesOptions,
+        projectRouting,
       },
       splitFieldValues,
       maxBuckets
@@ -48,6 +48,7 @@ export function estimateBucketSpanFactory(client) {
 
       this.runtimeMappings =
         runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {};
+      this.projectRouting = projectRouting !== undefined ? { project_routing: projectRouting } : {};
 
       // determine durations for bucket span estimation
       // taking into account the clusters' search.max_buckets settings
@@ -82,7 +83,9 @@ export function estimateBucketSpanFactory(client) {
         this.timeField,
         this.duration,
         this.query,
-        indicesOptions
+        this.runtimeMappings,
+        indicesOptions,
+        this.projectRouting
       );
 
       if (this.aggTypes.length === this.fields.length) {
@@ -101,7 +104,8 @@ export function estimateBucketSpanFactory(client) {
                 this.query,
                 this.thresholds,
                 this.runtimeMappings,
-                indicesOptions
+                indicesOptions,
+                this.projectRouting
               ),
               result: null,
             });
@@ -126,7 +130,8 @@ export function estimateBucketSpanFactory(client) {
                   queryCopy,
                   this.thresholds,
                   this.runtimeMappings,
-                  indicesOptions
+                  indicesOptions,
+                  this.projectRouting
                 ),
                 result: null,
               });
@@ -260,7 +265,13 @@ export function estimateBucketSpanFactory(client) {
     }
   }
 
-  const getFieldCardinality = function (index, field, runtimeMappings, indicesOptions) {
+  const getFieldCardinality = function (
+    index,
+    field,
+    runtimeMappings,
+    indicesOptions,
+    projectRouting
+  ) {
     return new Promise((resolve, reject) => {
       asCurrentUser
         .search(
@@ -278,6 +289,7 @@ export function estimateBucketSpanFactory(client) {
               ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
             },
             ...(indicesOptions ?? {}),
+            ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
           },
           { maxRetries: 0 }
         )
@@ -291,13 +303,20 @@ export function estimateBucketSpanFactory(client) {
     });
   };
 
-  const getRandomFieldValues = function (index, field, query, runtimeMappings, indicesOptions) {
+  const getRandomFieldValues = function (
+    index,
+    field,
+    query,
+    runtimeMappings,
+    indicesOptions,
+    projectRouting
+  ) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
-      getFieldCardinality(index, field, runtimeMappings, indicesOptions)
+      getFieldCardinality(index, field, runtimeMappings, indicesOptions, projectRouting)
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           asCurrentUser
@@ -321,6 +340,7 @@ export function estimateBucketSpanFactory(client) {
                   ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
                 },
                 ...(indicesOptions ?? {}),
+                ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
               },
               { maxRetries: 0 }
             )
@@ -413,7 +433,8 @@ export function estimateBucketSpanFactory(client) {
               formConfig.splitField,
               formConfig.query,
               formConfig.runtimeMappings,
-              formConfig.indicesOptions
+              formConfig.indicesOptions,
+              formConfig.projectRouting
             )
               .then((splitFieldValues) => {
                 runEstimator(splitFieldValues);

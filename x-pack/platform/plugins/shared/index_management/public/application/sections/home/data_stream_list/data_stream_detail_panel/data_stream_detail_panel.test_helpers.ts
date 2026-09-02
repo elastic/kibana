@@ -33,6 +33,7 @@ export const createMockDataStream = (overrides?: Partial<DataStream>): DataStrea
     delete_index: true,
     manage_data_stream_lifecycle: true,
     read_failure_store: true,
+    manage: true,
   },
   hidden: false,
   lifecycle: {
@@ -101,6 +102,7 @@ export const createMockAppContext = (): AppDependencies =>
       enableSizeAndDocCount: true,
       enableDataStreamStats: true,
       enableTogglingDataRetention: true,
+      enableIndexMode: true,
       isServerless: false,
     },
   } as unknown as AppDependencies);

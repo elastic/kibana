@@ -48,6 +48,11 @@ const mockConnectors: unknown[] = [
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const updateAttackDiscoveryScheduleMock = jest.fn();
 
+interface WorkflowsPrivilegesOptions {
+  executeWorkflow?: boolean;
+  isWorkflowsEnabled?: boolean;
+}
+
 const defaultProps = {
   scheduleId: mockAttackDiscoverySchedule.id,
   onClose: jest.fn(),
@@ -63,7 +68,10 @@ const renderComponent = async () => {
   });
 };
 
-const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
+const setupUseKibana = (
+  updateAttackDiscoverySchedule = true,
+  { executeWorkflow = true, isWorkflowsEnabled = false }: WorkflowsPrivilegesOptions = {}
+) => {
   mockUseKibana.mockReturnValue({
     services: {
       application: {
@@ -71,7 +79,13 @@ const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
           [ATTACK_DISCOVERY_FEATURE_ID]: {
             updateAttackDiscoverySchedule,
           },
+          workflowsManagement: {
+            executeWorkflow,
+          },
         },
+      },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(isWorkflowsEnabled),
       },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,

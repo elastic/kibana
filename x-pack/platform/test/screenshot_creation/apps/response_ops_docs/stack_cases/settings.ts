@@ -10,31 +10,46 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const cases = getService('cases');
   const commonScreenshots = getService('commonScreenshots');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const header = getPageObject('header');
   const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
 
   describe('case settings', function () {
     it('case settings screenshot', async () => {
+      // With the templates feature flag pinned ON for this suite, custom fields and
+      // templates are managed on the dedicated v2 templates / field-library pages
+      // rather than inline on the Case Settings page.
       await cases.navigation.navigateToApp();
       await cases.navigation.navigateToConfigurationPage();
+      await header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories, 1400, 1024);
-      await testSubjects.click('add-template');
+
+      // Templates list page — reachable when the templates flag is ON.
+      await cases.navigation.navigateToTemplatesPage();
+      await header.waitUntilLoadingHasFinished();
+      await retry.waitFor('templates-table exist', async () => {
+        return await testSubjects.exists('templates-table');
+      });
       await commonScreenshots.takeScreenshot(
         'cases-templates-add',
         screenshotDirectories,
         1400,
         1000
       );
-      await testSubjects.click('common-flyout-cancel');
-      await testSubjects.click('add-custom-field');
+
+      // Field library page — reachable when the templates flag is ON.
+      await cases.navigation.navigateToFieldLibraryPage();
+      await header.waitUntilLoadingHasFinished();
+      await retry.waitFor('fieldDefinitionsTable exist', async () => {
+        return await testSubjects.exists('fieldDefinitionsTable');
+      });
       await commonScreenshots.takeScreenshot(
         'cases-custom-fields-add',
         screenshotDirectories,
         1400,
         700
       );
-      await testSubjects.setValue('custom-field-label-input', 'my-field');
-      await testSubjects.click('common-flyout-save');
-      await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories, 1400, 1024);
+
       await cases.navigation.navigateToApp();
       await testSubjects.click('createNewCaseBtn');
       await commonScreenshots.takeScreenshot('cases-create', screenshotDirectories, 1400, 1900);

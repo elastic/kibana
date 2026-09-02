@@ -27,16 +27,16 @@ export interface RuleCreateOptionsFlyoutProps {
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   /**
-   * When `true`, the "Create with AI Agent" option is rendered disabled. Independent of
+   * When `true`, the "With AI Agent" option is rendered disabled. Independent of
    * `createWithAgentTooltipText`.
    */
   createWithAgentDisabled?: boolean;
   /**
-   * Optional tooltip text for the "Create with AI Agent" option (e.g. explaining a missing
+   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
-  onCreateThresholdAlert?: () => void;
+  onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
@@ -46,7 +46,7 @@ export const RuleCreateOptionsFlyout = ({
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
-  onCreateThresholdAlert,
+  onCreateThresholdRule,
   legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
   return (
@@ -98,7 +98,7 @@ export const RuleCreateOptionsFlyout = ({
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled={createWithAgentDisabled}
           createWithAgentTooltipText={createWithAgentTooltipText}
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
           legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>

@@ -10,14 +10,25 @@ import {
   DISCOVER_SESSION_ATTACHMENT_TYPE,
   DISCOVER_SESSION_SO_TYPE,
 } from '../../../../constants/attachments';
-import { MAX_TITLE_LENGTH } from '../../../../constants';
+import {
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ISO_DATE_LENGTH,
+  MAX_OWNER_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../../constants';
 
 export interface SavedObjectReferenceMetadata {
   title: string;
   soType: string;
 }
 
-export const TimeRangeSchema = z.object({ from: z.string(), to: z.string() }).strict();
+export const TimeRangeSchema = z
+  .object({
+    from: z.string().max(MAX_ISO_DATE_LENGTH),
+    to: z.string().max(MAX_ISO_DATE_LENGTH),
+    mode: z.enum(['absolute', 'relative']).optional(),
+  })
+  .strict();
 
 export const buildSavedObjectMetadataSchema = <SoType extends string>(soType: SoType) =>
   z
@@ -39,8 +50,8 @@ export const buildSavedObjectPayloadSchema = <AttachmentType extends string, SoT
   z
     .object({
       type: z.literal(attachmentType),
-      owner: z.string(),
-      attachmentId: z.string(),
+      owner: z.string().max(MAX_OWNER_LENGTH),
+      attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
       metadata: buildSavedObjectMetadataSchema(soType),
     })
     .strict();

@@ -49,7 +49,7 @@ describe('runWorkflowYamlValidations', () => {
     model.dispose();
   });
 
-  it('excludes editor-only connector and ES|QL validators from the preview subset', () => {
+  it('does not run connector or ES|QL validators in the structural layer', () => {
     const yaml = [
       'name: connector-workflow',
       'steps:',
@@ -74,6 +74,49 @@ describe('runWorkflowYamlValidations', () => {
 
     expect(results.some((result) => result.owner === 'connector-id-validation')).toBe(false);
     expect(results.some((result) => result.owner === 'esql-validation')).toBe(false);
+
+    model.dispose();
+  });
+
+  it('keeps validating the document when a variable reads a prototype-chain key', () => {
+    // A `__proto__` key in the inferred foreach item shape used to resolve to
+    // Object.prototype, and the resulting TypeError escaped every validator and
+    // wiped the whole document's diagnostics.
+    const yaml = [
+      'name: proto-workflow',
+      'steps:',
+      '  - name: dupe',
+      '    type: console',
+      '    with:',
+      '      message: hello',
+      '  - name: dupe',
+      '    type: console',
+      '    with:',
+      '      message: world',
+      '  - name: loop',
+      '    type: foreach',
+      `    foreach: '[{"__proto__": {"x": 1}}]'`,
+      '    steps:',
+      '      - name: inner',
+      '        type: console',
+      '        with:',
+      '          message: "{{ foreach.item.__proto__ }}"',
+    ].join('\n');
+
+    const computed = performComputation(yaml);
+    const model = monaco.editor.createModel(yaml, 'yaml');
+
+    const results = runWorkflowYamlValidations({
+      yamlString: yaml,
+      model,
+      yamlDocument: computed.yamlDocument!,
+      lineCounter: computed.yamlLineCounter!,
+      workflowLookup: computed.workflowLookup,
+      workflowGraph: computed.workflowGraph,
+      workflowDefinition: computed.workflowDefinition ?? undefined,
+    });
+
+    expect(results.filter((result) => result.ruleId === 'duplicateStepName')).not.toHaveLength(0);
 
     model.dispose();
   });

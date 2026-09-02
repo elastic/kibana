@@ -18,6 +18,7 @@ import {
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
@@ -67,6 +68,13 @@ Use when the user asks to modify a watchlist's settings (e.g. "rename X", "set t
 Do NOT use this tool to add or remove entities — that is a separate action.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Update Watchlist',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -80,6 +88,13 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         `${SECURITY_UPDATE_WATCHLIST_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_UPDATE_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
+
       try {
         const updates: { name?: string; description?: string; riskModifier?: number } = {};
         if (params.name !== undefined) updates.name = params.name;
@@ -87,14 +102,16 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         if (params.riskModifier !== undefined) updates.riskModifier = params.riskModifier;
 
         if (Object.keys(updates).length === 0) {
+          const errorMessage =
+            'No update fields supplied. Pass at least one of name, description, or riskModifier.';
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message:
-                    'No update fields supplied. Pass at least one of name, description, or riskModifier.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -112,6 +129,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
           action: 'update watchlists',
         });
         if (!accessResult.allowed) {
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -125,6 +143,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
 
         const promptId = `watchlists.update_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           const existing = await client.get(params.watchlistId);
@@ -163,6 +182,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
             };
           }
 
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Update watchlist',
@@ -199,6 +219,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -208,6 +229,8 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
             },
           ],
         };
+      } finally {
+        await telemetryTracker.report();
       }
     },
   };

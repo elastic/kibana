@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkAction } from 'redux-thunk';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkAction } from 'redux-thunk-v2';
 import { SECTIONS } from '../../constants';
 import { loadAutoFollowStats as loadAutoFollowStatsRequest } from '../../services/api';
 import * as t from '../action_types';

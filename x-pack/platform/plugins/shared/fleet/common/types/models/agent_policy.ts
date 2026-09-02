@@ -170,12 +170,15 @@ export interface FullAgentPolicyAddFields {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export interface FullAgentPolicyOutput {
+  type: Output['type'];
+  hosts?: string[];
+  ca_sha256?: string | null;
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   [key: string]: any;
-};
+}
 
 export interface FullAgentPolicyMonitoring {
   namespace?: string;
@@ -314,6 +317,10 @@ export interface FleetServerPolicy {
    * The ID of the policy
    */
   policy_id: string;
+  /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
   /**
    * The revision index of the policy
    */

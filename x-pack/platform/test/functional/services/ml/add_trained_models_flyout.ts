@@ -67,7 +67,12 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async open() {
-      await retry.tryForTime(3_000, async () => {
+      await retry.tryForTime(30_000, async () => {
+        // Primary action may collapse into the app menu overflow on smaller viewports.
+        if (!(await testSubjects.exists('mlModelsAddTrainedModelButton', { timeout: 1000 }))) {
+          await testSubjects.click('app-menu-overflow-button', 1000);
+          await testSubjects.existOrFail('mlModelsAddTrainedModelButton', { timeout: 5000 });
+        }
         await testSubjects.click('mlModelsAddTrainedModelButton');
         await this.assertOpen(true);
       });

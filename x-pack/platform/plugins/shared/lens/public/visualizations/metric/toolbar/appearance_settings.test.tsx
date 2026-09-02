@@ -20,9 +20,18 @@ const palette: PaletteOutput<CustomPaletteParams> = {
   },
 };
 
-// Remove legacy state properties as they should be removed in the initialize method
+// Current-state fixture. Initialize consumes secondaryPrefix, valuesTextAlign,
+// titleWeight, and secondaryLabelPosition. secondaryLabel is omitted because it
+// is optional leftover (kept as a render fallback), not because initialize deletes it.
 const fullState: Required<
-  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+  Omit<
+    MetricVisualizationState,
+    | 'secondaryPrefix'
+    | 'valuesTextAlign'
+    | 'titleWeight'
+    | 'secondaryLabel'
+    | 'secondaryLabelPosition'
+  >
 > = {
   layerId: 'first',
   layerType: 'data',
@@ -32,7 +41,6 @@ const fullState: Required<
   breakdownByAccessor: 'breakdown-col-id',
   collapseFn: 'sum',
   subtitle: 'subtitle',
-  secondaryLabel: 'extra-text',
   progressDirection: 'vertical',
   maxCols: 5,
   color: 'static-color',
@@ -51,8 +59,9 @@ const fullState: Required<
   primaryPosition: 'bottom',
   iconAlign: 'right',
   valueFontMode: 'default',
+  density: 'default',
   secondaryTrend: { type: 'none' },
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'before',
   applyColorTo: 'background',
 };
 
@@ -215,6 +224,19 @@ describe('appearance settings', () => {
     btnGroup.select('Default');
 
     expect(mockSetState.mock.calls.map(([s]) => s.valueFontMode)).toEqual(['default']);
+  });
+
+  it('should set density to Default', async () => {
+    renderComponent({ density: 'compact' });
+
+    const btnGroup = new EuiButtonGroupTestHarness('lens-metric-appearance-other-density-btn');
+
+    expect(btnGroup.getSelected()?.textContent).toBe('Compact');
+
+    btnGroup.select('Default');
+    btnGroup.select('Compact');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.density)).toEqual(['default']);
   });
 
   it('should set iconAlign when Left position option is selected', async () => {

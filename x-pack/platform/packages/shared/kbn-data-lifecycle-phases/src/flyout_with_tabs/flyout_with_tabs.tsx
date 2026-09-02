@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { usePushFlyoutFocus } from '../hooks/use_push_flyout_focus';
 
 export interface FlyoutHeaderTab<TId extends string> {
   id: TId;
@@ -36,6 +37,8 @@ export type NonEmptyFlyoutTabs<TId extends string> = readonly [
 
 export interface FlyoutWithTabsProps<TId extends string> {
   title: string;
+  /** Optional content rendered inline after the title (e.g. a status badge). */
+  titleAppend?: React.ReactNode;
   showBackButton?: boolean;
   onBack?: () => void;
   tabsAriaLabel: string;
@@ -51,6 +54,7 @@ export interface FlyoutWithTabsProps<TId extends string> {
 
 export const FlyoutWithTabs = <TId extends string>({
   title,
+  titleAppend,
   showBackButton = false,
   onBack,
   tabsAriaLabel,
@@ -65,6 +69,7 @@ export const FlyoutWithTabs = <TId extends string>({
 }: FlyoutWithTabsProps<TId>) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'flyoutWithTabs' });
   const { euiTheme } = useEuiTheme();
+  const { focusProps } = usePushFlyoutFocus({ enabled: type === 'push' });
   const [selectedTab, setSelectedTab] = useState<TId | undefined>(() => initialTabId ?? tabs[0].id);
 
   const resolvedSelectedTab =
@@ -97,6 +102,7 @@ export const FlyoutWithTabs = <TId extends string>({
       type={type}
       container={container}
       data-test-subj="flyoutWithTabs"
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
@@ -122,9 +128,20 @@ export const FlyoutWithTabs = <TId extends string>({
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow>
-                <EuiTitle size="s">
-                  <h2 id={flyoutTitleId}>{title}</h2>
-                </EuiTitle>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  wrap
+                  justifyContent="flexStart"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s">
+                      <h2 id={flyoutTitleId}>{title}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

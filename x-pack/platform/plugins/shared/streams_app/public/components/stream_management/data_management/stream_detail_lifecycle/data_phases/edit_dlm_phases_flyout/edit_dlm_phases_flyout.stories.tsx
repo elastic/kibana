@@ -126,9 +126,9 @@ export const MissingDefaultRepository: Story = {
       return (
         <EditDlmPhasesFlyout
           initialDsl={initialDsl}
-          onMissingDefaultRepository={action('onMissingDefaultRepository')}
           onRefreshDefaultRepository={action('onRefreshDefaultRepository')}
           manageRepositoriesHref="#"
+          createDefaultRepositoryHref="#"
           selectedPhase={selectedPhase}
           setSelectedPhase={setSelectedPhase}
           onClose={action('onClose')}

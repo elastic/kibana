@@ -91,7 +91,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.versionData?.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -109,9 +109,18 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         updateOrigin,
         openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
+        closeCanvas,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, agentId, updateOrigin, openSidebarConversation, dynamicButtons]);
+  }, [
+    canvasState,
+    uiDefinition,
+    agentId,
+    updateOrigin,
+    openSidebarConversation,
+    dynamicButtons,
+    closeCanvas,
+  ]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
@@ -160,9 +169,12 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"
+        isCanvas
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <AttachmentRenderErrorBoundary key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
+        <AttachmentRenderErrorBoundary
+          key={`${attachment.id}:${attachment.versionData?.version ?? 'latest'}`}
+        >
           {() =>
             renderCanvasContent(
               {

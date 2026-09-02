@@ -53,7 +53,7 @@ describe('unenroll', () => {
       await unenrollAgent(soClient, esClient, agentInRegularDoc._id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrollment_started_at');
@@ -61,27 +61,27 @@ describe('unenroll', () => {
 
     it('cannot unenroll from hosted agent policy by default', async () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
-      await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrowError(
+      await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrow(
         HostedAgentPolicyRestrictionRelatedError
       );
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('cannot unenroll from hosted agent policy with revoke=true', async () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
       await expect(
         unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('can unenroll from hosted agent policy with force=true', async () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
       await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true });
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrollment_started_at');
@@ -91,7 +91,7 @@ describe('unenroll', () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
       await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true, revoke: true });
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrolled_at');
@@ -248,7 +248,7 @@ describe('unenroll', () => {
         agentIds: idsToUnenroll,
         revoke: true,
       });
-      expect(unenrolledResponse.actionId).toBeDefined();
+      expect(unenrolledResponse).toHaveProperty('actionId');
 
       // calls ES update with correct values
       const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -312,7 +312,7 @@ describe('unenroll', () => {
         force: true,
       });
 
-      expect(unenrolledResponse.actionId).toBeDefined();
+      expect(unenrolledResponse).toHaveProperty('actionId');
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
@@ -385,8 +385,8 @@ describe('unenroll', () => {
         } as any,
       ]);
 
-      expect(mockedInvalidateAPIKeys).toBeCalledTimes(1);
-      expect(mockedInvalidateAPIKeys).toBeCalledWith([
+      expect(mockedInvalidateAPIKeys).toHaveBeenCalledTimes(1);
+      expect(mockedInvalidateAPIKeys).toHaveBeenCalledWith([
         'accessApiKey1',
         'defaultApiKey1',
         'defaultApiKeyHistory1',
@@ -421,7 +421,7 @@ describe('unenroll', () => {
         } as any,
       ]);
 
-      expect(mockedInvalidateAPIKeys).toBeCalledWith(['accessApiKey1', 'localOutputApiKey1']);
+      expect(mockedInvalidateAPIKeys).toHaveBeenCalledWith(['accessApiKey1', 'localOutputApiKey1']);
     });
 
     it('treats output as local when outputService.get throws', async () => {
@@ -436,7 +436,7 @@ describe('unenroll', () => {
         } as any,
       ]);
 
-      expect(mockedInvalidateAPIKeys).toBeCalledWith(['outputApiKey1']);
+      expect(mockedInvalidateAPIKeys).toHaveBeenCalledWith(['outputApiKey1']);
     });
   });
 
@@ -636,5 +636,35 @@ describe('unenrollAgents kuery path — cheap count and sync/async branching', (
 
     expect(mockUnenrollBatch).toHaveBeenCalled();
     expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 42, page: 1, perPage: 0 });
+
+    const result = await unenrollAgents(soClient, esClient, {
+      kuery: 'status:online',
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 42 });
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
+    expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count of found agents only', async () => {
+    const { soClient, esClient } = createClientMock();
+    const mockGetAgents = jest
+      .spyOn(crud, 'getAgents')
+      .mockResolvedValue([{ id: 'agent-1' }, { id: 'agent-2' }] as any);
+
+    const result = await unenrollAgents(soClient, esClient, {
+      agentIds: ['agent-1', 'agent-2', 'missing-1'],
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 2 });
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
+    mockGetAgents.mockRestore();
   });
 });

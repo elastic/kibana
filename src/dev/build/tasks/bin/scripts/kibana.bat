@@ -33,13 +33,15 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 
 :: Include pre-defined node option
 set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%"
-IF "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="true" (
+:: Code generation from strings (eval / new Function) is disallowed by default.
+:: Opt out by setting KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false.
+IF NOT "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="false" (
   set "NODE_OPTIONS=--disallow-code-generation-from-strings %NODE_OPTIONS%"
 )
 
 :: This should run independently as the last instruction
 :: as we need NODE_OPTIONS previously set to expand
-"%NODE%" "%DIR%\src\cli\kibana\dist" %*
+"%NODE%" "%DIR%\node_modules\@kbn\cli\kibana\dist" %*
 
 :finally
 

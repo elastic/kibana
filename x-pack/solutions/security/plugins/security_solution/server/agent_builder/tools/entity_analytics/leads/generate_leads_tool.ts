@@ -18,6 +18,7 @@ import { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score
 import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
+  SetupPlugins,
   StartPlugins,
 } from '../../../../plugin_contract';
 import { getLeadToolAvailability } from './lead_availability';
@@ -29,6 +30,7 @@ import { fetchCandidateEntities } from '../../../../lib/entity_analytics/lead_ge
 import { resolveChatModel } from '../../../../lib/entity_analytics/lead_generation/utils';
 import { runLeadGenerationInBackground } from '../../../../lib/entity_analytics/lead_generation/run_background_pipeline';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 
 // kibanaVersion is only used in RiskScoreDataClient write methods (index template creation).
@@ -90,7 +92,8 @@ export const generateLeadsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  ml: SetupPlugins['ml']
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_GENERATE_LEADS_TOOL_ID,
@@ -100,6 +103,13 @@ export const generateLeadsTool = (
       'Lead generation is asynchronous — this tool starts the job and returns immediately; use list_leads to check for new results after it completes.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'Generate Leads',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -111,17 +121,26 @@ export const generateLeadsTool = (
     ) => {
       logger.debug(`${SECURITY_GENERATE_LEADS_TOOL_ID} tool called`);
 
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
+
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_write_permissions) {
+        if (!privileges.has_write_permissions) {
+          const errorMessage = 'You do not have permission to generate leads in this space.';
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message: 'You do not have permission to generate leads in this space.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -130,8 +149,10 @@ export const generateLeadsTool = (
 
         const promptId = `generate_leads.confirm.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Generate investigation leads',
@@ -163,6 +184,7 @@ export const generateLeadsTool = (
           const allConnectors = await actionsClient.getAll();
           const resolution = resolveConnectorIdByName(allConnectors, params.connectorName);
           if ('error' in resolution) {
+            telemetryTracker.recordFailure(resolution.error);
             return {
               results: [
                 {
@@ -180,14 +202,16 @@ export const generateLeadsTool = (
         }
 
         if (!resolvedConnectorId) {
+          const errorMessage =
+            'No AI connector is configured for lead generation. Provide a connectorName argument, or configure one via the Lead Generation settings.';
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message:
-                    'No AI connector is configured for lead generation. Provide a connectorName argument, or configure one via the Lead Generation settings.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -196,6 +220,10 @@ export const generateLeadsTool = (
 
         const currentEsClient = esClient.asCurrentUser;
         const crudClient = startPlugins.entityStore.createCRUDClient(currentEsClient, spaceId);
+        const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+          currentEsClient,
+          spaceId
+        );
         const riskScoreDataClient = new RiskScoreDataClient({
           logger,
           kibanaVersion: RISK_SCORE_CLIENT_KIBANA_VERSION,
@@ -228,6 +256,10 @@ export const generateLeadsTool = (
             sourceType: 'adhoc',
             analytics: coreStart.analytics,
             chatModel,
+            ml,
+            request,
+            soClient: savedObjectsClient,
+            relationshipsClient,
           },
         });
 
@@ -247,6 +279,7 @@ export const generateLeadsTool = (
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         logger.error(`[LeadGeneration] Error starting lead generation: ${errorMessage}`);
         return {
           results: [
@@ -257,6 +290,8 @@ export const generateLeadsTool = (
             },
           ],
         };
+      } finally {
+        await telemetryTracker.report();
       }
     },
   };

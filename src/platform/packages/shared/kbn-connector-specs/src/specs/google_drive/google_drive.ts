@@ -103,7 +103,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -147,6 +147,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
   actions: {
     searchFiles: {
       isTool: true,
+      scope: 'read',
       description:
         "Search for files in Google Drive using Google's query syntax. Use this to find files by name, content, type, owner, or modification date across the entire Drive.",
       input: lazySchema(() =>
@@ -240,6 +241,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     listFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and subfolders within a specific Google Drive folder. Use this to browse folder contents by folder ID, or start at the root folder.',
       input: lazySchema(() =>
@@ -319,6 +321,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from Google Drive and return its content. ' +
         'With the default responseType "arraybuffer", content is returned base64-encoded — suitable for PDFs, images, Office documents, and any binary format. ' +
@@ -438,6 +441,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     getFileMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for one or more specific files, including ownership, sharing status, permissions, labels, and descriptions. Use after searchFiles or listFiles to inspect specific files in depth.',
       input: lazySchema(() =>
@@ -537,31 +541,11 @@ export const GoogleDriveConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
-      try {
-        const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
-          params: {
-            fields: 'user',
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Drive API' };
-        }
-
-        return {
-          ok: true,
-          message: `Successfully connected to Google Drive API as ${
-            response.data.user?.emailAddress || 'user'
-          }`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Drive API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
+        params: { fields: 'user' },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

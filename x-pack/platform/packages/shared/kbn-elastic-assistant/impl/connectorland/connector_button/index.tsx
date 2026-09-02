@@ -41,7 +41,7 @@ export const ConnectorButton: React.FC<ConnectorButtonProps> = React.memo<Connec
           <EuiCard
             data-test-subj="connectorButton"
             layout="horizontal"
-            icon={<EuiIcon size="xl" type={OpenAILogo} />}
+            icon={<EuiIcon size="xl" type={OpenAILogo} aria-hidden={true} />}
             title={title}
             description={description}
             onClick={assistantAvailability.hasConnectorsAllPrivilege ? onClick : undefined}

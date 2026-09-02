@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckboxGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import {
   API_VERSIONS,
@@ -402,9 +402,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
           {newConnectorError && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut announceOnMount title="Error" color="danger" size="s">
-                {newConnectorError}
-              </EuiCallOut>
+              <KbnDangerCallout announceOnMount title="Error" size="s" text={newConnectorError} />
             </>
           )}
         </>
@@ -530,9 +528,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       {createError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            {createError}
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title="Error" text={createError} />
         </>
       )}
 
@@ -580,9 +576,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       {getByIdError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            {getByIdError}
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title="Error" text={getByIdError} />
         </>
       )}
 
@@ -645,9 +639,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       {setDeployingError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            {setDeployingError}
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title="Error" text={setDeployingError} />
         </>
       )}
 
@@ -686,9 +678,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       {deleteError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            {deleteError}
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title="Error" text={deleteError} />
         </>
       )}
 

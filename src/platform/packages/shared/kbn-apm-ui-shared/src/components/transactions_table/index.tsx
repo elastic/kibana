@@ -51,6 +51,7 @@ interface TransactionsTableProps {
   onSearchQueryChange?: (query: string) => void;
   remainingTransactionsCellTooltipContent?: React.ReactNode;
   showSparklines?: boolean;
+  isSparklineLoading?: boolean;
   errorMessage?: string;
   'data-test-subj': string;
 }
@@ -82,6 +83,7 @@ export function TransactionsTable({
   onSearchQueryChange,
   remainingTransactionsCellTooltipContent,
   showSparklines: showSparklinesProp,
+  isSparklineLoading,
   errorMessage,
   'data-test-subj': dataTestSubj,
 }: TransactionsTableProps) {
@@ -105,6 +107,7 @@ export function TransactionsTable({
       nameInteraction: columnInteractions?.name,
       alertsInteraction: columnInteractions?.alerts,
       showSparklines: resolvedShowSparklines,
+      isSparklineLoading,
       remainingTransactionsCellTooltipContent,
     });
     return (columns ?? DEFAULT_COLUMNS).map((col) =>
@@ -114,6 +117,7 @@ export function TransactionsTable({
     latencyAggregationType,
     columnInteractions,
     resolvedShowSparklines,
+    isSparklineLoading,
     columns,
     remainingTransactionsCellTooltipContent,
   ]);

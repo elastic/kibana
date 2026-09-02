@@ -28,7 +28,7 @@ export interface AgentlessEnrollmentSelectedInput {
 /**
  * Minimal contract for the agentless enrollment flyout, intentionally decoupled
  * from both `PackagePolicy` and the `AgentlessPolicy` API DTO. The caller maps its
- * own data source (today `PackagePolicy`, eventually the agentless policies API)
+ * own data source (today `PackagePolicy`, eventually the managed integrations API)
  * into these primitives, so the flyout never has to change when the source flips.
  */
 export interface AgentlessEnrollmentFlyoutProps {

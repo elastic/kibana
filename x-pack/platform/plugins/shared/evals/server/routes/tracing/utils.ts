@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-/**
- * Escapes Elasticsearch wildcard metacharacters (`\`, `*`, `?`) in user input
- * so the literal characters are matched rather than interpreted as wildcards.
- */
-export const escapeWildcard = (input: string): string =>
-  input.replace(/[\\\*\?]/g, (ch) => `\\${ch}`);
+import { JUDGE_SPAN_NAME_PREFIX } from '../../task_providers/tracing';
+
+export { escapeWildcard } from '@kbn/evals-common';
+
+/** Matches non-judge evaluator root spans for exclusion from Tracing queries. */
+export const EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS: Record<string, unknown> = {
+  bool: {
+    filter: [{ exists: { field: 'attributes.evaluator.name' } }],
+    must_not: [{ prefix: { name: JUDGE_SPAN_NAME_PREFIX } }],
+  },
+};

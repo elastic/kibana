@@ -8,11 +8,18 @@
  */
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_STEPS,
+  LEGACY_COMPLIMENTARY_PALETTE,
+  COMPLEMENTARY_PALETTE,
+} from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
   AutoColorType,
   ColorByValueAbsolute,
+  ColorByValuePaletteType,
   ColorByValueStep,
   ColorByValueType,
   ColorMappingCategoricalType,
@@ -25,10 +32,16 @@ import type {
 } from '../../schema/color';
 export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import type { PaletteId } from '../../schema/constants';
+import { PALETTE_IDS } from '../../schema/constants';
 import { getReversibleMappings } from '../charts/utils';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
+
+const DISTRIBUTED_PALETTE_ID_SET: ReadonlySet<string> = new Set(PALETTE_IDS);
+const isValidDistributedPaletteId = (id: string): id is PaletteId =>
+  DISTRIBUTED_PALETTE_ID_SET.has(id);
 
 const paletteRangeCompat = getReversibleMappings([
   ['percentage', 'percent'],
@@ -56,12 +69,126 @@ export function getContinuity(
     : 'none';
 }
 
+/**
+ * Merges a trailing same-color continuation step that was added by
+ * `fromColorByValueLensStateToAPI` to encode an open upper bound for
+ * single-stop palettes (continuity 'all' or 'above').
+ *
+ * This only applies to the exact two-step shape produced for a single logical
+ * stop. Genuine multi-stop palettes whose last two bands happen to share a color
+ * and have an open upper bound must be preserved as-is.
+ *
+ * The trailing step is identified as: same color as the previous step,
+ * contiguous boundary (`gte` === prev `lt`/`lte`), and no upper bound.
+ */
+function mergeTrailingSameColorStep(steps: ColorByValueStep[]): ColorByValueStep[] {
+  if (steps.length !== 2) return steps;
+
+  const last = steps.at(-1)!;
+  const prev = steps.at(-2)!;
+
+  const isTrailingContinuation =
+    last.lt == null &&
+    last.lte == null &&
+    last.color === prev.color &&
+    last.gte != null &&
+    last.gte === (prev.lt ?? prev.lte);
+
+  return isTrailingContinuation ? steps.slice(0, -1) : steps;
+}
+
+/**
+ * Builds the Lens palette state for a named palette. A named palette doesn't need to
+ * have per-band `stops`/`colorStops`: its colors are derived at render time from the
+ * palette id + `steps` (see `getOverridePaletteColors`). Only three things matter:
+ * - `steps`: how many bands to split the domain into (`numberOfBands`).
+ * - `rangeType`: `percent` by default, or `number` when `useNumericRange` is `true`. Named
+ *   palettes color a percentage domain; single-value charts (single-value metric charts and
+ * legacy metric) opt into a numeric one.
+ * - `continuity`: always `all`. A distributed palette spreads its colors across the whole
+ *   domain, but the range bounds it colors against are not always the recalculated data
+ *   min/max: charts like `metric` with a user-defined max use that max as the 100% bound, so
+ *   values can fall above (or below) it. Opening both ends (`all`) ensures those out-of-range
+ *   values still receive the nearest band color instead of being left uncolored.
+ */
+function buildNamedPaletteLensState({
+  palette,
+  numberOfBands,
+  useNumericRange,
+}: {
+  palette: string;
+  numberOfBands: number;
+  useNumericRange: boolean;
+}): PaletteOutput<CustomPaletteParams> {
+  return {
+    type: 'palette',
+    name: palette,
+    params: {
+      name: palette,
+      progression: 'fixed', // to be removed
+      reverse: false, // always applied to steps during transform
+      rangeType: useNumericRange ? 'number' : 'percent',
+      // distributed palettes span the full domain; the recalculated min/max act as bounds except for the cases
+      // where we use a user-defined max or min. In those cases, we need to open both ends to ensure that
+      // values outside the range are still colored.
+      continuity: 'all',
+      steps: numberOfBands,
+      maxSteps: Math.max(DEFAULT_COLOR_STEPS, numberOfBands),
+    },
+  };
+}
+
+/**
+ * API -> Lens state for a `distributed_palette` or the deprecated `legacy_dynamic`.
+ * - `continuity` is always `all`; opening both bounds keeps values outside the effective range
+ *   (e.g. above a metric's user-defined max) colored with the nearest band.
+ * - `numberOfBands` is the per-chart default band count used to split the domain.
+ * - `useNumericRange` defaults to `false` (`percent`). Single-value charts (metric without
+ *   a max or breakdown, and legacy metric) pass `true` (`number`) instead, since they color a
+ *   single value across an absolute range where percentages are meaningless.
+ */
+function fromColorByValuePaletteAPIToLensState(
+  config: ColorByValuePaletteType | Extract<ColorByValueType, { type: 'legacy_dynamic' }>,
+  numberOfBands: number = DEFAULT_COLOR_STEPS,
+  useNumericRange: boolean = false
+): PaletteOutput<CustomPaletteParams> {
+  const { palette } = config;
+  return buildNamedPaletteLensState({
+    palette,
+    numberOfBands,
+    useNumericRange,
+  });
+}
+
+/**
+ * API -> Lens state entry point for color by value. Routes on the config `type`:
+ * - `distributed_palette` / `legacy_dynamic` -> a named palette whose bands are owned by the
+ *   palette service (`numberOfBands` and `useNumericRange` configure the band count and range).
+ * - `dynamic` -> a `custom` palette with explicit per-band `stops`/`colorStops` and numeric
+ *   `rangeMin`/`rangeMax` derived from the steps; `numberOfBands`/`useNumericRange` do not apply.
+ */
 export function fromColorByValueAPIToLensState(
-  config?: ColorByValueType
+  config?: ColorByValueType,
+  numberOfBands?: number,
+  useNumericRange: boolean = false
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 
-  const stops = config.steps.map(
+  // `legacy_dynamic` is parse-only (deprecated) and is rebuilt as a named palette.
+  if (config.type === 'distributed_palette' || config.type === 'legacy_dynamic') {
+    return fromColorByValuePaletteAPIToLensState(config, numberOfBands, useNumericRange);
+  }
+
+  // Derive range bounds from original steps BEFORE merging, so that a trailing
+  // open-ended continuation step correctly produces rangeMax = null.
+  const rawFirst = config.steps[0];
+  const rawLast = config.steps.at(-1);
+  const rangeMin = rawFirst?.gte ?? null;
+  const rangeMax = rawLast?.lt ?? rawLast?.lte ?? null;
+
+  const effectiveSteps = mergeTrailingSameColorStep(config.steps);
+
+  const stops = effectiveSteps.map(
     ({ lt, lte, color }): ColorStop => ({
       color,
       // @ts-expect-error - This can be null
@@ -69,7 +196,7 @@ export function fromColorByValueAPIToLensState(
     })
   );
 
-  const colorStops = config.steps.map(
+  const colorStops = effectiveSteps.map(
     ({ gte, color }): ColorStop => ({
       color,
       // @ts-expect-error - This can be null
@@ -77,18 +204,11 @@ export function fromColorByValueAPIToLensState(
     })
   );
 
-  const rangeMin = colorStops.at(0)?.stop ?? null;
-  const rangeMax = stops.at(-1)?.stop ?? null;
-
-  const isLegacy = config.type === 'legacy_dynamic';
-  const name = isLegacy ? config.palette : 'custom';
-  const needsPaletteShift = isLegacy && config.shift;
-
   return {
     type: 'palette',
-    name,
+    name: CUSTOM_PALETTE,
     params: {
-      name,
+      name: CUSTOM_PALETTE,
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       // @ts-expect-error - This can be null
@@ -96,13 +216,7 @@ export function fromColorByValueAPIToLensState(
       // @ts-expect-error - This can be null
       rangeMax,
       rangeType: paletteRangeCompat.toState(config.range ?? 'absolute'),
-      stops: !needsPaletteShift
-        ? stops
-        : stops.map((stop, i) => ({
-            ...stop,
-            // value can be null
-            stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
-          })),
+      stops,
       colorStops,
       continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
@@ -116,36 +230,50 @@ export function getRangeValue(value?: number | null): number | null {
   return value;
 }
 
+/**
+ * Lens state -> API for color by value; inverse of {@link fromColorByValueAPIToLensState}.
+ * - A named (non-custom) palette becomes a `distributed_palette`: per-band stops are dropped
+ *   since the palette service owns the band distribution.
+ * - A custom palette becomes a `dynamic` config, rematerializing each stop as a
+ *   `{ gte, lt | lte, color }` step and applying `reverse` to the stop colors first.
+ */
 export function fromColorByValueLensStateToAPI(
   config: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
   const colorParams = config?.params;
 
   if (!colorParams) return;
-
-  const { rangeType, reverse } = colorParams;
-  let originalStops = colorParams.stops ?? [];
-
   // config.name is the root palette identifier used by the runtime palette service
-  const palette = config.name ?? colorParams.name ?? 'custom';
-  const isLegacy = palette !== 'custom';
+  const palette = config.name ?? colorParams.name ?? CUSTOM_PALETTE;
   const rangeMin = getRangeValue(colorParams.rangeMin);
   const rangeMax = getRangeValue(colorParams.rangeMax);
-  const needsPaletteShift =
-    isLegacy &&
-    ((rangeMin !== null && rangeMin === originalStops.at(0)?.stop) ||
-      (rangeMax !== null && rangeMax !== originalStops.at(-1)?.stop));
 
-  // legacy non-custom color stops are incorrectly configured for bwc and "fixed" in client logic
-  // we need to return the incorrect stops to make it work as it does currently.
-  // see https://github.com/elastic/kibana/issues/251135
-  if (needsPaletteShift) {
-    // @ts-expect-error - stop value can be null
-    originalStops = originalStops.map((stop, i) => ({
-      ...stop,
-      stop: i === originalStops.length - 1 ? rangeMax : originalStops[i + 1].stop,
-    }));
+  // A named (non-custom) palette maps to a `distributed_palette`, where the palette
+  // service owns the individual bands, so the per-band stops are dropped.
+  if (palette !== CUSTOM_PALETTE) {
+    // `complimentary` is the legacy misspelling of `complementary`
+    // (https://github.com/elastic/kibana/issues/161194). Runtime canonicalizes it before rendering,
+    // so we map only that alias here
+    const canonicalPalette =
+      palette === LEGACY_COMPLIMENTARY_PALETTE ? COMPLEMENTARY_PALETTE : palette;
+    if (!isValidDistributedPaletteId(canonicalPalette)) {
+      return;
+    }
+    return {
+      type: 'distributed_palette',
+      palette: canonicalPalette,
+    };
   }
+
+  const { rangeType, reverse, continuity: rawContinuity } = colorParams;
+  const originalStops = colorParams.stops ?? [];
+  // Continuity drives the open/closed bounds on the first and last API steps.
+  // An open bound (no gte/lte) signals that the color extends beyond the defined range.
+  // When the SO omits `continuity` (common for older/real panels), fall back to deriving
+  // it from the range bounds, matching `getContinuity` used by the reverse transform.
+  const continuity = rawContinuity ?? getContinuity(rangeMin, rangeMax);
+  const isOpenBelow = continuity === 'below' || continuity === 'all';
+  const isOpenAbove = continuity === 'above' || continuity === 'all';
 
   const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
@@ -157,11 +285,11 @@ export function fromColorByValueLensStateToAPI(
           ...originalStops[i],
           color,
         }));
-  const steps = stops.map((step, i): ColorByValueStep => {
+  const mappedSteps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {
       return {
-        ...(rangeMin !== null && { gte: rangeMin }),
+        ...(!isOpenBelow && rangeMin !== null && { gte: rangeMin }),
         lt: currentStop,
         color,
       };
@@ -172,8 +300,7 @@ export function fromColorByValueLensStateToAPI(
     if (i === stops.length - 1) {
       return {
         gte: prevStop,
-        // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-        ...(rangeMax !== null && { lte: rangeMax }),
+        ...(!isOpenAbove && rangeMax !== null && { lte: rangeMax }),
         color,
       };
     }
@@ -185,15 +312,21 @@ export function fromColorByValueLensStateToAPI(
     };
   });
 
-  if (isLegacy) {
-    return {
-      type: 'legacy_dynamic',
-      range,
-      palette,
-      shift: needsPaletteShift,
-      steps,
-    };
-  }
+  // For single-stop palettes the i===0 branch always emits a closed `lt`, which prevents
+  // the last-step branch from running. When the upper bound is open (continuity 'all'/'above')
+  // append a trailing open step (`gte` with no upper bound) to encode that openness;
+  // the reverse transform merges it back into the single stop. For a closed upper bound
+  // ('none'/'below') the single `lt` step already fully describes the range.
+  const steps: ColorByValueStep[] =
+    stops.length === 1 && isOpenAbove
+      ? [
+          ...mappedSteps,
+          {
+            gte: stops[0].stop,
+            color: stops[0].color,
+          },
+        ]
+      : mappedSteps;
 
   return {
     type: 'dynamic',
@@ -270,7 +403,7 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
  *   - `match` with `matchEntireWord: true` -> bare pattern string; lowercased
  *     when `matchCase` is falsy (matcher lowercases the rule side on lookup).
  * Other shapes (`match` with `matchEntireWord: false`, `regex`, `range`) are not
- * renderable and are silently dropped.=
+ * renderable and are silently dropped.
  *
  * Round-trip rebuilds everything as `type: 'raw'` (see `fromRulesAPIToLensState`).
  * Render-equivalent for editor-produced match rules, since both reduce to the
@@ -473,12 +606,19 @@ export function fromColorMappingAPIToLensState(
 
 export function isColorByValueColor(color?: AllColoringTypes): color is ColorByValueType {
   if (!color || !('type' in color)) return false;
-  return color.type === 'dynamic' || color.type === 'legacy_dynamic';
+  return (
+    color.type === 'dynamic' ||
+    color.type === 'distributed_palette' ||
+    color.type === 'legacy_dynamic'
+  );
+}
+
+export function isColorByValuePalette(color?: AllColoringTypes): color is ColorByValuePaletteType {
+  return !!color && 'type' in color && color.type === 'distributed_palette';
 }
 
 export function isColorByValueAbsolute(color?: AllColoringTypes): color is ColorByValueAbsolute {
-  // This is needed because the schema for `absolute` and `percentage` are combined in one
-  return isColorByValueColor(color) && color.range === 'absolute';
+  return isColorByValueColor(color) && 'range' in color && color.range === 'absolute';
 }
 
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {

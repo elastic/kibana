@@ -586,6 +586,7 @@ describe('Data Streams tab', () => {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
         });
         const ds2 = createDataStreamPayload({
@@ -594,6 +595,7 @@ describe('Data Streams tab', () => {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
         });
 
@@ -1011,9 +1013,10 @@ describe('Data Streams tab', () => {
 
         test('disables data stream lifecycle when switching to an ILM policy', async () => {
           setupDataStreamsMocks();
-          httpRequestsMockHelpers.setLoadDataStreamsIlmPoliciesResponse([
-            { name: 'my_ilm_policy', phases: { hot: { min_age: '0ms', actions: {} } } },
-          ]);
+          httpRequestsMockHelpers.setLoadDataStreamsIlmPoliciesResponse({
+            hasManageIlm: true,
+            policies: [{ name: 'my_ilm_policy', phases: { hot: { min_age: '0ms', actions: {} } } }],
+          });
           await renderHome(httpSetup, {
             initialEntries: ['/data_streams'],
             appServicesContext: { url: urlServiceMock },
@@ -1761,6 +1764,7 @@ describe('Data Streams tab', () => {
         delete_index: true,
         manage_data_stream_lifecycle: true,
         read_failure_store: true,
+        manage: true,
       },
     });
     const dataStreamNoDelete = createDataStreamPayload({
@@ -1769,6 +1773,7 @@ describe('Data Streams tab', () => {
         delete_index: false,
         manage_data_stream_lifecycle: true,
         read_failure_store: true,
+        manage: true,
       },
     });
     const dataStreamNoEditRetention = createDataStreamPayload({
@@ -1777,6 +1782,7 @@ describe('Data Streams tab', () => {
         delete_index: true,
         manage_data_stream_lifecycle: false,
         read_failure_store: true,
+        manage: false,
       },
     });
     const dataStreamNoPermissions = createDataStreamPayload({
@@ -1785,6 +1791,7 @@ describe('Data Streams tab', () => {
         delete_index: false,
         manage_data_stream_lifecycle: false,
         read_failure_store: false,
+        manage: false,
       },
     });
 

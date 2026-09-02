@@ -41,6 +41,7 @@ import {
   ALERT_START,
   ALERT_STATE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_DELAYED,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
@@ -1916,7 +1917,7 @@ describe('Alerts Client', () => {
           alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
-          await expect(alertsClient.persistAlerts()).rejects.toThrowError(
+          await expect(alertsClient.persistAlerts()).rejects.toThrow(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
           );
         });
@@ -2701,7 +2702,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutRuleId as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+            ).rejects.toThrow(`Must specify both rule ID and space ID for AAD alert query.`);
           });
 
           test('if spaceId is not specified', async () => {
@@ -2709,7 +2710,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutSpaceId as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+            ).rejects.toThrow(`Must specify both rule ID and space ID for AAD alert query.`);
           });
 
           test('if executionUuid or start date are not specified', async () => {
@@ -2719,7 +2720,7 @@ describe('Alerts Client', () => {
               alertsClient.getSummarizedAlerts(
                 paramsWithoutExecutionUuid as GetSummarizedAlertsParams
               )
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2729,7 +2730,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutStart as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2739,7 +2740,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutEnd as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2847,7 +2848,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -2861,7 +2862,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -2875,7 +2876,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -4043,10 +4044,15 @@ describe('Alerts Client', () => {
       });
 
       describe('isTrackedAlert()', () => {
-        test('should return true if alert was active in a previous execution, false otherwise', async () => {
+        test('should return true for active or delayed alerts, false otherwise', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
+
+          const delayedAlert = {
+            ...fetchedAlert2,
+            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          };
 
           clusterClient.search.mockResolvedValue({
             took: 10,
@@ -4067,7 +4073,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
-                  _source: fetchedAlert2,
+                  _source: delayedAlert,
                 },
               ],
             },
@@ -4078,8 +4084,8 @@ describe('Alerts Client', () => {
             activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
           });
 
-          expect(alertsClient.isTrackedAlert('1')).toBe(true);
-          expect(alertsClient.isTrackedAlert('2')).toBe(true);
+          expect(alertsClient.isTrackedAlert('1')).toBe(true); // active
+          expect(alertsClient.isTrackedAlert('2')).toBe(true); // delayed
           expect(alertsClient.isTrackedAlert('3')).toBe(false);
         });
       });

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { StorageService } from './storage_service';
 
 /**
  * StorageService flavor that uses an Elasticsearch client scoped to the current request user:
  * `elasticsearch.client.asScoped(request).asCurrentUser`
  */
-export const StorageServiceScopedToken = Symbol.for(
+export const StorageServiceScopedToken = createToken<StorageService>(
   'alerting_v2.StorageServiceScoped'
-) as ServiceIdentifier<StorageService>;
+);
 
 /**
  * StorageService flavor that uses the internal Kibana system user:
  * `elasticsearch.client.asInternalUser`
  */
-export const StorageServiceInternalToken = Symbol.for(
+export const StorageServiceInternalToken = createToken<StorageService>(
   'alerting_v2.StorageServiceInternal'
-) as ServiceIdentifier<StorageService>;
+);

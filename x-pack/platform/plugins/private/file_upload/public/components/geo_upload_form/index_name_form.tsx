@@ -8,8 +8,9 @@
 import _ from 'lodash';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import { EuiFormRow, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { validateIndexName } from '../../validate_index_name';
 
 export interface Props {
@@ -70,7 +71,7 @@ export class IndexNameForm extends Component<Props> {
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
-        <EuiCallOut
+        <KbnInfoCallout
           title={i18n.translate('xpack.fileUpload.indexNameForm.indexNameGuidelines', {
             defaultMessage: 'Index name guidelines',
           })}
@@ -113,7 +114,7 @@ export class IndexNameForm extends Component<Props> {
               })}
             </li>
           </ul>
-        </EuiCallOut>
+        </KbnInfoCallout>
       </>
     );
   }

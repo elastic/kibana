@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,8 +23,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Agent, ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
+import { OPAMP_NON_REPORTING_STATUSES } from '../../../../../common/constants';
 
 import type { OTelComponentType } from '../constants';
 import { COMPONENT_TYPE_LABELS } from '../constants';
@@ -38,13 +39,6 @@ import {
   nanosToMs,
   type ComponentHealthStatus,
 } from '../utils';
-
-const NON_REPORTING_STATUSES: Array<Agent['status']> = [
-  'offline',
-  'inactive',
-  'unenrolled',
-  'uninstalled',
-];
 
 interface CollectorDetailHealthProps {
   health?: ComponentHealth;
@@ -373,25 +367,20 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
 
   const { euiTheme } = useEuiTheme();
 
-  if (agentStatus && NON_REPORTING_STATUSES.includes(agentStatus)) {
+  if (agentStatus && OPAMP_NON_REPORTING_STATUSES.includes(agentStatus)) {
     return (
-      <EuiCallOut
-        color="warning"
-        iconType="offline"
+      <KbnWarningCallout
         announceOnMount={false}
         title={i18n.translate('xpack.fleet.otelUi.collectorDetail.health.offlineTitle', {
           defaultMessage: 'Collector is not active',
         })}
         data-test-subj="collectorDetailHealthOffline"
-      >
-        <p>
-          {i18n.translate('xpack.fleet.otelUi.collectorDetail.health.offlineBody', {
-            defaultMessage:
-              'This collector is currently {status}. Health data is only available while the collector is running.',
-            values: { status: agentStatus },
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.fleet.otelUi.collectorDetail.health.offlineBody', {
+          defaultMessage:
+            'This collector is currently {status}. Health data is only available while the collector is running.',
+          values: { status: agentStatus },
+        })}
+      />
     );
   }
 

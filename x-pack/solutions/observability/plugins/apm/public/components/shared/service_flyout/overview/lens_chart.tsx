@@ -11,7 +11,7 @@ import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import type { LensESQLConfig } from './types';
 
 const CHART_HEIGHT = 200;
@@ -35,7 +35,9 @@ function ServiceFlyoutLensChartComponent({
   rangeTo,
   refreshToken,
 }: ServiceFlyoutLensChartProps) {
-  const { lens, dataViews } = useApmPluginContext();
+  const {
+    deps: { lens, dataViews },
+  } = useServiceFlyoutContext();
   const timeRange = useMemo(() => ({ from: rangeFrom, to: rangeTo }), [rangeFrom, rangeTo]);
 
   const { value: builtAttributes } = useAsync(async () => {

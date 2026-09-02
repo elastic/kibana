@@ -136,8 +136,13 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
                 defaultMessage: 'Create component template',
               })
         }
-        back="/app/management/data/index_management/component_templates"
-        padding={{ bleed: 'l' }}
+        back={{
+          href: '/app/management/data/index_management/component_templates',
+          label: i18n.translate('xpack.idxMgmt.createComponentTemplate.backToListLabel', {
+            defaultMessage: 'Component templates',
+          }),
+        }}
+        spacing="bleed"
       />
 
       <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">

@@ -83,19 +83,22 @@ function MetricCell({
   color,
   comparisonColor,
   showSparkline,
+  isSparklineLoading = false,
 }: {
   valueLabel: string;
   series?: TransactionGroup['latency']['series'];
   color: string;
   comparisonColor: string;
   showSparkline: boolean;
+  isSparklineLoading?: boolean;
 }) {
-  if (!series || !showSparkline) {
+  if (!showSparkline || (!series && !isSparklineLoading)) {
     return <>{valueLabel}</>;
   }
 
   return (
     <EuiFlexGroup
+      data-test-subj="transactionSparklineChart"
       justifyContent="flexEnd"
       gutterSize="xs"
       alignItems="flexEnd"
@@ -113,6 +116,7 @@ function MetricCell({
           series={series?.value ?? null}
           comparisonSeries={series?.comparison}
           comparisonSeriesColor={comparisonColor}
+          isLoading={isSparklineLoading && !series}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -182,12 +186,14 @@ export function getBuiltInColumns({
   nameInteraction,
   alertsInteraction,
   showSparklines = true,
+  isSparklineLoading = false,
   remainingTransactionsCellTooltipContent,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   nameInteraction?: TransactionGroupInteraction;
   alertsInteraction?: TransactionGroupInteraction;
   showSparklines?: boolean;
+  isSparklineLoading?: boolean;
   remainingTransactionsCellTooltipContent?: ReactNode;
 }): Record<ColumnId, EuiBasicTableColumn<TransactionGroup>> {
   return {
@@ -309,6 +315,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.latency.current}
           comparisonColor={SPARKLINE_COLORS.latency.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },
@@ -329,6 +336,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.throughput.current}
           comparisonColor={SPARKLINE_COLORS.throughput.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },
@@ -357,6 +365,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.errorRate.current}
           comparisonColor={SPARKLINE_COLORS.errorRate.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },

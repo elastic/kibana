@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';

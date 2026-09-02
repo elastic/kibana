@@ -1390,6 +1390,85 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
   });
 });
 
+describe('Fleet - validatePackagePolicy() additional_datastreams_permissions', () => {
+  const minimalPackage = {
+    name: 'mock-package',
+    title: 'Mock package',
+    version: '0.0.0',
+    description: 'description',
+    type: 'mock',
+    categories: [],
+    requirement: { kibana: { versions: '' }, elasticsearch: { versions: '' } },
+    format_version: '',
+    download: '',
+    path: '',
+    assets: {
+      kibana: { dashboard: [], visualization: [], search: [], 'index-pattern': [] },
+    },
+    status: installationStatuses.NotInstalled,
+    data_streams: [],
+    policy_templates: [],
+  } as unknown as PackageInfo;
+
+  const buildPolicy = (permissions: string[]): NewPackagePolicy =>
+    ({
+      name: 'pkgPolicy-perms',
+      namespace: 'default',
+      enabled: true,
+      policy_id: 'test',
+      policy_ids: ['test'],
+      package: { name: 'mock-package', title: 'Mock package', version: '0.0.0' },
+      inputs: [],
+      additional_datastreams_permissions: permissions,
+    } as unknown as NewPackagePolicy);
+
+  const errorsFor = (permissions: string[]) =>
+    validatePackagePolicy(buildPolicy(permissions), minimalPackage, deps)
+      .additional_datastreams_permissions;
+
+  // Values that must be accepted: a datastream-type prefix (logs/metrics/traces/synthetics/
+  // profiles) followed by "-" and a non-empty suffix (wildcards in the suffix are allowed).
+  const LEGITIMATE = [
+    'logs-myapp',
+    'metrics-foo-default',
+    'traces-apm-default',
+    'synthetics-http-default',
+    'profiles-events-all',
+    'logs-nginx.access-*',
+    'metrics-system.cpu-*',
+  ];
+
+  // Values that must be rejected: leading wildcards, substring matches, dot-prefixed system
+  // indices, and bare prefixes with no suffix. The mis-grouped alternation accepted every one.
+  const REJECTED = [
+    '*metrics*',
+    'logs*',
+    '.metrics-endpoint.metadata_united_default',
+    '.kibana_alerting_cases*metrics*',
+    'xxxsyntheticsxxx',
+    'anything-with-metrics-in-the-middle',
+    '*',
+    '.*',
+    'logs-',
+    'metrics-',
+  ];
+
+  it.each(LEGITIMATE)('accepts legitimate datastream permission %p', (value) => {
+    expect(errorsFor([value])).toBeNull();
+  });
+
+  it.each(REJECTED)('rejects out-of-scope datastream permission %p', (value) => {
+    const errors = errorsFor([value]);
+    expect(errors).not.toBeNull();
+    expect(errors).toHaveLength(1);
+  });
+
+  it('reports every invalid value when a mix is supplied', () => {
+    const errors = errorsFor(['logs-myapp', '*metrics*', 'xxxsyntheticsxxx']);
+    expect(errors).toHaveLength(2);
+  });
+});
+
 describe('Fleet - validationHasErrors()', () => {
   it('returns true for stream validation results with errors', () => {
     expect(
@@ -2139,11 +2218,47 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(null);
     });
 
-    it('should not return an error message if the package is not input type', () => {
+    it('should return an error message for integration packages with invalid dataset', () => {
       const res = validatePackagePolicyConfig(
         {
           type: 'text',
           value: { dataset: 'Test', package: 'log' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(['Dataset must be lowercase']);
+    });
+
+    it('should return an error message for integration packages with hyphens in dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'gew-audit-logs', package: 'aws_logs' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(['Dataset contains invalid characters']);
+    });
+
+    it('should not return an error message for integration packages with valid dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'aws_logs.audit', package: 'aws_logs' },
         },
         {
           name: 'data_stream.dataset',

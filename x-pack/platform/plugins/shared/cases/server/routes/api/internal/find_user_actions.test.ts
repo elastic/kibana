@@ -229,6 +229,101 @@ describe('findUserActionsRoute', () => {
     );
   });
 
+  describe('query param decoding', () => {
+    const casesClientMock = () => ({
+      userActions: {
+        find: jest.fn().mockResolvedValue({ userActions: [], page: 1, perPage: 10, total: 0 }),
+      },
+      attachments: {
+        bulkGet: jest.fn().mockResolvedValue({ attachments: [], errors: [] }),
+      },
+    });
+
+    it('passes a single `types` query value through as an array', async () => {
+      const client = casesClientMock();
+      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const request = {
+        params: { case_id: 'my_fake_case_id' },
+        query: { types: 'action' },
+      };
+
+      // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+      await findUserActionsRoute.handler({ context, request, response });
+
+      expect(client.userActions.find).toHaveBeenCalledWith(
+        expect.objectContaining({ params: expect.objectContaining({ types: ['action'] }) })
+      );
+    });
+
+    it('passes multiple `types` query values through unchanged', async () => {
+      const client = casesClientMock();
+      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const request = {
+        params: { case_id: 'my_fake_case_id' },
+        query: { types: ['action', 'alert'] },
+      };
+
+      // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+      await findUserActionsRoute.handler({ context, request, response });
+
+      expect(client.userActions.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ types: ['action', 'alert'] }),
+        })
+      );
+    });
+
+    it('passes a single `authors` query value through as an array', async () => {
+      const client = casesClientMock();
+      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const request = {
+        params: { case_id: 'my_fake_case_id' },
+        // supertest/query-string encode a single-entry array as a plain string
+        query: { authors: 'elastic' },
+      };
+
+      // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+      await findUserActionsRoute.handler({ context, request, response });
+
+      expect(client.userActions.find).toHaveBeenCalledWith(
+        expect.objectContaining({ params: expect.objectContaining({ authors: ['elastic'] }) })
+      );
+    });
+
+    it('passes multiple `authors` query values through unchanged', async () => {
+      const client = casesClientMock();
+      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const request = {
+        params: { case_id: 'my_fake_case_id' },
+        query: { authors: ['elastic', 'other'] },
+      };
+
+      // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+      await findUserActionsRoute.handler({ context, request, response });
+
+      expect(client.userActions.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ authors: ['elastic', 'other'] }),
+        })
+      );
+    });
+
+    it('omits `authors` from the decoded params when not provided', async () => {
+      const client = casesClientMock();
+      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const request = {
+        params: { case_id: 'my_fake_case_id' },
+        query: {},
+      };
+
+      // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+      await findUserActionsRoute.handler({ context, request, response });
+
+      const [{ params: decodedParams }] = client.userActions.find.mock.calls[0];
+      expect(decodedParams).not.toHaveProperty('authors');
+    });
+  });
+
   it('should return empty attachments when no commentId', async () => {
     const casesClientMock = {
       userActions: {

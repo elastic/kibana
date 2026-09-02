@@ -47,7 +47,10 @@ describe('StreamOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseStreamsPrivileges.mockReturnValue({
-      features: { contentPacks: { enabled: false } },
+      features: {
+        contentPacks: { enabled: false },
+      },
+      isLoading: false,
     });
   });
 

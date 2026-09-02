@@ -12,7 +12,7 @@ import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteColors } from '@kbn/coloring';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -127,13 +127,14 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const stops = getOverridePaletteStops(paletteService, palette);
+  const colors = getOverridePaletteColors(paletteService, palette);
+  const stops = palette.params?.stops?.map(({ stop }) => stop) ?? [];
 
   return {
     ...palette.params,
-    // rewrite colors and stops as two distinct arguments
-    colors: stops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
+    colors,
+    // Positions are a custom-palette concept only; named palettes distribute uniformly at render.
+    stops: palette.params?.name === CUSTOM_PALETTE ? stops : [],
     reverse: false, // managed at UI level
   };
 }

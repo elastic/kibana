@@ -6,8 +6,7 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
-
+import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 export const queryKeys = {
   all: ['alert-episodes'] as const,
   actionsAll: () => [...queryKeys.all, 'actions'] as const,
@@ -33,6 +32,9 @@ export const queryKeys = {
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
+  episodeFlappingAll: () => [...queryKeys.all, 'episode-flapping'] as const,
+  episodeFlapping: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeFlappingAll(), spaceId, episodeId] as const,
   episodeTrendAll: () => [...queryKeys.all, 'episode-trend'] as const,
   episodeTrend: (spaceId: string, episodeId: string, metricLabels: string[]) =>
     [...queryKeys.episodeTrendAll(), spaceId, episodeId, ...metricLabels] as const,

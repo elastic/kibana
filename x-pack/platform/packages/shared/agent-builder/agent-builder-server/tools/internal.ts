@@ -13,7 +13,8 @@ import type {
   ToolAvailabilityContext,
   ToolAvailabilityResult,
   ToolReturnSummarizerFn,
-  ToolConfirmationPolicy,
+  BuiltInToolConfirmationPolicy,
+  McpToolAnnotations,
 } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
@@ -53,9 +54,24 @@ export interface InternalToolDefinition<
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
   /**
+   * Per-tool override of the tool-result length guardrail's token budget.
+   * When set, replaces the ToolManager-wide default for this tool specifically.
+   * Set to `Infinity` to fully exempt this tool's results from truncation.
+   */
+  maxResultTokens?: number;
+  /**
    * Tool call policy to control tool call confirmation behavior
    */
-  confirmation?: ToolConfirmationPolicy;
+  confirmation?: BuiltInToolConfirmationPolicy;
+  /**
+   * MCP annotations surfaced to MCP clients. Propagated from BuiltinToolDefinition.
+   */
+  annotations?: McpToolAnnotations;
+  /**
+   * When true, this tool is excluded from the MCP server's tool list but
+   * remains available to 1P Agent Builder chat via the builtin tool registry.
+   */
+  excludeFromMcp?: boolean;
 }
 
 export type InternalToolAvailabilityHandler = (

@@ -19,14 +19,32 @@ import type { EntityToAttach } from '../../../cases/attachments/entity';
 import { useEntityCaseTakeActionItems } from '../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
 
 export const ServicePanelFooter = ({
+  serviceName,
   identityFields,
   entity,
+  flyoutFooterProps,
+  panelProps,
 }: {
+  /**
+   * Display name the flyout was opened with. Used for the "Add to chat" attachment so it
+   * matches the identifier the risk-score tab's AiAssistantButton sends for the same entity,
+   * rather than a value derived from `identityFields`.
+   */
+  serviceName: string;
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
+  /**
+   * Overrides forwarded to the outer `EuiFlyoutFooter` (e.g. `css` for compact spacing in the EUI
+   * system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutFooterProps?: React.ComponentProps<typeof EuiFlyoutFooter>;
+  /**
+   * Overrides for the inner `EuiPanel` (e.g. `{ paddingSize: 'none' }`). Legacy callers omit this.
+   */
+  panelProps?: React.ComponentProps<typeof EuiPanel>;
 }) => {
-  const serviceName = useMemo(
+  const identityServiceName = useMemo(
     () =>
       identityFields[EntityIdentifierFields.serviceName] || Object.values(identityFields)[0] || '',
     [identityFields]
@@ -46,14 +64,20 @@ export const ServicePanelFooter = ({
   const riskScore = risk?.calculated_score_norm;
 
   const entityToAttach = useMemo<EntityToAttach>(
-    () => ({ id: entityStoreId ?? '', name: serviceName, type: 'service', riskLevel, riskScore }),
-    [entityStoreId, serviceName, riskLevel, riskScore]
+    () => ({
+      id: entityStoreId ?? '',
+      name: identityServiceName,
+      type: 'service',
+      riskLevel,
+      riskScore,
+    }),
+    [entityStoreId, identityServiceName, riskLevel, riskScore]
   );
   const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
 
   return (
-    <EuiFlyoutFooter>
-      <EuiPanel color="transparent">
+    <EuiFlyoutFooter {...flyoutFooterProps}>
+      <EuiPanel color="transparent" {...panelProps}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <AiAssistantButton
@@ -64,8 +88,8 @@ export const ServicePanelFooter = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeAction
-              isDisabled={!serviceName}
-              kqlQuery={euidEntityFilter ?? `service.name: "${serviceName}"`}
+              isDisabled={!identityServiceName}
+              kqlQuery={euidEntityFilter ?? `service.name: "${identityServiceName}"`}
               additionalItems={additionalItems}
             />
           </EuiFlexItem>

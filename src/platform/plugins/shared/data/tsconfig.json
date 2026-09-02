@@ -19,6 +19,7 @@
     "@kbn/scout",
     "@kbn/core-http-common",
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/core-user-storage-common",
     "@kbn/ui-actions-plugin",
     "@kbn/share-plugin",
@@ -51,7 +52,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/es-types",
     "@kbn/code-editor",
     "@kbn/core-test-helpers-model-versions",
@@ -75,7 +75,8 @@
     "@kbn/css-utils",
     "@kbn/shared-ux-utility",
     "@kbn/date-range-picker-presets-common",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,12 +1,37 @@
 {
   "security.put_role": {
     "data_autocomplete_rules": {
-      "cluster": [],
       "indices": [
         {
-          "field_security": {},
+          "field_security": {
+            "except": "",
+            "grant": ""
+          },
           "names": [],
-          "privileges": [],
+          "privileges": {
+            "__any_of": [
+              "all",
+              "auto_configure",
+              "create",
+              "create_doc",
+              "create_index",
+              "create_view",
+              "delete",
+              "delete_index",
+              "delete_view",
+              "index",
+              "maintenance",
+              "manage",
+              "manage_data_stream_lifecycle",
+              "manage_view",
+              "monitor",
+              "none",
+              "read",
+              "read_view_metadata",
+              "view_index_metadata",
+              "write"
+            ]
+          },
           "query": ""
         }
       ],
@@ -18,9 +43,7 @@
           "privileges": [],
           "query": ""
         }
-      ],
-      "run_as": [],
-      "metadata": {}
+      ]
     }
   }
 }

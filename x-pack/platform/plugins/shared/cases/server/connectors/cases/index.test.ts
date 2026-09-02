@@ -8,6 +8,7 @@
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
+import { CasesConnector } from './cases_connector';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DEFAULT_MAX_OPEN_CASES,
@@ -22,18 +23,60 @@ import { attackDiscoveryAlerts } from './attack_discovery/group_alerts.mock';
 import type { AttackDiscoveryExpandedAlert } from './attack_discovery';
 import { ATTACK_DISCOVERY_MAX_OPEN_CASES } from './attack_discovery';
 
+jest.mock('./cases_connector');
+
+const CasesConnectorMock = CasesConnector as jest.Mock;
+
 describe('getCasesConnectorType', () => {
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   let caseConnectorType: SubActionConnectorType<CasesConnectorConfig, CasesConnectorSecrets>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     caseConnectorType = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
+      isTemplatesEnabled: false,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
+  });
+
+  it('threads isTemplatesEnabled through to the CasesConnector', () => {
+    // @ts-expect-error: only the subset of params used by getService is provided
+    caseConnectorType.getService({});
+
+    expect(CasesConnectorMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        casesParams: expect.objectContaining({ isTemplatesEnabled: false }),
+      })
+    );
+  });
+
+  it('threads isTemplatesEnabled: true through to the CasesConnector when enabled', () => {
+    const caseConnectorTypeWithTemplatesEnabled = getCasesConnectorType({
+      getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
+      getUnsecuredSavedObjectsClient: jest.fn(),
+      getUiSettingsClient: jest.fn(),
+      getSpaceId: jest.fn(),
+      isCasesAttachmentsEnabled: false,
+      isTemplatesEnabled: true,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
+    });
+
+    // @ts-expect-error: only the subset of params used by getService is provided
+    caseConnectorTypeWithTemplatesEnabled.getService({});
+
+    expect(CasesConnectorMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        casesParams: expect.objectContaining({ isTemplatesEnabled: true }),
+      })
+    );
   });
 
   describe('getKibanaPrivileges', () => {
@@ -93,6 +136,7 @@ describe('getCasesConnectorType', () => {
         reopenClosedCases: false,
         timeWindow: '7d',
         templateId: null,
+        templateVersion: null,
         autoPushCase: null,
         maximumCasesToOpen: null,
         ...overrides,
@@ -198,6 +242,7 @@ describe('getCasesConnectorType', () => {
                 ],
               },
               "templateId": null,
+              "templateVersion": null,
               "timeWindow": "7d",
             },
           }
@@ -246,6 +291,7 @@ describe('getCasesConnectorType', () => {
                 ],
               },
               "templateId": null,
+              "templateVersion": null,
               "timeWindow": "7d",
             },
           }
@@ -294,6 +340,7 @@ describe('getCasesConnectorType', () => {
                 ],
               },
               "templateId": "template_key_1",
+              "templateVersion": null,
               "timeWindow": "7d",
             },
           }
@@ -340,6 +387,7 @@ describe('getCasesConnectorType', () => {
                 ],
               },
               "templateId": null,
+              "templateVersion": null,
               "timeWindow": "7d",
             },
           }
@@ -633,7 +681,7 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(
           ATTACK_DISCOVERY_MAX_OPEN_CASES
         );
-        expect(mockLogger.error).not.toBeCalled();
+        expect(mockLogger.error).not.toHaveBeenCalled();
       });
 
       it('correctly fallsback to general flow if alerts schema does not pass validation', () => {
@@ -650,7 +698,7 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
-        expect(mockLogger.error).toBeCalledWith(
+        expect(mockLogger.error).toHaveBeenCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: [0.kibana.alert.attack_discovery.alert_ids]: expected value of type [array] but got [undefined]'
         );
       });

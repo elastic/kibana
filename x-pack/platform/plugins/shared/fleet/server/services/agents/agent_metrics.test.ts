@@ -194,7 +194,7 @@ describe('fetchAndAssignAgentMetrics', () => {
     expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 
-  it('assigns the same metrics bucket to all agents sharing the same elastic.display.name', async () => {
+  it('assigns metrics only to the most-recently-enrolled agent when two share the same elastic.display.name', async () => {
     const esClient = {
       search: jest
         .fn()
@@ -213,16 +213,19 @@ describe('fetchAndAssignAgentMetrics', () => {
       {
         id: 'opamp-id-1',
         type: 'OPAMP',
+        enrolled_at: '2024-01-01T00:00:00.000Z',
         non_identifying_attributes: { 'elastic.display.name': 'shared-host' },
       },
       {
         id: 'opamp-id-2',
         type: 'OPAMP',
+        enrolled_at: '2024-01-02T00:00:00.000Z', // newer — wins the hostname
         non_identifying_attributes: { 'elastic.display.name': 'shared-host' },
       },
     ];
     const result = await fetchAndAssignAgentMetrics(esClient as any, agents as any);
-    expect(result[0].metrics).toEqual({ cpu_avg: 0.3, memory_size_byte_avg: 768 });
+    // Only the newer agent receives the shared-host metrics bucket
+    expect(result[0].metrics).toEqual({ cpu_avg: undefined, memory_size_byte_avg: undefined });
     expect(result[1].metrics).toEqual({ cpu_avg: 0.3, memory_size_byte_avg: 768 });
     // Only one unique instanceId should be queried
     const otelSearchCall = esClient.search.mock.calls[1][0];

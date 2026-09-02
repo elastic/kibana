@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 
 import { getPackages } from '@kbn/repo-packages';
-import globby from 'globby';
+import { globbyStream } from 'globby';
 import Piscina from 'piscina';
 
 import type { Task } from '../lib';
@@ -58,7 +58,7 @@ export const CopyLegacySource: Task = {
 
     const globbyOptions = { cwd: config.resolveFromRepo('.') };
     const promises = [];
-    for await (const source of globby.stream(select, globbyOptions)) {
+    for await (const source of globbyStream(select, globbyOptions)) {
       promises.push(piscina.run({ source }));
     }
     await Promise.all(promises);

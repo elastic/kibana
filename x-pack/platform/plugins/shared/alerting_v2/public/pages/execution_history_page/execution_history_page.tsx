@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -59,7 +59,12 @@ export const ExecutionHistoryPage = () => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
-  const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -77,12 +82,12 @@ export const ExecutionHistoryPage = () => {
   );
 
   return (
-    <>
+    <div data-test-subj="executionHistoryPage">
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'l' }}
+        badges={[experimentalBadge]}
+        spacing="bleed"
         tabs={tabs}
       />
       <EuiSpacer size="m" />
@@ -116,6 +121,7 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
-    </>
+      {confirmationModal}
+    </div>
   );
 };

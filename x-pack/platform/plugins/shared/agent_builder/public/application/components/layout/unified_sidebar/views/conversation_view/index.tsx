@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
+import type { DragStart, DragUpdate, DropResult } from '@hello-pangea/dnd';
 
 import {
   EuiButton,
+  EuiDragDropContext,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -17,11 +20,16 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
-import { agentBuilderDefaultAgentId, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AGENT_BUILDER_EVENT_TYPES,
+  AGENT_BUILDER_UI_EBT,
+} from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { appPaths } from '../../../../../utils/app_paths';
 import {
@@ -29,18 +37,22 @@ import {
   getAgentSettingsNavItems,
   getConversationIdFromPath,
 } from '../../../../../route_config';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { useRouteAccessConfig } from '../../../../../hooks/use_route_access_config';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_agent_id';
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
+import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
 import { ConversationList } from './conversation_list';
+import { PinnedConversationList } from './pinned_conversation_list';
 import { ConversationSearchModal } from '../../../../conversations/conversation_search_modal';
+import { DROPPABLE_IDS } from './droppable_ids';
 
 const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.customize', {
   defaultMessage: 'Customize',
@@ -62,6 +74,17 @@ const chatsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.chats
   defaultMessage: 'Chats',
 });
 
+const pinnedLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.pinned', {
+  defaultMessage: 'Pinned',
+});
+
+const pinnedListScrollRegionLabel = i18n.translate(
+  'xpack.agentBuilder.sidebar.conversation.pinnedListScrollRegion',
+  {
+    defaultMessage: 'Pinned conversation list',
+  }
+);
+
 const conversationListScrollRegionLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.conversationListScrollRegion',
   {
@@ -69,20 +92,103 @@ const conversationListScrollRegionLabel = i18n.translate(
   }
 );
 
+const pinnedSectionCss = css`
+  overflow: hidden;
+  max-block-size: 40%;
+`;
+
+const sectionLabelCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+`;
+
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
   const agentId = getAgentIdFromPath(pathname) ?? agentBuilderDefaultAgentId;
   const conversationId = getConversationIdFromPath(pathname);
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const validateAgentId = useValidateAgentId();
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
   const routeAccessConfig = useRouteAccessConfig();
 
-  const { conversations = [] } = useConversationList({ agentId });
-  const hasConversations = conversations.length > 0;
+  // Pinned and unpinned conversations are fetched via separate server-side filtered queries.
+  const {
+    conversations: pinnedConversations,
+    total: pinnedTotal,
+    hasNextPage: pinnedHasNextPage,
+    fetchNextPage: fetchNextPinnedPage,
+    isFetchingNextPage: isFetchingNextPinnedPage,
+  } = useConversationList({ agentId, pinned: true });
+  const { total: unpinnedTotal } = useConversationList({ agentId, pinned: false });
+  // Enable the Search button when any conversations exist across either list.
+  const hasConversations = unpinnedTotal > 0 || pinnedTotal > 0;
+
   const { removeAllErrors, removeError } = useStreamingContext();
+
+  const { markAsPinned, markAsUnpinned } = useConversationListMutations({
+    routeConversationId: conversationId,
+    agentId,
+  });
+
+  const [draggingFromId, setDraggingFromId] = useState<string | null>(null);
+  const [hoveredDroppableId, setHoveredDroppableId] = useState<string | null>(null);
+
+  const onDragStart = useCallback(({ source }: DragStart) => {
+    flushSync(() => setDraggingFromId(source.droppableId));
+  }, []);
+
+  const onDragUpdate = useCallback(({ destination }: DragUpdate) => {
+    setHoveredDroppableId(destination?.droppableId ?? null);
+  }, []);
+
+  const dropBackgrounds = useMemo(() => {
+    const bg = (id: string) =>
+      hoveredDroppableId === id
+        ? euiTheme.colors.backgroundLightPrimary
+        : draggingFromId !== null
+        ? euiTheme.colors.backgroundBasePrimary
+        : 'transparent';
+    return {
+      [DROPPABLE_IDS.PINNED]: bg(DROPPABLE_IDS.PINNED),
+      [DROPPABLE_IDS.CHATS]: bg(DROPPABLE_IDS.CHATS),
+    };
+  }, [hoveredDroppableId, draggingFromId, euiTheme]);
+
+  const onDragEnd = useCallback(
+    ({ draggableId, source, destination }: DropResult) => {
+      setDraggingFromId(null);
+      setHoveredDroppableId(null);
+      if (!destination) return;
+      if (source.droppableId === destination.droppableId) return;
+
+      if (
+        source.droppableId === DROPPABLE_IDS.CHATS &&
+        destination.droppableId === DROPPABLE_IDS.PINNED
+      ) {
+        markAsPinned(draggableId);
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+          element_kind: 'other',
+        });
+      } else if (
+        source.droppableId === DROPPABLE_IDS.PINNED &&
+        destination.droppableId === DROPPABLE_IDS.CHATS
+      ) {
+        markAsUnpinned(draggableId);
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION,
+          element_kind: 'other',
+        });
+      }
+    },
+    [analytics, markAsPinned, markAsUnpinned]
+  );
 
   const isNewConversationRoute =
     conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
@@ -96,13 +202,6 @@ export const ConversationSidebarView: React.FC = () => {
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  const sectionLabelCss = useMemo(
-    () => css`
-      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-    `,
-    [euiTheme]
-  );
-
   useEffect(() => {
     // Once agents have loaded, redirect to the last valid agent if the current agent ID
     // is not recognised — but only when there is no conversation ID in the URL (new
@@ -112,7 +211,12 @@ export const ConversationSidebarView: React.FC = () => {
     // We also check that lastAgentId itself is valid before redirecting: if local storage
     // holds a stale/invalid ID too, navigating to it would trigger this effect again and
     // cause an infinite redirect loop.
+
+    // Gate on isLastAgentIdReady so the redirect only fires with a validated lastAgentId
+    // (see useLastAgentId contract). Redirecting to the pre-ready value would send
+    // restricted users to their localStorage id and then bounce them via AgentRouteGuard.
     if (
+      isLastAgentIdReady &&
       isAgentsFetched &&
       !conversationId &&
       !validateAgentId(agentId) &&
@@ -121,6 +225,7 @@ export const ConversationSidebarView: React.FC = () => {
       navigateToAgentBuilderUrl(appPaths.agent.root({ agentId: lastAgentId }));
     }
   }, [
+    isLastAgentIdReady,
     isAgentsFetched,
     conversationId,
     agentId,
@@ -182,79 +287,117 @@ export const ConversationSidebarView: React.FC = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow className="eui-fullHeight">
-                  <EuiFlexGroup
-                    direction="column"
-                    gutterSize="none"
-                    responsive={false}
-                    className="eui-fullHeight"
+                  <EuiDragDropContext
+                    onDragEnd={onDragEnd}
+                    onDragStart={onDragStart}
+                    onDragUpdate={onDragUpdate}
                   >
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued" css={sectionLabelCss}>
-                        {chatsLabel}
-                      </EuiText>
-                      <EuiSpacer size="s" />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
-                        <EuiFlexItem grow>
-                          <EuiButton
-                            fullWidth
-                            iconType="plus"
-                            size="s"
-                            color="text"
-                            onClick={handlePressNewConversation}
-                            data-test-subj="agentBuilderSidebarNewConversationButton"
-                            {...getEbtProps({
-                              element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                              action:
-                                AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
-                            })}
-                          >
-                            {newLabel}
-                          </EuiButton>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow>
-                          <EuiButton
-                            fullWidth
-                            iconType="search"
-                            size="s"
-                            color="text"
-                            aria-label={searchChatsAriaLabel}
-                            onClick={() => setIsSearchModalOpen(true)}
-                            disabled={!hasConversations}
-                            data-test-subj="agentBuilderSidebarSearchChatsButton"
-                            {...getEbtProps({
-                              element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                              action:
-                                AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_SEARCH,
-                            })}
-                          >
-                            {searchLabel}
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiSpacer size="m" />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem
-                      grow
-                      tabIndex={0}
-                      role="region"
-                      aria-label={conversationListScrollRegionLabel}
-                      className="eui-yScroll"
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="none"
+                      responsive={false}
+                      className="eui-fullHeight"
                     >
-                      <ConversationList
-                        agentId={agentId}
-                        currentConversationId={conversationId}
-                        isNewConversationRoute={isNewConversationRoute}
-                        onItemClick={handleConversationItemClick}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                          {pinnedLabel}
+                        </EuiText>
+                        <EuiSpacer size="xs" />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        role="region"
+                        aria-label={pinnedListScrollRegionLabel}
+                        css={pinnedSectionCss}
+                      >
+                        <PinnedConversationList
+                          agentId={agentId}
+                          currentConversationId={conversationId}
+                          pinnedConversations={pinnedConversations}
+                          hasNextPage={pinnedHasNextPage}
+                          fetchNextPage={fetchNextPinnedPage}
+                          isFetchingNextPage={isFetchingNextPinnedPage}
+                          isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
+                          backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
+                          onItemClick={handleConversationItemClick}
+                          isDragging={draggingFromId !== null}
+                        />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiSpacer size="m" />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                          {chatsLabel}
+                        </EuiText>
+                        <EuiSpacer size="s" />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
+                          <EuiFlexItem grow>
+                            <EuiButton
+                              fullWidth
+                              iconType="plus"
+                              size="s"
+                              color="text"
+                              onClick={handlePressNewConversation}
+                              data-test-subj="agentBuilderSidebarNewConversationButton"
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                                action:
+                                  AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+                              })}
+                            >
+                              {newLabel}
+                            </EuiButton>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow>
+                            <EuiButton
+                              fullWidth
+                              iconType="magnify"
+                              size="s"
+                              color="text"
+                              aria-label={searchChatsAriaLabel}
+                              onClick={() => setIsSearchModalOpen(true)}
+                              disabled={!hasConversations}
+                              data-test-subj="agentBuilderSidebarSearchChatsButton"
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                                action:
+                                  AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_SEARCH,
+                              })}
+                            >
+                              {searchLabel}
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiSpacer size="m" />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem
+                        grow
+                        tabIndex={0}
+                        role="region"
+                        aria-label={conversationListScrollRegionLabel}
+                        className="eui-yScroll"
+                      >
+                        <ConversationList
+                          agentId={agentId}
+                          currentConversationId={conversationId}
+                          isNewConversationRoute={isNewConversationRoute}
+                          onItemClick={handleConversationItemClick}
+                          isDropDisabled={draggingFromId === DROPPABLE_IDS.CHATS}
+                          backgroundColor={dropBackgrounds[DROPPABLE_IDS.CHATS]}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiDragDropContext>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

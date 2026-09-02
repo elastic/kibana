@@ -18,6 +18,7 @@ export interface UnifiedDataTableRestorableState {
   selectedDocsMap: Record<SelectedDocId, boolean>;
   isFilterActive: boolean; // show only selected fields
   pageIndex: number;
+  scrolledToExpandedDocId?: string;
   inTableSearch?: InTableSearchRestorableState;
 
   // comparison mode

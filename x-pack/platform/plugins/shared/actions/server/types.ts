@@ -100,6 +100,7 @@ export interface ActionTypeExecutorOptions<
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  connectorVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -247,6 +248,10 @@ export interface ActionTypeCoreFields<
    */
   description?: string;
   /**
+   * When true, the connector type supports testing.
+   */
+  isTestable?: boolean;
+  /**
    * When true, the connector type is shown as technical preview in the UI.
    */
   isExperimental?: boolean;
@@ -320,6 +325,12 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId?: string;
   consumer?: string;
   source?: string;

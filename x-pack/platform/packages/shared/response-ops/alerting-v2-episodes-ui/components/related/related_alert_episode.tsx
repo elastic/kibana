@@ -8,18 +8,22 @@
 import React from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AlertEpisode } from '../../queries/episodes_query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
 import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
-import { getNonEmptyGroupingFields, parseEpisodeDataJson } from '../../utils/episode_grouping_data';
+import { getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
 
 export interface RelatedAlertEpisodeProps {
   episode: AlertEpisode;
   ruleName: string;
   groupingFields: string[];
+  /** Source data view used to format grouping values with their field's `fieldFormats` formatter. */
+  groupingDataView?: DataView;
   episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
   href: string;
@@ -34,6 +38,7 @@ export function RelatedAlertEpisode({
   episode,
   ruleName,
   groupingFields,
+  groupingDataView,
   episodeAction,
   groupAction,
   href,
@@ -43,7 +48,8 @@ export function RelatedAlertEpisode({
   const episodeId = episode['episode.id'];
   const episodeData = parseEpisodeDataJson(episode.episode_data);
   const showGroupingBadges =
-    groupingFields.length > 0 && getNonEmptyGroupingFields(groupingFields, episodeData).length > 0;
+    groupingFields.length > 0 &&
+    getNonEmptyGroupingFields(groupingFields, episodeData, groupingDataView).length > 0;
 
   return (
     <EuiCard
@@ -99,6 +105,7 @@ export function RelatedAlertEpisode({
             <AlertingEpisodeGroupingTags
               fields={groupingFields}
               data={episodeData}
+              dataView={groupingDataView}
               data-test-subj="relatedAlertEpisodeGroupingTags"
             />
           </EuiFlexItem>

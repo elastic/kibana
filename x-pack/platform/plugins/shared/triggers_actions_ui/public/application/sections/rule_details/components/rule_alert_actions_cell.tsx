@@ -14,6 +14,9 @@ import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-
 import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useCanModifyAlerts } from '../../alerts_page/hooks/use_can_modify_alerts';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const VIEW_DETAILS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.viewDetailsLabel',
@@ -38,6 +41,18 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
   const { rowIndex, alert, getAlertFormatter, openLinksInNewTab, alertDetailsNavigation } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const viewInAppUrl = useViewInAppUrl(alert, getAlertFormatter);
+  const canModifyAlerts = useCanModifyAlerts();
+
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const { authorizedToReadRuleForAlert } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes: [],
+  });
+  const canReadAlertRule = authorizedToReadRuleForAlert(alert);
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -68,9 +83,12 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
       onExpandedAlertIndexChange={onExpandedAlertIndexChange}
       alertDetailsNavigation={alertDetailsNavigation}
       resolveRulePagePath={(alertRuleId) =>
-        alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
+        canReadAlertRule && alertRuleId
+          ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}`
+          : null
       }
       {...defaultActionProps}
+      canModifyAlerts={canModifyAlerts}
     />,
   ];
 
@@ -80,7 +98,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
         <EuiToolTip content={VIEW_DETAILS} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="expand-event"
-            iconType="expand"
+            iconType="maximize"
             onClick={onExpandEvent}
             size="s"
             color="text"
@@ -115,7 +133,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />

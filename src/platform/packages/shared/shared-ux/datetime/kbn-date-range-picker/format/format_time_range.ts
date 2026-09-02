@@ -17,6 +17,7 @@ import {
   type LocaleGrammar,
 } from '../parse';
 import {
+  CHAINED_DATE_MATH_RE,
   DATE_RANGE_DISPLAY_DELIMITER,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_NO_YEAR,
@@ -178,6 +179,10 @@ function formatDateInstant(
     );
   }
 
+  if (isChainedDateMath(dateString)) {
+    return dateString;
+  }
+
   // For absolute dates, format using the date object
   if (date) {
     return formatAbsoluteInstant(date, dateFormat);
@@ -187,6 +192,13 @@ function formatDateInstant(
   return dateString;
 }
 
+/** True for chained date math like `now/y+3M`; not simple offsets or `now/d`. */
+function isChainedDateMath(value: string): boolean {
+  if (!value.startsWith('now') || !CHAINED_DATE_MATH_RE.test(value)) return false;
+  if (dateMathToRelativeParts(value)) return false;
+  return !/^now\/(?:ms|[smhdwMy])$/.test(value);
+}
+
 /**
  * Parses date math like "now-7m" or "now+3d/d" into parts.
  * Returns `null` for values that are not relative date math (absolute dates, bare `now`, rounding-only).
@@ -194,7 +206,7 @@ function formatDateInstant(
 export function dateMathToRelativeParts(
   value: string
 ): { count: number; unit: string; isFuture: boolean; round?: string } | null {
-  const match = value.match(/^now([+-])(\d+)([smhdwMy])(\/[smhdwMy])?$/);
+  const match = value.match(/^now([+-])(\d+)(ms|[smhdwMy])(\/[smhdwMy])?$/);
   if (!match) {
     return null;
   }

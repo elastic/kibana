@@ -46,45 +46,42 @@ const renderWithEui = (ui: React.ReactElement) => render(<EuiProvider>{ui}</EuiP
 
 describe('CorrelationsOverview (v2)', () => {
   it('renders the section with the correlations test id', () => {
-    renderWithEui(<CorrelationsOverview alertIds={['alert-1', 'alert-2']} />);
+    renderWithEui(
+      <CorrelationsOverview alertIds={['alert-1', 'alert-2']} onShowCorrelations={jest.fn()} />
+    );
 
     expect(screen.getByTestId(INSIGHTS_CORRELATIONS_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders the Related alerts label', () => {
-    renderWithEui(<CorrelationsOverview alertIds={['alert-1']} />);
+    renderWithEui(<CorrelationsOverview alertIds={['alert-1']} onShowCorrelations={jest.fn()} />);
 
     expect(screen.getByText('Related alerts')).toBeInTheDocument();
   });
 
   it('renders the related alerts count in a badge', () => {
-    renderWithEui(<CorrelationsOverview alertIds={['alert-1', 'alert-2']} />);
+    renderWithEui(
+      <CorrelationsOverview alertIds={['alert-1', 'alert-2']} onShowCorrelations={jest.fn()} />
+    );
 
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
   it('renders count of zero when alertIds is empty', () => {
-    renderWithEui(<CorrelationsOverview alertIds={[]} />);
+    renderWithEui(<CorrelationsOverview alertIds={[]} onShowCorrelations={jest.fn()} />);
 
     expect(screen.getByText('0')).toBeInTheDocument();
   });
 
   it('renders count matching the length of alertIds', () => {
-    renderWithEui(<CorrelationsOverview alertIds={['id-1', 'id-2', 'id-3']} />);
+    renderWithEui(
+      <CorrelationsOverview alertIds={['id-1', 'id-2', 'id-3']} onShowCorrelations={jest.fn()} />
+    );
 
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
-  it('renders the title as plain text when onShowCorrelations is not provided', () => {
-    renderWithEui(<CorrelationsOverview alertIds={['alert-1']} />);
-
-    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)).toBeInTheDocument();
-    expect(
-      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders the title as a link when onShowCorrelations is provided', () => {
+  it('renders the title as a link that invokes onShowCorrelations', () => {
     const onShowCorrelations = jest.fn();
     renderWithEui(
       <CorrelationsOverview alertIds={['alert-1']} onShowCorrelations={onShowCorrelations} />

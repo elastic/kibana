@@ -7,46 +7,43 @@
 
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 import type {
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
   StoreStatus,
 } from '../../../constants/entity_analytics';
 
-const ENTITY_STORE_V2_INSTALL_URL = '/api/security/entity_store/install';
-const ENTITY_STORE_V2_UNINSTALL_URL = '/api/security/entity_store/uninstall';
-const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
-const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
-const ENTITY_STORE_V2_STATUS_URL = '/api/security/entity_store/status';
+const ENTITY_STORE_INSTALL_URL = '/api/security/entity_store/install';
+const ENTITY_STORE_UNINSTALL_URL = '/api/security/entity_store/uninstall';
+const ENTITY_STORE_STATUS_URL = '/api/security/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
 const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
 
-const API_VERSIONS = {
-  public: {
-    v1: '2023-10-31',
-  },
-  internal: {
-    v1: '1',
-  },
-};
+export type IndexEntityStoreEntryOptions =
+  | { entityType?: 'host' }
+  | {
+      entityType: 'user';
+      hostId: string;
+      namespace: 'local';
+    };
 
 export interface EntityAnalyticsApiService {
   installEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
   uninstallEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
-  indexEntityStoreEntry: (entityId: string, hostName: string) => Promise<void>;
+  indexEntityStoreEntry: (
+    entityId: string,
+    entityName: string,
+    options?: IndexEntityStoreEntryOptions
+  ) => Promise<void>;
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
   initRiskEngine: () => Promise<void>;
   getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
   getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
-  getEntityStoreStatusV2: () => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatus: (
-    expectedStatus: StoreStatus,
-    timeoutMs?: number
-  ) => Promise<GetEntityStoreStatusResponse>;
-  waitForEntityStoreStatusV2: (
     expectedStatus: StoreStatus,
     timeoutMs?: number
   ) => Promise<GetEntityStoreStatusResponse>;
@@ -75,7 +72,7 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.installEntityStore',
         async () => {
-          const current = await service.getEntityStoreStatusV2();
+          const current = await service.getEntityStoreStatus();
           if (current.status === 'running') {
             return;
           }
@@ -86,14 +83,14 @@ export const getEntityAnalyticsApiService = ({
           const existingDataView = await kbnClient.request<{ data_view?: unknown }>({
             method: 'GET',
             path: `${basePath}/api/data_views/data_view/${dataViewId}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             ignoreErrors: [404],
           });
           if (!existingDataView?.data?.data_view) {
             await kbnClient.request({
               method: 'POST',
               path: `${basePath}/api/data_views/data_view`,
-              headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+              headers: PUBLIC_API_HEADERS,
               body: {
                 data_view: {
                   id: dataViewId,
@@ -106,13 +103,11 @@ export const getEntityAnalyticsApiService = ({
           }
           await kbnClient.request({
             method: 'POST',
-            path: `${basePath}${ENTITY_STORE_V2_INSTALL_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            path: `${basePath}${ENTITY_STORE_INSTALL_URL}`,
+            headers: PUBLIC_API_HEADERS,
             body: { entityTypes },
           });
-          await service.waitForEntityStoreStatusV2('running');
+          await service.waitForEntityStoreStatus('running');
         }
       );
     },
@@ -124,17 +119,21 @@ export const getEntityAnalyticsApiService = ({
         async () => {
           await kbnClient.request({
             method: 'POST',
-            path: `${basePath}${ENTITY_STORE_V2_UNINSTALL_URL}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
+            headers: PUBLIC_API_HEADERS,
             body: { entityTypes },
             ignoreErrors: [404],
           });
-          await service.waitForEntityStoreStatusV2('not_installed');
+          await service.waitForEntityStoreStatus('not_installed');
         }
       );
     },
 
-    indexEntityStoreEntry: async (entityId: string, hostName: string) => {
+    indexEntityStoreEntry: async (
+      entityId: string,
+      entityName: string,
+      options: IndexEntityStoreEntryOptions = {}
+    ) => {
       if (!esClient) {
         throw new Error('esClient is required to index entity store entries');
       }
@@ -143,12 +142,23 @@ export const getEntityAnalyticsApiService = ({
         'security.entityAnalytics.indexEntityStoreEntry',
         async () => {
           const alias = `entities-latest-${spaceId}`;
+          const entityType = options.entityType ?? 'host';
+          const entityFields =
+            options.entityType === 'user'
+              ? { user: { name: entityName }, host: { id: options.hostId } }
+              : { host: { name: entityName } };
+          const entityNamespace =
+            options.entityType === 'user' ? { namespace: options.namespace } : {};
           await esClient.index({
             index: alias,
             document: {
               '@timestamp': new Date().toISOString(),
-              entity: { id: entityId, EngineMetadata: { Type: 'host' } },
-              host: { name: hostName },
+              entity: {
+                id: entityId,
+                ...entityNamespace,
+                EngineMetadata: { Type: entityType },
+              },
+              ...entityFields,
             },
             refresh: true,
           });
@@ -161,13 +171,27 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.deleteEntityStoreEngines',
         async () => {
+          // The v2 status route returns 403 when the entity store v2 feature
+          // flag is disabled. In that case there is nothing to clean up, so
+          // short-circuit instead of polling forever. Use ignoreErrors so only
+          // a 403 is treated as "flag off"; any other error (5xx, network)
+          // still surfaces and fails the test.
+          const statusProbe = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
+            headers: PUBLIC_API_HEADERS,
+            ignoreErrors: [403],
+          });
+          if (statusProbe.status === 403) {
+            log.debug('Skipping entity store cleanup; feature flag disabled (403)');
+            return;
+          }
           await kbnClient.request({
-            method: 'DELETE',
-            path: `${basePath}${ENTITY_STORE_ENGINES_URL}`,
-            query: {
-              delete_data: 'true',
-            },
-            ignoreErrors: [404, 500],
+            method: 'POST',
+            path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
+            headers: PUBLIC_API_HEADERS,
+            body: {},
+            ignoreErrors: [403, 404, 500],
           });
           // Wait for cleanup to complete - ensure server state is fully cleaned up
           await service.waitForEntityStoreCleanup();
@@ -217,9 +241,7 @@ export const getEntityAnalyticsApiService = ({
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}${RISK_ENGINE_INIT_URL}`,
-          headers: {
-            'elastic-api-version': API_VERSIONS.internal.v1,
-          },
+          headers: INTERNAL_API_HEADERS,
           body: {},
         });
       });
@@ -233,9 +255,7 @@ export const getEntityAnalyticsApiService = ({
           const response = await kbnClient.request<RiskEngineStatusResponse>({
             method: 'GET',
             path: `${basePath}${RISK_ENGINE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.internal.v1,
-            },
+            headers: INTERNAL_API_HEADERS,
           });
           return response.data;
         }
@@ -250,26 +270,7 @@ export const getEntityAnalyticsApiService = ({
           const response = await kbnClient.request<GetEntityStoreStatusResponse>({
             method: 'GET',
             path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
-          });
-          return response.data;
-        }
-      );
-    },
-
-    getEntityStoreStatusV2: async () => {
-      return measurePerformanceAsync(
-        log,
-        'security.entityAnalytics.getEntityStoreStatusV2',
-        async () => {
-          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
-            method: 'GET',
-            path: `${basePath}${ENTITY_STORE_V2_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
           });
           return response.data;
         }
@@ -287,38 +288,6 @@ export const getEntityAnalyticsApiService = ({
           while (Date.now() - startTime < timeoutMs) {
             try {
               const status = await service.getEntityStoreStatus();
-              lastStatus = status;
-
-              if (status.status === expectedStatus) {
-                return status;
-              }
-            } catch (error) {
-              log.debug(`Error checking entity store status: ${error}`);
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-
-          throw new Error(
-            `Timeout waiting for entity store status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
-              lastStatus
-            )}`
-          );
-        }
-      );
-    },
-
-    waitForEntityStoreStatusV2: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
-      return measurePerformanceAsync(
-        log,
-        `security.entityAnalytics.waitForEntityStoreStatusV2 [${expectedStatus}]`,
-        async () => {
-          const startTime = Date.now();
-          let lastStatus: GetEntityStoreStatusResponse | undefined;
-
-          while (Date.now() - startTime < timeoutMs) {
-            try {
-              const status = await service.getEntityStoreStatusV2();
               lastStatus = status;
 
               if (status.status === expectedStatus) {

@@ -17,12 +17,16 @@ export const mainTranslations = {
       'Connect to external data sources and add specific datasets to query with ES|QL, just like your indexed data. No ingestion required.',
   }),
 
-  technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
-    defaultMessage: 'Technical Preview',
+  experimental: i18n.translate('xpack.dataFederation.experimental', {
+    defaultMessage: 'Experimental',
   }),
 
   docsLink: i18n.translate('xpack.dataFederation.docsLink', {
     defaultMessage: 'Learn more',
+  }),
+
+  quickstartLink: i18n.translate('xpack.dataFederation.quickstartLink', {
+    defaultMessage: 'Quickstart',
   }),
 
   columns: {
@@ -61,6 +65,13 @@ export const mainTranslations = {
         'xpack.dataFederation.table.deleteActionDescription',
         {
           defaultMessage: 'Delete data source',
+        }
+      ),
+      deleteActionHasDataSetsDescription: i18n.translate(
+        'xpack.dataFederation.table.deleteActionHasDataSetsDescription',
+        {
+          defaultMessage:
+            'To delete a data source, you must first delete all datasets that read from it.',
         }
       ),
       caption: i18n.translate('xpack.dataFederation.table.caption', {

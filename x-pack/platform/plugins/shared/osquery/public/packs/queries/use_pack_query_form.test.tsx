@@ -50,6 +50,14 @@ const makeBasePayload = (overrides: Partial<PackQueryFormData> = {}): PackQueryF
   ...overrides,
 });
 
+const makeSOPayload = (overrides: Partial<PackSOQueryFormData> = {}): PackSOQueryFormData => ({
+  id: 'test-query',
+  query: 'select * from processes;',
+  interval: '3600',
+  shards: {},
+  ...overrides,
+});
+
 // Render the hook and return the serializer closure.
 const getSerializer = (props: Parameters<typeof usePackQueryForm>[0]) => {
   const { result } = renderHook(() => usePackQueryForm(props));
@@ -58,6 +66,44 @@ const getSerializer = (props: Parameters<typeof usePackQueryForm>[0]) => {
 };
 
 describe('usePackQueryForm', () => {
+  describe('deserializer (defaultValues)', () => {
+    // Regression for elastic/kibana#277700: a legacy query (no schedule_type
+    // override) must seed its displayed schedule from its own interval, not
+    // the synthesized pack default, when the pack has no real pack-level
+    // schedule.
+    it('deserializes the schedule from the query own interval for a legacy non-override query', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ interval: '80' }),
+          packSchedule: {
+            schedule_type: 'interval',
+            interval: 3600,
+            // No hasExplicitSchedule — legacy pack, no real pack-level schedule.
+          },
+        })
+      );
+
+      expect(result.current.getValues('schedule')?.interval).toBe(80);
+    });
+
+    it('deserializes the schedule from the pack interval when the pack schedule is explicit', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ interval: '80' }),
+          packSchedule: {
+            schedule_type: 'interval',
+            interval: 3600,
+            hasExplicitSchedule: true,
+          },
+        })
+      );
+
+      expect(result.current.getValues('schedule')?.interval).toBe(3600);
+    });
+  });
+
   describe('serializer', () => {
     it('should strip schedule_type and interval from query when pack is rrule-scheduled and override is off', () => {
       const serialize = getSerializer({
@@ -230,6 +276,9 @@ describe('usePackQueryForm', () => {
         packSchedule: {
           schedule_type: 'interval' as const,
           interval: 3600,
+          // The pack SO genuinely persisted this interval schedule (not a
+          // legacy synthesized default) — inheritance-and-strip is intended.
+          hasExplicitSchedule: true,
         },
       });
 
@@ -250,6 +299,35 @@ describe('usePackQueryForm', () => {
       // ...but `timeout` is an independent per-query field (beats reads
       // `Query.timeout` in interval mode) and MUST be preserved.
       expect(result.timeout).toBe(90);
+    });
+
+    // Regression for elastic/kibana#277700: a legacy pack (pre-9.5, no real
+    // pack-level schedule) synthesizes an interval-mode packSchedule so the
+    // form has something to render. Unlike the explicit case above, this must
+    // NOT strip the query's own interval — doing so would turn the display
+    // bug into actual data loss on save.
+    it('should preserve interval for a non-override query when the pack schedule is a synthesized legacy default', () => {
+      const serialize = getSerializer({
+        uniqueQueryIds: [],
+        packSchedule: {
+          schedule_type: 'interval' as const,
+          interval: 3600,
+          // No `hasExplicitSchedule` — legacy pack, SO never persisted a
+          // pack-level schedule.
+        },
+      });
+
+      const payload = makeBasePayload({
+        interval: 80,
+        override_pack_schedule: false,
+        schedule: makeIntervalSchedule(80),
+      });
+
+      const result = serialize(payload) as PackSOQueryFormData;
+
+      expect(result.interval).toBe('80');
+      expect(result).not.toHaveProperty('schedule_type');
+      expect(result).not.toHaveProperty('rrule_schedule');
     });
 
     it('should emit rrule_schedule with RFC 3339 start_date when override is on with rrule mode', () => {
@@ -275,6 +353,76 @@ describe('usePackQueryForm', () => {
       const result = serialize(payload) as PackSOQueryFormData;
 
       expect(result.rrule_schedule?.start_date).toMatch(RFC3339_REGEX);
+    });
+  });
+
+  describe('deserializedSchedule', () => {
+    // Regression (#276903): must be a single memoized value, not two
+    // independent `deserializeSchedule` calls that can diverge.
+    const NOW = new Date('2026-06-19T12:00:00.000Z');
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    // Missing `start_date` forces `deserializeSchedule`'s `new Date()` fallback.
+    const rruleWithoutStartDate = { rrule: 'FREQ=DAILY' } as unknown as {
+      rrule: string;
+      start_date: string;
+    };
+
+    it('matches the schedule seeded onto defaultValues.schedule when the query has no explicit override', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: rruleWithoutStartDate,
+          },
+        })
+      );
+
+      expect(result.current.deserializedSchedule).toEqual(result.current.getValues('schedule'));
+    });
+
+    it('matches the schedule seeded onto defaultValues.schedule for an existing per-query override', () => {
+      const defaultValue = makeBasePayload({
+        schedule_type: 'rrule' as const,
+        rrule_schedule: rruleWithoutStartDate,
+      }) as unknown as PackSOQueryFormData;
+
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue,
+        })
+      );
+
+      expect(result.current.deserializedSchedule).toEqual(result.current.getValues('schedule'));
+    });
+
+    it('re-renders with the exact same startDate rather than a freshly re-evaluated `new Date()`', () => {
+      const packSchedule = {
+        schedule_type: 'rrule' as const,
+        rrule_schedule: rruleWithoutStartDate,
+      };
+      const initialProps = { uniqueQueryIds: [] as string[], packSchedule };
+
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof usePackQueryForm>[0]) => usePackQueryForm(props),
+        { initialProps }
+      );
+
+      const firstStartDate = result.current.deserializedSchedule.startDate.getTime();
+
+      jest.setSystemTime(new Date(NOW.getTime() + 60_000));
+      rerender(initialProps);
+
+      expect(result.current.deserializedSchedule.startDate.getTime()).toBe(firstStartDate);
     });
   });
 });

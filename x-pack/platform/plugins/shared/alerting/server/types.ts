@@ -26,6 +26,7 @@ import type {
   ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,
@@ -167,7 +168,7 @@ export interface RuleExecutorOptions<
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
   services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
-  spaceId: string;
+  spaceId: SpaceId;
   startedAt: Date;
   startedAtOverridden: boolean;
   state: State;
@@ -205,6 +206,28 @@ export type ExecutorType<
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: Partial<Params>) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
+}
+
+/**
+ * Context passed to a rule type's params authorizer. Provides the request that
+ * initiated the write (so authorization can be resolved against the acting
+ * user's privileges) and, on updates, the rule's previous params (so the
+ * authorizer can restrict its checks to params that actually changed).
+ */
+export interface RuleTypeParamsAuthorizerContext<Params extends RuleTypeParams> {
+  request: KibanaRequest;
+  previousParams?: Params;
+}
+
+/**
+ * Optional, rule-type-defined authorization gate for privileged params.
+ *
+ * An async guard that authorizes the params against the acting user's privileges
+ * and throws when the user is not allowed to set them. It is invoked on rule write paths
+ * (create/update/bulk) after params have been validated.
+ */
+export interface RuleTypeParamsAuthorizer<Params extends RuleTypeParams> {
+  authorize: (params: Params, context: RuleTypeParamsAuthorizerContext<Params>) => Promise<void>;
 }
 
 export type AlertHit = Alert & {
@@ -330,6 +353,15 @@ export interface RuleType<
   validate: {
     params: RuleTypeParamsValidator<Params>;
   };
+  /**
+   * Optional, rule-type-defined authorization for privileged params. When
+   * provided, `authorize.params` is invoked on rule write paths after the
+   * params validator runs, and may throw to reject the write. Rule types with
+   * no privileged params simply omit this.
+   */
+  authorize?: {
+    params?: RuleTypeParamsAuthorizer<Params>;
+  };
   schemas?: {
     params?:
       | {
@@ -389,10 +421,10 @@ export interface RuleType<
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
   /**
-   * Task priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to
-   * normal priority.
+   * Task priority allowing rule type tasks to be claimed at a lower priority
+   * (`Deferrable` vs `Standard`), defaults to `TaskPriority.Standard`.
    */
-  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning;
+  priority?: TaskPriority.Standard | TaskPriority.Deferrable;
   /**
    * Indicates that the rule type is managed internally by a Kibana plugin.
    * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
@@ -476,7 +508,12 @@ export interface CpsLinkedProject {
 
 export interface CpsData {
   resolvedExpression?: string;
-  linkedProjects: CpsLinkedProject[];
+  /**
+   * Linked projects visible to the rule's execution principal. `undefined` means resolution
+   * failed (unknown scope), while an empty array means the resolved scope genuinely contains
+   * no linked projects.
+   */
+  linkedProjects?: CpsLinkedProject[];
 }
 
 export interface ConsumerExecutionMetrics {
@@ -517,6 +554,10 @@ export type {
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
 
-export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
+export type {
+  RawRuleTemplate,
+  AlertingV1RawRuleTemplate,
+  AlertingV2RawRuleTemplate,
+} from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

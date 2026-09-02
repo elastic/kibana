@@ -109,6 +109,18 @@ describe('DlmPhasesSelector', () => {
     );
   });
 
+  it('shows phase-boundary help text on frozen and delete fields when both are enabled', () => {
+    const { getByText } = renderSelector({
+      defaultValue: {
+        frozen: { enabled: true, value: '30', unit: 'd' },
+        delete: { enabled: true, value: '60', unit: 'd' },
+      },
+    });
+
+    expect(getByText('Must occur before the delete phase (60d).')).toBeInTheDocument();
+    expect(getByText('Must occur after the frozen phase (30d).')).toBeInTheDocument();
+  });
+
   it('disables frozen phase when Enterprise license is unavailable', () => {
     const { getByLabelText, getByRole, getByText, queryByText, queryByTestId } = renderSelector({
       hasEnterpriseLicense: false,
@@ -249,6 +261,57 @@ describe('DlmPhasesSelector', () => {
       expect(getByTestId('dlmPhasesSelectorFrozenPhaseCard')).toBeInTheDocument();
       expect(getByTestId('frozenDefaultRepositoryRequiredCallout')).toBeInTheDocument();
       expect(getByTestId('frozenCreateDefaultRepositoryButton')).toBeDisabled();
+    });
+  });
+
+  describe('maximum retention', () => {
+    it('shows the maximum retention help text when the delete phase is enabled', () => {
+      const { getByText } = renderSelector({
+        serverless: true,
+        maximumRetentionPeriod: '365d',
+        defaultValue: { delete: { enabled: true, value: '60', unit: 'd' } },
+      });
+
+      expect(getByText('Must occur before the maximum retention (365d).')).toBeInTheDocument();
+    });
+
+    it('flags an error and reports invalid when the delete phase exceeds the maximum', () => {
+      const { getByText, getByTestId, onChange } = renderSelector({
+        serverless: true,
+        maximumRetentionPeriod: '365d',
+        defaultValue: { delete: { enabled: true, value: '60', unit: 'd' } },
+      });
+
+      fireEvent.change(getByTestId('deleteDurationValue'), { target: { value: '400' } });
+
+      expect(getByText('Must occur before the maximum retention (365d).')).toBeInTheDocument();
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          frozen: { enabled: false, value: '30', unit: 'd' },
+          delete: { enabled: true, value: '400', unit: 'd' },
+        },
+        { frozen_after: undefined, data_retention: '400d' },
+        false
+      );
+    });
+
+    it('reports valid when the delete phase is within the maximum', () => {
+      const { getByTestId, onChange } = renderSelector({
+        serverless: true,
+        maximumRetentionPeriod: '365d',
+        defaultValue: { delete: { enabled: true, value: '60', unit: 'd' } },
+      });
+
+      fireEvent.change(getByTestId('deleteDurationValue'), { target: { value: '300' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          frozen: { enabled: false, value: '30', unit: 'd' },
+          delete: { enabled: true, value: '300', unit: 'd' },
+        },
+        { frozen_after: undefined, data_retention: '300d' },
+        true
+      );
     });
   });
 

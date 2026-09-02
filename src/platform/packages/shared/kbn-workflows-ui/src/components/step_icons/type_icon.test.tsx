@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   PublicStepDefinition,
   PublicTriggerDefinition,
 } from '@kbn/workflows-extensions/public';
+import { HardcodedIcons } from './hardcoded_icons';
 import { TypeIcon } from './type_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 import { useWorkflowsUiServices } from '../../context/workflows_ui_services';
@@ -32,15 +34,26 @@ beforeEach(() => {
 const iconType = (container: HTMLElement) =>
   container.querySelector('[data-euiicon-type]')?.getAttribute('data-euiicon-type');
 
+const dataUrlIcon = (container: HTMLElement) =>
+  container.querySelector('[data-test-subj="workflowTypeIconDataUrl"]');
+
+const hoverTooltipAnchor = async (container: HTMLElement) => {
+  const user = userEvent.setup();
+  await user.hover(container.querySelector('[tabindex="0"]') as HTMLElement);
+  return screen.findByRole('tooltip');
+};
+
 describe('TypeIcon', () => {
   describe('kind="trigger"', () => {
     it.each([
-      ['manual', 'play'],
-      ['alert', 'warning'],
-      ['scheduled', 'clock'],
+      ['manual', HardcodedIcons.manual],
+      ['alert', HardcodedIcons.alert],
+      ['scheduled', HardcodedIcons.scheduled],
     ])('renders the built-in icon for "%s"', (triggerType, expectedIcon) => {
       const { container } = render(<TypeIcon type={triggerType} kind="trigger" />);
-      expect(iconType(container)).toBe(expectedIcon);
+      expect(iconType(container) ?? dataUrlIcon(container)?.getAttribute('data-test-subj')).toBe(
+        expectedIcon.startsWith('data:') ? 'workflowTypeIconDataUrl' : expectedIcon
+      );
     });
 
     it('resolves a custom trigger icon from the workflows extensions registry', () => {
@@ -56,7 +69,21 @@ describe('TypeIcon', () => {
 
     it('falls back to "bolt" for an unknown trigger with no registered definition', () => {
       const { container } = render(<TypeIcon type="custom-trigger" kind="trigger" />);
-      expect(iconType(container)).toBe('bolt');
+      expect(iconType(container) ?? dataUrlIcon(container)?.getAttribute('data-test-subj')).toBe(
+        HardcodedIcons.trigger.startsWith('data:')
+          ? 'workflowTypeIconDataUrl'
+          : HardcodedIcons.trigger
+      );
+    });
+
+    it('shows a capitalized display label in the tooltip for a known trigger type', async () => {
+      const { container } = render(<TypeIcon type="manual" kind="trigger" />);
+      expect(await hoverTooltipAnchor(container)).toHaveTextContent('Manual');
+    });
+
+    it('falls back to the raw type as the tooltip label for an unknown trigger type', async () => {
+      const { container } = render(<TypeIcon type="custom-trigger" kind="trigger" />);
+      expect(await hoverTooltipAnchor(container)).toHaveTextContent('custom-trigger');
     });
   });
 
@@ -98,6 +125,11 @@ describe('TypeIcon', () => {
     it('falls back to "plugs" for an unrecognized step type', () => {
       const { container } = render(<TypeIcon type="unknown_connector.doThing" kind="step" />);
       expect(iconType(container)).toBe('plugs');
+    });
+
+    it('shows the raw type as the tooltip label', async () => {
+      const { container } = render(<TypeIcon type="abuseipdb.checkIp" kind="step" />);
+      expect(await hoverTooltipAnchor(container)).toHaveTextContent('abuseipdb.checkIp');
     });
   });
 });

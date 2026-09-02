@@ -8,12 +8,25 @@
 import { useCallback } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
+import {
+  formatRelatedEntity,
+  formatOmittedRelatedEntityCounts,
+} from '../../../../../common/entity_analytics/lead_generation/format_related_entity';
 import type { HuntingLead } from './types';
+
+export const formatRelatedEntities = (lead: HuntingLead): string => {
+  if (lead.topRelatedEntities.length === 0) return 'None';
+  const lines = lead.topRelatedEntities.map((r) => `- ${formatRelatedEntity(r)}`).join('\n');
+  const omitted = formatOmittedRelatedEntityCounts(
+    lead.topRelatedEntities,
+    lead.relatedEntityCounts
+  );
+  return `${lines}${omitted ? `\n\n_${omitted} not shown._` : ''}`;
+};
 
 // This markdown is sent as an AI agent prompt and must remain in English
 // regardless of user locale — intentionally not using i18n here.
 const formatLeadAsMarkdown = (lead: HuntingLead): string => {
-  const entityList = lead.entities.map((e) => `- **${e.type}**: ${e.name}`).join('\n');
   const observationList = lead.observations
     .map((obs) => `- [${obs.severity}] ${obs.type}: ${obs.description}`)
     .join('\n');
@@ -27,14 +40,17 @@ const formatLeadAsMarkdown = (lead: HuntingLead): string => {
 ## Description
 ${lead.description}
 
-## Entities
-${entityList}
+## Entity
+**${lead.entity.type}**: ${lead.entity.name}
 
 ## Observations
 ${observationList}
 
 ## Tags
 ${lead.tags.join(', ')}
+
+## Related Entities
+${formatRelatedEntities(lead)}
 
 ## Recommended Investigation Prompts
 ${recommendations}`;

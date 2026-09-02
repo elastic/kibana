@@ -18,8 +18,10 @@ import {
   type GetEvaluationExperimentDatasetExamplesResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
 
@@ -40,6 +42,7 @@ const isValidScoreDocument = (source: unknown): source is EvaluationScoreDocumen
 export const registerGetExperimentDatasetExamplesRoute = ({
   router,
   logger,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -67,11 +70,12 @@ export const registerGetExperimentDatasetExamplesRoute = ({
           const { experimentId, datasetId } = request.params;
           const { execution_id: executionId } = request.query;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const filterId = executionId ?? experimentId;
           const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildDatasetExampleScoresQuery(datasetId, filterId, { filterField }),
+            query: buildDatasetExampleScoresQuery(datasetId, filterId, { filterField, spaceId }),
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });
@@ -106,6 +110,14 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             body: { examples },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get experiment dataset examples',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(`Failed to get experiment dataset examples: ${error}`);
           return response.customError({
             statusCode: 500,

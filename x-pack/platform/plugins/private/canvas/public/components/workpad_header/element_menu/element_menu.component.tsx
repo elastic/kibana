@@ -16,6 +16,7 @@ import { getId } from '../../../lib/get_id';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import type { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { useCanvasContextMenuTopBorderStyles } from '../../../lib/use_canvas_context_menu_top_border_styles';
 import { AssetManager } from '../../asset_manager';
 import type { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
@@ -121,6 +122,7 @@ export interface Props {
 }
 
 export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
+  const contextMenuTopBorderStyles = useCanvasContextMenuTopBorderStyles();
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
@@ -215,6 +217,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
           <EuiContextMenu
             initialPanelId={0}
             panels={flattenPanelTree(getPanelTree(closePopover))}
+            css={contextMenuTopBorderStyles}
           />
         )}
       </ToolbarPopover>

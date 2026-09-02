@@ -64,16 +64,21 @@ export const fetchMonitorRecentPings = async ({
   );
 };
 
+export interface LatestTestRunRequest {
+  monitorId: string;
+  locationLabel?: string;
+  remoteName?: string;
+}
+
 export const fetchLatestTestRun = async ({
   monitorId,
   locationLabel,
-}: {
-  monitorId: string;
-  locationLabel?: string;
-}): Promise<{ ping?: Ping }> => {
+  remoteName,
+}: LatestTestRunRequest): Promise<{ ping?: Ping }> => {
   return apiService.get<{ ping?: Ping }>(SYNTHETICS_API_URLS.LATEST_TEST_RUN, {
     monitorId,
     locationLabel,
+    ...(remoteName ? { remoteName } : {}),
     version: INITIAL_REST_VERSION,
   });
 };

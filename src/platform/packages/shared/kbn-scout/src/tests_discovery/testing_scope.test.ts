@@ -38,7 +38,7 @@ describe('isScoutTestsOnlyDiff', () => {
   it('returns true when every non-noise file is in a Scout test scope', () => {
     const files = [
       'pkg/test/scout/ui/tests/a.spec.ts',
-      'pkg/test/scout/ui/fixtures/page_objects/foo.ts',
+      'pkg/test/scout/ui/helpers/foo.ts',
       'pkg/README.md', // noise — ignored
     ];
     expect(isScoutTestsOnlyDiff(files)).toBe(true);
@@ -47,6 +47,41 @@ describe('isScoutTestsOnlyDiff', () => {
   it('returns false when at least one non-noise file is outside Scout scope', () => {
     const files = ['pkg/test/scout/ui/tests/a.spec.ts', 'pkg/public/foo.ts'];
     expect(isScoutTestsOnlyDiff(files)).toBe(false);
+  });
+
+  it('returns false for a fixtures-only diff (cross-plugin importable surface)', () => {
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/fixtures/page_objects/foo.ts'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/api/fixtures/params.ts'])).toBe(false);
+  });
+
+  it('returns false when a fixtures file is mixed with in-scope test files', () => {
+    const files = [
+      'pkg/test/scout/ui/tests/a.spec.ts',
+      'pkg/test/scout/ui/fixtures/page_objects/foo.ts',
+    ];
+    expect(isScoutTestsOnlyDiff(files)).toBe(false);
+  });
+
+  it('returns false for namespaced fixtures (both namespace placements)', () => {
+    // namespace nested under fixtures/
+    expect(
+      isScoutTestsOnlyDiff(['pkg/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts'])
+    ).toBe(false);
+    // namespace before the category
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/detection_engine/ui/fixtures/data.ts'])).toBe(
+      false
+    );
+  });
+
+  it('keeps non-fixtures scope files (helpers, configs) on the tests-only fast path', () => {
+    expect(
+      isScoutTestsOnlyDiff([
+        'pkg/test/scout/ui/helpers/foo.ts',
+        'pkg/test/scout/ui/constants.ts',
+        'pkg/test/scout/ui/playwright.config.ts',
+        'pkg/test/scout/ui/parallel.playwright.config.ts',
+      ])
+    ).toBe(true);
   });
 
   it('matches custom scout_<server> scopes', () => {

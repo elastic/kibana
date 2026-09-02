@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -23,13 +22,10 @@ import { useDataTableFilters } from '../../../../common/hooks/use_data_table_fil
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
-import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
-import { AttacksEventTypes } from '../../../../common/lib/telemetry';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
-import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
-import { AttackFlyoutWrapper } from '../../../../flyout_v2/attack/main/attack_flyout_wrapper';
-import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -63,6 +59,22 @@ import { useLocalStorage } from '../../../../common/components/local_storage';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const ATTACKS_TABLE_SORT_STORAGE_KEY = 'securitySolution:attacksTableSort';
+
+/**
+ * Scoped override: EUI's accordion button applies `text-decoration: underline` to its
+ * entire content on hover/focus. We strip that off the button and re-apply it only to
+ * the attack title `<h5>` so the underline is limited to the attack name itself.
+ */
+const accordionTitleUnderlineCss = css`
+  .euiAccordion__button:hover,
+  .euiAccordion__button:focus {
+    text-decoration: none;
+  }
+  .euiAccordion__button:hover h5,
+  .euiAccordion__button:focus h5 {
+    text-decoration: underline;
+  }
+`;
 
 export interface TableSectionProps {
   /**
@@ -133,12 +145,9 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const { services } = useKibana();
-    const { telemetry, overlays } = services;
-    const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const store = useStore();
-    const history = useHistory();
+    const { telemetry } = useKibana().services;
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
 
     const [{ loading: userInfoLoading }] = useUserData();
 
@@ -177,25 +186,12 @@ export const TableSection = React.memo(
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
           if (enableNewFlyout) {
-            overlays.openSystemFlyout(
-              flyoutProviders({
-                services,
-                store,
-                history,
-                children: (
-                  <AttackFlyoutWrapper
-                    attackId={attack.id}
-                    indexName={dataView.getIndexPattern()}
-                    onAttackUpdated={() => {}}
-                  />
-                ),
-              }),
-              {
-                ...defaultFlyoutProperties,
-                historyKey: documentFlyoutHistoryKey,
-                session: 'start',
-              }
-            );
+            openAttackFlyout({
+              attackId: attack.id,
+              indexName: dataView.getIndexPattern(),
+              origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
+              attackTitle: attack.title,
+            });
           } else {
             openFlyout({
               right: {
@@ -213,18 +209,7 @@ export const TableSection = React.memo(
           });
         }
       },
-      [
-        dataView,
-        defaultFlyoutProperties,
-        enableNewFlyout,
-        getAttack,
-        history,
-        openFlyout,
-        overlays,
-        services,
-        store,
-        telemetry,
-      ]
+      [dataView, enableNewFlyout, getAttack, openAttackFlyout, openFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
@@ -360,7 +345,7 @@ export const TableSection = React.memo(
     const dslFilter = useMemo(() => dsl.isNotAttack(), []);
 
     return (
-      <div data-test-subj={TABLE_SECTION_TEST_ID}>
+      <div data-test-subj={TABLE_SECTION_TEST_ID} css={accordionTitleUnderlineCss}>
         <GroupedAlertsTable
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}

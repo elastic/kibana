@@ -8,14 +8,14 @@
  */
 
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
-export { getESQLTimeFieldFromQuery } from './utils/get_esql_time_field_from_query';
+export { getESQLTimeField } from './utils/get_time_field';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
@@ -46,6 +46,7 @@ export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
 export { classifyESQLSource, isSingleSource } from './utils/classify_esql_source';
@@ -76,6 +77,7 @@ export {
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
+export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
 export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
@@ -104,3 +106,5 @@ export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_
 
 // Callback functions
 export * from './utils/callbacks';
+
+export { ensureApproximationLicense } from './utils/ensure_approximation_license';

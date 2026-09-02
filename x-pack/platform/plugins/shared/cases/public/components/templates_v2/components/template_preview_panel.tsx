@@ -79,11 +79,16 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
       return null;
     }
     return {
-      name: template.name,
-      description: template.description,
-      tags: template.tags ?? undefined,
-      severity: template.severity as 'low' | 'medium' | 'high' | 'critical' | undefined,
-      category: template.category ?? undefined,
+      // Case-default title, falling back to the template name for this preview object (the field
+      // renderer below only reads `fields`, but `name` is a required case default).
+      name: template.caseDefaults?.title ?? template.name,
+      description: template.caseDefaults?.description,
+      tags: template.caseDefaults?.tags,
+      severity: template.caseDefaults?.severity,
+      // caseDefaults.category may be null on the summary type; the definition no longer allows null,
+      // so coerce an absent category to undefined ("no default").
+      category: template.caseDefaults?.category ?? undefined,
+      assignees: template.caseDefaults?.assignees,
       fields: template.definition.fields,
     };
   }, [template]);

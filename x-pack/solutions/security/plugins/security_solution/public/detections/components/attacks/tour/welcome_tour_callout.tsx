@@ -35,7 +35,7 @@ import * as i18n from './translations';
 const CALLOUT_IMAGE_SIZE = 80;
 
 /**
- * The "What's new in Attacks" welcome callout. Renders above the page header and
+ * The "The new home for Attack Discovery" welcome callout. Renders above the page header and
  * lets the user start the guided tour, open the docs, or dismiss the promotion.
  */
 const WelcomeTourCalloutComponent: React.FC = () => {

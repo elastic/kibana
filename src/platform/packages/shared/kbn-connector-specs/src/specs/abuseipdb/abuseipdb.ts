@@ -8,20 +8,23 @@
  */
 
 /**
- * Example: AbuseIPDB Connector
- *
- * This demonstrates a threat intelligence connector with:
- * - IP reputation checking
- * - Abuse reporting
- * - Geolocation and ISP data
- * - Bulk IP checking
- *
- * MVP implementation focusing on core IP reputation actions.
+ * AbuseIPDB connector - IP reputation check, report, CIDR bulk-check, and blacklist feed.
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
+
+const ABUSEIPDB_API = 'https://api.abuseipdb.com/api/v2';
+
+/** AbuseIPDB accepts IPv4 and IPv6 on check/report endpoints. */
+const IpAddressSchema = z.union([z.ipv4(), z.ipv6()]);
+
+const MaxAgeInDaysSchema = z.coerce.number().int().min(1).max(365);
+
+const MAX_BLACKLIST_LIMIT = 10_000;
+const MAX_REPORT_CATEGORIES = 30;
+const MAX_COMMENT_LENGTH = 1024;
 
 export const AbuseIPDBConnector: ConnectorSpec = {
   metadata: {
@@ -41,25 +44,24 @@ export const AbuseIPDBConnector: ConnectorSpec = {
   actions: {
     checkIp: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Check an IPv4 or IPv6 address against AbuseIPDB. Returns abuseConfidenceScore, totalReports, and lastReportedAt. Unknown or clean addresses return score 0 as data (do not treat as an error). Use getIpInfo when you need verbose geo/ISP/domain fields.',
       input: lazySchema(() =>
         z.object({
-          ipAddress: z.ipv4().describe('IP address to check'),
-          maxAgeInDays: z
-            .number()
-            .int()
-            .min(1)
-            .max(365)
-            .optional()
+          ipAddress: IpAddressSchema.describe(
+            'IPv4 or IPv6 address to check. Example: 8.8.8.8 or 2001:4860:4860::8888.'
+          ),
+          maxAgeInDays: MaxAgeInDaysSchema.optional()
             .default(90)
-            .describe('Maximum age of reports in days'),
+            .describe('Only consider reports from the last N days (1-365). Defaults to 90.'),
         })
       ),
-      handler: async (ctx, input) => {
-        const typedInput = input as { ipAddress: string; maxAgeInDays?: number };
-        const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
+      handler: async (ctx, input: { ipAddress: string; maxAgeInDays?: number }) => {
+        const response = await ctx.client.get(`${ABUSEIPDB_API}/check`, {
           params: {
-            ipAddress: typedInput.ipAddress,
-            maxAgeInDays: typedInput.maxAgeInDays || 90,
+            ipAddress: input.ipAddress,
+            maxAgeInDays: input.maxAgeInDays ?? 90,
           },
         });
         return {
@@ -69,27 +71,41 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           isp: response.data.data.isp,
           countryCode: response.data.data.countryCode,
           totalReports: response.data.data.totalReports,
+          lastReportedAt: response.data.data.lastReportedAt ?? null,
         };
       },
     },
 
     reportIp: {
       isTool: true,
+      scope: 'write',
+      description:
+        'Submit an abuse report for an IPv4 or IPv6 address. Requires one or more numeric category IDs (see AbuseIPDB category list). Returns the updated abuseConfidenceScore.',
       input: lazySchema(() =>
         z.object({
-          ip: z.ipv4().describe('IP address to report'),
-          categories: z.array(z.number().int()).min(1).describe('Abuse category IDs'),
-          comment: z.string().optional().describe('Additional details'),
+          ip: IpAddressSchema.describe('IPv4 or IPv6 address to report.'),
+          categories: z
+            .array(z.coerce.number().int().min(1).max(99))
+            .min(1)
+            .max(MAX_REPORT_CATEGORIES)
+            .describe(
+              'Abuse category IDs (integers). Example: [18, 22] for brute-force / SSH. At least one required.'
+            ),
+          comment: z
+            .string()
+            .min(1)
+            .max(MAX_COMMENT_LENGTH)
+            .optional()
+            .describe('Optional comment describing the observed abuse (max 1024 characters).'),
         })
       ),
-      handler: async (ctx, input) => {
-        const typedInput = input as { ip: string; categories: number[]; comment?: string };
+      handler: async (ctx, input: { ip: string; categories: number[]; comment?: string }) => {
         const response = await ctx.client.post(
-          'https://api.abuseipdb.com/api/v2/report',
+          `${ABUSEIPDB_API}/report`,
           new URLSearchParams({
-            ip: typedInput.ip,
-            categories: typedInput.categories.join(','),
-            ...(typedInput.comment && { comment: typedInput.comment }),
+            ip: input.ip,
+            categories: input.categories.join(','),
+            ...(input.comment !== undefined ? { comment: input.comment } : {}),
           }),
           {
             headers: {
@@ -106,16 +122,22 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getIpInfo: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Verbose IP enrichment via /check?verbose=true. Prefer this over checkIp when workflows need isPublic, isWhitelisted, domain, or fuller geo/ISP context. Uses the same maxAgeInDays default (90) as checkIp so totalReports and lastReportedAt stay comparable.',
       input: lazySchema(() =>
         z.object({
-          ipAddress: z.ipv4().describe('IP address to lookup'),
+          ipAddress: IpAddressSchema.describe('IPv4 or IPv6 address to look up.'),
+          maxAgeInDays: MaxAgeInDaysSchema.optional()
+            .default(90)
+            .describe('Only consider reports from the last N days (1-365). Defaults to 90.'),
         })
       ),
-      handler: async (ctx, input) => {
-        const typedInput = input as { ipAddress: string };
-        const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
+      handler: async (ctx, input: { ipAddress: string; maxAgeInDays?: number }) => {
+        const response = await ctx.client.get(`${ABUSEIPDB_API}/check`, {
           params: {
-            ipAddress: typedInput.ipAddress,
+            ipAddress: input.ipAddress,
+            maxAgeInDays: input.maxAgeInDays ?? 90,
             verbose: true,
           },
         });
@@ -129,31 +151,34 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           usageType: response.data.data.usageType,
           isp: response.data.data.isp,
           domain: response.data.data.domain,
+          totalReports: response.data.data.totalReports,
+          lastReportedAt: response.data.data.lastReportedAt ?? null,
         };
       },
     },
 
     bulkCheck: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Check a CIDR network block via /check-block. Returns network metadata and reported addresses within the block for subnet-level triage.',
       input: lazySchema(() =>
         z.object({
-          network: z.string().describe('Network in CIDR notation'),
-          maxAgeInDays: z
-            .number()
-            .int()
+          network: z
+            .string()
             .min(1)
-            .max(365)
-            .optional()
+            .max(64)
+            .describe('Network in CIDR notation. Example: 198.51.100.0/24.'),
+          maxAgeInDays: MaxAgeInDaysSchema.optional()
             .default(30)
-            .describe('Maximum age of reports in days'),
+            .describe('Only consider reports from the last N days (1-365). Defaults to 30.'),
         })
       ),
-      handler: async (ctx, input) => {
-        const typedInput = input as { network: string; maxAgeInDays?: number };
-        const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check-block', {
+      handler: async (ctx, input: { network: string; maxAgeInDays?: number }) => {
+        const response = await ctx.client.get(`${ABUSEIPDB_API}/check-block`, {
           params: {
-            network: typedInput.network,
-            maxAgeInDays: typedInput.maxAgeInDays || 30,
+            network: input.network,
+            maxAgeInDays: input.maxAgeInDays ?? 30,
           },
         });
         return {
@@ -163,27 +188,61 @@ export const AbuseIPDBConnector: ConnectorSpec = {
         };
       },
     },
+
+    getBlacklist: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Fetch the AbuseIPDB blacklist feed of most-reported IPs at or above a confidence threshold. Use for blocklist generation and enrichment feeds. Prefer confidenceMinimum 75-100 for denial-of-service style blocking.',
+      input: lazySchema(() =>
+        z.object({
+          confidenceMinimum: z.coerce
+            .number()
+            .int()
+            .min(25)
+            .max(100)
+            .optional()
+            .default(100)
+            .describe(
+              'Minimum abuse confidence score (25-100). Defaults to 100. AbuseIPDB recommends 75-100 for most deny-list uses.'
+            ),
+          limit: z.coerce
+            .number()
+            .int()
+            .min(1)
+            .max(MAX_BLACKLIST_LIMIT)
+            .optional()
+            .default(10)
+            .describe(
+              `Maximum number of IPs to return (1-${MAX_BLACKLIST_LIMIT}). Defaults to 10 to keep workflow step outputs small; raise explicitly when you need a larger feed. AbuseIPDB may truncate further based on subscription tier.`
+            ),
+        })
+      ),
+      handler: async (ctx, input: { confidenceMinimum?: number; limit?: number }) => {
+        const response = await ctx.client.get(`${ABUSEIPDB_API}/blacklist`, {
+          params: {
+            confidenceMinimum: input.confidenceMinimum ?? 100,
+            limit: input.limit ?? 10,
+          },
+        });
+        return {
+          generatedAt: response.data.meta?.generatedAt ?? null,
+          ips: response.data.data ?? [],
+        };
+      },
+    },
   },
 
   test: {
     handler: async (ctx) => {
-      try {
-        await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
-          params: { ipAddress: '8.8.8.8' },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to AbuseIPDB API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get(`${ABUSEIPDB_API}/check`, {
+        params: { ipAddress: '8.8.8.8' },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.abuseipdb.test.description', {
       defaultMessage: 'Verifies AbuseIPDB API key',
     }),
+    enabled: true,
   },
 };

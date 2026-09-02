@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { FC } from 'react';
 import React from 'react';
 import { useFileUploadContext } from '../../use_file_upload';
@@ -18,9 +19,7 @@ export const ImportErrors: FC = () => {
       {uploadStatus.errors.map((error, index) => (
         <React.Fragment key={index}>
           <EuiSpacer size="m" />
-          <EuiCallOut title={error.title} color="danger" iconType="warning">
-            <p>{JSON.stringify(error)}</p>
-          </EuiCallOut>
+          <KbnDangerCallout title={error.title} text={JSON.stringify(error)} />
         </React.Fragment>
       ))}
     </>

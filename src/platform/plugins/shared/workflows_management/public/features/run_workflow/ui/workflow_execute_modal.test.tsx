@@ -161,6 +161,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -181,6 +182,7 @@ describe('WorkflowExecuteModal', () => {
             ...baseWorkflowDefinition,
             triggers: [{ type: 'alert' }],
           }}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -193,8 +195,8 @@ describe('WorkflowExecuteModal', () => {
       expect(queryByText('Event')).not.toBeInTheDocument();
     });
 
-    it('uses the test run title and still exposes the full trigger tab set', () => {
-      const { getByText } = renderWithProviders(
+    it('uses the test run title and hides historical without a workflow id', () => {
+      const { getByText, queryByText } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={true}
           definition={null}
@@ -208,7 +210,7 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Document')).toBeInTheDocument();
       expect(getByText('Event')).toBeInTheDocument();
       expect(getByText('Manual')).toBeInTheDocument();
-      expect(getByText('Historical')).toBeInTheDocument();
+      expect(queryByText('Historical')).not.toBeInTheDocument();
     });
 
     it('keeps the alert trigger enabled when RAC prefetch succeeds (no capability pre-check)', () => {
@@ -334,6 +336,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -365,6 +368,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -981,6 +985,30 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Historical trigger', () => {
+    it('does not render historical for unsaved test workflows', () => {
+      const { queryByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
+            } as WorkflowYaml
+          }
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(queryByText('Historical')).not.toBeInTheDocument();
+      expect(mockWorkflowExecuteHistoricalForm).not.toHaveBeenCalled();
+    });
+
     it('defaults to historical tab when initialExecutionId is provided', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
@@ -1023,6 +1051,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />

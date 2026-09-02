@@ -53,7 +53,7 @@ const ShareSelectComponent: React.FC<Props> = ({
     (title: string, icon: string) => (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
         </EuiFlexItem>
 
         <EuiFlexItem>{title}</EuiFlexItem>

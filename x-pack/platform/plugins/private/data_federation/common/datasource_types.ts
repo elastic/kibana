@@ -19,14 +19,44 @@ export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
 
 export type DataSource = S3DataSource | GCSDataSource | AzureDataSource;
 
-// When read back from ES, the secret fields below come redacted (value "::es_redacted::")
-// rather than in plain text, so routes can return them to the caller as-is.
+// When read back from ES, the secret fields below come redacted (value
+// ES_REDACTED_SECRET_VALUE) rather than in plain text, so routes can return them to the
+// caller as-is.
 export type DataSourceWithSecrets =
   | S3DataSourceWithSecrets
   | GCSDataSourceWithSecrets
   | AzureDataSourceWithSecrets;
 
+/** Sentinel value Elasticsearch substitutes for a secret field on GET. */
+export const ES_REDACTED_SECRET_VALUE = '::es_redacted::';
+
 export type DataSourceType = 's3' | 'gcs' | 'azure';
+
+/**
+ * The settings fields Elasticsearch stores as encrypted secrets, per data source type.
+ * On PUT these fields get merge semantics: omitting one keeps the stored value, an
+ * explicit `null` clears it, a supplied value replaces it. Every other settings field is
+ * plaintext and keeps full-replace semantics on PUT.
+ */
+export const SECRET_FIELDS_BY_TYPE: Record<DataSourceType, readonly string[]> = {
+  s3: ['access_key', 'secret_key'],
+  gcs: ['credentials'],
+  azure: ['connection_string', 'key', 'sas_token'],
+};
+
+/**
+ * Of `SECRET_FIELDS_BY_TYPE`, the subset the create/edit flyout actually exposes for each
+ * type. Azure's `connection_string` and `sas_token` are valid ES secret fields but the
+ * flyout only supports `key`-based auth, so those two never appear in submitted settings
+ * regardless of whether the stored data source has them set. On update, only fields in
+ * this list should be nulled when absent — the rest must be left untouched so editing an
+ * Azure source created outside the UI (e.g. via the API) can't wipe an auth method the UI
+ * doesn't manage.
+ */
+export const UI_MANAGED_SECRET_FIELDS_BY_TYPE: Record<DataSourceType, readonly string[]> = {
+  ...SECRET_FIELDS_BY_TYPE,
+  azure: ['key'],
+};
 
 /** All supported data source type values, for select components and validation. */
 export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = ['s3', 'gcs', 'azure'];
@@ -43,11 +73,11 @@ export const DATA_SOURCE_TYPES_TO_ICONS: Record<DataSourceType, string> = {
 } as const;
 
 export const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceType, string>> = {
-  // TODO
   // URI, glob pattern, table name, or SQL query that identifies the data (e.g. s3://logs-bucket/access/**/*.parquet).
   s3: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
-  gcs: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
-  azure: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
+  gcs: 'URI with path and glob pattern(e.g. gs://logs-bucket/access/**/*.parquet)',
+  azure:
+    'URI with path and glob pattern(e.g. https://account.blob.core.windows.net/logs-bucket/access/**/*.parquet)',
 } as const;
 
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;

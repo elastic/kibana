@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import moment from 'moment-timezone';
 import React from 'react';
 
 import type { TransformListRow } from '../../../../common';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import * as appDependencies from '../../../../app_dependencies';
 import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
@@ -22,6 +23,8 @@ import { useEnabledFeatures } from '../../../../serverless_context';
 jest.mock('../../../../hooks', () => ({
   useGetTransformStats: jest.fn(),
 }));
+
+jest.mock('../../../../app_dependencies');
 
 jest.mock('../../../../serverless_context', () => ({
   useEnabledFeatures: jest.fn(),
@@ -38,6 +41,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });
+    appDependencies.useAppDependencies().cps = undefined;
 
     // Set timezone to US/Eastern for consistent test results.
     moment.tz.setDefault('US/Eastern');
@@ -69,6 +73,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     expect(screen.getAllByText(item.id).length).toBeGreaterThan(0);
     expect(screen.getByText('source_index')).toBeInTheDocument();
     expect(screen.getByText('farequote-2019')).toBeInTheDocument();
+    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
     expect(screen.getByText('destination_index')).toBeInTheDocument();
     expect(screen.getAllByText('fq_date_histogram_1m_1441').length).toBeGreaterThan(0);
 
@@ -101,6 +106,117 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
 
     expect(screen.getByText('source_index')).toBeInTheDocument();
     expect(screen.getByText('source-index-1')).toBeInTheDocument();
+  });
+
+  test('displays project routing when configured', () => {
+    appDependencies.useAppDependencies().cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
+      },
+    } as any;
+    mockUseGetTransformStats.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformStats>);
+
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        source: {
+          ...transformListRow.config.source,
+          project_routing: '_alias:*',
+        },
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
+
+    expect(screen.getByText('project_routing')).toBeInTheDocument();
+    expect(screen.getByText('_alias:*')).toBeInTheDocument();
+  });
+
+  test('hides project routing when there are no linked projects', async () => {
+    const fetchProjects = jest.fn().mockResolvedValue({
+      origin: {
+        _id: 'origin-id',
+        _alias: 'local_project',
+        _organisation: 'org',
+        _type: 'security',
+      },
+      linkedProjects: [],
+    });
+    appDependencies.useAppDependencies().cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects,
+      },
+    } as any;
+    mockUseGetTransformStats.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformStats>);
+
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        source: {
+          ...transformListRow.config.source,
+          project_routing: '_alias:*',
+        },
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
+
+    await waitFor(() => {
+      expect(fetchProjects).toHaveBeenCalled();
+    });
+    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
+    expect(screen.queryByText('_alias:*')).not.toBeInTheDocument();
+  });
+
+  test('keeps project routing visible when linked project discovery fails', async () => {
+    const fetchProjects = jest.fn().mockRejectedValue(new Error('Project fetch failed'));
+    appDependencies.useAppDependencies().cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects,
+      },
+    } as any;
+    mockUseGetTransformStats.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformStats>);
+
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        source: {
+          ...transformListRow.config.source,
+          project_routing: '_alias:*',
+        },
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
+
+    await waitFor(() => {
+      expect(fetchProjects).toHaveBeenCalled();
+    });
+    expect(screen.getByText('project_routing')).toBeInTheDocument();
+    expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 
   test('displays source_index when index is an array', () => {
