@@ -22,8 +22,7 @@ export const registerCleanRoute = (router: IRouter) => {
       },
       validate: {
         body: schema.object({
-          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
-          types: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+          types: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 1000 }),
         }),
       },
     },
