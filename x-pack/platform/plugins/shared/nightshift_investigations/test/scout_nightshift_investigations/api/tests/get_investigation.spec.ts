@@ -53,7 +53,11 @@ apiTest.describe(
     });
 
     apiTest('returns 404 for a non-existent investigation id', async ({ apiClient }) => {
-      const response = await getInvestigation(apiClient, cookieHeader, 'non-existent-id');
+      const response = await getInvestigation(
+        apiClient,
+        cookieHeader,
+        uniqueId('missing-get-investigation')
+      );
       expect(response).toHaveStatusCode(404);
     });
 

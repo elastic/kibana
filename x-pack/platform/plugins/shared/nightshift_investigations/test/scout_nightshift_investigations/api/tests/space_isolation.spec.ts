@@ -16,13 +16,13 @@ import {
   seedInvestigation,
   deleteInvestigation,
   uniqueId,
+  seedTimeWindow,
 } from '../fixtures';
 
 const SPACE_ID = uniqueId('nightshift-inv-space');
 const TEST_ID = uniqueId('space-scoped-investigation');
 const CONTROL_ID = uniqueId('space-isolation-default');
-const SUITE_CREATED_RANGE =
-  'created_after=2024-07-01T00:00:00Z&created_before=2024-07-02T00:00:00Z';
+const times = seedTimeWindow(1);
 
 apiTest.describe(
   'investigations are isolated per space',
@@ -43,7 +43,7 @@ apiTest.describe(
         subject_type: 'alert',
         subject_id: 'alert-space',
         trigger_type: 'automatic',
-        created_at: '2024-07-01T10:00:00Z',
+        created_at: times.iso({ day: 0, hour: 10 }),
         summary: 'Space-scoped investigation.',
       });
     });
@@ -79,7 +79,10 @@ apiTest.describe(
     );
 
     apiTest('LIST in the custom space includes the investigation', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, { spaceId: SPACE_ID });
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        spaceId: SPACE_ID,
+        query: times.createdRange,
+      });
       expect(response).toHaveStatusCode(200);
 
       const ids = response.body.results.map(
@@ -97,11 +100,11 @@ apiTest.describe(
           subject_type: 'alert',
           subject_id: 'alert-default-space',
           trigger_type: 'automatic',
-          created_at: '2024-07-01T10:00:00Z',
+          created_at: times.iso({ day: 0, hour: 10 }),
         });
 
         const response = await listInvestigations(apiClient, cookieHeader, {
-          query: SUITE_CREATED_RANGE,
+          query: times.createdRange,
         });
         expect(response).toHaveStatusCode(200);
 

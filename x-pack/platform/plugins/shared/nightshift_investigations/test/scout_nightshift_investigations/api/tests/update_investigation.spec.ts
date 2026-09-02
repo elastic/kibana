@@ -57,10 +57,15 @@ apiTest.describe(
     });
 
     apiTest('returns 404 when the investigation does not exist', async ({ apiClient }) => {
-      const response = await updateInvestigation(apiClient, cookieHeader, 'non-existent-id', {
-        status: 'completed',
-        summary: 'All clear.',
-      });
+      const response = await updateInvestigation(
+        apiClient,
+        cookieHeader,
+        uniqueId('missing-update-investigation'),
+        {
+          status: 'completed',
+          summary: 'All clear.',
+        }
+      );
       expect(response).toHaveStatusCode(404);
     });
 

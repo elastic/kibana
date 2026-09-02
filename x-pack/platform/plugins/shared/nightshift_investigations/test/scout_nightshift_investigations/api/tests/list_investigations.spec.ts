@@ -15,6 +15,7 @@ import {
   seedInvestigation,
   deleteInvestigation,
   uniqueId,
+  seedTimeWindow,
 } from '../fixtures';
 
 apiTest.describe(
@@ -27,8 +28,7 @@ apiTest.describe(
       uniqueId('list-inv-3'),
       uniqueId('list-inv-4'),
     ];
-    const SEED_CREATED_RANGE =
-      'created_after=2024-06-01T00:00:00Z&created_before=2024-06-05T00:00:00Z';
+    const times = seedTimeWindow(4);
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ kbnClient, samlAuth }) => {
@@ -40,9 +40,9 @@ apiTest.describe(
         subject_type: 'alert',
         subject_id: 'alert-1',
         trigger_type: 'automatic',
-        created_at: '2024-06-01T10:00:00Z',
-        started_at: '2024-06-01T10:00:00Z',
-        completed_at: '2024-06-01T11:00:00Z',
+        created_at: times.iso({ day: 0, hour: 10 }),
+        started_at: times.iso({ day: 0, hour: 10 }),
+        completed_at: times.iso({ day: 0, hour: 11 }),
         summary: 'First investigation.',
         conclusion: 'Resolved.',
       });
@@ -52,8 +52,8 @@ apiTest.describe(
         subject_type: 'significant_event',
         subject_id: 'se-1',
         trigger_type: 'manual',
-        created_at: '2024-06-02T10:00:00Z',
-        started_at: '2024-06-02T10:00:00Z',
+        created_at: times.iso({ day: 1, hour: 10 }),
+        started_at: times.iso({ day: 1, hour: 10 }),
       });
       await seedInvestigation(kbnClient, {
         id: IDS[2],
@@ -61,9 +61,9 @@ apiTest.describe(
         subject_type: 'alert',
         subject_id: 'alert-2',
         trigger_type: 'automatic',
-        created_at: '2024-06-03T10:00:00Z',
-        started_at: '2024-06-03T10:00:00Z',
-        completed_at: '2024-06-03T10:30:00Z',
+        created_at: times.iso({ day: 2, hour: 10 }),
+        started_at: times.iso({ day: 2, hour: 10 }),
+        completed_at: times.iso({ day: 2, hour: 10, minute: 30 }),
         error: 'Agent timed out.',
       });
       await seedInvestigation(kbnClient, {
@@ -72,7 +72,7 @@ apiTest.describe(
         subject_type: 'alert',
         subject_id: 'alert-3',
         trigger_type: 'automatic',
-        created_at: '2024-06-04T10:00:00Z',
+        created_at: times.iso({ day: 3, hour: 10 }),
       });
     });
 
@@ -93,7 +93,7 @@ apiTest.describe(
 
     apiTest('returns seeded investigations', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: SEED_CREATED_RANGE,
+        query: times.createdRange,
       });
       expect(response).toHaveStatusCode(200);
 
@@ -107,7 +107,7 @@ apiTest.describe(
 
     apiTest('each result has list fields without structured output', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: SEED_CREATED_RANGE,
+        query: times.createdRange,
       });
       expect(response).toHaveStatusCode(200);
 
@@ -116,9 +116,9 @@ apiTest.describe(
       );
       expect(inv).toBeDefined();
       expect(inv.status).toBe('completed');
-      expect(inv.created_at).toBe('2024-06-01T10:00:00Z');
-      expect(inv.started_at).toBe('2024-06-01T10:00:00Z');
-      expect(inv.completed_at).toBe('2024-06-01T11:00:00Z');
+      expect(inv.created_at).toBe(times.iso({ day: 0, hour: 10 }));
+      expect(inv.started_at).toBe(times.iso({ day: 0, hour: 10 }));
+      expect(inv.completed_at).toBe(times.iso({ day: 0, hour: 11 }));
       expect(inv.subject).toBeUndefined();
       expect(inv.trigger_type).toBeUndefined();
       expect(inv.summary).toBeUndefined();
@@ -128,7 +128,7 @@ apiTest.describe(
 
     apiTest('filters by status', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: `statuses=running&${SEED_CREATED_RANGE}`,
+        query: `statuses=running&${times.createdRange}`,
       });
       expect(response).toHaveStatusCode(200);
 
@@ -144,7 +144,7 @@ apiTest.describe(
 
     apiTest('reports a pending investigation as created but not started', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: `statuses=pending&${SEED_CREATED_RANGE}`,
+        query: `statuses=pending&${times.createdRange}`,
       });
       expect(response).toHaveStatusCode(200);
 
@@ -152,13 +152,13 @@ apiTest.describe(
         (r: { investigation_id: string }) => r.investigation_id === IDS[3]
       );
       expect(inv).toBeDefined();
-      expect(inv.created_at).toBe('2024-06-04T10:00:00Z');
+      expect(inv.created_at).toBe(times.iso({ day: 3, hour: 10 }));
       expect(inv.started_at).toBeUndefined();
     });
 
     apiTest('filters by created_after and created_before', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'created_after=2024-06-02T00:00:00Z&created_before=2024-06-03T00:00:00Z',
+        query: `created_after=${times.iso({ day: 1 })}&created_before=${times.iso({ day: 2 })}`,
       });
       expect(response).toHaveStatusCode(200);
 
@@ -172,7 +172,7 @@ apiTest.describe(
 
     apiTest('matches a pending investigation on created_after only', async ({ apiClient }) => {
       const createdOnly = await listInvestigations(apiClient, cookieHeader, {
-        query: `created_after=2024-06-04T00:00:00Z&created_before=2024-06-05T00:00:00Z`,
+        query: `created_after=${times.iso({ day: 3 })}&created_before=${times.iso({ day: 4 })}`,
       });
       expect(createdOnly).toHaveStatusCode(200);
       expect(
@@ -180,7 +180,7 @@ apiTest.describe(
       ).toContain(IDS[3]);
 
       const startedOnly = await listInvestigations(apiClient, cookieHeader, {
-        query: `started_after=2024-06-01T00:00:00Z&${SEED_CREATED_RANGE}`,
+        query: `started_after=${times.iso({ day: 0 })}&${times.createdRange}`,
       });
       expect(startedOnly).toHaveStatusCode(200);
       const startedOnlyIds = startedOnly.body.results.map(
@@ -190,6 +190,25 @@ apiTest.describe(
       expect(startedOnlyIds).toContain(IDS[1]);
       expect(startedOnlyIds).toContain(IDS[2]);
       expect(startedOnlyIds).not.toContain(IDS[3]);
+    });
+
+    apiTest('filters and sorts by completed_at', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query:
+          `completed_after=${times.iso({ day: 0 })}&completed_before=${times.iso({ day: 3 })}` +
+          `&sort_field=completed_at&sort_order=asc&${times.createdRange}`,
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const ids = response.body.results.map(
+        (r: { investigation_id: string }) => r.investigation_id
+      );
+      expect(ids).not.toContain(IDS[1]);
+      expect(ids).not.toContain(IDS[3]);
+      expect(ids.filter((id: string) => id === IDS[0] || id === IDS[2])).toStrictEqual([
+        IDS[0],
+        IDS[2],
+      ]);
     });
 
     apiTest('returns 400 for a non-datetime created_after value', async ({ apiClient }) => {

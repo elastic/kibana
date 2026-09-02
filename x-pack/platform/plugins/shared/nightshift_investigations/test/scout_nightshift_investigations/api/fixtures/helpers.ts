@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { randomUUID } from 'crypto';
+import { randomInt, randomUUID } from 'crypto';
 import type { ApiClientFixture, ApiClientResponse, KbnClient } from '@kbn/scout';
 import { COMMON_HEADERS } from './constants';
 
@@ -18,6 +18,31 @@ const spacePath = (path: string, spaceId?: string): string =>
 
 /** A per-run id so parallel/repeated Scout runs against a shared deployment cannot collide. */
 export const uniqueId = (prefix: string): string => `${prefix}-${randomUUID()}`;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const ORIGIN_START_MS = Date.UTC(1990, 0, 1);
+const ORIGIN_SPAN_DAYS = 30 * 365;
+
+export interface SeedTimeWindow {
+  /** Builds an ISO timestamp offset from the window's random origin. */
+  iso: (offset: { day: number; hour?: number; minute?: number }) => string;
+  /** A `created_after`/`created_before` query string spanning the whole window. */
+  createdRange: string;
+}
+
+/**
+ * A per-run time window so list-query isolation doesn't depend on a shared fixed
+ * calendar date that other suites or interrupted runs could also seed into.
+ */
+export const seedTimeWindow = (dayCount = 4): SeedTimeWindow => {
+  const originMs = ORIGIN_START_MS + randomInt(ORIGIN_SPAN_DAYS) * DAY_MS;
+  const iso = ({ day, hour = 0, minute = 0 }: { day: number; hour?: number; minute?: number }) =>
+    new Date(originMs + day * DAY_MS + hour * 3_600_000 + minute * 60_000).toISOString();
+  return {
+    iso,
+    createdRange: `created_after=${iso({ day: 0 })}&created_before=${iso({ day: dayCount })}`,
+  };
+};
 
 export interface InvestigationRequestOptions {
   spaceId?: string;

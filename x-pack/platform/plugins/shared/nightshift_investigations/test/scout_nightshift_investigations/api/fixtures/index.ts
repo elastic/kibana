@@ -20,4 +20,6 @@ export {
   updateInvestigation,
   ensureInvestigation,
   uniqueId,
+  seedTimeWindow,
 } from './helpers';
+export type { SeedTimeWindow } from './helpers';

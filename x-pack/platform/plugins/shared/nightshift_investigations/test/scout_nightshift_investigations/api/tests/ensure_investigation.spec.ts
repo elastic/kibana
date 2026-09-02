@@ -65,7 +65,11 @@ apiTest.describe(
     apiTest(
       'returns 404 when no investigation record and no matching workflow execution exist',
       async ({ apiClient }) => {
-        const response = await ensureInvestigation(apiClient, cookieHeader, 'non-existent-id');
+        const response = await ensureInvestigation(
+          apiClient,
+          cookieHeader,
+          uniqueId('missing-ensure-investigation')
+        );
         expect(response).toHaveStatusCode(404);
       }
     );
