@@ -14,7 +14,9 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import {
+  generateVisualizationEsql
+} from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';

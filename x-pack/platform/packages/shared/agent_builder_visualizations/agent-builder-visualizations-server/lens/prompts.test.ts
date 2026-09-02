@@ -34,8 +34,10 @@ describe('createGenerateConfigPrompt', () => {
   });
 
   it('falls back to query-text inference when no executed columns are available', () => {
-    expect(systemText()).toContain(
+    const text = systemText();
+    expect(text).toContain(
       'No column information is available; infer fields from the ES|QL query: FROM logs-* | STATS count = COUNT(*) BY status'
     );
+    expect(text).not.toContain('<columns>');
   });
 });

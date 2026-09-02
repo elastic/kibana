@@ -8,17 +8,10 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { formatColumnsBlock } from '../shared/format_columns';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { getColorPalettesPromptContent } from './color_palettes';
 import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
-
-const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined, query: string): string => {
-  if (!columns || columns.length === 0) {
-    return `No column information is available; infer fields from the ES|QL query: ${query}`;
-  }
-
-  return columns.map((column) => `- "${column.name}" (${column.type})`).join('\n');
-};
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -56,10 +49,7 @@ ${existingConfig}
 3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be one of the executed result columns.
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.
 
-Columns available in the data (reference these EXACT names):
-<columns>
-${formatColumns(columns, esqlQuery)}
-</columns>`,
+${formatColumnsBlock(columns, esqlQuery)}`,
     titleRulesPromptContent,
     numberFormatRulesPromptContent,
     getColorPalettesPromptContent(chartType),

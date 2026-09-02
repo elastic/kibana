@@ -24,6 +24,29 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('FROM logs-* | STATS count = COUNT(*) BY status');
   });
 
+  it('lists executed columns and falls back to the query when none are available', () => {
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*) BY status';
+    const [withColumns] = createAuthorVegaSpecPrompt({
+      nlQuery: 'a bar chart of counts by status',
+      esqlQuery,
+      columns: [
+        { name: 'count', type: 'long' },
+        { name: 'status', type: 'keyword' },
+      ],
+    });
+    expect(String((withColumns as [string, string])[1])).toContain('- "count" (long)');
+
+    const [withoutColumns] = createAuthorVegaSpecPrompt({
+      nlQuery: 'a bar chart of counts by status',
+      esqlQuery,
+    });
+    const withoutColumnsText = String((withoutColumns as [string, string])[1]);
+    expect(withoutColumnsText).toContain(
+      `No column information is available; infer fields from the ES|QL query: ${esqlQuery}`
+    );
+    expect(withoutColumnsText).not.toContain('<columns>');
+  });
+
   it('instructs Vega-Lite only (never raw Vega)', () => {
     const text = systemText('any chart');
     expect(text).toContain('Vega-Lite ONLY');
