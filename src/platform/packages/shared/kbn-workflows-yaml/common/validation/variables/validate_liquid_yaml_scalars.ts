@@ -28,14 +28,15 @@ import {
   isLiquidStringLiteral,
   resolveAssignChain,
 } from '../context/extract_template_local_context';
-
 import {
   getForeachCollectionDiagnostic,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
-import type { StepContextResolver } from '../context/step_context_resolver';
-import { createStepContextResolver } from '../context/step_context_resolver';
+import {
+  createStepContextResolver,
+  type StepContextResolver,
+} from '../context/step_context_resolver';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';

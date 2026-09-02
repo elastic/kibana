@@ -15,17 +15,11 @@ import { getContextSchemaForStep } from './get_context_for_path';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
 /**
- * Memoised access to the context schema of each step, so a single validation
- * pass builds each step context at most once.
- *
- * Share one instance across every validator that resolves references in the
- * same document: building a step context walks that step's predecessors, so two
- * validators with private caches do the whole traversal twice.
+ * Memoised step context schemas. Share one instance across the validators
+ * running over a document so each step context is built once.
  */
 export interface StepContextResolver {
-  /** Root context: consts, inputs, trigger event. No `steps.*`. */
   readonly baseSchema: typeof DynamicStepContextSchema;
-  /** Context visible to the named step, or the root context when omitted. */
   forStep(stepName?: string): typeof DynamicStepContextSchema;
 }
 
