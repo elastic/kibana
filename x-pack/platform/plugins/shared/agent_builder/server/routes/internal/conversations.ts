@@ -28,6 +28,7 @@ import {
   internalApiPath,
   MAX_CONVERSATION_SEARCH_PER_PAGE,
   MAX_RESULT_WINDOW,
+  CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
 } from '../../../common/constants';
 
 export function registerInternalConversationRoutes({
@@ -283,7 +284,7 @@ export function registerInternalConversationRoutes({
           {
             query: schema.string({
               minLength: 1,
-              maxLength: CONVERSATION_TITLE_MAX_LENGTH,
+              maxLength: CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
             }),
             agent_id: schema.maybe(
               schema.string({
