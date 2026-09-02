@@ -136,7 +136,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     if (plugins.cases) {
-      plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+      plugins.cases.attachmentFramework.registerAttachment(osqueryUnifiedAttachment);
     }
 
     return {

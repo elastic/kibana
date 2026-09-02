@@ -73,7 +73,7 @@ function useServiceIconCandidates({
     return [
       {
         key: 'service' as const,
-        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
+        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'vectorTriangle',
         title: i18n.translate('xpack.apm.serviceIcons.service', {
           defaultMessage: 'Service',
         }),
@@ -99,7 +99,7 @@ function useServiceIconCandidates({
       },
       {
         key: 'serverless' as const,
-        iconType: getServerlessIcon(icons?.serverlessType) || 'node',
+        iconType: getServerlessIcon(icons?.serverlessType) || 'vectorTriangle',
         title: getServerlessTitle(icons?.serverlessType),
         isVisible: !!icons?.serverlessType,
       },

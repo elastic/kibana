@@ -27,7 +27,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -79,7 +78,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -113,7 +111,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -159,7 +156,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -195,7 +191,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -229,7 +224,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -297,7 +291,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": "override-field",
@@ -331,7 +324,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 12,
     "syncField": null,
@@ -365,7 +357,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": true,
     "syncDelay": 180,
     "syncField": null,
@@ -400,7 +391,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -436,7 +426,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -470,7 +459,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -504,7 +492,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,

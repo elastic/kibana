@@ -217,7 +217,7 @@ describe('When a Console command is entered by the user', () => {
     await enterCommand('cmd6');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --foo, --bar'
+      'This command requires (only) one of the following arguments: --foo, --bar'
     );
   });
 
@@ -226,7 +226,7 @@ describe('When a Console command is entered by the user', () => {
     await enterCommand('cmd6 --foo 234 --bar 123');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --foo, --bar'
+      'This command requires (only) one of the following arguments: --foo, --bar'
     );
   });
 
@@ -293,6 +293,23 @@ describe('When a Console command is entered by the user', () => {
 
       expect(getByTestId('test-badArgument-message')).toHaveTextContent(
         executionTranslations.mustBeGreaterThanZero('foo')
+      );
+    });
+
+    it('should reject a value for an argument with `mustHaveValue=false`', async () => {
+      const cmd2 = commands.find(({ name }) => name === 'cmd2');
+
+      if (!cmd2) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      cmd2.args!.ext.mustHaveValue = false;
+
+      const { getByTestId } = render();
+      await enterCommand('cmd2 --file test --ext value');
+
+      expect(getByTestId('test-badArgument-message')).toHaveTextContent(
+        executionTranslations.argDoesNotAcceptAnyValue('ext')
       );
     });
   });
@@ -378,6 +395,201 @@ describe('When a Console command is entered by the user', () => {
 
       // Restore original component
       mockCommand.RenderComponent = originalRenderComponent;
+    });
+  });
+
+  describe('exclusiveOrGroupId validation', () => {
+    describe('when command has multiple exclusive or argument groups', () => {
+      beforeEach(() => {
+        commands.push({
+          name: 'cmd-multi-exclusive',
+          about: 'command with multiple exclusive or groups',
+          RenderComponent: commands[0].RenderComponent,
+          args: {
+            argA: {
+              about: 'arg a',
+              required: false,
+              allowMultiples: false,
+              exclusiveOrGroupId: 'group1',
+            },
+            argB: {
+              about: 'arg b',
+              required: false,
+              allowMultiples: false,
+              exclusiveOrGroupId: 'group1',
+            },
+            argC: {
+              about: 'arg c',
+              required: false,
+              allowMultiples: false,
+              exclusiveOrGroupId: 'group2',
+            },
+            argD: {
+              about: 'arg d',
+              required: false,
+              allowMultiples: false,
+              exclusiveOrGroupId: 'group2',
+            },
+          },
+        });
+      });
+
+      it('should show error when no arguments are provided', async () => {
+        render();
+        await enterCommand('cmd-multi-exclusive');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'This command requires (only) one of the following arguments: --argA, --argB, --argC, --argD'
+        );
+      });
+
+      it('should show error when only one group is satisfied but not the other', async () => {
+        render();
+        await enterCommand('cmd-multi-exclusive --argA');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'This command requires (only) one of the following arguments: --argC, --argD'
+        );
+      });
+
+      it('should show error when multiple arguments from the same group are provided', async () => {
+        render();
+        await enterCommand('cmd-multi-exclusive --argA --argB --argC');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'This command requires (only) one of the following arguments: --argA, --argB'
+        );
+      });
+
+      it('should succeed when exactly one argument from each group is provided', async () => {
+        render();
+        await enterCommand('cmd-multi-exclusive --argA --argC');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
+
+      it('should succeed when an alternate argument from each group is provided', async () => {
+        render();
+        await enterCommand('cmd-multi-exclusive --argB --argD');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
+    });
+  });
+
+  describe('conditionallyRequired validation', () => {
+    describe('when command has conditionally required allOf arguments', () => {
+      beforeEach(() => {
+        commands.push({
+          name: 'cmd-cond-allof',
+          about: 'command with conditionally required allOf args',
+          RenderComponent: commands[0].RenderComponent,
+          args: {
+            trigger: { about: 'trigger arg', required: false, allowMultiples: false },
+            depA: {
+              about: 'dep a',
+              required: false,
+              allowMultiples: false,
+              conditionallyRequired: ['trigger'],
+            },
+            depB: {
+              about: 'dep b',
+              required: false,
+              allowMultiples: false,
+              conditionallyRequired: ['trigger'],
+            },
+          },
+        });
+      });
+
+      it('should show error when trigger is used without any conditionally required args', async () => {
+        render();
+        await enterCommand('cmd-cond-allof --trigger');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'Use of --trigger requires the following additional arguments: --depA, --depB'
+        );
+      });
+
+      it('should show error when trigger is used with only some of the conditionally required args', async () => {
+        render();
+        await enterCommand('cmd-cond-allof --trigger --depA');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'Use of --trigger requires the following additional arguments: --depA, --depB'
+        );
+      });
+
+      it('should succeed when trigger is used with all conditionally required args', async () => {
+        render();
+        await enterCommand('cmd-cond-allof --trigger --depA --depB');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
+
+      it('should succeed when trigger is not used and conditionally required args are absent', async () => {
+        render();
+        await enterCommand('cmd-cond-allof --depA');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
+    });
+
+    describe('when command has conditionally required oneOf (exclusiveOr) arguments', () => {
+      beforeEach(() => {
+        commands.push({
+          name: 'cmd-cond-oneof',
+          about: 'command with conditionally required oneOf args',
+          RenderComponent: commands[0].RenderComponent,
+          args: {
+            trigger: { about: 'trigger arg', required: false, allowMultiples: false },
+            depX: {
+              about: 'dep x',
+              required: false,
+              allowMultiples: false,
+              conditionallyRequired: ['trigger'],
+              exclusiveOrGroupId: 'depGroup',
+            },
+            depY: {
+              about: 'dep y',
+              required: false,
+              allowMultiples: false,
+              conditionallyRequired: ['trigger'],
+              exclusiveOrGroupId: 'depGroup',
+            },
+          },
+        });
+      });
+
+      it('should show error when trigger is used without any argument from the exclusive or group', async () => {
+        render();
+        await enterCommand('cmd-cond-oneof --trigger');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'Argument --trigger requires (only) one of the following arguments: --depX, --depY'
+        );
+      });
+
+      it('should succeed when trigger is used with one argument from the exclusive or group', async () => {
+        render();
+        await enterCommand('cmd-cond-oneof --trigger --depX');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
+
+      it('should succeed when trigger is used with the other argument from the exclusive or group', async () => {
+        render();
+        await enterCommand('cmd-cond-oneof --trigger --depY');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
+
+      it('should succeed when trigger is not used and the exclusive or group is not required', async () => {
+        render();
+        await enterCommand('cmd-cond-oneof --depX');
+
+        expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+      });
     });
   });
 });

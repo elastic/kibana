@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { EuiSelectable, EuiSpacer } from '@elastic/eui';
+import { EuiSelectable, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InputHistoryItem } from '../../console_state/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -33,152 +33,163 @@ const NO_FILTERED_MATCHES = i18n.translate(
   { defaultMessage: 'No entries found matching the filter entered' }
 );
 
-export const CommandInputHistory = memo(() => {
-  const getTestId = useTestIdGenerator(useDataTestSubj());
-  const dispatch = useConsoleStateDispatch();
-  const inputHistory = useWithInputHistory();
-  const [priorInputState] = useState(useWithInputTextEntered());
-  const optionWasSelected = useRef(false);
+interface CommandInputHistoryProps {
+  /**
+   * The HTML `id` that will be added to the element that should have focus when this component
+   * is rendered. Useful when using it with `EuiPopover`'s `initialFocus` prop.
+   */
+  initialFocusId?: string;
+}
 
-  const selectableHistoryOptions = useMemo(() => {
-    return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
+export const CommandInputHistory = memo<CommandInputHistoryProps>(
+  ({ initialFocusId = htmlIdGenerator()() }) => {
+    const getTestId = useTestIdGenerator(useDataTestSubj());
+    const dispatch = useConsoleStateDispatch();
+    const inputHistory = useWithInputHistory();
+    const [priorInputState] = useState(useWithInputTextEntered());
+    const optionWasSelected = useRef(false);
+
+    const selectableHistoryOptions = useMemo(() => {
+      return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
+        return {
+          label: inputItem.display,
+          key: inputItem.id,
+          data: inputItem,
+        };
+      });
+    }, [inputHistory]);
+
+    const selectableListProps: EuiSelectableProps['listProps'] = useMemo(() => {
       return {
-        label: inputItem.display,
-        key: inputItem.id,
-        data: inputItem,
+        showIcons: false,
+        bordered: true,
       };
-    });
-  }, [inputHistory]);
+    }, []);
 
-  const selectableListProps: EuiSelectableProps['listProps'] = useMemo(() => {
-    return {
-      showIcons: false,
-      bordered: true,
-    };
-  }, []);
+    const selectableSearchProps = useMemo(() => {
+      return {
+        placeholder: FILTER_HISTORY_PLACEHOLDER,
+        compressed: true,
+        fullWidth: true,
+        id: initialFocusId,
+      };
+    }, [initialFocusId]);
 
-  const selectableSearchProps = useMemo(() => {
-    return {
-      placeholder: FILTER_HISTORY_PLACEHOLDER,
-      compressed: true,
-      fullWidth: true,
-    };
-  }, []);
-
-  const renderSelectionContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
-    (list, search) => {
-      return (
-        <>
-          {list}
-          <EuiSpacer size="s" />
-          {/*
+    const renderSelectionContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
+      (list, search) => {
+        return (
+          <>
+            {list}
+            <EuiSpacer size="s" />
+            {/*
             The empty DIV below helps with a strange behaviour around losing the focus from inside the
             popover's Portal. Normally, the `search` input will force the focus to behave as expected, but
             if no input history exists, we don't want to show the search bar. In that case, we insert this
             div with `tabindex` which seems to get around the issue.
           */}
-          {inputHistory.length > 0 ? search : <div tabIndex={-1} />}
-        </>
-      );
-    },
-    [inputHistory.length]
-  );
+            {inputHistory.length > 0 ? search : <div tabIndex={-1} />}
+          </>
+        );
+      },
+      [inputHistory.length]
+    );
 
-  const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
-    (items: EuiSelectableOption[]) => {
-      optionWasSelected.current = true;
+    const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
+      (items: EuiSelectableOption[]) => {
+        optionWasSelected.current = true;
 
-      const selected = items.find((item) => item.checked === 'on');
+        const selected = items.find((item) => item.checked === 'on');
 
-      dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
-      dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
-
-      if (selected) {
-        const { input: historyItemInput, argState: historyItemArgState } =
-          selected.data as InputHistoryItem;
-
-        dispatch({
-          type: 'updateInputTextEnteredState',
-          payload: {
-            leftOfCursorText: historyItemInput,
-            rightOfCursorText: '',
-            argState: historyItemArgState,
-          },
-        });
-      }
-
-      dispatch({ type: 'addFocusToKeyCapture' });
-    },
-    [dispatch]
-  );
-
-  const handleOnActiveOptionChange = useCallback<
-    NonNullable<EuiSelectableProps['onActiveOptionChange']>
-  >(
-    (option) => {
-      if (option) {
-        dispatch({
-          type: 'updateInputPlaceholderState',
-          payload: {
-            placeholder: (option.data as InputHistoryItem).input,
-          },
-        });
-      }
-    },
-    [dispatch]
-  );
-
-  const handleRenderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
-    (option) => {
-      return <UserCommandInput input={option.label} />;
-    },
-    []
-  );
-
-  // When first loaded, clear out the current text entered, and when this component
-  // unloads, if no option from the history was selected, then set the prior text
-  // entered back
-  useEffect(() => {
-    dispatch({
-      type: 'updateInputTextEnteredState',
-      payload: { leftOfCursorText: '', rightOfCursorText: '' },
-    });
-
-    return () => {
-      if (!optionWasSelected.current) {
-        dispatch({
-          type: 'updateInputTextEnteredState',
-          payload: {
-            leftOfCursorText: priorInputState.leftOfCursorText,
-            rightOfCursorText: priorInputState.rightOfCursorText,
-          },
-        });
+        dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
         dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
-      }
-    };
-  }, [dispatch, optionWasSelected, priorInputState]);
 
-  return (
-    <div>
-      {inputHistory.length > 0 && <CommandInputClearHistory />}
+        if (selected) {
+          const { input: historyItemInput, argState: historyItemArgState } =
+            selected.data as InputHistoryItem;
 
-      <EuiSelectable
-        options={selectableHistoryOptions}
-        onChange={handleSelectableOnChange}
-        onActiveOptionChange={handleOnActiveOptionChange}
-        renderOption={handleRenderOption}
-        listProps={selectableListProps}
-        singleSelection={true}
-        searchable={true}
-        searchProps={selectableSearchProps}
-        emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
-        noMatchesMessage={NO_FILTERED_MATCHES}
-        data-test-subj={getTestId('inputHistorySelector')}
-        data-console-input-history={true}
-      >
-        {renderSelectionContent}
-      </EuiSelectable>
-    </div>
-  );
-});
+          dispatch({
+            type: 'updateInputTextEnteredState',
+            payload: {
+              leftOfCursorText: historyItemInput,
+              rightOfCursorText: '',
+              argState: historyItemArgState,
+            },
+          });
+        }
+
+        dispatch({ type: 'addFocusToKeyCapture' });
+      },
+      [dispatch]
+    );
+
+    const handleOnActiveOptionChange = useCallback<
+      NonNullable<EuiSelectableProps['onActiveOptionChange']>
+    >(
+      (option) => {
+        if (option) {
+          dispatch({
+            type: 'updateInputPlaceholderState',
+            payload: {
+              placeholder: (option.data as InputHistoryItem).input,
+            },
+          });
+        }
+      },
+      [dispatch]
+    );
+
+    const handleRenderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
+      (option) => {
+        return <UserCommandInput input={option.label} />;
+      },
+      []
+    );
+
+    // When first loaded, clear out the current text entered, and when this component
+    // unloads, if no option from the history was selected, then set the prior text
+    // entered back
+    useEffect(() => {
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: { leftOfCursorText: '', rightOfCursorText: '' },
+      });
+
+      return () => {
+        if (!optionWasSelected.current) {
+          dispatch({
+            type: 'updateInputTextEnteredState',
+            payload: {
+              leftOfCursorText: priorInputState.leftOfCursorText,
+              rightOfCursorText: priorInputState.rightOfCursorText,
+            },
+          });
+          dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
+        }
+      };
+    }, [dispatch, optionWasSelected, priorInputState]);
+
+    return (
+      <div>
+        {inputHistory.length > 0 && <CommandInputClearHistory />}
+
+        <EuiSelectable
+          options={selectableHistoryOptions}
+          onChange={handleSelectableOnChange}
+          onActiveOptionChange={handleOnActiveOptionChange}
+          renderOption={handleRenderOption}
+          listProps={selectableListProps}
+          singleSelection={true}
+          searchable={true}
+          searchProps={selectableSearchProps}
+          emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
+          noMatchesMessage={NO_FILTERED_MATCHES}
+          data-test-subj={getTestId('inputHistorySelector')}
+          data-console-input-history={true}
+        >
+          {renderSelectionContent}
+        </EuiSelectable>
+      </div>
+    );
+  }
+);
 CommandInputHistory.displayName = 'CommandInputHistory';

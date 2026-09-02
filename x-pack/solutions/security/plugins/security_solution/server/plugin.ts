@@ -175,6 +175,10 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
 import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { SecuritySolutionEventBus } from './events/event_bus';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
+import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -214,9 +218,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
+  private securityEventBus?: SecuritySolutionEventBus;
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
   private defendCpsEnabled = false;
+  private platformCpsEnabled = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -332,8 +338,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
+    this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     this.defendCpsEnabled =
-      (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.defendCrossProjectSearch;
+      this.platformCpsEnabled && experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -537,7 +544,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
-    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
+    plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -653,6 +660,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
+
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
@@ -674,7 +685,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled,
+      this.securityEventBus
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -840,6 +853,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
@@ -879,6 +893,21 @@ export class Plugin implements ISecuritySolutionPlugin {
       void installSecurityAlertAnalysisWorkflowAndMarkReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
+      });
+    }
+
+    if (this.securityEventBus && plugins.workflowsExtensions) {
+      registerSecurityWorkflowEventBridge(
+        this.securityEventBus,
+        plugins.workflowsExtensions,
+        logger
+      );
+    }
+
+    if (this.securityEventBus && plugins.cases) {
+      const securityEventBus = this.securityEventBus;
+      plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
+        forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
       });
     }
 
@@ -1195,5 +1224,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
+    this.securityEventBus?.removeAllListeners();
   }
 }

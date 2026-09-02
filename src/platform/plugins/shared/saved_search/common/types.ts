@@ -17,7 +17,11 @@ import type {
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
 import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '../server';
 import type { VIEW_MODE } from '.';
@@ -72,6 +76,8 @@ export interface SavedSearchAttributes {
   breakdownField?: string;
   chartInterval?: string;
   density?: DataGridDensity;
+  documentsDisplayMode?: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabs: DiscoverSessionTabSchema[];
@@ -131,6 +137,8 @@ export interface DiscoverSessionTab {
   breakdownField?: string;
   chartInterval?: string;
   density?: DataGridDensity;
+  documentsDisplayMode?: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
 }

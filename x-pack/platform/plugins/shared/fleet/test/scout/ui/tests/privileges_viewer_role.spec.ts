@@ -68,12 +68,9 @@ test.describe('When the user has Viewer built-in role', { tag: '@local-stateful-
     await browserAuth.loginAsViewer();
     const { integrationHome } = pageObjects;
 
-    await integrationHome.navigateTo();
-    await integrationHome.waitForPageToLoad();
-
-    // Scroll to and click the Apache integration
-    await integrationHome.scrollToIntegration('apache');
-    await integrationHome.clickIntegrationCard('apache');
+    // Apache is now grouped into a collection tile, so navigate directly to its detail
+    // page instead of browsing and clicking through the collection.
+    await integrationHome.navigateToDetailPage('apache');
 
     // Verify the Add Integration button is disabled
     await expect(integrationHome.getAddIntegrationPolicyButton()).toBeDisabled();

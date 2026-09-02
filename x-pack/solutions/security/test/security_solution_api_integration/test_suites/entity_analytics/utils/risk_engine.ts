@@ -392,31 +392,6 @@ export const waitForRiskScoreForId = async ({
   return bestMatch;
 };
 
-/**
- *
- * It waits for the risk engine 'runAt' time to be bigger than the initial time.
- */
-export const waitForRiskEngineRun = async ({
-  supertest,
-  log,
-}: {
-  supertest: SuperTest.Agent;
-  log: ToolingLog;
-}): Promise<void> => {
-  const initialTime = new Date();
-  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
-
-  await waitFor(
-    async () => {
-      const { body } = await riskEngineRoutes.getStatus();
-      const runAtTime = body?.risk_engine_task_status?.runAt;
-      return !!runAtTime && new Date(runAtTime) > initialTime;
-    },
-    'waitForRiskEngineToRun',
-    log
-  );
-};
-
 export const getRiskEngineTasks = async ({
   es,
   index = ['.kibana_task_manager*'],
@@ -537,10 +512,12 @@ export const updateRiskEngineConfigSO = async ({
   }
 };
 
-const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
-  if (response.status !== statusCode) {
+const assertStatusCode = (statusCode: number | number[], response: SuperTest.Response) => {
+  const expected = Array.isArray(statusCode) ? statusCode : [statusCode];
+  if (!expected.includes(response.status)) {
     throw new Error(
-      `Expected status code ${statusCode}, but got ${response.statusCode} \n` + response.text
+      `Expected status code ${expected.join(' or ')}, but got ${response.statusCode} \n` +
+        response.text
     );
   }
 };
@@ -615,7 +592,7 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
       return response;
     },
 
-    scheduleNow: async (expectStatusCode: number = 200) => {
+    scheduleNow: async (expectStatusCode: number | number[] = 200) => {
       const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
         .set('kbn-xsrf', 'true')

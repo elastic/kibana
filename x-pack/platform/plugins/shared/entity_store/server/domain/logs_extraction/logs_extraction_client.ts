@@ -39,10 +39,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
-import {
-  resolveLatestEntitiesIndexName,
-  resolveUpdatesDataStreamName,
-} from '../asset_manager/resolve_entity_store_indices';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
@@ -60,7 +57,6 @@ import {
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import type { RemoteLogsExtractionClient } from './remote';
 import { EntityStoreNotRunningError } from '../errors';
 import type { LogExtractionUpdateParams } from '../../routes/constants';
 
@@ -106,7 +102,6 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  remoteLogsExtractionClient: RemoteLogsExtractionClient;
 }
 
 export class LogsExtractionClient {
@@ -116,7 +111,6 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  remoteLogsExtractionClient: RemoteLogsExtractionClient;
   constructor({
     logger,
     namespace,
@@ -124,7 +118,6 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
-    remoteLogsExtractionClient,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -132,7 +125,6 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.remoteLogsExtractionClient = remoteLogsExtractionClient;
   }
 
   private async getLogExtractionConfigAndState(
@@ -163,7 +155,6 @@ export class LogsExtractionClient {
         pages,
         indexPatterns,
         lastSearchTimestamp,
-        remoteError,
         logsCapDeferred,
         logsCapApplied,
         logsProcessed,
@@ -195,9 +186,7 @@ export class LogsExtractionClient {
       if (logsCapDeferred) {
         // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
         // do not overwrite it — only clear any stale error.
-        await this.engineDescriptorClient.update(type, {
-          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
-        });
+        await this.engineDescriptorClient.update(type, { error: null });
       } else {
         await this.engineDescriptorClient.update(type, {
           logExtractionState: {
@@ -205,7 +194,7 @@ export class LogsExtractionClient {
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
           },
-          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
+          error: null,
         });
       }
 
@@ -243,7 +232,6 @@ export class LogsExtractionClient {
     pages: number;
     indexPatterns: string[];
     lastSearchTimestamp: string;
-    remoteError?: Error;
     logsCapDeferred: boolean;
     logsCapApplied: boolean;
     logsProcessed: number;
@@ -253,43 +241,22 @@ export class LogsExtractionClient {
       config.excludedIndexPatterns
     );
 
-    const mainPromise = this.runMainPath({
+    const allIndexPatterns = [...localIndexPatterns, ...remoteIndexPatterns];
+
+    const mainResult = await this.runMainPath({
       type,
       config,
       engineState,
       opts,
       entityDefinition,
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
-      indexPatterns: localIndexPatterns,
+      indexPatterns: allIndexPatterns,
     });
-
-    const remoteStrategyIndexPatterns = this.remoteLogsExtractionClient.strategy.buildPatterns({
-      localIndexPatterns,
-      remoteIndexPatterns,
-    });
-    const remotePromise = this.remoteLogsExtractionClient.extractToUpdates({
-      type,
-      entityDefinition,
-      remoteIndexPatterns: remoteStrategyIndexPatterns,
-      docsLimit: config.docsLimit,
-      maxLogsPerPage: config.maxLogsPerPage,
-      lookbackPeriod: config.lookbackPeriod,
-      delay: config.delay,
-      frequency: config.frequency,
-      maxTimeWindowSize: config.maxTimeWindowSize,
-      maxLogsPerWindow: config.maxLogsPerWindow,
-      maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
-      signal: opts?.signal,
-      windowOverride: opts?.specificWindow,
-    });
-
-    const [mainResult, remoteResult] = await Promise.all([mainPromise, remotePromise]);
 
     return {
       ...mainResult,
-      isRemote: remoteStrategyIndexPatterns.length > 0,
-      indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
-      remoteError: remoteResult.error,
+      isRemote: remoteIndexPatterns.length > 0,
+      indexPatterns: allIndexPatterns,
     };
   }
 
@@ -821,6 +788,16 @@ export class LogsExtractionClient {
         remote: false,
       });
 
+      if (
+        esqlResponse._clusters &&
+        esqlResponse._clusters.successful !== esqlResponse._clusters.total
+      ) {
+        const { partial, skipped, successful, total, failed } = esqlResponse._clusters;
+        this.logger.warn(
+          `Cluster-level partial success during extraction for ${type} in ${this.namespace}: partial=${partial}, failed=${failed}, skipped=${skipped}, successful=${successful}, total=${total}`
+        );
+      }
+
       addedToTotalCount += esqlResponse.values.length;
       pagination = extractMainPaginationParams(esqlResponse, docsLimit);
       if (esqlResponse.values.length > 0) {
@@ -940,10 +917,10 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Returns local index patterns and remote patterns separately.
-   * Cluster-prefixed patterns (`cluster1:logs-*`) go to remote (CCS strategy).
-   * Unqualified patterns stay local; CPS strategy reuses local patterns for linked projects.
-   * Main extraction uses local patterns only (LOOKUP JOIN does not support remote).
+   * Returns local and remote index patterns. Both are passed to the main extraction path;
+   * coordinator-mode LOOKUP JOIN handles cross-cluster resolution for remote patterns.
+   * Cluster-prefixed patterns (`cluster1:logs-*`) are remote (CCS); unqualified patterns are
+   * local (CPS reuses local patterns for linked projects via the coordinator).
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
@@ -1001,15 +978,14 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Builds the full list of index patterns (updates, additional, security data view),
+   * Builds the full list of index patterns (additional, security data view),
    * including cluster-prefixed patterns from the data view, without alerts or
    * local/remote splitting applied.
    */
   private async getAllIndexPatternsIncludingRemote(
     additionalIndexPatterns: string[] = []
   ): Promise<string[]> {
-    const updatesDataStream = await resolveUpdatesDataStreamName(this.esClient, this.namespace);
-    const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
+    const indexPatterns: string[] = [...additionalIndexPatterns];
 
     try {
       const secSolDataView = await this.dataViewsService.get(

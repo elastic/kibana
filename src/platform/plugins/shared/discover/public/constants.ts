@@ -19,6 +19,4 @@ export const CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY = 'discover.cascadeLayoutEn
  */
 export const DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY = 'discover.dataTableJsonView';
 
-export { EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY } from '../common';
-
 export { IS_ESQL_DEFAULT_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
