@@ -253,20 +253,15 @@ export function initializeLayoutManager(
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
       const sameType = existingPanel?.type === type;
 
-      const child = children$.getValue()[uuid]; // preserve existing child API if it exists
-      if (child) {
-        if (sameType) {
-          child.applySerializedState({
-            ...(currentChildState[uuid] ? currentChildState[uuid] : {}),
-            ...serializedState,
-          });
-        } else {
-          replacePanel(uuid, { serializedState, panelType: type });
-        }
-      } else {
-        const updatedLayout = runPanelPlacementStrategy(
-          PlacementStrategy.findTopLeftMostOpenSpace,
-          {
+      const updatedLayout = existingPanel
+        ? {
+            ...layout$.value,
+            panels: {
+              ...layout$.value.panels,
+              [uuid]: { grid: existingPanel.grid, type },
+            },
+          }
+        : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
             currentLayout: layout$.value,
             newPanel: {
               uuid,
@@ -281,11 +276,13 @@ export function initializeLayoutManager(
              * place them close together by grouping them around the first embeddable.
              */
             beside: uuid === first.embeddableId ? undefined : first.embeddableId,
-          }
-        );
-        currentChildState[uuid] = serializedState;
-        layout$.next(updatedLayout);
-      }
+          });
+      currentChildState[uuid] = {
+        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
+        ...serializedState,
+      };
+
+      layout$.next(updatedLayout);
     }
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
@@ -394,7 +391,7 @@ export function initializeLayoutManager(
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
     const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
     if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
-
+    console.log({ existingGridData });
     removePanel(idToRemove);
     if (existingGridData) {
       const newPanel = await addNewPanel<DefaultEmbeddableApi>(
