@@ -6,7 +6,7 @@
  */
 
 export { useHighCriticalCount } from './use_high_critical_count';
-export { useNeedsAttentionEntries } from './use_needs_attention_entries';
+
 export { useEntitiesWithAlertsCount } from './use_hc_entities_with_open_alerts';
 export { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
 export { useHiddenRiskCount } from './use_hidden_risk_count';
