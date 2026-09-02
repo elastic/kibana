@@ -287,7 +287,7 @@ export class LensConfigBuilder {
     const converter = this.apiConvertersByChart[chartType];
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
     const { filters, query, references } = filtersAndQueryToLensState(
-      config as any,
+      config,
       attributes.references ?? []
     );
 
