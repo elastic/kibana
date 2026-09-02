@@ -93,28 +93,6 @@ steps:
         on-failure:
           continue: true
 
-      # Aggregate entity breakdown from the alert IDs already collected by the harvest.
-      # Querying by _id avoids re-applying the workflow_status/reason/timestamp filters.
-      # Columns: fp_count, host.name, user.name, source.ip, process.name.
-      - name: fetch_fp_entities
-        type: elasticsearch.esql.query
-        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
-        with:
-          query: |-
-            FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
-            | WHERE MV_CONTAINS("${{ foreach.item.5 }}", _id)
-            | STATS fp_count = COUNT(*) BY `host.name`, `user.name`, `source.ip`, `process.name`
-            | SORT fp_count DESC
-            | LIMIT 10
-        on-failure:
-          continue: true
-
-      # The investigate-rule skill is intentionally not used here. That skill is
-      # designed for interactive analyst sessions: it produces five-section prose
-      # output and explicitly never applies or offers to apply changes. The worker
-      # needs machine-actionable structured JSON from a schema fence, not prose.
-      # Entity context is pre-aggregated above and passed directly so the agent
-      # never needs to issue its own queries.
       - name: diagnose_rule
         type: ai.agent
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
@@ -122,27 +100,14 @@ steps:
         create-conversation: true
         with:
           message: |-
-            Diagnose why rule "{{ foreach.item.1 }}" (rule_id: {{ foreach.item.3 }})
-            is generating false positives and propose one structured tuning change.
-
-            Rule details:
-            - Type: {{ steps.fetch_rule.output.type }}
-            - Severity: {{ steps.fetch_rule.output.severity }}
-            - Risk score: {{ steps.fetch_rule.output.risk_score }}
-            {% if steps.fetch_rule.output.query %}- Query: {{ steps.fetch_rule.output.query }}{% endif %}
+            Use the [/investigate-rule](skill://investigate-rule) skill to investigate
+            rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}).
 
             {{ foreach.item.2 }} alerts from this rule were closed as false positives
             during the last {{ inputs.lookback_hours }} hours. These are confirmed
             analyst dispositions — not suspected noise.
 
-            {% if steps.fetch_fp_entities.output.values %}
-            Top entity combinations driving false positives
-            (columns: fp_count, host.name, user.name, source.ip, process.name):
-            {% for row in steps.fetch_fp_entities.output.values %}
-            - {{ row }}
-            {% endfor %}
-            {% endif %}
-
+            After investigating, return one structured tuning proposal using the schema.
             Choose exactly one change_type in this order of preference:
 
             exception  — The rule logic is correct but fires on a known-good entity.
