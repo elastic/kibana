@@ -9,19 +9,11 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useKibana } from '../../../common/lib/kibana';
-import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
-import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
-import { getEntitiesAlias, ENTITY_LATEST } from './constants';
-
-const HIGH_CRITICAL_SCORE_THRESHOLD = 70;
-
-const getQueryBody = (watchlistId?: string) => `
-| WHERE entity.EngineMetadata.Type IN ("user", "host", "service")
-  AND entity.risk.calculated_score_norm >= ${HIGH_CRITICAL_SCORE_THRESHOLD}${
-  watchlistId ? ` AND MV_CONTAINS(entity.attributes.watchlists, "${watchlistId}")` : ''
-}
-| STATS count = COUNT(*)`;
+import { useKibana } from '../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
+import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
+import { buildHcCountQueryBody } from '../queries/hc_count_query';
 
 export const useHighCriticalCount = ({
   spaceId,
@@ -36,12 +28,9 @@ export const useHighCriticalCount = ({
   const { filterQuery } = useGlobalFilterQuery();
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
-  const query = `FROM ${index} ${getQueryBody(watchlistId)}`;
+  const query = `FROM ${index} ${buildHcCountQueryBody(watchlistId)}`;
 
-  const {
-    data: riskEngineStatus,
-    isFetching: isStatusLoading,
-  } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
 
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';

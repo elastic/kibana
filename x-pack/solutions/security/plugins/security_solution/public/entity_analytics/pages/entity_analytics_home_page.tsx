@@ -55,8 +55,7 @@ import {
   AttentionSignalCard,
   AttentionSignalGrid,
 } from '../components/home/facelift/v1/attention_signal_card';
-import { useNeedsAttentionEntries } from '../components/home/use_needs_attention_entries';
-import { useHcEntitiesWithOpenAlerts } from '../components/home/use_hc_entities_with_open_alerts';
+import { useNeedsAttentionEntries, useHcEntitiesWithOpenAlerts } from '../components/home/hooks';
 import type { ActiveFilter, FaceliftIdentity } from '../components/home/facelift/v1/data';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';

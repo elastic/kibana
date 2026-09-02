@@ -11,31 +11,11 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useErrorToast } from '../../../common/hooks/use_error_toast';
-import { useKibana } from '../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
-import { getEntitiesAlias, ENTITY_LATEST } from './constants';
-
-// Open-alert index — space-unaware, all spaces share the default tier.
-const ALERTS_INDEX = '.alerts-security.alerts-default';
-
-// Derives entity.name and entity.EngineMetadata.Type from alert fields so the
-// LOOKUP JOIN keys match the entity-latest index schema.
-const buildQuery = (entityLatestIndex: string): string =>
-  [
-    `FROM ${ALERTS_INDEX}`,
-    `| WHERE kibana.alert.workflow_status == "open"`,
-    `| EVAL \`entity.name\` = COALESCE(user.name, host.name, service.name),`,
-    `       \`entity.EngineMetadata.Type\` = CASE(`,
-    `         user.name IS NOT NULL, "user",`,
-    `         host.name IS NOT NULL, "host",`,
-    `         "service"`,
-    `       )`,
-    `| WHERE \`entity.name\` IS NOT NULL`,
-    `| LOOKUP JOIN ${entityLatestIndex} ON \`entity.name\`, \`entity.EngineMetadata.Type\``,
-    `| WHERE entity.risk.calculated_level IN ("High", "Critical")`,
-    `| STATS value = COUNT_DISTINCT(entity.id)`,
-  ].join('\n');
+import { useErrorToast } from '../../../../common/hooks/use_error_toast';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
+import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
+import { buildHcOpenAlertsQuery } from '../queries/hc_open_alerts_query';
 
 export const useHcEntitiesWithOpenAlerts = ({
   spaceId,
@@ -47,7 +27,7 @@ export const useHcEntitiesWithOpenAlerts = ({
   const { data } = useKibana().services;
 
   const entityLatestIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
-  const query = useMemo(() => buildQuery(entityLatestIndex), [entityLatestIndex]);
+  const query = useMemo(() => buildHcOpenAlertsQuery(entityLatestIndex), [entityLatestIndex]);
 
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
 

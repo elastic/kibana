@@ -9,35 +9,20 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { EntityType } from '../../../../common/entity_analytics/types';
-import { useKibana } from '../../../common/lib/kibana';
-import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
-import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
-import { getEntitiesAlias, ENTITY_LATEST } from './constants';
-import type { AttentionEntry, FaceliftIdentity } from './facelift/v1/data';
-import { attentionReasonsFor } from './facelift/v1/data';
-
-const HIGH_CRITICAL_SCORE_THRESHOLD = 70;
-const MAX_ATTENTION_ENTRIES = 10;
+import { EntityType } from '../../../../../common/entity_analytics/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
+import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
+import type { AttentionEntry, FaceliftIdentity } from '../facelift/v1/data';
+import { attentionReasonsFor } from '../facelift/v1/data';
+import { buildAttentionEntriesQuery } from '../queries/attention_entries_query';
 
 const ENTITY_TYPE_MAP: Record<string, EntityType> = {
   user: EntityType.user,
   host: EntityType.host,
   service: EntityType.service,
 };
-
-const buildQuery = (index: string, watchlistId?: string): string =>
-  [
-    `FROM ${index}`,
-    `| WHERE entity.EngineMetadata.Type IN ("user", "host", "service")`,
-    `  AND entity.risk.calculated_score_norm >= ${HIGH_CRITICAL_SCORE_THRESHOLD}`,
-    ...(watchlistId
-      ? [`  AND MV_CONTAINS(entity.attributes.watchlists, "${watchlistId}")`]
-      : []),
-    `| SORT entity.risk.calculated_score_norm DESC`,
-    `| LIMIT ${MAX_ATTENTION_ENTRIES}`,
-    `| KEEP entity.id, entity.name, \`entity.EngineMetadata.Type\`, entity.risk.calculated_score_norm, asset.criticality`,
-  ].join('\n');
 
 export const useNeedsAttentionEntries = ({
   spaceId,
@@ -53,7 +38,7 @@ export const useNeedsAttentionEntries = ({
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
-  const query = useMemo(() => buildQuery(index, watchlistId), [index, watchlistId]);
+  const query = useMemo(() => buildAttentionEntriesQuery(index, watchlistId), [index, watchlistId]);
 
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
