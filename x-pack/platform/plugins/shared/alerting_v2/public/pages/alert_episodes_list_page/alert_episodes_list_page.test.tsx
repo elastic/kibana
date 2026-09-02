@@ -287,6 +287,7 @@ describe('AlertEpisodesListPage', () => {
       'rule.id',
       'duration',
       'tags',
+      'rule_tags',
       'assignees',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');

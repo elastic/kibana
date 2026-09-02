@@ -50,6 +50,7 @@ import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeRuleTagsCell,
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
@@ -88,7 +89,11 @@ const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): 
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ALERT_TAGS,
+  }),
+  rule_tags: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_RULE_TAGS,
   }),
   assignees: ({ column }) => ({
     ...column,
@@ -405,6 +410,9 @@ export const AlertEpisodesListPage = () => {
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
+      rule_tags: (props) => (
+        <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
+      ),
       'rule.id': (props) => (
         <EpisodeRuleCell
           {...props}
