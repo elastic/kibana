@@ -67,8 +67,7 @@ export const CentralizedActionPoliciesBanner = () => {
     <>
       <AnnouncementBanner
         data-test-subj="centralizedActionPoliciesBanner"
-        size="s"
-        color="plain"
+        size="m"
         headingElement="h3"
         title={TITLE}
         text={DESCRIPTION}
@@ -78,7 +77,6 @@ export const CentralizedActionPoliciesBanner = () => {
         actionProps={{
           primary: {
             children: CREATE_CTA_LABEL,
-            fill: true,
             href: createUrl,
             onClick: (e: React.MouseEvent) => {
               e.preventDefault();
