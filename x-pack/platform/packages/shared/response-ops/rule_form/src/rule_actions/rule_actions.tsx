@@ -89,7 +89,7 @@ export const RuleActions = () => {
           >
             <EuiIllustration
               type={taskAutomation}
-              alt=""
+              alt="Rule actions illustration"
               style={{ maxInlineSize: 180, marginInline: 'auto' }}
             />
             <EuiFlexItem>
