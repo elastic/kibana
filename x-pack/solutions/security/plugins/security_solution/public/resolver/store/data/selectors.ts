@@ -183,14 +183,20 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
 });
 
 /**
- * The origin node's collapsed lifecycle `@timestamp`, which is the process start time from the tree query that sorts
- * `@timestamp` ascending. This approximates the analyzed-event time for ancestor labels, but it is not the alert
- * document timestamp.
+ * The analyzed document's own `@timestamp`, used as the reference time for ancestor labels so that a node shows
+ * the process name it had when the analyzed event happened. This is sourced from the document that opened the
+ * Resolver, not from the tree query response, so it is invariant under date-picker changes. Falls back to the
+ * origin node's collapsed lifecycle `@timestamp` (its process-start time from the tree query, sorted `@timestamp`
+ * ascending) when the caller did not supply a timestamp, e.g. in older saved state.
  */
 export const originTimestamp: (state: DataState) => number | undefined = createSelector(
+  (state: DataState) => state.tree?.currentParameters?.databaseDocumentTimestamp,
   originID,
   graphableNodes,
-  function (currentOriginID, nodes) {
+  function (databaseDocumentTimestamp, currentOriginID, nodes) {
+    if (databaseDocumentTimestamp !== undefined) {
+      return databaseDocumentTimestamp;
+    }
     if (currentOriginID === undefined) {
       return undefined;
     }

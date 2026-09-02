@@ -152,7 +152,8 @@ function eventTimestampMs(event: SafeResolverEvent): number | undefined {
 /**
  * Newest process event at or before originTimestampMs.
  * Node data events from `/events` are descending by `@timestamp`.
- * When originTimestampMs is missing, this matches firstEvent (newest).
+ * When originTimestampMs is missing, or no event is at or before it (e.g. a descendant of the origin,
+ * whose events all postdate it), this matches firstEvent (newest), preserving pre-existing behavior.
  */
 export function eventAtOrBefore(
   data: NodeData | undefined,
@@ -168,7 +169,7 @@ export function eventAtOrBefore(
     const ms = eventTimestampMs(event);
     return ms !== undefined && ms <= originTimestampMs;
   });
-  return match ?? data.events[data.events.length - 1];
+  return match ?? data.events[0];
 }
 
 /**
