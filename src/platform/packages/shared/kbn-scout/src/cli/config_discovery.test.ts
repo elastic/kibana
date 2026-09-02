@@ -866,7 +866,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toBe('No Playwright config files found');
   });
 
-  it('only collects tags from passed spec files', () => {
+  it('only collects tags from runnable tests', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
@@ -908,8 +908,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   id: 'test3',
                   title: 'Test 3',
                   expectedStatus: 'passed',
-                  location: { file: 'test3.ts', line: 1, column: 1 }, // Not a .spec.ts file
-                  tags: ['@cloud-serverless-search'], // Should NOT be included (not .spec.ts)
+                  location: { file: 'parallel_tests/global.setup.ts', line: 1, column: 1 },
+                  tags: ['@cloud-serverless-search'], // Should NOT be included (setup hook)
                 },
                 {
                   id: 'test4',
@@ -954,7 +954,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // For target 'all', only tags in deploymentAgnostic are shown (filtered by filterModulesByTargetTags)
     expect(configLogCall![0]).toContain('@local-stateful-classic');
     expect(configLogCall![0]).toContain('@cloud-serverless-observability_complete');
-    // Should NOT contain tags from failed tests or non-spec files
+    // Should NOT contain tags from failed tests or global setup hooks
     expect(configLogCall![0]).not.toContain('@cloud-serverless-security_complete');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-search');
   });
