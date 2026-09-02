@@ -2001,9 +2001,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_120.0.0_buttongroup_filterbutton_redesign_002.tgz":
+"@elastic/eui@file:./eui_120.0.0_buttongroup_filterbutton_redesign_003.tgz":
   version "120.0.0"
-  resolved "file:./eui_120.0.0_buttongroup_filterbutton_redesign_002.tgz#d42e38a0b0a92240d6aacd9d2d03c370a93d36c1"
+  resolved "file:./eui_120.0.0_buttongroup_filterbutton_redesign_003.tgz#9a2888d8e7184db978c16629d1b4706c9df60c67"
   dependencies:
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
