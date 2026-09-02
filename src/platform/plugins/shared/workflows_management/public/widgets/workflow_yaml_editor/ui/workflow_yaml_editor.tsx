@@ -117,6 +117,13 @@ import {
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
 
+/**
+ * Monaco renders hovers and the quick fix menu into an overflow container that defaults to
+ * z-index 900, which the chrome sidebar (1050) paints over, cutting widgets off at the editor
+ * edge when the agent chat is open. Matches the level shared-ux uses for editors above flyouts.
+ */
+const OVERFLOW_WIDGETS_Z_INDEX = 1100;
+
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
   quickSuggestions: {
@@ -914,6 +921,7 @@ export const WorkflowYAMLEditor = ({
           value={workflowYaml}
           enableFindAction={true}
           dataTestSubj="workflowYamlEditor"
+          overflowWidgetsContainerZIndexOverride={OVERFLOW_WIDGETS_Z_INDEX}
         />
       </div>
       {isActive && (
