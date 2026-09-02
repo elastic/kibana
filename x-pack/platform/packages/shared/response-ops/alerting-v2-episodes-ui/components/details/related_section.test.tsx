@@ -122,7 +122,11 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodesRelatedSectionLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodesRelatedSectionLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('renders the error state when the episode fails to load', async () => {

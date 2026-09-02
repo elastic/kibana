@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
+interface ApiKeysStats {
+  total: number | null;
+  expiring: number | null;
+}
 interface MeteringIndexStat {
   name: string;
   num_docs: number;
@@ -31,29 +35,33 @@ interface IndexStats {
   indicesCount: number | null;
   storeSizeBytes: number | null;
   vectorCount: number | null;
+  documentsCount: number | null;
 }
 
-export const INDEX_STATS_UNAVAILABLE: IndexStats = {
+const INDEX_STATS_UNAVAILABLE: IndexStats = {
   indicesCount: null,
   storeSizeBytes: null,
   vectorCount: null,
+  documentsCount: null,
 };
 
 const USER_INDICES_PATTERN = ['*', '-.*'];
 
 /**
- * Whether the caller may see cluster-wide totals. Every source behind `fetchIndexStats` runs with
- * elevated privileges, so Elasticsearch will not reject an unprivileged caller on its own and the
- * route has to ask on their behalf. Errors deny access rather than granting it.
+ * Whether the caller may see the cluster-wide vector count. `countVectors` reads `indices.stats`
+ * as the internal user, so Elasticsearch will not scope it to the caller and the route has to ask
+ * on their behalf. `monitor` is the privilege that governs index stats, and requiring it over `*`
+ * keeps a partially privileged caller from being shown totals that span indices they cannot see.
+ * Errors deny access rather than granting it.
  */
-export const hasIndexManagePrivilege = async (
+export const hasIndexMonitorPrivilege = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<boolean> => {
   try {
     const { has_all_requested: hasAllRequested } =
       await client.asCurrentUser.security.hasPrivileges({
-        index: [{ names: USER_INDICES_PATTERN, privileges: ['manage'] }],
+        index: [{ names: ['*'], privileges: ['monitor'] }],
       });
 
     return hasAllRequested;
@@ -67,10 +75,9 @@ export const hasIndexManagePrivilege = async (
 
 /**
  * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), aggregated at
- * the cluster level so no per-index breakdown is returned. Excluding dot indices keeps the total
- * scoped to the same indices as the metering-derived index and size counts. `open` is already the
- * default for `expand_wildcards`, but is pinned so hidden indices can't be pulled in by a later
- * edit.
+ * the cluster level. Excluding dot indices keeps the total scoped to the same indices as the
+ * metering-derived index and size counts. `open` is already the default for `expand_wildcards`, but
+ * is pinned so hidden indices can't be pulled in by a later edit.
  */
 const countVectors = async (client: IScopedClusterClient): Promise<number> => {
   const stats = await client.asInternalUser.indices.stats({
@@ -85,13 +92,45 @@ const countVectors = async (client: IScopedClusterClient): Promise<number> => {
 };
 
 /**
- * Fetches index-level stats: user index count, aggregate store size, and indexed dense/sparse
- * vector count. Failures are logged and surfaced as `null` so callers can distinguish
- * "unavailable" from a genuine `0`.
+ * Counts top-level documents via `_count`. This matches only root documents and reads a single
+ * copy of each shard. It runs with the caller's own credentials because the internal user can only
+ * read Kibana-owned patterns such as `kibana_sample_data_*`. Against a wildcard, that silently
+ * resolves to whichever of those indices exist and undercounts instead of erroring. A failed-shard
+ * result is reported as unavailable rather than as an undercount, since `_count` cannot opt out of
+ * partial search results.
+ */
+const countDocuments = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<number | null> => {
+  const { count, _shards: shards } = await client.asCurrentUser.count({
+    index: USER_INDICES_PATTERN,
+    expand_wildcards: ['open'],
+  });
+
+  if (shards.failed > 0) {
+    logger.warn(
+      `Document count for vectordb deployment stats covered only ${
+        shards.total - shards.failed
+      } of ${shards.total} shards. Reporting it as unavailable rather than as an undercount.`
+    );
+    return null;
+  }
+
+  return count;
+};
+
+/**
+ * Fetches index-level stats: user index count, aggregate store size, indexed dense/sparse vector
+ * count, and top-level document count. The index, size, and document counts are scoped to the
+ * caller by Elasticsearch itself. The vector count is not scoped, so it is only read when the
+ * caller has the `monitor` all indices privilege. Failures are logged and surfaced as `null`
+ * so callers can distinguish "unavailable" from a genuine `0`.
  */
 export const fetchIndexStats = async (
   client: IScopedClusterClient,
-  logger: Logger
+  logger: Logger,
+  { canMonitorAllIndices }: { canMonitorAllIndices: boolean }
 ): Promise<IndexStats> => {
   try {
     const meteringStats = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>(
@@ -108,21 +147,29 @@ export const fetchIndexStats = async (
     const indicesCount = userIndices.length;
     const storeSizeBytes = userIndices.reduce((sum, index) => sum + (index.size_in_bytes ?? 0), 0);
 
-    let vectorCount: number | null = 0;
+    let vectorCount: number | null = canMonitorAllIndices ? 0 : null;
+    let documentsCount: number | null = 0;
 
     if (indicesCount > 0) {
-      try {
-        vectorCount = await countVectors(client);
-      } catch (error) {
-        // Index/size counts are still valid; only the vector count is unavailable.
-        logger.warn(
-          `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
-        );
-        vectorCount = null;
-      }
+      [vectorCount, documentsCount] = await Promise.all([
+        canMonitorAllIndices
+          ? countVectors(client).catch((error) => {
+              logger.warn(
+                `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
+              );
+              return null;
+            })
+          : Promise.resolve(null),
+        countDocuments(client, logger).catch((error) => {
+          logger.warn(
+            `Failed to compute document count for vectordb deployment stats. Returning partial stats: ${error.message}`
+          );
+          return null;
+        }),
+      ]);
     }
 
-    return { indicesCount, storeSizeBytes, vectorCount };
+    return { indicesCount, storeSizeBytes, vectorCount, documentsCount };
   } catch (error) {
     logger.warn(`Failed to fetch index stats for vectordb deployment stats: ${error.message}`);
     return INDEX_STATS_UNAVAILABLE;
@@ -130,18 +177,54 @@ export const fetchIndexStats = async (
 };
 
 /**
- * Fetches the number of dashboards in the current space. Returns `null` on failure so
- * a lookup error is distinguishable from "0 dashboards".
+ * Keys that Kibana creates on a user's behalf — task manager, alerting, and other internal keys.
+ * The `Alerting: ` name prefix covers keys created before `metadata.managed` was introduced.
  */
-export const fetchDashboardsCount = async (
-  savedObjectsClient: SavedObjectsClientContract,
+const MANAGED_KEY_FILTERS = [
+  { prefix: { name: { value: 'Alerting: ' } } },
+  { term: { 'metadata.managed': true } },
+];
+
+/**
+ * Mirrors the default view of the Stack Management API keys list, which the card links out to:
+ * non-invalidated `rest` keys minus the ones Kibana manages. Without the same exclusions the card
+ * reports keys the user cannot see in that list.
+ */
+const USER_API_KEYS_QUERY = {
+  bool: {
+    must: [{ term: { invalidated: false } }, { term: { type: 'rest' } }],
+    must_not: MANAGED_KEY_FILTERS,
+  },
+};
+
+const EXPIRING_SOON_WINDOW = '30d';
+
+/**
+ * Fetches API key stats: total keys visible to the caller and those expiring within
+ * `EXPIRING_SOON_WINDOW`. Returns `null` values on failure.
+ */
+export const fetchApiKeysStats = async (
+  client: IScopedClusterClient,
   logger: Logger
-): Promise<number | null> => {
+): Promise<ApiKeysStats> => {
   try {
-    const result = await savedObjectsClient.find({ type: 'dashboard', perPage: 0 });
-    return result.total;
+    const { total, aggregations } = await client.asCurrentUser.security.queryApiKeys({
+      size: 0,
+      query: USER_API_KEYS_QUERY,
+      aggs: {
+        expiring: {
+          filter: { range: { expiration: { gt: 'now', lte: `now+${EXPIRING_SOON_WINDOW}` } } },
+        },
+      },
+    });
+
+    const expiringAggregation = aggregations?.expiring;
+    const expiring =
+      expiringAggregation && 'doc_count' in expiringAggregation ? expiringAggregation.doc_count : 0;
+
+    return { total, expiring };
   } catch (error) {
-    logger.warn(`Failed to fetch dashboard count for vectordb deployment stats: ${error.message}`);
-    return null;
+    logger.warn(`Failed to fetch API keys stats for vectordb deployment stats: ${error.message}`);
+    return { total: null, expiring: null };
   }
 };

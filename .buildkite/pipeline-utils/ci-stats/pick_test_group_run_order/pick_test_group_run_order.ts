@@ -9,7 +9,7 @@
 
 import * as Fs from 'fs';
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
@@ -143,6 +143,14 @@ export async function pickTestGroupRunOrder() {
       );
       return;
     }
+
+    if (config.allowZeroConfigMatches) {
+      const message = "No Jest unit/integration or FTR configs matched this run's criteria.";
+      console.log(message);
+      bk.setAnnotation('no-matching-jest-ftr-test-configs', 'info', message);
+      return;
+    }
+
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 

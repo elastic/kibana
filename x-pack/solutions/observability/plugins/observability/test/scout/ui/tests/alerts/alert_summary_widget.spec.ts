@@ -15,31 +15,35 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // (x-pack/solutions/observability/test/observability_functional/apps/observability/pages/alerts/alert_summary_widget.ts).
 // The two FTR `it` blocks shared one browser session (the second cleared the
 // status control), so they are combined into a single journey with `test.step`s.
-test.describe('Observability alerts - summary widget', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ esClient }) => {
-    await generateObservabilityAlerts(esClient);
-  });
-
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    await pageObjects.alertsTablePage.goto();
-  });
-
-  test('shows active and total alert counts', async ({ pageObjects }) => {
-    const { alertsTablePage, alertControls } = pageObjects;
-
-    await test.step('reflects only active alerts while the status filter is active', async () => {
-      await expect(alertsTablePage.summaryWidget).toBeVisible();
-      // Default view is filtered to active alerts, so active === total.
-      await expect(alertsTablePage.summaryActiveAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
-      await expect(alertsTablePage.summaryTotalAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
+test.describe(
+  'Observability alerts - summary widget',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ esClient }) => {
+      await generateObservabilityAlerts(esClient);
     });
 
-    await test.step('reflects all alerts once the status filter is cleared', async () => {
-      await alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
-      await alertsTablePage.waitForTableToLoad();
-      await expect(alertsTablePage.summaryActiveAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
-      await expect(alertsTablePage.summaryTotalAlertCount).toHaveText(`${ALERT_COUNTS.ALL}`);
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.alertsTablePage.goto();
     });
-  });
-});
+
+    test('shows active and total alert counts', async ({ pageObjects }) => {
+      const { alertsTablePage, alertControls } = pageObjects;
+
+      await test.step('reflects only active alerts while the status filter is active', async () => {
+        await expect(alertsTablePage.summaryWidget).toBeVisible();
+        // Default view is filtered to active alerts, so active === total.
+        await expect(alertsTablePage.summaryActiveAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
+        await expect(alertsTablePage.summaryTotalAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
+      });
+
+      await test.step('reflects all alerts once the status filter is cleared', async () => {
+        await alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
+        await alertsTablePage.waitForTableToLoad();
+        await expect(alertsTablePage.summaryActiveAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
+        await expect(alertsTablePage.summaryTotalAlertCount).toHaveText(`${ALERT_COUNTS.ALL}`);
+      });
+    });
+  }
+);

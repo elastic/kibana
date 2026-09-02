@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DistributiveOmit } from '@elastic/eui';
+
 import type { SimplifiedPackagePolicy } from '../../services/simplified_package_policy_helper';
 
 import type {
@@ -15,6 +17,7 @@ import type {
 } from './package_policy';
 import type { NewAgentPolicy } from './agent_policy';
 import type { Output } from './output';
+import type { DownloadSourceBase } from './download_sources';
 
 // TODO: This type is not usable directly, and instead we typically use a type assertion
 // e.g. `NewPackagePolicyInput as InputsOverride[]`. This type should be altered so that it's
@@ -58,7 +61,11 @@ export interface PreconfiguredPackage extends Omit<PackagePolicyPackage, 'title'
   skipDataStreamRollover?: boolean;
 }
 
-export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
+export type PreconfiguredOutput = DistributiveOmit<Output, 'config_yaml'> & {
   config?: Record<string, unknown>;
   allow_edit?: string[];
+};
+
+export interface PreconfiguredDownloadSource extends DownloadSourceBase {
+  id: string;
 }

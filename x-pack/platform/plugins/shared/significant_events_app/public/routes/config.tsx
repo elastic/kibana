@@ -49,6 +49,7 @@ const significantEventsAppRoutes = {
               showComputed: t.string,
               selectedItem: t.string,
               selectedEvent: t.string,
+              openEvent: t.string,
             }),
           }),
         ]),

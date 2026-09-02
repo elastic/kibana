@@ -55,8 +55,11 @@ export const WorkflowsManagementOperationPrivileges = {
   // Resuming acts on an execution that is already running, so it rides on `execute` until the
   // resume-specific privilege model is defined.
   resumeExecution: [WorkflowsManagementApiActions.execute],
-  readExecution: [WorkflowsManagementApiActions.readExecution],
+  // `readExecution` is an extension of `read`: reading execution details also requires read access
+  // to the workflow definition (the executed YAML snapshot is part of the execution document).
+  readExecution: [WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.readExecution],
   readManagedExecution: [
+    WorkflowsManagementApiActions.read,
     WorkflowsManagementApiActions.readExecution,
     WorkflowsManagementApiActions.readManagedExecution,
   ],

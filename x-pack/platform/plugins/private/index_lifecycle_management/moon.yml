@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/index_lifecycle_management
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/management-plugin'
@@ -45,6 +46,7 @@ dependsOn:
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/licensing-types'
   - '@kbn/test-eui-helpers'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

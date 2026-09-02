@@ -81,6 +81,7 @@ export const defaultGroupStatsAggregations = (field: string): NamedAggregation[]
       aggMetrics.push(RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION);
       break;
     case 'source.ip':
+    case 'destination.ip':
       aggMetrics.push(RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION);
       break;
     default:

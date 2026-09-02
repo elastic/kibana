@@ -124,8 +124,6 @@ export const createModelProvider = ({
     return connectorId;
   });
 
-  getFastModelConnectorId().catch(() => undefined);
-
   const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
     const { effortLevel = EffortLevels.medium } = opts;
     if (effortLevel === EffortLevels.low) {

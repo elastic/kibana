@@ -41,7 +41,7 @@ import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -61,6 +61,7 @@ import { getDashboardRecentlyAccessedService } from '../services/dashboard_recen
 import {
   coreServices,
   dataService,
+  screenshotModeService,
   serverlessService,
   unifiedSearchService,
 } from '../services/kibana_services';
@@ -153,9 +154,9 @@ export function InternalDashboardTopNav({
   //  - `inline`: next chrome, standalone -> we render `AppHeader`.
   //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
   //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome or next chrome disabled -> push through the imperative chrome APIs.
+  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
+  const isAppHeaderActive = chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
   const { onAppLeave } = useDashboardMountContext();
@@ -546,7 +547,15 @@ export function InternalDashboardTopNav({
         />
       )}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      <span
+        // ControlsRenderer must always be rendered
+        // so that control filters are applied to dashboard
+        //
+        // do not display ControlsRenderer in reports
+        style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
+      >
+        <DashboardControlsRenderer />
+      </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

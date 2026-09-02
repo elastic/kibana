@@ -1,0 +1,8 @@
+{
+  // Explicitly suppress Oxlint 1.79's default plugin injection when this config is extended.
+  "plugins": ["jest"],
+  "rules": {
+    "jest/no-focused-tests": "error"
+    // "jest/no-identical-title": "error",
+  }
+}

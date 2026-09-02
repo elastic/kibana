@@ -80,17 +80,23 @@ export function sendGetEnrollmentAPIKeys(
 
 export function useGetEnrollmentAPIKeysQuery(
   query: GetEnrollmentAPIKeysRequest['query'],
-  options?: RequestOptions
+  options: RequestOptions & { refetchInterval?: number | false } = {}
 ) {
-  return useQuery(['get-enrollment-api-keys', query], () => {
-    return sendRequestForRq<GetEnrollmentAPIKeysResponse>({
-      method: 'get',
-      path: enrollmentAPIKeyRouteService.getListPath(),
-      version: API_VERSIONS.public.v1,
-      query,
-      ...options,
-    });
-  });
+  const { refetchInterval, ...requestOptions } = options;
+
+  return useQuery(
+    ['get-enrollment-api-keys', query],
+    () => {
+      return sendRequestForRq<GetEnrollmentAPIKeysResponse>({
+        method: 'get',
+        path: enrollmentAPIKeyRouteService.getListPath(),
+        version: API_VERSIONS.public.v1,
+        query,
+        ...requestOptions,
+      });
+    },
+    { refetchInterval, refetchIntervalInBackground: false }
+  );
 }
 
 export function sendCreateEnrollmentAPIKey(body: PostEnrollmentAPIKeyRequest['body']) {

@@ -15,6 +15,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
@@ -124,6 +125,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'inferred', streamName);
@@ -271,20 +273,35 @@ const identifyComputedFeaturesRoute = createServerRoute({
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
+        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    maintenanceService,
+  }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, licensing } = scopedClients;
+    const { streamDataEsClient, streamsClient, licensing, tuningConfig } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'computed', streamName);
     const now = Date.now();
-    const { start = now - MS_PER_DAY, end = now, runId = uuidv4() } = params.body ?? {};
+    const {
+      start = now - MS_PER_DAY,
+      end = now,
+      runId = uuidv4(),
+      computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
+    } = params.body ?? {};
 
     const [kiClient, stream] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -299,7 +316,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
 
     try {
-      const computedFeatures = await identifyComputedFeatures({
+      const { features: computedFeatures, errors } = await identifyComputedFeatures({
         stream,
         streamName,
         start,
@@ -308,6 +325,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
         kiClient,
         logger: routeLogger,
         runId,
+        signal: getRequestAbortSignal(request),
+        timeoutMs: computedFeaturesTimeoutMs,
         ...(codeGroundingEnabled
           ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
           : {}),
@@ -316,6 +335,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       return {
         computedFeatures,
         computedFeaturesCount: computedFeatures.length,
+        errors,
       };
     } catch (error) {
       routeLogger.error(
@@ -354,6 +374,9 @@ const shouldIdentifyRoute = createServerRoute({
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    // Intentionally not guarded by assertNotPaused: continuous onboarding
+    // calls this route to decide whether to skip a stream, and a 409 here
+    // would turn a clean skip into a workflow failure.
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({
