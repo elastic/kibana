@@ -7,9 +7,11 @@
 
 import type { WorkflowAnonymizationFailureMode } from '../config';
 import type { WorkflowAnonymizationProvider } from '../workflow_anonymization_provider';
+import type { PiiRegexWorkerService } from '../workflow_anonymization/detection';
 
 export interface WorkflowAnonymizationOptions {
   readonly provider: WorkflowAnonymizationProvider;
   readonly failureMode: WorkflowAnonymizationFailureMode;
   readonly preLLMTimeoutMs: number;
+  readonly piiRegexWorker: PiiRegexWorkerService;
 }
