@@ -54,9 +54,8 @@ const mockGraphOutput = {
 
 const createMockModel = () => {
   const docInvoke = jest.fn().mockResolvedValue({ commands: ['LIMIT'], functions: ['COUNT'] });
-  const docRunnable = { withConfig: jest.fn(() => ({ invoke: docInvoke })) };
   const chatModel = {
-    withStructuredOutput: jest.fn(() => docRunnable),
+    withStructuredOutput: jest.fn(() => ({ invoke: docInvoke })),
     withConfig: jest.fn(() => ({ invoke: jest.fn() })),
   };
   return { model: { chatModel } as unknown as ScopedModel, docInvoke };

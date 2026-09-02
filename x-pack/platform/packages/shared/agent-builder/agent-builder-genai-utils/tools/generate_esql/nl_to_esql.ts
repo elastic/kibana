@@ -14,7 +14,6 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
-import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
 import type { RequestDocumentationAction } from './actions';
@@ -177,14 +176,9 @@ export const generateEsql = async ({
         if (!selectedTarget) {
           // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
           // The resource-less prompt is an accepted quality tradeoff for the latency win.
-          const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
-            sessionId: sessionId ? `${sessionId}:request-doc-prefetch` : undefined,
-          };
-          const requestDocModel = model.chatModel
-            .withStructuredOutput(requestDocumentationSchema, {
-              name: 'request_documentation',
-            })
-            .withConfig(requestDocCallConfig);
+          const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
+            name: 'request_documentation',
+          });
           const docPromise = requestDocModel
             .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
             .then(({ commands = [], functions = [] }) => {
