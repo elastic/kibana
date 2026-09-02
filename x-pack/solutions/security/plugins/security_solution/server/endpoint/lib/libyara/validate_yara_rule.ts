@@ -8,7 +8,14 @@
 import { createRequire } from 'module';
 import path from 'path';
 import type { Logger } from '@kbn/logging';
-import type { YaraDiagnostic, YaraValidateResult } from './types';
+import type {
+  YaraCompiledRule,
+  YaraCompiledRuleMeta,
+  YaraDiagnostic,
+  YaraMetaKeyOfInterest,
+  YaraValidateResult,
+} from './types';
+import { YARA_META_KEYS_OF_INTEREST } from './constants';
 
 let logger: Logger | undefined;
 
@@ -28,22 +35,36 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const started = performance.now();
-  const mod = await loadModule();
+  const mod = await loadYaraValidateModule();
+
+  /**
+   * WASM heap address of the C string returned by `validate_yara`.
+   *
+   * In Emscripten this is not a JS object: `ptr` is an integer byte offset into
+   * the module's linear memory (a large ArrayBuffer). C `malloc` returns such
+   * an offset; `0` is C's NULL (allocation failed — nothing to free).
+   * `UTF8ToString(ptr)` copies the bytes at that offset into a JS string;
+   * `validate_yara_free` must then release the allocation.
+   */
   let ptr = 0;
 
   try {
     ptr = mod.ccall<number>('validate_yara', 'number', ['string'], [source]);
+    if (ptr === 0) {
+      // calloc/malloc failure in WASM. Not a trap — the module remains usable.
+      throw new Error('libyara WASM validate_yara returned null (allocation failed)');
+    }
     const json = mod.UTF8ToString(ptr);
     const result = parseResult(json);
     const durationMs = Math.round(performance.now() - started);
-    const outcome = result.errors.length > 0 ? 'compile_error' : 'success';
+    const outcome = result.errorCount > 0 ? 'compile_error' : 'success';
 
     logger?.debug(
       () =>
         `YARA validate completed: outcome=${outcome}, errorCount=${
-          result.errors.length
-        }, warningCount=${
-          result.warnings.length
+          result.errorCount
+        }, warningCount=${result.warningCount}, ruleCount=${
+          result.rules.length
         }, durationMs=${durationMs}, sourceByteLength=${Buffer.byteLength(source, 'utf8')}`
     );
 
@@ -80,7 +101,7 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
  * (e.g. `"4.3.2"`). See `wasm/dist/ENGINE.md`.
  */
 export const getYaraEngineVersion = async (): Promise<string> => {
-  const mod = await loadModule();
+  const mod = await loadYaraValidateModule();
   try {
     return mod.ccall<string>('yara_engine_version', 'string', [], []);
   } catch (error) {
@@ -100,7 +121,24 @@ export const getYaraEngineVersion = async (): Promise<string> => {
  * Generated JS lives next to this package under wasm/dist/.
  */
 interface YaraValidateModule {
+  /**
+   * Calls a compiled C function from JavaScript by name.
+   * See https://emscripten.org/docs/api_reference/preamble.js.html#ccall
+   *
+   * @param ident - C function name (e.g. `'validate_yara'`)
+   * @param returnType - `'number'`, `'string'`, or `null` for void
+   * @param argTypes - type of each argument (`'number'` or `'string'`)
+   * @param args - argument values as native JavaScript values
+   */
   ccall: <T>(ident: string, returnType: string | null, argTypes: string[], args: unknown[]) => T;
+  /**
+   * Given a pointer `ptr` to a null-terminated UTF-8 C string in WASM linear
+   * memory, returns a copy of that string as a JavaScript `string`.
+   * See https://emscripten.org/docs/api_reference/preamble.js.html#UTF8ToString
+   *
+   * @param ptr - integer byte offset into WASM memory (the C `char*` address),
+   *   not a JavaScript object
+   */
   UTF8ToString: (ptr: number) => string;
 }
 
@@ -119,7 +157,8 @@ const isWasmTrap = (error: unknown): boolean =>
     (/memory access out of bounds|function signature mismatch|Aborted\(/i.test(error.message) ||
       error.name === 'RuntimeError'));
 
-const loadModule = async (): Promise<YaraValidateModule> => {
+/** @internal Exported so tests can stub WASM `ccall` on the loaded module. */
+export const loadYaraValidateModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
     modulePromise = (async () => {
       const started = performance.now();
@@ -150,10 +189,57 @@ const loadModule = async (): Promise<YaraValidateModule> => {
   return modulePromise;
 };
 
+const isYaraMetaKeyOfInterest = (value: string): value is YaraMetaKeyOfInterest =>
+  YARA_META_KEYS_OF_INTEREST.some((key) => key === value);
+
+const parseOptionalString = (value: string | undefined): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+const parseDuplicateMeta = (value: string[] | undefined): YaraMetaKeyOfInterest[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter(isYaraMetaKeyOfInterest);
+};
+
+const parseCompiledRule = (item: {
+  identifier?: string;
+  meta?: { os?: string; arch?: string; scan_type?: string };
+  duplicateMeta?: string[];
+}): YaraCompiledRule => {
+  const meta: YaraCompiledRuleMeta = {};
+  const os = parseOptionalString(item.meta?.os);
+  const arch = parseOptionalString(item.meta?.arch);
+  const scanType = parseOptionalString(item.meta?.scan_type);
+
+  if (os !== undefined) {
+    meta.os = os;
+  }
+  if (arch !== undefined) {
+    meta.arch = arch;
+  }
+  if (scanType !== undefined) {
+    meta.scan_type = scanType;
+  }
+
+  return {
+    identifier: item.identifier ?? '',
+    meta,
+    duplicateMeta: parseDuplicateMeta(item.duplicateMeta),
+  };
+};
+
 const parseResult = (json: string): YaraValidateResult => {
   const parsed = JSON.parse(json) as {
     errors?: Array<{ severity?: string; message?: string; line?: number }>;
     warnings?: Array<{ severity?: string; message?: string; line?: number }>;
+    rules?: Array<{
+      identifier?: string;
+      meta?: { os?: string; arch?: string; scan_type?: string };
+      duplicateMeta?: string[];
+    }>;
+    errorCount?: number;
+    warningCount?: number;
   };
 
   const toDiagnostic = (
@@ -165,8 +251,14 @@ const parseResult = (json: string): YaraValidateResult => {
     line: typeof item.line === 'number' ? item.line : 0,
   });
 
+  const errors = (parsed.errors ?? []).map((e) => toDiagnostic(e, 'error'));
+  const warnings = (parsed.warnings ?? []).map((w) => toDiagnostic(w, 'warning'));
+
   return {
-    errors: (parsed.errors ?? []).map((e) => toDiagnostic(e, 'error')),
-    warnings: (parsed.warnings ?? []).map((w) => toDiagnostic(w, 'warning')),
+    errors,
+    warnings,
+    errorCount: typeof parsed.errorCount === 'number' ? parsed.errorCount : errors.length,
+    warningCount: typeof parsed.warningCount === 'number' ? parsed.warningCount : warnings.length,
+    rules: (parsed.rules ?? []).map(parseCompiledRule),
   };
 };
