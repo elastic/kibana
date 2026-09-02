@@ -66,3 +66,40 @@ describe('persona_matrix.config.json column wiring', () => {
     expect(ids).toHaveLength(new Set(ids).size);
   });
 });
+
+/**
+ * The extra suites do not run on the same branch as the persona prompts: attack
+ * discovery's weekly job lives on its feature branch and automatic migrations on
+ * the weekly-evals-matrix branch. Reading them from the global `branch` (main)
+ * returns nothing, which renders as an empty column rather than an error — the
+ * exact failure that published a matrix with 0/21 translation cells while ~2,500
+ * scored documents sat in the golden cluster.
+ */
+describe('persona_matrix.config.json extra-suite branch pins', () => {
+  const branchByColumn = new Map(config.columns.map((column) => [column.id, column.branch]));
+
+  it('reads attack discovery from the branch its runs were exported on', () => {
+    expect(branchByColumn.get('attack-discovery')).toBe(
+      'patrykkopycinski:feat/attack-discovery-agent-builder-evals'
+    );
+  });
+
+  it('reads both migration columns from the weekly-evals-matrix branch', () => {
+    expect(branchByColumn.get('migrations-rules')).toBe('elastic:fix/weekly-evals-matrix');
+    expect(branchByColumn.get('migrations-dashboards')).toBe('elastic:fix/weekly-evals-matrix');
+  });
+
+  it('keeps both migration columns on one branch so the suite is queried once', () => {
+    // branchBySuiteFromColumns throws on disagreement; asserting equality here
+    // names the constraint at the config instead of at a generator stack trace.
+    expect(branchByColumn.get('migrations-rules')).toBe(
+      branchByColumn.get('migrations-dashboards')
+    );
+  });
+
+  it('keeps a lookback window wide enough to reach those runs', () => {
+    // The pinned branches last exported 2026-07-30 and 2026-08-11; a 14-day
+    // window silently drops them even with the branch pinned correctly.
+    expect(config.lookbackDays).toBeGreaterThanOrEqual(45);
+  });
+});

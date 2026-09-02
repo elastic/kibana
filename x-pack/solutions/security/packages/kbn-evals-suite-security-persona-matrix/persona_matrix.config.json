@@ -1,7 +1,7 @@
 {
   "title": "Persona Matrix \u2014 per-prompt proprietary sweep",
   "branch": "main",
-  "lookbackDays": 14,
+  "lookbackDays": 45,
   "scoring": {
     "useVerdictLadder": true,
     "requireEisJudge": true,
@@ -284,7 +284,7 @@
         "Criteria"
       ],
       "weight": 1,
-      "branch": "main"
+      "branch": "patrykkopycinski:feat/attack-discovery-agent-builder-evals"
     },
     {
       "id": "migrations-rules",
