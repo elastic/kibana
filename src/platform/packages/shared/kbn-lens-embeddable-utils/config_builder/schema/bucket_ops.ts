@@ -71,7 +71,7 @@ export const bucketDateHistogramOperationSchema = z
       description: 'When `true`, drops partial intervals from the results.',
     }),
   })
-  .meta({ id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram });
+  .meta({ id: 'visDateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram });
 const bucketTermsRankByCustomSharedSchema = z
   .object({
     type: z.literal('custom'),
@@ -85,7 +85,7 @@ const bucketTermsRankByCustomSharedSchema = z
      * Direction of the custom operation
      */
     direction: directionSchema.meta({
-      id: 'termsRankByCustomDirection',
+      id: 'visTermsRankByCustomDirection',
       description: 'Sort direction for custom ranking.',
     }),
   })
@@ -105,7 +105,7 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
     ]),
   })
   .meta({
-    id: 'termsRankByCustomOperation',
+    id: 'visTermsRankByCustomOperation',
     title: 'Terms Rank By Custom Operation',
     description: 'Terms ranked by custom operation.',
   });
@@ -118,7 +118,7 @@ const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomShare
     }),
   })
   .meta({
-    id: 'termsRankByCustomCountOperation',
+    id: 'visTermsRankByCustomCountOperation',
     title: 'Terms Rank By Custom Count Operation',
     description: 'Terms ranked by count, either of all documents or of a specific field.',
   });
@@ -132,7 +132,7 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
     }),
   })
   .meta({
-    id: 'termsRankByPercentileOperation',
+    id: 'visTermsRankByPercentileOperation',
     title: 'Terms Rank By Percentile Operation',
     description:
       'Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.',
@@ -146,7 +146,7 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
     }),
   })
   .meta({
-    id: 'termsRankByPercentileRankOperation',
+    id: 'visTermsRankByPercentileRankOperation',
     title: 'Terms Rank By Percentile Rank Operation',
     description:
       'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.',
@@ -234,13 +234,13 @@ export const bucketTermsOperationSchema = z
              * Direction of the alphabetical order
              */
             direction: directionSchema.meta({
-              id: 'termsRankByAlphabeticalDirection',
+              id: 'visTermsRankByAlphabeticalDirection',
               description: 'Sort direction for alphabetical ranking.',
             }),
           })
           .strip()
           .meta({
-            id: 'termsRankByAlphabetical',
+            id: 'visTermsRankByAlphabetical',
             title: 'Terms Rank By Alphabetical',
             description: 'Terms ranked alphabetically.',
           }),
@@ -256,7 +256,7 @@ export const bucketTermsOperationSchema = z
           })
           .strip()
           .meta({
-            id: 'termsRankByRare',
+            id: 'visTermsRankByRare',
             title: 'Terms Rank By Rarity',
             description: 'Terms ranked by rarity.',
           }),
@@ -266,7 +266,7 @@ export const bucketTermsOperationSchema = z
           })
           .strip()
           .meta({
-            id: 'termsRankBySignificant',
+            id: 'visTermsRankBySignificant',
             title: 'Terms Rank By Significance',
             description: 'Terms ranked by significance.',
           }),
@@ -279,13 +279,13 @@ export const bucketTermsOperationSchema = z
             }),
 
             direction: directionSchema.meta({
-              id: 'termsRankByMetricDirection',
+              id: 'visTermsRankByMetricDirection',
               description: 'Sort direction for metric-based ranking.',
             }),
           })
           .strip()
           .meta({
-            id: 'termsRankByMetric',
+            id: 'visTermsRankByMetric',
             title: 'Terms Rank By Metric',
             description: 'Terms ranked by a linked metric.',
           }),
@@ -296,7 +296,7 @@ export const bucketTermsOperationSchema = z
       ])
       .optional(),
   })
-  .meta({ id: 'termsOperation', title: BUCKET_OP_TITLES.terms });
+  .meta({ id: 'visTermsOperation', title: BUCKET_OP_TITLES.terms });
 
 export const bucketFiltersOperationSchema = z
   .object({
@@ -307,7 +307,7 @@ export const bucketFiltersOperationSchema = z
      */
     filters: z.array(filterWithLabelSchema).max(100),
   })
-  .meta({ id: 'filtersOperation', title: BUCKET_OP_TITLES.filters });
+  .meta({ id: 'visFiltersOperation', title: BUCKET_OP_TITLES.filters });
 
 export const bucketHistogramOperationSchema = z
   .object({
@@ -351,7 +351,7 @@ export const bucketHistogramOperationSchema = z
       description: 'When `true`, includes empty rows in the results.',
     }),
   })
-  .meta({ id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram });
+  .meta({ id: 'visHistogramOperation', title: BUCKET_OP_TITLES.histogram });
 
 export const bucketRangesOperationSchema = z
   .object({
@@ -400,7 +400,7 @@ export const bucketRangesOperationSchema = z
       )
       .max(100),
   })
-  .meta({ id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges });
+  .meta({ id: 'visRangesOperation', title: BUCKET_OP_TITLES.ranges });
 
 export const bucketOperationDefinitionSchema = z
   .union([

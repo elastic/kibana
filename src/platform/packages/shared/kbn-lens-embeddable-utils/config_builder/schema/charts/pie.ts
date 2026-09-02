@@ -45,7 +45,7 @@ const pieStateSharedShape = {
     .strict()
     .optional()
     .meta({
-      id: 'pieLegend',
+      id: 'visPieLegend',
       title: 'Legend',
       description: 'Legend configuration for pie chart',
     }),
@@ -84,7 +84,7 @@ const pieStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'pieStyling',
+    id: 'visPieStyling',
     title: 'Pie chart styling',
     description: 'Visual chart styling options',
   });
@@ -165,7 +165,7 @@ export const pieConfigSchemaNoESQL = z
     }
   })
   .meta({
-    id: 'pieNoESQL',
+    id: 'visPieNoESQL',
     title: 'Pie Chart (DSL)',
     description: 'Pie chart configuration for standard queries',
   });
@@ -204,7 +204,7 @@ export const pieConfigSchemaESQL = z
     }
   })
   .meta({
-    id: 'pieESQL',
+    id: 'visPieESQL',
     title: 'Pie Chart (ES|QL)',
     description: 'Pie chart configuration for ES|QL queries',
   });
@@ -213,7 +213,7 @@ export const pieConfigSchemaESQL = z
  * Complete pie chart configuration supporting both standard and ES|QL queries
  */
 export const pieConfigSchema = z.union([pieConfigSchemaNoESQL, pieConfigSchemaESQL]).meta({
-  id: 'pieChart',
+  id: 'visPieChart',
   title: 'Pie Chart',
   description: 'Pie chart state: standard query or ES|QL query',
 });

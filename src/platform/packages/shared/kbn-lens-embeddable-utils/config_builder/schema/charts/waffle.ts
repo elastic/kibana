@@ -47,7 +47,7 @@ const waffleConfigSharedShape = {
     .strict()
     .optional()
     .meta({
-      id: 'waffleLegend',
+      id: 'visWaffleLegend',
       title: 'Legend',
       description: 'Legend configuration for waffle chart',
     }),
@@ -60,7 +60,7 @@ const waffleStylingSchema = z
   .strict()
 
   .meta({
-    id: 'waffleStyling',
+    id: 'visWaffleStyling',
     title: 'Waffle styling',
     description: 'Visual chart styling options',
   });
@@ -122,7 +122,7 @@ export const waffleConfigSchemaNoESQL = z
     }
   })
   .meta({
-    id: 'waffleNoESQL',
+    id: 'visWaffleNoESQL',
     title: 'Waffle Chart (DSL)',
     description: 'Waffle chart configuration for standard queries',
   });
@@ -157,7 +157,7 @@ export const waffleConfigSchemaESQL = z
     }
   })
   .meta({
-    id: 'waffleESQL',
+    id: 'visWaffleESQL',
     title: 'Waffle Chart (ES|QL)',
     description: 'Waffle chart configuration for ES|QL queries',
   });
@@ -166,7 +166,7 @@ export const waffleConfigSchemaESQL = z
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
 export const waffleConfigSchema = z.union([waffleConfigSchemaNoESQL, waffleConfigSchemaESQL]).meta({
-  id: 'waffleChart',
+  id: 'visWaffleChart',
   title: 'Waffle Chart',
   description: 'Waffle chart configuration: DSL or ES|QL query based',
 });

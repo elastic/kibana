@@ -48,13 +48,13 @@ export const legendSizeSchema = z
   .union([z.literal('auto'), z.literal('s'), z.literal('m'), z.literal('l'), z.literal('xl')])
   .optional()
   .meta({
-    id: 'legendSize',
+    id: 'visLegendSize',
     title: 'Legend Size',
     description: 'Legend size.',
   });
 
 function ctxMeta(context: string, suffix: string, title: string) {
-  return { id: `${context}${suffix}`, title };
+  return { id: `vis${context[0].toUpperCase()}${context.slice(1)}${suffix}`, title };
 }
 
 function getSimpleMetricsSchema(context: string) {

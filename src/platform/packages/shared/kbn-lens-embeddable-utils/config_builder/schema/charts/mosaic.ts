@@ -40,7 +40,7 @@ const mosaicConfigSharedShape = {
     .strict()
     .optional()
     .meta({
-      id: 'mosaicLegend',
+      id: 'visMosaicLegend',
       title: 'Legend',
       description: 'Legend configuration for mosaic chart appearance and behavior',
     }),
@@ -52,7 +52,7 @@ const mosaicStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'mosaicStyling',
+    id: 'visMosaicStyling',
     title: 'Mosaic styling',
     description: 'Visual chart styling options',
   });
@@ -148,7 +148,7 @@ export const mosaicConfigSchemaNoESQL = z
     }
   })
   .meta({
-    id: 'mosaicNoESQL',
+    id: 'visMosaicNoESQL',
     title: 'Mosaic Chart (DSL)',
     description:
       'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
@@ -193,14 +193,14 @@ export const mosaicConfigSchemaESQL = z
     }
   })
   .meta({
-    id: 'mosaicESQL',
+    id: 'visMosaicESQL',
     title: 'Mosaic Chart (ES|QL)',
     description:
       'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
   });
 
 export const mosaicConfigSchema = z.union([mosaicConfigSchemaNoESQL, mosaicConfigSchemaESQL]).meta({
-  id: 'mosaicChart',
+  id: 'visMosaicChart',
   title: 'Mosaic Chart',
   description:
     'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',

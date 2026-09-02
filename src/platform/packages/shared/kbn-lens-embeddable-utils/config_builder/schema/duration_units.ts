@@ -60,7 +60,7 @@ export const durationFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'durationFormat',
+    id: 'visDurationFormat',
     title: 'Duration Format',
     description: 'Duration format between time units.',
   });

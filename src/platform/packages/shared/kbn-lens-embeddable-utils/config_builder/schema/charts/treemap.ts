@@ -46,7 +46,7 @@ const treemapSharedConfigShape = {
     .strict()
     .optional()
     .meta({
-      id: 'treemapLegend',
+      id: 'visTreemapLegend',
       title: 'Legend',
       description: 'Configuration for the treemap chart legend appearance and behavior',
     }),
@@ -68,7 +68,7 @@ const treemapStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'treemapStyling',
+    id: 'visTreemapStyling',
     title: 'Treemap styling',
     description: 'Visual chart styling options',
   });
@@ -164,7 +164,7 @@ export const treemapConfigSchemaNoESQL = z
     }
   })
   .meta({
-    id: 'treemapNoESQL',
+    id: 'visTreemapNoESQL',
     title: 'Treemap Chart (DSL)',
     description:
       'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
@@ -206,7 +206,7 @@ export const treemapConfigSchemaESQL = z
     }
   })
   .meta({
-    id: 'treemapESQL',
+    id: 'visTreemapESQL',
     title: 'Treemap Chart (ES|QL)',
     description:
       'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
@@ -215,7 +215,7 @@ export const treemapConfigSchemaESQL = z
 export const treemapConfigSchema = z
   .union([treemapConfigSchemaNoESQL, treemapConfigSchemaESQL])
   .meta({
-    id: 'treemapChart',
+    id: 'visTreemapChart',
     title: 'Treemap Chart',
     description:
       'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',

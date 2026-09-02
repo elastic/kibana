@@ -21,4 +21,4 @@ export const lensResponseItemSchema = z
     meta: asCodeMetaSchema,
   })
   .strict()
-  .meta({ id: 'lensResponseItem', title: 'Visualization Response' });
+  .meta({ id: 'visResponseItem', title: 'Visualization Response' });
