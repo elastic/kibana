@@ -104002,14 +104002,14 @@ components:
               properties:
                 placement:
                   default: before
-                  description: Label placement relative to the secondary metric value (before or after).
+                  description: Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.
                   enum:
                     - before
                     - after
                   type: string
                 visible:
-                  default: true
-                  description: When `true`, displays the label.
+                  default: false
+                  description: When `true`, displays the secondary metric name as its label.
                   type: boolean
             value:
               additionalProperties: false

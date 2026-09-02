@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useConversationContext } from './conversation_context';
-
-export const useShouldStickToBottom = () => {
-  const { shouldStickToBottom } = useConversationContext();
-  return shouldStickToBottom ?? true;
-};
+export class InvestigationNotFoundError extends Error {
+  constructor(investigationId: string) {
+    super(`Investigation "${investigationId}" not found`);
+    this.name = 'InvestigationNotFoundError';
+  }
+}
