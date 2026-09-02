@@ -881,7 +881,7 @@ describe('findBackfill()', () => {
         initiator: 'user',
         initiatorId: 'id',
       })
-    ).rejects.toThrowError('Failed to find backfills: Could not validate find parameters');
+    ).rejects.toThrow('Failed to find backfills: Could not validate find parameters');
   });
 
   describe('error handling', () => {

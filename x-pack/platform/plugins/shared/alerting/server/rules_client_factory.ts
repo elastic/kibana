@@ -32,6 +32,7 @@ import {
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -69,7 +70,7 @@ export interface RulesClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -99,7 +100,7 @@ export class RulesClientFactory {
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
-  private getSpaceId!: (request: KibanaRequest) => string;
+  private getSpaceId!: (request: KibanaRequest) => SpaceId;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
@@ -178,7 +179,7 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
@@ -366,7 +367,7 @@ export class RulesClientFactory {
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
-    spaceId: string;
+    spaceId: SpaceId;
     isExplicitSpaceOverride: boolean;
     options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {

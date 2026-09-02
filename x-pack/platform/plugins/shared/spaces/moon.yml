@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/ui-theme'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-browser-hooks'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/core-spaces-common'
   - '@kbn/css-utils'
@@ -85,7 +86,9 @@ dependsOn:
   - '@kbn/deeplinks-vectordb'
   - '@kbn/deeplinks-workplace-ai'
   - '@kbn/core-user-profile-server'
+  - '@kbn/core-http-browser'
   - '@kbn/ui-callout'
+  - '@kbn/core-user-profile-common'
 tags:
   - plugin
   - prod
@@ -99,6 +102,8 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - test/scout_cps_local/**/*
+    - test/scout_initial_solution_setup/**/*
+    - test/scout_initial_solution_setup_api/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

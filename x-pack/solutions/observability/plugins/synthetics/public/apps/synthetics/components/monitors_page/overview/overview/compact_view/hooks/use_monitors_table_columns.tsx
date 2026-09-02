@@ -99,7 +99,7 @@ export const useMonitorsTableColumns = ({
       dispatch(
         setFlyoutConfigCallback({
           configId,
-          id: configId,
+          id: monitor.monitorQueryId,
           location: locationLabel,
           locationId,
           spaces: monitor.spaces,

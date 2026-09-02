@@ -251,7 +251,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           sortField: '@timestamp',
           sortDirection: 'desc',
         })
-      ).rejects.toThrowError(/error getting SO!/);
+      ).rejects.toThrow(/error getting SO!/);
     });
 
     test('should audit and throw when authorization fails', async () => {
@@ -269,7 +269,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           sortField: '@timestamp',
           sortDirection: 'desc',
         })
-      ).rejects.toThrowError(/Failed to get gap fill auto scheduler logs by id: gap-1/);
+      ).rejects.toThrow(/Failed to get gap fill auto scheduler logs by id: gap-1/);
 
       // Audit contains the error
       expect(auditLogger.log).toHaveBeenCalledWith(
@@ -288,7 +288,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           page: 1,
           perPage: 10,
         } as unknown as FindGapAutoFillSchedulerLogsParams)
-      ).rejects.toThrowError(/Error validating gap auto fill scheduler logs parameters/);
+      ).rejects.toThrow(/Error validating gap auto fill scheduler logs parameters/);
     });
   });
 });

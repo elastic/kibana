@@ -17,8 +17,7 @@ export const CLAIMS_SEED: Record<string, SeedScenario> = {
         description: 'Health check: successful claim-intake paths during baseline traffic.',
         esql: (streamName: string) =>
           `${fromStream(streamName)}
-| WHERE \`service.name\` == "claim-intake" AND message LIKE "*completed*"
-| LIMIT 500`,
+| WHERE \`service.name\` == "claim-intake" AND message LIKE "*completed*"`,
       },
     ],
   },
@@ -29,11 +28,10 @@ export const CLAIMS_SEED: Record<string, SeedScenario> = {
       {
         title: 'Primary fraud gateway timeouts',
         description: 'True incident: fraud-check deadline / upstream timeout errors.',
-        severityScore: 9,
+        severityScore: 90,
         esql: (streamName: string) =>
           `${fromStream(streamName)}
-| WHERE \`service.name\` == "fraud-check" AND (message LIKE "*deadline*" OR message LIKE "*Upstream timeout*" OR message LIKE "*timeout*")
-| LIMIT 500`,
+| WHERE \`service.name\` == "fraud-check" AND (message LIKE "*deadline*" OR message LIKE "*Upstream timeout*" OR message LIKE "*timeout*")`,
       },
       {
         title: 'Redis / Kafka red-herring mentions',
@@ -42,8 +40,7 @@ export const CLAIMS_SEED: Record<string, SeedScenario> = {
         severityScore: 4,
         esql: (streamName: string) =>
           `${fromStream(streamName)}
-| WHERE message LIKE "*Redis*" OR message LIKE "*Kafka*" OR message LIKE "*consumer lag*"
-| LIMIT 500`,
+| WHERE message LIKE "*Redis*" OR message LIKE "*Kafka*" OR message LIKE "*consumer lag*"`,
       },
     ],
   },

@@ -997,6 +997,23 @@ const equalsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'date_range',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'dense_vector',
           optional: false,
           description: 'An expression.',
@@ -1065,6 +1082,40 @@ const equalsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'double_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'double_range',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'flattened',
           optional: false,
           description: 'An expression.',
@@ -1157,6 +1208,23 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'geotile',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'histogram',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'histogram',
           optional: false,
           description: 'An expression.',
         },
@@ -1310,6 +1378,23 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'long',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'tdigest',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'tdigest',
           optional: false,
           description: 'An expression.',
         },
@@ -2401,6 +2486,24 @@ const inDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'date_range[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'An expression.',
@@ -2408,6 +2511,24 @@ const inDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'double[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'double_range[]',
           optional: false,
           description: 'A list of items.',
         },
@@ -2731,6 +2852,18 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_range',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'dense_vector',
           optional: false,
           description:
@@ -2744,6 +2877,18 @@ const isNotNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'double',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double_range',
           optional: false,
           description:
             'Value to check. It can be a single- or multi-valued column or an expression.',
@@ -3079,6 +3224,18 @@ const isNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_range',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'dense_vector',
           optional: false,
           description:
@@ -3092,6 +3249,18 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'double',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double_range',
           optional: false,
           description:
             'Value to check. It can be a single- or multi-valued column or an expression.',
@@ -4177,7 +4346,7 @@ const likeDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.LIKE,
   description: i18n.translate('kbn-esql-language.esql.definitions.like', {
     defaultMessage:
-      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
+      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern, which can be a string literal, a query parameter, or any\nconstant expression such as a call to `CONCAT` or `TO_LOWER`.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
   preview: false,
   alias: undefined,
@@ -4195,6 +4364,9 @@ const likeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Pattern.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4213,6 +4385,9 @@ const likeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Pattern.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4238,7 +4413,7 @@ const matchOperatorDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.MATCH_OPERATOR,
   description: i18n.translate('kbn-esql-language.esql.definitions.match_operator', {
     defaultMessage:
-      'Use the match operator (`:`) to perform a match query on the specified field.\nUsing `:` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nThe match operator is equivalent to the match function.\n\nFor using the function syntax, or adding match query parameters, you can use the\nmatch function.\n\n`:` returns true if the provided query matches the row.',
+      'Use the match operator (`:`) to perform a match query on the specified field or expression.\nUsing `:` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nThe match operator is equivalent to the match function.\n\nFor using the function syntax, or adding match query parameters, you can use the\nmatch function.\n\n`:` returns true if the provided query matches the row.',
   }),
   preview: false,
   alias: undefined,
@@ -4249,14 +4424,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'boolean',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'boolean',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4270,14 +4445,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'boolean',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4291,14 +4466,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'date',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'date',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4312,14 +4487,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'date',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4333,14 +4508,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'date_nanos',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'date_nanos',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4354,14 +4529,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'date_nanos',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4375,14 +4550,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'double',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'double',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4396,14 +4571,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'double',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'integer',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4417,14 +4592,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'double',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4438,14 +4613,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'double',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'long',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4459,14 +4634,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'integer',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'double',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4480,14 +4655,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'integer',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'integer',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4501,14 +4676,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'integer',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4522,14 +4697,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'integer',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'long',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4543,14 +4718,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'ip',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'ip',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4564,14 +4739,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'ip',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4585,14 +4760,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'keyword',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4606,14 +4781,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'double',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4627,14 +4802,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'integer',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4648,14 +4823,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4669,14 +4844,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'long',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4690,14 +4865,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'text',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4711,14 +4886,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'unsigned_long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'double',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4732,14 +4907,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'unsigned_long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'integer',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4753,14 +4928,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'unsigned_long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4774,14 +4949,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'unsigned_long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'long',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4795,14 +4970,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'unsigned_long',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'unsigned_long',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4816,14 +4991,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'version',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -4837,14 +5012,14 @@ const matchOperatorDefinition: FunctionDefinition = {
           name: 'left',
           type: 'version',
           optional: false,
-          description: 'Field that the query will target.',
+          description: 'Field or expression that the query will target.',
           fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'version',
           optional: false,
-          description: 'Value to find in the provided field.',
+          description: 'Value to find in the provided field or expression.',
           hint: {
             kind: 'constant',
           },
@@ -5588,6 +5763,23 @@ const notEqualsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'date_range',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'dense_vector',
           optional: false,
           description: 'An expression.',
@@ -5656,6 +5848,40 @@ const notEqualsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'double_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'double_range',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'flattened',
           optional: false,
           description: 'An expression.',
@@ -5748,6 +5974,23 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'geotile',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'histogram',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'histogram',
           optional: false,
           description: 'An expression.',
         },
@@ -5901,6 +6144,23 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'long',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'tdigest',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'tdigest',
           optional: false,
           description: 'An expression.',
         },
@@ -6126,6 +6386,24 @@ const notInDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'date_range[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'An expression.',
@@ -6133,6 +6411,24 @@ const notInDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'double[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double_range',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'double_range[]',
           optional: false,
           description: 'A list of items.',
         },
@@ -6340,7 +6636,7 @@ const notLikeDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.NOT_LIKE,
   description: i18n.translate('kbn-esql-language.esql.definitions.not_like', {
     defaultMessage:
-      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
+      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern, which can be a string literal, a query parameter, or any\nconstant expression such as a call to `CONCAT` or `TO_LOWER`.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
   preview: false,
   alias: undefined,
@@ -6358,6 +6654,9 @@ const notLikeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Pattern.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6376,6 +6675,9 @@ const notLikeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Pattern.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6401,7 +6703,7 @@ const notRlikeDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.NOT_RLIKE,
   description: i18n.translate('kbn-esql-language.esql.definitions.not_rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern, which can\nbe a string literal, a query parameter, or any constant expression such as a call\nto `CONCAT` or `TO_UPPER`.',
   }),
   preview: false,
   alias: undefined,
@@ -6419,6 +6721,9 @@ const notRlikeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'A regular expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6437,6 +6742,9 @@ const notRlikeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'A regular expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6462,7 +6770,7 @@ const rlikeDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.RLIKE,
   description: i18n.translate('kbn-esql-language.esql.definitions.rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern, which can\nbe a string literal, a query parameter, or any constant expression such as a call\nto `CONCAT` or `TO_UPPER`.',
   }),
   preview: false,
   alias: undefined,
@@ -6480,6 +6788,9 @@ const rlikeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'A regular expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6498,6 +6809,9 @@ const rlikeDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'A regular expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
