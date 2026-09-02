@@ -14,7 +14,7 @@ import {
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
 import type { AnyObject, Nullable } from '../types';
-import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
+import { generateDEK, encryptDEKWithRSA, encryptField, encryptDocumentAsJson } from './encryption';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
@@ -65,7 +65,7 @@ export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: { encryptionKeyId?: string },
+  query?: { encryptionKeyId?: string; encryptDocument?: true },
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
@@ -179,6 +179,29 @@ export async function applyFilterlist(
       }
     }
   };
+
+  if (query?.encryptDocument === true) {
+    if (!query.encryptionKeyId) {
+      throw new Error('encryptionKeyId is required when encryptDocument is true');
+    }
+    if (!encryptionPublicKeys?.[query.encryptionKeyId]) {
+      throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
+    }
+    const docKeyId = query.encryptionKeyId;
+    const docPublicKey = encryptionPublicKeys[docKeyId];
+    const docDek = generateDEK();
+    const docEncryptedDEK = encryptDEKWithRSA(docDek, docPublicKey);
+    const hasRules = Object.keys(rules).length > 0;
+
+    const result: string[] = [];
+    for (const rawDoc of data) {
+      const doc = unflatten(rawDoc as AnyObject);
+      const subDoc = hasRules ? await applyFilterToDoc(doc) : doc;
+      result.push(encryptDocumentAsJson(subDoc, docDek, docEncryptedDEK, docKeyId));
+    }
+    docDek.fill(0);
+    return result;
+  }
 
   for (const rawDoc of data) {
     const doc = unflatten(rawDoc as AnyObject);

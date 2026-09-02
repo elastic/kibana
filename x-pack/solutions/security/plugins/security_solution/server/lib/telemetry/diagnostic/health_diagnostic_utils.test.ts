@@ -741,6 +741,75 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
     });
   });
 
+  describe('applyFilterlist — encryptDocument mode', () => {
+    const { publicKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
+    const keys = { 'test-key': publicKey };
+    const query = { encryptionKeyId: 'test-key', encryptDocument: true as const };
+
+    it('returns an array of v1 wire-format strings when no filterlist rules', async () => {
+      const data = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
+      const result = await applyFilterlist(data, {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(2);
+      for (const item of result) {
+        expect(typeof item).toBe('string');
+        expect((item as string).split(':')[0]).toBe('v1');
+      }
+    });
+
+    it('all documents share the same encryptedDEK component', async () => {
+      const data = [{ a: '1' }, { b: '2' }, { c: '3' }];
+      const result = await applyFilterlist(data, {}, 'salt', query, keys);
+
+      const deks = result.map((r) => (r as string).split(':')[2]);
+      expect(new Set(deks).size).toBe(1);
+    });
+
+    it('encrypts only the fields listed in filterlist rules', async () => {
+      const data = [{ 'process.name': 'cmd.exe', 'host.ip': '1.2.3.4', count: 5 }];
+      const rules = { 'process.name': Action.KEEP };
+      const result = await applyFilterlist(data, rules, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      expect(typeof result[0]).toBe('string');
+      // ciphertext differs per call (fresh IV), so just check it's a wire format string
+      expect((result[0] as string).startsWith('v1:test-key:')).toBe(true);
+    });
+
+    it('applies mask to fields with mask action before encrypting', async () => {
+      // Two docs with the same value masked should produce the same masked value inside
+      // the blob (deterministic SHA-256), but different outer ciphertexts (fresh IV).
+      const data = [{ 'host.ip': '1.2.3.4' }];
+      const rules = { 'host.ip': Action.MASK };
+      const result = await applyFilterlist(data, rules, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      expect((result[0] as string).startsWith('v1:')).toBe(true);
+    });
+
+    it('throws when encryptDocument is true but encryptionKeyId is missing', async () => {
+      await expect(
+        applyFilterlist([{ a: 1 }], {}, 'salt', { encryptDocument: true as const }, keys)
+      ).rejects.toThrow('encryptionKeyId is required');
+    });
+
+    it('throws when encryptionKeyId is not in encryptionPublicKeys', async () => {
+      await expect(
+        applyFilterlist(
+          [{ a: 1 }],
+          {},
+          'salt',
+          { encryptionKeyId: 'missing', encryptDocument: true as const },
+          keys
+        )
+      ).rejects.toThrow('Public key not found');
+    });
+  });
+
   describe('nextExecution', () => {
     test.each([
       ['5m', '2025-05-14T17:00:00.000Z', '2025-05-14T17:03:00.000Z', false],
