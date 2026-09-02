@@ -911,11 +911,11 @@ const normalizeFormatParamsForId = (
  * - Pattern-less `custom` format is dropped; with a pattern, `decimals` → `0` — see `normalizeCustomFormat`.
  * - `duration` units and mode-dependent `decimals`/`compact` — see `normalizeDurationFormatParams`.
  */
-const normalizeFormatParams = (col: GenericIndexPatternColumn): void => {
-  if (!('params' in col) || !col.params) {
+const normalizeFormatParams = (col: { params?: { format?: ValueFormatConfig } }): void => {
+  if (!col.params) {
     return;
   }
-  const params = col.params as { format?: ValueFormatConfig };
+  const params = col.params;
   const { format } = params;
   if (!format) {
     return;
@@ -1270,6 +1270,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               inferColumnDataType?.(columnId, { isTextBased: true })
             );
             normalizeColumnLabel(updatedColumn, { isTextBased: true });
+            normalizeFormatParams(updatedColumn);
             return updatedColumn;
           });
 
@@ -1301,6 +1302,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
           if ('allColumns' in layer) {
             delete layer.allColumns;
           }
+        }
+
+        // leaked runtime-only property, not persisted or produced by transform
+        if ('initialContext' in ds) {
+          delete ds.initialContext;
         }
 
         return ds;
@@ -1450,7 +1456,10 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               normalizeLastValueShowArrayValues(col);
 
               // Strip empty `format.params` / empty-string `suffix`; canonicalize per format id
-              normalizeFormatParams(col);            }
+              if ('params' in col) {
+                normalizeFormatParams(col);
+              }
+            }
           }
           return ds;
         }

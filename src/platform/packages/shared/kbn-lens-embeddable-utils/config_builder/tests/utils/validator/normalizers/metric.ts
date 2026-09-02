@@ -248,13 +248,7 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     }
     return attributes;
   },
-  ignore: [
-    // ES|QL column display format (`params`) is not preserved through the API round-trip.
-    'state.datasourceStates.textBased.layers.*.columns.*.params',
-    // Runtime-only ES|QL fields not produced by the transform.
-    'state.datasourceStates.textBased.initialContext',
-    'state.datasourceStates.textBased.layers.*.columns.*.variable',
-  ],
+  ignore: ['state.datasourceStates.textBased.layers.*.columns.*.variable'],
 };
 
 /**
