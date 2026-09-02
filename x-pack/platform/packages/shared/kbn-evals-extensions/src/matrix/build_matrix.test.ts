@@ -793,3 +793,89 @@ describe('per-row commit provenance', () => {
     expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('spans'));
   });
 });
+
+describe('buildMatrix self-judged disclosure', () => {
+  // gemini-3.1-pro judges the attack-discovery suite AND is ranked in it.
+  // The column opts into `allowSelfJudged` because an audit found no
+  // self-preference, so the score is publishable -- but it must not look
+  // like an independently-judged one. A bare {kind:'score'} is
+  // indistinguishable from an arm's-length score, which is what the
+  // reporting rule forbids.
+  const discloseConfig: MatrixConfig = parseMatrixConfig({
+    minCoverage: 1,
+    columns: [
+      {
+        id: 'kill-chain',
+        label: 'Kill-Chain',
+        suites: ['suite-a'],
+        weight: 1,
+        allowSelfJudged: true,
+      },
+      { id: 'triage', label: 'Triage', suites: ['suite-b'], weight: 1 },
+    ],
+    models: [{ id: 'model-a', label: 'A' }],
+  });
+
+  it('marks a score from an allowSelfJudged column as self-judged', () => {
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'model-a',
+          provider: 'p',
+          suites: [
+            {
+              suiteId: 'suite-a',
+              experimentId: 'e1',
+              selfJudged: true,
+              datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(0.762)] }],
+            },
+            {
+              suiteId: 'suite-b',
+              experimentId: 'e2',
+              datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(0.8)] }],
+            },
+          ],
+        },
+      ],
+      discloseConfig
+    );
+
+    const row = matrix.proprietary[0];
+    const kc = row.cells['kill-chain'];
+    const triage = row.cells.triage;
+
+    // The opted-in column carries the disclosure...
+    expect(kc).toMatchObject({ kind: 'score', selfJudged: true });
+    // ...and a normally-judged column is NOT falsely flagged.
+    expect(triage).toMatchObject({ kind: 'score' });
+    expect((triage as { selfJudged?: boolean }).selfJudged).toBeUndefined();
+  });
+
+  // The opt-out is a COLUMN setting, but only some rows in that column are
+  // actually self-judged: gemini judges attack-discovery, so gpt-5.4's cell in
+  // that same column was graded at arm's length. Flagging the whole column
+  // libels five models to disclose one, and a reader who spots one bogus flag
+  // has no reason to trust the real one.
+  it('flags only the rows whose judge is the graded model', () => {
+    const suite = (judgedSelf: boolean) => ({
+      suiteId: 'suite-a',
+      experimentId: 'e1',
+      selfJudged: judgedSelf,
+      datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(0.762)] }],
+    });
+
+    const own = buildMatrix(
+      [{ modelId: 'model-a', provider: 'p', suites: [suite(true)] }],
+      discloseConfig
+    );
+    const other = buildMatrix(
+      [{ modelId: 'model-a', provider: 'p', suites: [suite(false)] }],
+      discloseConfig
+    );
+
+    expect(own.proprietary[0].cells['kill-chain']).toMatchObject({ selfJudged: true });
+    expect(
+      (other.proprietary[0].cells['kill-chain'] as { selfJudged?: boolean }).selfJudged
+    ).toBeUndefined();
+  });
+});

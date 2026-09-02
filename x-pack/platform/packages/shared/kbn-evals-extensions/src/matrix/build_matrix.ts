@@ -18,7 +18,14 @@ import type { EvaluatorSaturation } from './evaluator_saturation';
 
 /** A single matrix cell: either a numeric 0-10 score or "Not recommended". */
 export type MatrixCell =
-  | { kind: 'score'; value: number }
+  /**
+   * `selfJudged` marks a score the column's judge produced about itself,
+   * admitted because the column set `allowSelfJudged` after an audit found no
+   * self-preference. The score is real and rankable, but consumers must be
+   * able to disclose it rather than present it as arm's-length — publishing it
+   * undisclosed is the failure mode this flag exists to prevent.
+   */
+  | { kind: 'score'; value: number; selfJudged?: boolean }
   | { kind: 'not-recommended' }
   /**
    * Scores existed but every one was rejected by judge policy (self-judged,
@@ -132,8 +139,16 @@ const matchesModel = (modelConfig: MatrixModelConfig, modelId: string): boolean 
 const isExcludedEvaluator = (evaluatorName: string, excluded: readonly string[]): boolean =>
   excluded.some((entry) => evaluatorName.startsWith(entry));
 
-const toCell = (value: number, config: MatrixConfig): MatrixCell =>
-  value <= config.notRecommendedBelow ? { kind: 'not-recommended' } : { kind: 'score', value };
+const toCell = (
+  value: number,
+  config: MatrixConfig,
+  { selfJudged = false }: { selfJudged?: boolean } = {}
+): MatrixCell =>
+  value <= config.notRecommendedBelow
+    ? { kind: 'not-recommended' }
+    : // Only attach the flag when true, so normally-judged cells keep their
+      // exact existing shape and no consumer sees `selfJudged: false` noise.
+      { kind: 'score', value, ...(selfJudged ? { selfJudged: true } : {}) };
 
 /** Sample count doubles as the aggregation weight; zero-count evaluators still count once. */
 const weightOf = (evaluator: AggregatedEvaluatorScore): number =>
@@ -205,14 +220,15 @@ const computeColumnMean = (
 const buildCell = (
   mean: number | undefined,
   column: MatrixColumnConfig,
-  config: MatrixConfig
+  config: MatrixConfig,
+  { selfJudged = false }: { selfJudged?: boolean } = {}
 ): MatrixCell => {
   if (mean === undefined) {
     return { kind: 'missing' };
   }
 
   const scale = column.scale ?? config.defaultScale;
-  return toCell(roundTo(mean * scale, config.decimals), config);
+  return toCell(roundTo(mean * scale, config.decimals), config, { selfJudged });
 };
 
 const CONTRACT_EVALUATORS = new Set([
@@ -511,10 +527,18 @@ export const buildMatrix = (
 
     const cells: Record<string, MatrixCell> = {};
     for (const column of config.columns) {
+      const columnSuites = new Set(column.suites);
       cells[column.id] = buildCell(
         computeColumnMean(modelScores, column, excludeEvaluators),
         column,
-        config
+        config,
+        {
+          // Disclose only when a suite actually feeding THIS column was graded
+          // by the model itself.
+          selfJudged: modelScores.suites.some(
+            (suite) => columnSuites.has(suite.suiteId) && suite.selfJudged === true
+          ),
+        }
       );
     }
 

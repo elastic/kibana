@@ -114,6 +114,13 @@ export interface AggregatedSuiteScores {
    * added to an existing matrix, which is the normal way this board grows.
    */
   commitSha?: string;
+  /**
+   * True when the admitted scores for this suite were graded by the model
+   * being graded. Only possible when the suite opted out of
+   * `excludeSelfJudged`; carries the fact to the artifact so a published
+   * self-judged score can be disclosed per row rather than per column.
+   */
+  selfJudged?: boolean;
   datasets: AggregatedDatasetScores[];
 }
 
@@ -525,6 +532,14 @@ export const queryMatrixScores = async (
         experimentId: latest.experiment_id,
         timestamp: latest.timestamp,
         commitSha: latest.git_commit_sha ?? undefined,
+        // Derived from the experiment's own judge/task ids, NOT from the
+        // column's opt-out: a column that admits self-judged scores still
+        // contains rows the judge graded at arm's length, and flagging those
+        // too would be a false accusation.
+        selfJudged:
+          latest.evaluator_model?.id && latest.task_model?.id
+            ? describeJudge(latest.evaluator_model.id, latest.task_model.id).selfJudged
+            : undefined,
         datasets,
       });
     }

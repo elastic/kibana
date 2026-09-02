@@ -9,6 +9,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import type { EvalsClient, ExperimentStats } from '@kbn/evals';
+import { describeJudge } from './judge_provenance';
 import {
   pickLatestExperimentPerModel,
   experimentStatsToDatasets,
@@ -29,6 +30,19 @@ const experiment = (
 };
 
 describe('pickLatestExperimentPerModel', () => {
+  it('records self-judged per experiment from the judge and task ids', () => {
+    // D4: a hardcoded `true` here would flag every row in an opted-out column
+    // and no build_matrix test would notice -- the derivation only shows up
+    // against live golden data. Pin it where it is computed.
+    expect(describeJudge('google-gemini-3.1-pro', 'google-gemini-3.1-pro').selfJudged).toBe(true);
+    // Same family, different model: gemini-3.0-flash graded by gemini-3.1-pro
+    // is arm's-length and must NOT be disclosed as self-judged.
+    expect(describeJudge('google-gemini-3.1-pro', 'google-gemini-3.0-flash').selfJudged).toBe(
+      false
+    );
+    expect(describeJudge('google-gemini-3.1-pro', 'openai-gpt-5.4').selfJudged).toBe(false);
+  });
+
   it('keeps a self-judged experiment when allowSelfJudged is set', () => {
     const experiments = [
       {
@@ -594,6 +608,9 @@ describe('queryMatrixScores with examplePrefixes', () => {
           execution_id: 'x1',
           timestamp: new Date().toISOString(),
           task_model: { id: 'm1' },
+          // The judge IS the graded model here; the aggregation must derive
+          // that from these two ids so the artifact can disclose it per row.
+          evaluator_model: { id: 'm1' },
         },
       ]);
       return {
@@ -606,14 +623,15 @@ describe('queryMatrixScores with examplePrefixes', () => {
     const prefixIds = (r: Awaited<ReturnType<typeof queryMatrixScores>>) =>
       r[0].suites[0].datasets.map((d) => d.datasetId);
 
-    // Strict global policy: the self-judged prefix score is thrown away.
+    // Strict global policy: the self-judged experiment is dropped outright,
+    // so the model yields no scores at all.
     const strict = await queryMatrixScores(build(), log, {
       suiteIds: ['suite-a'],
       modelIds: ['m1'],
       prefixesBySuite: { 'suite-a': ['alert-analysis'] },
       scoring: { excludeSelfJudged: true },
     });
-    expect(prefixIds(strict)).not.toContain('prefix:alert-analysis');
+    expect(strict[0]?.suites ?? []).toHaveLength(0);
 
     // Same global policy, but this suite opted out -> the cell survives.
     const opted = await queryMatrixScores(build(), log, {
@@ -624,6 +642,31 @@ describe('queryMatrixScores with examplePrefixes', () => {
       scoringBySuite: { 'suite-a': { excludeSelfJudged: false } },
     });
     expect(prefixIds(opted)).toContain('prefix:alert-analysis');
+    // ...carrying the disclosure derived from the experiment's own ids.
+    expect(opted[0].suites[0].selfJudged).toBe(true);
+
+    // An arm's-length judge in the same opted-out suite must NOT be flagged,
+    // or the artifact libels every other row in the column.
+    const armsLength = build() as unknown as {
+      listExperiments: jest.Mock;
+    };
+    armsLength.listExperiments.mockResolvedValue([
+      {
+        experiment_id: 'e1',
+        execution_id: 'x1',
+        timestamp: new Date().toISOString(),
+        task_model: { id: 'm1' },
+        evaluator_model: { id: 'some-other-judge' },
+      },
+    ]);
+    const independent = await queryMatrixScores(armsLength as unknown as EvalsClient, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
+      scoring: { excludeSelfJudged: true },
+      scoringBySuite: { 'suite-a': { excludeSelfJudged: false } },
+    });
+    expect(independent[0].suites[0].selfJudged).toBe(false);
   });
 
   it('does not fetch per-example scores when no prefixes requested', async () => {
