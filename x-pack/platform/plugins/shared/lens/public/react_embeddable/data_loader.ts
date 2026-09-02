@@ -159,7 +159,7 @@ export function loadEmbeddableData(
     updateBlockingErrors,
     updateValidationErrors,
     updateWarnings,
-    resetMessages,
+    discardRuntimeMessages,
     updateMessages,
   } = buildUserMessagesHelpers(
     api,
@@ -206,6 +206,9 @@ export function loadEmbeddableData(
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
+
+    // Hide badges while reloading. `onRenderComplete` republishes them.
+    updateMessages([]);
 
     // notify about data loading
     internalApi.updateDataLoading(true);
@@ -290,6 +293,10 @@ export function loadEmbeddableData(
       ),
     ]);
 
+    // Drop runtime errors from the old expression that can arrive during `await`.
+    // (`dispatchBlockingErrorIfAny` reads these, so stale errors would skip rendering)
+    discardRuntimeMessages();
+
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
     internalApi.updateVisualizationContext({
@@ -300,11 +307,6 @@ export function loadEmbeddableData(
 
     // Publish the used dataViews on the Lens API
     internalApi.updateDataViews(dataViewIds);
-
-    // Reset here, and not when the reload starts, to also discard whatever the previous
-    // expression reported while this one was being built: those messages belong to a
-    // state that no longer exists and could block the expression about to be rendered.
-    resetMessages();
 
     // This will catch also failed loaded dataViews
     const hasBlockingErrors = dispatchBlockingErrorIfAny();
