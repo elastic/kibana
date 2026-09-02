@@ -10,7 +10,7 @@ entries:
     name: 287638.yaml
     checksum: c8abf732e5fc62688a51bf8bee4bfb7e33c34fb1
   type: bug-fix
-  title: Document set_extended_fields in Agent Builder cases-management skill
+  title: Document `set_extended_fields` in Agent Builder cases-management skill
   products:
   - product: cloud-serverless
   - product: kibana
@@ -94,7 +94,7 @@ entries:
     name: 287571.yaml
     checksum: 79aaf23feffe4014d52f14efa52ab567573fae5b
   type: bug-fix
-  title: Fix agentless orphan cleanup to respect ownership and force options
+  title: Fix managed integration orphan cleanup to respect ownership and force options
   products:
   - product: cloud-serverless
   - product: kibana
@@ -147,7 +147,7 @@ entries:
     name: 287642.yaml
     checksum: 36f9f457f2da1b646f176b41e05b74b746cd4733
   type: bug-fix
-  title: fix stale secret_references after credential rotation
+  title: Fix stale `secret_references` after credential rotation
   products:
   - product: cloud-serverless
   - product: kibana
@@ -180,11 +180,11 @@ entries:
     name: 287316.yaml
     checksum: 6153a6bb6362a0633c65dd05a19d38b7edb2ee2e
   type: bug-fix
-  title: Restrict PrivateLink URL to preconfigured Elasticsearch output in serverless
+  title: Restrict PrivateLink URL to preconfigured Elasticsearch output
   products:
   - product: cloud-serverless
   - product: kibana
-  description: POST /api/fleet/outputs now correctly rejects attempts to create a non-preconfigured Elasticsearch output at the PrivateLink URL in serverless. Previously, the server-side host validation whitelisted the PrivateLink URL unconditionally, allowing an unsupported duplicate output to be created via the API.
+  description: "`POST /api/fleet/outputs now correctly` rejects attempts to create a non-preconfigured Elasticsearch output at the PrivateLink URL in Serverless. Previously, the server-side host validation whitelisted the PrivateLink URL unconditionally, allowing an unsupported duplicate output to be created via the API."
   prs:
   - https://github.com/elastic/kibana/pull/287316
 - file:
@@ -205,7 +205,7 @@ entries:
     name: 287681.yaml
     checksum: e17fbcb67d6926118c3a6c7ac16a807e7164d86d
   type: bug-fix
-  title: 'feat(streams): do not register list_ilm_policies tool on serverless'
+  title: 'Skip registering the `list_ilm_policies` tool for Agent Builder and MCP'
   products:
   - product: cloud-serverless
   - product: kibana
@@ -226,7 +226,7 @@ entries:
     name: 282575.yaml
     checksum: 31aa0cf2e30d58892c2f8d32c1a71c7cacd54a43
   type: bug-fix
-  title: Fix global params shared across spaces dropped from private location monitors
+  title: Fix an issue where global parameters shared across spaces were dropped from private location monitors
   products:
   - product: cloud-serverless
   - product: kibana
@@ -243,7 +243,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes the Fleet integration policy edit page presenting policies created before a package introduced var_groups (e.g. AWS < 7.0.0) with the wrong credential method selected and blocking saves. The selection is now inferred from the policy's configured variables during package policy upgrade and on the edit page.
+  description: Fixes the Fleet integration policy edit page presenting policies created before a package introduced `var_groups` (for example, AWS < 7.0.0) with the wrong credential method selected and blocking saves. The selection is now inferred from the policy's configured variables during package policy upgrade and on the edit page.
   prs:
   - https://github.com/elastic/kibana/pull/287389
   issues:
@@ -292,7 +292,7 @@ entries:
     name: 286645.yaml
     checksum: 5da9c4139f41aa7493a40133f7713926d621447e
   type: feature
-  title: Add conversation sharing UI
+  title: Add a UI for sharing AI Assistant conversations with other users
   products:
   - product: cloud-serverless
   - product: kibana
@@ -320,7 +320,7 @@ entries:
     name: 281118.yaml
     checksum: b41ad59cb16d9a6982637fa59d64db9b8e9ab6db
   type: feature
-  title: Enable last space recollection for Elastic Cloud Hosted and serverless
+  title: Enable last space recollection
   products:
   - product: cloud-serverless
   - product: kibana
@@ -332,18 +332,12 @@ entries:
     name: 287023.yaml
     checksum: fd2668e31df1ac237e7b8730538da7e4425bb91c
   type: bug-fix
-  title: 'Fix packs stuck on Execution #0'
+  title: 'Fix Osquery pack results stuck on execution #0'
   products:
   - product: cloud-serverless
   - product: kibana
   description: >-
-    Fixes a bug where scheduled osquery pack results were all recorded under execution number 0.
-
-    Affected packs are repaired automatically on upgrade. Because execution numbering is now
-
-    anchored to the pack's creation time, existing packs will jump from `0` to a non-zero
-
-    execution count on their first run after upgrading; historical documents are not rewritten.
+    Fixes a bug where scheduled Osquery pack results were all recorded under execution number 0. Affected packs are repaired automatically on upgrade. Because execution numbering is now anchored to the pack's creation time, existing packs will jump from `0` to a non-zero execution count on their first run after upgrading; historical documents are not rewritten.
   prs:
   - https://github.com/elastic/kibana/pull/287023
 - file:
@@ -400,7 +394,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Integration packages that share a group identifier are now collapsed into a single collection tile in both the Integrations catalog (Fleet → Integrations) and the Observability Onboarding / Add Data page. Clicking a collection tile opens a flyout listing the available variants (e.g. "Nginx (ECS)" vs "Nginx (OTel)"), from which users can select and proceed to the normal install flow. This replaces the previous behavior where each variant appeared as a separate top-level card.
+  description: Integration packages that share a group identifier are now collapsed into a single collection tile in both the Integrations catalog (Fleet → Integrations) and the Observability Onboarding/Add Data page. Clicking a collection tile opens a flyout listing the available variants (for example, "Nginx (ECS)" vs "Nginx (OTel)"), from which you can proceed to the normal install flow. This replaces the previous behavior where each variant appeared as a separate top-level card.
   prs:
   - https://github.com/elastic/kibana/pull/287372
   issues:
@@ -413,11 +407,9 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: >-
+  description: |
     Splits the prior `cases.attachments` tool into two:
-
-    - `cases.get_attachments` (readonly, covers the previous `get_all` mode)
-
+    - `cases.get_attachments` (read-only, covers the previous `get_all` mode)
     - `cases.manage_attachments` (non-destructive writes, covers `add_comment`, `add_alerts`, `add_events`, `add_attachments` modes)
   prs:
   - https://github.com/elastic/kibana/pull/286133
@@ -425,7 +417,7 @@ entries:
     name: 287597.yaml
     checksum: 7ba4fa9a5388c7dafc3a2d28ba6363440104361f
   type: feature
-  title: Surface projects request information in inspector flyout
+  title: Surface projects request information in the inspector flyout
   products:
   - product: cloud-serverless
   - product: kibana
@@ -467,7 +459,7 @@ entries:
     name: 287113.yaml
     checksum: 1c0ec22d81c017497904f605c0d73c42b40185a7
   type: enhancement
-  title: Optimize outputs fetching
+  title: Improve Fleet outputs fetching performance on Fleet setup and Integrations UI page load
   products:
   - product: cloud-serverless
   - product: kibana
@@ -503,7 +495,7 @@ entries:
     name: 287148.yaml
     checksum: e6bed99530b345f6ea779142c42df81c76084db0
   type: enhancement
-  title: Add `user.full_name` to audit logs, adjust `user.id` for serverless
+  title: Add `user.full_name` to audit logs and adjust `user.id` for Serverless
   products:
   - product: cloud-serverless
   - product: kibana
@@ -531,7 +523,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Improves region names on the Inference Preferences Regions list by using the name Elasticsearch sends with each endpoint.
+  description: Improves region names in the Inference Preferences > Regions list by using the name Elasticsearch sends with each endpoint.
   areas:
   - Search and data
   prs:
@@ -553,7 +545,7 @@ entries:
     name: 285778.yaml
     checksum: d731d68adbf1914f1fa8b44fe9c9e4dfbfbcbef6
   type: enhancement
-  title: Support ES|QL variables
+  title: Support ES|QL variables in Vega panels
   products:
   - product: cloud-serverless
   - product: kibana
@@ -582,7 +574,7 @@ entries:
     name: 286302.yaml
     checksum: 1e04928b718d1a9c0c7d650ab17e1dada6442e5d
   type: bug-fix
-  title: Fix Gemini connector failing when tool parameters have empty enum constraints
+  title: Fix Gemini connector failing when tool parameters have empty `enum` constraints
   products:
   - product: cloud-serverless
   - product: kibana
@@ -621,11 +613,11 @@ entries:
     name: 287549.yaml
     checksum: a9560445e0a5c0a68313486b3d14277449a39a71
   type: bug-fix
-  title: Fix wrong autocomplete in `SET`
+  title: Fix incorrect autocomplete suggestions in the ES|QL `SET` command
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes incorrect autocomplete suggestions in the ES|QL `SET` command. This issue affected serverless environments only.
+  description: Fixes incorrect autocomplete suggestions in the ES|QL `SET` command.
   areas:
   - Discover and ES|QL
   prs:
@@ -694,7 +686,7 @@ entries:
     name: 287441.yaml
     checksum: 3dac4f8e960a021815284652bdbdb7ecca2550b2
   type: bug-fix
-  title: Fix close timeslider button only covers top quarter of panel
+  title: Fix an issue where the "close timeslider" button only covered the top quarter of the panel
   products:
   - product: cloud-serverless
   - product: kibana
@@ -708,18 +700,18 @@ entries:
     name: 287011.yaml
     checksum: 5a510c87ced772a89c8ceed0ed121c2fdcd2776a
   type: bug-fix
-  title: Fix 404 on agentless policy updating or deleting for pre-invariant policies
+  title: Fix a 404 error on updating or deleting a managed integration policy
   products:
   - product: cloud-serverless
   - product: kibana
-  description: '`PUT /api/fleet/managed_integrations/{id}` no longer returns 404 for agentless policies created before the agent-policy/package-policy same-ID invariant was introduced.'
+  description: '`PUT /api/fleet/managed_integrations/{id}` no longer returns 404 for managed integration policies created before the agent-policy/package-policy same-ID invariant was introduced.'
   prs:
   - https://github.com/elastic/kibana/pull/287011
 - file:
     name: 287945.yaml
     checksum: 078a3748b689432746df6fdc2cd599c0510c530a
   type: bug-fix
-  title: 'fix(cases): reset page to 1 when filter options change'
+  title: 'Fix an issue in the Cases list where changing a filter (search, status, severity, tags, date range, and so on) did not reset the page index to 1'
   products:
   - product: cloud-serverless
   - product: kibana
