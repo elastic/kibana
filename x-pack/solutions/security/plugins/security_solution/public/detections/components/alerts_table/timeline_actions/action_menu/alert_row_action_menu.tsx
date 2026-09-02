@@ -53,7 +53,7 @@ const ACTION_ICONS_BY_ID = {
   [ALERT_EXCEPTION_ACTION_IDS.addRuleException]: 'filter',
   [ALERT_TAG_ACTION_ID]: 'tag',
   [EVENT_FILTER_ACTION_ID]: 'filter',
-  [OSQUERY_ACTION_ID]: 'console',
+  [OSQUERY_ACTION_ID]: 'commandLine',
   [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
   [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
 } as const;

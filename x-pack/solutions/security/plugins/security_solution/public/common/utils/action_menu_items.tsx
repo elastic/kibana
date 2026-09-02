@@ -6,7 +6,8 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import type { EuiContextMenuPanelItemDescriptor, EuiIconProps, IconType } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor, EuiIconProps } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { ReactNode } from 'react';
 import React from 'react';
 
@@ -24,13 +25,13 @@ export const isActionMenuItem = (
 
 export const withActionIcon = (
   items: readonly EuiContextMenuPanelItemDescriptor[],
-  icon: IconType
+  icon: EuiIconType
 ): EuiContextMenuPanelItemDescriptor[] =>
   items.map((item) => (isActionMenuItem(item) ? { ...item, icon } : item));
 
 export const withActionIcons = (
   items: readonly EuiContextMenuPanelItemDescriptor[],
-  iconsByActionId: Readonly<Record<string, IconType>>
+  iconsByActionId: Readonly<Record<string, EuiIconType>>
 ): EuiContextMenuPanelItemDescriptor[] =>
   items.map((item) => {
     if (!isActionMenuItem(item) || typeof item.key !== 'string') {
