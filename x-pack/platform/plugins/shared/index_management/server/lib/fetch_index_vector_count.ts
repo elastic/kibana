@@ -28,7 +28,7 @@ const shardVectorCount = (shard: IndicesStatsShardStats): number =>
   (shard.dense_vector?.value_count ?? 0) + (shard.sparse_vector?.value_count ?? 0);
 
 /**
- * Counts indexed dense + sparse vectors, counting each logical shard exactly once. 
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
  * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
  * Returns null when not all shards responded.
  */

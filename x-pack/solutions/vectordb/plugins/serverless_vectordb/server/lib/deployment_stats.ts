@@ -88,11 +88,14 @@ const sumVectorCounts = (indices: Record<string, IndicesStatsIndicesStats> | und
 };
 
 /**
- * Counts indexed dense + sparse vectors, counting each logical shard exactly once. 
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
  * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
  * Returns null when not all shards responded.
  */
-const countVectors = async (client: IScopedClusterClient, logger: Logger): Promise<number | null> => {
+const countVectors = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<number | null> => {
   const { _shards: shards, indices } = await client.asInternalUser.indices.stats({
     index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
