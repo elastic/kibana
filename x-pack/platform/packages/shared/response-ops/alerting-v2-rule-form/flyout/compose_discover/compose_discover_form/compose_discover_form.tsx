@@ -47,7 +47,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
     title: i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.stepTitle', {
-      defaultMessage: 'Alert Condition',
+      defaultMessage: 'Condition',
     }),
     render: (props) => (
       <AlertConditionStep
@@ -63,7 +63,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   builderCondition: {
     id: 'builderCondition',
     title: i18n.translate('xpack.alertingV2.composeDiscover.step.builderCondition', {
-      defaultMessage: 'Alert Condition',
+      defaultMessage: 'Condition',
     }),
     render: () => null,
   },

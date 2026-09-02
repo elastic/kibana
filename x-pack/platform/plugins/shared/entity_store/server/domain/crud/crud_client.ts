@@ -231,10 +231,6 @@ export class CRUDClient {
     });
   }
 
-  private async latestIndexName(): Promise<string> {
-    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
-  }
-
   private async assertInstalled(): Promise<void> {
     const indexName = await this.latestIndexName();
     const exists = await this.esClient.indices.exists({ index: indexName });
@@ -264,6 +260,10 @@ export class CRUDClient {
       this.logger.warn(`Failed to bulk get ${ids.length} entities: ${error}`);
       return new Map();
     }
+  }
+
+  public async latestIndexName(): Promise<string> {
+    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
   }
 
   /**
