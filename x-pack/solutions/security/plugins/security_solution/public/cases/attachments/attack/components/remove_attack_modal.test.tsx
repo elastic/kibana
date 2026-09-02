@@ -117,10 +117,24 @@ describe('RemoveAttackModal', () => {
   it('disables the checkbox and explains why when nothing is removable', () => {
     renderModal({ isResolvable: true, alertCount: 0 });
 
-    expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID)).toBeDisabled();
+    const checkbox = screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
+    expect(checkbox).toBeDisabled();
+    // The default tick is not shown when there is nothing for it to take.
+    expect(checkbox).not.toBeChecked();
     expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_EXPLANATION_TEST_ID)).toHaveTextContent(
       'None of this attack’s alerts can be removed with it'
     );
+  });
+
+  it.each([
+    ['the attack cannot be resolved', { isResolvable: false, alertCount: 0 }],
+    ['nothing is removable', { isResolvable: true, alertCount: 0 }],
+  ])('confirms without the related alerts when %s', async (_, overrides) => {
+    renderModal(overrides);
+
+    await userEvent.click(screen.getByText('Remove'));
+
+    expect(onConfirm).toHaveBeenCalledWith({ removeRelatedAlerts: false });
   });
 
   it('never confirms the related alerts when the resolution turned unresolvable after checking', async () => {
