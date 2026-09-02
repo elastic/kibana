@@ -10,6 +10,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getFieldFormat } from '../../../shared/utils/get_field_format';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import { withStatusDotIcons } from '../../../../common/utils/action_menu_items';
+import { ALERT_STATUS_ICON_COLORS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
   CHANGE_ALERT_STATUS,
@@ -103,7 +105,12 @@ export const StatusPopoverButton = memo(
     });
 
     const actionItems = useMemo(
-      () => wrapActionTelemetry(rawActionItems, STATUS_ACTION_TEST_SUBJ, reportActionClicked),
+      () =>
+        wrapActionTelemetry(
+          withStatusDotIcons(rawActionItems, ALERT_STATUS_ICON_COLORS),
+          STATUS_ACTION_TEST_SUBJ,
+          reportActionClicked
+        ),
       [rawActionItems, reportActionClicked]
     );
 
