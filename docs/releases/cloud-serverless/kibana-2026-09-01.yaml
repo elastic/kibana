@@ -57,7 +57,7 @@ entries:
     name: 287643.yaml
     checksum: 1d939c8cbc00e2791470c3186dd06282c4ed39d3
   type: bug-fix
-  title: Bound alerts-as-data resource-install concurrency to cap peak heap
+  title: Limit alerts-as-data resource installation concurrency to reduce peak memory usage
   products:
   - product: cloud-serverless
   - product: kibana
@@ -252,7 +252,7 @@ entries:
     name: 287151.yaml
     checksum: 85797000d8f3e975f6b2070b173a4beec6f8a788
   type: bug-fix
-  title: Fix alerting rules sharing state that causes incorrect no-data responses across rules
+  title: Fix alerting rules incorrectly sharing state and triggering no-data responses
   products:
   - product: cloud-serverless
   - product: kibana
@@ -472,7 +472,7 @@ entries:
     name: 286493.yaml
     checksum: 691b90c8c5f8f450a8c4fa5e55f547a7bf8c975a
   type: bug-fix
-  title: Fix back navigation from Observability Add Data returning to Integrations catalog
+  title: Fix back navigation from Observability Add Data incorrectly going to the Integrations catalog
   products:
   - product: cloud-serverless
   - product: kibana
@@ -483,7 +483,7 @@ entries:
     name: 287095.yaml
     checksum: 0f17718d1b15b2490436dbe0361c620e0b6eb449
   type: bug-fix
-  title: Fix stale version-specific variant `.fleet-policies` docs not cleaned up
+  title: Fix stale version-specific `.fleet-policies` documents not being cleaned up
   products:
   - product: cloud-serverless
   - product: kibana
@@ -676,7 +676,7 @@ entries:
     name: 287154.yaml
     checksum: 64bcd91e299b0bb18dbddd0225d6a6c47c35f96f
   type: enhancement
-  title: Update workflow authoring skill to know about Knowledge Indicators steps
+  title: Update workflow authoring skill with Knowledge Indicators steps
   products:
   - product: cloud-serverless
   - product: kibana
