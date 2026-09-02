@@ -48,6 +48,8 @@ export function injectStyleTag(html: string, style: string): string {
  *
  * Two rules are `!important`, both because they are ours rather than the template's: the body
  * background and the reduced-motion guard.
+ * Both stay escapable on purpose — redefining the token, or an author `!important`, wins. These
+ * only need to be unbypassable by accident.
  *
  * The guard is enforced here rather than asked for in the prompt because a generated template
  * cannot be relied on to wrap its own keyframes — and the templates most likely to animate are the
