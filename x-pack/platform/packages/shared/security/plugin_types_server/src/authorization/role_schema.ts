@@ -54,42 +54,6 @@ const dataSourcePrivilegesEntrySchema = schema.object(
 
 const globalPrivilegeEntrySchema = schema.object(
   {
-    application: schema.maybe(
-      schema.object({
-        manage: schema.maybe(
-          schema.object({
-            applications: schema.arrayOf(
-              schema.string({
-                meta: {
-                  description:
-                    'A list of application names that the role can manage at the global privilege scope.',
-                },
-              }),
-              { maxSize: 1000 }
-            ),
-          })
-        ),
-      })
-    ),
-    profile: schema.maybe(
-      schema.object({
-        write: schema.maybe(
-          schema.object({
-            applications: schema.arrayOf(
-              schema.string({
-                meta: {
-                  description:
-                    'A list of application names whose user profile data the role can write at the global privilege scope.',
-                },
-              }),
-              { maxSize: 1000 }
-            ),
-          })
-        ),
-      })
-    ),
-    // Present on some built-in roles; currently empty in responses.
-    role: schema.maybe(schema.object({}, { meta: { description: 'Global role privileges.' } })),
     data_source: schema.maybe(schema.arrayOf(dataSourcePrivilegesEntrySchema, { maxSize: 1000 })),
   },
   {
