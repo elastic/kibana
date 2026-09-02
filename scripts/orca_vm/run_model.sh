@@ -122,6 +122,14 @@ source /tmp/golden-cluster-env.sh 2>/dev/null
 python3 /tmp/export_scores.py "$MODEL" 2>&1
 EXPORT_EXIT=$?
 
+# export_scores.py exits 2 when SOME documents landed and some did not. That is
+# not a success: golden holds a partial picture, and a controller reading only
+# "did it exit 0" would call the sweep complete while cells are silently
+# missing. Surface it distinctly from a total failure (1).
+if [ "$EXPORT_EXIT" -eq 2 ]; then
+  echo "EXPORT_PARTIAL=1 — some docs landed on golden, some failed; see stderr above"
+fi
+
 echo "=== DONE: $MODEL (EVAL_EXIT=$EVAL_EXIT, EXPORT_EXIT=$EXPORT_EXIT) ==="
 
 # Propagate eval failure as the process exit code so the sweep controller's

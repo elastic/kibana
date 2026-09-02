@@ -16,6 +16,8 @@ LOCAL_AUTH = "Basic ZWxhc3RpYzpjaGFuZ2VtZQ=="  # elastic:changeme
 
 DATASET = "f2db90e6-cb7f-58f2-b862-1b69e47f6a77"  # persona-matrix
 INDEX = ".evaluation-scores"
+# Bulk in chunks so one bad batch cannot discard the whole export.
+BULK_BATCH_SIZE = 500
 
 
 def es_local(path, body=None):
@@ -43,7 +45,7 @@ def export_model(model_id: str):
     hits = resp.get("hits", {}).get("hits", [])
     if not hits:
         sys.stderr.write(f"no local persona-matrix docs for {model_id}\n")
-        return 0
+        return 0, 0
 
     stored_models = {
         h.get("_source", {}).get("task", {}).get("model", {}).get("id") for h in hits
@@ -56,53 +58,86 @@ def export_model(model_id: str):
 
     # Preserve IDs and use create so retries are idempotent. Version conflicts
     # mean the document already landed and are not export failures.
-    bulk_lines = []
-    for h in hits:
-        bulk_lines.append(
-            json.dumps({"create": {"_index": INDEX, "_id": h["_id"]}})
+    #
+    # Batched deliberately. A single 10k-doc bulk is one all-or-nothing shot:
+    # a mid-flight timeout loses the whole sweep's scores even though most
+    # documents were fine. And the old code returned 0 whenever ANY document
+    # failed -- reporting total failure while 293 of 294 docs sat safely on
+    # golden. Partial data beats no data; report the honest count.
+    exported = 0
+    failed = 0
+    first_failure = None
+
+    for start in range(0, len(hits), BULK_BATCH_SIZE):
+        batch = hits[start : start + BULK_BATCH_SIZE]
+        bulk_lines = []
+        for h in batch:
+            bulk_lines.append(json.dumps({"create": {"_index": INDEX, "_id": h["_id"]}}))
+            bulk_lines.append(json.dumps(h["_source"]))
+        bulk_body = "\n".join(bulk_lines) + "\n"
+        req = urllib.request.Request(
+            f"{GOLDEN_URL}/{INDEX}/_bulk",
+            data=bulk_body.encode(),
+            headers={
+                "Authorization": f"ApiKey {GOLDEN_KEY}",
+                "Content-Type": "application/x-ndjson",
+                "kbn-xsrf": "kbn-client",
+                "x-elastic-internal-origin": "kbn-client",
+            },
+            method="POST",
         )
-        bulk_lines.append(json.dumps(h["_source"]))
-    bulk_body = "\n".join(bulk_lines) + "\n"
-    req = urllib.request.Request(
-        f"{GOLDEN_URL}/{INDEX}/_bulk",
-        data=bulk_body.encode(),
-        headers={
-            "Authorization": f"ApiKey {GOLDEN_KEY}",
-            "Content-Type": "application/x-ndjson",
-            "kbn-xsrf": "kbn-client",
-            "x-elastic-internal-origin": "kbn-client",
-        },
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=60) as r:
-        result = json.loads(r.read())
-    failed_items = []
-    for item in result.get("items", []):
-        op = item.get("create", {})
-        status = int(op.get("status", 500))
-        if status not in (201, 409):
-            failed_items.append(op)
-    if failed_items:
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                result = json.loads(r.read())
+        except Exception as exc:  # noqa: BLE001 - keep earlier batches
+            # A dead batch must not erase the batches that already landed.
+            failed += len(batch)
+            if first_failure is None:
+                first_failure = {"transport": str(exc)}
+            sys.stderr.write(
+                f"batch {start}-{start + len(batch)} failed at transport: {exc}\n"
+            )
+            continue
+
+        for item in result.get("items", []):
+            op = item.get("create", {})
+            status = int(op.get("status", 500))
+            if status in (201, 409):
+                exported += 1
+            else:
+                failed += 1
+                if first_failure is None:
+                    first_failure = op
+
+    if failed:
+        # Report, do not discard. The documents that landed are real and the
+        # golden gate downstream counts them independently.
         sys.stderr.write(
-            f"export failed for {len(failed_items)}/{len(hits)} docs; "
-            f"first={failed_items[0]}\n"
+            f"export incomplete for {model_id}: {exported} landed, {failed} failed "
+            f"of {len(hits)}; first={first_failure}\n"
         )
-        return 0
-    sys.stderr.write(
-        f"exported {len(hits)} docs for {model_id} "
-        f"(models={sorted(stored_models)}, idempotent_conflicts_ok)\n"
-    )
-    return len(hits)
+    else:
+        sys.stderr.write(
+            f"exported {exported} docs for {model_id} "
+            f"(models={sorted(stored_models)}, idempotent_conflicts_ok)\n"
+        )
+    return exported, failed
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         raise SystemExit("usage: export_scores.py <eis-model-id>")
     model = sys.argv[1]
-    count = export_model(model)
+    count, missing = export_model(model)
     # Transport-level check only: >0 docs landed. Exact-count validation
     # (21 examples x (evaluators + 1) x reps) happens in the sweep
     # controller's golden gate, which derives the evaluator count live from
     # the VM's Scout summary — the hardcoded 252 here went stale when the
     # suite grew to 14 docs/example (21x14=294).
-    raise SystemExit(0 if count > 0 else 1)
+    #
+    # A PARTIAL export is not a success. Exiting 0 would tell the controller
+    # everything landed while documents were silently missing -- exactly the
+    # false green the golden gate exists to catch. 2 = partial, 1 = nothing.
+    if count == 0:
+        raise SystemExit(1)
+    raise SystemExit(2 if missing else 0)
