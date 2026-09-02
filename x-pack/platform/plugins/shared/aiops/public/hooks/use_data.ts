@@ -109,7 +109,8 @@ export const useData = (
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
     lastRefresh,
-    changePointsByDefault
+    changePointsByDefault,
+    projectRoutingOverride
   );
 
   useEffect(() => {
