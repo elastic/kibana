@@ -780,7 +780,6 @@ describe('v4 encryptDocument', () => {
       'encryptDocument: true',
     ].join('\n');
     const [result] = parseHealthDiagnosticQueries(yaml);
-    const failure = result as ParseFailureQuery;
-    expect(failure.failureReason).not.toBe('unknown_version');
+    expect(result).toMatchObject({ kind: 'index' });
   });
 });
