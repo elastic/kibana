@@ -514,7 +514,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     ...privilege,
                     'data-test-subj': `${privilege.id}-privilege-button`,
                   }))}
-                  color="primary"
                   idSelected={roleSpacePrivilege}
                   onChange={(id) => onRoleSpacePrivilegeChange(id as KibanaRolePrivilege)}
                   isFullWidth
