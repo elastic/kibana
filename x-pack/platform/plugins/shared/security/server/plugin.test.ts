@@ -104,6 +104,9 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "actions": Actions {
+              "aiIndex": AiIndexActions {
+                "prefix": "ai_index:",
+              },
               "alerting": AlertingActions {
                 "prefix": "alerting:",
               },
@@ -212,6 +215,9 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "actions": Actions {
+              "aiIndex": AiIndexActions {
+                "prefix": "ai_index:",
+              },
               "alerting": AlertingActions {
                 "prefix": "alerting:",
               },

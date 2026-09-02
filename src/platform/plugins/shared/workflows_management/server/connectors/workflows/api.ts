@@ -31,10 +31,9 @@ const run = async ({
   const originalEvent = inputs.event;
   const { rule, ruleUrl, spaceId: eventSpaceId } = originalEvent;
 
-  // Summary mode: execute workflow once with all alerts
   if (summaryMode) {
-    const res = await externalService.runWorkflow({ workflowId, spaceId, inputs });
-    return { workflowRunId: res.workflowRunId, status: res.status };
+    const workflowRunId = await externalService.scheduleWorkflow({ workflowId, spaceId, inputs });
+    return { workflowRunId, status: 'scheduled' };
   }
 
   // Per-alert mode: schedule workflow for each alert individually

@@ -32,17 +32,19 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
   const OriginalFlyout = actual.UnifiedDocViewerFlyout;
   return {
     ...actual,
-    UnifiedDocViewerFlyout: (props: UnifiedDocViewerFlyoutProps) => (
-      <>
-        <div data-test-subj="mockFlyoutTitle">
-          {props.flyoutTitle ?? (props.isEsqlQuery ? 'Result' : 'Document')}
-        </div>
-        <OriginalFlyout
-          {...props}
-          {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
-        />
-      </>
-    ),
+    UnifiedDocViewerFlyout: (props: UnifiedDocViewerFlyoutProps) => {
+      return (
+        <>
+          <div data-test-subj="mockFlyoutTitle">
+            {props.flyoutTitle ?? (props.isEsqlQuery ? 'Result' : 'Document')}
+          </div>
+          <OriginalFlyout
+            {...props}
+            {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
+          />
+        </>
+      );
+    },
   };
 });
 

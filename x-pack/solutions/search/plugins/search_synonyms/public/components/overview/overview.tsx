@@ -8,15 +8,10 @@
 import React, { useMemo, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { PLUGIN_TITLE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
@@ -24,9 +19,9 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 import { useSynonymsBreadcrumbs } from '../../hooks/use_synonyms_breadcrumbs';
-import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
+import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { isPermissionError } from '../../utils/synonyms_utils';
 
 export const SearchSynonymsOverview = () => {
@@ -41,6 +36,24 @@ export const SearchSynonymsOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'createSynonymsSet',
+        label: i18n.translate('xpack.searchSynonyms.synonymsSetDetail.createButton', {
+          defaultMessage: 'Create',
+        }),
+        iconType: 'plusCircle',
+        testId: 'searchSynonymsSearchSynonymsOverviewCreateButton',
+        run: () => {
+          setIsCreateModalVisible(true);
+        },
+      },
+    }),
+    []
+  );
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -51,49 +64,14 @@ export const SearchSynonymsOverview = () => {
       color="primary"
     >
       {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
-        <KibanaPageTemplate.Header
-          pageTitle={PLUGIN_TITLE}
-          restrictWidth
-          rightSideItems={[
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="searchSynonymsSearchSynonymsOverviewApiDocumentationLink"
-                  external
-                  target="_blank"
-                  href={docLinks.synonymsApi}
-                >
-                  <FormattedMessage
-                    id="xpack.searchSynonyms.synonymsSetDetail.documentationLink"
-                    defaultMessage="API Documentation"
-                  />
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="searchSynonymsSearchSynonymsOverviewCreateButton"
-                  fill
-                  iconType="plusCircle"
-                  onClick={() => {
-                    setIsCreateModalVisible(true);
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.searchSynonyms.synonymsSetDetail.createButton"
-                    defaultMessage="Create"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-          ]}
-        >
-          <EuiText>
-            <FormattedMessage
-              id="xpack.searchSynonyms.synonymsSetDetail.description"
-              defaultMessage="Create and manage synonym sets and synonym rules."
-            />
-          </EuiText>
-        </KibanaPageTemplate.Header>
+        <AppHeader
+          title={PLUGIN_TITLE}
+          description={i18n.translate('xpack.searchSynonyms.synonymsSetDetail.description', {
+            defaultMessage: 'Create and manage synonym sets and synonym rules.',
+          })}
+          menu={menu}
+          docLink={docLinks.synonymsApi}
+        />
       )}
       <KibanaPageTemplate.Section
         restrictWidth

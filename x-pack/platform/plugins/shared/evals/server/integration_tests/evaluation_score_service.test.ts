@@ -12,8 +12,8 @@ import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-hel
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EvaluationIndices, type IngestScoresRequestBodyInput } from '@kbn/evals-common';
-import { EvaluationScoreService } from '../storage/evaluation_score_service';
-import { evaluationsDataStreamDefinition } from '../storage/scores_index_template';
+import { EvaluationScoreService } from '../storage/scores/evaluation_score_service';
+import { evaluationsDataStreamDefinition } from '../storage/scores/scores_index_template';
 
 const getPayload = (experimentId: string): IngestScoresRequestBodyInput => ({
   experiment_id: experimentId,

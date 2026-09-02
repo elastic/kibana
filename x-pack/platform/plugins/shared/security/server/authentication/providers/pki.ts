@@ -202,8 +202,16 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
     // If peer is authorized, but its certificate isn't available, that likely means the connection
     // with the peer is closed already. We shouldn't invalidate peer's access token in this case
     // since we cannot guarantee that there is a mismatch in access token and peer certificate.
+    //
+    // Under HTTP/2, when a stream is destroyed mid-request (e.g. RST_STREAM from an AbortController
+    // cancellation), Node's Http2ServerRequest.socket returns a Proxy over the destroyed stream.
+    // After stream destruction, stream.session is cleared and the Proxy's getPrototypeOf trap
+    // falls back to the Http2Stream prototype, causing `instanceof TLSSocket` to return false in
+    // KibanaSocket. This makes `socket.authorized` return `undefined` (not `true` or `false`).
+    // We must treat `undefined` the same as `true` here — both indicate the socket state is
+    // indeterminate or was previously authorized. Only `false` means "definitively unauthorized."
     const peerCertificate = request.socket.getPeerCertificate(true);
-    if (peerCertificate === null && request.socket.authorized) {
+    if (peerCertificate === null && request.socket.authorized !== false) {
       this.logger.debug(
         'Cannot validate state access token with the peer certificate since it is not available.'
       );
@@ -264,8 +272,14 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
     );
 
     if (!request.socket.authorized) {
+      // `authorized === false` means the peer cert was presented but rejected (e.g. untrusted CA).
+      // `authorized === undefined` means socket state is unknowable, typically because the HTTP/2
+      // stream was destroyed (RST_STREAM) before or during the auth lifecycle — see pki.ts comment
+      // in authenticateViaState for details.
       this.logger.debug(
-        `Authentication is not possible since peer certificate was not authorized: ${request.socket.authorizationError}.`
+        request.socket.authorized === false
+          ? `Authentication is not possible since peer certificate was not authorized: ${request.socket.authorizationError}.`
+          : 'Authentication is not possible since socket authorization state is unknown (the HTTP/2 stream may have been cancelled before authentication completed).'
       );
       return AuthenticationResult.notHandled();
     }

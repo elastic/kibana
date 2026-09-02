@@ -23,6 +23,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "dataViews",
       "home",
       "management",

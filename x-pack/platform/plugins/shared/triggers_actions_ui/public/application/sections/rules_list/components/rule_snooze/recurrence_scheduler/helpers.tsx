@@ -156,6 +156,24 @@ export const recurrenceSummary = ({
 export const rRuleWeekdayToWeekdayName = (weekday: string) =>
   moment().isoWeekday(RRULE_WEEKDAYS_TO_ISO_WEEKDAYS[weekday.slice(-2)]).format('dddd');
 
+export const isCustomRecurrenceFrequency = ({
+  freq,
+  interval,
+  byweekday,
+  bymonthday,
+}: RecurrenceSchedule): boolean => {
+  if (interval > 1) {
+    return true;
+  }
+  if (freq === RRuleFrequency.WEEKLY && (byweekday?.length ?? 0) > 1) {
+    return true;
+  }
+  if (freq === RRuleFrequency.MONTHLY && (bymonthday?.length ?? 0) > 0) {
+    return true;
+  }
+  return false;
+};
+
 export const buildCustomRecurrenceSchedulerState = ({
   frequency,
   interval,

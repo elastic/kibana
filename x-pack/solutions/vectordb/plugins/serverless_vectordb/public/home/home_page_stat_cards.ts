@@ -18,7 +18,9 @@ interface StatCardDeps {
   isLoading: boolean;
 }
 
-/** Builds the full width data card, whose only action is promoted to a button. */
+const showsVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
+  application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
+
 export const getDataCard = ({
   application,
   stats,
@@ -43,12 +45,16 @@ export const getDataCard = ({
       value: formatNumber(stats.documentsCount),
       isLoading,
     },
-    {
-      key: 'vectors',
-      label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorCount),
-      isLoading,
-    },
+    ...(showsVectorCount({ application })
+      ? [
+          {
+            key: 'vectors',
+            label: STAT_TILE_LABELS.vectors,
+            value: formatNumber(stats.vectorCount),
+            isLoading,
+          },
+        ]
+      : []),
     {
       key: 'totalSize',
       label: STAT_TILE_LABELS.totalSize,
@@ -100,7 +106,7 @@ const getDashboardsCard = ({
   actions: [
     {
       key: 'createDashboard',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.createDashboard', {
         defaultMessage: 'Create a dashboard',
       }),
@@ -149,7 +155,7 @@ const getWorkflowsCard = ({
   actions: [
     {
       key: 'createWorkflow',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.createWorkflow', {
         defaultMessage: 'Create a workflow',
       }),
@@ -198,7 +204,7 @@ const getApiKeysCard = ({
   actions: [
     {
       key: 'createApiKey',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.createApiKey', {
         defaultMessage: 'Create an API key',
       }),
