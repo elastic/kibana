@@ -387,6 +387,81 @@ describe('queryMatrixScores', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('thrice'));
   });
 
+  it('unions a suite across several branches so no branch-local model is lost', async () => {
+    // Real golden data for one suite is split across branches by model: the
+    // weekly-matrix branch holds six models, while a seventh (4.5-sonnet) only
+    // ever ran on the feature branch. Pinning to either single branch silently
+    // discards the other's rows, so a branch LIST has to be unioned.
+    const listExperiments = jest
+      .fn()
+      .mockImplementation(
+        async ({ taskModelId, branch }: { taskModelId?: string; branch?: string }) => {
+          if (branch === 'weekly' && taskModelId === 'm1') {
+            return [experiment({ experiment_id: 'exp-weekly-m1', modelId: 'm1' })];
+          }
+          if (branch === 'feature' && taskModelId === 'm2') {
+            return [experiment({ experiment_id: 'exp-feature-m2', modelId: 'm2' })];
+          }
+          return [];
+        }
+      );
+    const client = {
+      listExperiments,
+      getExperimentStats: jest.fn().mockResolvedValue(stats),
+    } as unknown as EvalsClient;
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['migrations-suite'],
+      modelIds: ['m1', 'm2'],
+      branch: 'main',
+      branchBySuite: { 'migrations-suite': ['weekly', 'feature'] },
+    });
+
+    // Both branch-local models survive the union.
+    expect(result.map((model) => model.modelId).sort()).toEqual(['m1', 'm2']);
+  });
+
+  it('prefers the newest run when the same model ran on several unioned branches', async () => {
+    // Union must not resurrect a stale run: when a model exists on both
+    // branches, selection still picks the most recent experiment.
+    const listExperiments = jest
+      .fn()
+      .mockImplementation(async ({ branch }: { branch?: string }) => {
+        if (branch === 'old') {
+          return [
+            experiment({
+              experiment_id: 'exp-old',
+              modelId: 'm1',
+              timestamp: '2026-01-01T00:00:00.000Z',
+            }),
+          ];
+        }
+        return [
+          experiment({
+            experiment_id: 'exp-new',
+            modelId: 'm1',
+            timestamp: '2026-06-01T00:00:00.000Z',
+          }),
+        ];
+      });
+    const getExperimentStats = jest.fn().mockResolvedValue(stats);
+    const client = { listExperiments, getExperimentStats } as unknown as EvalsClient;
+
+    await queryMatrixScores(client, log, {
+      suiteIds: ['migrations-suite'],
+      modelIds: ['m1'],
+      branch: 'main',
+      branchBySuite: { 'migrations-suite': ['old', 'new'] },
+    });
+
+    // Only the newer run is fetched; the stale branch's run is never scored.
+    expect(getExperimentStats).toHaveBeenCalledTimes(1);
+    expect(getExperimentStats).toHaveBeenCalledWith(
+      'exp-new',
+      expect.objectContaining({ executionId: 'exp-new' })
+    );
+  });
+
   it('reads a suite from its branch override instead of the global branch', async () => {
     const { client, listExperiments } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],

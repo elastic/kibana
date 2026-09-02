@@ -306,7 +306,7 @@
         "NL Description Faithfulness"
       ],
       "weight": 1,
-      "branch": "elastic:fix/weekly-evals-matrix"
+      "branch": ["elastic:fix/weekly-evals-matrix", "elastic:feat/siem-migrations-invoke-endpoint", "feat/evals-extensions-matrix-v3"]
     },
     {
       "id": "migrations-dashboards",
@@ -325,7 +325,7 @@
         "translation_fidelity"
       ],
       "weight": 1,
-      "branch": "elastic:fix/weekly-evals-matrix"
+      "branch": ["elastic:fix/weekly-evals-matrix", "elastic:feat/siem-migrations-invoke-endpoint", "feat/evals-extensions-matrix-v3"]
     }
   ],
   "models": [

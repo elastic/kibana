@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
+import { branchBySuiteFromColumns } from './matrix';
 import { parseMatrixConfig } from '../../matrix/load_matrix_config';
 import type { AggregatedModelScores } from '../../matrix/query_matrix_scores';
 import { matrixScoreQuery } from './matrix';
@@ -156,6 +157,52 @@ describe('matrix command empty-result guard', () => {
     const rendered = renderMatrix(buildMatrix(aggregated, config), config);
 
     expect(rendered.proprietaryCsv.trim().split('\n').length).toBeGreaterThan(1);
+  });
+
+  it('projects a branch LIST onto every suite the column reads', () => {
+    // Golden migrations data is split across branches by model, so a column
+    // may need several branches unioned rather than one pinned branch.
+    const withList = {
+      ...config,
+      columns: [
+        {
+          ...config.columns[0],
+          suites: ['migrations-suite'],
+          branch: ['elastic:fix/weekly-evals-matrix', 'feat/evals-extensions-matrix-v3'],
+        },
+      ],
+    } as unknown as typeof config;
+
+    expect(branchBySuiteFromColumns(withList)).toEqual({
+      'migrations-suite': ['elastic:fix/weekly-evals-matrix', 'feat/evals-extensions-matrix-v3'],
+    });
+  });
+
+  it('treats two columns declaring the same branch list as agreeing', () => {
+    // The conflict guard compares by value: two columns sharing a suite and
+    // declaring an equal list must not throw just because the arrays are
+    // distinct objects.
+    const shared = {
+      ...config,
+      columns: [
+        { ...config.columns[0], suites: ['migrations-suite'], branch: ['a', 'b'] },
+        { ...config.columns[0], suites: ['migrations-suite'], branch: ['a', 'b'] },
+      ],
+    } as unknown as typeof config;
+
+    expect(() => branchBySuiteFromColumns(shared)).not.toThrow();
+  });
+
+  it('still rejects columns that disagree on a suite branch list', () => {
+    const conflicting = {
+      ...config,
+      columns: [
+        { ...config.columns[0], suites: ['migrations-suite'], branch: ['a', 'b'] },
+        { ...config.columns[0], suites: ['migrations-suite'], branch: ['a', 'c'] },
+      ],
+    } as unknown as typeof config;
+
+    expect(() => branchBySuiteFromColumns(conflicting)).toThrow(/Conflicting branch overrides/);
   });
 
   it('produces no model rows when no experiments match', () => {

@@ -152,7 +152,7 @@ export interface QueryMatrixScoresOptions {
    * Per-suite branch overrides, keyed by suite id. A suite listed here is read
    * from its mapped branch instead of the global `branch`.
    */
-  branchBySuite?: Record<string, string>;
+  branchBySuite?: Record<string, string | string[]>;
   lookbackDays?: number;
   /**
    * When any config column sets `examplePrefixes`, per-example score documents
@@ -360,6 +360,20 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
  * then picked client-side (a bare `per_page: 1` request could not express the
  * lookback fallback).
  */
+/**
+ * Normalises a branch override to a list.
+ *
+ * `branchBySuite` accepts either a single branch or several. A suite whose
+ * models are split across branches needs the union; a suite pinned to one
+ * branch keeps the plain-string form.
+ */
+const toBranchList = (branch: string | string[] | undefined): Array<string | undefined> => {
+  if (Array.isArray(branch)) {
+    return branch.length > 0 ? branch : [undefined];
+  }
+  return [branch];
+};
+
 export const queryMatrixScores = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
@@ -389,15 +403,26 @@ export const queryMatrixScores = async (
   }> = [];
 
   for (const suiteId of suiteIds) {
-    const suiteBranch = branchBySuite?.[suiteId] ?? branch;
+    const suiteBranches = toBranchList(branchBySuite?.[suiteId] ?? branch);
     const suiteScoring = scoringBySuite?.[suiteId] ?? scoring;
     for (const modelId of modelIds) {
-      const experiments = await evalsClient.listExperiments({
-        suiteId,
-        taskModelId: modelId,
-        branch: suiteBranch,
-        limit: MAX_LIST_EXPERIMENTS,
-      });
+      // Golden data for one suite is split across branches by model: a weekly
+      // matrix branch may hold six models while a seventh only ever ran on a
+      // feature branch. Querying a single branch silently discards the rest,
+      // so every configured branch is queried and the results unioned before
+      // selection picks the newest run per model.
+      const experiments = (
+        await Promise.all(
+          suiteBranches.map((suiteBranch) =>
+            evalsClient.listExperiments({
+              suiteId,
+              taskModelId: modelId,
+              branch: suiteBranch,
+              limit: MAX_LIST_EXPERIMENTS,
+            })
+          )
+        )
+      ).flat();
       const [latest] = [
         ...pickLatestExperimentPerModel(experiments, {
           lookbackDays,

@@ -125,8 +125,14 @@ export const prefixesBySuiteFromColumns = (config: MatrixConfig): Record<string,
  * make the resulting cells depend on config ordering, so a genuine conflict
  * throws rather than resolving arbitrarily.
  */
-export const branchBySuiteFromColumns = (config: MatrixConfig): Record<string, string> => {
-  const bySuite: Record<string, string> = {};
+export const branchBySuiteFromColumns = (
+  config: MatrixConfig
+): Record<string, string | string[]> => {
+  const bySuite: Record<string, string | string[]> = {};
+  // Compare by value: a branch override may be a list, and two columns
+  // declaring equal lists agree even though the arrays are distinct objects.
+  const describe = (branch: string | string[]): string =>
+    Array.isArray(branch) ? branch.join(', ') : branch;
 
   for (const column of config.columns) {
     if (!column.branch) {
@@ -134,11 +140,11 @@ export const branchBySuiteFromColumns = (config: MatrixConfig): Record<string, s
     }
     for (const suiteId of column.suites) {
       const existing = bySuite[suiteId];
-      if (existing !== undefined && existing !== column.branch) {
+      if (existing !== undefined && describe(existing) !== describe(column.branch)) {
         throw new Error(
           `Conflicting branch overrides for suite "${suiteId}": ` +
-            `"${existing}" and "${column.branch}". A suite is queried once, so its ` +
-            `columns must agree on which branch to read.`
+            `"${describe(existing)}" and "${describe(column.branch)}". A suite is queried ` +
+            `once, so its columns must agree on which branch to read.`
         );
       }
       bySuite[suiteId] = column.branch;

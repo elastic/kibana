@@ -84,15 +84,25 @@ describe('persona_matrix.config.json extra-suite branch pins', () => {
     );
   });
 
-  it('reads both migration columns from the weekly-evals-matrix branch', () => {
-    expect(branchByColumn.get('migrations-rules')).toBe('elastic:fix/weekly-evals-matrix');
-    expect(branchByColumn.get('migrations-dashboards')).toBe('elastic:fix/weekly-evals-matrix');
+  it('unions every branch that holds migrations runs for a distinct model', () => {
+    // Golden migrations data is split across branches by model: the weekly
+    // branch holds six models, 4.6-sonnet has a newer run on the endpoint
+    // branch, and 4.5-sonnet only ever ran here. Pinning one branch blanks
+    // the others' cells, so the column reads the union.
+    const expected = [
+      'elastic:fix/weekly-evals-matrix',
+      'elastic:feat/siem-migrations-invoke-endpoint',
+      'feat/evals-extensions-matrix-v3',
+    ];
+
+    expect(branchByColumn.get('migrations-rules')).toStrictEqual(expected);
+    expect(branchByColumn.get('migrations-dashboards')).toStrictEqual(expected);
   });
 
-  it('keeps both migration columns on one branch so the suite is queried once', () => {
+  it('keeps both migration columns on one branch set so the suite is queried once', () => {
     // branchBySuiteFromColumns throws on disagreement; asserting equality here
     // names the constraint at the config instead of at a generator stack trace.
-    expect(branchByColumn.get('migrations-rules')).toBe(
+    expect(branchByColumn.get('migrations-rules')).toStrictEqual(
       branchByColumn.get('migrations-dashboards')
     );
   });

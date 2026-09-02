@@ -78,7 +78,16 @@ const columnSchema = schema.object({
    * top-level `branch`. Suites do not all publish on the same branch, and a
    * single global branch renders every column that is absent from it blank.
    */
-  branch: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH })),
+  branch: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+      // A suite whose models are split across branches needs every branch
+      // queried and unioned; a single string silently drops the others' rows.
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+        minSize: 1,
+      }),
+    ])
+  ),
   /**
    * Opt this column's suites out of the global `scoring.excludeSelfJudged`.
    *
