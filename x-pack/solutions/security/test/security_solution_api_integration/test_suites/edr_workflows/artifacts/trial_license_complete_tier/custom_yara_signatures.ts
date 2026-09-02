@@ -1402,7 +1402,7 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
 
-        it('should return 200 with both erros and warnings for multiple rules', async () => {
+        it('should return 200 with both errors and warnings for multiple rules', async () => {
           await callApi(globalWriteAccessTestAgent, {
             yara_rule: `
             // invalid
