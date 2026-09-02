@@ -11,6 +11,7 @@ export * from './auth_types/api_key_header';
 export * from './auth_types/api_key_query';
 export { AzureSharedKeyAuth } from './auth_types/azure_shared_key';
 export * from './auth_types/aws_credentials';
+export * from './auth_types/aws_iam_role';
 export * from './auth_types/bearer';
 export { BearerWithTlsAuth } from './auth_types/bearer_with_tls';
 export * from './auth_types/basic';

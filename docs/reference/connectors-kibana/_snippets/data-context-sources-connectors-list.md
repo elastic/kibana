@@ -1,5 +1,6 @@
 **Third-party search**
 
+- [Amazon DynamoDB](/reference/connectors-kibana/amazon-dynamodb-action-type.md): List tables, query, scan, and manage items in Amazon DynamoDB.
 - [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
