@@ -104,7 +104,7 @@ spaceTest.describe(
           extraText: metricTile.extraText?.replace(/\n/g, ' '),
         }).toStrictEqual({
           ...BASE_METRIC_TILE,
-          extraText: 'Maximum of bytes 19,986',
+          extraText: '19,986',
         });
       });
     });

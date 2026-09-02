@@ -41,6 +41,7 @@ export const ShodanConnector: ConnectorSpec = {
   actions: {
     searchHosts: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           query: z.string().describe('Search query'),
@@ -67,6 +68,7 @@ export const ShodanConnector: ConnectorSpec = {
 
     getHostInfo: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           ip: z.ipv4().describe('IP address'),
@@ -95,6 +97,7 @@ export const ShodanConnector: ConnectorSpec = {
 
     countResults: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           query: z.string().describe('Search query'),
@@ -120,6 +123,7 @@ export const ShodanConnector: ConnectorSpec = {
 
     getServices: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';

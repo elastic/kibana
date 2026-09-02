@@ -474,7 +474,7 @@ describe('ReportingStore', () => {
           },
         }
       `);
-      expect(createIlmPolicySpy).toBeCalled();
+      expect(createIlmPolicySpy).toHaveBeenCalled();
     });
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
@@ -486,7 +486,7 @@ describe('ReportingStore', () => {
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
-      expect(createIlmPolicySpy).toBeCalled();
+      expect(createIlmPolicySpy).toHaveBeenCalled();
     });
 
     it('does not call ILM APIs in serverless', async () => {
@@ -499,7 +499,7 @@ describe('ReportingStore', () => {
       const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
       await store.start();
 
-      expect(createIlmPolicySpy).not.toBeCalled();
+      expect(createIlmPolicySpy).not.toHaveBeenCalled();
     });
   });
 });
