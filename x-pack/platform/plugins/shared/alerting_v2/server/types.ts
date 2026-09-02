@@ -29,6 +29,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
@@ -53,13 +54,13 @@ export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<RulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<ActionPolicyClientApi>;
 
   /**
