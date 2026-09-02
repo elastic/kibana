@@ -296,9 +296,6 @@ describe('createActionPolicySmlType', () => {
       // — so the read goes through the user's authorization context.
       getActionPolicy.mockResolvedValueOnce({
         ...baseActionPolicyAttrs,
-        // TEMPORARY: the API response still carries `matcher` as a KQL string, while the saved
-        // object attributes above already use the structured shape.
-        matcher: 'alert.severity = "critical"',
         id: 'policy-1',
       });
 

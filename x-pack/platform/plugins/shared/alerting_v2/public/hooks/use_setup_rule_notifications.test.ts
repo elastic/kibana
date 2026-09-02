@@ -19,7 +19,7 @@ jest.mock('@kbn/workflows-ui');
 jest.mock('../services/action_policies_api');
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
-  buildRuleScopedMatcher: jest.fn((ruleId: string) => `rule.id: "${ruleId}"`),
+  buildRuleScopedMatcher: jest.fn((ruleId: string) => ({ expression: `rule.id: "${ruleId}"` })),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -129,7 +129,7 @@ describe('useSetupRuleNotifications', () => {
         expect(mockCreateActionPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'My Test Rule notifications',
-            matcher: 'rule.id: "rule-1"',
+            matcher: { expression: 'rule.id: "rule-1"' },
             destinations: [{ type: 'workflow', id: 'workflow-new-1' }],
           })
         );

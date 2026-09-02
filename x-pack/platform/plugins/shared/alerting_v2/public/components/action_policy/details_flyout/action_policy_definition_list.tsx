@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +21,7 @@ import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
 import { BadgeList } from '../badge_list';
 import { PopoverItems } from '../../popover_items';
 import { DestinationRow } from './destination_row';
+import { MatcherSummary } from './matcher_summary';
 
 const EMPTY_VALUE = '-';
 
@@ -88,16 +88,7 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher', {
         defaultMessage: 'Matcher',
       }),
-      description: matcher ? (
-        <EuiCode>{matcher}</EuiCode>
-      ) : (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicyDefinition.matchesAll"
-            defaultMessage="Matches all alerts."
-          />
-        </EuiText>
-      ),
+      description: <MatcherSummary matcher={matcher} />,
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.dispatchMode', {

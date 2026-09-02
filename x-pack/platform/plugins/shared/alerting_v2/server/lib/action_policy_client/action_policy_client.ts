@@ -40,6 +40,7 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
+import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
@@ -424,14 +425,17 @@ export class ActionPolicyClient {
 
     const allPolicies = await this.findActionPolicies({ perPage: 100 });
     for (const actionPolicy of allPolicies.items) {
-      if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
+      // TEMPORARY: matchers are structured but still evaluated as KQL here. A follow-up PR
+      // replaces this with a direct intersection of the rule tags and the matcher tag clause.
+      const matcherKql = PolicyMatcher.of(actionPolicy.matcher).toKql();
+      if (matcherKql === null) {
         items.push({ actionPolicy, category: 'global' });
         continue;
       }
 
       let isMatch = false;
       try {
-        isMatch = evaluateKql(actionPolicy.matcher, context);
+        isMatch = evaluateKql(matcherKql, context);
       } catch {
         this.logger.warn({
           message: 'Policy matcher failed to evaluate; treating as no-match',

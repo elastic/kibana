@@ -5,18 +5,14 @@
  * 2.0.
  */
 
+import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+
 export interface QuickFiltersProps {
-  matcher: string;
-  onChange: (matcher: string) => void;
+  matcher: PolicyMatcher | null;
+  onChange: (matcher: PolicyMatcher | null) => void;
 }
 
 export const POPOVER_PANEL_STYLE = { maxWidth: 360 };
-
-/**
- * Action policies only target alert-kind rules, so the rule quick filter
- * restricts the rules it surfaces to `kind: 'alert'`.
- */
-export const ALERT_KIND_RULE_LIST_FILTER = 'kind:alert';
 
 export const SELECTABLE_LIST_PROPS = {
   isVirtualized: false as const,
