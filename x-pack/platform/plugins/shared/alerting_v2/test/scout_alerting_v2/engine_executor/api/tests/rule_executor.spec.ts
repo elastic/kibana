@@ -182,6 +182,53 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
+        'persists ES|QL date columns as epoch millis in the data field',
+        async ({ apiServices }) => {
+          const eventCreated = new Date().toISOString();
+
+          await apiServices.alertingV2.sourceIndex.indexDocs({
+            index: SOURCE_INDEX,
+            docs: [
+              {
+                '@timestamp': new Date().toISOString(),
+                'event.created': eventCreated,
+                'host.name': 'host-date-epoch-millis',
+                severity: 'high',
+                value: 1,
+              },
+            ],
+          });
+
+          const rule = await apiServices.alertingV2.rules.create(
+            buildCreateRuleData({
+              metadata: { name: 'executor-date-epoch-millis' },
+              grouping: undefined,
+              query: {
+                format: 'standalone',
+                breach: {
+                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-date-epoch-millis" | KEEP host.name, event.created`,
+                },
+              },
+            })
+          );
+
+          await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+            status: 'breached',
+          });
+
+          const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+            status: 'breached',
+          });
+
+          expect(breachEvents.length).toBeGreaterThanOrEqual(1);
+
+          const persistedDate = breachEvents[0].data['event.created'];
+          expect(typeof persistedDate).toBe('number');
+          expect(persistedDate).toBe(Date.parse(eventCreated));
+        }
+      );
+
+      apiTest(
         'populates rule, source, and scheduling fields on every breach event',
         async ({ apiServices }) => {
           await apiServices.alertingV2.sourceIndex.indexDocs({

@@ -106,7 +106,12 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
-    expect(request.subject).toEqual({ type: 'significant_event', id: 'event-42' });
+    expect(request.subject).toEqual({
+      type: 'significant_event',
+      id: 'event-42',
+      summary: 'P99 latency climbed above 2s.',
+    });
+    expect(request.trigger_type).toBe('manual');
     expect(request.context.event_uuid).toBe('event-42');
   });
 

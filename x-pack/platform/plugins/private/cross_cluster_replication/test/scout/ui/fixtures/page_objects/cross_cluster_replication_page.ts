@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 const CCR_FOLLOWER_INDICES_PATH = 'management/data/cross_cluster_replication/follower_indices';
@@ -35,7 +36,7 @@ export class CrossClusterReplicationPage {
   readonly closeFlyoutButton;
 
   constructor(private readonly page: ScoutPage) {
-    this.appTitle = page.testSubj.locator('appTitle');
+    this.appTitle = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.followerIndicesTab = page.testSubj.locator('followerIndicesTab');
     this.autoFollowPatternsTab = page.testSubj.locator('autoFollowPatternsTab');
     this.createFollowerIndexButton = page.testSubj.locator('createFollowerIndexButton');

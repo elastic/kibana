@@ -226,6 +226,8 @@ function getDefaultAppState({
     grid: undefined,
     breakdownField: undefined,
     density: undefined,
+    documentsDisplayMode: undefined,
+    jsonModeSettings: undefined,
   };
 
   if (persistedTab?.grid) {
@@ -266,6 +268,12 @@ function getDefaultAppState({
   }
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
+  }
+  if (persistedTab?.documentsDisplayMode) {
+    defaultState.documentsDisplayMode = persistedTab.documentsDisplayMode;
+  }
+  if (persistedTab?.jsonModeSettings) {
+    defaultState.jsonModeSettings = persistedTab.jsonModeSettings;
   }
 
   return defaultState;

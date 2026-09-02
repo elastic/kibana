@@ -13,17 +13,43 @@ Use `platform.core.list_indices` to discover which ones exist.
 
 ### Field reference
 
-| Field | ES|QL type | Purpose |
+| Field | ES\|QL type | Purpose |
 |---|---|---|
 | `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
 | `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
 | `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
 | `description` | text | Short description of this KI; semantic via `description.semantic` |
 | `tags` | keyword | Filter facets |
-| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
+| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
 | `spaces` | keyword | Optional — Kibana spaces a KI belongs to; absent means visible from every space. Filter via the `filter` parameter of `execute_esql`, never `WHERE` (see Space scoping) |
 
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
+
+### `attributes.esql` — a KI's runnable ES|QL
+
+When a KI carries runnable ES|QL (e.g. a `detection` KI's materialized query, or an
+`index_metadata` KI's runnable example queries), those queries live in `attributes.esql`, as a
+string or an array of strings. This is the canonical location — do not hunt for runnable
+queries elsewhere in `attributes`. The prose access-pattern presentation (templates, params,
+returns) also appears inside `content`.
+
+The field is **optional**: only KI kinds that carry ES|QL set it, so queries must tolerate its
+absence rather than assume every KI has it. `attributes` is `flattened`, so extract the value
+with `FIELD_EXTRACT` before filtering or keeping it:
+
+```esql
+FROM ai-index-*
+| WHERE type == "detection"
+| EVAL esql = FIELD_EXTRACT(attributes, "esql")
+| WHERE esql IS NOT NULL
+| KEEP title, description, esql
+| LIMIT <n>
+```
+
+When the KI stores an array of queries, the extracted value is multivalued: `IS NOT NULL`
+still filters correctly, but scalar comparisons like `==` skip multivalued rows. Add
+`| MV_EXPAND esql` after the `WHERE esql IS NOT NULL` to get one row per query when you
+need per-query filtering.
 
 ### Space scoping
 

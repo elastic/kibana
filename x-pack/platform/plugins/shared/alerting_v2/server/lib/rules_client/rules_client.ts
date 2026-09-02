@@ -131,6 +131,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 @injectable()
 export class RulesClient {
   private readonly config: PluginConfig;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -145,10 +146,11 @@ export class RulesClient {
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {

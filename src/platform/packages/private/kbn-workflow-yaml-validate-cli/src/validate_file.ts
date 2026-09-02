@@ -183,7 +183,10 @@ const isBranchWrapper = (error: ErrorObject): boolean =>
   error.keyword === 'anyOf' || error.keyword === 'oneOf';
 /** Noise from the Liquid-template-value alternative that shadows most fields. */
 const isTemplateValueNoise = (error: ErrorObject): boolean =>
-  error.keyword === 'pattern' || (error.keyword === 'type' && error.message === 'must be string');
+  error.keyword === 'pattern' ||
+  // ajv puts the expected type in `params`, so this does not depend on the
+  // rendered message text (`must be string`).
+  (error.keyword === 'type' && (error.params as { type?: string }).type === 'string');
 /** Wrapper/template noise that is only meaningful when nothing deeper explains the failure. */
 const isNoise = (error: ErrorObject): boolean =>
   isBranchWrapper(error) || isTemplateValueNoise(error);

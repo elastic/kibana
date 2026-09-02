@@ -16,12 +16,16 @@ import type {
 } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { RelationshipsClient } from '@kbn/entity-store/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
 import { createLeadGenerationEngine } from './engine/lead_generation_engine';
 import type { LeadCandidate } from './engine/lead_generation_engine';
 import { registerObservationModules } from './observation_modules/register_modules';
+import { errorMessage } from './observation_modules/utils';
+import { buildEntityLookupMap } from './entities_relationships';
+import { attachRelatedEntities } from './attach_related_entities';
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadActionDecision } from './lead_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
@@ -41,6 +45,7 @@ export interface RunPipelineParams {
   readonly ml?: MlPluginSetup;
   readonly request?: KibanaRequest;
   readonly soClient?: SavedObjectsClientContract;
+  readonly relationshipsClient: RelationshipsClient;
 }
 
 const shouldRunLLMSynthesis = (
@@ -70,6 +75,7 @@ export const runLeadGenerationPipeline = async ({
   ml,
   request,
   soClient,
+  relationshipsClient,
 }: RunPipelineParams): Promise<void> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
@@ -88,6 +94,24 @@ export const runLeadGenerationPipeline = async ({
     return;
   }
 
+  const buildEntityMapStart = Date.now();
+  let entitiesMap: ReadonlyMap<string, LeadEntity>;
+  try {
+    entitiesMap = await buildEntityLookupMap(leadEntities, esClient, spaceId, logger);
+  } catch (error) {
+    logger.warn(
+      `[LeadGeneration] Failed to build entity lookup map; continuing with candidates only: ${errorMessage(
+        error
+      )}`
+    );
+    entitiesMap = new Map(leadEntities.map((entity) => [entity.id, entity]));
+  }
+  logger.info(
+    `[LeadGeneration][Telemetry] Build entity map to lookup related entities: ${
+      Date.now() - buildEntityMapStart
+    }ms`
+  );
+
   const engine = createLeadGenerationEngine({ logger });
   registerObservationModules(engine, {
     logger,
@@ -97,10 +121,12 @@ export const runLeadGenerationPipeline = async ({
     ml,
     request,
     soClient,
+    relationshipsClient,
+    entitiesMap,
   });
 
   const prepareStart = Date.now();
-  const candidates = await engine.prepareLeadCandidates(leadEntities);
+  let candidates = await engine.prepareLeadCandidates(leadEntities);
   logger.info(
     `[LeadGeneration][Telemetry] Prepare candidates: ${Date.now() - prepareStart}ms (${
       candidates.length
@@ -110,13 +136,39 @@ export const runLeadGenerationPipeline = async ({
     return;
   }
 
+  const attachStart = Date.now();
+  try {
+    candidates = await attachRelatedEntities({
+      candidates,
+      entitiesMap,
+      esClient,
+      spaceId,
+      logger,
+    });
+  } catch (error) {
+    logger.warn(
+      `[LeadGeneration] Failed to attach related entities; continuing without them: ${errorMessage(
+        error
+      )}`
+    );
+  }
+  logger.info(`[LeadGeneration][Telemetry] Attach related entities: ${Date.now() - attachStart}ms`);
+
   const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
 
   const classifyStart = Date.now();
   const decisions = await leadDataClient.classifyLeadCandidates(candidates);
   const toSynthesize = decisions.filter(shouldRunLLMSynthesis);
   const refreshes = decisions.flatMap((item) =>
-    item.decision.type === 'refresh' ? [{ existingId: item.decision.existingId }] : []
+    item.decision.type === 'refresh'
+      ? [
+          {
+            existingId: item.decision.existingId,
+            topRelatedEntities: item.candidate.topRelatedEntities,
+            relatedEntityCounts: item.candidate.relatedEntityCounts,
+          },
+        ]
+      : []
   );
   logger.info(
     `[LeadGeneration][Telemetry] Classify leads: ${Date.now() - classifyStart}ms ` +

@@ -263,9 +263,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
-        // Pass through as configured (string or string[]). Serverless needs
-        // both cluster-internal-cas and the MKI intermediate (http-certs/ca.crt);
-        // kibana-controller injects that list. Unset keeps Mozilla roots (ECH).
+        // Unset keeps Mozilla roots (ECH / Let's Encrypt).
         certificateAuthorities: tls?.ca,
       })
     );
@@ -278,6 +276,13 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         // carries server-side client-auth semantics and defaults to false —
         // not applicable to an outbound client connection.
         rejectUnauthorized: true,
+        // The applications, including Kibana, running inside the MKI cluster
+        // should not need access to things like the root CA and should be able
+        // to work with the CAs related to that particular cluster. The trust
+        // bundle we currently deploy in the Kibana pods includes only the
+        // intermediate CA that is scoped to the application cluster.
+        // Therefore, we need to allow partial trust chain validation.
+        allowPartialTrustChain: true,
       },
     });
   }

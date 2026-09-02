@@ -149,6 +149,28 @@ describe('extractDiscoveriesFromToolCall', () => {
     ]);
   });
 
+  it('extracts events from live Agent Builder underscore tool ids', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: 'platform_sig_events_events_write',
+        tool_call_id: 'ew-underscore',
+        params: { items: [{ title: 'Live event', status: 'open' }] },
+        results: [
+          {
+            data: {
+              results: [{ index: 0, event_uuid: 'uuid-1', event_id: 'event-1', written: true }],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', title: 'Live event' }),
+    ]);
+  });
+
   it('skips misaligned bulk results', () => {
     const steps: ConverseStep[] = [
       {

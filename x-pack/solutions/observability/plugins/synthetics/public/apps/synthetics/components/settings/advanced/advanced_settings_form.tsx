@@ -18,6 +18,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -44,6 +45,10 @@ export const AdvancedSettingsForm = () => {
     DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval
   );
 
+  const [rebalanceShardsEnabled, setRebalanceShardsEnabled] = useState<boolean>(
+    DYNAMIC_SETTINGS_DEFAULTS.rebalancePrivateLocationShardsEnabled ?? true
+  );
+
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
 
@@ -59,18 +64,27 @@ export const AdvancedSettingsForm = () => {
     }
   }, [settings]);
 
+  useEffect(() => {
+    if (settings?.rebalancePrivateLocationShardsEnabled !== undefined) {
+      setRebalanceShardsEnabled(settings.rebalancePrivateLocationShardsEnabled);
+    }
+  }, [settings]);
+
   const onApply = () => {
     if (settings) {
       dispatch(
         setDynamicSettingsAction.get({
           ...settings,
           privateLocationsSyncInterval: syncInterval,
+          rebalancePrivateLocationShardsEnabled: rebalanceShardsEnabled,
         } as DynamicSettings)
       );
     }
   };
 
-  const isFormDirty = !isEqual(syncInterval, settings?.privateLocationsSyncInterval);
+  const isFormDirty =
+    !isEqual(syncInterval, settings?.privateLocationsSyncInterval) ||
+    !isEqual(rebalanceShardsEnabled, settings?.rebalancePrivateLocationShardsEnabled ?? true);
   const isFormValid =
     syncInterval >= MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL &&
     syncInterval <= MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL &&
@@ -142,6 +156,35 @@ export const AdvancedSettingsForm = () => {
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <EuiSpacer size="m" />
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.synthetics.settings.advanced.rebalanceShards.title"
+              defaultMessage="Private location shard rebalancing"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.synthetics.settings.advanced.rebalanceShards.description"
+            defaultMessage="Reassign monitors across the healthy agents of scalable private locations. Applies to all Kibana spaces. Disabling this pauses rebalancing and removes agent pins from existing monitors in the background."
+          />
+        }
+      >
+        <EuiSwitch
+          data-test-subj="syntheticsRebalanceShardsEnabledSwitch"
+          label={i18n.translate('xpack.synthetics.settings.advanced.rebalanceShards.label', {
+            defaultMessage: 'Rebalance private location shards',
+          })}
+          checked={rebalanceShardsEnabled}
+          onChange={(e) => {
+            setRebalanceShardsEnabled(e.target.checked);
+          }}
+          disabled={isDisabled}
+        />
+      </EuiDescribedFormGroup>
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
@@ -152,6 +195,11 @@ export const AdvancedSettingsForm = () => {
               setSyncInterval(
                 settings?.privateLocationsSyncInterval ??
                   DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval
+              );
+              setRebalanceShardsEnabled(
+                settings?.rebalancePrivateLocationShardsEnabled ??
+                  DYNAMIC_SETTINGS_DEFAULTS.rebalancePrivateLocationShardsEnabled ??
+                  true
               );
             }}
             flush="left"

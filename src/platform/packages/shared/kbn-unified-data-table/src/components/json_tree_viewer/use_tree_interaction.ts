@@ -49,6 +49,7 @@ export interface TreeExpansion {
   isAllExpanded: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
+  expandIds: (ids: string[]) => void;
   revealMore: (id: string) => void;
   showFewer: (id: string) => void;
   expandAll: () => void;
@@ -99,6 +100,19 @@ export const useTreeExpansion = ({
     [effectiveExpanded, setExpandedFor]
   );
 
+  const expandIds = useCallback((ids: string[]) => {
+    setExpanded((prev) => {
+      let next: Set<string> | undefined;
+      for (const id of ids) {
+        if (!prev.has(id)) {
+          next = next ?? new Set(prev);
+          next.add(id);
+        }
+      }
+      return next ?? prev;
+    });
+  }, []);
+
   const revealMore = useCallback((id: string) => {
     setRevealed((prev) => {
       const next = new Map(prev);
@@ -129,6 +143,7 @@ export const useTreeExpansion = ({
     isAllExpanded,
     toggle,
     setExpandedFor,
+    expandIds,
     revealMore,
     showFewer,
     expandAll,
@@ -139,7 +154,6 @@ export const useTreeExpansion = ({
 // The slice of `TreeExpansion` the keyboard model drives (so the whole expansion object can be
 // passed straight in).
 interface RovingNavActions {
-  hasControls: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
 }
@@ -150,12 +164,14 @@ export interface RovingNav {
   registerRow: (id: string) => (element: HTMLDivElement | null) => void;
   onRowKeyDown: (event: KeyboardEvent<HTMLDivElement>, row: NodeRow | PagerRow) => void;
   onControlKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
-  expandAllRef: MutableRefObject<HTMLButtonElement | null>;
+  // The first header control (Expand/Collapse-all when present, otherwise Copy all): the target
+  // when ArrowUp steps up out of the first row.
+  firstControlRef: MutableRefObject<HTMLButtonElement | null>;
 }
 
 export const useRovingTreeNavigation = (
   rows: RenderRow[],
-  { hasControls, toggle, setExpandedFor }: RovingNavActions
+  { toggle, setExpandedFor }: RovingNavActions
 ): RovingNav => {
   const orderedIds = useMemo(() => rows.filter(isFocusable).map(rowKey), [rows]);
   const orderedIdSet = useMemo(() => new Set(orderedIds), [orderedIds]);
@@ -166,7 +182,7 @@ export const useRovingTreeNavigation = (
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const refCallbacks = useRef(new Map<string, (element: HTMLDivElement | null) => void>());
-  const expandAllRef = useRef<HTMLButtonElement | null>(null);
+  const firstControlRef = useRef<HTMLButtonElement | null>(null);
 
   // A stable ref callback per row id, so React doesn't detach/attach the node every render.
   const registerRow = useCallback((id: string) => {
@@ -202,8 +218,8 @@ export const useRovingTreeNavigation = (
           break;
         case 'ArrowUp':
           claim();
-          // From the first row, step up to the Expand/Collapse-all control above the tree.
-          if (index === 0 && hasControls) expandAllRef.current?.focus();
+          // From the first row, step up to the first header control above the tree.
+          if (index === 0) firstControlRef.current?.focus();
           else focusRow(orderedIds[index - 1]);
           break;
         case 'Home':
@@ -225,10 +241,10 @@ export const useRovingTreeNavigation = (
           } else if (row.hasChildren && row.isExpanded) {
             focusRow(orderedIds[index + 1]);
           } else {
-            // Leaf row: step into its copy-value button, if it has one.
+            // Leaf row: step into its first trailing action (copy, then any host-defined actions).
             rowRefs.current
               .get(rowKey(row))
-              ?.querySelector<HTMLElement>('.jsonTreeViewerCopyButton')
+              ?.querySelector<HTMLElement>('.jsonTreeViewerRowAction')
               ?.focus();
           }
           break;
@@ -254,14 +270,25 @@ export const useRovingTreeNavigation = (
           break;
       }
     },
-    [orderedIds, focusRow, setExpandedFor, toggle, hasControls]
+    [orderedIds, focusRow, setExpandedFor, toggle]
   );
 
-  // The Expand/Collapse-all control joins the tree's keyboard navigation: ArrowDown steps into the
-  // first row, Escape returns to the grid cell, and its keys never leak to the grid's cell nav.
+  // The header controls join the tree's keyboard navigation: Left/Right move between them, ArrowDown
+  // steps into the first row, Escape returns to the grid cell, and their keys never leak to the
+  // grid's cell nav.
   const onControlKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
-      if (event.key.startsWith('Arrow')) {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        event.stopPropagation();
+        const header = event.currentTarget.closest<HTMLElement>('.jsonTreeViewerHeader');
+        const controls = header
+          ? Array.from(header.querySelectorAll<HTMLElement>('.jsonTreeViewerHeaderControl'))
+          : [];
+        const index = controls.indexOf(event.currentTarget);
+        const next = event.key === 'ArrowRight' ? controls[index + 1] : controls[index - 1];
+        next?.focus();
+      } else if (event.key.startsWith('Arrow')) {
         event.preventDefault();
         event.stopPropagation();
         if (event.key === 'ArrowDown') focusRow(orderedIds[0]);
@@ -278,6 +305,6 @@ export const useRovingTreeNavigation = (
     registerRow,
     onRowKeyDown,
     onControlKeyDown,
-    expandAllRef,
+    firstControlRef,
   };
 };
