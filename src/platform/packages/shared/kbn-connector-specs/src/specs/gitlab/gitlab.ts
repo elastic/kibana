@@ -121,6 +121,7 @@ import {
 
 const GITLAB_DEFAULT_BASE_URL = 'https://gitlab.com';
 const DIFF_TEXT_LIMIT = 4000;
+const DIFF_FILE_LIMIT = 100;
 const DEFAULT_ARTIFACT_LIMIT = 20000;
 
 /** Normalizes the configured instance URL to `https://host[/prefix]/api/v4`. */
@@ -820,7 +821,7 @@ export const GitLab: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Get a merge request by project and iid: state, mergeStatus (e.g. "mergeable", "not_approved", "ci_still_running", "conflict"), branches, head SHA, head pipeline, labels, assignees, reviewers, and by default the approval state (approved, approvalsLeft, approvedBy) and the list of changed files without diff text. Use this to decide whether to approve or merge.',
+        'Get a merge request by project and iid: state, mergeStatus (e.g. "mergeable", "not_approved", "ci_still_running", "conflict"), branches, head SHA, head pipeline, labels, assignees, reviewers, and by default the approval state (approved, approvalsLeft, approvedBy) and the list of changed files without diff text (first 100 files; changedFilesTruncated is true when there may be more). Use this to decide whether to approve or merge.',
       input: GetMergeRequestInputSchema,
       handler: async (ctx, input: GetMergeRequestInput) =>
         runAction('getMergeRequest', async () => {
@@ -834,12 +835,17 @@ export const GitLab: ConnectorSpec = {
           }
           const [approvals, diffs] = await Promise.all([
             ctx.client.get<GitLabApprovals>(`${url}/approvals`),
-            ctx.client.get<GitLabDiff[]>(`${url}/diffs`, { params: { per_page: 100 } }),
+            ctx.client.get<GitLabDiff[]>(`${url}/diffs`, {
+              params: { per_page: DIFF_FILE_LIMIT },
+            }),
           ]);
+          const changedFiles = (diffs.data ?? []).map(toChangedFile);
           return {
             ...summary,
             approvals: toApprovalSummary(approvals.data),
-            changedFiles: (diffs.data ?? []).map(toChangedFile),
+            changedFiles,
+            // Only the first page of diffs is fetched; flag when the MR may touch more files.
+            changedFilesTruncated: changedFiles.length >= DIFF_FILE_LIMIT,
           };
         }),
     },
@@ -1025,7 +1031,7 @@ export const GitLab: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        "Get a single commit by SHA (or branch/tag name) with its message, author, dates, parents, and line stats, plus by default the per-file diff (each file's diff text truncated to 4000 characters). Set includeDiff=false for metadata only.",
+        "Get a single commit by SHA (or branch/tag name) with its message, author, dates, parents, and line stats, plus by default the per-file diff for the first 100 changed files (each file's diff text truncated to 4000 characters; diffsTruncated is true when the commit may touch more files). Set includeDiff=false for metadata only.",
       input: GetCommitInputSchema,
       handler: async (ctx, input: GetCommitInput) =>
         runAction('getCommit', async () => {
@@ -1039,9 +1045,15 @@ export const GitLab: ConnectorSpec = {
             return summary;
           }
           const diffs = await ctx.client.get<GitLabDiff[]>(`${url}/diff`, {
-            params: { per_page: 100 },
+            params: { per_page: DIFF_FILE_LIMIT },
           });
-          return { ...summary, diffs: (diffs.data ?? []).map(toFileDiff) };
+          const fileDiffs = (diffs.data ?? []).map(toFileDiff);
+          return {
+            ...summary,
+            diffs: fileDiffs,
+            // Only the first page of file diffs is fetched; flag when the commit may touch more files.
+            diffsTruncated: fileDiffs.length >= DIFF_FILE_LIMIT,
+          };
         }),
     },
 

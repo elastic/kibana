@@ -336,7 +336,7 @@ export const GetMergeRequestInputSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe(
-        'When true (default), also returns the list of changed files (paths and change type, without diff text) and the approval state.'
+        'When true (default), also returns the approval state and the first 100 changed files (paths and change type, without diff text) with a changedFilesTruncated flag.'
       ),
   })
 );
@@ -545,7 +545,7 @@ export const GetCommitInputSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe(
-        'When true (default), also returns the per-file diff. Each file diff is truncated to 4000 characters; set false to skip diffs for large commits.'
+        'When true (default), also returns the per-file diff for the first 100 changed files (diffsTruncated flags more). Each file diff is truncated to 4000 characters; set false to skip diffs for large commits.'
       ),
   })
 );

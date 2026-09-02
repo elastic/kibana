@@ -463,8 +463,29 @@ describe('GitLab', () => {
               deletedFile: false,
             },
           ],
+          changedFilesTruncated: false,
         })
       );
+    });
+
+    it('flags changedFiles as truncated when a full page of diffs comes back', async () => {
+      mockClient.get.mockImplementation(async (url: string) => {
+        if (url.endsWith('/approvals')) {
+          return { data: { approved: false } };
+        }
+        if (url.endsWith('/diffs')) {
+          return {
+            data: Array.from({ length: 100 }, (_, index) => ({ new_path: `f${index}.ts` })),
+          };
+        }
+        return { data: sampleMergeRequest };
+      });
+      const result = await GitLab.actions.getMergeRequest.handler(
+        mockContext,
+        parse('getMergeRequest', { projectId: '42', mergeRequestIid: 5 })
+      );
+      expect(result.changedFiles).toHaveLength(100);
+      expect(result.changedFilesTruncated).toBe(true);
     });
 
     it('skips approvals and diffs when includeDiffSummary is false', async () => {
@@ -675,6 +696,7 @@ describe('GitLab', () => {
       expect(result.diffs?.[1]).toEqual(
         expect.objectContaining({ newFile: true, diffTruncated: false })
       );
+      expect(result.diffsTruncated).toBe(false);
     });
 
     it('gets a commit without diff when includeDiff is false', async () => {

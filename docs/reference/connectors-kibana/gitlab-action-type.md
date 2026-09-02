@@ -79,7 +79,7 @@ Authentication
 
 Instance-wide and group-wide `searchCode` require GitLab Advanced Search (Premium or Ultimate) and return `403` on other tiers. Project-scoped search works on every tier.
 
-`triggerPipeline` requires a `.gitlab-ci.yml` on the ref. Passing `variables` also requires the project's **Settings > CI/CD > Variables > Minimum role to use pipeline variables** to include the token's role (new projects default to **No one allowed**). On GitLab.com, free namespaces must complete identity verification before any CI job can run.
+`triggerPipeline` requires a `.gitlab-ci.yml` on the ref. Passing `variables` also requires the project's **Settings → CI/CD → Variables → Minimum role to use pipeline variables** to include the token's role (new projects default to **No one allowed**). On GitLab.com, free namespaces must complete identity verification before any CI job can run.
 
 ## Connector networking configuration [gitlab-connector-networking-configuration]
 
@@ -89,11 +89,11 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 To create a personal access token on GitLab.com or a self-managed instance:
 
-1. Sign in to GitLab and open **User settings** > **Access tokens** (on GitLab.com: [https://gitlab.com/-/user_settings/personal_access_tokens](https://gitlab.com/-/user_settings/personal_access_tokens)).
+1. Sign in to GitLab and open **User settings → Access tokens** (on GitLab.com: [https://gitlab.com/-/user_settings/personal_access_tokens](https://gitlab.com/-/user_settings/personal_access_tokens)).
 2. Select **Add new token**. On instances that offer fine-grained tokens, open the **Generate token** dropdown and choose **Legacy token** to use scopes.
 3. Enter a name (for example, `Kibana connector`) and an expiry date.
 4. Select the `api` scope. For a read-only connector, `read_api` is sufficient. If you use a fine-grained token instead, grant the Projects, Project Planning, Repository, CI/CD, Search, Groups, and Note resources for the projects you want to automate.
 5. Select **Create personal access token** and copy the token (it starts with `glpat-`).
 6. When configuring the connector in {{kib}}, paste the token as the **Access token**, and set **GitLab URL** only if you are not using GitLab.com.
 
-Project, group, and instance access tokens work the same way; they act as bot users and cannot approve their own merge requests. Refer to the [GitLab token documentation](https://docs.gitlab.com/security/tokens/) for the differences.
+Project, group, and instance access tokens work the same way. They act as bot users and cannot approve their own merge requests. Refer to the [GitLab token documentation](https://docs.gitlab.com/security/tokens/) for the differences.
