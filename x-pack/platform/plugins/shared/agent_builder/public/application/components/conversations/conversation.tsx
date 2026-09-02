@@ -25,7 +25,6 @@ import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
-import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
 import { useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
@@ -60,7 +59,6 @@ export const Conversation: React.FC<{}> = () => {
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
-  const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
   const { attachmentsService } = useAgentBuilderServices();
   const {
@@ -85,7 +83,6 @@ export const Conversation: React.FC<{}> = () => {
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
   const { showScrollButton, onMessageSent, smoothScrollToBottom, stickToBottom } =
     useConversationScrollActions({
-      conversationId: conversationId || '',
       scrollContainer,
     });
 
@@ -114,14 +111,14 @@ export const Conversation: React.FC<{}> = () => {
     setDismissStaleAttachments(false);
   }, [staleAttachments, conversationId]);
 
-  // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
+  // Stick to bottom when opening a conversation, once its data has loaded
   useEffect(() => {
-    if (isFetched && conversationId && shouldStickToBottom) {
+    if (isFetched && conversationId) {
       requestAnimationFrame(() => {
         stickToBottom();
       });
     }
-  }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
+  }, [stickToBottom, isFetched, conversationId]);
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
