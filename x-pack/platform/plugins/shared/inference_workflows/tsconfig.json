@@ -13,6 +13,11 @@
     "@kbn/workflows-extensions",
     "@kbn/inference-plugin",
     "@kbn/inference-common",
-    "@kbn/search-inference-endpoints"
+    "@kbn/search-inference-endpoints",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-spaces-common",
+    "@kbn/spaces-plugin",
+    "@kbn/config-schema"
   ]
 }
