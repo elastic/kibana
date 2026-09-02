@@ -98,6 +98,14 @@ export const INVESTIGATION_STATUSES = [
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
+export const UPDATABLE_INVESTIGATION_STATUSES = [
+  'running',
+  'completed',
+  'failed',
+  'cancelled',
+] as const;
+export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
+
 export interface InvestigationStructuredOutput {
   summary?: string;
   conclusion?: string;
@@ -107,6 +115,13 @@ export interface InvestigationStructuredOutput {
   blind_spots?: InvestigationBlindSpot[];
   trigger_feedback?: TriggerFeedback[];
   impact?: InvestigationImpact;
+}
+
+/** Body of PATCH /internal/nightshift/investigations/{id}. */
+export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
+  status: UpdatableInvestigationStatus;
+  error?: string;
+  conversation_id?: string;
 }
 
 export interface GetInvestigationResponse {
@@ -173,6 +188,13 @@ export interface ListInvestigationItem {
   severity?: Severity;
   concurrency_key?: string;
   executed_by?: string;
+}
+
+export interface PaginatedResponse<T> {
+  results: T[];
+  page: number;
+  size: number;
+  total: number;
 }
 
 export interface ListInvestigationsResponse {
