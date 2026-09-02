@@ -118,7 +118,9 @@ export function toStoredFieldFormats(
 export function toStoredFieldFormatParams(
   format: AsCodeFieldFormat
 ): NonNullable<DataViewSpec['fieldFormats']>[string]['params'] | undefined {
-  if (!('params' in format) || !format.params) return undefined;
+  if (!('params' in format) || !format.params || Object.keys(format.params).length === 0) {
+    return undefined;
+  }
 
   if (isDurationFormat(format)) {
     const outputFormat = format.params.output_format
