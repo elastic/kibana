@@ -329,7 +329,7 @@ describe('stepDeletePreviousPipelines', () => {
         ],
       });
 
-      expect(mockedDeletePreviousPipelines).not.toBeCalled();
+      expect(mockedDeletePreviousPipelines).not.toHaveBeenCalled();
       expect(res).toEqual({
         esReferences: [
           {
@@ -359,7 +359,7 @@ describe('stepDeletePreviousPipelines', () => {
         ],
       });
 
-      expect(mockedDeletePreviousPipelines).not.toBeCalled();
+      expect(mockedDeletePreviousPipelines).not.toHaveBeenCalled();
       expect(res).toEqual({
         esReferences: [
           {
@@ -389,7 +389,7 @@ describe('stepDeletePreviousPipelines', () => {
         ],
       });
 
-      expect(mockedDeletePreviousPipelines).not.toBeCalled();
+      expect(mockedDeletePreviousPipelines).not.toHaveBeenCalled();
       expect(res).toEqual({
         esReferences: [
           {
@@ -430,7 +430,7 @@ describe('stepDeletePreviousPipelines', () => {
         ],
       });
 
-      expect(mockedDeletePreviousPipelines).not.toBeCalled();
+      expect(mockedDeletePreviousPipelines).not.toHaveBeenCalled();
       expect(res).toEqual({
         esReferences: [
           {
@@ -471,7 +471,7 @@ describe('stepDeletePreviousPipelines', () => {
         ],
       });
 
-      expect(mockedDeletePreviousPipelines).not.toBeCalled();
+      expect(mockedDeletePreviousPipelines).not.toHaveBeenCalled();
       expect(res).toEqual({
         esReferences: [
           {
