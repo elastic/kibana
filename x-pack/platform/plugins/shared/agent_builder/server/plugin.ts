@@ -215,10 +215,7 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
-    const managementApi = new AgentBuilderManagementApi(
-      coreSetup.getStartServices,
-      this.logger
-    );
+    const managementApi = new AgentBuilderManagementApi(coreSetup.getStartServices, this.logger);
 
     return {
       tools: {
