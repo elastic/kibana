@@ -40,6 +40,10 @@ import { runMockQueryPreview, type MockQueryPreviewResult } from './services/moc
 
 const DEFAULT_QUERY = 'FROM kibana_sample_data_ecommerce | WHERE KQL("term")';
 
+// Match V2/V3: named EUI sizes resolve to viewport-relative percentages, so pin a
+// literal pixel width instead. 992px matches `size="l"`'s max-width.
+const MAIN_FLYOUT_WIDTH = 992;
+
 export interface CreateEditEsqlViewFlyoutProps {
   mode: 'create' | 'edit';
   initialView?: EsqlView;
@@ -230,7 +234,7 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
+      size={MAIN_FLYOUT_WIDTH}
       ownFocus
       aria-labelledby={flyoutTitleId}
       data-test-subj="esqlViewsCreateEditFlyout"
@@ -259,9 +263,15 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
           label={i18n.translate('esqlViews.flyout.nameLabel', { defaultMessage: 'Name' })}
           helpText={
             !nameError &&
-            i18n.translate('esqlViews.flyout.nameHelpText', {
-              defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores only.',
-            })
+            (name.trim()
+              ? i18n.translate('esqlViews.flyout.nameEsqlHelpText', {
+                  defaultMessage: 'Used in ES|QL queries as {query}',
+                  values: { query: `FROM ${name.trim()}` },
+                })
+              : i18n.translate('esqlViews.flyout.nameHelpText', {
+                  defaultMessage:
+                    'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
+                }))
           }
           isInvalid={Boolean(nameError)}
           error={nameError}
@@ -271,8 +281,8 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
             value={name}
             onChange={handleNameChange}
             onBlur={handleNameBlur}
-            placeholder={i18n.translate('esqlViews.flyout.textPlaceholder', {
-              defaultMessage: 'Type text',
+            placeholder={i18n.translate('esqlViews.flyout.namePlaceholder', {
+              defaultMessage: 'e.g. my-dataset',
             })}
             disabled={mode === 'edit'}
             isInvalid={Boolean(nameError)}
@@ -282,7 +292,10 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('esqlViews.flyout.descriptionLabel', {
-            defaultMessage: 'Description',
+            defaultMessage: 'Description (optional)',
+          })}
+          helpText={i18n.translate('esqlViews.flyout.descriptionHelpText', {
+            defaultMessage: 'A brief description to help identify this view.',
           })}
           fullWidth
         >

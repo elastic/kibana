@@ -67,10 +67,9 @@ const resultsFlyoutSelector = `[data-test-subj="${RESULTS_FLYOUT_TEST_SUBJ}"][da
 
 // Pinning both flyouts' widths to literal pixel values (rather than named sizes, which resolve
 // to viewport-relative percentages) means both always agree on the same numbers below, with no
-// runtime measuring needed. 460px approximated V2's own child flyout; 768px instead matches
-// `size="m"`'s own `max-width` (`euiTheme.breakpoint.m`, see `flyout.styles.js`), since the
-// results flyout below is semantically `size="m"`.
-const MAIN_FLYOUT_WIDTH = 600;
+// runtime measuring needed. 992px matches `size="l"`'s `max-width` (`euiTheme.breakpoint.l`,
+// see `flyout.styles.js`) for the main flyout; the results flyout is semantically `size="m"`.
+const MAIN_FLYOUT_WIDTH = 992;
 const RESULTS_FLYOUT_WIDTH = 768;
 
 const dockedResultsFlyoutStyles = css`
@@ -309,9 +308,15 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
             label={i18n.translate('esqlViews.flyout.nameLabel', { defaultMessage: 'Name' })}
             helpText={
               !nameError &&
-              i18n.translate('esqlViews.flyout.nameHelpText', {
-                defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores only.',
-              })
+              (name.trim()
+                ? i18n.translate('esqlViews.flyout.nameEsqlHelpText', {
+                    defaultMessage: 'Used in ES|QL queries as {query}',
+                    values: { query: `FROM ${name.trim()}` },
+                  })
+                : i18n.translate('esqlViews.flyout.nameHelpText', {
+                    defaultMessage:
+                      'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
+                  }))
             }
             isInvalid={Boolean(nameError)}
             error={nameError}
@@ -321,8 +326,8 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
               value={name}
               onChange={handleNameChange}
               onBlur={handleNameBlur}
-              placeholder={i18n.translate('esqlViews.flyout.textPlaceholder', {
-                defaultMessage: 'Type text',
+              placeholder={i18n.translate('esqlViews.flyout.namePlaceholder', {
+                defaultMessage: 'e.g. my-dataset',
               })}
               disabled={mode === 'edit'}
               isInvalid={Boolean(nameError)}
@@ -332,7 +337,10 @@ export const CreateEditEsqlViewFlyoutV3: React.FunctionComponent<CreateEditEsqlV
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('esqlViews.flyout.descriptionLabel', {
-              defaultMessage: 'Description',
+              defaultMessage: 'Description (optional)',
+            })}
+            helpText={i18n.translate('esqlViews.flyout.descriptionHelpText', {
+              defaultMessage: 'A brief description to help identify this view.',
             })}
             fullWidth
           >
