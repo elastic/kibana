@@ -45,6 +45,7 @@ import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { AlertingV2PageProps } from './application/composable_pages';
 import { AlertingV2RuleLibraryLocatorDefinition } from './locator';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
@@ -58,7 +59,43 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
-export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
+const lazyPage = (
+  loader: () => Promise<{ default: React.ComponentType<AlertingV2PageProps> }>
+): React.ComponentType<AlertingV2PageProps> => {
+  const LazyComponent = React.lazy(loader);
+  return (props: AlertingV2PageProps) =>
+    React.createElement(
+      React.Suspense,
+      { fallback: null },
+      React.createElement(LazyComponent, props)
+    );
+};
+
+const RulesPage = lazyPage(() =>
+  import('./application/composable_pages').then((m) => ({ default: m.AlertingV2RulesPage }))
+);
+const RuleLibraryPage = lazyPage(() =>
+  import('./application/composable_pages').then((m) => ({ default: m.AlertingV2RuleLibraryPage }))
+);
+const EpisodesPage = lazyPage(() =>
+  import('./application/composable_pages').then((m) => ({ default: m.AlertingV2EpisodesPage }))
+);
+const ActionPoliciesPage = lazyPage(() =>
+  import('./application/composable_pages').then((m) => ({
+    default: m.AlertingV2ActionPoliciesPage,
+  }))
+);
+const ExecutionHistoryPage = lazyPage(() =>
+  import('./application/composable_pages').then((m) => ({
+    default: m.AlertingV2ExecutionHistoryPage,
+  }))
+);
+
+export type {
+  AlertingV2PublicStart,
+  CreateRuleOptionsFlyoutLegacyItem,
+  AlertingV2PageProps,
+} from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
 
@@ -74,6 +111,11 @@ const pluginModule = new ContainerModule(({ bind }) => {
     .inSingletonScope();
   bind(Start).toConstantValue({
     CreateRuleOptionsFlyout,
+    RulesPage,
+    RuleLibraryPage,
+    EpisodesPage,
+    ActionPoliciesPage,
+    ExecutionHistoryPage,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
