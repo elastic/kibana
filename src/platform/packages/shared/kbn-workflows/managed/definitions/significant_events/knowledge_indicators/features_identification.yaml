@@ -135,9 +135,7 @@ steps:
             runId: "${{ execution.id }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"
-            totalFilters: "${{ steps.prepare.output.totalFilters }}"
-            filtersCapped: "${{ steps.prepare.output.filtersCapped }}"
-            hasFilteredDocuments: "${{ steps.prepare.output.hasFilteredDocuments }}"
+            samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"
             maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
 

@@ -46,9 +46,11 @@ export interface PrepareInferredSamplingResult {
   documents: InferenceDocument[];
   docsCount: number;
   docIds: string[];
-  totalFilters: number;
-  filtersCapped: boolean;
-  hasFilteredDocuments: boolean;
+  samplingTelemetry: {
+    totalFilters: number;
+    filtersCapped: boolean;
+    hasFilteredDocuments: boolean;
+  };
 }
 
 const compactDocuments = (hits: Array<SearchHit<Record<string, unknown>>>): InferenceDocument[] => {
@@ -134,8 +136,10 @@ export const prepareInferredSampling = async ({
     documents,
     docsCount: documents.length,
     docIds: documents.map(({ _id }) => _id).filter((id): id is string => id !== undefined),
-    totalFilters,
-    filtersCapped,
-    hasFilteredDocuments,
+    samplingTelemetry: {
+      totalFilters,
+      filtersCapped,
+      hasFilteredDocuments,
+    },
   };
 };

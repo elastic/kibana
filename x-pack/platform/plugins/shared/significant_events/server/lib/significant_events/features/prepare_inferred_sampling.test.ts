@@ -98,9 +98,11 @@ describe('prepareInferredSampling', () => {
       ],
       docsCount: 2,
       docIds: ['doc-1', 'doc-2'],
-      totalFilters: 3,
-      filtersCapped: true,
-      hasFilteredDocuments: true,
+      samplingTelemetry: {
+        totalFilters: 3,
+        filtersCapped: true,
+        hasFilteredDocuments: true,
+      },
     });
   });
 
@@ -120,9 +122,11 @@ describe('prepareInferredSampling', () => {
       documents: [],
       docsCount: 0,
       docIds: [],
-      totalFilters: 0,
-      filtersCapped: false,
-      hasFilteredDocuments: false,
+      samplingTelemetry: {
+        totalFilters: 0,
+        filtersCapped: false,
+        hasFilteredDocuments: false,
+      },
     });
   });
 

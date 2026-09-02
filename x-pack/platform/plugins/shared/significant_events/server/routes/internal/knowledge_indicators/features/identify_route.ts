@@ -190,9 +190,11 @@ const identifyInferredFeaturesRoute = createServerRoute({
       runId: z.string().max(MAX_ID_LENGTH).optional(),
       iteration: z.number().optional(),
       documents: inferenceDocumentsSchema,
-      totalFilters: z.number().int().min(0),
-      filtersCapped: z.boolean(),
-      hasFilteredDocuments: z.boolean(),
+      samplingTelemetry: z.object({
+        totalFilters: z.number().int().min(0),
+        filtersCapped: z.boolean(),
+        hasFilteredDocuments: z.boolean(),
+      }),
       maxExcludedFeaturesInPrompt: z.number().optional(),
       maxPreviouslyIdentifiedFeatures: z.number().optional(),
     }),
@@ -228,12 +230,11 @@ const identifyInferredFeaturesRoute = createServerRoute({
       runId = uuidv4(),
       iteration,
       documents,
-      totalFilters,
-      filtersCapped,
-      hasFilteredDocuments,
+      samplingTelemetry,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
+    const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
     const [connectorId, stream, kiClient] = await Promise.all([
       connectorIdOverride

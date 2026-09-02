@@ -81,9 +81,11 @@ const createInferredParams = (
   path: { streamName: 'logs.test' },
   body: {
     documents,
-    totalFilters: 0,
-    filtersCapped: false,
-    hasFilteredDocuments: false,
+    samplingTelemetry: {
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+    },
   },
 });
 
@@ -135,9 +137,11 @@ const makeInferredHandlerParams = ({
         runId: 'run-1',
         iteration: 2,
         documents: [{ _id: 'document-1', fields: { message: 'test message' } }],
-        totalFilters: 3,
-        filtersCapped: false,
-        hasFilteredDocuments: true,
+        samplingTelemetry: {
+          totalFilters: 3,
+          filtersCapped: false,
+          hasFilteredDocuments: true,
+        },
         maxExcludedFeaturesInPrompt: 5,
         maxPreviouslyIdentifiedFeatures: 6,
       },
