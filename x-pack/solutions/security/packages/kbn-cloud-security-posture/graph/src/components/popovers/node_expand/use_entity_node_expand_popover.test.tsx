@@ -219,6 +219,7 @@ describe('useEntityNodeExpandPopover', () => {
       expect(items[5]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        label: 'Show entity details',
         disabled: false,
       });
     });
@@ -260,6 +261,7 @@ describe('useEntityNodeExpandPopover', () => {
       expect(items[0]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        label: 'Show grouped entities',
         disabled: false,
       });
     });
