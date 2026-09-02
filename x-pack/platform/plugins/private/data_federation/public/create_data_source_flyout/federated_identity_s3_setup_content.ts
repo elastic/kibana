@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FederatedIdentityManualSetupStep } from './federated_identity_manual_setup';
 import {
-  buildClusterValueEditableLines,
+  buildClusterValuePrefilledLines,
   buildFederatedIdentityManualSetupLineNumbers,
   federatedIdentityManualSetupBucketAnnotation,
 } from './federated_identity_manual_setup_code_block';
@@ -56,7 +56,7 @@ IDP_ARN=$(aws iam create-open-id-connect-provider \\
 
 ISSUER_HOST="\${JWT_ISSUER#https://}"`,
     lineNumbers: buildFederatedIdentityManualSetupLineNumbers(
-      buildClusterValueEditableLines(1, 2, values)
+      buildClusterValuePrefilledLines(1, 2)
     ),
   },
   {

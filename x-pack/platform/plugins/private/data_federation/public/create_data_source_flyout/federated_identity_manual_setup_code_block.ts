@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { FederatedIdentitySetupValues } from './federated_identity_setup_values';
-
 export interface FederatedIdentityManualSetupCodeBlockLineNumbers {
   highlight: string;
   annotations: Record<number, string>;
@@ -19,25 +17,26 @@ export interface FederatedIdentityManualSetupEditableLine {
   annotation?: string;
 }
 
-export const isFederatedIdentityPlaceholderValue = (value: string): boolean =>
-  value.includes('<your-') ||
-  value.includes('<subscription-id>') ||
-  value.includes('<resource-group>');
-
 export const federatedIdentityManualSetupDefaultAnnotation = () =>
   i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.defaultAnnotation', {
     defaultMessage: 'Replace this placeholder with your own value before running the command.',
   });
 
 export const federatedIdentityManualSetupJwtIssuerAnnotation = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.jwtIssuerAnnotation', {
-    defaultMessage: 'Replace with your Elastic JWT issuer URL.',
-  });
+  i18n.translate(
+    'xpack.dataFederation.createFlyout.federated.manual.codeBlock.jwtIssuerPrefilledAnnotation',
+    {
+      defaultMessage: "Your deployment's issuer URL, filled in for you.",
+    }
+  );
 
 export const federatedIdentityManualSetupSubjectAnnotation = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.subjectAnnotation', {
-    defaultMessage: 'Replace with your project or deployment ID.',
-  });
+  i18n.translate(
+    'xpack.dataFederation.createFlyout.federated.manual.codeBlock.subjectPrefilledAnnotation',
+    {
+      defaultMessage: 'Your deployment ID, filled in for you.',
+    }
+  );
 
 export const federatedIdentityManualSetupBucketAnnotation = () =>
   i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.bucketAnnotation', {
@@ -45,9 +44,12 @@ export const federatedIdentityManualSetupBucketAnnotation = () =>
   });
 
 export const federatedIdentityManualSetupProjectIdAnnotation = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.projectIdAnnotation', {
-    defaultMessage: 'Replace with your cloud project ID.',
-  });
+  i18n.translate(
+    'xpack.dataFederation.createFlyout.federated.manual.codeBlock.projectIdAnnotation',
+    {
+      defaultMessage: 'Replace with your cloud project ID.',
+    }
+  );
 
 export const federatedIdentityManualSetupServiceAccountAnnotation = () =>
   i18n.translate(
@@ -66,9 +68,12 @@ export const federatedIdentityManualSetupStorageAccountAnnotation = () =>
   );
 
 export const federatedIdentityManualSetupAzureScopeAnnotation = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.azureScopeAnnotation', {
-    defaultMessage: 'Replace the subscription ID and resource group with your Azure values.',
-  });
+  i18n.translate(
+    'xpack.dataFederation.createFlyout.federated.manual.codeBlock.azureScopeAnnotation',
+    {
+      defaultMessage: 'Replace the subscription ID and resource group with your Azure values.',
+    }
+  );
 
 export const buildFederatedIdentityManualSetupLineNumbers = (
   editableLines: FederatedIdentityManualSetupEditableLine[]
@@ -87,26 +92,14 @@ export const buildFederatedIdentityManualSetupLineNumbers = (
   };
 };
 
-export const buildClusterValueEditableLines = (
+/**
+ * The issuer URL and subject are resolved for the user, so both lines are always annotated to
+ * make clear they need no editing.
+ */
+export const buildClusterValuePrefilledLines = (
   jwtIssuerLine: number,
-  subjectLine: number,
-  values: FederatedIdentitySetupValues
-): FederatedIdentityManualSetupEditableLine[] => {
-  const editableLines: FederatedIdentityManualSetupEditableLine[] = [];
-
-  if (isFederatedIdentityPlaceholderValue(values.jwtIssuer)) {
-    editableLines.push({
-      line: jwtIssuerLine,
-      annotation: federatedIdentityManualSetupJwtIssuerAnnotation(),
-    });
-  }
-
-  if (isFederatedIdentityPlaceholderValue(values.subject)) {
-    editableLines.push({
-      line: subjectLine,
-      annotation: federatedIdentityManualSetupSubjectAnnotation(),
-    });
-  }
-
-  return editableLines;
-};
+  subjectLine: number
+): FederatedIdentityManualSetupEditableLine[] => [
+  { line: jwtIssuerLine, annotation: federatedIdentityManualSetupJwtIssuerAnnotation() },
+  { line: subjectLine, annotation: federatedIdentityManualSetupSubjectAnnotation() },
+];

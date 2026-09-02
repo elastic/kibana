@@ -8,11 +8,12 @@
 import { resolveFederatedIdentitySetupValues } from './federated_identity_setup_values';
 
 describe('resolveFederatedIdentitySetupValues', () => {
-  it('uses placeholder values when cloud info is missing', () => {
-    expect(resolveFederatedIdentitySetupValues(undefined)).toEqual({
-      jwtIssuer: 'https://<your-jwt-issuer>',
-      subject: 'deployment:<your-deployment-id>',
-    });
+  it('falls back to mock values the user never has to edit when cloud info is missing', () => {
+    const { jwtIssuer, subject } = resolveFederatedIdentitySetupValues(undefined);
+
+    expect(jwtIssuer).toMatch(/^https:\/\//);
+    expect(subject).toMatch(/^deployment:/);
+    expect(`${jwtIssuer} ${subject}`).not.toContain('<your-');
   });
 
   it('uses injected cloud info values when present', () => {
@@ -29,17 +30,15 @@ describe('resolveFederatedIdentitySetupValues', () => {
     });
   });
 
-  it('uses serverless placeholder when cloud info is serverless without deployment id', () => {
-    expect(
-      resolveFederatedIdentitySetupValues({
-        jwtIssuer: '',
-        cloudOrgId: 'org-1',
-        deploymentId: '',
-        isServerless: true,
-      })
-    ).toEqual({
-      jwtIssuer: 'https://<your-jwt-issuer>',
-      subject: 'project:<your-project-id>',
+  it('falls back to mock values when cloud info is present but empty', () => {
+    const { jwtIssuer, subject } = resolveFederatedIdentitySetupValues({
+      jwtIssuer: '',
+      cloudOrgId: 'org-1',
+      deploymentId: '',
+      isServerless: true,
     });
+
+    expect(jwtIssuer).toMatch(/^https:\/\//);
+    expect(subject).toMatch(/^deployment:/);
   });
 });

@@ -6,12 +6,10 @@
  */
 
 import {
-  buildClusterValueEditableLines,
+  buildClusterValuePrefilledLines,
   buildFederatedIdentityManualSetupLineNumbers,
-  federatedIdentityManualSetupBucketAnnotation,
   federatedIdentityManualSetupJwtIssuerAnnotation,
   federatedIdentityManualSetupSubjectAnnotation,
-  isFederatedIdentityPlaceholderValue,
 } from './federated_identity_manual_setup_code_block';
 
 describe('federated identity manual setup code block helpers', () => {
@@ -34,28 +32,15 @@ describe('federated identity manual setup code block helpers', () => {
     expect(buildFederatedIdentityManualSetupLineNumbers([])).toBeUndefined();
   });
 
-  it('adds cluster value lines only when placeholders are present', () => {
-    expect(
-      buildClusterValueEditableLines(1, 2, {
-        jwtIssuer: 'https://issuer.example',
-        subject: 'project:abc',
-      })
-    ).toEqual([]);
-
-    expect(
-      buildClusterValueEditableLines(1, 2, {
-        jwtIssuer: 'https://<your-jwt-issuer>',
-        subject: 'project:<your-project-id>',
-      })
-    ).toEqual([
+  it('annotates the prefilled cluster value lines', () => {
+    expect(buildClusterValuePrefilledLines(1, 2)).toEqual([
       { line: 1, annotation: federatedIdentityManualSetupJwtIssuerAnnotation() },
       { line: 2, annotation: federatedIdentityManualSetupSubjectAnnotation() },
     ]);
   });
 
-  it('detects placeholder values in command strings', () => {
-    expect(isFederatedIdentityPlaceholderValue('https://<your-jwt-issuer>')).toBe(true);
-    expect(isFederatedIdentityPlaceholderValue('/subscriptions/<subscription-id>/')).toBe(true);
-    expect(isFederatedIdentityPlaceholderValue('https://issuer.example')).toBe(false);
+  it('tells the user the prefilled values need no editing', () => {
+    expect(federatedIdentityManualSetupJwtIssuerAnnotation()).not.toMatch(/replace/i);
+    expect(federatedIdentityManualSetupSubjectAnnotation()).not.toMatch(/replace/i);
   });
 });

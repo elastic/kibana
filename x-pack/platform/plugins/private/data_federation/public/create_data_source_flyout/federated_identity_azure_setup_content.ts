@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FederatedIdentityManualSetupStep } from './federated_identity_manual_setup';
 import {
-  buildClusterValueEditableLines,
+  buildClusterValuePrefilledLines,
   buildFederatedIdentityManualSetupLineNumbers,
   federatedIdentityManualSetupAzureScopeAnnotation,
   federatedIdentityManualSetupStorageAccountAnnotation,
@@ -66,7 +66,7 @@ az ad app federated-credential create \\
     "audiences": [ "api://AzureADTokenExchange" ]
   }'`,
     lineNumbers: buildFederatedIdentityManualSetupLineNumbers(
-      buildClusterValueEditableLines(1, 2, values)
+      buildClusterValuePrefilledLines(1, 2)
     ),
   },
   {

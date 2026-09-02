@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FederatedIdentityManualSetupStep } from './federated_identity_manual_setup';
 import {
-  buildClusterValueEditableLines,
+  buildClusterValuePrefilledLines,
   buildFederatedIdentityManualSetupLineNumbers,
   federatedIdentityManualSetupBucketAnnotation,
   federatedIdentityManualSetupProjectIdAnnotation,
@@ -70,7 +70,7 @@ gcloud iam workload-identity-pools providers create-oidc "\${PROVIDER_ID}" \\
   --attribute-mapping="google.subject=assertion.sub,attribute.elastic_subject=assertion.sub" \\
   --attribute-condition="assertion.sub=='\${SUBJECT}'"`,
     lineNumbers: buildFederatedIdentityManualSetupLineNumbers(
-      buildClusterValueEditableLines(1, 2, values)
+      buildClusterValuePrefilledLines(1, 2)
     ),
   },
   {
