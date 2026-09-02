@@ -13,11 +13,11 @@ import { VariableNamePrefix } from '@kbn/esql-types';
 import type { LensApiESQLColumnWithFormat } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
-const getESQLControlVariable = (fieldName: string): string | undefined => {
-  if (!fieldName.startsWith(VariableNamePrefix.IDENTIFIER)) {
-    return;
+const getESQLControlVariable = (column: string | undefined): string | undefined => {
+  if (!column?.startsWith(VariableNamePrefix.IDENTIFIER)) {
+    return undefined;
   }
-  const variable = fieldName.slice(VariableNamePrefix.IDENTIFIER.length);
+  const variable = column.slice(VariableNamePrefix.IDENTIFIER.length);
   return variable.length > 0 ? variable : undefined;
 };
 
@@ -28,12 +28,11 @@ export const getValueColumn = (
   inMetricDimension?: boolean
 ): TextBasedLayerColumn => {
   const format = fromFormatAPIToLensState(column?.format);
-  const fieldName = column?.column || id;
-  const variable = getESQLControlVariable(fieldName);
+  const variable = getESQLControlVariable(column?.column);
 
   return {
     columnId: id,
-    fieldName,
+    fieldName: column?.column || id,
     ...(column?.label != null ? { label: column.label, customLabel: true } : {}),
     ...(format ? { params: { format } } : {}),
     ...(fieldType ? { meta: { type: fieldType } } : {}),
