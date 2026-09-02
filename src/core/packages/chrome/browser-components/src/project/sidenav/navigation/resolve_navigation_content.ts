@@ -30,8 +30,11 @@ export interface ResolvedLinksContent {
   };
 }
 
-const toSecondaryMenuItem = (item: ProjectNavigationLinkItem): SecondaryMenuItem => ({
-  id: item.id,
+const toSecondaryMenuItem = (
+  sectionId: string,
+  item: ProjectNavigationLinkItem
+): SecondaryMenuItem => ({
+  id: `${sectionId}:${item.id}`,
   href: item.href,
   label: item.label,
   badgeType: item.badgeType,
@@ -95,7 +98,7 @@ export const resolveLinksContent = (
           id: section.id,
           nodeId,
           title: section.title,
-          items: items.map(toSecondaryMenuItem),
+          items: items.map((item) => toSecondaryMenuItem(section.id, item)),
           viewAll: section.viewAll,
         }))
       )

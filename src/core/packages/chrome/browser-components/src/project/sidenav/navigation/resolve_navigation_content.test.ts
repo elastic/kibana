@@ -88,7 +88,13 @@ describe('attachPopoverSections', () => {
       {
         id: 'dashboardRecentlyViewed',
         label: 'Recently viewed',
-        items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
+        items: [
+          {
+            id: 'dashboardRecentlyViewed:dash-1',
+            href: '/app/dashboards#/dash-1',
+            label: 'One',
+          },
+        ],
       },
       {
         id: 'dashboards-viewAll',
