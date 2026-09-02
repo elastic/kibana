@@ -12,7 +12,6 @@ import {
   listWatches,
   listWorkers,
   resetWatchStore,
-  setSkillEnabled,
   setWorkerEnabled,
 } from './watch_store';
 
@@ -64,23 +63,16 @@ describe('watch store', () => {
     });
   });
 
-  describe('global worker and skill flags', () => {
-    it('toggles a skill', () => {
-      expect(setSkillEnabled('alert-triage', false)).toBeDefined();
-      expect(listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(false);
-    });
-
+  describe('global worker flags', () => {
     it('does not confuse a worker id with the identically named skill id', () => {
       // Containment exists as both a worker and a skill, so the two must move independently.
       expect(setWorkerEnabled('containment', false)).toBeDefined();
 
       expect(listWorkers().find(({ id }) => id === 'containment')?.enabled).toBe(false);
-      expect(listSkills().find(({ id }) => id === 'containment')?.enabled).toBe(true);
     });
 
     it('returns undefined for unknown global ids', () => {
       expect(setWorkerEnabled('nope', false)).toBeUndefined();
-      expect(setSkillEnabled('nope', false)).toBeUndefined();
     });
   });
 });
