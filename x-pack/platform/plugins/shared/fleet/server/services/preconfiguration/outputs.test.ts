@@ -665,8 +665,10 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toHaveBeenCalled();
-      expect(mockedOutputService.create.mock.calls[0][2].hosts).toEqual(['http://default-es:9200']);
+      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.create.mock.calls[0][2]).toMatchObject({
+        hosts: ['http://default-es:9200'],
+      });
     });
 
     it('should create a preconfigured logstash output that does not exist', async () => {
@@ -1646,7 +1648,7 @@ describe('createManagedBulkOutputMatcher', () => {
       isManagedBulk({
         type: 'elasticsearch',
         hosts: ['https://managed-otlp.example.invalid:443/_es'],
-      })
+      } as unknown as Output)
     ).toBe(true);
   });
 
@@ -1672,7 +1674,7 @@ describe('createManagedBulkOutputMatcher', () => {
       isManagedBulk({
         type: 'elasticsearch',
         hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
-      })
+      } as unknown as Output)
     ).toBe(true);
   });
 
@@ -1692,7 +1694,7 @@ describe('createManagedBulkOutputMatcher', () => {
       isManagedBulk({
         type: 'remote_elasticsearch',
         hosts: ['https://managed-otlp.example.invalid:443/_es'],
-      })
+      } as unknown as Output)
     ).toBe(false);
   });
 
@@ -1709,7 +1711,10 @@ describe('createManagedBulkOutputMatcher', () => {
     const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
 
     expect(
-      isManagedBulk({ type: 'elasticsearch', hosts: ['https://es.example.invalid:9200'] })
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://es.example.invalid:9200'],
+      } as unknown as Output)
     ).toBe(false);
   });
 
@@ -1725,7 +1730,9 @@ describe('createManagedBulkOutputMatcher', () => {
 
     const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
 
-    expect(isManagedBulk({ type: 'elasticsearch', hosts: undefined })).toBe(false);
+    expect(isManagedBulk({ type: 'elasticsearch', hosts: undefined } as unknown as Output)).toBe(
+      false
+    );
   });
 
   it('returns false for all outputs and does not throw when config is undefined', () => {
@@ -1735,7 +1742,7 @@ describe('createManagedBulkOutputMatcher', () => {
       isManagedBulk({
         type: 'elasticsearch',
         hosts: ['https://managed-otlp.example.invalid:443/_es'],
-      })
+      } as unknown as Output)
     ).toBe(false);
   });
 
@@ -1752,10 +1759,16 @@ describe('createManagedBulkOutputMatcher', () => {
     const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
 
     expect(() =>
-      isManagedBulk({ type: 'elasticsearch', hosts: ['https://something.example.invalid'] })
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://something.example.invalid'],
+      } as unknown as Output)
     ).not.toThrow();
     expect(
-      isManagedBulk({ type: 'elasticsearch', hosts: ['https://something.example.invalid'] })
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://something.example.invalid'],
+      } as unknown as Output)
     ).toBe(false);
   });
 });
