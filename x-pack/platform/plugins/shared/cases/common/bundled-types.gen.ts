@@ -494,7 +494,10 @@ export const CreateCaseRequest = lazySchema(() =>
         })
       )
       .max(10)
-      .optional(),
+      .optional()
+      .describe(
+        'Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n'
+      ),
     extended_fields: CaseExtendedFields.optional(),
     /**
       * A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
@@ -806,12 +809,24 @@ export const CaseResponseProperties = lazySchema(() =>
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
 
       */
-    duration: z.number().int().nullable(),
+    duration: z
+      .number()
+      .int()
+      .nullable()
+      .describe(
+        'The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n'
+      ),
     /**
       * The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
 
       */
-    extended_fields: z.object({}).catchall(z.string()).optional(),
+    extended_fields: z
+      .object({})
+      .catchall(z.string())
+      .optional()
+      .describe(
+        "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n"
+      ),
     external_service: ExternalService,
     id: z.string(),
     /**
