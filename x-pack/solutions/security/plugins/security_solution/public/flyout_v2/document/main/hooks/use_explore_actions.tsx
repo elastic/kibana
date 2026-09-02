@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getExploreButtonInfo } from '../utils/get_explore_url';
@@ -31,7 +30,7 @@ export interface UseExploreActionsResult {
   exploreActionItems: {
     'data-test-subj': string;
     key: string;
-    name: React.JSX.Element;
+    name: string;
     onClick: () => void;
   }[];
 }
@@ -59,14 +58,7 @@ export const useExploreActions = ({
       {
         'data-test-subj': 'explore-in-alerts-or-timeline',
         key: EXPLORE_ACTION_ID,
-        name: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexStart">
-            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="external" size="m" aria-hidden={true} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        name: label,
         onClick,
       },
     ],
