@@ -35,7 +35,7 @@ describe('fromStoredFields', () => {
 
   describe.each(FORMATS_WITH_PATTERN)('when the format is %s', (format) => {
     describe('when the params are undefined', () => {
-      it('should return no params', () => {
+      it('should return empty params', () => {
         const result = fromStoredFields(
           {},
           {
@@ -46,14 +46,14 @@ describe('fromStoredFields', () => {
           {}
         );
         expect(result).toEqual({
-          'field-name': { format: { type: format } },
+          'field-name': { format: { type: format, params: {} } },
         });
         expectValidFormat(result);
       });
     });
 
     describe.each([undefined, null])('when the pattern is %s', (pattern) => {
-      it('should return no params', () => {
+      it('should return empty params', () => {
         const result = fromStoredFields(
           {},
           {
@@ -65,7 +65,7 @@ describe('fromStoredFields', () => {
           {}
         );
         expect(result).toEqual({
-          'field-name': { format: { type: format } },
+          'field-name': { format: { type: format, params: {} } },
         });
         expectValidFormat(result);
       });
@@ -154,7 +154,7 @@ describe('fromStoredFields', () => {
       { transform: null },
       { transform: 'false' },
     ])('when the params are %s', (params) => {
-      it('should return no params', () => {
+      it('should return empty params', () => {
         const result = fromStoredFields(
           {},
           {
@@ -166,7 +166,7 @@ describe('fromStoredFields', () => {
           {}
         );
         expect(result).toEqual({
-          'field-name': { format: { type: 'string' } },
+          'field-name': { format: { type: 'string', params: {} } },
         });
         expectValidFormat(result);
       });
@@ -204,7 +204,7 @@ describe('fromStoredFields', () => {
     describe.each([undefined, { fieldLength: undefined }, { fieldLength: null }])(
       'when the params are %s',
       (params) => {
-        it('should return no params', () => {
+        it('should return empty params', () => {
           const result = fromStoredFields(
             {},
             {
@@ -216,7 +216,7 @@ describe('fromStoredFields', () => {
             {}
           );
           expect(result).toEqual({
-            'field-name': { format: { type: 'truncate' } },
+            'field-name': { format: { type: 'truncate', params: {} } },
           });
           expectValidFormat(result);
         });
@@ -248,7 +248,7 @@ describe('fromStoredFields', () => {
 
   describe('when the format is unknown', () => {
     describe.each([undefined, {}])('when the params are %s', (params) => {
-      it('should return no params', () => {
+      it('should return empty params', () => {
         const result = fromStoredFields(
           {},
           {
@@ -260,7 +260,7 @@ describe('fromStoredFields', () => {
           {}
         );
         expect(result).toEqual({
-          'field-name': { format: { type: 'my_custom_format' } },
+          'field-name': { format: { type: 'my_custom_format', params: {} } },
         });
         expectValidFormat(result);
       });

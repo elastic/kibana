@@ -27,7 +27,7 @@ import {
   type AsCodeSavedDataView,
   type AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
-import { isEmpty, isNil, isPlainObject, omitBy, snakeCase } from 'lodash';
+import { isNil, isPlainObject, omitBy, snakeCase } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
 import {
@@ -96,8 +96,7 @@ export function fromStoredFields<IncludePopularity extends boolean = false>(
 
 function omitNilParams<T extends object>(value: T | undefined): T | undefined {
   if (value == null) return undefined;
-  const cleaned = omitBy(value, isNil) as T;
-  return isEmpty(cleaned) ? undefined : cleaned;
+  return omitBy(value, isNil) as T;
 }
 
 function getCommonProperties(

@@ -343,7 +343,7 @@ describe('fromStoredFields.field_settings (runtime inline)', () => {
       assertPrimitiveRuntimeEntry(fieldB);
       expect(fieldA.script).toBe('emit("a")');
       expect(fieldA.format).toBeUndefined();
-      expect(fieldB.format).toEqual({ type: 'number', params: undefined });
+      expect(fieldB.format).toEqual({ type: 'number', params: {} });
     });
   });
 });
@@ -359,7 +359,7 @@ describe('fromStoredFields.field_settings (indexed)', () => {
     expect(result).toEqual({
       rt: { type: 'keyword' },
       mapped: {
-        format: { type: 'bytes', params: undefined },
+        format: { type: 'bytes', params: {} },
         custom_label: 'Mapped',
       },
     });
@@ -378,7 +378,7 @@ describe('fromStoredFields.field_settings (indexed)', () => {
     expect(result).toEqual({
       rt: {
         type: 'keyword',
-        format: { type: 'string', params: undefined },
+        format: { type: 'string', params: {} },
         custom_label: 'runtime',
       },
       parent: {
@@ -386,13 +386,13 @@ describe('fromStoredFields.field_settings (indexed)', () => {
         fields: {
           child: {
             type: 'keyword',
-            format: { type: 'number', params: undefined },
+            format: { type: 'number', params: {} },
             custom_label: 'sub',
           },
         },
       },
       mapped: {
-        format: { type: 'bytes', params: undefined },
+        format: { type: 'bytes', params: {} },
       },
     });
   });
