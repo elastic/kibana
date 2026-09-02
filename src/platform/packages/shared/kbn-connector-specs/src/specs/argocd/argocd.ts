@@ -500,6 +500,7 @@ export const ArgocdConnector: ConnectorSpec = {
   actions: {
     request: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Make an authenticated request to any Argo CD API path. Prefer the typed actions ' +
         '(listApplications, getApplication, syncApplication, getResourceTree, listApplicationEvents, ' +
@@ -518,6 +519,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     listApplications: {
       isTool: true,
+      scope: 'read',
       description:
         'List Argo CD applications with optional filters (project, selector, name, repo). ' +
         'Returns a slim summary per app (name, project, source, destination, sync/health status). ' +
@@ -547,6 +549,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getApplication: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single Argo CD application by name. Returns condensed status (history capped to ' +
         `the last ${MAX_HISTORY_ENTRIES} entries; oversized syncResult.resources stripped). ` +
@@ -569,6 +572,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getResourceTree: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the resource tree for an application — health and sync state per managed Kubernetes ' +
         'object. Primary diagnostic tool when an app is Degraded or OutOfSync.',
@@ -584,6 +588,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     listApplicationEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List Kubernetes events related to an Argo CD application (or a specific managed resource). ' +
         'Useful for diagnosing why sync or hooks failed.',
@@ -604,6 +609,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getPodLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve logs for a pod managed by an Argo CD application. Output is capped to the last ' +
         `${MAX_LOG_CHARS} characters. Prefer finite query params (tailLines, sinceSeconds); ` +
@@ -640,6 +646,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     syncApplication: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Trigger a sync of an Argo CD application to reconcile the live cluster state with Git. ' +
         'prune defaults to false (does not delete resources removed from Git). Prefer dryRun: true ' +
@@ -667,6 +674,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     listClusters: {
       isTool: true,
+      scope: 'read',
       description:
         'List clusters registered with Argo CD. Credential fields (bearerToken, tlsClientConfig, ' +
         'etc.) are scrubbed from the response.',
@@ -688,6 +696,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getProject: {
       isTool: true,
+      scope: 'read',
       description:
         'Get an Argo CD AppProject by name. Defaults to the detailed endpoint for richer agent ' +
         'context (destinations, source repos, roles).',

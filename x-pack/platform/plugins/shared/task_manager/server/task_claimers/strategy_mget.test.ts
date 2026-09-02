@@ -380,7 +380,7 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
           createTaskRunner: jest.fn(),
         },
         bar: {
