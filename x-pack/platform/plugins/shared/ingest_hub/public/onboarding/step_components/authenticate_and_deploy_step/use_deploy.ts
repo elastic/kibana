@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
+import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import {
   buildDeployGroups,
   buildInstanceStatuses,
@@ -23,28 +23,22 @@ import type { DeployGroup } from './deploy_groups';
 
 export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
 
-interface ServiceSettingsPersistedState {
-  globalRegion: string;
-  serviceVars: Record<string, ServiceVars>;
-  instances?: ServiceInstance[];
-}
-
 export interface UseDeployResult {
   namespace: string;
   setNamespace: (ns: string) => void;
   isDeploying: boolean;
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => void;
+  isAlreadyDeployed: boolean;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
   const {
     servicesStep,
     authenticateAndDeployStep,
-    deployAndDetectStep,
-    updateDeployAndDetectStep,
+    detectAndReviewStep,
+    updateDetectAndReviewStep,
     getLatestFailedInstances,
-    registerDeployHandler,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -56,7 +50,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
-  const [failedInstances, setFailedInstances] = useState<string[]>([]);
+  // Seeded from session storage so a partial failure survives unmounting Step 3. Without this,
+  // navigating Back and forward again clears the failure locally while serviceStatuses still holds
+  // the 'error' chip, which opens the isDone gate on a deploy that never succeeded.
+  const [failedInstances, setFailedInstances] = useState<string[]>(
+    () => detectAndReviewStep.failedInstances ?? []
+  );
 
   const deployGroups: DeployGroup[] = useMemo(
     () =>
@@ -66,6 +65,18 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         servicesMap ?? new Map()
       ),
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
+  );
+
+  const isAlreadyDeployed = useMemo(
+    () =>
+      deployGroups.length > 0 &&
+      deployGroups.every((group) =>
+        group.members.every(({ instance }) => {
+          const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
+          return status === 'receiving' || status === 'detecting' || status === 'timeout';
+        })
+      ),
+    [deployGroups, detectAndReviewStep.serviceStatuses]
   );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
@@ -92,7 +103,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         groupsToDeploy = deployGroups
           .map((group) => {
             const untrackedMembers = group.members.filter(
-              ({ instance }) => !(instance.instanceId in deployAndDetectStep.serviceStatuses)
+              ({ instance }) => !(instance.instanceId in detectAndReviewStep.serviceStatuses)
             );
             if (untrackedMembers.length === 0) return null;
             return {
@@ -108,7 +119,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // Non-agentless services are shown as gray chips but never deployed.
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
         for (const service of nonAgentlessServices) {
-          if (!(service.id in deployAndDetectStep.serviceStatuses)) {
+          if (!(service.id in detectAndReviewStep.serviceStatuses)) {
             newNonAgentlessStatuses[service.id] = 'instantiating';
           }
         }
@@ -120,7 +131,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
         const initialStatuses = buildInstanceStatuses(targets, []);
         if (targets.length > 0) setIsDeploying(true);
-        updateDeployAndDetectStep({
+        updateDetectAndReviewStep({
           isDeploying: targets.length > 0,
           serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
         });
@@ -139,11 +150,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // dropped — otherwise it would be set to 'instantiating' and never resolved.
         const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
         const retryStatuses = buildInstanceStatuses(deployedTargets, []);
-        const remainingFailed = deployAndDetectStep.failedInstances.filter(
+        const remainingFailed = detectAndReviewStep.failedInstances.filter(
           (id) => !deployedTargets.includes(id)
         );
         setIsDeploying(true);
-        updateDeployAndDetectStep({
+        updateDetectAndReviewStep({
           isDeploying: true,
           serviceStatuses: retryStatuses,
           failedInstances: remainingFailed,
@@ -172,7 +183,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         failedInstances: newFailed,
         errorsByInstance,
       } = collectDeployResults(results, groupsToDeploy);
-      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'receiving');
+      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
       const deployedSet = new Set(deployedTargets);
@@ -181,7 +192,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
       setIsDeploying(false);
       setFailedInstances(mergedFailed);
-      updateDeployAndDetectStep({
+      updateDetectAndReviewStep({
         isDeploying: false,
         serviceStatuses: newServiceStatuses,
         policyIdsByInstance,
@@ -197,16 +208,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       authenticateAndDeployStep,
       namespace,
       onContinue,
-      updateDeployAndDetectStep,
+      updateDetectAndReviewStep,
       getLatestFailedInstances,
-      deployAndDetectStep.serviceStatuses,
-      deployAndDetectStep.failedInstances,
+      detectAndReviewStep.serviceStatuses,
+      detectAndReviewStep.failedInstances,
     ]
   );
 
-  useEffect(() => {
-    registerDeployHandler(handleDeploy);
-  }, [handleDeploy, registerDeployHandler]);
-
-  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy };
+  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
 }

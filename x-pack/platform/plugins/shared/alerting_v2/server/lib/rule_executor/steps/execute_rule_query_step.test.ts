@@ -27,20 +27,30 @@ import { createQueryService } from '../../services/query_service/query_service.m
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import type { EsqlConfig, PluginConfig } from '../../../config';
+import { type EsqlConfig, type PluginConfig, NON_STREAMING_MAX_ROWS } from '../../../config';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 
-const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN) => {
+const createPluginConfigAccessor = ({
+  maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN,
+  responseFormat = 'json',
+}: {
+  maxAlertsPerRun?: number;
+  responseFormat?: EsqlConfig['responseFormat'];
+} = {}) => {
   const config: PluginConfig = {
     enabled: true,
     invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: maxAlertsPerRun }, query: { maxResponseSize: 50 * 1024 * 1024 } },
+      run: {
+        alerts: { max: maxAlertsPerRun },
+        query: { maxResponseSize: 50 * 1024 * 1024 },
+        maxGroupsPerExecution: 10000,
+      },
     },
-    esql: { responseFormat: 'json' },
+    esql: { responseFormat },
   };
 
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
@@ -61,7 +71,7 @@ describe('ExecuteRuleQueryStep', () => {
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
       mocks.queryService,
-      createPluginConfigAccessor(maxAlertsPerRun)
+      createPluginConfigAccessor({ maxAlertsPerRun, responseFormat })
     );
   }
 
@@ -110,7 +120,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     const expectedQuery =
       rule.query.format === 'standalone'
-        ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`
+        ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${NON_STREAMING_MAX_ROWS}`
         : '';
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: expectedQuery, drop_null_columns: true }),
@@ -134,7 +144,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: `FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+        query: `FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
       }),
       expect.objectContaining({ signal: state.input.executionContext.signal })
     );
@@ -155,13 +165,29 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: `FROM metrics-* | STATS avg(cpu) BY host.name\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+        query: `FROM metrics-* | STATS avg(cpu) BY host.name\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
       }),
       expect.objectContaining({ signal: state.input.executionContext.signal })
     );
   });
 
-  it('appends the configured alerts max as an ES|QL LIMIT clause', async () => {
+  it('caps the JSON path at NON_STREAMING_MAX_ROWS when alerts.max is higher', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: `FROM logs-*\n| LIMIT ${NON_STREAMING_MAX_ROWS}` }),
+      expect.any(Object)
+    );
+  });
+
+  it('appends the configured alerts max as an ES|QL LIMIT clause when it is below NON_STREAMING_MAX_ROWS', async () => {
     step = createStep(500);
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
@@ -342,6 +368,59 @@ describe('ExecuteRuleQueryStep', () => {
     });
   });
 
+  it('flags dropped rows when JSON results hit the query row limit', async () => {
+    step = createStep(2);
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])
+    );
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse(),
+      logger: loggerService,
+    });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
+    });
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('truncated at the 2-row limit'),
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          rule_id: state.input.ruleId,
+          step: 'execute_rule_query',
+        }),
+      })
+    );
+  });
+
+  it('does not flag dropped rows when JSON results are below the cap', async () => {
+    step = createStep(10);
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])
+    );
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse(),
+      logger: loggerService,
+    });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+    });
+    expect(mockLogger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('truncated'),
+      expect.anything()
+    );
+  });
+
   describe('arrow response format', () => {
     beforeEach(() => {
       step = createStep(undefined, 'arrow');
@@ -360,6 +439,25 @@ describe('ExecuteRuleQueryStep', () => {
       expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
       expect(mockEsClient.helpers.esql).toHaveBeenCalled();
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('appends alerts.max as LIMIT and does not apply the JSON row cap', async () => {
+      step = createStep(undefined, 'arrow');
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ 'host.name': 'host-a' }] },
+      ]);
+
+      const rule = createRuleResponse({
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      });
+      const state = createRulePipelineState({ rule });
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+        expect.objectContaining({ query: `FROM logs-*\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}` }),
+        expect.any(Object)
+      );
     });
 
     it('streams each Arrow batch separately with per-batch rowsReturnedByQuery', async () => {
@@ -385,6 +483,40 @@ describe('ExecuteRuleQueryStep', () => {
       expect(results[1].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
       });
+    });
+
+    it('flags truncation once across Arrow batches when cumulative rows reach alerts.max', async () => {
+      step = createStep(3, 'arrow');
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 2, rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }] },
+        { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
+      ]);
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse(),
+        logger: loggerService,
+      });
+      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(results).toHaveLength(2);
+
+      // First batch: cumulative 2 < cap 3, no truncation flag yet.
+      // @ts-expect-error: meta is present on the result
+      expect(results[0].meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      });
+
+      // Second batch: cumulative 3 hits the cap, truncation flagged once.
+      // @ts-expect-error: meta is present on the result
+      expect(results[1].meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+        [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
+      });
+
+      const truncationLogs = (mockLogger.debug as jest.Mock).mock.calls.filter(
+        ([message]) => typeof message === 'string' && message.includes('truncated')
+      );
+      expect(truncationLogs).toHaveLength(1);
     });
 
     it('yields continue with empty esqlRowBatch when the reader yields no batches', async () => {

@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/270769
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-08-07
-- product: kibana
-title: Add API to ingest external alerts into alerting
-description: "External monitoring systems can push alert events into alerting so they appear in the same episode lifecycle, UI, and action policies as Elastic-produced alerts, without creating a Kibana rule."

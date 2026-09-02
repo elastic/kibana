@@ -48,9 +48,7 @@ const navigation: NavigationStructure = {
 
 describe('useNavigation', () => {
   it('derives active states for primary and secondary items', () => {
-    const { result } = renderHook(() =>
-      useNavigation(false, navigation, 'logo-id', 'dashboards-overview')
-    );
+    const { result } = renderHook(() => useNavigation(false, navigation, 'dashboards-overview'));
 
     expect(result.current.actualActiveItemId).toBe('dashboards-overview');
     expect(result.current.visuallyActivePageId).toBe('dashboards');
@@ -59,17 +57,8 @@ describe('useNavigation', () => {
     expect(result.current.isSidePanelOpen).toBe(true);
   });
 
-  it('marks the logo as active when the active id matches the logo', () => {
-    const { result } = renderHook(() => useNavigation(false, navigation, 'logo-id', 'logo-id'));
-
-    expect(result.current.visuallyActivePageId).toBe('logo-id');
-    expect(result.current.visuallyActiveSubpageId).toBeUndefined();
-    expect(result.current.openerNode).toBeNull();
-    expect(result.current.isSidePanelOpen).toBe(false);
-  });
-
   it('treats the navigation as collapsed when requested', () => {
-    const { result } = renderHook(() => useNavigation(true, navigation, 'logo-id'));
+    const { result } = renderHook(() => useNavigation(true, navigation));
 
     expect(result.current.isCollapsed).toBe(true);
     expect(result.current.isSidePanelOpen).toBe(false);

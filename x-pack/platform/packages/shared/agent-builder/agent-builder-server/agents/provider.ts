@@ -13,7 +13,6 @@ import type {
   ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
@@ -49,6 +48,7 @@ import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
+import type { AiIndexResolver } from './ai_index_resolver';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -91,7 +91,6 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -106,7 +105,6 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -117,7 +115,6 @@ export interface SendToSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -151,6 +148,8 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
   /** Whether the sub-agent execution feature is enabled */
@@ -322,6 +321,11 @@ export interface AgentHandlerContext {
    * skill-invocation counts. Provided by the plugin when telemetry is wired.
    */
   trackingService?: AgentBuilderTracking;
+  /**
+   * Resolves AI index details. Absent when no resolver is registered, in which case
+   * non-default AI indices are omitted from the prompt.
+   */
+  aiIndexResolver?: AiIndexResolver;
 }
 
 /**
@@ -353,10 +357,6 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
-  /**
-   * Agent capabilities to enable.
-   */
-  capabilities?: AgentCapabilities;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.

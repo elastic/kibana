@@ -20,7 +20,8 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // clears all rules and the "With data" case creates one rule before navigating.
 const ALERTS_FIRST_PAGE = 10;
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/286401
+test.describe.skip(
   'Observability alerts - overview alert table',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

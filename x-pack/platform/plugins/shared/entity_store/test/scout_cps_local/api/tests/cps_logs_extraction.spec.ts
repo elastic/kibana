@@ -13,7 +13,6 @@ import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   LATEST_ALIAS,
-  UPDATES_INDEX,
 } from '../../../scout/common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
@@ -66,7 +65,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'writes a user entity into updates from a linked log',
+      'writes a user entity into latest from a linked log',
       async ({ apiClient, esClient, linkedProject }) => {
         const userName = `cps_user_${Date.now()}`;
         await ingestLogOnLinked(linkedProject.esClient, {
@@ -85,10 +84,10 @@ apiTest.describe(
         );
         expect(extraction.statusCode).toBe(200);
         expect((extraction.body as { success: boolean }).success).toBe(true);
-        await esClient.indices.refresh({ index: UPDATES_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const hits = await esClient.search({
-          index: UPDATES_INDEX,
+          index: LATEST_ALIAS,
           query: { term: { 'user.name': userName } },
         });
         expect(hits.hits.hits.length).toBeGreaterThanOrEqual(1);
@@ -97,7 +96,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'promotes a linked-log entity into latest after a follow-up main run',
+      'writes a linked-log entity into latest in a single extraction run',
       async ({ apiClient, esClient, linkedProject }) => {
         const userName = `cps_latest_${Date.now()}`;
         const hostId = 'h-latest';
@@ -108,28 +107,15 @@ apiTest.describe(
           event: { outcome: 'success' },
         });
 
-        // First call: CPS path writes the entity-update doc into updates.
-        const firstExtraction = await forceLogExtraction(
+        const extraction = await forceLogExtraction(
           apiClient,
           internalHeaders,
           'user',
           WINDOW_FROM,
           WINDOW_TO
         );
-        expect(firstExtraction.statusCode).toBe(200);
-        expect((firstExtraction.body as { success: boolean }).success).toBe(true);
-        // Ensure the updates doc is visible before the main path reads it.
-        await esClient.indices.refresh({ index: UPDATES_INDEX });
-        // Second call: main path scans updates and merges into latest.
-        const secondExtraction = await forceLogExtraction(
-          apiClient,
-          internalHeaders,
-          'user',
-          WINDOW_FROM,
-          WINDOW_TO
-        );
-        expect(secondExtraction.statusCode).toBe(200);
-        expect((secondExtraction.body as { success: boolean }).success).toBe(true);
+        expect(extraction.statusCode).toBe(200);
+        expect((extraction.body as { success: boolean }).success).toBe(true);
 
         await esClient.indices.refresh({ index: LATEST_ALIAS });
 
@@ -144,7 +130,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'produces a correct entity document after the CPS extract → promote round-trip',
+      'produces a correct entity document from a CPS log in a single extraction run',
       async ({ apiClient, esClient, linkedProject }) => {
         const hostName = `cps_entity_doc_${Date.now()}`;
         const hostId = `${hostName}-id`;
@@ -175,30 +161,15 @@ apiTest.describe(
           },
         });
 
-        // Run 1: CPS remote path writes the entity update into the updates data stream.
-        const firstExtraction = await forceLogExtraction(
+        const extraction = await forceLogExtraction(
           apiClient,
           internalHeaders,
           'host',
           WINDOW_FROM,
           WINDOW_TO
         );
-        expect(firstExtraction.statusCode).toBe(200);
-        expect((firstExtraction.body as { success: boolean }).success).toBe(true);
-
-        // Make the updates doc visible before the main path reads it.
-        await esClient.indices.refresh({ index: UPDATES_INDEX });
-
-        // Run 2: main local path reads the updates data stream and promotes into the latest index.
-        const secondExtraction = await forceLogExtraction(
-          apiClient,
-          internalHeaders,
-          'host',
-          WINDOW_FROM,
-          WINDOW_TO
-        );
-        expect(secondExtraction.statusCode).toBe(200);
-        expect((secondExtraction.body as { success: boolean }).success).toBe(true);
+        expect(extraction.statusCode).toBe(200);
+        expect((extraction.body as { success: boolean }).success).toBe(true);
 
         await esClient.indices.refresh({ index: LATEST_ALIAS });
 

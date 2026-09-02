@@ -33,7 +33,6 @@ import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
 import {
   normalizeLogSamplesFromFileContent,
-  UPLOAD_SAMPLES_MAX_LINES,
   type DataStream,
   type InputType,
 } from '../../../../../common';
@@ -471,7 +470,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
             title: i18n.SAMPLES_NORMALIZED_WARNING_TITLE,
             text: i18n.SAMPLES_NORMALIZED_WARNING_LINES_OMITTED(
               linesOmittedOverLimit,
-              UPLOAD_SAMPLES_MAX_LINES
+              samples.length
             ),
           });
         }

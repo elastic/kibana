@@ -115,6 +115,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     closeFlyout: closeLogEntryFlyout,
     isFlyoutOpen: isLogEntryFlyoutOpen,
     logEntryId: flyoutLogEntryId,
+    projectRouting: flyoutProjectRouting,
   } = useLogEntryFlyoutContext();
 
   const linkToLogStream = useCallback(
@@ -304,6 +305,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={linkToLogStream}
           logViewReference={logViewReference}
+          projectRouting={flyoutProjectRouting}
         />
       ) : null}
     </LogsPageTemplate>

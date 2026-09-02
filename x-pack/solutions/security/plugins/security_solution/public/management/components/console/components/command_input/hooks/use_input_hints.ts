@@ -7,9 +7,10 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
+import { buildCommandUsageList } from '../../../service/utils';
 import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
-import { getArgumentsForCommand } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
@@ -28,7 +29,11 @@ const NO_ARGUMENTS_HINT = i18n.translate('xpack.securitySolution.useInputHints.n
 
 export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
   'xpack.securitySolution.useInputHints.viewInputHistory',
-  { defaultMessage: 'Press the up arrow key to access previously entered commands' }
+  {
+    defaultMessage:
+      'Press [{isMac, select, true {⌥} other {ALT}}][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
+    values: { isMac },
+  }
 );
 
 /**
@@ -81,15 +86,14 @@ export const useInputHints = () => {
         //
         // Generated usage is only created if the command has arguments.
         if (!hint || !exampleUsage) {
-          const commandArguments = getArgumentsForCommand(commandEnteredDefinition);
-
-          if (commandArguments.length > 0) {
-            hint += `${commandEnteredDefinition.name} ${commandArguments}`;
+          if (commandEnteredDefinition.args) {
+            hint +=
+              (hint.length > 0 ? ' | ' : '') +
+              buildCommandUsageList(commandEnteredDefinition).shift();
           } else {
             hint += NO_ARGUMENTS_HINT;
           }
         }
-
         dispatch({
           type: 'updateFooterContent',
           payload: { value: hint },

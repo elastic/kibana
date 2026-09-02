@@ -23,6 +23,7 @@ const createCpsManager = (overrides: Partial<ICPSManager> = {}): ICPSManager => 
   updateDefaultProjectRouting: jest.fn(),
   getProjectPickerAccess$: jest.fn(),
   registerAppAccess: jest.fn(),
+  getConfigurationLinks: jest.fn(),
   ...overrides,
 });
 

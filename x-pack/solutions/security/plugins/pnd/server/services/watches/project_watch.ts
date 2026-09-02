@@ -7,43 +7,27 @@
 
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import type {
-  ScheduleCadence,
-  ScheduleHandoff,
-  ScheduleMode,
-  ScopeAccess,
   Watch,
   WatchCallableRef,
   WatchRecentRun,
   WatchSchedule,
-  WatchScope,
   WatchTriggerProjection,
   WorkflowTriggerType,
 } from '@kbn/pnd-common';
 import { coverageFromSchedule } from '@kbn/pnd-common';
+import type { AgentLookup } from '../utils';
 
 /** Static watch policy bag from `consts.watch_policy`. */
 interface WatchPolicyAttrs {
   mandate?: string;
-  handoff?: ScheduleHandoff;
-  scopes?: WatchScope[];
-  onDemand?: boolean;
-  draft?: boolean;
-  from?: number;
-  to?: number;
-  mode?: ScheduleMode;
-  cadence?: ScheduleCadence;
-  every?: number;
-  scopeSummary?: string;
   ui?: {
     color?: string;
-    icon?: string;
     order?: number;
   };
   callables?: WatchCallableRef[];
 }
 
 const DEFAULT_COLOR = '#6b7280';
-const DEFAULT_ICON = 'email';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -53,32 +37,6 @@ const asString = (value: unknown, fallback = ''): string =>
 
 const asNumber = (value: unknown, fallback: number): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-
-const asBoolean = (value: unknown, fallback: boolean): boolean =>
-  typeof value === 'boolean' ? value : fallback;
-
-const asScopeAccess = (value: unknown): ScopeAccess => {
-  if (value === 'full' || value === 'masked' || value === 'denied') return value;
-  return 'full';
-};
-
-const asHandoff = (value: unknown): ScheduleHandoff => {
-  if (
-    value === 'officer' ||
-    value === 'oncall' ||
-    value === 'brief' ||
-    value === 'records' ||
-    value === 'none'
-  ) {
-    return value;
-  }
-  return 'none';
-};
-
-const asMode = (value: unknown): ScheduleMode => {
-  if (value === 'always' || value === 'window' || value === 'demand') return value;
-  return 'demand';
-};
 
 export const extractWatchPolicy = (
   definition: WorkflowYaml | null | undefined
@@ -114,44 +72,22 @@ export const projectTriggers = (
   });
 };
 
-export const projectSchedule = (
-  triggers: WatchTriggerProjection[],
-  policy: WatchPolicyAttrs | undefined
-): WatchSchedule => {
+export const projectSchedule = (triggers: WatchTriggerProjection[]): WatchSchedule => {
   const hasSchedule = triggers.some((t) => t.type === 'schedule');
   const hasEvent = triggers.some((t) => t.type === 'event');
   const hasManual = triggers.some((t) => t.type === 'manual');
-  const manualOnly = hasManual && !hasSchedule && !hasEvent;
-  const onDemand = manualOnly || (policy?.onDemand ?? false);
-
-  let mode: ScheduleMode = 'demand';
-  if (hasSchedule) {
-    mode = policy?.mode ? asMode(policy.mode) : 'window';
-  } else if (hasEvent) {
-    mode = 'always';
-  }
-
-  const set = !asBoolean(policy?.draft, false) && mode !== 'demand';
+  const set = hasSchedule || hasEvent;
 
   return {
     set,
-    mode,
-    from: asNumber(policy?.from, 8),
-    to: asNumber(policy?.to, 18),
-    onDemand,
+    mode: set ? 'always' : 'demand',
+    from: 0,
+    to: 23,
+    onDemand: hasManual,
     cadence: hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual',
-    every: asNumber(policy?.every, 60),
-    handoff: asHandoff(policy?.handoff),
+    every: 60,
+    handoff: 'none',
   };
-};
-
-const projectScopes = (policy: WatchPolicyAttrs | undefined): WatchScope[] => {
-  if (!policy?.scopes || !Array.isArray(policy.scopes)) return [];
-  return policy.scopes.map((scope) => ({
-    name: asString(scope.name, 'Scope'),
-    access: asScopeAccess(scope.access),
-    label: asString(scope.label, 'Read'),
-  }));
 };
 
 const SKILL_URI_RE = /skill:\/\/([a-zA-Z0-9._-]+)/g;
@@ -196,33 +132,56 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
   }
 };
 
-/**
- * Derive executable capabilities from the workflow graph.
- * Policy `callables` are display overrides only (name/summary/gated/enabled).
- */
-export const projectCallablesFromDefinition = (
+export const projectSkillsFromDefinition = (
   definition: WorkflowYaml | null | undefined,
-  policy: WatchPolicyAttrs | undefined
+  policy: WatchPolicyAttrs | undefined,
+  agentLookupCallback?: AgentLookup
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
-  const workflowIds = new Set<string>();
 
   walkSteps(definition?.steps, (step) => {
     const type = asString(step.type);
     if (type === 'ai.agent') {
       const withBlock = isRecord(step.with) ? step.with : {};
-      const message = asString(withBlock.message);
-      if (message) collectSkillIdsFromText(message, skillIds);
-      // Also scan the whole with-block for skill URIs in other string fields.
-      collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
-    }
-    if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
-      const withBlock = isRecord(step.with) ? step.with : {};
-      const workflowId =
-        asString(withBlock['workflow-id']) ||
-        asString(withBlock.workflowId) ||
-        asString(withBlock.workflow_id);
-      if (workflowId) workflowIds.add(workflowId);
+      const agentId = asString(step['agent-id']);
+
+      // Parse configuration_overrides.skill_ids unconditionally so they survive
+      // when the agent lookup is unavailable or the agent-id cannot be resolved.
+      const overridesBlock = isRecord(withBlock.configuration_overrides)
+        ? withBlock.configuration_overrides
+        : {};
+      const overrideSkillIds = Array.isArray(overridesBlock.skill_ids)
+        ? overridesBlock.skill_ids.filter((s): s is string => typeof s === 'string')
+        : null;
+
+      if (agentId && agentLookupCallback) {
+        const agentDef = agentLookupCallback.getAgent(agentId);
+        if (agentDef) {
+          const agentTypeDef = agentDef.type
+            ? agentLookupCallback.getAgentType(agentDef.type)
+            : undefined;
+          const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
+          // When the step has no overrides, fall back to the agent's own skill list.
+          const agentSkills: readonly string[] =
+            overrideSkillIds === null ? agentDef.configuration.skill_ids ?? [] : [];
+          for (const id of [...baseSkills, ...(overrideSkillIds ?? agentSkills)]) {
+            if (id) skillIds.add(id);
+          }
+          return;
+        }
+      }
+
+      // No lookup or unresolved agent: use structured overrides when present so
+      // skills are not lost. Fall back to URI scanning only when no overrides exist.
+      if (overrideSkillIds !== null) {
+        for (const id of overrideSkillIds) {
+          if (id) skillIds.add(id);
+        }
+      } else {
+        const message = asString(withBlock.message);
+        if (message) collectSkillIdsFromText(message, skillIds);
+        collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
+      }
     }
   });
 
@@ -235,41 +194,26 @@ export const projectCallablesFromDefinition = (
       name: asString(c.name, id),
       kind: c.kind === 'workflow' ? 'workflow' : 'skill',
       summary: asString(c.summary, ''),
-      gated: asBoolean(c.gated, false),
-      enabled: asBoolean(c.enabled, true),
       lastRun: typeof c.lastRun === 'string' ? c.lastRun : null,
     });
   }
 
-  const callables: WatchCallableRef[] = [];
+  const skills: WatchCallableRef[] = [];
 
   for (const id of skillIds) {
     const override = overrides.get(id);
-    callables.push({
+    // Default to skill definition only if UI overrides are not defined
+    const skillDef = override ? undefined : agentLookupCallback?.getSkill(id);
+    skills.push({
       id,
-      name: override?.name ?? humanizeId(id),
+      name: override?.name ?? skillDef?.name ?? humanizeId(id),
       kind: 'skill',
-      summary: override?.summary ?? 'Invoked via ai.agent',
-      gated: override?.gated ?? false,
-      enabled: override?.enabled ?? true,
+      summary: override?.summary ?? skillDef?.description ?? 'Invoked via ai.agent',
       lastRun: override?.lastRun ?? null,
     });
   }
 
-  for (const id of workflowIds) {
-    const override = overrides.get(id);
-    callables.push({
-      id,
-      name: override?.name ?? humanizeId(id.replace(/^system-/, '')),
-      kind: 'workflow',
-      summary: override?.summary ?? 'Nested workflow',
-      gated: override?.gated ?? false,
-      enabled: override?.enabled ?? true,
-      lastRun: override?.lastRun ?? null,
-    });
-  }
-
-  return callables;
+  return skills;
 };
 
 export const projectRecentRunsFromHistory = (
@@ -285,11 +229,14 @@ export const projectRecentRunsFromHistory = (
   }));
 };
 
-export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
+export const projectWorkflowToWatch = (
+  item: WorkflowListItemDto,
+  agentLookupCallback?: AgentLookup
+): Watch => {
   const definition = item.definition;
   const policy = extractWatchPolicy(definition);
   const triggers = projectTriggers(definition);
-  const schedule = projectSchedule(triggers, policy);
+  const schedule = projectSchedule(triggers);
   const coverage = coverageFromSchedule(schedule);
   const recentRuns = projectRecentRunsFromHistory(item.history);
   const lastRun = recentRuns[0]?.startedAt ?? null;
@@ -302,9 +249,8 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     name: item.name,
     tags,
     color: asString(policy?.ui?.color, DEFAULT_COLOR),
-    icon: asString(policy?.ui?.icon, DEFAULT_ICON),
     enabled: item.enabled,
-    draft: asBoolean(policy?.draft, !item.enabled),
+    draft: false,
     managed: item.managed === true,
     sortOrder,
     mandate: asString(policy?.mandate, item.description || 'Watch'),
@@ -312,46 +258,12 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     schedule,
     triggers,
     coverage,
-    scopeSummary: asString(policy?.scopeSummary, '—'),
-    scopes: projectScopes(policy),
-    callables: projectCallablesFromDefinition(definition, policy),
+    scopeSummary: '',
+    scopes: [],
+    skills: projectSkillsFromDefinition(definition, policy, agentLookupCallback),
     metrics: {
-      // Real 7-day run counts are not available from the list/history projection yet.
-      runs7d: null,
-      acceptedPct: null,
-      timeSaved: null,
       lastRun,
     },
     recentRuns,
   };
 };
-
-export const buildCustomWatchYaml = (name: string, description: string): string => `version: "1"
-name: ${JSON.stringify(name)}
-description: ${JSON.stringify(description)}
-enabled: true
-tags:
-  - watch
-  - watch-custom
-triggers:
-  - type: manual
-consts:
-  watch_policy:
-    mandate: ${JSON.stringify(name)}
-    handoff: none
-    onDemand: true
-    draft: false
-    cadence: manual
-    mode: demand
-    ui:
-      color: "#6b7280"
-      icon: sparkles
-    scopeSummary: Custom
-    scopes: []
-    callables: []
-steps:
-  - name: run_watch
-    type: console
-    with:
-      message: "Custom watch skeleton — add agent skills next"
-`;

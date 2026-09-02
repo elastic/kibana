@@ -84,6 +84,30 @@ export const deleteRulesByPrefix = async (kbnClient: KbnClient, prefix: string) 
 
 export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
 
+/**
+ * Filters the rules table by name. Search is applied on Enter, not on fill.
+ * The table pages at 10 rows and shared environments include preinstalled
+ * Elastic Agent rules that occupy the first page.
+ */
+export const searchRulesList = async (page: ScoutPage, searchText: string) => {
+  const searchField = page.testSubj.locator('ruleSearchField');
+  await searchField.fill(searchText);
+  await expect(searchField).toHaveValue(searchText);
+  await searchField.press('Enter');
+};
+
+export const openRulesListAndSearch = async (page: ScoutPage, searchText: string) => {
+  await page.gotoApp('rules');
+  await page.testSubj.click('rulesTab');
+  await expect(page.testSubj.locator('rulesList')).toBeVisible();
+  const clearFilters = page.testSubj.locator('rules-list-clear-filter');
+  if (await clearFilters.isVisible()) {
+    await clearFilters.click();
+    await clearFilters.waitFor({ state: 'hidden' });
+  }
+  await searchRulesList(page, searchText);
+};
+
 // Fills the index-threshold rule form to a state where save is enabled:
 // name + THRESHOLD_TEST_INDEX + time field (first non-placeholder option).
 // Callers must create THRESHOLD_TEST_INDEX (with @timestamp mapping) in beforeAll.

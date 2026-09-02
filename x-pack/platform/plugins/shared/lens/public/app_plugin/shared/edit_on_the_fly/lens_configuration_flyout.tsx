@@ -21,9 +21,8 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -215,7 +214,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
+  const textBasedMode = isTextBasedAttributes(attributes);
 
   const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
     useCurrentAttributes({

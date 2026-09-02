@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/shared-components'
   - '@kbn/shared-ux-router'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-server'
+  - '@kbn/search-agent'
   - '@kbn/vectordb-onboarding'
   - '@kbn/react-query'
   - '@kbn/i18n'

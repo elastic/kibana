@@ -78,6 +78,10 @@ export const WatchSkill = lazySchema(() =>
      */
     id: z.string(),
     /**
+     * Display name resolved from the Agent Builder registry at projection time.
+     */
+    name: z.string().optional(),
+    /**
      * Watches whose workers may call this skill
      */
     watchIds: z.array(z.string()),
@@ -85,10 +89,7 @@ export const WatchSkill = lazySchema(() =>
      * ISO 8601 timestamp of last invocation, or null when never invoked
      */
     lastRun: z.string().nullable(),
-    /**
-     * Global flag. Effective enablement is this AND the per-watch attachment flag.
-     */
-    enabled: z.boolean(),
+    summary: z.string().optional(),
     /**
      * Omitted for generally available skills; badge shown otherwise
      */
@@ -118,20 +119,6 @@ export const WatchSkillAttachment = lazySchema(() =>
   })
 );
 export type WatchSkillAttachment = z.infer<typeof WatchSkillAttachment>;
-
-export const WatchGeneralSettings = lazySchema(() =>
-  z.object({
-    /**
-     * Service account each run executes as, e.g. svc-watch-floor
-     */
-    runAsIdentity: z.string(),
-    /**
-     * Renders the MVP-scope callout about autonomy inheritance being undecided
-     */
-    showMvpScopeWarning: z.boolean(),
-  })
-);
-export type WatchGeneralSettings = z.infer<typeof WatchGeneralSettings>;
 
 /**
  * A single-choice setting. Both ids resolve to copy in the UI.
@@ -240,7 +227,6 @@ export const WatchSettings = lazySchema(() =>
      * The selected level. The scale itself is shared across every watch, so it is not repeated per watch — see WATCH_AUTONOMY_LEVELS.
      */
     autonomy: WatchAutonomyLevel,
-    general: WatchGeneralSettings.optional(),
     triggers: WatchTriggersSettings.optional(),
     scopeRouting: WatchScopeRoutingSettings.optional(),
     workers: z.array(WatchWorkerAttachment).optional(),

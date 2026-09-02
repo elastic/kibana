@@ -8,7 +8,6 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
@@ -19,13 +18,10 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
-// workflow.
-const BASE_WORKFLOW_COUNT = 8;
+// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`).
+const BASE_WORKFLOW_COUNT = 9;
 const MEMORY_WORKFLOW_COUNT = 4;
-const INVESTIGATION_WORKFLOW_COUNT = 1;
-const TOTAL_WORKFLOW_COUNT =
-  BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + INVESTIGATION_WORKFLOW_COUNT;
+const TOTAL_WORKFLOW_COUNT = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT;
 
 const createClientMock = () => {
   const client = {
@@ -101,7 +97,7 @@ describe('createManagedWorkflowsInstaller', () => {
 
     await installer.install();
 
-    // base + memory + investigation, all installed before ready() closes the window.
+    // base + memory, all installed before ready() closes the window.
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(installCountAtReady).toBe(TOTAL_WORKFLOW_COUNT);
   });
@@ -123,14 +119,6 @@ describe('createManagedWorkflowsInstaller', () => {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
     }
-  });
-
-  it('installs the investigation workflow when available', async () => {
-    const { client, installer } = createInstaller();
-
-    await installer.install();
-
-    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID);
   });
 
   it('re-installs on later calls but reconciles (ready) only once', async () => {
