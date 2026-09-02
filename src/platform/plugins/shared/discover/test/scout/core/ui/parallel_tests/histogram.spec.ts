@@ -16,8 +16,11 @@ const createClassicSession = async (
   apiServices: ApiServicesFixture,
   discoverScoutSpace: DiscoverScoutSpace,
   title: string,
-  tab: Pick<DiscoverSessionApiDataInput['tabs'][number], 'hide_chart' | 'chart_interval'> = {}
+  tab: Pick<DiscoverSessionApiDataInput['tabs'][number], 'hide_chart' | 'chart_interval'> & {
+    dataViewTitle?: string;
+  } = {}
 ) => {
+  const { dataViewTitle = testData.DEFAULT_DATA_VIEW, ...tabFields } = tab;
   await apiServices.discover.create(
     {
       title,
@@ -27,9 +30,9 @@ const createClassicSession = async (
           label: 'Untitled',
           data_source: {
             type: 'data_view_reference',
-            ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+            ref_id: discoverScoutSpace.getDataViewId(dataViewTitle),
           },
-          ...tab,
+          ...tabFields,
         },
       ],
     } satisfies DiscoverSessionApiDataInput,
@@ -39,8 +42,7 @@ const createClassicSession = async (
 
 spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
-    await discoverScoutSpace.setupDiscoverDefaults();
-    await discoverScoutSpace.savedObjects.load(testData.LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
+    await discoverScoutSpace.setupDiscoverDefaults({ loadLongWindowDataView: true });
     await discoverScoutSpace.uiSettings.setDefaultIndex(testData.LONG_WINDOW_LOGSTASH_DATA_VIEW);
     await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
   });
@@ -201,8 +203,11 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
       const { discover } = pageObjects;
       const stateSession = `histogram state ${scoutSpace.id}`;
 
-      await createClassicSession(apiServices, discoverScoutSpace, stateSession);
+      await createClassicSession(apiServices, discoverScoutSpace, stateSession, {
+        dataViewTitle: testData.LONG_WINDOW_LOGSTASH_DATA_VIEW,
+      });
       await discover.loadSavedSearch(stateSession);
+      await discover.waitUntilSearchingHasFinished();
       await discover.chooseBreakdownField('extension.keyword');
       await discover.setChartInterval('Second');
       await expect(discover.getHistogramChart()).toHaveAttribute(
