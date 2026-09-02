@@ -966,7 +966,6 @@ const normalizeColumnLabel = (
     col.label = '';
   }
 };
-export type NormalizedDatasource = 'formBased' | 'textBased';
 
 export interface CommonNormalizerArgs {
   layerRemapping: IdRemapping;
