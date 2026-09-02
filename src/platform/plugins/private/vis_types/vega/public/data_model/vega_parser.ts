@@ -61,6 +61,7 @@ export class VegaParser {
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
   isVegaLite?: boolean;
+  approximationApplied?: boolean;
   useHover?: boolean;
   _config?: VegaConfig;
   useMap?: boolean;
@@ -661,6 +662,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       await Promise.all(
         pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
+      this.approximationApplied = (this._urlParsers.esql as EsqlQueryParser).approximationApplied;
     }
   }
 

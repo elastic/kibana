@@ -317,6 +317,7 @@ export const vegaEmbeddableFactory = (
             if (signal.aborted) {
               return;
             }
+            approximationApplied$.next(visData.approximationApplied);
             // Show warnings only in edit mode matching the legacy vega behavior.
             renderInput$.next({
               showWarnings: getInheritedViewMode(api) === 'edit',
