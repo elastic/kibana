@@ -54,6 +54,7 @@ export function runWorkflowYamlValidations({
   const liquidScalarResults = validateLiquidYamlScalars(
     yamlString,
     yamlDocument,
+    lineCounter,
     workflowGraph,
     workflowDefinition
   );
