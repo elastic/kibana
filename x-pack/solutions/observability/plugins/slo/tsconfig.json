@@ -136,6 +136,7 @@
     "@kbn/core-feature-flags-server",
     "@kbn/cps",
     "@kbn/cps-utils",
-    "@kbn/cps-server-utils"
+    "@kbn/cps-server-utils",
+    "@kbn/app-header"
   ]
 }
