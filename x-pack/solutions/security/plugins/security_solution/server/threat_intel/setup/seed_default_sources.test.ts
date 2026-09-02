@@ -327,7 +327,9 @@ describe('seedDefaultSources', () => {
     esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
     esClient.search.mockResolvedValue({
       hits: {
-        hits: [{ _id: 'legacy:custom-feed', sort: ['legacy:custom-feed'], _source: { enabled: true } }],
+        hits: [
+          { _id: 'legacy:custom-feed', sort: ['legacy:custom-feed'], _source: { enabled: true } },
+        ],
       },
     } as never);
     esClient.update.mockRejectedValue(new Error('version_conflict_engine_exception'));
