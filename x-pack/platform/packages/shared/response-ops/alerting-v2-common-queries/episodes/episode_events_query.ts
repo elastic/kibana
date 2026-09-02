@@ -40,6 +40,8 @@ export interface BuildEpisodeEventsQueryOptions {
   };
   /** Restrict to a single episode lifecycle status. */
   status?: AlertEpisodeStatus;
+  /** Explicit ES|QL LIMIT. Omitted by the details-page timeline. */
+  limit?: number;
 }
 
 /**
@@ -48,7 +50,7 @@ export interface BuildEpisodeEventsQueryOptions {
 export const buildEpisodeEventsQuery = (
   spaceId: string,
   episodeId: string,
-  { timeRange, status }: BuildEpisodeEventsQueryOptions = {}
+  { timeRange, status, limit }: BuildEpisodeEventsQueryOptions = {}
 ): TypedEsqlQuery<EpisodeEventRow> => {
   // prettier-ignore
   const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
@@ -61,15 +63,18 @@ export const buildEpisodeEventsQuery = (
     query.where`@timestamp <= ${timeRange.end}`;
   }
 
-  if (status) {
+  if (status !== undefined) {
     query.where`episode.status == ${status}`;
   }
 
   // prettier-ignore
-  return asTypedEsqlQuery<EpisodeEventRow>(
-    query
-      .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
-      .sort([DEFAULT_TIME_FIELD, 'ASC'])
-      .keep(...ALERT_EPISODE_EVENT_FIELDS)
-  );
+  let built = query
+    .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
+    .sort([DEFAULT_TIME_FIELD, 'ASC']);
+
+  if (limit !== undefined) {
+    built = built.limit(limit);
+  }
+
+  return asTypedEsqlQuery<EpisodeEventRow>(built.keep(...ALERT_EPISODE_EVENT_FIELDS));
 };

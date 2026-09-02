@@ -24,6 +24,7 @@ describe('buildEpisodeEventsQuery', () => {
     expect(queryString).toContain('type == "alert"');
     expect(queryString).not.toContain('@timestamp >=');
     expect(queryString).not.toContain('episode.status ==');
+    expect(queryString).not.toContain('LIMIT');
   });
 
   it('applies an inclusive time-range filter when provided', () => {
@@ -42,5 +43,12 @@ describe('buildEpisodeEventsQuery', () => {
       status: ALERT_EPISODE_STATUS.ACTIVE,
     }).print('basic');
     expect(queryString).toContain(`episode.status == "${ALERT_EPISODE_STATUS.ACTIVE}"`);
+  });
+
+  it('applies an explicit LIMIT when provided', () => {
+    const queryString = buildEpisodeEventsQuery(SPACE_ID, 'episode-xyz', {
+      limit: 1001,
+    }).print('basic');
+    expect(queryString).toContain('LIMIT 1001');
   });
 });

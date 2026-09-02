@@ -88,6 +88,8 @@ describe('getRuleEventsTool', () => {
       expect(tool.description).toContain('attach-1');
       expect(tool.description).toContain('read-only');
       expect(tool.description).toContain('episode.status');
+      expect(tool.description).toContain('or status to filter');
+      expect(tool.description).not.toContain('or episode.status to filter');
       expect(tool.description).toContain('no arguments');
       expect(tool.schema.safeParse(validArgs).success).toBe(true);
       expect(tool.schema.safeParse({}).success).toBe(true);
@@ -101,7 +103,7 @@ describe('getRuleEventsTool', () => {
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
-      expect(getEvents).toHaveBeenCalledWith('ep-1', {});
+      expect(getEvents).toHaveBeenCalledWith('ep-1', { limit: 1001 });
       expect(get).not.toHaveBeenCalled();
       expect(result).toEqual({
         results: [
@@ -128,6 +130,7 @@ describe('getRuleEventsTool', () => {
 
       expect(getEvents).toHaveBeenCalledWith('ep-1', {
         timeRange: validArgs,
+        limit: 1001,
       });
       expect(get).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -166,9 +169,32 @@ describe('getRuleEventsTool', () => {
       });
     });
 
-    it('sets truncated when the ES|QL default row cap is hit', async () => {
+    it('does not set truncated when the result fills the page exactly', async () => {
       getEvents.mockResolvedValueOnce(
         Array.from({ length: 1000 }, (_, i) => ({
+          ...eventRow,
+          '@timestamp': `2026-04-10T11:${String(i % 60).padStart(2, '0')}:00.000Z`,
+        }))
+      );
+
+      const result = await createTool().handler(
+        validArgs,
+        agentBuilderMocks.tools.createHandlerContext()
+      );
+
+      expect(result.results[0]).toEqual(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            count: 1000,
+            truncated: false,
+          }),
+        })
+      );
+    });
+
+    it('sets truncated and returns the page when one extra row is fetched', async () => {
+      getEvents.mockResolvedValueOnce(
+        Array.from({ length: 1001 }, (_, i) => ({
           ...eventRow,
           '@timestamp': `2026-04-10T11:${String(i % 60).padStart(2, '0')}:00.000Z`,
         }))
@@ -225,6 +251,7 @@ describe('getRuleEventsTool', () => {
       expect(getEvents).toHaveBeenCalledWith('ep-1', {
         timeRange: validArgs,
         status: ALERT_EPISODE_STATUS.ACTIVE,
+        limit: 1001,
       });
     });
 
@@ -312,6 +339,41 @@ describe('getRuleEventsTool', () => {
           },
           error: expect.objectContaining({
             message: 'boom',
+            type: 'Error',
+          }),
+        })
+      );
+    });
+
+    it('returns an error and logs a warning when the existence lookup throws', async () => {
+      getEvents.mockResolvedValueOnce([]);
+      get.mockRejectedValueOnce(new Error('timeout'));
+
+      const result = await createTool().handler(
+        validArgs,
+        agentBuilderMocks.tools.createHandlerContext()
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Failed to look up episode "ep-1": timeout',
+            },
+          },
+        ],
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to look up episode while fetching rule events',
+        expect.objectContaining({
+          labels: {
+            episode_id: 'ep-1',
+            space_id: 'default',
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_LOOKUP_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'timeout',
             type: 'Error',
           }),
         })

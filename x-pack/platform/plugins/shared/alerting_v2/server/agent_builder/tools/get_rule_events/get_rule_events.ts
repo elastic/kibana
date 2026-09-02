@@ -21,8 +21,9 @@ import type { EpisodesClient } from '../../../lib/episodes_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 
-/** ES|QL returns at most this many rows when the query has no explicit LIMIT. */
+/** Max rows returned to the agent. Fetch one extra so `truncated` is exact. */
 const ESQL_DEFAULT_RESULT_LIMIT = 1000;
+const ESQL_FETCH_LIMIT = ESQL_DEFAULT_RESULT_LIMIT + 1;
 
 const getRuleEventsSchema = z.object({
   start: z.iso
@@ -84,7 +85,7 @@ export const getRuleEventsTool = ({
 }: GetRuleEventsToolParams): BuiltinAttachmentBoundedTool<typeof getRuleEventsSchema> => ({
   id: getRuleEventsToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Fetch .rule-events rows for alert episode "${episodeId}" (attachment "${attachmentId}"), oldest first. Each event includes @timestamp, episode.status (inactive/pending/active/recovering), severity, source, group_hash, and event data. Call with no arguments to fetch this episode's events. Optionally pass start and end together to narrow the @timestamp window, or episode.status to filter lifecycle state. At most ${ESQL_DEFAULT_RESULT_LIMIT} rows are returned (ES|QL default); if truncated is true, pass a narrower start/end. This tool is read-only.`,
+  description: `Fetch .rule-events rows for alert episode "${episodeId}" (attachment "${attachmentId}"), oldest first. Each event includes @timestamp, episode.status (inactive/pending/active/recovering), severity, source, group_hash, and event data. Call with no arguments to fetch this episode's events. Optionally pass start and end together to narrow the @timestamp window, or status to filter lifecycle state. At most ${ESQL_DEFAULT_RESULT_LIMIT} rows are returned; if truncated is true, pass a narrower start/end. This tool is read-only.`,
   schema: getRuleEventsSchema,
   handler: async (args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({
@@ -123,46 +124,18 @@ export const getRuleEventsTool = ({
       };
     }
 
+    const client = getEpisodesClient({
+      request: toolContext.request,
+      spaceId: toolContext.spaceId,
+    });
+
+    let events: EpisodeEventRow[];
     try {
-      const client = getEpisodesClient({
-        request: toolContext.request,
-        spaceId: toolContext.spaceId,
-      });
-      const events = await client.getEvents(episodeId, {
+      events = await client.getEvents(episodeId, {
         ...(start !== undefined && end !== undefined ? { timeRange: { start, end } } : {}),
         ...(status !== undefined ? { status } : {}),
+        limit: ESQL_FETCH_LIMIT,
       });
-
-      // Existence is only ambiguous when the events query is empty (missing
-      // episode vs nothing in this window). Skip the extra lookup otherwise.
-      if (events.length === 0) {
-        const episode = await client.get(episodeId);
-        if (!episode) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: `Episode "${episodeId}" not found`,
-                },
-              },
-            ],
-          };
-        }
-      }
-
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              events: events.map((event) => ({ ...event, data: parseEventData(event.data) })),
-              count: events.length,
-              truncated: events.length >= ESQL_DEFAULT_RESULT_LIMIT,
-            },
-          },
-        ],
-      };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn({
@@ -185,5 +158,62 @@ export const getRuleEventsTool = ({
         ],
       };
     }
+
+    // Existence is only ambiguous when the events query is empty (missing
+    // episode vs nothing in this window). Skip the extra lookup otherwise.
+    if (events.length === 0) {
+      try {
+        const episode = await client.get(episodeId);
+        if (!episode) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `Episode "${episodeId}" not found`,
+                },
+              },
+            ],
+          };
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn({
+          message: 'Failed to look up episode while fetching rule events',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_LOOKUP_FAILED,
+          labels: {
+            episode_id: episodeId,
+            space_id: toolContext.spaceId,
+          },
+          error,
+        });
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Failed to look up episode "${episodeId}": ${message}`,
+              },
+            },
+          ],
+        };
+      }
+    }
+
+    const truncated = events.length > ESQL_DEFAULT_RESULT_LIMIT;
+    const page = truncated ? events.slice(0, ESQL_DEFAULT_RESULT_LIMIT) : events;
+
+    return {
+      results: [
+        {
+          type: ToolResultType.other,
+          data: {
+            events: page.map((event) => ({ ...event, data: parseEventData(event.data) })),
+            count: page.length,
+            truncated,
+          },
+        },
+      ],
+    };
   },
 });

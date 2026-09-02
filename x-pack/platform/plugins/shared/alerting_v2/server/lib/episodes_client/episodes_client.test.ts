@@ -132,7 +132,7 @@ describe('EpisodesClient', () => {
       expect(query).toContain('SORT @timestamp ASC');
     });
 
-    it('forwards time-range and status filters to the shared query', async () => {
+    it('forwards time-range, status, and limit filters to the shared query', async () => {
       const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
         executeQueryRows: jest.fn().mockResolvedValueOnce([]),
       };
@@ -144,12 +144,14 @@ describe('EpisodesClient', () => {
           end: '2026-08-03T01:00:00.000Z',
         },
         status: ALERT_EPISODE_STATUS.ACTIVE,
+        limit: 1001,
       });
 
       const [{ query }] = queryService.executeQueryRows.mock.calls[0];
       expect(query).toContain('@timestamp >= "2026-08-03T00:00:00.000Z"');
       expect(query).toContain('@timestamp <= "2026-08-03T01:00:00.000Z"');
       expect(query).toContain(`episode.status == "${ALERT_EPISODE_STATUS.ACTIVE}"`);
+      expect(query).toContain('LIMIT 1001');
     });
   });
 });
