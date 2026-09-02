@@ -28,7 +28,9 @@ export interface CPSServerStart {
   /**
    * `true` only when a cross-project read is both possible and meaningful for this request, i.e.
    * at least one linked project is visible to the principal. Unresolved resolves to `false`, so a
-   * principal that cannot list linked projects reads origin-only rather than failing.
+   * principal that cannot list linked projects reads origin-only rather than failing. That is
+   * fail-closed rather than exact: a principal without the `read_project_routing` cluster
+   * privilege may still be authorized to search linked projects, but this returns `false` for it.
    */
   isCpsActive(request: KibanaRequest): Promise<boolean>;
 }

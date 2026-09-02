@@ -33,8 +33,8 @@ export class LinkedProjectsService {
   }
 
   /**
-   * Unresolved deliberately means "not active" because a principal that cannot list linked projects
-   * cannot search them either, so origin-only is the correct read for it.
+   * Unresolved deliberately means "not active": the caller falls back to origin-only reads rather
+   * than failing. See `fetchLinkedProjects` for why that is the safe direction on a 403.
    */
   public async isCpsActive(request: KibanaRequest): Promise<boolean> {
     return (await this.getLinkedProjects(request))?.length ? true : false;
@@ -71,10 +71,15 @@ export class LinkedProjectsService {
       // long as the principal keeps making them. Either way the scope stays unresolved rather than
       // being misreported as empty.
       if (statusCode === 403) {
-        // The principal lacks the `read_project_routing` cluster privilege, so it cannot search
-        // linked projects either.
+        // The principal lacks the `read_project_routing` cluster privilege. That does not mean it
+        // cannot search linked projects — Elasticsearch scopes cross-project results by index
+        // authorization, not by this privilege — so treating 403 as "not active" is a deliberate
+        // fail-closed choice, not an inference. Flipping it would move principals whose index
+        // grants we cannot inspect (custom roles) onto `asCurrentUser`, which is exactly the
+        // exposure this signal exists to shrink. The cost is that a custom role without
+        // `read_project_routing` reads origin-only.
         this.logger.debug(
-          `The request principal is not authorized to resolve linked projects via /_project/tags (status 403); it lacks the read_project_routing cluster privilege, so cross-project reads are not available to it.`
+          `The request principal is not authorized to resolve linked projects via /_project/tags (status 403); it lacks the read_project_routing cluster privilege, so this request reads origin-only.`
         );
       } else if (statusCode === 401) {
         // Not a Kibana authentication failure - those are rejected by the HTTP layer long before a

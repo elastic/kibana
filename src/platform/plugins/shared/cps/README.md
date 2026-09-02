@@ -21,7 +21,7 @@ Kibana acts as a **transparent orchestrator**. It does not execute cross-project
 - **Start contract**: When `cpsEnabled` is true, `start()` returns:
   - `createNpreClient(request)` — a request-scoped client for named project routing expressions.
   - `getLinkedProjects(request)` — the linked projects visible to the request principal, or `undefined` when they could not be resolved (unauthorized or the call failed). `undefined` is distinct from `[]`: "unknown" must never be read as "none".
-  - `isCpsActive(request)` — `true` only when a cross-project read is both possible and meaningful for this request (at least one linked project is visible to the principal). This is the signal consumers should use for "this request can and should fan out". Unresolved resolves to `false`, so a principal that cannot list linked projects reads origin-only rather than failing. When `cpsEnabled` is false, `start()` returns `undefined` (capability off).
+  - `isCpsActive(request)` — `true` only when a cross-project read is both possible and meaningful for this request (at least one linked project is visible to the principal). This is the signal consumers should use for "this request can and should fan out". Unresolved resolves to `false`, so a principal that cannot list linked projects reads origin-only rather than failing. This is fail-closed rather than exact: as noted under [Privileges](#privileges), a principal without `read_project_routing` may still be authorized to search linked projects, but `isCpsActive` returns `false` for it. When `cpsEnabled` is false, `start()` returns `undefined` (capability off).
 
 ### API Routes
 
@@ -67,3 +67,5 @@ Elasticsearch gates the CPS metadata APIs behind cluster privileges:
 - `manage_project_routing` — additionally allows creating/updating NPREs (e.g. customizing a space's default project routing).
 
 Users without `read_project_routing` can still run searches: the space default project routing is resolved via the Kibana internal user and applied to their queries, and Elasticsearch scopes cross-project results to the projects the user is authorized to access.
+
+`isCpsActive` does not take advantage of that. It resolves to `false` for those users, so consumers that branch on it read origin-only. Reporting them as active would mean routing principals whose index grants Kibana cannot inspect through `asCurrentUser`, which is the exposure the signal exists to bound.
