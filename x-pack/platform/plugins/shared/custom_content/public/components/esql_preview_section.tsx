@@ -22,6 +22,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
@@ -41,6 +42,29 @@ interface EsqlPreviewSectionProps {
 }
 
 const MAX_PREVIEW_ROWS = 5;
+/**
+ * This table shows the shape of the data, not its content — a markdown or multivalue column can
+ * carry kilobytes per cell, which stretches the table in both axes and buries the column names.
+ */
+const MAX_PREVIEW_CELL_CHARS = 120;
+
+// Fixed layout gives every column an equal share, so one long column cannot starve the rest; the
+// cell rules keep a row one line tall. The untruncated value stays available as the cell's title.
+const previewTableCss = css({
+  'td, th': {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+});
+
+const formatCell = (value: unknown): { text: string; full: string } => {
+  const full = Array.isArray(value) ? value.join(', ') : String(value ?? '');
+  return {
+    text: full.length > MAX_PREVIEW_CELL_CHARS ? `${full.slice(0, MAX_PREVIEW_CELL_CHARS)}…` : full,
+    full,
+  };
+};
 
 /** `isPending` keeps the "no time field" hint hidden until detection actually resolves. */
 interface TimeFieldDetection {
@@ -185,7 +209,7 @@ export const EsqlPreviewSection = ({
       {esqlData && columns.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <EuiTable tableLayout="auto" compressed>
+          <EuiTable tableLayout="fixed" compressed css={previewTableCss}>
             <EuiTableHeader>
               {columns.map((col) => (
                 <EuiTableHeaderCell key={col.name}>{col.name}</EuiTableHeaderCell>
@@ -194,9 +218,14 @@ export const EsqlPreviewSection = ({
             <EuiTableBody>
               {previewRows.map((row, rowIdx) => (
                 <EuiTableRow key={rowIdx}>
-                  {columns.map((col, colIdx) => (
-                    <EuiTableRowCell key={col.name}>{String(row[colIdx] ?? '')}</EuiTableRowCell>
-                  ))}
+                  {columns.map((col, colIdx) => {
+                    const { text, full } = formatCell(row[colIdx]);
+                    return (
+                      <EuiTableRowCell key={col.name} title={full}>
+                        {text}
+                      </EuiTableRowCell>
+                    );
+                  })}
                 </EuiTableRow>
               ))}
             </EuiTableBody>

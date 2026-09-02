@@ -102,4 +102,30 @@ describe('EsqlPreviewSection', () => {
     expect(screen.getByText('count')).toBeInTheDocument();
     expect(screen.getByText('42')).toBeInTheDocument();
   });
+
+  it('truncates a long cell and keeps the full value in the title', () => {
+    const long = 'x'.repeat(500);
+    const esqlData = {
+      columns: [{ name: 'steps', type: 'keyword' }],
+      values: [[long]],
+      all_columns: [],
+    } as unknown as EsqlDataResult;
+
+    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+
+    const cell = screen.getByTitle(long);
+    expect(cell.textContent).toBe(`${'x'.repeat(120)}…`);
+  });
+
+  it('joins a multivalue cell rather than rendering it as a bare array', () => {
+    const esqlData = {
+      columns: [{ name: 'tactics', type: 'keyword' }],
+      values: [[['Initial Access', 'Execution']]],
+      all_columns: [],
+    } as unknown as EsqlDataResult;
+
+    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+
+    expect(screen.getByText('Initial Access, Execution')).toBeInTheDocument();
+  });
 });
