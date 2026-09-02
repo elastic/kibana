@@ -17,7 +17,7 @@ import type {
 } from '@kbn/observability-shared-plugin/common';
 import type { AlertsLocator } from '@kbn/observability-plugin/common';
 import type { RulesServiceSetup } from '../services/rules';
-import type { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
+import type { InfraConfig, InfraPluginStartServicesAccessor, ServerlessInfo } from '../types';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import type { InfraMetricsDomain } from './domains/metrics_domain';
 import type { InfraSources } from './sources';
@@ -51,6 +51,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logger: Logger;
   plugins: Plugins;
+  serverless: ServerlessInfo;
 }
 
 export interface InfraLocators {

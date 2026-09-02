@@ -42995,6 +42995,91 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/data_streams/data:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/data_streams/data</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Check whether one or more data stream index patterns contain any documents indexed at or after the given start time.<br/><br/>[Required authorization] Route required privileges: fleet-read.
+      operationId: get-fleet-data-streams-data
+      parameters:
+        - description: A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-*` or `metrics-<dataset>-*`.
+          in: query
+          name: dataStreams
+          required: true
+          schema:
+            maxLength: 4096
+            type: string
+        - description: An ISO 8601 timestamp. Only documents with an `@timestamp` at or after this time are considered.
+          in: query
+          name: start
+          required: true
+          schema:
+            maxLength: 64
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getDataStreamsHasDataExample:
+                  description: One entry per requested index pattern
+                  value:
+                    results:
+                      logs-aws.cloudtrail-*: true
+                      metrics-aws.ec2-*: false
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  results:
+                    additionalProperties:
+                      type: boolean
+                    description: One entry per requested index pattern. `true` when the pattern matched at least one document, `false` when it matched none or the pattern resolved to no index.
+                    type: object
+                required:
+                  - results
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                getDataStreamsHasDataInvalidPatternExample:
+                  description: A requested pattern is not a supported data stream wildcard
+                  value:
+                    error: Bad Request
+                    message: 'Invalid index pattern: ".security-7"'
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad request
+      summary: Check if data streams have data
+      tags:
+        - Data streams
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/enrollment_api_keys:
     get:
       description: |-
@@ -130749,7 +130834,6 @@ components:
             parameters:
               oneOf:
                 - description: Dump the entire kernel memory.
-                  type: object
                   properties:
                     type:
                       enum:
@@ -130757,8 +130841,19 @@ components:
                       type: string
                   required:
                     - type
-                - description: Dump the entire memory of a process using the PID.
+                  title: kernel
                   type: object
+                - description: Dump the entire raw memory.
+                  properties:
+                    type:
+                      enum:
+                        - raw
+                      type: string
+                  required:
+                    - type
+                  title: raw
+                  type: object
+                - description: Dump the entire memory of a process using the PID.
                   properties:
                     pid:
                       type: number
@@ -130769,8 +130864,9 @@ components:
                   required:
                     - type
                     - pid
-                - description: Dump the entire memory of a process using the entity ID.
+                  title: Process PID
                   type: object
+                - description: Dump the entire memory of a process using the entity ID.
                   properties:
                     entity_id:
                       maxLength: 256
@@ -130783,6 +130879,8 @@ components:
                   required:
                     - type
                     - entity_id
+                  title: Process Entity ID
+                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
