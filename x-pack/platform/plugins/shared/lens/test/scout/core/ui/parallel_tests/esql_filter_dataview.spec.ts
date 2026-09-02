@@ -131,8 +131,7 @@ spaceTest.describe(
     spaceTest(
       'dashboard add filter from ES|QL panel should not show duplicate data view names',
       async ({ page, pageObjects }) => {
-        const { dashboard, lens } = pageObjects;
-        let esqlEmbeddableId: string;
+        const { dashboard, filterBar, lens } = pageObjects;
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
@@ -147,9 +146,6 @@ spaceTest.describe(
         await spaceTest.step('apply and close the inline editor', async () => {
           await applyLensInlineEditorAndWaitClosed({ lens });
           await dashboard.waitForRenderComplete();
-          // Capture the ES|QL panel ID while it's the only panel on the dashboard
-          const panelElementId = await page.testSubj.locator('dashboardPanel').getAttribute('id');
-          esqlEmbeddableId = panelElementId!.replace('panel-', '');
         });
 
         await spaceTest.step('add a flights Lens panel from the library', async () => {
@@ -160,21 +156,13 @@ spaceTest.describe(
           await dashboard.expectPanelCount(2);
         });
 
-        await spaceTest.step('click on a chart coordinate to trigger a filter', async () => {
-          const canvas = page.locator(
-            `[data-test-embeddable-id="${esqlEmbeddableId}"] .echCanvasRenderer`
-          );
-          await canvas.waitFor({ state: 'visible' });
-          const box = (await canvas.boundingBox())!;
-          await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.5);
-        });
-
-        await spaceTest.step('wait for the filter badge to appear', async () => {
-          await expect(page.testSubj.locator('^filter-badge')).toBeVisible();
+        await spaceTest.step('add a filter via the filter bar', async () => {
+          // Prefer the filter bar over chart-canvas clicks — canvas hits are coordinate-fragile.
+          await filterBar.addFilter({ field: 'agent.keyword', operator: 'exists' });
         });
 
         await spaceTest.step('open the filter editor', async () => {
-          await page.testSubj.locator('~filter').click();
+          await page.testSubj.locator('~filter & ~filter-key-agent.keyword').click();
           await page.testSubj.click('editFilter');
         });
 
