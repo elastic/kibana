@@ -104,9 +104,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const installedEs: Array<{ id: string; type: string }> =
           pkgRes.body.item.installationInfo.installed_es;
-        const transformRefIds = installedEs
-          .filter((a) => a.type === 'transform')
-          .map((a) => a.id);
+        const transformRefIds = installedEs.filter((a) => a.type === 'transform').map((a) => a.id);
 
         for (const expectedId of expectedIds) {
           expect(transformRefIds).to.contain(expectedId);
