@@ -24,39 +24,11 @@ export const defaultInferenceEndpoints = {
   ANTHROPIC_CLAUDE_4_6_OPUS: '.anthropic-claude-4.6-opus-chat_completion',
   ANTHROPIC_CLAUDE_4_6_SONNET: '.anthropic-claude-4.6-sonnet-chat_completion',
 
-  // Anthropic Claude (chat)
+  // Anthropic Claude tier aliases (chat). Opus/Sonnet/Haiku are stable tiers, so
+  // these are reassigned when EIS ships a newer GA model in the tier.
   ANTHROPIC_CLAUDE_OPUS_LATEST: '.anthropic-claude-5-opus-chat_completion',
   ANTHROPIC_CLAUDE_SONNET_LATEST: '.anthropic-claude-5-sonnet-chat_completion',
   ANTHROPIC_CLAUDE_HAIKU_LATEST: '.anthropic-claude-4.5-haiku-chat_completion',
-
-  // Google Gemini (chat)
-  GOOGLE_GEMINI_FLASH_LATEST: '.google-gemini-3.6-flash-chat_completion',
-  GOOGLE_GEMINI_FLASH_LITE_LATEST: '.google-gemini-3.5-flash-lite-chat_completion',
-  GOOGLE_GEMINI_PRO_LATEST: '.google-gemini-3.1-pro-chat_completion',
-
-  // OpenAI (chat)
-  OPENAI_GPT_LATEST: '.openai-gpt-5.5-chat_completion',
-  OPENAI_GPT_MINI_LATEST: '.openai-gpt-5.4-mini-chat_completion',
-  OPENAI_GPT_NANO_LATEST: '.openai-gpt-5.4-nano-chat_completion',
-  OPENAI_GPT_OSS_LATEST: '.openai-gpt-oss-120b-chat_completion',
-  OPENAI_GPT_OSS_SMALL_LATEST: '.openai-gpt-oss-20b-chat_completion',
-  OPENAI_GPT_5_6_LUNA: '.openai-gpt-5.6-luna-chat_completion',
-  OPENAI_GPT_5_6_SOL: '.openai-gpt-5.6-sol-chat_completion',
-  OPENAI_GPT_5_6_TERRA: '.openai-gpt-5.6-terra-chat_completion',
-
-  // z.ai (chat)
-  ZAI_GLM_LATEST: '.zai-glm-5.2-chat_completion',
-
-  // Embeddings
-  JINA_EMBEDDINGS_TEXT_LATEST: '.jina-embeddings-v5-text-small',
-  JINA_EMBEDDINGS_OMNI_LATEST: '.jina-embeddings-v5-omni-small',
-  JINA_CLIP_LATEST: '.jina-clip-v2',
-  GOOGLE_GEMINI_EMBEDDING_LATEST: '.google-gemini-embedding-2',
-  OPENAI_TEXT_EMBEDDING_LARGE_LATEST: '.openai-text-embedding-3-large',
-  OPENAI_TEXT_EMBEDDING_SMALL_LATEST: '.openai-text-embedding-3-small',
-
-  // Rerankers
-  JINA_RERANKER_LATEST: '.jina-reranker-v3.5',
 } as const;
 
 /**
