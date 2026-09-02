@@ -127,6 +127,22 @@ export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_re
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
 export { sendGetPackageInfoByKey } from './hooks/use_request/epm';
+export {
+  sendRenderIacTemplate,
+  sendResolveIacBlueprints,
+} from './hooks/use_request/iac_provisioner';
+export { useIacProvisioner } from './hooks/use_iac_provisioner';
+export type {
+  IacBlueprintCoverage,
+  IacNotCoveredReason,
+  IacNotCoveredReasonCode,
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+  RenderIacTemplateRequest,
+  RenderIacTemplateResponse,
+  ResolveIacBlueprintsRequest,
+  ResolveIacBlueprintsResponse,
+} from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 

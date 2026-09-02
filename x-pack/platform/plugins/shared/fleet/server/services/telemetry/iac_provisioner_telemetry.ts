@@ -10,10 +10,14 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   IacProvisionerRenderCompletedFields,
   IacProvisionerRenderRequestedFields,
+  IacProvisionerResolveCompletedFields,
+  IacProvisionerResolveRequestedFields,
 } from '../../../common/telemetry/iac_provisioner_events';
 import {
   IAC_PROVISIONER_RENDER_COMPLETED_EVENT,
   IAC_PROVISIONER_RENDER_REQUESTED_EVENT,
+  IAC_PROVISIONER_RESOLVE_COMPLETED_EVENT,
+  IAC_PROVISIONER_RESOLVE_REQUESTED_EVENT,
   registerIacProvisionerTelemetryEvents,
 } from '../../../common/telemetry/iac_provisioner_events';
 
@@ -34,4 +38,16 @@ export const reportIacProvisionerRenderCompleted = (
   fields: IacProvisionerRenderCompletedFields
 ): void => {
   analytics?.reportEvent(IAC_PROVISIONER_RENDER_COMPLETED_EVENT.eventType, fields);
+};
+
+export const reportIacProvisionerResolveRequested = (
+  fields: IacProvisionerResolveRequestedFields
+): void => {
+  analytics?.reportEvent(IAC_PROVISIONER_RESOLVE_REQUESTED_EVENT.eventType, fields);
+};
+
+export const reportIacProvisionerResolveCompleted = (
+  fields: IacProvisionerResolveCompletedFields
+): void => {
+  analytics?.reportEvent(IAC_PROVISIONER_RESOLVE_COMPLETED_EVENT.eventType, fields);
 };
