@@ -16,11 +16,19 @@ import {
 import { LogSourcesProvider } from '@kbn/logs-data-access-plugin/public';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
-import { useIsInfraMlCpsEnabled } from '../../hooks/use_infra_ml_cps';
+import { MlCpsCapabilityProvider, useIsInfraMlCpsEnabled } from '../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../containers/kbn_url_state_context';
 
-export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
+// The ML CPS capability must be settled before the inner providers mount, because the log view
+// state machine below captures its project routing when its actor is created.
+export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <MlCpsCapabilityProvider>
+    <LogsPageProvidersContent>{children}</LogsPageProvidersContent>
+  </MlCpsCapabilityProvider>
+);
+
+const LogsPageProvidersContent: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     services: {
       notifications: { toasts: toastsService },

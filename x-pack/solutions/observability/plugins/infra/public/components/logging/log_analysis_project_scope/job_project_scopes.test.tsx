@@ -9,6 +9,7 @@ import React from 'react';
 import { screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { type CPSProject, type ICPSManager, PROJECT_ROUTING } from '@kbn/cps-utils';
+import { MlCpsCapabilityContext } from '../../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { JobProjectScopes, type JobProjectScopeItem } from './job_project_scopes';
 
@@ -44,7 +45,11 @@ const renderJobProjectScopes = (
     },
   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
 
-  return renderWithKibanaRenderContext(<JobProjectScopes jobs={jobs} />);
+  return renderWithKibanaRenderContext(
+    <MlCpsCapabilityContext.Provider value={true}>
+      <JobProjectScopes jobs={jobs} />
+    </MlCpsCapabilityContext.Provider>
+  );
 };
 
 describe('JobProjectScopes', () => {
