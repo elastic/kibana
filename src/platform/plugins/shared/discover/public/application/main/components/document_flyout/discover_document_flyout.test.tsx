@@ -258,13 +258,6 @@ describe('DiscoverDocumentFlyout', () => {
       ebtDetail: 'esqlUnsupportedSource',
     },
     {
-      name: 'an ES|QL result without document metadata',
-      query: { esql: 'FROM logs' },
-      expandedDoc: buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock),
-      linkability: ExpandedDocLinkability.EsqlMissingMetadata,
-      ebtDetail: 'esqlMissingMetadata',
-    },
-    {
       name: 'a result from a transformational ES|QL query',
       query: { esql: 'FROM logs METADATA _id, _index | STATS count() BY host' },
       expandedDoc: buildDataTableRecord(outOfResultsHit, dataViewMock),
@@ -297,6 +290,38 @@ describe('DiscoverDocumentFlyout', () => {
       expect(copyToClipboard).not.toHaveBeenCalled();
     }
   );
+
+  it('shows a source-line example when an ES|QL result is missing document metadata', async () => {
+    const { services } = await setup({
+      hits: esHitsMock,
+      query: { esql: 'FROM logs-* | WHERE host.name == "web-01"' },
+      initialFlyout: {
+        type: 'openDocument',
+        document: buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock),
+      },
+    });
+    const disabledReason = getExpandedDocLinkDisabledReason(
+      ExpandedDocLinkability.EsqlMissingMetadata
+    );
+
+    const shareButton = await screen.findByRole('button', {
+      name: `Cannot share direct link: ${disabledReason}`,
+    });
+
+    expectShareButtonEbt(shareButton, 'esqlMissingMetadata');
+    expect(shareButton).toBeEnabled();
+    fireEvent.click(shareButton);
+
+    expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
+      {
+        title: 'Direct link not copied',
+        text: expect.any(Function),
+        'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
+      },
+      { toastLifeTimeMs: Infinity }
+    );
+    expect(copyToClipboard).not.toHaveBeenCalled();
+  });
 
   it('renders nothing when no document is expanded', async () => {
     await setup({ initialFlyout: { type: 'closed' } });
