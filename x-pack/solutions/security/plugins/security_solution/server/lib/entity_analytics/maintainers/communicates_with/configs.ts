@@ -119,4 +119,49 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
     AND host.target.entity.id IS NOT NULL`,
     targetEvalOverride: `CONCAT("host:", host.target.entity.id)`,
   },
+  {
+    kind: 'standard',
+    id: 'windows_forwarded',
+    name: 'Windows Forwarded Events',
+    indexPattern: (ns) => `logs-windows.forwarded-${ns}`,
+    relationshipKey: 'communicates_with',
+    targetEntityType: 'host',
+    requireTargetEntityIdExists: true,
+    // Mirrors system_security exactly — Windows Event Forwarding produces the
+    // same ECS field shape as system.security for 4624/4648 events.
+    customActor: { fields: ['user.name'] },
+    esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
+    AND event.code IN ("4624", "4648")
+    AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
+    AND event.outcome == "success"
+    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
+      SUCCESSFUL_OUTCOME_FILTER,
+    ],
+    hostScopedUsersOnly: true,
+  },
+  {
+    kind: 'standard',
+    id: 'crowdstrike_fdr',
+    name: 'CrowdStrike FDR',
+    indexPattern: (ns) => `logs-crowdstrike.fdr-${ns}`,
+    relationshipKey: 'communicates_with',
+    targetEntityType: 'host',
+    requireTargetEntityIdExists: true,
+    // See accesses/configs.ts crowdstrike_fdr entry for field-level rationale
+    // (LogonType exclusion list, NULL tolerance, machine-account guard).
+    customActor: { fields: ['user.name'] },
+    esqlWhereClause: `event.action == "UserLogon"
+    AND event.category == "authentication"
+    AND (crowdstrike.LogonType IS NULL OR NOT crowdstrike.LogonType IN ("3", "4", "5", "8"))
+    AND event.outcome == "success"
+    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})
+    AND NOT user.name LIKE "*$"`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['UserLogon'] } },
+      SUCCESSFUL_OUTCOME_FILTER,
+    ],
+    hostScopedUsersOnly: true,
+  },
 ];

@@ -114,4 +114,62 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     ],
     hostScopedUsersOnly: true,
   },
+  {
+    kind: 'bucketed',
+    id: 'windows_forwarded',
+    name: 'Windows Forwarded Events',
+    indexPattern: (ns) => `logs-windows.forwarded-${ns}`,
+    targetEntityType: 'host',
+    bucketTargetByThreshold: ACCESSES_BUCKETING,
+    requireTargetEntityIdExists: true,
+    // Mirrors system_security exactly — Windows Event Forwarding produces the
+    // same ECS field shape as system.security for 4624/4648 events. The same
+    // filter and actor field apply.
+    customActor: { fields: ['user.name'] },
+    esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
+    AND event.code IN ("4624", "4648")
+    AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
+    AND event.outcome == "success"
+    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
+      SUCCESSFUL_OUTCOME_FILTER,
+    ],
+    hostScopedUsersOnly: true,
+  },
+  {
+    kind: 'bucketed',
+    id: 'crowdstrike_fdr',
+    name: 'CrowdStrike FDR',
+    indexPattern: (ns) => `logs-crowdstrike.fdr-${ns}`,
+    targetEntityType: 'host',
+    bucketTargetByThreshold: ACCESSES_BUCKETING,
+    requireTargetEntityIdExists: true,
+    // host.id is populated from crowdstrike.aid (the CrowdStrike Agent ID) by
+    // the FDR ingest pipeline and is first in the host EUID ranking, so
+    // host:<AID> resolves to the entity extraction already created from the
+    // same FDR stream.
+    //
+    // LogonType is inverted to an exclusion list to tolerate NULL: an IN
+    // allow-list returns NULL for missing fields, silently dropping events
+    // with the richest identity data. Excluded: 3=Network, 4=Batch, 5=Service,
+    // 8=NetworkCleartext. Machine accounts (WORKSTATION$) are guarded by the
+    // LIKE filter because they are not in EXCLUDED_USERNAMES.
+    //
+    // event.outcome == "success" is always true on UserLogon (the pipeline
+    // hard-codes it), but kept for test-suite consistency with the other
+    // accesses configs.
+    customActor: { fields: ['user.name'] },
+    esqlWhereClause: `event.action == "UserLogon"
+    AND event.category == "authentication"
+    AND (crowdstrike.LogonType IS NULL OR NOT crowdstrike.LogonType IN ("3", "4", "5", "8"))
+    AND event.outcome == "success"
+    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})
+    AND NOT user.name LIKE "*$"`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['UserLogon'] } },
+      SUCCESSFUL_OUTCOME_FILTER,
+    ],
+    hostScopedUsersOnly: true,
+  },
 ];
