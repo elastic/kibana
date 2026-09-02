@@ -23,6 +23,11 @@ export const MAX_CONVERSATIONS_PER_PAGE = 1000;
 export const MAX_CONVERSATION_SEARCH_PER_PAGE = 50;
 
 /**
+ * Maximum length for a conversation search query
+ */
+export const CONVERSATION_SEARCH_QUERY_MAX_LENGTH = 512;
+
+/**
  * ES default `index.max_result_window`. Conversations beyond this offset are
  * not reachable through offset pagination; requests past it return 400.
  */
