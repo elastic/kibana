@@ -95,6 +95,49 @@ describe('RowActionsMenu', () => {
     expect(screen.getByText('Edit')).toBeInTheDocument();
   });
 
+  it('shows viewLabel when isViewOnly is true even though canWrite is true', () => {
+    renderWithIntl(
+      React.createElement(RowActionsMenu, {
+        ...defaultProps,
+        canWrite: true,
+        isViewOnly: true,
+        viewLabel: 'View',
+      })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('View')).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    // A writer keeps duplicate on a view-only item; only the open affordance changes.
+    expect(screen.getByText('Duplicate')).toBeInTheDocument();
+  });
+
+  it('falls back to editLabel when isViewOnly is true but viewLabel is omitted', () => {
+    renderWithIntl(
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true, isViewOnly: true })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+  });
+
+  it('uses the eye icon when showing viewLabel and the pencil icon otherwise', () => {
+    const { unmount } = renderWithIntl(
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false, viewLabel: 'View' })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('View').closest('button')).toContainHTML('data-euiicon-type="eye"');
+    unmount();
+
+    renderWithIntl(
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true, viewLabel: 'View' })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('Edit').closest('button')).toContainHTML('data-euiicon-type="pencil"');
+  });
+
   it('hides delete but shows duplicate when isReadOnly is true', () => {
     renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isReadOnly: true }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));

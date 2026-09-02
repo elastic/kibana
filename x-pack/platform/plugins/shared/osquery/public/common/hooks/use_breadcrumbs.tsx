@@ -142,7 +142,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  pack_edit: ({ packName }) => [
+  pack_edit: ({ packName, isReadOnly }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.packs(),
@@ -154,9 +154,16 @@ const breadcrumbGetters: {
       text: packName,
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
-        defaultMessage: 'Edit',
-      }),
+      // A readPacks-only user lands on a read-only pack page, so the trailing crumb
+      // must not say "Edit" (matches the kebab affordance in pack_row_actions).
+      text:
+        isReadOnly === 'true'
+          ? i18n.translate('xpack.osquery.breadcrumbs.viewpacksPageTitle', {
+              defaultMessage: 'View',
+            })
+          : i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
+              defaultMessage: 'Edit',
+            }),
     },
   ],
 };

@@ -59,6 +59,7 @@ const EditPackPageComponent = () => {
   useBreadcrumbs('pack_edit', {
     packId: data?.id ?? '',
     packName: data?.name ?? '',
+    isReadOnly: String(isReadOnly),
   });
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
