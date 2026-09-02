@@ -40,8 +40,7 @@ export const createConnectorRoute = (
         },
         response: {
           200: {
-            description:
-              'Indicates a successful call. Inbound event connectors may include a one-time secrets.ingest_token when credentials are minted.',
+            description: 'Indicates a successful call.',
             body: () => connectorResponseSchemaV1,
           },
           403: {

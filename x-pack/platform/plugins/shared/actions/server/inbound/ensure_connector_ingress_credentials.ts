@@ -27,7 +27,7 @@ export interface EnsureConnectorIngressCredentialsParams {
   connectorId: string;
   spaceId: string;
   existingConfig: Record<string, unknown>;
-  /** Create always mints. Update mints only when the stored hash is missing. */
+  /** Rotate always mints. Create and update never mint. */
   forceMint: boolean;
 }
 
@@ -95,4 +95,25 @@ export const applyInboundIngressCredentialsIfNeeded = ({
     },
     ingestToken: minted.ingestToken,
   };
+};
+
+/** Server-owned hash: drop a client-supplied value and keep the stored hash. Never mints. */
+export const preserveInboundIngressHashIfNeeded = ({
+  actionTypeId,
+  config,
+  storedConfig,
+}: {
+  actionTypeId: string;
+  config: Record<string, unknown>;
+  storedConfig?: Record<string, unknown>;
+}): Record<string, unknown> => {
+  if (!connectorTypeHasInboundEvents(actionTypeId)) {
+    return config;
+  }
+  const { ingestTokenHash: _clientHash, ...rest } = config;
+  const storedHash = storedConfig?.ingestTokenHash;
+  if (typeof storedHash === 'string' && storedHash.length > 0) {
+    return { ...rest, ingestTokenHash: storedHash };
+  }
+  return rest;
 };

@@ -504,6 +504,7 @@ export class ActionsPlugin
             isActionTypeEnabled: (actionTypeId) =>
               actionsConfigUtils.isActionTypeEnabled(actionTypeId),
             maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
             getStartServices: core.getStartServices,
             inMemoryConnectors: this.inMemoryConnectors,
             emitConnectorEvents: (params) =>

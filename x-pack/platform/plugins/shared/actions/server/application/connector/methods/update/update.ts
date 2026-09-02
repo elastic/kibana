@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omitBy } from 'lodash';
-import type { Connector, ConnectorWithMintedSecrets } from '../../types';
+import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
@@ -19,10 +19,7 @@ import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
-import {
-  applyInboundIngressCredentialsIfNeeded,
-  resolveInboundEventsSpaceId,
-} from '../../../../inbound/ensure_connector_ingress_credentials';
+import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -30,12 +27,7 @@ const getAuthTypeId = (
 ): string | undefined =>
   (secrets as { authType?: string })?.authType ?? (config as { authType?: string })?.authType;
 
-export async function update({
-  context,
-  id,
-  action,
-  rotateIngress = false,
-}: ConnectorUpdateParams): Promise<ConnectorWithMintedSecrets> {
+export async function update({ context, id, action }: ConnectorUpdateParams): Promise<Connector> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'update' });
 
@@ -166,15 +158,11 @@ export async function update({
         )
       : validatedActionTypeConfig;
 
-  const storedConfig = attributes.config;
-
-  const { config: configWithIngress, ingestToken } = applyInboundIngressCredentialsIfNeeded({
+  const storedConfig = attributes.config as Record<string, unknown> | undefined;
+  const configWithIngress = preserveInboundIngressHashIfNeeded({
     actionTypeId,
-    connectorId: id,
-    spaceId: resolveInboundEventsSpaceId(context),
     config: configForSave as Record<string, unknown>,
     storedConfig,
-    forceMint: rotateIngress,
   });
 
   const result = await tryCatch(
@@ -257,6 +245,5 @@ export async function update({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
-    ...(ingestToken !== undefined ? { secrets: { ingestToken } } : {}),
   };
 }

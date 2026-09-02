@@ -46,7 +46,19 @@ export {
   handleEventsResultSchema,
   isJsonSerializableSpokeBody,
   parseHandleEventsResult,
+  MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH,
+  MAX_HANDLE_EVENTS_EVENT_ID_LENGTH,
+  MAX_HANDLE_EVENTS_EVENTS,
+  MAX_HANDLE_EVENTS_EVENTS_LIMIT,
+  MAX_HANDLE_EVENTS_HEADERS,
+  MAX_HANDLE_EVENTS_HEADER_NAME_LENGTH,
+  MAX_HANDLE_EVENTS_HEADER_VALUE_LENGTH,
+  MAX_HANDLE_EVENTS_HTTP_BODY_BYTES,
+  MAX_HANDLE_EVENTS_PAYLOAD_BYTES,
+  MAX_HANDLE_EVENTS_PAYLOAD_KEY_LENGTH,
+  MAX_HANDLE_EVENTS_PAYLOAD_KEYS,
 } from './src/handle_events_result';
+export type { ParseHandleEventsLimits } from './src/handle_events_result';
 export {
   buildEventId,
   connectorTypeToEventNamespace,

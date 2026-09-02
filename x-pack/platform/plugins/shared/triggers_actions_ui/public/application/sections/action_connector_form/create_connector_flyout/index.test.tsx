@@ -697,11 +697,15 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('keeps the flyout open and shows webhook URL and ingest token after inbound create', async () => {
-      appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
-        ...createConnectorResponse,
-        connector_type_id: actionTypeModel.id,
-        secrets: { ingest_token: 'once-token' },
-        config: { ingestTokenHash: 'a'.repeat(64) },
+      appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+        if (String(path).includes('_rotate_ingress')) {
+          return Promise.resolve({ ingest_token: 'once-token' });
+        }
+        return Promise.resolve({
+          ...createConnectorResponse,
+          connector_type_id: '.inboundWebhook',
+          config: {},
+        });
       });
 
       appMockRenderer.render(
@@ -733,6 +737,9 @@ describe('CreateConnectorFlyout', () => {
 
       expect(onClose).not.toHaveBeenCalled();
       expect(onConnectorCreated).toHaveBeenCalled();
+      expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_ingress')
+      );
       expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
       expect(screen.getByTestId('connector-settings-label')).toBeInTheDocument();
       expect(screen.queryByTestId('create-connector-flyout-save-btn')).not.toBeInTheDocument();

@@ -52,6 +52,7 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   inboundEventsEnabled: boolean;
   isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
+  maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
@@ -77,6 +78,7 @@ export async function ingestInboundEvent({
   inboundEventsEnabled,
   isActionTypeEnabled,
   maxEmitted,
+  maxBodyBytes,
   emitConnectorEvents,
   logger,
   getUnsecuredSavedObjectsClient,
@@ -167,7 +169,8 @@ export async function ingestInboundEvent({
         config: stripIngestTokenHash(connector.config),
         rawBody: body,
         log: logger,
-      })
+      }),
+      { maxEvents: maxEmitted, maxPayloadBytes: maxBodyBytes }
     );
     if (!parsed.ok) {
       logInboundIngressOutcome(logger, {

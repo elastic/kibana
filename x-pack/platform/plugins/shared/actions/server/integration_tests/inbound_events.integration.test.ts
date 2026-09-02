@@ -94,11 +94,26 @@ describe('Inbound events HTTP API', () => {
       });
 
     const created = createRes.body as ConnectorHttpBody;
-    const ingestToken = created.secrets?.ingest_token;
     expect(created.id).toEqual(expect.any(String));
     expect(created.connector_type_id).toBe(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID);
+    expect(created.secrets).toBeUndefined();
+    expect(created.config?.ingestTokenHash).toBeUndefined();
+
+    const mintRes = await getSupertest(
+      kibanaServer.root,
+      'post',
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_ingress`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect((res: { status: number; body: unknown }) => {
+        if (res.status !== 200) {
+          throw new Error(`mint ingress failed ${res.status}: ${JSON.stringify(res.body)}`);
+        }
+      });
+
+    const ingestToken = (mintRes.body as { ingest_token?: string }).ingest_token;
     expect(ingestToken).toEqual(expect.any(String));
-    expect(created.config?.ingestTokenHash).toMatch(/^[a-f0-9]{64}$/);
 
     await postHub(created.id, ingestToken!, {
       type: 'url_verification',

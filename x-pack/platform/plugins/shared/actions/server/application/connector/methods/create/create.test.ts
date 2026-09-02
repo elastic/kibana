@@ -27,7 +27,6 @@ import { z as z4 } from '@kbn/zod/v4';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
-import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -1247,35 +1246,7 @@ describe('create()', () => {
       }));
     });
 
-    test('mints hash and URL, returns token once, and does not persist the raw token', async () => {
-      const result = await create({
-        context: inboundContext,
-        action: {
-          name: 'Sales ingress',
-          actionTypeId: '.inboundWebhook',
-          config: {},
-          secrets: {},
-        },
-      });
-
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-        secrets: Record<string, unknown>;
-      };
-
-      expect(result.secrets?.ingestToken).toEqual(expect.any(String));
-      expect(saved.config.ingestTokenHash).toBe(
-        computeIngestTokenHash({
-          connectorId: 'mock-saved-object-id',
-          spaceId: 'default',
-          token: result.secrets!.ingestToken!,
-        })
-      );
-      expect(JSON.stringify(saved)).not.toContain(result.secrets!.ingestToken);
-      expect(result.config).toEqual(saved.config);
-    });
-
-    test('overwrites a client-supplied ingestTokenHash', async () => {
+    test('does not mint credentials or return secrets', async () => {
       const result = await create({
         context: inboundContext,
         action: {
@@ -1287,39 +1258,11 @@ describe('create()', () => {
       });
 
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
+        config: { ingestTokenHash?: string };
       };
-      expect(saved.config.ingestTokenHash).not.toBe('a'.repeat(64));
-      expect(saved.config.ingestTokenHash).toBe(
-        computeIngestTokenHash({
-          connectorId: 'mock-saved-object-id',
-          spaceId: 'default',
-          token: result.secrets!.ingestToken!,
-        })
-      );
-    });
 
-    test('binds spaceId into the ingest token hash', async () => {
-      const result = await create({
-        context: { ...inboundContext, spaceId: 'sales' },
-        action: {
-          name: 'Sales ingress',
-          actionTypeId: '.inboundWebhook',
-          config: {},
-          secrets: {},
-        },
-      });
-
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-      };
-      expect(saved.config.ingestTokenHash).toBe(
-        computeIngestTokenHash({
-          connectorId: 'mock-saved-object-id',
-          spaceId: 'sales',
-          token: result.secrets!.ingestToken!,
-        })
-      );
+      expect(result).not.toHaveProperty('secrets');
+      expect(saved.config.ingestTokenHash).toBeUndefined();
     });
   });
 });

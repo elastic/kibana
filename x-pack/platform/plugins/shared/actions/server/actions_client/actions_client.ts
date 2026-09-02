@@ -26,6 +26,7 @@ import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
 import type {
+  Connector,
   ConnectorWithExtraFindData,
   ConnectorWithMintedSecrets,
 } from '../application/connector/types';
@@ -223,7 +224,7 @@ export class ActionsClient {
   public async create({
     action,
     options,
-  }: Omit<ConnectorCreateParams, 'context'>): Promise<ConnectorWithMintedSecrets> {
+  }: Omit<ConnectorCreateParams, 'context'>): Promise<Connector> {
     return create({ context: this.context, action, options });
   }
 
@@ -233,7 +234,7 @@ export class ActionsClient {
   public async update({
     id,
     action,
-  }: Pick<ConnectorUpdateParams, 'id' | 'action'>): Promise<ConnectorWithMintedSecrets> {
+  }: Pick<ConnectorUpdateParams, 'id' | 'action'>): Promise<Connector> {
     return update({ context: this.context, id, action });
   }
 

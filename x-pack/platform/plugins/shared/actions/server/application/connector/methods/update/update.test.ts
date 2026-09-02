@@ -24,8 +24,6 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
-
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const authorization = actionsAuthorizationMock.create();
@@ -924,39 +922,10 @@ describe('update()', () => {
         config: { ingestTokenHash: string };
       };
       expect(saved.config.ingestTokenHash).toBe(storedHash);
-      expect(result.secrets).toBeUndefined();
+      expect(result).not.toHaveProperty('secrets');
     });
 
-    test('mints credentials when the stored hash is missing', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        ...existingRawAction,
-        attributes: {
-          ...existingRawAction.attributes,
-          actionTypeId: '.inboundWebhook',
-          config: {},
-        },
-      } as never);
-
-      const result = await update({
-        context: inboundContext,
-        id: 'connector-id',
-        action: { name: 'renamed', config: {}, secrets: {} },
-      });
-
-      expect(result.secrets?.ingestToken).toEqual(expect.any(String));
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-      };
-      expect(saved.config.ingestTokenHash).toBe(
-        computeIngestTokenHash({
-          connectorId: 'connector-id',
-          spaceId: 'default',
-          token: result.secrets!.ingestToken!,
-        })
-      );
-    });
-
-    test('remints credentials when rotateIngress is true', async () => {
+    test('ignores a client-supplied ingestTokenHash', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...existingRawAction,
         attributes: {
@@ -966,25 +935,20 @@ describe('update()', () => {
         },
       } as never);
 
-      const result = await update({
+      await update({
         context: inboundContext,
         id: 'connector-id',
-        action: { name: 'renamed', config: {}, secrets: {} },
-        rotateIngress: true,
+        action: {
+          name: 'renamed',
+          config: { ingestTokenHash: 'c'.repeat(64) },
+          secrets: {},
+        },
       });
 
-      expect(result.secrets?.ingestToken).toEqual(expect.any(String));
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
         config: { ingestTokenHash: string };
       };
-      expect(saved.config.ingestTokenHash).not.toBe(storedHash);
-      expect(saved.config.ingestTokenHash).toBe(
-        computeIngestTokenHash({
-          connectorId: 'connector-id',
-          spaceId: 'default',
-          token: result.secrets!.ingestToken!,
-        })
-      );
+      expect(saved.config.ingestTokenHash).toBe(storedHash);
     });
   });
 });

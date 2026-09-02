@@ -10,6 +10,7 @@ import {
   applyInboundIngressCredentialsIfNeeded,
   ensureConnectorIngressCredentials,
   generateIngestToken,
+  preserveInboundIngressHashIfNeeded,
 } from './ensure_connector_ingress_credentials';
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
 
@@ -47,18 +48,6 @@ describe('ensureConnectorIngressCredentials', () => {
     );
     expect(result.config.ingestTokenHash).not.toBe('a'.repeat(64));
   });
-
-  it('preserves the stored hash when not force-minting', () => {
-    const storedHash = 'b'.repeat(64);
-    const result = ensureConnectorIngressCredentials({
-      ...baseParams,
-      existingConfig: { ingestTokenHash: storedHash },
-      forceMint: false,
-    });
-
-    expect(result.ingestToken).toBeUndefined();
-    expect(result.config).toEqual({ ingestTokenHash: storedHash });
-  });
 });
 
 describe('applyInboundIngressCredentialsIfNeeded', () => {
@@ -85,5 +74,38 @@ describe('applyInboundIngressCredentialsIfNeeded', () => {
 
     expect(result.ingestToken).toEqual(expect.any(String));
     expect(result.config.ingestTokenHash).not.toBe('d'.repeat(64));
+  });
+});
+
+describe('preserveInboundIngressHashIfNeeded', () => {
+  it('leaves outbound connector config unchanged', () => {
+    expect(
+      preserveInboundIngressHashIfNeeded({
+        actionTypeId: '.http',
+        config: { url: 'https://example.com' },
+        storedConfig: { ingestTokenHash: 'a'.repeat(64) },
+      })
+    ).toEqual({ url: 'https://example.com' });
+  });
+
+  it('keeps the stored hash and drops a client-supplied hash', () => {
+    const storedHash = 'b'.repeat(64);
+    expect(
+      preserveInboundIngressHashIfNeeded({
+        actionTypeId: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        config: { ingestTokenHash: 'c'.repeat(64), other: 'kept' },
+        storedConfig: { ingestTokenHash: storedHash },
+      })
+    ).toEqual({ other: 'kept', ingestTokenHash: storedHash });
+  });
+
+  it('does not mint when the stored hash is missing', () => {
+    expect(
+      preserveInboundIngressHashIfNeeded({
+        actionTypeId: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        config: { ingestTokenHash: 'c'.repeat(64) },
+        storedConfig: {},
+      })
+    ).toEqual({});
   });
 });

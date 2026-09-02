@@ -101,6 +101,7 @@ describe('ingestInboundEvent', () => {
     enabled?: boolean;
     isActionTypeEnabled?: (actionTypeId: string) => boolean;
     maxEmitted?: number;
+    maxBodyBytes?: number;
     connectorTypeId?: string;
     spaceId?: string;
     query?: Record<string, unknown>;
@@ -119,6 +120,7 @@ describe('ingestInboundEvent', () => {
       inboundEventsEnabled: overrides?.enabled ?? true,
       isActionTypeEnabled: overrides?.isActionTypeEnabled ?? (() => true),
       maxEmitted: overrides?.maxEmitted ?? INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+      maxBodyBytes: overrides?.maxBodyBytes ?? 1024 * 1024,
       emitConnectorEvents: overrides?.emit ?? emitConnectorEvents,
       logger,
       getUnsecuredSavedObjectsClient,
@@ -627,6 +629,44 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run({ maxEmitted: 2 });
     expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
+  it('emits when the event count is within a raised maxEmitted', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    const events = Array.from({ length: INBOUND_EVENTS_MAX_EMITTED_DEFAULT + 1 }, (_, i) => ({
+      eventId,
+      correlationKey: `corr-${i}`,
+      payload: { body: {} },
+    }));
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
+        typeof getConnectorSpec
+      >
+    );
+    const { response: res } = await run({ maxEmitted: INBOUND_EVENTS_MAX_EMITTED_DEFAULT + 1 });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).toHaveBeenCalled();
+  });
+
+  it('returns 500 when the emit payload exceeds a tighter maxBodyBytes', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [
+            {
+              eventId: buildEventId('.myConnector', 'received'),
+              correlationKey: 'c1',
+              payload: { body: 'x'.repeat(200) },
+            },
+          ],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({ maxBodyBytes: 50 });
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
   });
 
   it('returns 500 when emitted events fail validation', async () => {

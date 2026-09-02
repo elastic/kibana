@@ -29,12 +29,9 @@ describe('inbound ingress helpers', () => {
     );
   });
 
-  it('reads ingest token from camelCase or snake_case secrets', () => {
+  it('reads the ingest token from connector secrets', () => {
     expect(
       getInboundIngestToken(createMockActionConnector({ secrets: { ingestToken: 'once-token' } }))
-    ).toBe('once-token');
-    expect(
-      getInboundIngestToken(createMockActionConnector({ secrets: { ingest_token: 'once-token' } }))
     ).toBe('once-token');
   });
 });

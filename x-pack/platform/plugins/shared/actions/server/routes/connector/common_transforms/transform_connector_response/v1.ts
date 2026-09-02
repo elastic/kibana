@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConnectorResponseWithMintedSecretsV1 } from '../../../../../common/routes/connector/response';
-import type { ConnectorWithMintedSecrets } from '../../../../application/connector/types';
+import type { ConnectorResponse } from '../../../../../common/routes/connector/response';
+import type { Connector } from '../../../../application/connector/types';
 
 export const transformConnectorResponse = ({
   actionTypeId,
@@ -16,9 +16,8 @@ export const transformConnectorResponse = ({
   isSystemAction,
   isConnectorTypeDeprecated,
   authMode,
-  secrets,
   ...res
-}: ConnectorWithMintedSecrets): ConnectorResponseWithMintedSecretsV1 => ({
+}: Connector): ConnectorResponse => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
@@ -27,5 +26,4 @@ export const transformConnectorResponse = ({
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { auth_mode: authMode } : {}),
-  ...(secrets?.ingestToken !== undefined ? { secrets: { ingest_token: secrets.ingestToken } } : {}),
 });

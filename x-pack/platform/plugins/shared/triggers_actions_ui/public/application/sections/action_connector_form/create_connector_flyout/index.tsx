@@ -51,7 +51,8 @@ import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 import { InboundIngressCredentials } from '../inbound_ingress_credentials';
-import { getInboundIngestToken } from '../../../lib/inbound_ingress';
+import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
+import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -177,6 +178,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   );
   const [isFormModified, setIsFormModified] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { isLoading: isRotating, rotateIngress } = useRotateInboundIngress();
 
   const testConnector = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
@@ -201,14 +203,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onConnectorCreated(createdConnector);
       }
 
-      if (getInboundIngestToken(createdConnector)) {
-        setCreatedInboundConnector(createdConnector);
+      if (isInboundIngressConnector(createdConnector)) {
+        const rotated = await rotateIngress(createdConnector.id);
+        setCreatedInboundConnector(
+          rotated
+            ? ({
+                ...createdConnector,
+                secrets: { ingestToken: rotated.ingestToken },
+              } as ActionConnector)
+            : createdConnector
+        );
         return;
       }
 
       onClose();
     }
-  }, [validateAndCreateConnector, onClose, onConnectorCreated]);
+  }, [validateAndCreateConnector, onClose, onConnectorCreated, rotateIngress]);
 
   const handleSearchValueChange = useCallback((newValue: string) => {
     setSearchValue(newValue);
@@ -250,7 +260,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const inboundSettingsContent = useMemo(() => {
     if (createdInboundConnector) {
-      return <InboundIngressCredentials connector={createdInboundConnector} />;
+      return <InboundIngressCredentials allowRotate connector={createdInboundConnector} />;
     }
     if (actionType == null || !connectorTypeHasInboundEvents(actionType.id)) {
       return undefined;
@@ -527,7 +537,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         isUsingInitialConnector={isUsingInitialConnector}
         onTestConnector={onTestConnector}
         disabled={disabled}
-        isSaving={isSaving}
+        isSaving={isSaving || isRotating}
         onSubmit={onSubmit}
         testConnector={testConnector}
         isTestable={isTestable}

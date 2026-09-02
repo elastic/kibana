@@ -9,12 +9,17 @@ import Boom from '@hapi/boom';
 import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
+import { isUndefined, omitBy } from 'lodash';
 
-import type { SavedObjectAttributes } from '@kbn/core/server';
-import type { RawAction } from '../../../../types';
 import type { ConnectorWithMintedSecrets } from '../../types';
-import { resolveInboundEventsSpaceId } from '../../../../inbound/ensure_connector_ingress_credentials';
-import { update } from '../update';
+import type { RawAction } from '../../../../types';
+import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { tryCatch } from '../../../../lib';
+import { getAuthMode, isConnectorDeprecated } from '../../lib';
+import {
+  applyInboundIngressCredentialsIfNeeded,
+  resolveInboundEventsSpaceId,
+} from '../../../../inbound/ensure_connector_ingress_credentials';
 import type { RotateInboundIngressParams } from './types';
 
 export async function rotateInboundIngress({
@@ -30,7 +35,8 @@ export async function rotateInboundIngress({
     spaceId !== DEFAULT_SPACE_ID ? { namespace: spaceId } : {}
   );
 
-  if (!connectorTypeHasInboundEvents(rawAction.attributes.actionTypeId)) {
+  const actionTypeId = rawAction.attributes.actionTypeId;
+  if (!connectorTypeHasInboundEvents(actionTypeId)) {
     throw Boom.badRequest(
       i18n.translate('xpack.actions.serverSideErrors.rotateInboundIngressNotSupported', {
         defaultMessage: 'This connector does not use inbound ingest credentials.',
@@ -38,14 +44,82 @@ export async function rotateInboundIngress({
     );
   }
 
-  return update({
-    context,
-    id,
-    action: {
-      name: rawAction.attributes.name,
-      config: rawAction.attributes.config as SavedObjectAttributes,
-      secrets: rawAction.attributes.secrets as SavedObjectAttributes,
-    },
-    rotateIngress: true,
+  const storedConfig = (rawAction.attributes.config ?? {}) as Record<string, unknown>;
+  const { config, ingestToken } = applyInboundIngressCredentialsIfNeeded({
+    actionTypeId,
+    connectorId: id,
+    spaceId,
+    config: storedConfig,
+    storedConfig,
+    forceMint: true,
   });
+
+  if (ingestToken === undefined) {
+    throw Boom.badImplementation(
+      i18n.translate('xpack.actions.rotateInboundIngress.missingMintedToken', {
+        defaultMessage: 'Rotate did not return an ingest token.',
+      })
+    );
+  }
+
+  context.auditLogger?.log(
+    connectorAuditEvent({
+      action: ConnectorAuditAction.UPDATE,
+      savedObject: { type: 'action', id },
+      outcome: 'unknown',
+    })
+  );
+
+  const { references, version } = rawAction;
+  const result = await tryCatch(
+    async () =>
+      await context.unsecuredSavedObjectsClient.create<RawAction>(
+        'action',
+        {
+          ...rawAction.attributes,
+          config,
+          secrets: rawAction.attributes.secrets,
+        },
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            references,
+            version,
+          },
+          isUndefined
+        )
+      )
+  );
+
+  if (result instanceof Error) {
+    context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.UPDATE,
+        savedObject: { type: 'action', id },
+        error: result,
+      })
+    );
+    throw result;
+  }
+
+  await context.evictClientPool?.(id);
+
+  const resolvedAuthMode = getAuthMode(
+    result.attributes.authMode as ConnectorWithMintedSecrets['authMode'] | undefined
+  );
+
+  return {
+    id,
+    actionTypeId: result.attributes.actionTypeId as string,
+    isMissingSecrets: result.attributes.isMissingSecrets as boolean,
+    name: result.attributes.name as string,
+    config: result.attributes.config as Record<string, unknown>,
+    isPreconfigured: false,
+    isSystemAction: false,
+    isDeprecated: isConnectorDeprecated(result.attributes),
+    isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    authMode: resolvedAuthMode,
+    secrets: { ingestToken },
+  };
 }

@@ -56,11 +56,6 @@ export const connectorResponseSchema = schema.object(
   { meta: { id: 'connector_response' } }
 );
 
-/**
- * Rotate only. GET/list/create/update use `connectorResponseSchema` so OAS does
- * not freeze a secrets bag on every connector write. Create/update still return
- * `secrets.ingest_token` at runtime when minted.
- */
 export const connectorResponseWithMintedSecretsSchema = connectorResponseSchema.extends(
   {
     secrets: schema.maybe(
@@ -71,7 +66,7 @@ export const connectorResponseWithMintedSecretsSchema = connectorResponseSchema.
               maxLength: INBOUND_EVENTS_TOKEN_MAX_LENGTH,
               meta: {
                 description:
-                  'One-time ingest token for inbound connector events. Returned on rotate (and once on create/update when minted). Store it; it cannot be retrieved again. Authenticate hub requests with `Authorization: Bearer` or the `token` query parameter.',
+                  'One-time ingest token for inbound connector events. Returned on rotate only. Store it; it cannot be retrieved again. Authenticate hub requests with `Authorization: Bearer` or the `token` query parameter.',
               },
             })
           ),
@@ -79,7 +74,7 @@ export const connectorResponseWithMintedSecretsSchema = connectorResponseSchema.
         {
           meta: {
             description:
-              'Secrets returned once after minting. OAS documents this bag on rotate. Create/update may include it at runtime. Never contains the stored ingest-token hash.',
+              'Secrets returned once after rotate. Never contains the stored ingest-token hash.',
           },
         }
       )

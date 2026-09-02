@@ -11,7 +11,9 @@ xpack.actions.inboundEvents.enabled: true
 
 Restart Kibana. With the flag off, `.inboundWebhook` is not registered (create / `listTypes` omit it) and the hub route is not mounted.
 
-## Create (copy URL + token once)
+## Create, then mint the token
+
+Public create/update never return a plaintext token (and never mint one). After create, call rotate once to mint the first live token.
 
 ```bash
 curl -u elastic:changeme -X POST "$KIBANA_URL/api/actions/connector" \
@@ -22,12 +24,6 @@ curl -u elastic:changeme -X POST "$KIBANA_URL/api/actions/connector" \
 
 Spec connectors require `secrets.authType`. For inbound webhook that is `"none"` (no outbound credentials).
 
-The create response includes:
-
-- `id` — connector instance id
-- `config.ingestTokenHash` — HMAC-SHA256 of the token (this is what is stored)
-- `secrets.ingest_token` — **plaintext token, once**. GET/list never return it.
-
 Webhook URL is not persisted. Compose it (or copy it from the connector flyout when the UI is available):
 
 ```
@@ -36,7 +32,7 @@ Webhook URL is not persisted. Compose it (or copy it from the connector flyout w
 
 Use `{publicBaseUrl}/s/{spaceId}/api/actions/events/.inboundWebhook/{connectorId}` when the space is not `default`. `server.publicBaseUrl` should include the Kibana server base path.
 
-Store the token with the URL. You cannot retrieve the token again without rotating.
+Store the token from rotate with the URL. You cannot retrieve the token again without rotating.
 
 ## POST the hub
 
@@ -70,9 +66,9 @@ curl -X POST "$KIBANA_URL/api/actions/events/.inboundWebhook/$CONNECTOR_ID" \
 
 A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token returns **404** (fail-closed; same as unknown connector).
 
-## Rotate
+## Rotate (first mint and later rotations)
 
-Invalidates the current token immediately and returns `{ "ingest_token": "<token>" }` once. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl.
+Mints a new token, invalidates the previous one immediately (if any), and returns `{ "ingest_token": "<token>" }` once. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl. The Stack Management flyout rotates once after create to show the first token.
 
 ```bash
 curl -u elastic:changeme -X POST \
