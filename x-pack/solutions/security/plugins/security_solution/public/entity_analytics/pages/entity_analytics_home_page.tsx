@@ -446,13 +446,11 @@ const EntityAnalyticsHomePageContent = () => {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
-              <EuiPanel hasBorder paddingSize="none">
-                <SignalCards
-                  activeFilter={activeFilter}
-                  cards={signalCards}
-                  onFilterForCard={handleFilterForCard}
-                />
-              </EuiPanel>
+              <SignalCards
+                activeFilter={activeFilter}
+                cards={signalCards}
+                onFilterForCard={handleFilterForCard}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
