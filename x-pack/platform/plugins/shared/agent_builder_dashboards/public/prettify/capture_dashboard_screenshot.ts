@@ -106,26 +106,6 @@ const renderGrid = async (
   throw new Error('dashboard screenshot exceeds the attachment size limit');
 };
 
-export const SCREENSHOT_PREVIEW_STORAGE_KEY = 'agentBuilderDashboards.previewDashboardScreenshot';
-
-// TODO: Remove before merging.
-const maybePreviewScreenshot = (blob: Blob): void => {
-  const url = URL.createObjectURL(blob);
-  const overlay = document.createElement('div');
-  overlay.setAttribute('data-test-subj', 'dashboardScreenshotPreview');
-  overlay.style.cssText =
-    'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);cursor:pointer;';
-  const image = document.createElement('img');
-  image.src = url;
-  image.style.cssText = 'max-width:90%;max-height:90%;background:#fff;';
-  overlay.appendChild(image);
-  overlay.addEventListener('click', () => {
-    URL.revokeObjectURL(url);
-    overlay.remove();
-  });
-  document.body.appendChild(overlay);
-};
-
 export const captureDashboardScreenshot = async ({
   dashboardApi,
   files,
@@ -140,7 +120,6 @@ export const captureDashboardScreenshot = async ({
     await waitForPanelsToRender(dashboardApi, grid);
 
     const { blob, mimeType } = await renderGrid(grid);
-    maybePreviewScreenshot(blob);
     const name = mimeType === 'image/png' ? 'dashboard-screenshot.png' : 'dashboard-screenshot.jpg';
 
     const client = files.filesClientFactory.asScoped(CHAT_ATTACHMENT_IMAGES_FILE_KIND);

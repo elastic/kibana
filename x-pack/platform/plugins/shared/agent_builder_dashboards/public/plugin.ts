@@ -19,8 +19,7 @@ import type {
 } from './types';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
 
-// TODO: Disable before merging.
-const PRETTIFY_DASHBOARD_ENABLED = true;
+const PRETTIFY_DASHBOARD_ENABLED = false;
 
 export class AgentBuilderDashboardsPlugin
   implements
