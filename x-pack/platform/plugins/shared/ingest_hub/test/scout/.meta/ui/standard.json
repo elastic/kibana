@@ -1,11 +1,11 @@
 {
-  "sha1": "488d8bbd3371a6fd1c00f46ade6784b5d582d37f",
+  "sha1": "2b3d9c8c65acb650e2488a4a3d662134d8ab1768",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "07a9893f4bfa48c-8a982de270c8a77",
+      "id": "a002a5dadd7e00b-8a982de270c8a77",
       "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
       "expectedStatus": "passed",
       "tags": [
@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_step.spec.ts",
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
         "line": 108,
         "column": 30
       }
