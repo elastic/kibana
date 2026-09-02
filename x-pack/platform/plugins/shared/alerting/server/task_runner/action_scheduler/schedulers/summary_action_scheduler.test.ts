@@ -321,7 +321,7 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const scheduler = new SummaryActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,
