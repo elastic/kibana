@@ -51,7 +51,7 @@ export type JobSummaryProjectScopeFields = Pick<MlSummaryJob, 'projectRouting' |
 export function getProjectRoutingFromJobSummary({
   projectRouting,
   isUiamEnabled,
-}: JobSummaryProjectScopeFields): string | null {
+}: JobSummaryProjectScopeFields | MlSummaryJob): string | null {
   if (projectRouting === undefined && isUiamEnabled === undefined) {
     return null;
   }

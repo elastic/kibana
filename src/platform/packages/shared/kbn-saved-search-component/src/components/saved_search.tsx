@@ -178,12 +178,11 @@ const SavedSearchComponentTable: React.FC<
 
   const { executionContext, projectRouting } = props;
 
-  const projectRouting$ = useMemo(
-    () => new BehaviorSubject<ProjectRouting | undefined>(projectRouting),
-    // projectRouting only used as the initial value. Changes are published via the effect below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  // created once; later changes are published through the effect below
+  const [projectRouting$] = useState(
+    () => new BehaviorSubject<ProjectRouting | undefined>(projectRouting)
   );
+
   useEffect(() => {
     if (projectRouting$.getValue() !== projectRouting) {
       projectRouting$.next(projectRouting);
