@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyPartialUpdate } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
@@ -14,11 +14,51 @@ import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
 export { configIdOf };
 
 /**
+ * The projection of a package policy that the shard-rebalance path actually
+ * reads.
+ *
+ * Rebalancing only ever re-pins `condition`, so the snapshot no longer has to
+ * carry the whole policy the way it did when the write went through Fleet's
+ * full `bulkUpdate` and had to re-send every attribute. Everything outside this
+ * shape is dead weight in a task that holds every monitor of a location in
+ * memory at once — above all `inputs[].streams[].compiled_stream`, which
+ * carries a browser monitor's inline script.
+ *
+ * Deliberately narrower than `PackagePolicy`: Fleet's `list` types its result as
+ * complete however it is projected, so a field that is read but not fetched
+ * would be `undefined` at runtime with nothing to catch it. Keep in step with
+ * {@link SHARDED_PACKAGE_POLICY_FIELDS}.
+ */
+export type ShardedPackagePolicy = Pick<
+  PackagePolicy,
+  'id' | 'version' | 'spaceIds' | 'condition' | 'revision' | 'policy_ids'
+> & {
+  inputs: Array<Pick<PackagePolicyInput, 'type' | 'enabled'>>;
+};
+
+/**
+ * Source filter producing {@link ShardedPackagePolicy}. `id`, `version` and
+ * `spaceIds` are omitted because they come off the saved-object envelope and are
+ * returned whatever the projection.
+ *
+ * `name` is not read by this path either; it is fetched so Fleet's `list` can
+ * keep naming package policies in its saved-object audit log.
+ */
+export const SHARDED_PACKAGE_POLICY_FIELDS = [
+  'name',
+  'condition',
+  'revision',
+  'policy_ids',
+  'inputs.type',
+  'inputs.enabled',
+];
+
+/**
  * Monitor type of a synthetics package policy, read from its single enabled
  * input (`synthetics/${type}`). Only `browser` vs. lightweight matters for the
  * memory cost model, so anything non-browser is treated as lightweight.
  */
-export const monitorTypeOfPolicy = (pp: PackagePolicy): string =>
+export const monitorTypeOfPolicy = (pp: ShardedPackagePolicy): string =>
   pp.inputs?.some((input) => input.enabled && input.type === 'synthetics/browser')
     ? 'browser'
     : 'http';
@@ -33,7 +73,7 @@ export const monitorTypeOfPolicy = (pp: PackagePolicy): string =>
  * isn't skewed.
  */
 export const toMonitorPlacements = (
-  pkgPolicies: PackagePolicy[],
+  pkgPolicies: ShardedPackagePolicy[],
   locationId: string
 ): MonitorPlacement[] => {
   const byId = new Map<string, MonitorPlacement>();
@@ -70,8 +110,9 @@ export interface ConditionUpdate {
  * optimistic-concurrency token mandatory on the write path rather than
  * degrading to a blind overwrite when it is somehow absent.
  */
-const hasVersion = (pkgPolicy: PackagePolicy): pkgPolicy is PackagePolicy & { version: string } =>
-  typeof pkgPolicy.version === 'string';
+const hasVersion = (
+  pkgPolicy: ShardedPackagePolicy
+): pkgPolicy is ShardedPackagePolicy & { version: string } => typeof pkgPolicy.version === 'string';
 
 /**
  * Minimal write that only re-targets a package policy to a different agent by
@@ -92,7 +133,7 @@ const hasVersion = (pkgPolicy: PackagePolicy): pkgPolicy is PackagePolicy & { ve
  * is idempotent).
  */
 export const toConditionUpdate = (
-  pkgPolicy: PackagePolicy & { version: string },
+  pkgPolicy: ShardedPackagePolicy & { version: string },
   condition: string | null
 ): ConditionUpdate => ({
   update: {
@@ -120,7 +161,7 @@ export const toConditionUpdate = (
  * {@link toMonitorPlacements} dedupes them.
  */
 export const toConditionUpdates = (
-  pkgPolicies: PackagePolicy[],
+  pkgPolicies: ShardedPackagePolicy[],
   assignment: ReadonlyMap<string, string>,
   locationId: string
 ): Map<string, ConditionUpdate[]> => {
@@ -154,7 +195,7 @@ export const toConditionUpdates = (
  * rebalancing is turned off so monitors go back to unfiltered (classic) scheduling.
  */
 export const toClearedConditionUpdates = (
-  pkgPolicies: PackagePolicy[]
+  pkgPolicies: ShardedPackagePolicy[]
 ): Map<string, ConditionUpdate[]> => {
   const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {

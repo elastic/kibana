@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { agentIdCondition, UNASSIGNED_CONDITION } from './assign_by_condition';
 import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
+import type { ShardedPackagePolicy } from './rebalance_writes';
 import {
   configIdOf,
   toClearedConditionUpdates,
@@ -17,23 +17,24 @@ import {
 
 const LOCATION = 'loc1';
 
-const policy = (over: Partial<PackagePolicy> & { id: string }): PackagePolicy =>
-  ({
-    name: over.id,
-    enabled: true,
-    inputs: [{ type: 'synthetics/http', enabled: true, streams: [] }],
-    policy_ids: ['agent-policy-1'],
-    spaceIds: ['default'],
-    version: 'WzAsMV0=',
-    revision: 1,
-    ...over,
-  } as PackagePolicy);
+// Fixtures carry exactly what `listByAgentPolicy` projects, so a field this
+// path stops fetching but starts reading fails to compile here.
+const policy = (over: Partial<ShardedPackagePolicy> & { id: string }): ShardedPackagePolicy => ({
+  inputs: [{ type: 'synthetics/http', enabled: true }],
+  policy_ids: ['agent-policy-1'],
+  spaceIds: ['default'],
+  version: 'WzAsMV0=',
+  revision: 1,
+  ...over,
+});
 
-const browserPolicy = (over: Partial<PackagePolicy> & { id: string }): PackagePolicy =>
+const browserPolicy = (
+  over: Partial<ShardedPackagePolicy> & { id: string }
+): ShardedPackagePolicy =>
   policy({
     inputs: [
-      { type: 'synthetics/http', enabled: false, streams: [] },
-      { type: 'synthetics/browser', enabled: true, streams: [] },
+      { type: 'synthetics/http', enabled: false },
+      { type: 'synthetics/browser', enabled: true },
     ],
     ...over,
   });

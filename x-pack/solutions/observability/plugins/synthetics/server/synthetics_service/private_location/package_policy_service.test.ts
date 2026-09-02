@@ -16,6 +16,7 @@ import {
 } from './package_policy_service';
 import { AGENT_POLICY_REVISION_BATCH_WINDOW_MS } from './agent_policy_revision_batcher';
 import type { ConditionUpdate } from './rebalance_writes';
+import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 import type { SyntheticsServerSetup } from '../../types';
 
 beforeEach(() => {
@@ -476,6 +477,28 @@ describe('PackagePolicyService.listByAgentPolicy', () => {
           'ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"ap-1"',
       })
     );
+  });
+
+  it('source-filters to the fields the rebalance path reads', async () => {
+    const { server, list } = makeListServer([[{ id: 'm1-loc' }]]);
+
+    await new PackagePolicyService(server).listByAgentPolicy({ agentPolicyId: 'ap-1' });
+
+    // Not just any projection: dropping one of these silently yields
+    // `undefined` downstream, and keeping the policy body loads every browser
+    // monitor's inline script for a write that never sends it.
+    expect(list).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ fields: SHARDED_PACKAGE_POLICY_FIELDS })
+    );
+    expect(SHARDED_PACKAGE_POLICY_FIELDS).toEqual([
+      'name',
+      'condition',
+      'revision',
+      'policy_ids',
+      'inputs.type',
+      'inputs.enabled',
+    ]);
   });
 
   it('paginates until a short page and concatenates the results', async () => {

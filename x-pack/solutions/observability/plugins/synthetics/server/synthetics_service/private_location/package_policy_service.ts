@@ -14,7 +14,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
-import type { ConditionUpdate } from './rebalance_writes';
+import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
+import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 
 interface GetByIdsOptions {
   spaceId: string;
@@ -205,6 +206,11 @@ export class PackagePolicyService {
    * filtering by id suffix in memory (this runs once per location per rebalance
    * cycle, ~1m). Paginated so a location with more than one page of monitors
    * isn't truncated.
+   *
+   * Source-filtered to {@link SHARDED_PACKAGE_POLICY_FIELDS}: every monitor of
+   * the location is held in memory at once here, and the condition-only write
+   * this feeds needs none of the policy body. Unprojected, each browser monitor
+   * would drag its inline script along in `compiled_stream` for nothing.
    */
   async listByAgentPolicy({
     agentPolicyId,
@@ -212,9 +218,9 @@ export class PackagePolicyService {
   }: {
     agentPolicyId: string;
     signal?: AbortSignal;
-  }): Promise<PackagePolicy[]> {
+  }): Promise<ShardedPackagePolicy[]> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const items: PackagePolicy[] = [];
+    const items: ShardedPackagePolicy[] = [];
     const perPage = 1000;
     let page = 1;
     let hasMore = true;
@@ -224,6 +230,7 @@ export class PackagePolicyService {
       const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
         kuery: `ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"${agentPolicyId}"`,
         spaceId: ALL_SPACES_ID,
+        fields: SHARDED_PACKAGE_POLICY_FIELDS,
         page,
         perPage,
       });
