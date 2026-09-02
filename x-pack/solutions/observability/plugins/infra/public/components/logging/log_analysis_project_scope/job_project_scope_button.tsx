@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useId, useState } from 'react';
+import React, { type FC, useCallback, useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -39,7 +39,6 @@ export const JobProjectScopeButton: FC<JobProjectScopeButtonProps> = ({
   name,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const popoverTitleId = useId();
   const { label, isLoading, hasError } = useProjectScopeLabel({ cpsManager, projectRouting });
 
   const fetchProjects = useCallback(
@@ -53,7 +52,7 @@ export const JobProjectScopeButton: FC<JobProjectScopeButtonProps> = ({
   return (
     <EuiPopover
       anchorPosition="downLeft"
-      aria-labelledby={popoverTitleId}
+      aria-label={projectScopeLabel}
       button={
         <ProjectScopeButton
           data-test-subj="infraLogAnalysisJobProjectScopeButton"
