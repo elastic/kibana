@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildAlertSnapshot } from './build_alert_snapshot';
+import { parseAlertSnapshot } from './build_alert_snapshot';
 
 const alert = {
   'kibana.alert.uuid': 'alert-1',
@@ -17,11 +17,12 @@ const alert = {
   'kibana.alert.status': 'active',
   'kibana.alert.start': '2026-09-02T10:00:00.000Z',
   'kibana.alert.flapping': false,
+  '@timestamp': '2026-09-02T10:01:00.000Z',
   'kibana.alert.group': [{ field: 'host.name', value: 'host-1' }],
 };
 
 it('builds a validated alert snapshot', () => {
-  expect(buildAlertSnapshot(alert)).toEqual({
+  expect(parseAlertSnapshot(alert)).toEqual({
     id: 'alert-1',
     rule_id: 'rule-1',
     rule_name: 'Test rule',
@@ -31,16 +32,29 @@ it('builds a validated alert snapshot', () => {
     status: 'active',
     start: '2026-09-02T10:00:00.000Z',
     flapping: false,
+    timestamp: '2026-09-02T10:01:00.000Z',
     group: [{ field: 'host.name', value: 'host-1' }],
   });
 });
 
-it('rejects missing required fields and malformed groups', () => {
-  expect(buildAlertSnapshot({ ...alert, 'kibana.alert.uuid': undefined })).toBeUndefined();
+it('rejects missing required fields and omits malformed optional fields', () => {
+  expect(parseAlertSnapshot({ ...alert, 'kibana.alert.uuid': undefined })).toBeUndefined();
   expect(
-    buildAlertSnapshot({
+    parseAlertSnapshot({ ...alert, 'kibana.alert.group': [{ field: 'host.name', value: 42 }] })
+  ).toEqual(expect.objectContaining({ id: 'alert-1' }));
+});
+
+it('normalizes valid legacy and metric alert fields', () => {
+  expect(
+    parseAlertSnapshot({
       ...alert,
-      'kibana.alert.group': [{ field: 'host.name', value: 42 }],
+      'kibana.alert.reason': undefined,
+      'kibana.alert.flapping': undefined,
+      'kibana.alert.evaluation.values': [42, null],
     })
-  ).toBeUndefined();
+  ).toEqual(
+    expect.objectContaining({
+      evaluation: { value: [42, null] },
+    })
+  );
 });

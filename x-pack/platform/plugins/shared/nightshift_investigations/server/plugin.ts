@@ -152,7 +152,7 @@ export class NightshiftInvestigationsPlugin
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
-      isAvailable: (request) =>
+      isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,
           agentBuilder: this.agentBuilder,
@@ -181,6 +181,7 @@ export class NightshiftInvestigationsPlugin
           request,
           agentBuilder: this.agentBuilder,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
+          spaceId: resolvedSpaceId,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,

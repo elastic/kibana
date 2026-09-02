@@ -26,7 +26,7 @@ const alert = {
 const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
 const dependencies = {
   nightshiftInvestigations: {
-    isAvailable: jest.fn().mockResolvedValue(true),
+    isInvestigationAvailable: jest.fn().mockResolvedValue(true),
     getInvestigationsClient: jest.fn().mockReturnValue({ start }),
   },
   ruleRegistry: {
@@ -38,7 +38,7 @@ const dependencies = {
   },
 };
 
-it('starts an investigation from an authorized alert', async () => {
+it('starts an investigation from a loaded alert', async () => {
   const { handler } =
     alertInvestigationRouteRepository['POST /internal/observability/alerts/{alertId}/investigate'];
 
@@ -52,11 +52,57 @@ it('starts an investigation from an authorized alert', async () => {
   });
 });
 
-it('returns connector availability from Nightshift', async () => {
+it('returns investigation start availability from Nightshift', async () => {
   const { handler } =
     alertInvestigationRouteRepository[
       'GET /internal/observability/alerts/investigation/availability'
     ];
 
   await expect(handler({ request, dependencies } as never)).resolves.toEqual({ available: true });
+});
+
+it('returns not found when the user has no authorized alert indices', async () => {
+  const { handler } =
+    alertInvestigationRouteRepository['POST /internal/observability/alerts/{alertId}/investigate'];
+  const noIndicesDependencies = {
+    ...dependencies,
+    ruleRegistry: {
+      ...dependencies.ruleRegistry,
+      getRacClientWithRequest: jest.fn().mockResolvedValue({
+        getAuthorizedAlertsIndices: jest.fn().mockResolvedValue([]),
+      }),
+    },
+  };
+
+  await expect(
+    handler({
+      request,
+      dependencies: noIndicesDependencies,
+      params: { path: { alertId: 'alert-1' } },
+    } as never)
+  ).rejects.toMatchObject({ output: { statusCode: 404 } });
+});
+
+it('preserves alert lookup failures', async () => {
+  const { handler } =
+    alertInvestigationRouteRepository['POST /internal/observability/alerts/{alertId}/investigate'];
+  const lookupError = new Error('Elasticsearch unavailable');
+  const failingDependencies = {
+    ...dependencies,
+    ruleRegistry: {
+      ...dependencies.ruleRegistry,
+      getRacClientWithRequest: jest.fn().mockResolvedValue({
+        getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
+        get: jest.fn().mockRejectedValue(lookupError),
+      }),
+    },
+  };
+
+  await expect(
+    handler({
+      request,
+      dependencies: failingDependencies,
+      params: { path: { alertId: 'alert-1' } },
+    } as never)
+  ).rejects.toBe(lookupError);
 });

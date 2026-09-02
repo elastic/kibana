@@ -118,13 +118,15 @@ export function AlertActions(
 
   const [isInvestigating, setIsInvestigating] = useState(false);
   const alertId = observabilityAlert.fields[ALERT_UUID];
-  const canStartInvestigation = Boolean(
+  const hasInvestigationActionPrerequisites = Boolean(
     application.capabilities.agentBuilder?.write === true && alertId
   );
   const isInvestigationAvailable = useInvestigationAvailability({
-    enabled: canStartInvestigation,
+    enabled: hasInvestigationActionPrerequisites,
   });
-  const showInvestigateAction = Boolean(canStartInvestigation && isInvestigationAvailable);
+  const showInvestigateAction = Boolean(
+    hasInvestigationActionPrerequisites && isInvestigationAvailable
+  );
 
   const handleInvestigate = async () => {
     if (!alertId) return;

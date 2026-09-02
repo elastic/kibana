@@ -103,14 +103,16 @@ export function HeaderActions({
     notifications,
   } = services;
   const alertId = alert?.fields[ALERT_UUID];
-  const canStartInvestigation = Boolean(
+  const hasInvestigationActionPrerequisites = Boolean(
     services.application?.capabilities?.agentBuilder?.write === true && alertId
   );
   const isInvestigationAvailable = useInvestigationAvailability({
-    enabled: canStartInvestigation,
+    enabled: hasInvestigationActionPrerequisites,
     skipAlertsQueryContext: true,
   });
-  const showInvestigateAction = Boolean(canStartInvestigation && isInvestigationAvailable);
+  const showInvestigateAction = Boolean(
+    hasInvestigationActionPrerequisites && isInvestigationAvailable
+  );
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 

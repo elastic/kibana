@@ -1012,7 +1012,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
 describe('NightshiftInvestigationsClient.start()', () => {
   const WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
-  const mockWorkflow = { id: WORKFLOW_ID, definition: { steps: [] } };
+  const mockWorkflow = { id: WORKFLOW_ID, enabled: true, valid: true, definition: { steps: [] } };
 
   const alertContext = {
     alerts: [
@@ -1166,6 +1166,14 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
+
+    await expect(
+      makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+    ).rejects.toThrow(InvestigationUnavailableError);
+  });
+
+  it('throws InvestigationUnavailableError when the workflow cannot execute', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({ ...mockWorkflow, enabled: false });
 
     await expect(
       makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })

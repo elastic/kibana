@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../scout/ui/fixtures';
 import { INVESTIGATE_ALERT_ROLE } from '../../../scout/ui/fixtures/roles';
-import { mockStartInvestigation } from '../fixtures/mocks';
+import { mockInvestigationApi } from '../fixtures/mocks';
 
 const suffix = randomUUID();
 const alertId = `nightshift-investigation-alert-${suffix}`;
@@ -52,7 +52,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginWithCustomRole(INVESTIGATE_ALERT_ROLE);
-      await mockStartInvestigation(page);
+      await mockInvestigationApi(page);
     });
 
     test.afterAll(async ({ esClient }) => {
@@ -65,7 +65,10 @@ test.describe(
       });
     });
 
-    test('starts an investigation from an alert row action', async ({ page, pageObjects }) => {
+    test('sends an investigation request from an alert row action', async ({
+      page,
+      pageObjects,
+    }) => {
       await pageObjects.alertsTablePage.gotoWithAppState({
         kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
         rangeFrom: 'now-1h',
@@ -88,7 +91,7 @@ test.describe(
       );
     });
 
-    test('starts an investigation from the alert detail action menu', async ({
+    test('sends an investigation request from the alert detail action menu', async ({
       page,
       pageObjects,
     }) => {

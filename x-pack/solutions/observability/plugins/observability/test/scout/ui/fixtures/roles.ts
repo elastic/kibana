@@ -164,7 +164,7 @@ export const INVESTIGATE_ALERT_ROLE: KibanaRole = {
   kibana: [
     {
       base: [],
-      feature: { observabilityAlerts: ['read'], apm: ['read'], agentBuilder: ['all'] },
+      feature: { observabilityAlerts: ['read'], agentBuilder: ['all'] },
       spaces: ['*'],
     },
   ],

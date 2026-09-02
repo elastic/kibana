@@ -11,7 +11,7 @@ import { ALERTS_API_URLS } from '../../../common/constants';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
 import { AlertNotFoundError } from '../../common/errors/alert_not_found_error';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
-import { buildAlertSnapshot } from './build_alert_snapshot';
+import { parseAlertSnapshot } from './build_alert_snapshot';
 
 const availabilityRoute = createObservabilityServerRoute({
   endpoint: `GET ${ALERTS_API_URLS.INTERNAL_INVESTIGATION_AVAILABILITY}`,
@@ -19,12 +19,13 @@ const availabilityRoute = createObservabilityServerRoute({
   security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
   params: z.object({}),
   handler: async ({ dependencies, request }) => ({
-    available: (await dependencies.nightshiftInvestigations?.isAvailable(request)) === true,
+    available:
+      (await dependencies.nightshiftInvestigations?.isInvestigationAvailable(request)) === true,
   }),
 });
 
 const investigateRoute = createObservabilityServerRoute({
-  endpoint: `POST ${ALERTS_API_URLS.INTERNAL_INVESTIGATE}`,
+  endpoint: `POST ${ALERTS_API_URLS.INTERNAL_START_ALERT_INVESTIGATION}`,
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
   params: z.object({
@@ -42,7 +43,7 @@ const investigateRoute = createObservabilityServerRoute({
 
     try {
       const alert = await investigateAlertsClient.getAlertById(params.path.alertId);
-      const snapshot = buildAlertSnapshot(alert.getAlert());
+      const snapshot = parseAlertSnapshot(alert.getRawAlert());
       if (!snapshot) {
         throw badRequest('Alert does not contain the fields required for an investigation');
       }

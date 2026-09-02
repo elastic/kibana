@@ -19,6 +19,7 @@ export const isInvestigationAvailable = async ({
   request,
   agentBuilder,
   searchInferenceEndpoints,
+  spaceId,
   spaces,
   workflowsExtensions,
   workflowsManagement,
@@ -26,6 +27,7 @@ export const isInvestigationAvailable = async ({
   request: KibanaRequest;
   agentBuilder?: AgentBuilderPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  spaceId?: string;
   spaces?: SpacesPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -34,19 +36,24 @@ export const isInvestigationAvailable = async ({
     return false;
   }
 
-  const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-  const [workflow, { endpoints }] = await Promise.all([
-    workflowsManagement.management.getWorkflow(
-      SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-      spaceId
-    ),
-    searchInferenceEndpoints.endpoints.getForFeature(
-      SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-      request
-    ),
-  ]);
+  try {
+    const resolvedSpaceId =
+      spaceId ?? spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const [workflow, { endpoints }] = await Promise.all([
+      workflowsManagement.management.getWorkflow(
+        SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+        resolvedSpaceId
+      ),
+      searchInferenceEndpoints.endpoints.getForFeature(
+        SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+        request
+      ),
+    ]);
 
-  return Boolean(
-    workflow?.enabled && workflow.valid && workflow.definition && endpoints.length > 0
-  );
+    return Boolean(
+      workflow?.enabled && workflow.valid && workflow.definition && endpoints.length > 0
+    );
+  } catch {
+    return false;
+  }
 };

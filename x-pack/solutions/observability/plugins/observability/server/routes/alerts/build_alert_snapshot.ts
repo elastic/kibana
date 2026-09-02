@@ -31,27 +31,34 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
-export const buildAlertSnapshot = (alert: Record<string, unknown>): AlertSnapshot | undefined => {
+export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapshot | undefined => {
   const value = alert[ALERT_EVALUATION_VALUES] ?? alert[ALERT_EVALUATION_VALUE];
   const threshold = alert[ALERT_EVALUATION_THRESHOLD];
-  const parsed = alertSnapshotSchema.safeParse({
+  const result = alertSnapshotSchema.safeParse({
     id: alert[ALERT_UUID],
     rule_id: alert[ALERT_RULE_UUID],
     rule_name: alert[ALERT_RULE_NAME],
     rule_type_id: alert[ALERT_RULE_TYPE_ID],
     rule_category: alert[ALERT_RULE_CATEGORY],
-    reason: alert[ALERT_REASON],
+    reason: alertSnapshotSchema.shape.reason.catch(undefined).parse(alert[ALERT_REASON]),
     status: alert[ALERT_STATUS],
     start: alert[ALERT_START] ?? alert[TIMESTAMP],
-    flapping: alert[ALERT_FLAPPING],
-    url: alert[ALERT_URL],
-    rule_tags: alert[ALERT_RULE_TAGS],
-    grouping: alert[ALERT_GROUPING],
-    group: alert[ALERT_GROUP],
-    ...(value !== undefined || threshold !== undefined ? { evaluation: { value, threshold } } : {}),
-    rule_parameters: alert[ALERT_RULE_PARAMETERS],
-    index_pattern: alert[ALERT_INDEX_PATTERN],
+    timestamp: alertSnapshotSchema.shape.timestamp.catch(undefined).parse(alert[TIMESTAMP]),
+    flapping: alertSnapshotSchema.shape.flapping.catch(undefined).parse(alert[ALERT_FLAPPING]),
+    url: alertSnapshotSchema.shape.url.catch(undefined).parse(alert[ALERT_URL]),
+    rule_tags: alertSnapshotSchema.shape.rule_tags.catch(undefined).parse(alert[ALERT_RULE_TAGS]),
+    grouping: alertSnapshotSchema.shape.grouping.catch(undefined).parse(alert[ALERT_GROUPING]),
+    group: alertSnapshotSchema.shape.group.catch(undefined).parse(alert[ALERT_GROUP]),
+    evaluation: alertSnapshotSchema.shape.evaluation
+      .catch(undefined)
+      .parse(value !== undefined || threshold !== undefined ? { value, threshold } : undefined),
+    rule_parameters: alertSnapshotSchema.shape.rule_parameters
+      .catch(undefined)
+      .parse(alert[ALERT_RULE_PARAMETERS]),
+    index_pattern: alertSnapshotSchema.shape.index_pattern
+      .catch(undefined)
+      .parse(alert[ALERT_INDEX_PATTERN]),
   });
 
-  return parsed.success ? parsed.data : undefined;
+  return result.success ? result.data : undefined;
 };

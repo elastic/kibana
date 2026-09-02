@@ -18,7 +18,7 @@ export const useInvestigationAvailability = ({
 }): boolean => {
   const { http } = useKibana().services;
   const { data } = useQuery({
-    queryKey: ['investigationAvailability'],
+    queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
     queryFn: ({ signal }) =>
       http.get<{ available: boolean }>(
         '/internal/observability/alerts/investigation/availability',
@@ -27,7 +27,7 @@ export const useInvestigationAvailability = ({
     context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
     enabled,
     retry: false,
-    staleTime: Infinity,
+    staleTime: 30_000,
   });
 
   return data?.available === true;

@@ -64,3 +64,17 @@ it('returns false when any dependency, connector, or executable workflow is unav
     })
   ).resolves.toBe(false);
 });
+
+it('returns false when a requirement probe fails', async () => {
+  await expect(
+    isInvestigationAvailable({
+      request,
+      agentBuilder,
+      searchInferenceEndpoints: {
+        endpoints: { getForFeature: jest.fn().mockRejectedValue(new Error('unavailable')) },
+      } as never,
+      workflowsExtensions,
+      workflowsManagement,
+    })
+  ).resolves.toBe(false);
+});

@@ -7,7 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 
-export const mockStartInvestigation = async (page: ScoutPage) => {
+export const mockInvestigationApi = async (page: ScoutPage) => {
   await page.route('**/internal/observability/alerts/investigation/availability', async (route) => {
     await route.fulfill({ status: 200, json: { available: true } });
   });
