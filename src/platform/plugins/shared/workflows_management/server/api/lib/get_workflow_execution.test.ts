@@ -251,6 +251,7 @@ describe('getWorkflowExecution', () => {
       expect(result?.stepExecutions).toHaveLength(2);
       expect(result?.concurrencyGroupKey).toBe('streams-ki-onboarding-my-stream');
       expect(result).not.toHaveProperty('billable');
+      expect(result).not.toHaveProperty('stepExecutionsTruncatedCount');
     });
 
     it('should include workflow document version when present on the execution', async () => {
@@ -287,27 +288,16 @@ describe('getWorkflowExecution', () => {
       expect(result?.version).toBeUndefined();
     });
 
-    it('should include stepExecutionsTruncatedCount when step loading is truncated', async () => {
-      const manyIds = ['s1', 's2', 's3'];
+    it('should include stepExecutionsTruncatedCount when there are more step ids than the mget cap', async () => {
+      const manyIds = Array.from({ length: 101 }, (_, index) => `s${index}`);
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, stepExecutionIds: manyIds },
         ] as unknown as EsWorkflowExecution[])
       );
-      const sizeError = new errors.RequestAbortedError(
-        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      mockStepDataClient.getByIds.mockImplementation(async (ids) =>
+        mockStepGetByIds(ids.map((id) => ({ id, stepId: id, status: 'completed' })))
       );
-      let singleIdCalls = 0;
-      mockStepDataClient.getByIds.mockImplementation(async (ids) => {
-        if (ids.length > 1) {
-          throw sizeError;
-        }
-        singleIdCalls += 1;
-        if (singleIdCalls === 1) {
-          return mockStepGetByIds([{ id: ids[0], stepId: ids[0], status: 'completed' }]);
-        }
-        throw sizeError;
-      });
 
       const result = await getWorkflowExecution({
         ...baseParams,
@@ -316,8 +306,33 @@ describe('getWorkflowExecution', () => {
         logger: mockLogger,
       });
 
-      expect(result?.stepExecutions).toHaveLength(1);
-      expect(result?.stepExecutionsTruncatedCount).toBe(2);
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
+      expect(mockStepDataClient.getByIds.mock.calls[0][0]).toHaveLength(100);
+      expect(result?.stepExecutions).toHaveLength(100);
+      expect(result?.stepExecutionsTruncatedCount).toBe(1);
+    });
+
+    it('should return empty steps without truncatedCount when search fallback hits a size abort', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, stepExecutionIds: undefined },
+        ] as unknown as EsWorkflowExecution[])
+      );
+      mockStepDataClient.search.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(result?.stepExecutions).toEqual([]);
+      expect(result).not.toHaveProperty('stepExecutionsTruncatedCount');
       expect(mockLogger.warn).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });

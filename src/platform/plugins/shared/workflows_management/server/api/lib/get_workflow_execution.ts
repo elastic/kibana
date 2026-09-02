@@ -20,8 +20,11 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
-import { fetchStepExecutionsForExecutionDetail } from './fetch_step_executions_for_execution_detail';
+
+/** Max step documents loaded in one `_mget` for execution detail. */
+const STEP_EXECUTIONS_MAX_COUNT = 100;
 
 interface GetWorkflowExecutionParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -57,21 +60,31 @@ export const getWorkflowExecution = async ({
     if (!includeInput) sourceExcludes.push('input');
     if (!includeOutput) sourceExcludes.push('output');
 
-    const { stepExecutions, stepExecutionsTruncatedCount } =
-      await fetchStepExecutionsForExecutionDetail({
+    let stepExecutions: EsWorkflowStepExecution[] = [];
+    try {
+      stepExecutions = await getStepExecutionsByWorkflowExecution({
         stepExecutionsDataClient,
-        logger,
         workflowExecutionId,
-        stepExecutionIds: doc.stepExecutionIds,
+        stepExecutionIds: doc.stepExecutionIds?.slice(0, STEP_EXECUTIONS_MAX_COUNT),
         sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
       });
+    } catch (error) {
+      if (!isMaximumResponseSizeExceededError(error)) {
+        throw error;
+      }
+      logger.warn(
+        `Failed to get workflow execution with steps: Elasticsearch response exceeded the maximum size Kibana can process`
+      );
+    }
+
+    const truncatedCount = (doc.stepExecutionIds?.length ?? 0) - stepExecutions.length;
 
     return transformToWorkflowExecutionDetailDto(
       workflowExecutionId,
       doc,
       stepExecutions,
       logger,
-      stepExecutionsTruncatedCount
+      truncatedCount > 0 ? truncatedCount : undefined
     );
   } catch (error) {
     if (isMaximumResponseSizeExceededError(error)) {

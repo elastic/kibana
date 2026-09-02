@@ -1,6 +1,6 @@
 responses:
   200:
-    description: 'Indicates a successful response. May include stepExecutionsTruncatedCount when the step list was truncated because the Elasticsearch response was too large.'
+    description: 'Indicates a successful response. May include stepExecutionsTruncatedCount when only a prefix of step executions was loaded.'
     content:
       application/json:
         examples:
