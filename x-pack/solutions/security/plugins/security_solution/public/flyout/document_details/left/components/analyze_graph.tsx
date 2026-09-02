@@ -75,6 +75,11 @@ export const AnalyzeGraph: FC = () => {
     [searchHit]
   );
   const isEnabled = useIsAnalyzerEnabled(hit);
+  const databaseDocumentTimestamp = useMemo(() => {
+    const value = hit.flattened?.['@timestamp'];
+    const ms = value ? Date.parse(String(value)) : NaN;
+    return Number.isFinite(ms) ? ms : undefined;
+  }, [hit]);
 
   const key = useWhichFlyout() ?? 'memory';
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
@@ -176,6 +181,7 @@ export const AnalyzeGraph: FC = () => {
       )}
       <Resolver
         databaseDocumentID={eventId}
+        databaseDocumentTimestamp={databaseDocumentTimestamp}
         resolverComponentInstanceID={`${key}-${scopeId}`}
         indices={withDocumentIndex(selectedPatterns, searchHit._index)}
         shouldUpdate={shouldUpdate}
