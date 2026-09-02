@@ -28,8 +28,8 @@ interface HasRumDataQueryOptions {
 }
 
 /**
- * Formats a response to `hasRumDataWithServiceNameQuery`. `serviceName` is read defensively because
- * the aggregation is absent whenever Elasticsearch returns no buckets for the requested range.
+ * Formats a response to `hasRumDataWithServiceNameQuery`; `serviceName` is optional because the
+ * `mostTraffic` buckets are empty when the requested range holds no matching documents.
  */
 export function formatHasRumResult<T>(
   esResult: ESSearchResponse<

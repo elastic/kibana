@@ -96,12 +96,20 @@ describe('useFallbackLatch', () => {
     expect(result.current).toBe(false);
   });
 
-  it('reports latched for an undefined key, which callers must gate on separately', () => {
-    // `latchedFor` also starts as `undefined`, so the identity check cannot tell "nothing latched"
-    // apart from "latched for no key". `useHasRumData` is unaffected because it only feeds the
-    // result into a request whose `index` is falsy in that same state.
+  it('starts unlatched for an undefined key too', () => {
+    // `useDataView` yields `undefined` until the data view resolves, so this is the state the first
+    // renders are actually in.
     const { result } = render({ latchKey: undefined, latchWhen: false, clearWhen: false });
 
+    expect(result.current).toBe(false);
+  });
+
+  it('latches and clears an undefined key like any other', () => {
+    const { result, rerender } = render({ latchKey: undefined, latchWhen: true, clearWhen: false });
     expect(result.current).toBe(true);
+
+    rerender({ latchKey: undefined, latchWhen: false, clearWhen: true });
+
+    expect(result.current).toBe(false);
   });
 });

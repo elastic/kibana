@@ -23,14 +23,15 @@ export function useFallbackLatch(
   latchWhen: boolean,
   clearWhen: boolean
 ): boolean {
-  const latchedFor = useRef<string | undefined>(undefined);
+  // Wrapped so that "nothing latched" stays distinct from "latched for an undefined key".
+  const latchedFor = useRef<{ key: string | undefined } | undefined>(undefined);
 
-  if (latchedFor.current !== undefined && (latchedFor.current !== key || clearWhen)) {
+  if (latchedFor.current !== undefined && (latchedFor.current.key !== key || clearWhen)) {
     latchedFor.current = undefined;
   }
   if (latchWhen) {
-    latchedFor.current = key;
+    latchedFor.current = { key };
   }
 
-  return latchedFor.current === key;
+  return latchedFor.current !== undefined && latchedFor.current.key === key;
 }
