@@ -25,12 +25,12 @@ describe('useMatchedActionPolicies', () => {
   it('returns items from the API on success', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-1', name: 'Policy 1' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-1', name: 'Policy 1' }, category: 'tags' }],
       total: 42,
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, ruleId: 'rule-abc' }), {
+    const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
       wrapper: createWrapper(),
     });
 
@@ -45,7 +45,7 @@ describe('useMatchedActionPolicies', () => {
       '/api/alerting/v2/action_policies/_match_for_rule',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ rule: { id: 'rule-abc' } }),
+        body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
       })
     );
   });
@@ -54,7 +54,7 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     http.fetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, ruleId: 'rule-abc' }), {
+    const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
       wrapper: createWrapper(),
     });
 
@@ -66,40 +66,39 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.total).toBe(0);
   });
 
-  it('re-fetches when ruleId changes', async () => {
+  it('re-fetches when tags change', async () => {
     const http = httpServiceMock.createStartContract();
     http.fetch
       .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-1' }, category: 'global' }],
+        items: [{ actionPolicy: { id: 'ap-1' }, category: 'tags' }],
       } as any)
       .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-2' }, category: 'global-filtered' }],
+        items: [{ actionPolicy: { id: 'ap-2' }, category: 'catch-all' }],
       } as any);
 
     const { result, rerender } = renderHook(
-      ({ ruleId }: { ruleId: string }) => useMatchedActionPolicies({ http, ruleId }),
-      { wrapper: createWrapper(), initialProps: { ruleId: 'rule-1' } }
+      ({ tags }: { tags: string[] }) => useMatchedActionPolicies({ http, tags }),
+      { wrapper: createWrapper(), initialProps: { tags: ['env:prod'] } }
     );
 
     await waitFor(() => expect(result.current.items[0].actionPolicy.id).toBe('ap-1'));
 
-    rerender({ ruleId: 'rule-2' });
+    rerender({ tags: ['env:staging'] });
     await waitFor(() => expect(result.current.items[0].actionPolicy.id).toBe('ap-2'));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('sends name and tags when ruleId is not provided', async () => {
+  it('fires a request with an empty rule body when no tags are provided', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch-all' }],
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
-    const { result } = renderHook(
-      () => useMatchedActionPolicies({ http, name: 'My Rule', tags: ['env:prod'] }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -108,37 +107,8 @@ describe('useMatchedActionPolicies', () => {
       '/api/alerting/v2/action_policies/_match_for_rule',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ rule: { name: 'My Rule', tags: ['env:prod'] } }),
+        body: JSON.stringify({ rule: {} }),
       })
     );
-  });
-
-  it('does not fire a request when all inputs are absent', async () => {
-    const http = httpServiceMock.createStartContract();
-
-    const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
-      wrapper: createWrapper(),
-    });
-
-    // Give it time in case the query fires unexpectedly
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.items).toEqual([]);
-    expect(http.fetch).not.toHaveBeenCalled();
-  });
-
-  it('does not fire a request when name is an empty string', async () => {
-    const http = httpServiceMock.createStartContract();
-
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, name: '' }), {
-      wrapper: createWrapper(),
-    });
-
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.items).toEqual([]);
-    expect(http.fetch).not.toHaveBeenCalled();
   });
 });

@@ -367,6 +367,14 @@
       "approvedBy": "@elastic/response-ops",
       "oasdiffId": "response-property-type-changed",
       "prUrl": "https://github.com/elastic/kibana/pull/288488"
+    },
+    {
+      "path": "/api/alerting/v2/action_policies/_match_for_rule",
+      "method": "post",
+      "reason": "Intentional: 'rule.id' and 'rule.name' removed from the request body. Matching no longer evaluates KQL over rule fields; it intersects the rule's tags with the structured matcher's tag clause. Alerting v2 action policies are experimental and have no external consumers.",
+      "approvedBy": "@elastic/response-ops",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288489"
     }
   ]
 }

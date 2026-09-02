@@ -34,7 +34,7 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Match action policies for a rule',
     description:
-      'Returns action policies that match a given rule, categorised as direct, global, or global-filtered.',
+      "Returns action policies that match a given rule, categorised as catch-all (no matcher, or a matcher with neither tags nor an expression) or tags (the rule's tags intersect the matcher's tag clause).",
     oasOperationObject: matchActionPoliciesForRuleOasExamples,
   } as const;
   static schemas = {
@@ -68,8 +68,6 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
   protected async execute() {
     const { rule } = this.request.body ?? {};
     const result = await this.actionPolicyClient.matchActionPoliciesForRule({
-      ruleId: rule?.id,
-      ruleName: rule?.name,
       ruleTags: rule?.tags,
     });
     return this.ctx.response.ok({ body: result });

@@ -9105,7 +9105,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns action policies that match a given rule, categorised as direct, global, or global-filtered.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Returns action policies that match a given rule, categorised as catch-all (no matcher, or a matcher with neither tags nor an expression) or tags (the rule's tags intersect the matcher's tag clause).<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: post-alerting-v2-action-policies-match-for-rule
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9123,8 +9123,6 @@ paths:
                 summary: Rule to match action policies against
                 value:
                   rule:
-                    id: rule-1
-                    name: Host CPU high
                     tags:
                       - production
             schema:
@@ -9153,7 +9151,8 @@ paths:
                           grouping_mode: per_episode
                           id: action-policy-1
                           matcher:
-                            expression: 'host.name: "web-*"'
+                            tags:
+                              - production
                           name: Notify on host alerts
                           snoozed_until: null
                           tags:
@@ -9164,7 +9163,7 @@ paths:
                           updated_at: '2026-01-15T12:00:00.000Z'
                           updated_by: elastic
                           version: WzAsMV0=
-                        category: global-filtered
+                        category: tags
                     total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_match_action_policies_for_rule_response'
@@ -88698,18 +88697,8 @@ components:
           additionalProperties: false
           type: object
           properties:
-            id:
-              description: The ID of the rule.
-              maxLength: 256
-              minLength: 1
-              type: string
-            name:
-              description: The name of the rule, used to evaluate global matcher expressions.
-              maxLength: 256
-              minLength: 1
-              type: string
             tags:
-              description: The tags of the rule, used to evaluate global matcher expressions.
+              description: The tags of the rule, used to match against action policy tag clauses.
               items:
                 maxLength: 256
                 minLength: 1
@@ -88743,10 +88732,10 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: The matched action policy.
         category:
-          description: 'Why this action policy matches the rule: "global" (applies to all rules, no filter), or "global-filtered" (applies to all rules, KQL filter evaluated to true).'
+          description: 'Why this action policy matches the rule: "catch-all" (no matcher, or a matcher with neither tags nor an expression), or "tags" (the rule''s tags intersect the matcher''s tag clause).'
           enum:
-            - global
-            - global-filtered
+            - catch-all
+            - tags
           type: string
       required:
         - actionPolicy
