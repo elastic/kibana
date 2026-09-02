@@ -13,33 +13,26 @@ import { camelCase } from 'lodash';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ElasticsearchSettingsDefinition } from '@kbn/esql-language';
-import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
-import { clearDocumentationDirectives } from '../lib/docs';
+import { settingDefinitions } from '@elastic/esql-definitions/settings';
 
-// We exlude the time_zone setting as we decided that we won't support it in Kibana
+// We exclude the time_zone setting as we decided that we won't support it in Kibana
 const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
 const GENERATED_DEFINITIONS_PATH = join(
   REPO_ROOT,
   'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
 );
 
+// Clears MyST inline directives ({name}`content`) from documentation strings.
+const clearDocumentationDirectives = (docString: string): string =>
+  docString.replace(/\{([a-zA-Z_]+)\}`([^`]*)`/g, '');
+
 async function generateElasticsearchSettingsDefinitions(): Promise<void> {
-  const pathToElasticsearch = process.argv[2];
-
-  const esSettingsDefinitions = readElasticsearchDefinitions<ElasticsearchSettingsDefinition>({
-    pathToElasticsearch,
-    keywordType: 'settings',
-    language: 'esql',
-  });
-
   const outputSettingsDir = GENERATED_DEFINITIONS_PATH;
   await mkdir(outputSettingsDir, { recursive: true });
 
   const outputTsPath = join(outputSettingsDir, 'settings.ts');
 
-  // Generate individual setting constants
-  const settingConstants = esSettingsDefinitions
+  const settingConstants = settingDefinitions
     .map((setting) => {
       const settingName = setting.name;
       const modifiedSetting = {
@@ -54,12 +47,10 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
     })
     .join('\n\n');
 
-  // Generate array of setting names for export
-  const settingNames = esSettingsDefinitions.map((setting) => camelCase(setting.name)).join(', ');
+  const settingNames = settingDefinitions.map((setting) => camelCase(setting.name)).join(', ');
 
-  // Generate an enum for settings names
   const settingEnum = `export enum EsqlSettingNames {
-${esSettingsDefinitions
+${settingDefinitions
   .map((setting) => `  ${setting.name.toUpperCase()} = '${setting.name}',`)
   .join('\n')}
 }`;

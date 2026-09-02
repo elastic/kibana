@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join, basename } from 'path';
 import _ from 'lodash';
@@ -24,10 +23,7 @@ import {
   Location,
   FULL_TEXT_SEARCH_FUNCTIONS,
 } from '@kbn/esql-language';
-import {
-  readElasticsearchDefinitions,
-  findDefinitionFileByName,
-} from '../lib/elasticsearch_definitions';
+import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
 import {
   aliasTable,
   aliases,
@@ -695,17 +691,8 @@ ${functionsEnum}
 `
   );
 
-  // Copies inline_cast.json from ES.
-  // It holds a mapping of inline casts to the respective function name that performs the cast.
-  // Inline casting, `field::int`, is sugar syntax for `to_integer(field)`, so it's usefull to know this mapping
-  // to perform validations.
-  const ESInlineCastsFilePath = findDefinitionFileByName({
-    pathToElasticsearch,
-    language: 'esql',
-    fileName: 'inline_cast.json',
-  });
-  const inlineCastsDefinition = JSON.parse(readFileSync(ESInlineCastsFilePath, 'utf-8'));
-  const castsMap = JSON.stringify(inlineCastsDefinition, null, 2);
+  const { inlineCasts } = await import('@elastic/esql-definitions/inline-cast');
+  const castsMap = JSON.stringify(inlineCasts, null, 2);
   await writeFile(
     join(GENERATED_DIR, 'inline_casts_mapping.ts'),
     `${FILE_HEADER}
