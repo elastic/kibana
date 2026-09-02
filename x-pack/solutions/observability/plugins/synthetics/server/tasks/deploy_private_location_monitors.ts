@@ -32,7 +32,10 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../synthetics_service/formatters/public_formatters/format_configs';
-import { monitorUsesGlobalParams } from '../synthetics_service/formatters/param_utils';
+import {
+  getParamsForSpace,
+  monitorUsesGlobalParams,
+} from '../synthetics_service/formatters/param_utils';
 
 interface SyncConfig {
   config: HeartbeatConfig;
@@ -254,7 +257,10 @@ export class DeployPrivateLocationMonitors {
         const { privateLocations } = this.parseLocations(monitor);
 
         if (privateLocations.length > 0) {
-          privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
+          privateConfigs.push({
+            config: monitor,
+            globalParams: getParamsForSpace(paramsBySpace, spaceId),
+          });
         }
       }
       if (privateConfigs.length > 0) {
@@ -349,7 +355,7 @@ export class DeployPrivateLocationMonitors {
 
       monitorSpaceIds.add(spaceId);
       const { str: paramsString } = mixParamsWithGlobalParams(
-        paramsBySpace[spaceId],
+        getParamsForSpace(paramsBySpace, spaceId),
         normalizedMonitor
       );
 

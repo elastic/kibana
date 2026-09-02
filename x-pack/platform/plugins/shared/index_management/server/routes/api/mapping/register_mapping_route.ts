@@ -11,7 +11,7 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
-  indexName: schema.string(),
+  indexName: schema.string({ maxLength: 1000 }),
 });
 
 function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string) {

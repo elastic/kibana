@@ -18,7 +18,8 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  const kibanaAccessControlTags = ['generateReport'];
+  const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
+  const kibanaAccessControlTags = useKibanaAccessControl ? ['generateReport'] : [];
 
   const registerInternalPostScheduleEndpoint = () => {
     const path = `${SCHEDULE_PREFIX}/{exportType}`;
@@ -27,7 +28,15 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
         path,
         security: {
           authz: {
-            requiredPrivileges: kibanaAccessControlTags,
+            ...(kibanaAccessControlTags.length
+              ? {
+                  requiredPrivileges: kibanaAccessControlTags,
+                }
+              : {
+                  enabled: false,
+                  reason:
+                    'This route is opted out from authorization because of the kibana access control flag',
+                }),
           },
         },
         validate: ScheduleRequestHandler.getValidation(),

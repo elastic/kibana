@@ -10,21 +10,47 @@
 import { MonacoEditorActionsProvider } from '../../application/containers/editor/monaco_editor_actions_provider';
 import { CoreEditor, Range, Token } from '../../types';
 
+export interface AutocompleteNextGroup {
+  next?: any;
+  fallback?: boolean;
+}
+
+export interface AutocompleteContinuationState {
+  parentName?: string;
+  components: any[];
+  contextExtensionList: Array<Record<string, unknown>>;
+  fallbackGroups: string[];
+  preferredFallbackGroups: string[];
+  priority?: number;
+  specificity: number;
+}
+
+export interface AutocompleteMatchResult {
+  context_values?: Record<string, unknown>;
+  next?: any;
+  nextGroups?: AutocompleteNextGroup[];
+  nextStates?: AutocompleteContinuationState[];
+  priority?: number;
+}
+
+export type AutocompleteMatch = AutocompleteMatchResult | null | false | undefined;
+export type AutocompleteTermDefinition = string | ResultTerm;
+
 export interface ResultTerm {
   meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
-  name?: string | boolean;
+  name?: string | number | boolean;
   value?: string;
   score?: number;
-  template?: { __raw?: boolean; value?: string; [key: string]: unknown };
+  template?: unknown;
 }
 
 export interface DataAutoCompleteRulesOneOf {
   __condition?: {
     lines_regex: string;
   };
-  __template: Record<string, unknown>;
+  __template?: unknown;
   [key: string]: unknown;
 }
 

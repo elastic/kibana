@@ -45,6 +45,8 @@ export const TEST_RUN_DETAILS_ROUTE = '/monitor/:monitorId/test-run/:checkGroupI
 
 export const ERROR_DETAILS_ROUTE = '/monitor/:monitorId/errors/:errorStateId';
 
+export const SYNTHETICS_APP_BASE_PATH = '/app/synthetics';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',

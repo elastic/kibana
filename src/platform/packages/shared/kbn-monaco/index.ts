@@ -17,7 +17,9 @@ export {
   markdownLanguage,
   yamlConf,
   yamlLanguage,
+  setClipboardContextMenuLabels,
 } from './src/monaco_imports';
+export type { ClipboardContextMenuLabels } from './src/monaco_imports';
 export { XJsonLang } from './src/xjson';
 export { SQLLang } from './src/sql';
 export { ESQL_LANG_ID, ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQLLang } from './src/esql';

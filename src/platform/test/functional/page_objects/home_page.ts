@@ -90,11 +90,13 @@ export class HomePageObject extends FtrService {
   }
 
   async getVisibileSolutions() {
-    const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
-    const panelAttributes = await Promise.all(
-      solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
-    );
-    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
+    return this.retry.try(async () => {
+      const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
+      const panelAttributes = await Promise.all(
+        solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
+      );
+      return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
+    });
   }
 
   async goToSampleDataPage() {
@@ -103,11 +105,13 @@ export class HomePageObject extends FtrService {
   }
 
   async addSampleDataSet(id: string) {
-    await this.openSampleDataAccordion();
     await this.retry.waitFor(`${id} sample data to be installed`, async () => {
       if (await this.isSampleDataSetInstalled(id)) {
         return true;
       }
+
+      // The accordion is uncontrolled and re-collapses when the card list loads async, so re-open it each attempt.
+      await this.openSampleDataAccordion();
 
       this.log.debug(`Attempting to add sample data: ${id}`);
 
@@ -123,11 +127,13 @@ export class HomePageObject extends FtrService {
   }
 
   async removeSampleDataSet(id: string) {
-    await this.openSampleDataAccordion();
     await this.retry.waitFor('sample data to be removed', async () => {
       if (!(await this.isSampleDataSetInstalled(id))) {
         return true;
       }
+
+      // The accordion is uncontrolled and re-collapses when the card list loads async, so re-open it each attempt.
+      await this.openSampleDataAccordion();
 
       this.log.debug(`Attempting to remove sample data: ${id}`);
 
@@ -194,6 +200,8 @@ export class HomePageObject extends FtrService {
     await this.addSampleDataSet(id);
     await this.toasts.dismissIfExists();
     await this.retry.try(async () => {
+      // The accordion is uncontrolled and may be collapsed; re-open it before each attempt.
+      await this.openSampleDataAccordion();
       await this.testSubjects.click(`launchSampleDataSet${id}`);
       await this.find.byCssSelector(
         `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`

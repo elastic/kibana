@@ -291,7 +291,7 @@ describe('Ad Hoc Task Runner', () => {
         end: '2024-03-01T05:00:00.000Z',
         rule: {
           name: 'test',
-          tags: [],
+          tags: ['tag-1', 'tag-2'],
           alertTypeId: 'siem.queryRule',
           actions: [],
           params: {
@@ -477,7 +477,7 @@ describe('Ad Hoc Task Runner', () => {
     expect(call.rule).not.toBe(null);
     expect(call.rule.id).toBe(RULE_ID);
     expect(call.rule.name).toBe('test');
-    expect(call.rule.tags).toEqual([]);
+    expect(call.rule.tags).toEqual(['tag-1', 'tag-2']);
     expect(call.rule.consumer).toBe('siem');
     expect(call.rule.enabled).toBe(true);
     expect(call.rule.schedule).toEqual({ interval: '1h' });
@@ -569,7 +569,16 @@ describe('Ad Hoc Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledTimes(2);
     expect(logger.debug).nthCalledWith(
       1,
-      `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
+      `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
+      {
+        labels: {
+          spaceId: 'default',
+          executionId: UUID,
+          ruleId: RULE_ID,
+          ruleType: 'test',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       2,
@@ -800,7 +809,16 @@ describe('Ad Hoc Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledTimes(2);
     expect(logger.debug).nthCalledWith(
       1,
-      `Executing ad hoc run for rule test:rule-id for runAt ${schedule4.runAt}`
+      `Executing ad hoc run for rule test:rule-id for runAt ${schedule4.runAt}`,
+      {
+        labels: {
+          spaceId: 'default',
+          executionId: UUID,
+          ruleId: RULE_ID,
+          ruleType: 'test',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       2,
@@ -938,7 +956,16 @@ describe('Ad Hoc Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledTimes(2);
     expect(logger.debug).nthCalledWith(
       1,
-      `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`
+      `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`,
+      {
+        labels: {
+          spaceId: 'default',
+          executionId: UUID,
+          ruleId: RULE_ID,
+          ruleType: 'test',
+          taskInstanceId: '',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       2,
@@ -1130,7 +1157,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
         `"Executing ad hoc run with id \\"abc\\" has resulted in Error: rule type not enabled"`
       );
-      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed', 'test', 'rule-id']);
+      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed']);
+      expect(loggerMeta?.labels).toEqual({
+        executionId: UUID,
+        spaceId: 'default',
+        ruleId: RULE_ID,
+        ruleType: 'test',
+        taskInstanceId: '',
+      });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
 
@@ -1194,7 +1228,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
         `"Executing ad hoc run with id \\"abc\\" has resulted in Error: params not valid"`
       );
-      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed', 'test', 'rule-id']);
+      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed']);
+      expect(loggerMeta?.labels).toEqual({
+        executionId: UUID,
+        spaceId: 'default',
+        ruleId: RULE_ID,
+        ruleType: 'test',
+        taskInstanceId: '',
+      });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
 
@@ -1260,7 +1301,16 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).nthCalledWith(
         1,
-        `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
+        {
+          labels: {
+            spaceId: 'default',
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
 
@@ -1270,7 +1320,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
         `"Executing ad hoc run with id \\"abc\\" has resulted in Error: executor failed"`
       );
-      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed', 'test', 'rule-id']);
+      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed']);
+      expect(loggerMeta?.labels).toEqual({
+        executionId: UUID,
+        spaceId: 'default',
+        ruleId: RULE_ID,
+        ruleType: 'test',
+        taskInstanceId: '',
+      });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
 
@@ -1344,12 +1401,22 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).nthCalledWith(
         1,
-        `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`,
+        {
+          labels: {
+            spaceId: 'default',
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).nthCalledWith(
         1,
-        `Failed to cleanup ad_hoc_run_params object [id="abc"]: trouble deleting this`
+        `Failed to cleanup ad_hoc_run_params object [id="abc"]: trouble deleting this`,
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskInstanceId: '' } }
       );
     });
   });
@@ -1412,23 +1479,47 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(
         1,
-        `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
+        {
+          labels: {
+            spaceId: 'default',
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         2,
-        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
+        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskInstanceId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         3,
-        `Aborting any in-progress ES searches for rule type test with id rule-id`
+        `Aborting any in-progress ES searches for rule type test with id rule-id`,
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskInstanceId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         4,
-        `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
+        {
+          labels: {
+            ruleId: RULE_ID,
+            ruleType: 'siem.queryRule',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`,
+        {
+          labels: {
+            spaceId: 'default',
+            ruleId: RULE_ID,
+            ruleType: 'siem.queryRule',
+          },
+        }
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1498,23 +1589,61 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(
         1,
-        `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`,
+        {
+          labels: {
+            spaceId: 'default',
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         2,
-        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
+        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
+        {
+          labels: {
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         3,
-        `Aborting any in-progress ES searches for rule type test with id rule-id`
+        `Aborting any in-progress ES searches for rule type test with id rule-id`,
+        {
+          labels: {
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         4,
-        `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
+        {
+          labels: {
+            ruleId: RULE_ID,
+            ruleType: 'siem.queryRule',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`,
+        {
+          labels: {
+            spaceId: 'default',
+            ruleId: RULE_ID,
+            ruleType: 'siem.queryRule',
+          },
+        }
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1583,15 +1712,40 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).toHaveBeenCalledTimes(3);
       expect(logger.debug).nthCalledWith(
         1,
-        `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`,
+        {
+          labels: {
+            spaceId: 'default',
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         2,
-        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
+        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
+        {
+          labels: {
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.debug).nthCalledWith(
         3,
-        `Aborting any in-progress ES searches for rule type test with id rule-id`
+        `Aborting any in-progress ES searches for rule type test with id rule-id`,
+        {
+          labels: {
+            executionId: UUID,
+            ruleId: RULE_ID,
+            ruleType: 'test',
+            taskInstanceId: '',
+          },
+        }
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
 
@@ -1601,7 +1755,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
         `"Executing ad hoc run with id \\"abc\\" has resulted in Error: Search has been aborted due to cancelled execution"`
       );
-      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed', 'test', 'rule-id']);
+      expect(loggerMeta?.tags).toEqual(['abc', 'rule-ad-hoc-run-failed']);
+      expect(loggerMeta?.labels).toEqual({
+        executionId: UUID,
+        spaceId: 'default',
+        ruleId: RULE_ID,
+        ruleType: 'test',
+        taskInstanceId: '',
+      });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
   });
@@ -1657,6 +1818,7 @@ describe('Ad Hoc Task Runner', () => {
         name: mockedAdHocRunSO.attributes.rule.name,
         consumer: mockedAdHocRunSO.attributes.rule.consumer,
         revision: mockedAdHocRunSO.attributes.rule.revision,
+        tags: mockedAdHocRunSO.attributes.rule.tags,
       });
     }
 

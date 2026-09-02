@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.21>>
+* <<release-notes-8.19.20>>
 * <<release-notes-8.19.19>>
 * <<release-notes-8.19.18>>
 * <<release-notes-8.19.17>>
@@ -125,6 +127,80 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.21]]
+== {kib} 8.19.21
+
+The 8.19.21 release includes the following breaking changes and fixes.
+
+[IMPORTANT]
+====
+The 8.19.21 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
+
+[float]
+[[breaking-changes-v8.19.21]]
+=== Breaking changes
+The email connector now verifies TLS certificates on HTTPS proxies by default. Connections to hosts with self-signed, expired, or hostname-mismatched certificates that previously succeeded will now fail. 
+
+To keep the previous behavior on the proxy connection, set `xpack.actions.ssl.proxyVerificationMode` to `none`. 
+
+Per-host `xpack.actions.customHostSettings` (custom CA or relaxed hostname) does not apply to the proxy connection. Only self-managed deployments that route email through an HTTPS proxy are affected ({kibana-pull}283150[#283150]).
+
+[float]
+[[fixes-v8.19.21]]
+=== Fixes
+Alerting::
+* Limit alerts-as-data resource installation concurrency to reduce peak heap usage ({kibana-pull}287643[#287643]).
+* Fix alert suppression for alerts stored with nested `_source` fields to prevent creating duplicate alerts instead of updating existing ones ({kibana-pull}282192[#282192]).
+Data ingestion and Fleet::
+* Fix {fleet} to ignore cluster privileges other than `monitor` in package manifests when applying permissions to agent API keys ({kibana-pull}286084[#286084]).
+* Fix {fleet} Kafka output to accept custom multi-field format strings entered directly in the Dynamic Topic field instead of producing an invalid topic expression ({kibana-pull}285581[#285581]).
+Developer tools::
+* Fix duplicate Cut, Copy, and Paste actions in the Console context menu ({kibana-pull}286704[#286704]).
+* Fix Console body autocomplete to prioritize explicit field rules over same-name global rules ({kibana-pull}286703[#286703]).
+* Fix Console autocomplete inserting boolean and numeric values as quoted strings instead of JSON primitives ({kibana-pull}286699[#286699]).
+* Fix Console body autocomplete failing after closed triple-quoted string values ({kibana-pull}286695[#286695]).
+* Fix Console autocomplete not triggering at request body positions, and correct template expansion and text corruption bugs when accepting suggestions ({kibana-pull}284530[#284530]).
+* Fix Console incorrectly showing autocomplete suggestions inside non-query triple-quoted strings ({kibana-pull}282424[#282424]).
+Elastic Observability solution::
+* Add a warning in the Synthetics UI when a private-location agent is too old to support maintenance windows ({kibana-pull}285327[#285327]).
+* Fix custom threshold rate aggregation to correctly alert when a counter increases from 0 ({kibana-pull}283973[#283973]).
+Elastic Security solution::
+For the Elastic Security 8.19.21 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Fix query rule set and rule ID validation to reject invalid characters before sending requests to {es} ({kibana-pull}276710[#276710]).
+Kibana platform::
+* Fix PKI session invalidation when in-flight HTTP/2 requests are canceled ({kibana-pull}285153[#285153]).
+* Fix {kib} to detect a misconfigured audit log file path on startup and report a degraded state instead of crashing ({kibana-pull}282347[#282347]).
+Machine Learning::
+* Fix the trained model testing endpoint to require admin-level permissions and run inference as the requesting user ({kibana-pull}282002[#282002]).
+
+[[release-notes-8.19.20]]
+== {kib} 8.19.20
+
+The 8.19.20 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.20]]
+=== Fixes
+Data ingestion and Fleet::
+* Fix Kafka outputs incorrectly accepting a proxy configuration, which Kafka doesn't support ({kibana-pull}282313[#282313]).
+* Fix preconfigured Fleet proxies being rewritten on every {kib} startup even when unchanged, which needlessly incremented dependent agent policies ({kibana-pull}281059[#281059]).
+* Fix Fleet package policy bulk creation to store secrets in the secrets index instead of inline on the saved object, matching the existing create, update, and bulk update behavior ({kibana-pull}282213[#282213]).
+* Fix the create enrollment API key request to preserve an existing expiration value when creating the key in {es} security ({kibana-pull}281324[#281324]).
+Data management::
+* Fix ILM Explain in Index Management to include hidden and system indices when filtering by lifecycle phase ({kibana-pull}282137[#282137]).
+* Fix Cross-Cluster Replication to clear selected follower indices after a pause, resume, or unfollow action, so the Manage menu reflects the updated state ({kibana-pull}273576[#273576]).
+Elastic Observability solution::
+* Fix the Synthetics monitors overview failing to load maintenance window status for users with read-only access ({kibana-pull}281894[#281894]).
+Elastic Security solution::
+For the Elastic Security 8.19.20 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Machine Learning::
+* Fix the trained model infer, update, and stop APIs to prevent a deployment ID from being used to access a different trained model ({kibana-pull}280511[#280511]).
+* Fix the annotation and anomaly result search APIs to enforce job-level space access checks, and require a job ID on anomaly searches to prevent bypassing those checks ({kibana-pull}277197[#277197]).
+* Fix {ml} saved objects APIs to accept any one of the anomaly detection, data frame analytics, or trained models privileges instead of requiring all three, and correctly check trained models access when removing a saved object from a space ({kibana-pull}276936[#276936]).
 
 [[release-notes-8.19.19]]
 == {kib} 8.19.19

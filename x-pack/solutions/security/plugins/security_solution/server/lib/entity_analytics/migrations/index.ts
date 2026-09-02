@@ -20,6 +20,8 @@ export interface EntityAnalyticsMigrationsParams {
   getStartServices: StartServicesAccessor<StartPlugins>;
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
+  /** When defined, migrations are scoped to this space only. When undefined, all spaces are migrated. */
+  spaceId?: string;
 }
 
 /**

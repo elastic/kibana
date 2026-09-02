@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -96,7 +96,7 @@ export interface Props {
   setWorkpadVariables: (vars: CanvasVariable[]) => void;
 }
 
-export const WorkpadConfig: FC<Props> = (props) => {
+export const WorkpadConfig: CanvasFunctionComponent<Props> = (props) => {
   const [css, setCSS] = useState(props.css);
   const { size, name, setSize, setName, setWorkpadCSS, variables, setWorkpadVariables } = props;
   const rotate = () => setSize({ width: size.height, height: size.width });
@@ -222,11 +222,9 @@ export const WorkpadConfig: FC<Props> = (props) => {
 };
 
 WorkpadConfig.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   size: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   css: PropTypes.string,
-  // @ts-expect-error upgrade typescript v5.9.3
   variables: PropTypes.array,
   setSize: PropTypes.func.isRequired,
   setName: PropTypes.func.isRequired,

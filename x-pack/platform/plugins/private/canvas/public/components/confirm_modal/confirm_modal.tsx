@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 export interface Props {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export interface Props {
   className?: string;
 }
 
-export const ConfirmModal: FunctionComponent<Props> = (props) => {
+export const ConfirmModal: CanvasFunctionComponent<Props> = (props) => {
   const {
     isOpen,
     title,
@@ -57,7 +57,6 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
 };
 
 ConfirmModal.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   isOpen: PropTypes.bool,
   title: PropTypes.string,
   message: PropTypes.string.isRequired,

@@ -185,6 +185,8 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'tsconfig.json',
   '.node-version',
   '.nvmrc',
+  'config/**/*.yml',
+  'config/node.options',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
   'src/platform/packages/shared/kbn-repo-info/**/*',

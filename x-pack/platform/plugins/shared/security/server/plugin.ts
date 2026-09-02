@@ -263,6 +263,7 @@ export class SecurityPlugin
       config: config.audit,
       logging: core.logging,
       http: core.http,
+      status: core.status,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,

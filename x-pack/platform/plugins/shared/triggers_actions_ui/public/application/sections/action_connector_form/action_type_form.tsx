@@ -533,7 +533,13 @@ export const ActionTypeForm = ({
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
               <RuleActionsAlertsFilter
                 action={actionItem}
-                onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+                onChange={(query) =>
+                  setActionAlertsFilterProperty(
+                    'query',
+                    query as RuleActionAlertsFilterProperty,
+                    index
+                  )
+                }
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
                 plugins={{

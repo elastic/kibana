@@ -262,13 +262,20 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
   dataSelectors.originID
 );
 
+const ariaFlowtoCandidateSelector = composeSelectors(
+  dataStateSelector,
+  dataSelectors.ariaFlowtoCandidate
+);
+
 /**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
 export const ariaFlowtoNodeID = createSelector(
-  visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
+  [visibleNodesAndEdgeLines, ariaFlowtoCandidateSelector] as [
+    typeof visibleNodesAndEdgeLines,
+    typeof ariaFlowtoCandidateSelector
+  ],
   function (
     visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
     ariaFlowtoCandidate: (nodeId: string) => string | null
@@ -381,13 +388,20 @@ export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.n
  */
 export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.graphNodeForID);
 
+const nodeDataSelector = composeSelectors(
+  dataStateSelector,
+  (dataState: DataState) => dataState.nodeData
+);
+
 /**
  * Returns a Set of node IDs representing the visible nodes in the view that we do no have node data for already.
  */
 export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<string> =
   createSelector(
-    composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
-    visibleNodesAndEdgeLines,
+    [nodeDataSelector, visibleNodesAndEdgeLines] as [
+      typeof nodeDataSelector,
+      typeof visibleNodesAndEdgeLines
+    ],
     function (
       nodeData: Map<string, NodeData> | undefined,
       visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites

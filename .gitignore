@@ -85,6 +85,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn
@@ -142,12 +143,9 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel | TODO: Remove later
-.ijwb
-/bazel
-/bazel-*
-.bazelrc.user
-.bazelrc.cache
+# PNPM
+.pnpm-store
+.pnpm
 
 elastic-agent-*
 fleet-server-*

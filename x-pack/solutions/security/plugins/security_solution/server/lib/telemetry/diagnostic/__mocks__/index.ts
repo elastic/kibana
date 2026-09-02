@@ -11,11 +11,11 @@ import type { CircuitBreakingQueryExecutorImpl } from '../health_diagnostic_rece
 import {
   QueryType,
   Action,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
+  type IndexQuery,
+  type ApiQuery,
 } from '../health_diagnostic_service.types';
 
-export type { HealthDiagnosticQueryV1, HealthDiagnosticQueryV2 };
+export type { IndexQuery, ApiQuery };
 import type { TelemetryConfigProvider } from '../../../../../common/telemetry_config/telemetry_config_provider';
 
 export const createMockLogger = (): jest.Mocked<Logger> =>
@@ -51,6 +51,7 @@ export const createMockTelemetryConfigProvider = (
 export const createMockQueryExecutor = (): jest.Mocked<CircuitBreakingQueryExecutorImpl> =>
   ({
     search: jest.fn(),
+    searchApi: jest.fn(),
   } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockDocument = (overrides = {}) => ({
@@ -83,6 +84,9 @@ export const createMockEsClient = () => {
     helpers: mockHelpers,
     cluster: { health: jest.fn() },
     nodes: { stats: jest.fn() },
+    transport: {
+      request: jest.fn(),
+    },
   };
 };
 
@@ -111,14 +115,14 @@ export const createMockQuery = (type: QueryType, overrides = {}) => ({
 
 export const createMockQueryV1 = (
   type: QueryType,
-  overrides: Partial<HealthDiagnosticQueryV1> = {}
-): HealthDiagnosticQueryV1 => ({
-  version: 1,
-  id: 'test-query-v1',
-  name: 'test-query-v1',
+  overrides: Partial<IndexQuery> = {}
+): IndexQuery => ({
+  kind: 'index',
+  id: 'mock-v1-query',
+  name: 'mock-v1-query',
   index: 'test-index',
   type,
-  query: type === QueryType.DSL ? '{"query": {"match_all": {}}}' : 'test query',
+  query: '{"query": {"match_all": {}}}',
   scheduleCron: '5m',
   filterlist: { 'user.name': Action.KEEP },
   enabled: true,
@@ -128,18 +132,28 @@ export const createMockQueryV1 = (
 
 export const createMockQueryV2 = (
   type: QueryType,
-  overrides: Partial<HealthDiagnosticQueryV2> = {}
-): HealthDiagnosticQueryV2 => ({
-  version: 2,
-  id: 'test-query-v2',
-  name: 'test-query-v2',
-  integrations: ['endpoint.*'], // already an array — parser split happens at parse time
+  overrides: Partial<IndexQuery> = {}
+): IndexQuery => ({
+  kind: 'index',
+  id: 'mock-v2-query',
+  name: 'mock-v2-query',
+  integrations: ['endpoint'],
   type,
-  query: type === QueryType.DSL ? '{"query": {"match_all": {}}}' : 'test query',
+  query: '{"query": {"match_all": {}}}',
   scheduleCron: '5m',
   filterlist: { 'user.name': Action.KEEP },
   enabled: true,
-  size: 100,
+  ...overrides,
+});
+
+export const createMockApiQueryV3 = (overrides: Partial<ApiQuery> = {}): ApiQuery => ({
+  kind: 'api',
+  id: 'mock-api-query',
+  name: 'mock-api-query',
+  api: '_cat/tasks',
+  scheduleCron: '1h',
+  filterlist: {},
+  enabled: true,
   ...overrides,
 });
 
@@ -153,6 +167,7 @@ export const createMockPackageService = (
 ) => ({
   asInternalUser: {
     getPackages: jest.fn().mockResolvedValue(packages),
+    getInstallation: jest.fn().mockResolvedValue(null),
   },
 });
 

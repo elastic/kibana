@@ -157,6 +157,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.agent.ts
   - x-pack/platform/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.epm.ts
+  - x-pack/platform/test/fleet_api_integration/config.epm_upload_default.ts
   - x-pack/platform/test/fleet_api_integration/config.fleet.ts
   - x-pack/platform/test/fleet_api_integration/config.package_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
@@ -290,6 +291,7 @@ enabled:
   - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
   - x-pack/platform/test/security_api_integration/pki.http2.config.ts
+  - x-pack/platform/test/security_api_integration/pki.http2.stress.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml_cloud.config.ts
