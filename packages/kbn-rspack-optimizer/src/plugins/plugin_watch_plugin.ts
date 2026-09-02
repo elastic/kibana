@@ -98,6 +98,7 @@ export class PluginWatchPlugin {
           testPlugins: this.options.testPlugins || false,
           paths: this.options.pluginPaths,
           parentDirs: this.options.pluginScanDirs,
+          allowlistPluginGroups: this.options.allowlistPluginGroups,
         });
 
         // Collect plugin entries
