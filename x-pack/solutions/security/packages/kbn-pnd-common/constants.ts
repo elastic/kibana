@@ -40,6 +40,13 @@ export const PND_INVESTIGATION_URL_TEMPLATE = `${PND_INVESTIGATIONS_URL}/{id}` a
 export const buildInvestigationUrl = (id: string) =>
   `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 
+/**
+ * Shared thin AlertZero agent for all Worker `ai.agent` steps.
+ * Can expand this to multiple scoped thin agents in the future if needed.
+ * Prefer avoiding 1-1 correlation between Kibana managed agent and AZ Worker
+ */
+export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
+
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
@@ -144,10 +151,10 @@ export const INTERNAL_API_ACCESS = 'internal' as const;
 
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
-  'danger' | 'warning' | 'primary' | 'accent'
+  'danger' | 'warning' | 'accentSecondary' | 'accent'
 > = {
   contain: 'danger',
   escalate: 'warning',
-  investigate: 'primary',
+  investigate: 'accentSecondary',
   tune: 'accent',
 };
