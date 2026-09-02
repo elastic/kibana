@@ -29,6 +29,18 @@ import { ConversationAccessModeSelect } from './conversation_access_mode_select'
 import { ConversationParticipantsList } from './conversation_participants_list';
 import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
 
+/**
+ * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
+ * set, and renders it as an invisible `EuiIcon type="empty"` because an option is never kept
+ * selected here. Neither the column nor its flex gap is exposed as a prop, so the placeholder is
+ * hidden from the options panel to keep the user rows left aligned.
+ */
+const hiddenOptionIndicatorCss = css`
+  .euiListItemLayout__icon {
+    display: none;
+  }
+`;
+
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
 
 interface UserSearchOptionProps {
@@ -159,6 +171,9 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
             />
           }
           singleSelection={{ asPlainText: true }}
+          inputPopoverProps={{
+            panelProps: { css: hiddenOptionIndicatorCss },
+          }}
           renderOption={(option) => {
             const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
 
