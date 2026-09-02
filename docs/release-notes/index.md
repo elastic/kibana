@@ -49,7 +49,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
 * Fix case attachment UI issues, including delete controls on saved-object attachments and the more-actions menu for read-only access [#285456]({{kib-pull}}285456).
 * Fix saved Lens visualizations missing from case attachments, and add helper text in the markdown editor for inline Timeline and Lens references [#286164]({{kib-pull}}286164).
-* Fix case metrics failing when a case already has alerts from a linked project [#286185]({{kib-pull}}286185).
 * Fix creating a case from a workflow, a case template, or {{ml}} so **Sync alerts** is not turned on unless that solution enables it [#286670]({{kib-pull}}286670).
 * Fix the **Additional fields** editor on the {{sn-itsm}}, {{sn-sir}}, and Jira connectors rejecting Mustache context variables as invalid JSON [#286578]({{kib-pull}}286578).
 * Fix required-on-close validation skipping global fields that a template includes by `$ref` [#287306]({{kib-pull}}287306).
