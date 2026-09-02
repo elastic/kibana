@@ -344,6 +344,49 @@ describe('overviewStatusReducer', () => {
       );
     });
 
+    it('keeps CCS rows that share configId when appending pages', () => {
+      const east = makeMeta({
+        configId: 'shared',
+        name: 'east',
+        remote: { remoteName: 'cluster-east' },
+        locations: [{ id: 'us-east-1', label: 'us-east-1', status: 'up' }],
+        overallStatus: 'up',
+      });
+      const west = makeMeta({
+        configId: 'shared',
+        name: 'west',
+        remote: { remoteName: 'cluster-west' },
+        locations: [{ id: 'us-east-1', label: 'us-east-1', status: 'up' }],
+        overallStatus: 'up',
+      });
+
+      const initial = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([east], {
+            upConfigs: { 'cluster-east-shared-us-east-1': east },
+            total: 2,
+          })
+        )
+      );
+      const merged = overviewStatusReducer(
+        initial,
+        appendOverviewStatusAction.success(
+          makePaginated([west], {
+            upConfigs: { 'cluster-west-shared-us-east-1': west },
+            total: 2,
+          })
+        )
+      );
+
+      expect(merged.allConfigs).toHaveLength(2);
+      expect(merged.allConfigs?.map((config) => config.name).sort()).toEqual(['east', 'west']);
+      expect(Object.keys(merged.status?.upConfigs ?? {}).sort()).toEqual([
+        'cluster-east-shared-us-east-1',
+        'cluster-west-shared-us-east-1',
+      ]);
+    });
+
     it('replaces when there is no paginated base to merge into', () => {
       const merged = overviewStatusReducer(
         undefined,

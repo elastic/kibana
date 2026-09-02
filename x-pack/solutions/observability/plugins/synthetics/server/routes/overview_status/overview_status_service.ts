@@ -32,7 +32,7 @@ import {
   HEARTBEAT_UNMAPPED_LOCATION_ID,
   HEARTBEAT_UNMAPPED_LOCATION_LABEL,
 } from '../../../common/runtime_types';
-import { isRunStale } from '../../../common/lib';
+import { getOverviewConfigKey, isRunStale } from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
@@ -369,7 +369,7 @@ export class OverviewStatusService {
     const pageDisabledConfigs: Record<string, OverviewStatusMetaData> = {};
 
     for (const config of pageConfigs) {
-      const key = config.configId;
+      const key = getOverviewConfigKey(config);
       switch (config.overallStatus) {
         case MONITOR_STATUS_ENUM.DOWN:
           pageDownConfigs[key] = config;
@@ -1225,11 +1225,8 @@ export class OverviewStatusService {
           // remote clusters that host the same monitor configId in the same
           // locationId (e.g. an imported project monitor synced to both)
           // don't collide and silently overwrite each other.
-          placeExternalConfig(
-            `${remote.remoteName}-${configId}-${locData.locationId}`,
-            { ...baseMeta, remote },
-            status
-          );
+          const remoteMeta = { ...baseMeta, remote };
+          placeExternalConfig(getOverviewConfigKey(remoteMeta), remoteMeta, status);
           return;
         }
 
@@ -1254,11 +1251,8 @@ export class OverviewStatusService {
           }
           heartbeatMonitorIds.add(monitorId);
         }
-        placeExternalConfig(
-          `heartbeat-${configId}-${locData.locationId}`,
-          { ...baseMeta, origin: 'heartbeat' as const },
-          status
-        );
+        const heartbeatMeta = { ...baseMeta, origin: 'heartbeat' as const };
+        placeExternalConfig(getOverviewConfigKey(heartbeatMeta), heartbeatMeta, status);
       });
     });
 

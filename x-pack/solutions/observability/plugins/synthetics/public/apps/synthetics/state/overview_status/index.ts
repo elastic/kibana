@@ -14,7 +14,7 @@ import type {
   PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
-import { isRunStale } from '../../../../../common/lib';
+import { getOverviewConfigKey, isRunStale } from '../../../../../common/lib';
 import type { IHttpSerializedFetchError } from '..';
 import {
   appendOverviewStatusAction,
@@ -149,8 +149,10 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
   if (changed) {
     const rebuilt = buildAllConfigs(status);
     if (status.configs) {
-      const byConfigId = new Map(rebuilt.map((config) => [config.configId, config]));
-      status.configs = status.configs.map((config) => byConfigId.get(config.configId) ?? config);
+      const byKey = new Map(rebuilt.map((config) => [getOverviewConfigKey(config), config]));
+      status.configs = status.configs.map(
+        (config) => byKey.get(getOverviewConfigKey(config)) ?? config
+      );
       state.allConfigs = status.configs;
     } else {
       state.allConfigs = rebuilt;
@@ -163,23 +165,36 @@ const requestContextEquals = (
   b?: { scopeStatusByLocation?: boolean; statusFilter?: string }
 ) => a?.scopeStatusByLocation === b?.scopeStatusByLocation && a?.statusFilter === b?.statusFilter;
 
+const mergeBucketRecords = (
+  existing: Record<string, OverviewStatusMetaData> | undefined,
+  incoming: Record<string, OverviewStatusMetaData> | undefined
+): Record<string, OverviewStatusMetaData> => {
+  const merged: Record<string, OverviewStatusMetaData> = {};
+  for (const config of Object.values(existing ?? {})) {
+    merged[getOverviewConfigKey(config)] = config;
+  }
+  for (const config of Object.values(incoming ?? {})) {
+    merged[getOverviewConfigKey(config)] = config;
+  }
+  return merged;
+};
+
 const mergePaginatedStatus = (
   existing: PaginatedOverviewStatus,
   incoming: PaginatedOverviewStatus
 ): PaginatedOverviewStatus => {
-  const byConfigId = new Map(existing.configs!.map((config) => [config.configId, config]));
+  const byKey = new Map(existing.configs!.map((config) => [getOverviewConfigKey(config), config]));
   for (const config of incoming.configs!) {
-    byConfigId.set(config.configId, config);
+    byKey.set(getOverviewConfigKey(config), config);
   }
-  const mergedConfigs = Array.from(byConfigId.values());
   return {
     ...incoming,
-    upConfigs: { ...existing.upConfigs, ...incoming.upConfigs },
-    downConfigs: { ...existing.downConfigs, ...incoming.downConfigs },
-    pendingConfigs: { ...existing.pendingConfigs, ...incoming.pendingConfigs },
-    staleConfigs: { ...(existing.staleConfigs ?? {}), ...(incoming.staleConfigs ?? {}) },
-    disabledConfigs: { ...existing.disabledConfigs, ...incoming.disabledConfigs },
-    configs: mergedConfigs,
+    upConfigs: mergeBucketRecords(existing.upConfigs, incoming.upConfigs),
+    downConfigs: mergeBucketRecords(existing.downConfigs, incoming.downConfigs),
+    pendingConfigs: mergeBucketRecords(existing.pendingConfigs, incoming.pendingConfigs),
+    staleConfigs: mergeBucketRecords(existing.staleConfigs, incoming.staleConfigs),
+    disabledConfigs: mergeBucketRecords(existing.disabledConfigs, incoming.disabledConfigs),
+    configs: Array.from(byKey.values()),
   };
 };
 

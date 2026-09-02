@@ -3265,6 +3265,35 @@ describe('current status route', () => {
       expect(names).toEqual(['Alpha', 'Beta', 'Gamma']);
     });
 
+    it('keeps two CCS rows that share configId in page buckets', () => {
+      const east = {
+        ...makeMeta('shared', { name: 'East' }),
+        remote: { remoteName: 'cluster-east' },
+        locations: [{ id: 'us-east-1', label: 'us-east-1', status: 'up' }],
+      };
+      const west = {
+        ...makeMeta('shared', { name: 'West' }),
+        remote: { remoteName: 'cluster-west' },
+        locations: [{ id: 'us-east-1', label: 'us-east-1', status: 'up' }],
+      };
+      const service = createService({ page: 1, perPage: 20 });
+      const result = service.paginateConfigs({
+        upConfigs: {
+          'cluster-east-shared-us-east-1': east,
+          'cluster-west-shared-us-east-1': west,
+        },
+        downConfigs: {},
+        pendingConfigs: {},
+        disabledConfigs: {},
+      });
+
+      expect(result.configs).toHaveLength(2);
+      expect(Object.keys(result.pageUpConfigs).sort()).toEqual([
+        'cluster-east-shared-us-east-1',
+        'cluster-west-shared-us-east-1',
+      ]);
+    });
+
     it('handles empty config maps', () => {
       const service = createService({ page: 1, perPage: 20 });
       const result = service.paginateConfigs({
