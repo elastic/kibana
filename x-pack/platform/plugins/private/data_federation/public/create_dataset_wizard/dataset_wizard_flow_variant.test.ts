@@ -56,10 +56,11 @@ describe('dataset_wizard_flow_variant', () => {
     expect(parseWizardFlowVariantFromSearch('?flow=flow_3b')).toBeUndefined();
   });
 
-  it('defaults to flow 1 when the flow query param is missing or invalid', () => {
-    expect(resolveWizardFlowVariant('')).toBe(DATASET_WIZARD_FLOW_VARIANT_1);
-    expect(resolveWizardFlowVariant('?step=2')).toBe(DATASET_WIZARD_FLOW_VARIANT_1);
-    expect(resolveWizardFlowVariant('?flow=unknown')).toBe(DATASET_WIZARD_FLOW_VARIANT_1);
+  it('defaults to flow 3 9.6 when the flow query param is missing or invalid', () => {
+    expect(resolveWizardFlowVariant('')).toBe(DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    expect(resolveWizardFlowVariant('?step=2')).toBe(DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    expect(resolveWizardFlowVariant('?flow=unknown')).toBe(DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    expect(resolveWizardFlowVariant('?flow=flow_1')).toBe(DATASET_WIZARD_FLOW_VARIANT_1);
     expect(resolveWizardFlowVariant('?flow=flow_2')).toBe(DATASET_WIZARD_FLOW_VARIANT_2);
     expect(resolveWizardFlowVariant('?flow=flow_3')).toBe(DATASET_WIZARD_FLOW_VARIANT_3);
     expect(resolveWizardFlowVariant('?flow=flow_3_9_6')).toBe(DATASET_WIZARD_FLOW_VARIANT_3_9_6);

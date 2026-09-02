@@ -12,6 +12,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { DataSetWithName } from '../common';
 import type { DataSetListRow, DatasetsTableProps } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
+import { createFlowPreviewModeStore, FlowPreviewModeProvider } from './flow_preview_mode';
 import { mainTranslations } from './main_i18n';
 
 const createDataSetRow = ({
@@ -28,26 +29,35 @@ const createDataSetRow = ({
     description: '',
   } as DataSetWithName);
 
-const renderTable = (overrides: Partial<DatasetsTableProps> = {}) =>
-  render(
+const renderTable = (
+  overrides: Partial<DatasetsTableProps> = {},
+  { isFlowPreviewEnabled = false }: { isFlowPreviewEnabled?: boolean } = {}
+) => {
+  const flowPreviewModeStore = createFlowPreviewModeStore();
+  flowPreviewModeStore.next(isFlowPreviewEnabled);
+
+  return render(
     <EuiProvider>
-      <DatasetsTable
-        filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-        selectedItems={[]}
-        dataSourceNames={['ds1']}
-        dataSourceFilter={[]}
-        onSelectionChange={jest.fn()}
-        onDataSourceFilterChange={jest.fn()}
-        onCreate={jest.fn()}
-        onEdit={jest.fn()}
-        onClone={jest.fn()}
-        onOpenInDiscover={jest.fn()}
-        onDelete={jest.fn()}
-        onDeleteSelected={jest.fn()}
-        {...overrides}
-      />
+      <FlowPreviewModeProvider store={flowPreviewModeStore}>
+        <DatasetsTable
+          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+          selectedItems={[]}
+          dataSourceNames={['ds1']}
+          dataSourceFilter={[]}
+          onSelectionChange={jest.fn()}
+          onDataSourceFilterChange={jest.fn()}
+          onCreate={jest.fn()}
+          onEdit={jest.fn()}
+          onClone={jest.fn()}
+          onOpenInDiscover={jest.fn()}
+          onDelete={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          {...overrides}
+        />
+      </FlowPreviewModeProvider>
     </EuiProvider>
   );
+};
 
 describe('DatasetsTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
@@ -61,10 +71,22 @@ describe('DatasetsTable', () => {
     consoleWarnSpy.mockRestore();
   });
 
+  it('calls onCreate with flow 3 9.6 directly when flow preview is off', () => {
+    const onCreate = jest.fn();
+
+    const { getByTestId, queryByTestId } = renderTable({ onCreate });
+
+    fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
+
+    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(onCreate).toHaveBeenCalledWith('flow_3_9_6');
+    expect(queryByTestId('dataSetsSetsCreateFlow1Button')).not.toBeInTheDocument();
+  });
+
   it('calls onCreate with the selected flow when a menu item is chosen', async () => {
     const onCreate = jest.fn();
 
-    const { getByTestId } = renderTable({ onCreate });
+    const { getByTestId } = renderTable({ onCreate }, { isFlowPreviewEnabled: true });
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
     fireEvent.click(getByTestId('dataSetsSetsCreateFlow2Button'));

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { FieldConfig, ValidationFuncArg } from '../../../shared_imports';
+import type { FieldConfig, ValidationFunc } from '../../../shared_imports';
 import { TextField, UseField } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
@@ -27,8 +27,8 @@ export const RenameFieldParameter: React.FC = () => {
   const initialName = fieldToEdit ? byId[fieldToEdit].source.name : undefined;
   const parentId = fieldToEdit ? byId[fieldToEdit].parentId : fieldToAddFieldTo;
   const isAddingNewField = !fieldToEdit;
-  const uniqueNameValidator = useCallback(
-    (arg: ValidationFuncArg<string, string>) => {
+  const uniqueNameValidator = useCallback<ValidationFunc>(
+    (arg) => {
       return validateUniqueName(
         { rootLevelFields, byId },
         initialName,

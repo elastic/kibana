@@ -25,6 +25,12 @@ export const mainTranslations = {
     defaultMessage: 'Learn more',
   }),
 
+  flowPreview: {
+    switchLabel: i18n.translate('xpack.dataFederation.flowPreviewSwitchLabel', {
+      defaultMessage: 'Preview other creation flows',
+    }),
+  },
+
   columns: {
     dataSources: {
       name: i18n.translate('xpack.dataFederation.table.columnName', {

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ConfigProvider } from '../../../config_context';
 import { StateProvider } from '../../../mappings_state_context';
 
 import { SearchResultItem } from './search_result_item';
@@ -31,9 +32,11 @@ describe('SearchResultItem', () => {
   const renderComponent = (props: React.ComponentProps<typeof SearchResultItem>) => {
     return render(
       <I18nProvider>
-        <StateProvider>
-          <SearchResultItem {...props} />
-        </StateProvider>
+        <ConfigProvider>
+          <StateProvider>
+            <SearchResultItem {...props} />
+          </StateProvider>
+        </ConfigProvider>
       </I18nProvider>
     );
   };

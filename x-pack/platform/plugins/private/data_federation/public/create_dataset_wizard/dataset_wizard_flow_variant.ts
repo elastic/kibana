@@ -82,7 +82,7 @@ export const buildCreateDatasetWizardPath = (flowVariant: DatasetWizardFlowVaria
 
 export const resolveWizardFlowVariant = (
   search: string,
-  defaultFlow: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
+  defaultFlow: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_3_9_6
 ): DatasetWizardFlowVariant => parseWizardFlowVariantFromSearch(search) ?? defaultFlow;
 
 const buildNamedDatasetWizardPath = (action: 'edit' | 'clone', datasetName: string): string => {

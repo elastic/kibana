@@ -90,7 +90,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
               ? createDatasetFlyoutStrings.settingsPartitionPathOptionalLabel()
               : createDatasetFlyoutStrings.settingsPartitionPathLabel()
           }
-          helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
+          // A step pairs this with partition detection, which already names the
+          // Template constraint, and validation reports it when it is broken.
+          helpText={
+            isStepField ? undefined : createDatasetFlyoutStrings.settingsPartitionPathHelp()
+          }
           placeholder={createDatasetFlyoutStrings.settingsPartitionPathPlaceholder()}
           presets={PARTITION_PATH_PRESETS()}
           rules={{
@@ -415,7 +419,16 @@ const TextSettingsField: FunctionComponent<{
   placeholder?: string;
   testSubj: string;
   isCompressed?: boolean;
-}> = ({ control, name, label, helpText, description, placeholder, testSubj, isCompressed = true }) => {
+}> = ({
+  control,
+  name,
+  label,
+  helpText,
+  description,
+  placeholder,
+  testSubj,
+  isCompressed = true,
+}) => {
   const { field } = useController({ name, control });
   const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
 

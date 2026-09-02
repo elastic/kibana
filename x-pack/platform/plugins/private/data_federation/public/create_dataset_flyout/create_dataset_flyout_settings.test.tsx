@@ -115,7 +115,7 @@ describe('CreateDatasetFlyoutSettings', () => {
     });
 
     it('shows CSV advanced fields inside the advanced section', () => {
-      const { getByTestId } = renderSettings();
+      const { getByTestId, queryByTestId } = renderSettings();
 
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'csv' },
@@ -123,8 +123,10 @@ describe('CreateDatasetFlyoutSettings', () => {
       openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsNullValue')).toBeVisible();
+      expect(getByTestId('createDatasetFlyoutSettingsErrorMode')).toBeVisible();
+      // The error limits stay hidden until the error mode moves off its fail_fast default.
+      expect(queryByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeNull();
     });
 
     it('updates a CSV core field in form state', () => {

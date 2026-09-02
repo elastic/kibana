@@ -18,6 +18,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_4,
   type DatasetWizardFlowVariant,
 } from './create_dataset_wizard/dataset_wizard_flow_variant';
+import { useIsFlowPreviewEnabled } from './flow_preview_mode';
 import { mainTranslations } from './main_i18n';
 
 export interface AddDatasetMenuButtonProps {
@@ -27,6 +28,7 @@ export interface AddDatasetMenuButtonProps {
 export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> = ({
   onSelectFlow,
 }) => {
+  const isFlowPreviewEnabled = useIsFlowPreviewEnabled();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -78,6 +80,19 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
     ],
     [handleSelectFlow]
   );
+
+  if (!isFlowPreviewEnabled) {
+    return (
+      <EuiButton
+        fill
+        color="primary"
+        data-test-subj="dataSetsSetsCreateButton"
+        onClick={() => onSelectFlow(DATASET_WIZARD_FLOW_VARIANT_3_9_6)}
+      >
+        {mainTranslations.columns.dataSets.addButtonLabel}
+      </EuiButton>
+    );
+  }
 
   const button = (
     <EuiButton

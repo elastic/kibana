@@ -15,6 +15,11 @@ import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { Main } from './main';
+import {
+  createFlowPreviewModeStore,
+  FlowPreviewModeProvider,
+  FlowPreviewModeSwitch,
+} from './flow_preview_mode';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 import type { DataFederationKibanaServices, FederatedDataFeatureFlags } from './types';
 import { DataSourcesClient } from './data_sources_client';
@@ -57,18 +62,26 @@ export const mountManagementSection = (
     },
   };
 
+  const flowPreviewModeStore = createFlowPreviewModeStore();
+  const unregisterFlowPreviewSwitch = coreStart.chrome.setBreadcrumbsAppendExtension({
+    content: <FlowPreviewModeSwitch store={flowPreviewModeStore} />,
+  });
+
   ReactDOM.render(
     coreStart.rendering.addContext(
       <KibanaContextProvider services={services}>
-        <Router history={history}>
-          <Main />
-        </Router>
+        <FlowPreviewModeProvider store={flowPreviewModeStore}>
+          <Router history={history}>
+            <Main />
+          </Router>
+        </FlowPreviewModeProvider>
       </KibanaContextProvider>
     ),
     element
   );
 
   return () => {
+    unregisterFlowPreviewSwitch();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

@@ -20,8 +20,19 @@ describe('schema_mapping_settings_fields', () => {
     ]);
   });
 
-  it('returns no schema mapping settings for csv', () => {
-    expect(getSchemaMappingSettingsFieldIds('csv')).toEqual([]);
+  it('includes both schema mapping settings for csv and tsv', () => {
+    expect(getSchemaMappingSettingsFieldIds('csv')).toEqual([
+      'schema_sample_size',
+      'schema_resolution',
+    ]);
+    expect(getSchemaMappingSettingsFieldIds('tsv')).toEqual([
+      'schema_sample_size',
+      'schema_resolution',
+    ]);
+  });
+
+  it('omits schema mapping settings that the format does not support', () => {
+    expect(getSchemaMappingSettingsFieldIds('orc')).toEqual(['schema_resolution']);
   });
 
   it('returns all schema mapping settings for every format in flow 3 9.6', () => {
