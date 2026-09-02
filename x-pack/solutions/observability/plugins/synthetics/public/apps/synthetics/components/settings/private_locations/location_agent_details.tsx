@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiHealth,
   EuiIcon,
   EuiIconTip,
@@ -25,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -90,7 +90,7 @@ export const LocationAgentDetails = ({
   if (pressuredAgents.length > 0) {
     warnings.push(MEMORY_PRESSURE_WARNING(pressuredAgents.length));
   }
-  const calloutColor = unhealthyAgents.length > 0 ? 'danger' : 'warning';
+  const WarningsCallout = unhealthyAgents.length > 0 ? KbnDangerCallout : KbnWarningCallout;
 
   const columns: Array<EuiBasicTableColumn<AgentStat>> = [
     {
@@ -350,11 +350,9 @@ export const LocationAgentDetails = ({
         {warnings.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <WarningsCallout
               announceOnMount
               size="s"
-              color={calloutColor}
-              iconType="warning"
               title={ATTENTION_TITLE}
               data-test-subj="locationAgentWarnings"
             >
@@ -363,7 +361,7 @@ export const LocationAgentDetails = ({
                   <li key={i}>{warning}</li>
                 ))}
               </ul>
-            </EuiCallOut>
+            </WarningsCallout>
           </>
         )}
 

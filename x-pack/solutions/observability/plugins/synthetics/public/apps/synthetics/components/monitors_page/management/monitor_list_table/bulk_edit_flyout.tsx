@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +22,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type {
   EncryptedSyntheticsMonitor,
@@ -292,24 +292,18 @@ export const BulkEditFlyout = ({
         {skippedMonitors.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
               announceOnMount={false}
               title={i18n.translate('xpack.synthetics.bulkEditFlyout.skippedWarning.title', {
                 defaultMessage:
                   '{count, plural, one {# monitor} other {# monitors}} will not be updated',
                 values: { count: skippedMonitors.length },
               })}
+              text={i18n.translate('xpack.synthetics.bulkEditFlyout.skippedWarning.description', {
+                defaultMessage:
+                  'Project and Terraform-managed monitors cannot be edited here (update them from their source instead), and monitors using Elastic managed locations require additional permissions.',
+              })}
             >
-              <EuiText size="s">
-                <p>
-                  {i18n.translate('xpack.synthetics.bulkEditFlyout.skippedWarning.description', {
-                    defaultMessage:
-                      'Project and Terraform-managed monitors cannot be edited here (update them from their source instead), and monitors using Elastic managed locations require additional permissions.',
-                  })}
-                </p>
-              </EuiText>
               <EuiAccordion
                 id={skippedAccordionId}
                 buttonContent={i18n.translate(
@@ -326,7 +320,7 @@ export const BulkEditFlyout = ({
                   </ul>
                 </EuiText>
               </EuiAccordion>
-            </EuiCallOut>
+            </KbnWarningCallout>
           </>
         )}
       </EuiFlyoutBody>

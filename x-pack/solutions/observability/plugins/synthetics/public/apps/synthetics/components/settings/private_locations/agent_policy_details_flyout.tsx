@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiBadge,
   EuiButton,
-  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import {
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/agent_policies';
@@ -85,13 +85,7 @@ export const AgentPolicyDetailsFlyout = ({
       <EuiFlyoutBody>
         {!policy && (
           <>
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color="warning"
-              title={POLICY_NOT_FOUND}
-              iconType="warning"
-            />
+            <KbnWarningCallout announceOnMount size="s" title={POLICY_NOT_FOUND} />
             <EuiSpacer size="m" />
           </>
         )}

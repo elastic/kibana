@@ -5,13 +5,13 @@ exports[`PingListExpandedRow doesn't render list items if the body field is unde
   direction="column"
 >
   <EuiFlexItem>
-    <EuiCallOut
-      color="primary"
+    <KbnInfoCallout
+      title="Response details"
     >
       <EuiDescriptionList
         listItems={Array []}
       />
-    </EuiCallOut>
+    </KbnInfoCallout>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -21,13 +21,13 @@ exports[`PingListExpandedRow doesn't render list items if the http field is unde
   direction="column"
 >
   <EuiFlexItem>
-    <EuiCallOut
-      color="primary"
+    <KbnInfoCallout
+      title="Response details"
     >
       <EuiDescriptionList
         listItems={Array []}
       />
-    </EuiCallOut>
+    </KbnInfoCallout>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -37,13 +37,13 @@ exports[`PingListExpandedRow doesn't render list items if the response field is 
   direction="column"
 >
   <EuiFlexItem>
-    <EuiCallOut
-      color="primary"
+    <KbnInfoCallout
+      title="Response details"
     >
       <EuiDescriptionList
         listItems={Array []}
       />
-    </EuiCallOut>
+    </KbnInfoCallout>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -53,8 +53,8 @@ exports[`PingListExpandedRow renders error information when an error field is pr
   direction="column"
 >
   <EuiFlexItem>
-    <EuiCallOut
-      color="danger"
+    <KbnDangerCallout
+      title="Response details"
     >
       <EuiDescriptionList
         listItems={
@@ -88,7 +88,7 @@ exports[`PingListExpandedRow renders error information when an error field is pr
           ]
         }
       />
-    </EuiCallOut>
+    </KbnDangerCallout>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -98,8 +98,8 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
   direction="column"
 >
   <EuiFlexItem>
-    <EuiCallOut
-      color="primary"
+    <KbnInfoCallout
+      title="Response details"
     >
       <EuiDescriptionList
         listItems={
@@ -127,7 +127,7 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
           ]
         }
       />
-    </EuiCallOut>
+    </KbnInfoCallout>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -157,6 +157,11 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
           <div
             class="css-ak2bmi-content"
           >
+            <p
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+            >
+              Response details
+            </p>
             <div
               class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
             >
@@ -221,8 +226,8 @@ exports[`PingListExpandedRow shallow renders link to docs if body is not recorde
   direction="column"
 >
   <EuiFlexItem>
-    <EuiCallOut
-      color="primary"
+    <KbnInfoCallout
+      title="Response details"
     >
       <EuiDescriptionList
         listItems={
@@ -247,7 +252,7 @@ exports[`PingListExpandedRow shallow renders link to docs if body is not recorde
           ]
         }
       />
-    </EuiCallOut>
+    </KbnInfoCallout>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

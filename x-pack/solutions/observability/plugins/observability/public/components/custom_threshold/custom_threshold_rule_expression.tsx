@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
@@ -21,6 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import deepEqual from 'fast-deep-equal';
 import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { ISearchSource, Query } from '@kbn/data-plugin/common';
@@ -572,7 +572,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     <>
       {!!paramsWarning && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
@@ -580,12 +580,9 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
                 defaultMessage: 'Warning',
               }
             )}
-            color="warning"
-            iconType="warning"
             data-test-subj="thresholdRuleExpressionWarning"
-          >
-            {paramsWarning}
-          </EuiCallOut>
+            text={paramsWarning}
+          />
           <EuiSpacer size="s" />
         </>
       )}
@@ -599,42 +596,38 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
       </EuiTitle>
       <EuiSpacer size="s" />
       {paramsError && !triggerResetDataView ? (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
-          color="danger"
-          iconType="warning"
-          data-test-subj="thresholdRuleExpressionError"
-        >
-          <p>
-            {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
+          title={i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.message',
+            {
               defaultMessage: 'Error fetching search source',
-            })}
-            <br />
-            {i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
-              {
-                defaultMessage: 'Could not locate that data view (id: {id})',
-                values: { id: paramsError?.savedObjectId },
-              }
-            )}
-            <br />
-            <EuiButtonEmpty
-              data-test-subj="thresholdRuleExpressionErrorButton"
-              flush="left"
-              onClick={() => {
+            }
+          )}
+          data-test-subj="thresholdRuleExpressionError"
+          text={i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
+            {
+              defaultMessage: 'Could not locate that data view (id: {id})',
+              values: { id: paramsError?.savedObjectId },
+            }
+          )}
+          actionProps={{
+            primary: {
+              'data-test-subj': 'thresholdRuleExpressionErrorButton',
+              onClick: () => {
                 initSearchSource(true, data);
                 setTriggerResetDataView(true);
-              }}
-            >
-              {i18n.translate(
+              },
+              children: i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.error.message',
                 {
                   defaultMessage: 'Click here to choose a new data view',
                 }
-              )}
-            </EuiButtonEmpty>
-          </p>
-        </EuiCallOut>
+              ),
+            },
+          }}
+        />
       ) : (
         <DataViewSelectPopover
           dependencies={{ dataViews, dataViewEditor, toasts }}

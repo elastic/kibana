@@ -8,22 +8,28 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiToolTip, EuiCode } from '@elastic/eui';
+import { EuiToolTip, EuiCode } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { useEnablement } from '../../../hooks';
 import { SERVICE_NOT_ALLOWED } from '../../monitors_page/management/disabled_callout';
 
 export const FleetPermissionsCallout = () => {
   return (
-    <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="question">
-      <p>{NEED_PRIVATE_LOCATIONS_PERMISSION}</p>
-      <p>
-        <FormattedMessage
-          id="xpack.synthetics.privateLocations.needFleetPermission.description"
-          defaultMessage="Once there is an agent policy available, you'll be able to manage private locations and monitors with the regular Synthetics app privileges."
-        />
-      </p>
-    </EuiCallOut>
+    <KbnWarningCallout
+      title={NEED_PERMISSIONS_PRIVATE_LOCATIONS}
+      text={
+        <>
+          <p>{NEED_PRIVATE_LOCATIONS_PERMISSION}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.synthetics.privateLocations.needFleetPermission.description"
+              defaultMessage="Once there is an agent policy available, you'll be able to manage private locations and monitors with the regular Synthetics app privileges."
+            />
+          </p>
+        </>
+      }
+    />
   );
 };
 

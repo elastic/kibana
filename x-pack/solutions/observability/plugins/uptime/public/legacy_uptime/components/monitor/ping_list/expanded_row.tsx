@@ -7,7 +7,6 @@
 
 import { formatNumber } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -17,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import type { Ping, HttpResponseBody } from '../../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
@@ -51,6 +51,10 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
 
 const BodyExcerpt = ({ content }: { content: string }) =>
   content ? <EuiCodeBlock overflowHeight={250}>{content}</EuiCodeBlock> : null;
+
+const RESPONSE_DETAILS_TITLE = i18n.translate('xpack.uptime.pingList.expandedRow.calloutTitle', {
+  defaultMessage: 'Response details',
+});
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
@@ -95,9 +99,15 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
-          <EuiDescriptionList listItems={listItems} />
-        </EuiCallOut>
+        {ping?.error ? (
+          <KbnDangerCallout title={RESPONSE_DETAILS_TITLE}>
+            <EuiDescriptionList listItems={listItems} />
+          </KbnDangerCallout>
+        ) : (
+          <KbnInfoCallout title={RESPONSE_DETAILS_TITLE}>
+            <EuiDescriptionList listItems={listItems} />
+          </KbnInfoCallout>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

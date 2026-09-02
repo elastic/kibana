@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERT_CASE_IDS, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { EuiButton, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -87,53 +87,46 @@ function StaleAlert({
   return (
     <>
       {isAlertStale?.isStale && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           data-test-subj="o11yAlertDetailsAlertStaleCallout"
           title={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.title', {
             defaultMessage: 'This alert may be stale',
           })}
-          color="warning"
-          iconType="warning"
-        >
-          <p>
-            {i18n.translate('xpack.observability.alertDetails.staleAlertCallout.message', {
-              defaultMessage:
-                'This alert has been active for {numOfDays} days and is assigned to {numOfCases} {cases}.',
-              values: {
-                numOfDays: isAlertStale?.days,
-                numOfCases: isAlertStale?.cases,
-                cases: isAlertStale?.cases > 1 ? 'cases' : 'case',
-              },
-            })}
-          </p>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
-            <EuiButton
-              data-test-subj="o11yAlertDetailsAlertStaleCalloutMarkAsUntrackedButton"
-              color="warning"
-              fill
-              iconType="eyeSlash"
-              onClick={handleUntrackAlert}
-            >
-              {i18n.translate(
+          text={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.message', {
+            defaultMessage:
+              'This alert has been active for {numOfDays} days and is assigned to {numOfCases} {cases}.',
+            values: {
+              numOfDays: isAlertStale?.days,
+              numOfCases: isAlertStale?.cases,
+              cases: isAlertStale?.cases > 1 ? 'cases' : 'case',
+            },
+          })}
+          actionProps={{
+            primary: {
+              'data-test-subj': 'o11yAlertDetailsAlertStaleCalloutMarkAsUntrackedButton',
+              iconType: 'eyeSlash',
+              onClick: handleUntrackAlert,
+              children: i18n.translate(
                 'xpack.observability.alertDetails.alertStaleCallout.markAsUntrackedButton',
                 {
                   defaultMessage: 'Untrack',
                 }
-              )}
-            </EuiButton>
-            <EuiButton
-              data-test-subj="o11yAlertDetailsAlertStaleCalloutEditRule"
-              color="warning"
-              iconType="pencil"
-              onClick={handleEditRuleDetails}
-            >
-              {i18n.translate('xpack.observability.alertDetails.alertStaleCallout.editRuleButton', {
-                defaultMessage: 'Edit rule',
-              })}
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiCallOut>
+              ),
+            },
+            secondary: {
+              'data-test-subj': 'o11yAlertDetailsAlertStaleCalloutEditRule',
+              iconType: 'pencil',
+              onClick: handleEditRuleDetails,
+              children: i18n.translate(
+                'xpack.observability.alertDetails.alertStaleCallout.editRuleButton',
+                {
+                  defaultMessage: 'Edit rule',
+                }
+              ),
+            },
+          }}
+        />
       )}
       {rule && ruleConditionsFlyoutOpen ? (
         <RuleFormFlyout

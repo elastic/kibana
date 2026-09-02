@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiCallOut,
   EuiCheckbox,
   EuiConfirmModal,
   EuiDatePicker,
@@ -15,6 +14,7 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { BulkPurgePolicyInput } from '@kbn/slo-schema';
 import type { Moment } from 'moment';
@@ -149,9 +149,8 @@ export function PurgeRollupConfirmationModal({ purgePolicyHelpText, onCancel, on
       {forcePurge && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             size="s"
             title={i18n.translate('xpack.slo.purgeConfirmationModal.forceWarning', {
               defaultMessage:

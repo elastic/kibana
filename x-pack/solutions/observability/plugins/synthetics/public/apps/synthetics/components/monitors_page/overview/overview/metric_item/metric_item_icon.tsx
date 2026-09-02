@@ -14,7 +14,6 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -26,6 +25,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useMonitorMWs } from '../../../hooks/use_monitor_mws';
 import { MetricErrorIcon } from './metric_error_icon';
@@ -187,7 +187,7 @@ export const MetricItemIcon = ({
                 <EuiSpacer size="s" />
               </>
             )}
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={
                 latestPing?.error?.message ? (
@@ -196,8 +196,6 @@ export const MetricItemIcon = ({
                   <EuiSkeletonText lines={2} />
                 )
               }
-              color="danger"
-              iconType="warning"
             />
           </div>
           <EuiPopoverFooter>

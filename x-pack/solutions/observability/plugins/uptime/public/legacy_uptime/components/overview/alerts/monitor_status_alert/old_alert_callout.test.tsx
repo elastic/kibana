@@ -20,8 +20,7 @@ describe('OldAlertCallOut', () => {
         <EuiSpacer
           size="m"
         />
-        <EuiCallOut
-          iconType="warning"
+        <KbnInfoCallout
           size="s"
           title={
             <Memo(MemoizedFormattedMessage)

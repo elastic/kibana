@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
@@ -29,23 +29,22 @@ export function EnhancedRulesCallout({ ruleTypeId }: { ruleTypeId?: string }) {
   };
 
   return (
-    <EuiCallOut title={CALLOUT_TITLE}>
-      <p>{CALLOUT_DESCRIPTION}</p>
-      <EuiFlexGroup>
-        <EuiButton
-          data-test-subj="enhancedRulesCallout-createCTRRuleButton"
-          onClick={() => handleCreateRuleClick(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)}
-        >
-          {CREATE_CTR_RULE_LABEL}
-        </EuiButton>
-        <EuiButton
-          data-test-subj="enhancedRulesCallout-createESQRuleButton"
-          onClick={() => handleCreateRuleClick(ES_QUERY_ID)}
-        >
-          {CREATE_ESQ_RULE_LABEL}
-        </EuiButton>
-      </EuiFlexGroup>
-    </EuiCallOut>
+    <KbnInfoCallout
+      title={CALLOUT_TITLE}
+      text={CALLOUT_DESCRIPTION}
+      actionProps={{
+        primary: {
+          'data-test-subj': 'enhancedRulesCallout-createCTRRuleButton',
+          onClick: () => handleCreateRuleClick(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID),
+          children: CREATE_CTR_RULE_LABEL,
+        },
+        secondary: {
+          'data-test-subj': 'enhancedRulesCallout-createESQRuleButton',
+          onClick: () => handleCreateRuleClick(ES_QUERY_ID),
+          children: CREATE_ESQ_RULE_LABEL,
+        },
+      }}
+    />
   );
 }
 

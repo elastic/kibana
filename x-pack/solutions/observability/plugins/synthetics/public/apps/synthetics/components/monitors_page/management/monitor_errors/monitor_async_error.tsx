@@ -8,7 +8,8 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { selectMonitorListState, selectServiceLocationsState } from '../../../../state';
 
 export const MonitorAsyncError = () => {
@@ -20,7 +21,7 @@ export const MonitorAsyncError = () => {
 
   return syncErrors && syncErrors.length > 0 && !isDismissed ? (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         title={
           <FormattedMessage
@@ -28,15 +29,17 @@ export const MonitorAsyncError = () => {
             defaultMessage="Some monitors are not running correctly"
           />
         }
-        color="warning"
-        iconType="warning"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.synthetics.monitorManagement.monitorSync.failure.content"
             defaultMessage="There was a problem running your monitors for one or more locations:"
           />
-        </p>
+        }
+        onDismiss={() => setIsDismissed(true)}
+        dismissButtonProps={{
+          'aria-label': DISMISS_LABEL,
+        }}
+      >
         <ul style={{ maxHeight: 100, overflow: 'auto' }}>
           {Object.values(syncErrors ?? {}).map((e) => {
             return (
@@ -50,14 +53,7 @@ export const MonitorAsyncError = () => {
             );
           })}
         </ul>
-        <EuiButton
-          data-test-subj="syntheticsMonitorAsyncErrorButton"
-          onClick={() => setIsDismissed(true)}
-          color="warning"
-        >
-          {DISMISS_LABEL}
-        </EuiButton>
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   ) : null;

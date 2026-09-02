@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import * as labels from './labels';
 import { useEnablement } from '../../../hooks';
@@ -24,28 +25,31 @@ export const DisabledCallout = ({ total }: { total?: number }) => {
   const disabledCallout =
     !canEnable && showDisableCallout && !loading ? (
       <>
-        <EuiCallOut announceOnMount title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning">
-          <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
-          <p>
-            {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-            <EuiLink
-              data-test-subj="syntheticsMonitorManagementPageLink"
-              href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq"
-              target="_blank"
-            >
-              {labels.LEARN_MORE_LABEL}
-            </EuiLink>
-          </p>
-        </EuiCallOut>
+        <KbnWarningCallout
+          announceOnMount
+          title={labels.CALLOUT_MANAGEMENT_DISABLED}
+          text={
+            <>
+              <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
+              <p>{labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}</p>
+            </>
+          }
+          actionProps={{
+            primary: {
+              'data-test-subj': 'syntheticsMonitorManagementPageLink',
+              href: 'https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq',
+              target: '_blank',
+              children: labels.LEARN_MORE_LABEL,
+            },
+          }}
+        />
         <EuiSpacer size="m" />
       </>
     ) : null;
 
   const disAllowedCallout = !isServiceAllowed ? (
     <>
-      <EuiCallOut announceOnMount title={ACCOUNT_BLOCKED} color="warning">
-        <p>{SERVICE_NOT_ALLOWED}</p>
-      </EuiCallOut>
+      <KbnWarningCallout announceOnMount title={ACCOUNT_BLOCKED} text={SERVICE_NOT_ALLOWED} />
       <EuiSpacer size="m" />
     </>
   ) : null;

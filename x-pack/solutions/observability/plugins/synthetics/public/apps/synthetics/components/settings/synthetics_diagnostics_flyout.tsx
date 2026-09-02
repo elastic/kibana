@@ -10,7 +10,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
@@ -23,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
 import { NoPermissionsTooltip } from '../common/components/permissions';
 import { fetchSyntheticsDiagnostics } from './hooks/api';
@@ -204,36 +204,29 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
               <EuiLoadingSpinner size="xl" data-test-subj="syntheticsDiagnosticsLoading" />
             ) : null}
             {error ? (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
-                color="danger"
                 title={i18n.translate('xpack.synthetics.diagnostics.loadErrorTitle', {
                   defaultMessage: 'Could not load diagnostics',
                 })}
-              >
-                {error}
-              </EuiCallOut>
+                text={error}
+              />
             ) : null}
             {zipExporting && data ? (
               <>
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
-                  color="primary"
-                  iconType="download"
                   title={i18n.translate('xpack.synthetics.diagnostics.zipPreparingTitle', {
                     defaultMessage: 'Preparing download',
                   })}
                   data-test-subj="syntheticsDiagnosticsZipPreparingCallout"
+                  text={i18n.translate('xpack.synthetics.diagnostics.zipPreparingBody', {
+                    defaultMessage:
+                      'Building the ZIP file. This can take a moment for large environments.',
+                  })}
                 >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.synthetics.diagnostics.zipPreparingBody', {
-                      defaultMessage:
-                        'Building the ZIP file. This can take a moment for large environments.',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="s" />
                   <EuiProgress size="xs" color="primary" />
-                </EuiCallOut>
+                </KbnInfoCallout>
                 <EuiSpacer size="m" />
               </>
             ) : null}
