@@ -89,7 +89,7 @@ export const HomePageStatPanel = ({
   ));
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
+    <EuiPanel color="subdued" paddingSize="m" data-test-subj={testSubj}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} size="m" aria-hidden={true} />
@@ -152,36 +152,38 @@ export const HomePageStatPanel = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l" responsive={false} wrap justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
         {metrics.map(({ key, label, value, isLoading }) => (
           <EuiFlexItem key={key} grow>
-            <EuiStat
-              data-test-subj={`${testSubj}-${key}`}
-              css={{ whiteSpace: 'nowrap' }}
-              title={
-                isLoading ? (
-                  <EuiSkeletonText
-                    size="m"
-                    lines={1}
-                    data-test-subj={`${testSubj}-${key}-loading`}
-                  />
-                ) : (
-                  <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
-                )
-              }
-              titleColor="text"
-              titleElement="div"
-              description={
-                <>
-                  <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-${key}-label`}>
-                    {label}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                </>
-              }
-              descriptionElement="div"
-              titleSize="s"
-            />
+            <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
+              <EuiStat
+                data-test-subj={`${testSubj}-${key}`}
+                css={{ whiteSpace: 'nowrap' }}
+                title={
+                  isLoading ? (
+                    <EuiSkeletonText
+                      size="m"
+                      lines={1}
+                      data-test-subj={`${testSubj}-${key}-loading`}
+                    />
+                  ) : (
+                    <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
+                  )
+                }
+                titleColor="text"
+                titleElement="div"
+                description={
+                  <>
+                    <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-${key}-label`}>
+                      {label}
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                  </>
+                }
+                descriptionElement="div"
+                titleSize="s"
+              />
+            </EuiPanel>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
