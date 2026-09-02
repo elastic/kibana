@@ -16,7 +16,7 @@ import {
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
-  createRagEvaluators,
+  createIrEvaluators,
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
@@ -35,7 +35,7 @@ import {
 } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
-import { extractSearchRetrievedDocs } from './rag_extractor';
+import { extractSearchRetrievedDocs } from './ir_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -156,7 +156,7 @@ function configureExperiment({
     };
   };
 
-  const ragEvaluators = createRagEvaluators({
+  const irEvaluators = createIrEvaluators({
     k: 10,
     relevanceThreshold: 1,
     extractRetrievedDocs: extractSearchRetrievedDocs,
@@ -284,7 +284,7 @@ function configureExperiment({
     createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
-    ...ragEvaluators,
+    ...irEvaluators,
     ...Object.values({
       ...evaluators.traceBasedEvaluators,
       latency: createSpanLatencyEvaluator({

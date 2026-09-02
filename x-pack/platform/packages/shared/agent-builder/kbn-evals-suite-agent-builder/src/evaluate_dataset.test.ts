@@ -15,7 +15,7 @@ import type {
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { extractSearchRetrievedDocs } from './rag_extractor';
+import { extractSearchRetrievedDocs } from './ir_extractor';
 import { createEvaluateDataset, createEvaluateExternalDataset } from './evaluate_dataset';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
