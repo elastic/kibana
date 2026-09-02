@@ -96,7 +96,6 @@ export const GetAgentsRequestSchema = {
       ),
       searchAfter: schema.maybe(
         schema.string({
-          maxLength: 1000,
           meta: { description: 'JSON-encoded array of sort values for `search_after` pagination' },
         })
       ),
@@ -106,7 +105,7 @@ export const GetAgentsRequestSchema = {
         })
       ),
       pitId: schema.maybe(
-        schema.string({ maxLength: 500, meta: { description: 'Point-in-time ID for pagination' } })
+        schema.string({ meta: { description: 'Point-in-time ID for pagination' } })
       ),
       pitKeepAlive: schema.maybe(
         schema.string({
@@ -466,8 +465,8 @@ export const AgentResponseSchema = schema.object({
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
-  pit: schema.maybe(schema.string({ maxLength: 500 })),
-  nextSearchAfter: schema.maybe(schema.string({ maxLength: 1000 })),
+  pit: schema.maybe(schema.string()),
+  nextSearchAfter: schema.maybe(schema.string()),
   statusSummary: schema.maybe(schema.recordOf(AgentStatusSchema, schema.number())),
 });
 
