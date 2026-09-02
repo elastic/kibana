@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,15 +17,14 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormLabel,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -42,18 +42,11 @@ function hashString(value: string): number {
   return Math.abs(hash);
 }
 
-// Prototype-only: a stable-looking mock ingest endpoint, generated once per
-// flyout open rather than tied to the (still-empty) source name — mirrors how
-// a real backend would provision the endpoint before the user names anything.
+// Prototype-only: a stable-looking mock ingest endpoint, derived from the
+// source name so the read-only view stays consistent per source.
 function mockEndpoint(seed: number): string {
   const subdomain = (seed % 0xffffffff).toString(16).padStart(8, '0');
-  return `https://${subdomain}.ingest.us-central1.gcp.elastic.cloud:443`;
-}
-
-function mockApiKey(seed: number): string {
-  const left = (seed % 0xffffffff).toString(16).padStart(8, '0');
-  const right = ((seed * 40503) % 0xffffffff).toString(16).padStart(8, '0');
-  return `${left}-${right}`;
+  return `https://test-simple-k8s-${subdomain}.ingest.us-central1.gcp.elastic.cloud:443`;
 }
 
 interface MockApiKeyEntry {
@@ -76,33 +69,50 @@ function apiKeyLabel(timestamp: number): string {
   });
 }
 
-// Two deterministic-looking pre-existing keys for the configured-source view,
-// so the list looks populated without any backend.
+// A single deterministic-looking pre-existing key for the configured-source
+// view, so the list looks populated without any backend.
 function mockApiKeys(seed: number): MockApiKeyEntry[] {
   const base = Date.UTC(2026, 0, 1);
-  return [0, 1].map((index) => {
-    const dayOffset = (seed + index * 9973) % 365;
-    const timestamp = base + dayOffset * 86400000;
-    return {
-      id: `${seed}-${index}`,
-      label: apiKeyLabel(timestamp),
-    };
-  });
+  const dayOffset = seed % 365;
+  const timestamp = base + dayOffset * 86400000;
+  return [{ id: `${seed}-0`, label: apiKeyLabel(timestamp) }];
+}
+
+const DESTINATION_POOL = [
+  'traces-apm-prod',
+  'metrics-tsdb-prod',
+  'logs-otel-prod',
+  'logs-archive-cold',
+  'metrics-hot-tier',
+  'events-siem-prod',
+];
+
+// Prototype-only: a stable subset of destinations this source fans out to.
+function mockDestinations(seed: number): string[] {
+  const count = 2 + (seed % 3);
+  const names: string[] = [];
+  for (let i = 0; i < count; i++) {
+    names.push(DESTINATION_POOL[(seed + i * 7) % DESTINATION_POOL.length]);
+  }
+  return Array.from(new Set(names));
+}
+
+const SOURCE_PROTOCOLS: Array<{ label: string; iconType: string }> = [
+  { label: 'Prometheus', iconType: 'logoPrometheus' },
+  { label: 'Kafka', iconType: 'logoKafka' },
+  { label: 'Elastic Agent', iconType: 'logoElastic' },
+];
+
+// Prototype-only: the wire protocol shown in the "Sends data using" badge.
+function mockProtocol(seed: number): { label: string; iconType: string } {
+  return SOURCE_PROTOCOLS[seed % SOURCE_PROTOCOLS.length];
 }
 
 const SOURCE_TYPE_OPTIONS = [
-  {
-    value: 'direct-bulk',
-    inputDisplay: 'Direct _bulk',
-  },
-  {
-    value: 'otlp',
-    inputDisplay: 'OTLP endpoint',
-  },
-  {
-    value: 'fleet-agent',
-    inputDisplay: 'Fleet-managed agent',
-  },
+  { value: 'direct-bulk', inputDisplay: 'Direct _bulk' },
+  { value: 'managed-bulk', inputDisplay: 'Managed _bulk' },
+  { value: 'otlp', inputDisplay: 'OTLP endpoint' },
+  { value: 'prometheus-ew', inputDisplay: 'Prometheus EW' },
 ];
 
 // Prototype-only: pick a stable source-type label for an already-configured
@@ -118,183 +128,21 @@ export interface SourceConfigurationDetails {
   sourceTypeLabel: string;
 }
 
-// The form filled in while finishing setup for a freshly-placed, unconfigured
-// source card. Name/type are controlled by the parent (Save needs them);
-// the generated endpoint/API key are local since nothing outside this form
-// needs them.
-function SourceConfigurationBody({
-  name,
-  onNameChange,
-  sourceType,
-  onSourceTypeChange,
-}: {
-  name: string;
-  onNameChange: (name: string) => void;
-  sourceType: string;
-  onSourceTypeChange: (sourceType: string) => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  // Generated once per mount (not tied to the name) — mirrors a backend
-  // provisioning the endpoint before the user has named anything.
-  const seed = useMemo(() => hashString(`${Date.now()}`), []);
-  const endpoint = useMemo(() => mockEndpoint(seed), [seed]);
-
-  return (
-    <>
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.sourceFlyout.sourceTypeLabel', {
-          defaultMessage: 'Source type',
-        })}
-        fullWidth
-      >
-        <EuiSuperSelect
-          data-test-subj="sourceFlyoutSourceTypeSelect"
-          options={SOURCE_TYPE_OPTIONS}
-          valueOfSelected={sourceType}
-          onChange={onSourceTypeChange}
-          fullWidth
-        />
-      </EuiFormRow>
-      <EuiSpacer size="l" />
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.sourceFlyout.sourceNameLabel', {
-          defaultMessage: 'Source name',
-        })}
-        helpText={i18n.translate('xpack.streams.sourceFlyout.sourceNameHelpText', {
-          defaultMessage: 'Name your source. This cannot be changed later.',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          fullWidth
-          value={name}
-          onChange={(event) => onNameChange(event.target.value)}
-          placeholder={i18n.translate('xpack.streams.sourceFlyout.sourceNamePlaceholder', {
-            defaultMessage: 'Name123',
-          })}
-          aria-label={i18n.translate('xpack.streams.sourceFlyout.sourceNameAriaLabel', {
-            defaultMessage: 'Source name',
-          })}
-          data-test-subj="sourceFlyoutNameInput"
-        />
-      </EuiFormRow>
-      <EuiSpacer size="l" />
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.sourceFlyout.endpointLabel', {
-          defaultMessage: 'Endpoint',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          fullWidth
-          readOnly
-          value={endpoint}
-          aria-label={i18n.translate('xpack.streams.sourceFlyout.endpointAriaLabel', {
-            defaultMessage: 'Endpoint',
-          })}
-          data-test-subj="sourceFlyoutEndpointInput"
-          append={
-            <EuiCopy textToCopy={endpoint}>
-              {(copy) => (
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="copy"
-                  onClick={copy}
-                  aria-label={i18n.translate('xpack.streams.sourceFlyout.copyEndpoint', {
-                    defaultMessage: 'Copy endpoint',
-                  })}
-                  data-test-subj="sourceFlyoutCopyEndpointButton"
-                />
-              )}
-            </EuiCopy>
-          }
-        />
-      </EuiFormRow>
-      <EuiSpacer size="l" />
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.sourceFlyout.apiKeyLabel', {
-          defaultMessage: 'API key',
-        })}
-        fullWidth
-      >
-        {apiKey ? (
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            iconType="warning"
-            title={i18n.translate('xpack.streams.sourceFlyout.apiKeyCalloutTitle', {
-              defaultMessage:
-                'Make sure to copy your API key now as you will not be able to see this again',
-            })}
-            className={css`
-              .euiCallOutHeader__title {
-                font-size: 12px;
-                line-height: 20px;
-              }
-            `}
-            data-test-subj="sourceFlyoutApiKeyCallout"
-          >
-            <EuiFieldText
-              fullWidth
-              readOnly
-              value={apiKey}
-              aria-label={i18n.translate('xpack.streams.sourceFlyout.apiKeyAriaLabel', {
-                defaultMessage: 'API key',
-              })}
-              data-test-subj="sourceFlyoutApiKeyInput"
-              append={
-                <EuiCopy textToCopy={apiKey}>
-                  {(copy) => (
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType="copy"
-                      onClick={copy}
-                      aria-label={i18n.translate('xpack.streams.sourceFlyout.copyApiKey', {
-                        defaultMessage: 'Copy API key',
-                      })}
-                      data-test-subj="sourceFlyoutCopyApiKeyButton"
-                    />
-                  )}
-                </EuiCopy>
-              }
-            />
-          </EuiCallOut>
-        ) : (
-          <EuiButton
-            size="s"
-            className={css`
-              background-color: ${euiTheme.colors.backgroundLightPrimary};
-              color: ${euiTheme.colors.textPrimary};
-              border: none;
-            `}
-            onClick={() => setApiKey(mockApiKey(seed + 1))}
-            data-test-subj="sourceFlyoutGenerateKeyButton"
-          >
-            {i18n.translate('xpack.streams.sourceFlyout.generateKey', {
-              defaultMessage: 'Generate key',
-            })}
-          </EuiButton>
-        )}
-      </EuiFormRow>
-    </>
-  );
-}
-
-// Read-only view shown when opening an already-configured source: its type,
-// name and endpoint, the list of generated API keys, and a danger area.
+// Read-only view shown when opening an already-configured source: performance
+// stats, the destinations it feeds, the wire protocol / endpoint, its generated
+// API keys, and a danger area to delete the source.
 function ConfiguredSourceBody({
   sourceName,
-  sourceTypeLabel,
   onDeleteSource,
 }: {
   sourceName: string;
-  sourceTypeLabel: string;
   onDeleteSource: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const seed = useMemo(() => hashString(sourceName), [sourceName]);
   const endpoint = useMemo(() => mockEndpoint(seed), [seed]);
+  const destinations = useMemo(() => mockDestinations(seed), [seed]);
+  const protocol = useMemo(() => mockProtocol(seed), [seed]);
   const [apiKeys, setApiKeys] = useState<MockApiKeyEntry[]>(() => mockApiKeys(seed));
 
   const generateKey = () =>
@@ -307,40 +155,65 @@ function ConfiguredSourceBody({
 
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.sourceFlyout.sourceTypeLabel', {
-          defaultMessage: 'Source type',
+      <EuiCallOut
+        color="warning"
+        size="s"
+        title={i18n.translate('xpack.streams.sourceFlyout.statsCalloutTitle', {
+          defaultMessage: 'Placeholder note',
         })}
-        fullWidth
+        data-test-subj="sourceFlyoutStatsCallout"
+        className={css`
+          color: ${euiTheme.colors.textWarning};
+        `}
       >
-        <EuiFieldText
-          fullWidth
-          readOnly
-          value={sourceTypeLabel}
-          aria-label={i18n.translate('xpack.streams.sourceFlyout.sourceTypeLabel', {
-            defaultMessage: 'Source type',
+        <p>
+          {i18n.translate('xpack.streams.sourceFlyout.statsCalloutBody', {
+            defaultMessage:
+              'Source stats and metric data will live here in a future milestone. Users will read the data here, then choose to edit the source if they need to. For V1, everything stays in this one view.',
           })}
-          data-test-subj="sourceFlyoutSourceTypeValue"
-        />
-      </EuiFormRow>
+        </p>
+      </EuiCallOut>
+
       <EuiSpacer size="l" />
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.sourceFlyout.sourceNameLabel', {
-          defaultMessage: 'Source name',
+
+      <EuiFormLabel>
+        {i18n.translate('xpack.streams.sourceFlyout.destinationsLabel', {
+          defaultMessage: 'Destinations',
         })}
-        fullWidth
-      >
-        <EuiFieldText
-          fullWidth
-          readOnly
-          value={sourceName}
-          aria-label={i18n.translate('xpack.streams.sourceFlyout.sourceNameLabel', {
-            defaultMessage: 'Source name',
+      </EuiFormLabel>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+        {destinations.map((destination) => (
+          <EuiFlexItem grow={false} key={destination}>
+            <EuiLink
+              href="#"
+              external
+              onClick={(event: React.MouseEvent) => event.preventDefault()}
+              data-test-subj={`sourceFlyoutDestinationLink-${destination}`}
+            >
+              {destination}
+            </EuiLink>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="l" />
+
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('xpack.streams.sourceFlyout.sendsDataUsing', {
+            defaultMessage: 'Sends data using',
           })}
-          data-test-subj="sourceFlyoutSourceNameValue"
-        />
-      </EuiFormRow>
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <div>
+        <EuiBadge color="hollow" iconType={protocol.iconType}>
+          {protocol.label}
+        </EuiBadge>
+      </div>
       <EuiSpacer size="l" />
+
       <EuiFormRow
         label={i18n.translate('xpack.streams.sourceFlyout.endpointLabel', {
           defaultMessage: 'Endpoint',
@@ -372,6 +245,7 @@ function ConfiguredSourceBody({
           }
         />
       </EuiFormRow>
+
       <EuiSpacer size="l" />
 
       <EuiFormLabel>
@@ -402,7 +276,7 @@ function ConfiguredSourceBody({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="key" />
+                      <EuiIcon type="key" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s" color="subdued">
@@ -443,7 +317,11 @@ function ConfiguredSourceBody({
 
       <EuiHorizontalRule margin="l" />
 
-      <EuiFormLabel>
+      <EuiFormLabel
+        className={css`
+          color: ${euiTheme.colors.textDanger};
+        `}
+      >
         {i18n.translate('xpack.streams.sourceFlyout.dangerArea', {
           defaultMessage: 'Danger area',
         })}
@@ -466,40 +344,24 @@ function ConfiguredSourceBody({
 export function SourceFlyout({
   sourceName,
   onClose,
-  isConfiguring = false,
-  onSave,
   onDelete,
 }: {
   sourceName: string;
   onClose: () => void;
   /**
-   * True while this flyout is finishing setup for a freshly-placed,
-   * unconfigured source card (opened by clicking its "Click to configure"
-   * card) rather than viewing an already-configured one. Swaps the read-only
-   * configured-source view for a setup form, and adds a Save action in the
-   * footer.
-   */
-  isConfiguring?: boolean;
-  /** Called with the entered details when Save is clicked while `isConfiguring`. */
-  onSave?: (details: SourceConfigurationDetails) => void;
-  /**
-   * Called when "Delete source" is clicked in the configured-source view;
-   * expected to remove the source's node from the canvas. Falls back to
-   * `onClose` when not provided.
+   * Called when "Delete source" is clicked; expected to remove the source's
+   * node from the canvas. Falls back to `onClose` when not provided.
    */
   onDelete?: () => void;
 }) {
   const titleId = useGeneratedHtmlId({ prefix: 'sourceFlyoutTitle' });
-  // Lifted so Save can read the final values; SourceConfigurationBody owns the
-  // rest of the form's (purely cosmetic) state.
-  const [configuredName, setConfiguredName] = useState('');
-  const [configuredSourceType, setConfiguredSourceType] = useState(SOURCE_TYPE_OPTIONS[0].value);
+  const sourceTypeLabel = useMemo(() => mockSourceTypeLabel(hashString(sourceName)), [sourceName]);
 
   return (
     <EuiFlyout
       size="s"
-      type="push"
-      pushMinBreakpoint="m"
+      type="overlay"
+      ownFocus={false}
       resizable
       onClose={onClose}
       aria-labelledby={titleId}
@@ -507,72 +369,17 @@ export function SourceFlyout({
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="xs">
-          <h4 id={titleId}>
-            {isConfiguring
-              ? i18n.translate('xpack.streams.sourceFlyout.configureTitle', {
-                  defaultMessage: 'Configure new source',
-                })
-              : sourceName}
-          </h4>
+          <h4 id={titleId}>{sourceName}</h4>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          {isConfiguring
-            ? i18n.translate('xpack.streams.sourceFlyout.configuringDescription', {
-                defaultMessage: 'Use an endpoint to connect your incoming data.',
-              })
-            : i18n.translate('xpack.streams.sourceFlyout.configuredSubtitle', {
-                defaultMessage: 'Managed / OTel',
-              })}
+          {sourceTypeLabel}
         </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {isConfiguring ? (
-          <SourceConfigurationBody
-            name={configuredName}
-            onNameChange={setConfiguredName}
-            sourceType={configuredSourceType}
-            onSourceTypeChange={setConfiguredSourceType}
-          />
-        ) : (
-          <ConfiguredSourceBody
-            sourceName={sourceName}
-            sourceTypeLabel={mockSourceTypeLabel(hashString(sourceName))}
-            onDeleteSource={onDelete ?? onClose}
-          />
-        )}
+        <ConfiguredSourceBody sourceName={sourceName} onDeleteSource={onDelete ?? onClose} />
       </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left" data-test-subj="sourceFlyoutCloseButton">
-              {i18n.translate('xpack.streams.sourceFlyout.close', { defaultMessage: 'Close' })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {isConfiguring ? (
-              <EuiButton
-                fill
-                size="s"
-                onClick={() =>
-                  onSave?.({
-                    name: configuredName,
-                    sourceType: configuredSourceType,
-                    sourceTypeLabel:
-                      SOURCE_TYPE_OPTIONS.find((option) => option.value === configuredSourceType)
-                        ?.inputDisplay ?? SOURCE_TYPE_OPTIONS[0].inputDisplay,
-                  })
-                }
-                data-test-subj="sourceFlyoutSaveButton"
-              >
-                {i18n.translate('xpack.streams.sourceFlyout.save', { defaultMessage: 'Save' })}
-              </EuiButton>
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

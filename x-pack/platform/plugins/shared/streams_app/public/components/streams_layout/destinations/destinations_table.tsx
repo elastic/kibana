@@ -38,7 +38,7 @@ import { getFormattedError } from '../../../util/errors';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FilterGroup } from '../../stream_list_view/filter_group';
 import type { EntityTableSortDirection } from '../entity_table';
-import { AddDestinationModal } from './add_destination_modal';
+import { AddDestinationModal, type AddDestinationDetails } from './add_destination_modal';
 import { buildDestinationRows, getEffectiveSortField } from './build_destination_rows';
 import { createPrototypeDestination } from './canvas_destinations';
 import {
@@ -297,12 +297,13 @@ function DestinationsTableContent() {
     );
   }, []);
 
-  const handleAddDestination = useCallback((details: { name: string; isInternal: boolean }) => {
+  const handleAddDestination = useCallback((details: AddDestinationDetails) => {
+    const isInternal = details.storage === 'local';
     setAddedDestinations((current) => {
       if (current.some((destination) => destination.name === details.name)) {
         return current;
       }
-      return [...current, createPrototypeDestination(details)];
+      return [...current, createPrototypeDestination({ name: details.name, isInternal })];
     });
     setHiddenDestinationNames((current) => current.filter((name) => name !== details.name));
     setIsAddModalOpen(false);

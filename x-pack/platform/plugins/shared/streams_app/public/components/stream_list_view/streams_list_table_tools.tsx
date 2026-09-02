@@ -23,6 +23,8 @@ interface StreamsListTableToolsProps {
   newButtonIconType?: string | null;
   /** Disables the primary button (e.g. "Save changes" until the canvas is dirty). */
   newButtonDisabled?: boolean;
+  /** Click handler for the primary button (e.g. open the "Add source" modal). */
+  onNewButtonClick?: () => void;
 }
 
 /**
@@ -37,18 +39,14 @@ export function StreamsListTableTools({
   newButtonLabel = DEFAULT_NEW_BUTTON_LABEL,
   newButtonIconType = 'plus',
   newButtonDisabled = false,
+  onNewButtonClick,
 }: StreamsListTableToolsProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="code"
-          color="text"
-          data-test-subj="streamsListYamlButton"
-        >
+        <EuiButton size="s" iconType="code" color="text" data-test-subj="streamsListYamlButton">
           {YAML_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>
@@ -68,6 +66,7 @@ export function StreamsListTableTools({
           fill
           iconType={newButtonIconType ?? undefined}
           isDisabled={newButtonDisabled}
+          onClick={onNewButtonClick}
           data-test-subj="streamsListNewButton"
         >
           {newButtonLabel}

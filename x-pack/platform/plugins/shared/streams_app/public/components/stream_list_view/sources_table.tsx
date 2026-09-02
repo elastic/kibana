@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/css';
 import { StreamsListTableTools } from './streams_list_table_tools';
 import { SourceFlyout } from './source_flyout';
+import { AddSourceModal, type AddSourceDetails } from './add_source_modal';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 
 type SourceStatus = 'healthy' | 'degraded' | 'unhealthy';
@@ -41,7 +42,7 @@ function makeSeries(seed: number, count = 24): number[] {
   const out: number[] = [];
   let state = seed;
   for (let i = 0; i < count; i++) {
-    state = (state * 1103515245 + 12345) & 0x7fffffff;
+    state = (state * 1103515245 + 12345) % 0x80000000;
     out.push(15 + (state % 85));
   }
   return out;
@@ -129,27 +130,29 @@ const SOURCE_ROWS: SourceRow[] = [
   },
 ];
 
-const STATUS_META: Record<SourceStatus, { color: 'success' | 'warning' | 'danger'; label: string }> =
-  {
-    healthy: {
-      color: 'success',
-      label: i18n.translate('xpack.streams.sourcesTable.status.healthy', {
-        defaultMessage: 'Healthy',
-      }),
-    },
-    degraded: {
-      color: 'warning',
-      label: i18n.translate('xpack.streams.sourcesTable.status.degraded', {
-        defaultMessage: 'Degraded',
-      }),
-    },
-    unhealthy: {
-      color: 'danger',
-      label: i18n.translate('xpack.streams.sourcesTable.status.unhealthy', {
-        defaultMessage: 'Unhealthy',
-      }),
-    },
-  };
+const STATUS_META: Record<
+  SourceStatus,
+  { color: 'success' | 'warning' | 'danger'; label: string }
+> = {
+  healthy: {
+    color: 'success',
+    label: i18n.translate('xpack.streams.sourcesTable.status.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+  },
+  degraded: {
+    color: 'warning',
+    label: i18n.translate('xpack.streams.sourcesTable.status.degraded', {
+      defaultMessage: 'Degraded',
+    }),
+  },
+  unhealthy: {
+    color: 'danger',
+    label: i18n.translate('xpack.streams.sourcesTable.status.unhealthy', {
+      defaultMessage: 'Unhealthy',
+    }),
+  },
+};
 
 /** Formats an events-per-second value like "12k/s". */
 function formatRate(rate: number): string {
@@ -191,6 +194,31 @@ function RateSparkline({ values, color }: { values: number[]; color: string }) {
 export function SourcesTable() {
   const { euiTheme } = useEuiTheme();
   const [selectedSource, setSelectedSource] = useState<string | undefined>();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addedSources, setAddedSources] = useState<SourceRow[]>([]);
+
+  const handleAddSource = (details: AddSourceDetails) => {
+    setAddedSources((current) => {
+      if (current.some((source) => source.name === details.name)) {
+        return current;
+      }
+      return [
+        {
+          name: details.name,
+          type: details.sourceTypeLabel,
+          status: 'healthy',
+          rate: 0,
+          rateSeries: FLATLINE,
+          lastEvent: i18n.translate('xpack.streams.sourcesTable.justNow', {
+            defaultMessage: 'Just now',
+          }),
+          lastEventSeconds: 0,
+        },
+        ...current,
+      ];
+    });
+    setIsAddModalOpen(false);
+  };
 
   const rateColorFor = (status: SourceStatus): string => {
     if (status === 'unhealthy') return euiTheme.colors.textDisabled;
@@ -282,7 +310,7 @@ export function SourcesTable() {
           defaultMessage: 'Sources table',
         })}
         data-test-subj="sourcesTable"
-        items={SOURCE_ROWS}
+        items={[...addedSources, ...SOURCE_ROWS]}
         columns={columns}
         sorting={{ sort: { field: 'lastEvent', direction: 'asc' } }}
         search={{
@@ -296,12 +324,16 @@ export function SourcesTable() {
               newButtonLabel={i18n.translate('xpack.streams.sourcesTable.newButtonLabel', {
                 defaultMessage: 'Add source',
               })}
+              onNewButtonClick={() => setIsAddModalOpen(true)}
             />
           ),
         }}
       />
       {selectedSource && (
         <SourceFlyout sourceName={selectedSource} onClose={() => setSelectedSource(undefined)} />
+      )}
+      {isAddModalOpen && (
+        <AddSourceModal onClose={() => setIsAddModalOpen(false)} onDone={handleAddSource} />
       )}
     </>
   );

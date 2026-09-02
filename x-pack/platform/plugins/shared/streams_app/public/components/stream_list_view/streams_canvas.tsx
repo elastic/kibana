@@ -75,10 +75,11 @@ import '@xyflow/react/dist/style.css';
 
 import { DestinationFlyout } from './destination_flyout';
 import {
-  DestinationConfigurationFlyout,
-  type DestinationConfigurationDetails,
-} from './destination_configuration_flyout';
+  AddDestinationModal,
+  type AddDestinationDetails,
+} from '../streams_layout/destinations/add_destination_modal';
 import { SourceFlyout, type SourceConfigurationDetails } from './source_flyout';
+import { AddSourceModal } from './add_source_modal';
 import { PipelineFlyout } from './pipeline_flyout';
 import { CreatePipelineFlyout } from './create_pipeline_flyout';
 import { CreateRoutingFlyout, type RoutingApplyResult } from './create_routing_flyout';
@@ -314,7 +315,7 @@ function StreamsCanvasInner() {
   // destination. It stays unconnected (no incoming edge), so the card renders
   // its "Data not flowing in" state until a source is wired to it.
   const saveDestinationConfiguration = useCallback(
-    (details: DestinationConfigurationDetails) => {
+    (details: AddDestinationDetails) => {
       if (destinationConfigNodeId) {
         setNodes((current) =>
           current.map((node) =>
@@ -610,8 +611,8 @@ function StreamsCanvasInner() {
         return;
       }
 
-      const nodes = getNodes();
-      const selectedDestination = nodes.find((node) => node.id === destinationId);
+      const currentNodes = getNodes();
+      const selectedDestination = currentNodes.find((node) => node.id === destinationId);
       if (!selectedDestination) {
         setInheritanceRoutingNodeId(null);
         return;
@@ -1591,17 +1592,18 @@ function StreamsCanvasInner() {
                     />
                   ) : null}
                   {destinationConfigNodeId !== null ? (
-                    <DestinationConfigurationFlyout
+                    <AddDestinationModal
                       onClose={closeDestinationConfigurationFlyout}
-                      onSave={saveDestinationConfiguration}
+                      onAdd={saveDestinationConfiguration}
                     />
                   ) : null}
-                  {flyoutSource !== null ? (
+                  {flyoutSource !== null && flyoutSourceConfiguring ? (
+                    <AddSourceModal onClose={closeSourceFlyout} onDone={saveSourceConfiguration} />
+                  ) : null}
+                  {flyoutSource !== null && !flyoutSourceConfiguring ? (
                     <SourceFlyout
                       sourceName={flyoutSource}
                       onClose={closeSourceFlyout}
-                      isConfiguring={flyoutSourceConfiguring}
-                      onSave={saveSourceConfiguration}
                       onDelete={deleteSource}
                     />
                   ) : null}
