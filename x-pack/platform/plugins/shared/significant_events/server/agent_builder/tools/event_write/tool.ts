@@ -174,6 +174,23 @@ export const eventsWriteSchema = z
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
+/**
+ * Converts Discovery severity proposals into server-timestamped assessments before persistence.
+ * Source-less callers retain direct-severity behavior and do not create assessment history.
+ */
+const enrichWithSeverityAssessments = (
+  items: EventsWriteParams['items'],
+  source: EventsWriteParams['source']
+): EventsWriteInput[] => {
+  if (source === undefined) return items;
+
+  const assessedAt = new Date().toISOString();
+  return items.map((item) => ({
+    ...item,
+    severity_assessments: [{ source, severity: item.severity, assessed_at: assessedAt }],
+  }));
+};
+
 const enrichCausalFeatures = async (
   items: EventsWriteParams['items'],
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
@@ -319,19 +336,7 @@ export function createEventsWriteTool({
           logger
         );
 
-        const assessedAt = new Date().toISOString();
-        const inputs: EventsWriteInput[] = items.map((item) => ({
-          ...item,
-          ...(toolParams.source === 'discovery' && {
-            severity_assessments: [
-              {
-                source: toolParams.source,
-                severity: item.severity,
-                assessed_at: assessedAt,
-              },
-            ],
-          }),
-        }));
+        const inputs = enrichWithSeverityAssessments(items, toolParams.source);
 
         const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),

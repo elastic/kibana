@@ -21,10 +21,7 @@ import {
   toCompactBulkError,
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
-import {
-  invalidateActiveInvestigationAssessments,
-  materializeSeverity,
-} from '../../../lib/significant_events/events/severity_assessments';
+import { materializeSeverity } from '../../../lib/significant_events/events/severity_assessments';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -387,34 +384,12 @@ const buildPendingWrite = (
   let severityAssessments = latestEvent?.severity_assessments;
   let severity = candidate.input.severity;
   if (newSeverityAssessments.length > 0) {
-    const existingAssessments = severityAssessments ?? [];
-    const hasDiscoveryAssessment = newSeverityAssessments.some(
-      (assessment) => assessment.source === 'discovery'
-    );
-    const confirmedRuleUuids = extractRuleUuids(
-      (candidate.input.signals ?? []).filter(
-        (signal) => signal.type === 'detection' && signal.verdict === 'confirms'
-      )
-    );
-    const addsConfirmedRule = addsNewDetectionRules(
-      confirmedRuleUuids,
-      extractRuleUuidsFromEvents([latestEvent])
-    );
-    const reopensEvent =
-      latestEvent !== undefined && latestEvent.status !== 'open' && status === 'open';
-    const retainedAssessments =
-      hasDiscoveryAssessment && latestEvent !== undefined && (addsConfirmedRule || reopensEvent)
-        ? invalidateActiveInvestigationAssessments(existingAssessments, timestamp)
-        : existingAssessments;
-    severityAssessments = [...retainedAssessments, ...newSeverityAssessments];
-    severity =
-      latestEvent !== undefined && status !== 'open'
-        ? latestEvent.severity
-        : materializeSeverity({
-            assessments: severityAssessments,
-            currentSeverity: latestEvent?.severity ?? candidate.input.severity,
-            materializedAt: timestamp,
-          });
+    severityAssessments = [...(severityAssessments ?? []), ...newSeverityAssessments];
+    severity = materializeSeverity({
+      assessments: severityAssessments,
+      currentSeverity: latestEvent?.severity ?? candidate.input.severity,
+      materializedAt: timestamp,
+    });
   }
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to

@@ -6,10 +6,7 @@
  */
 
 import type { SeverityAssessment } from '@kbn/significant-events-schema';
-import {
-  invalidateActiveInvestigationAssessments,
-  materializeSeverity,
-} from './severity_assessments';
+import { materializeSeverity } from './severity_assessments';
 
 const discovery = (
   severity: SeverityAssessment['severity'],
@@ -92,25 +89,5 @@ describe('severity assessments', () => {
         materializedAt,
       })
     ).toBe('60-high');
-  });
-
-  it('invalidates only active investigation assessments', () => {
-    expect(
-      invalidateActiveInvestigationAssessments(
-        [
-          investigation('40-medium', '2026-01-01T23:00:00.000Z'),
-          investigation('60-high', '2025-12-31T23:00:00.000Z'),
-          discovery('80-critical', '2026-01-01T23:30:00.000Z'),
-        ],
-        materializedAt
-      )
-    ).toEqual([
-      expect.objectContaining({
-        source: 'investigation',
-        invalidated_at: materializedAt,
-      }),
-      investigation('60-high', '2025-12-31T23:00:00.000Z'),
-      discovery('80-critical', '2026-01-01T23:30:00.000Z'),
-    ]);
   });
 });

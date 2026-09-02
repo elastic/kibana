@@ -899,12 +899,12 @@ describe('eventsWriteBulkHandler — discovery severity assessments', () => {
       },
     ],
   });
-  const ruleSignal = (ruleUuid: string, verdict: SignalEntry['verdict'] = 'confirms') =>
+  const ruleSignal = (ruleUuid: string) =>
     ({
       type: 'detection',
       stream_name: 'logs.checkout',
       description: `${ruleUuid} detected an issue`,
-      verdict,
+      verdict: 'confirms',
       metadata: {
         detection_id: `detection-${ruleUuid}`,
         rule_uuid: ruleUuid,
@@ -984,7 +984,7 @@ describe('eventsWriteBulkHandler — discovery severity assessments', () => {
     });
   });
 
-  it('invalidates active investigation assessments for a new confirmed rule', async () => {
+  it('does not invalidate investigation assessments for a new confirmed rule', async () => {
     const stored = makeStoredEvent('event-1', {
       severity: '40-medium',
       signals: [ruleSignal('rule-1')],
@@ -1006,42 +1006,14 @@ describe('eventsWriteBulkHandler — discovery severity assessments', () => {
       ],
     });
 
-    expect(result).toMatchObject({ written: true, severity: '80-critical' });
+    expect(result).toMatchObject({ written: true, severity: '40-medium' });
     expect(eventClient.bulkCreate.mock.calls[0][0][0].severity_assessments).toEqual([
-      { ...investigationAssessment, invalidated_at: now },
+      investigationAssessment,
       { source: 'discovery', severity: '80-critical', assessed_at: now },
     ]);
   });
 
-  it('does not invalidate an investigation for a known or non-confirming rule', async () => {
-    const stored = makeStoredEvent('event-1', {
-      severity: '40-medium',
-      signals: [ruleSignal('rule-1')],
-      severity_assessments: [investigationAssessment],
-    });
-    const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    await eventsWriteBulkHandler({
-      eventClient,
-      inputs: [
-        withDiscoveryAssessment({
-          ...baseInput,
-          event_id: 'event-1',
-          severity: '80-critical',
-          signals: [ruleSignal('rule-2', 'inconclusive')],
-        }),
-      ],
-    });
-
-    expect(eventClient.bulkCreate.mock.calls[0][0][0]).toMatchObject({
-      severity: '40-medium',
-      severity_assessments: [investigationAssessment, expect.any(Object)],
-    });
-  });
-
-  it('invalidates active investigation assessments when reopening', async () => {
+  it('does not invalidate investigation assessments when reopening', async () => {
     const stored = makeStoredEvent('event-1', {
       status: 'closed',
       severity: '40-medium',
@@ -1063,14 +1035,16 @@ describe('eventsWriteBulkHandler — discovery severity assessments', () => {
       ],
     });
 
-    expect(result).toMatchObject({ written: true, severity: '60-high', status: 'open' });
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity_assessments?.[0]).toEqual({
-      ...investigationAssessment,
-      invalidated_at: now,
+    expect(result).toMatchObject({ written: true, severity: '40-medium', status: 'open' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0]).toMatchObject({
+      severity_assessments: [
+        investigationAssessment,
+        { source: 'discovery', severity: '60-high', assessed_at: now },
+      ],
     });
   });
 
-  it('preserves effective severity when discovery resolves an event', async () => {
+  it('materializes severity when discovery resolves an event', async () => {
     const stored = makeStoredEvent('event-1', {
       severity: '60-high',
       severity_assessments: [investigationAssessment],
@@ -1091,9 +1065,9 @@ describe('eventsWriteBulkHandler — discovery severity assessments', () => {
       ],
     });
 
-    expect(result).toMatchObject({ written: true, severity: '60-high', status: 'closed' });
+    expect(result).toMatchObject({ written: true, severity: '40-medium', status: 'closed' });
     expect(eventClient.bulkCreate.mock.calls[0][0][0]).toMatchObject({
-      severity: '60-high',
+      severity: '40-medium',
       severity_assessments: [
         investigationAssessment,
         { source: 'discovery', severity: '20-low', assessed_at: now },

@@ -405,10 +405,10 @@ describe('attachInvestigationToEvent', () => {
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
     expect(written.severity).toBe('60-high');
-    expect(written.severity_assessments).toBeUndefined();
+    expect(written.severity_assessments).toEqual([]);
   });
 
-  it('does not duplicate an assessment for the same workflow execution', async () => {
+  it('appends another assessment for the same workflow execution', async () => {
     const completedAt = '2026-01-01T02:00:00.000Z';
     const investigation = createInvestigation({ completed_at: completedAt });
     const existing = createEvent({
@@ -433,8 +433,23 @@ describe('attachInvestigationToEvent', () => {
       triggerFeedback: [severityFeedback('80-critical', '80-critical')],
     });
 
-    expect(result).toMatchObject({ updated: 0, ignored: 1 });
-    expect(dataStreamClient.create).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ updated: 1, ignored: 0 });
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+    expect(written.severity_assessments).toEqual([
+      {
+        source: 'investigation',
+        severity: '80-critical',
+        assessed_at: completedAt,
+        workflow_execution_id: investigation.workflow_execution_id,
+      },
+      {
+        source: 'investigation',
+        severity: '80-critical',
+        assessed_at: completedAt,
+        workflow_execution_id: investigation.workflow_execution_id,
+      },
+    ]);
   });
 
   it('resolves lineage: attach targets the latest event version for the given event_id', async () => {

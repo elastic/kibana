@@ -98,6 +98,25 @@ const fieldsFromTriggerFeedback = (
   return { fields, severity };
 };
 
+const buildSeverityAssessments = (
+  existing: SeverityAssessment[] | undefined,
+  severity: Severity | undefined,
+  investigation: SignificantEventInvestigation
+): SeverityAssessment[] => {
+  const assessments = existing ?? [];
+  if (severity === undefined || investigation.completed_at === undefined) return assessments;
+
+  return [
+    ...assessments,
+    {
+      source: 'investigation',
+      severity,
+      assessed_at: investigation.completed_at,
+      workflow_execution_id: investigation.workflow_execution_id,
+    },
+  ];
+};
+
 export const attachInvestigationToEvent = async ({
   eventClient,
   eventId,
@@ -137,32 +156,16 @@ export const attachInvestigationToEvent = async ({
 
   const acceptedFeedback = fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger);
   const changedFields = pickChangedFields(latest, acceptedFeedback.fields);
-  const existingSeverityAssessments = latest.severity_assessments ?? [];
-  const hasAssessmentForExecution = existingSeverityAssessments.some(
-    (assessment) =>
-      assessment.source === 'investigation' &&
-      assessment.workflow_execution_id === investigation.workflow_execution_id
+  const severityAssessments = buildSeverityAssessments(
+    latest.severity_assessments,
+    acceptedFeedback.severity,
+    investigation
   );
-  const investigationAssessment: SeverityAssessment | undefined =
-    acceptedFeedback.severity !== undefined &&
-    investigation.completed_at !== undefined &&
-    !hasAssessmentForExecution
-      ? {
-          source: 'investigation',
-          severity: acceptedFeedback.severity,
-          assessed_at: investigation.completed_at,
-          workflow_execution_id: investigation.workflow_execution_id,
-        }
-      : undefined;
-  const severityAssessments =
-    investigationAssessment === undefined
-      ? existingSeverityAssessments
-      : [...existingSeverityAssessments, investigationAssessment];
 
   // No-op only when neither the investigation list, assessment history, nor another field changed.
   if (
     isEqual(investigations, existing) &&
-    investigationAssessment === undefined &&
+    isEqual(severityAssessments, latest.severity_assessments ?? []) &&
     Object.keys(changedFields).length === 0
   ) {
     return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
@@ -176,16 +179,12 @@ export const attachInvestigationToEvent = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     investigations,
-    severity_assessments:
-      severityAssessments.length === 0 ? latest.severity_assessments : severityAssessments,
-    severity:
-      investigationAssessment === undefined
-        ? latest.severity
-        : materializeSeverity({
-            assessments: severityAssessments,
-            currentSeverity: latest.severity,
-            materializedAt: now,
-          }),
+    severity_assessments: severityAssessments,
+    severity: materializeSeverity({
+      assessments: severityAssessments,
+      currentSeverity: latest.severity,
+      materializedAt: now,
+    }),
     workflow_execution_id: investigation.workflow_execution_id,
     ...changedFields,
   };
