@@ -17,6 +17,7 @@ import { useStreamsAppBreadcrumbs } from './use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from './use_streams_app_params';
 import { useKibana } from './use_kibana';
 import { StreamNotFoundPrompt } from '../components/stream_not_found_prompt';
+import { getMockDestinationGetResponse } from '../components/streams_layout/destinations/canvas_destinations';
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -98,6 +99,15 @@ export function StreamDetailContextProvider({
               name,
             },
           },
+        })
+        .catch((err: Error) => {
+          if (isHttpFetchError(err) && err.body?.statusCode === 404) {
+            const mockDestination = getMockDestinationGetResponse(name);
+            if (mockDestination) {
+              return mockDestination;
+            }
+          }
+          throw err;
         })
         .then((response): Streams.all.GetResponse => {
           if (Streams.ingest.all.GetResponse.is(response)) {

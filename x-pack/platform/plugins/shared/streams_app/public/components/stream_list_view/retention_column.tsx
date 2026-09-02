@@ -80,7 +80,7 @@ export function RetentionColumn({
             whiteSpace: 'nowrap' as const,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
-            maxWidth: '150px',
+            maxWidth: '80px',
           }}
           data-test-subj={dataTestSubj}
         >
@@ -123,6 +123,7 @@ export function RetentionColumn({
 
   return (
     <EuiText
+      size="s"
       color="subdued"
       tabIndex={0}
       aria-label={NO_RETENTION_LABEL}

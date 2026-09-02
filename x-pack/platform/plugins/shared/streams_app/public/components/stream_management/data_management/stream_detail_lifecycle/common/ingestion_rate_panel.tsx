@@ -37,7 +37,7 @@ export function IngestionRatePanel({
               <EuiFlexItem grow={3}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiText>
+                    <EuiText size="s">
                       <h5>
                         {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
                           defaultMessage: 'Ingestion over time',

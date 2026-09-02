@@ -334,6 +334,27 @@ describe('AppHeaderView', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
+  it('renders a disabled tab with a hover tooltip', async () => {
+    render(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'pipelines',
+            label: 'Pipelines',
+            disabled: true,
+            toolTipContent: 'Not part of V1 milestone',
+            'data-test-subj': 'pipelinesTab',
+          },
+        ]}
+      />
+    );
+
+    const tab = screen.getByTestId('pipelinesTab');
+    expect(tab).toBeDisabled();
+    fireEvent.mouseOver(tab.parentElement!);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Not part of V1 milestone');
+  });
+
   it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {
     const onTabClick = jest.fn();
     const onCopy = jest.fn();

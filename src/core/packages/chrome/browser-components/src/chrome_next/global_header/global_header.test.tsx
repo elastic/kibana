@@ -36,6 +36,17 @@ describe('ChromeNextGlobalHeader', () => {
     );
   });
 
+  it('does not render the milestone panel inside the global header', () => {
+    renderWithI18n(
+      <TestChromeProviders>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId('chromeNextGlobalHeader')).toBeInTheDocument();
+    expect(screen.queryByTestId('chromeNextGlobalHeaderMilestone')).not.toBeInTheDocument();
+  });
+
   it('renders the help menu button', async () => {
     renderWithI18n(
       <TestChromeProviders>

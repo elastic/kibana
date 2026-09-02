@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -122,6 +123,16 @@ const renderTabAppend = (tab: AppHeaderTab) => {
   );
 };
 
+const disabledTabTooltipAnchor = css`
+  display: inline-flex;
+  height: 100%;
+
+  /* Native disabled tabs swallow pointer events; let the tooltip wrapper receive hover. */
+  & > * {
+    pointer-events: none;
+  }
+`;
+
 export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
   if (!tabs?.length) return null;
 
@@ -131,9 +142,8 @@ export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
         const label = asPlainText(tab.label);
         const toolTipContent = asOptionalPlainText(tab.toolTipContent);
 
-        return (
+        let tabNode = (
           <EuiTab
-            key={tab.id}
             isSelected={tab.isSelected}
             onClick={tab.onClick}
             href={tab.href}
@@ -141,15 +151,23 @@ export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
             disabled={tab.disabled}
             append={renderTabAppend(tab)}
           >
-            {toolTipContent !== undefined ? (
-              <EuiToolTip content={toolTipContent} position="bottom">
-                <span tabIndex={0}>{label}</span>
-              </EuiToolTip>
-            ) : (
-              label
-            )}
+            {label}
           </EuiTab>
         );
+
+        if (toolTipContent !== undefined && tab.disabled) {
+          tabNode = <span css={disabledTabTooltipAnchor}>{tabNode}</span>;
+        }
+
+        if (toolTipContent !== undefined) {
+          tabNode = (
+            <EuiToolTip content={toolTipContent} position="bottom">
+              {tabNode}
+            </EuiToolTip>
+          );
+        }
+
+        return <React.Fragment key={tab.id}>{tabNode}</React.Fragment>;
       })}
     </EuiTabs>
   );

@@ -16,6 +16,7 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsTourProvider } from '../streams_tour';
+import { StreamsViewModeProvider } from '../../hooks/use_streams_view_mode';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
@@ -51,24 +52,26 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <StreamsTourProvider>
-        <QueryClientProvider client={queryClient}>
-          {/* @ts-expect-error upgrade typescript v5.4.5 */}
-          <RouterProvider history={history} router={streamsAppRouter}>
-            <UpdateExecutionContextOnRouteChange>
-              <DateRangeRedirect>
-                <PerformanceContextProvider>
-                  <KbnUrlStateStorageFromRouterProvider>
-                    <BreadcrumbsContextProvider>
-                      <RouteRenderer />
-                    </BreadcrumbsContextProvider>
-                  </KbnUrlStateStorageFromRouterProvider>
-                </PerformanceContextProvider>
-              </DateRangeRedirect>
-            </UpdateExecutionContextOnRouteChange>
-          </RouterProvider>
-        </QueryClientProvider>
-      </StreamsTourProvider>
+      <StreamsViewModeProvider>
+        <StreamsTourProvider>
+          <QueryClientProvider client={queryClient}>
+            {/* @ts-expect-error upgrade typescript v5.4.5 */}
+            <RouterProvider history={history} router={streamsAppRouter}>
+              <UpdateExecutionContextOnRouteChange>
+                <DateRangeRedirect>
+                  <PerformanceContextProvider>
+                    <KbnUrlStateStorageFromRouterProvider>
+                      <BreadcrumbsContextProvider>
+                        <RouteRenderer />
+                      </BreadcrumbsContextProvider>
+                    </KbnUrlStateStorageFromRouterProvider>
+                  </PerformanceContextProvider>
+                </DateRangeRedirect>
+              </UpdateExecutionContextOnRouteChange>
+            </RouterProvider>
+          </QueryClientProvider>
+        </StreamsTourProvider>
+      </StreamsViewModeProvider>
     </StreamsAppContextProvider>
   );
 }

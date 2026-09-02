@@ -57,9 +57,20 @@ test.describe(
 
       await streams.clickStreamsLayoutTab('sources');
       await expect(streams.streamsLayoutSourcesPlaceholder).toBeVisible();
+    });
 
-      await streams.clickStreamsLayoutTab('pipelines');
-      await expect(streams.streamsLayoutPipelinesPlaceholder).toBeVisible();
+    test('shows the pipelines tab as disabled with a milestone tooltip', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.gotoStreamsLayout();
+
+      const pipelinesTab = streams.getStreamsLayoutTab('pipelines');
+      await expect(pipelinesTab).toBeVisible();
+      await expect(pipelinesTab).toBeDisabled();
+
+      await pipelinesTab.hover({ force: true });
+      await expect(page.getByRole('tooltip', { name: 'Not part of V1 milestone' })).toBeVisible();
     });
 
     test('renders the destinations table', async ({ pageObjects: { streams } }) => {
@@ -67,6 +78,22 @@ test.describe(
 
       await expect(streams.streamsDestinationsTable).toBeVisible();
       await expect(streams.streamsDestinationsSearch).toBeVisible();
+    });
+
+    test('lists canvas destinations and returns to the table from a destination', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.gotoStreamsLayoutTab('destinations');
+
+      const destinationLink = page.getByTestId('streamsDestinationsNameLink-logs-archive.cold');
+      await expect(destinationLink).toBeVisible();
+      await destinationLink.click();
+
+      await expect(page.getByRole('heading', { name: 'logs-archive.cold' })).toBeVisible();
+
+      await page.getByTestId('appHeaderBack').click();
+      await expect(streams.streamsDestinationsTable).toBeVisible();
     });
   }
 );

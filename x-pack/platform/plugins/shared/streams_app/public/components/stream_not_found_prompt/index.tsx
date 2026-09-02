@@ -31,7 +31,7 @@ export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) 
         </h2>
       }
       body={
-        <EuiText data-test-subj="streamNotFoundPromptBody">
+        <EuiText size="s" data-test-subj="streamNotFoundPromptBody">
           <p>
             <FormattedMessage
               id="xpack.streams.streamNotFound.body"

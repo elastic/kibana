@@ -43,7 +43,7 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
           <h2 id={flyoutTitleId}>{DATA_SOURCES_I18N.flyout.title}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText component="p" color="subdued">
+        <EuiText size="s" component="p" color="subdued">
           {DATA_SOURCES_I18N.flyout.subtitle}
         </EuiText>
       </EuiFlyoutHeader>

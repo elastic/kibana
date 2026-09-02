@@ -13,6 +13,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsAppHeaderBack } from '../../../../hooks/use_streams_app_header_back';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
@@ -51,6 +52,7 @@ export function QueryStreamDetailManagement({
     },
   } = useKibana();
   const router = useStreamsAppRouter();
+  const back = useStreamsAppHeaderBack();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -95,10 +97,6 @@ export function QueryStreamDetailManagement({
       defaultMessage: 'Attachments',
     }),
   };
-
-  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
-    defaultMessage: 'Streams',
-  });
 
   const badges: AppHeaderBadge[] = [
     {
@@ -179,7 +177,7 @@ export function QueryStreamDetailManagement({
     <>
       <StreamsAppHeader
         title={key}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={back}
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

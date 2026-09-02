@@ -11,6 +11,9 @@ export {
   ChromeNextGlobalHeader,
   ChromeNextGlobalHeaderShell,
   GlobalHeaderRightGroup,
+  GLOBAL_HEADER_HEIGHT_PX,
+  MilestoneBadge,
+  MILESTONE_PANEL_HEIGHT_PX,
 } from './global_header';
 export type {
   ChromeNextGlobalHeaderShellProps,

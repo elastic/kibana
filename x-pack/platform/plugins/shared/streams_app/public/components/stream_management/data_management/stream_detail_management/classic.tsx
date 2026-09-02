@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsAppHeaderBack } from '../../../../hooks/use_streams_app_header_back';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -90,6 +91,7 @@ function ClassicStreamDetailManagementContent({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
+  const back = useStreamsAppHeaderBack();
   const { rangeFrom, rangeTo } = useTimeRange();
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
@@ -98,10 +100,6 @@ function ClassicStreamDetailManagementContent({
   } = useStreamsPrivileges();
 
   const isProcessingEnabled = !definition.replicated;
-
-  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
-    defaultMessage: 'Streams',
-  });
 
   if (!definition.data_stream_exists) {
     const classicErrorBadges: AppHeaderBadge[] = [
@@ -120,11 +118,7 @@ function ClassicStreamDetailManagementContent({
     ];
     return (
       <>
-        <StreamsAppHeader
-          title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
-          badges={classicErrorBadges}
-        />
+        <StreamsAppHeader title={key} back={back} badges={classicErrorBadges} />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
             streamName={definition.stream.name}

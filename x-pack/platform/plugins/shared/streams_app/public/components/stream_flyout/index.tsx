@@ -301,6 +301,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
     <EuiFlyout
       size="l"
       maxWidth={1600}
+      resizable
       aria-labelledby={headerId}
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"

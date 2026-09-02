@@ -16,6 +16,7 @@ import {
   type EntityTableImplementations,
   type EntityTableUrlState,
 } from '../../entity_table';
+import { mergeLiveAndCanvasDestinations } from '../canvas_destinations';
 import { isDestinationStream, streamToDestination } from '../stream_to_destination';
 import type { Destination } from '../types';
 
@@ -52,7 +53,9 @@ export function createDestinationsTableImplementations({
         signal,
       });
 
-      return response.streams.filter(isDestinationStream).map(streamToDestination);
+      return mergeLiveAndCanvasDestinations(
+        response.streams.filter(isDestinationStream).map(streamToDestination)
+      );
     }),
   });
 }

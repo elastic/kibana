@@ -451,7 +451,7 @@ export function SchemaChangesReviewModal({
             <EuiSpacer size="m" />
           </>
         )}
-        <EuiText>
+        <EuiText size="s">
           {i18n.translate(
             'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
             {

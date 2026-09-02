@@ -7,10 +7,12 @@
 
 import type { ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
-import { StreamsCanvas } from '../stream_management/data_management/stream_detail_canvas';
+// Prototype Canvas and Sources views are wired into the new-experience layout
+// so enabling the Canvas feature flag keeps the custom prototype for those tabs.
+import { StreamsCanvas } from '../stream_list_view/streams_canvas';
+import { SourcesTable } from '../stream_list_view/sources_table';
 import { DestinationsTab } from './destinations';
 import { PipelinesTab } from './pipelines';
-import { SourcesTab } from './sources';
 
 interface StreamsLayoutTabConfig {
   label: string;
@@ -20,6 +22,11 @@ interface StreamsLayoutTabConfig {
    * padding instead of framing the content.
    */
   noPadding?: boolean;
+  /**
+   * When set, the tab is shown but rendered non-interactive with this tooltip.
+   * Used to surface features that are out of scope for the current milestone.
+   */
+  disabledReason?: string;
 }
 
 /** Tab ids in the order they render in the header. */
@@ -39,19 +46,21 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
       defaultMessage: 'Canvas',
     }),
     Component: StreamsCanvas,
-    noPadding: true,
   },
   sources: {
     label: i18n.translate('xpack.streams.streamsLayout.sourcesTab', {
       defaultMessage: 'Sources',
     }),
-    Component: SourcesTab,
+    Component: SourcesTable,
   },
   pipelines: {
     label: i18n.translate('xpack.streams.streamsLayout.pipelinesTab', {
       defaultMessage: 'Pipelines',
     }),
     Component: PipelinesTab,
+    disabledReason: i18n.translate('xpack.streams.streamsLayout.pipelinesTabDisabledTooltip', {
+      defaultMessage: 'Not part of V1 milestone',
+    }),
   },
   destinations: {
     label: i18n.translate('xpack.streams.streamsLayout.destinationsTab', {

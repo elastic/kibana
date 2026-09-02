@@ -22,6 +22,9 @@ import {
   Sidebar,
   useHasChromeAppHeaderContent,
   useHasInlineAppHeader,
+  GLOBAL_HEADER_HEIGHT_PX,
+  MilestoneBadge,
+  MILESTONE_PANEL_HEIGHT_PX,
 } from '@kbn/core-chrome-browser-components';
 import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
@@ -50,8 +53,8 @@ const layoutConfigs: {
   },
   project: {
     appearance: 'framed',
-    headerHeight: 48,
-    bannerHeight: 32,
+    headerHeight: GLOBAL_HEADER_HEIGHT_PX,
+    bannerHeight: MILESTONE_PANEL_HEIGHT_PX,
     /** Start at 0; ChromeAppHeaderRenderer measures and updates this when the slot is used. */
     applicationTopBarHeight: 0,
     applicationMarginRight: 8,
@@ -95,6 +98,7 @@ export class GridLayout implements LayoutService {
       const navigationWidth = useSideNavWidth();
 
       const layoutConfigKey = chromeStyle === 'classic' ? 'classic' : 'project';
+      const showMilestone = chromeVisible && chromeStyle !== 'classic';
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
@@ -121,7 +125,9 @@ export class GridLayout implements LayoutService {
         }
       }
 
-      if (hasHeaderBanner) {
+      if (showMilestone) {
+        banner = <MilestoneBadge />;
+      } else if (hasHeaderBanner) {
         banner = <HeaderTopBanner position="static" />;
       }
 

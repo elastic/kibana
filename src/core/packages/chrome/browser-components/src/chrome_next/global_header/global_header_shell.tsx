@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '@kbn/ui-side-navigation';
 import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
 
-const GLOBAL_HEADER_HEIGHT_PX = 48;
+export const GLOBAL_HEADER_HEIGHT_PX = 48;
 
 const logoSlot = css({
   display: 'flex',

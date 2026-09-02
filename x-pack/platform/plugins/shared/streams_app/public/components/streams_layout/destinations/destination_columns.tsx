@@ -26,12 +26,12 @@ import React from 'react';
 import type { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
 import { STREAMS_HISTOGRAM_NUM_DATA_POINTS } from '../../../hooks/use_streams_doc_counts_fetch';
 import type { useTimefilter } from '../../../hooks/use_timefilter';
-import { DiscoverBadgeButton } from '../../stream_badges';
 import { DataQualityColumn } from '../../stream_list_view/data_quality_column';
 import { DocumentsColumn } from '../../stream_list_view/documents_column';
 import { IngestionColumn } from '../../stream_list_view/ingestion_column';
 import { RetentionColumn } from '../../stream_list_view/retention_column';
 import { StorageColumn } from '../../stream_list_view/storage_column';
+import { DestinationRowActions } from './destination_row_actions';
 import type { SortableField } from './build_destination_rows';
 import {
   ACTIONS_COLUMN_HEADER,
@@ -293,11 +293,17 @@ export const createDestinationCellRenderer = ({
     }
   };
 
-export const createDestinationActionsColumn = (
-  rows: DestinationRow[]
-): EuiDataGridControlColumn => ({
+export const createDestinationActionsColumn = ({
+  rows,
+  getCanvasHref,
+  onDelete,
+}: {
+  rows: DestinationRow[];
+  getCanvasHref: (destinationName: string) => string;
+  onDelete: (destinationName: string) => void;
+}): EuiDataGridControlColumn => ({
   id: 'destinationActions',
-  width: 60,
+  width: 120,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>{ACTIONS_COLUMN_HEADER}</span>
@@ -311,10 +317,10 @@ export const createDestinationActionsColumn = (
     }
 
     return (
-      <DiscoverBadgeButton
-        hasDataStream={row.hasDataStream}
-        indexMode={row.indexMode}
-        stream={row.streamDefinition}
+      <DestinationRowActions
+        destination={row}
+        canvasHref={getCanvasHref(row.name)}
+        onDelete={onDelete}
       />
     );
   },

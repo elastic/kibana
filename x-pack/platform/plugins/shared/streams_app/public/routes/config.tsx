@@ -31,6 +31,17 @@ const timeRangeQueryParams = t.partial({
 const flyoutParams = t.partial({
   flyoutName: t.string,
   flyoutTab: t.string,
+  focus: t.string,
+});
+
+/**
+ * Query params for the Streams list view. Includes the optional `tab` param
+ * used to switch between the Canvas/Sources/Pipelines/Destinations tabs.
+ */
+const listViewQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+  tab: t.string,
 });
 
 /**
@@ -69,7 +80,7 @@ const streamsAppRoutes = {
       '/': {
         element: <StreamsRootRedirect />,
         params: t.partial({
-          query: timeRangeQueryParams,
+          query: listViewQueryParams,
         }),
       },
       /**

@@ -12,6 +12,7 @@ import {
   EuiI18nNumber,
   EuiLoadingChart,
   EuiIcon,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -121,7 +122,9 @@ export function DocumentsColumn({
             `}
             data-test-subj={`streamsDocCount-${indexPattern}`}
           >
-            {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
+            <EuiText size="s">
+              {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}

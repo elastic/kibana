@@ -15,6 +15,8 @@ export interface DestinationMockMetadata {
   isInternal: boolean;
   isManaged: boolean;
   tags: string[];
+  /** Storage size in bytes. Dummy value — the storage_stats API is not used. */
+  storageSizeBytes: number;
 }
 
 export const getDestinationMockMetadata = (destinationName: string): DestinationMockMetadata => {
@@ -24,5 +26,6 @@ export const getDestinationMockMetadata = (destinationName: string): Destination
     isInternal: seed % 5 !== 0,
     isManaged: seed % 2 === 0,
     tags: TAG_POOL.slice(0, (seed % TAG_POOL.length) + 1),
+    storageSizeBytes: (50 + (seed % 250)) * 1024 * 1024 * 1024,
   };
 };

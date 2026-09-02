@@ -228,7 +228,7 @@ export function AttachmentDetailsFlyout({
                 defaultMessage: 'Description',
               })}
             >
-              <EuiText>
+              <EuiText size="s">
                 {attachment.description ||
                   i18n.translate('xpack.streams.attachmentDetailsFlyout.noDescriptionAvailable', {
                     defaultMessage: 'No description available',
