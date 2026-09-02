@@ -53,7 +53,7 @@ export const sharedPanelInfoSchema = z
       description: 'The description of the chart. Optional. Any string value or undefined.',
     }),
     filters: z.array(asCodeFilterSchema).max(100).optional().meta({
-      id: 'visLensPanelFilters',
+      id: 'visPanelFilters',
       description: 'Filters applied to the panel',
     }),
   })
