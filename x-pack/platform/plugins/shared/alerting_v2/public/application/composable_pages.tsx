@@ -85,10 +85,7 @@ export const AlertingV2ExecutionHistoryPage = (props: AlertingV2PageProps) => (
   </StandardProviders>
 );
 
-export const AlertingV2EpisodesPage = ({
-  coreStart,
-  setBreadcrumbs,
-}: AlertingV2PageProps) => {
+export const AlertingV2EpisodesPage = ({ coreStart, setBreadcrumbs }: AlertingV2PageProps) => {
   const { queryClient, container } = useAlertingV2Providers(coreStart);
 
   const kibanaReactServices: AlertEpisodesKibanaServices = {
