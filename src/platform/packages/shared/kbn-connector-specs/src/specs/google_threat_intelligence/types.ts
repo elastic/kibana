@@ -28,6 +28,33 @@ const CURSOR_SCHEMA = z
     'Continuation cursor from a previous response, used to retrieve the next page of results.'
   );
 
+const relationshipSchema = (objectType: string, examples: string, docPath: string) =>
+  z
+    .string()
+    .min(1)
+    .max(100)
+    .describe(
+      `Relationship to retrieve for the ${objectType}, e.g. ${examples}. Full current list: ` +
+        `https://gtidocs.virustotal.com/reference/${docPath}#relationships`
+    );
+
+const analysisIdSchema = (scanAction: string) =>
+  z
+    .string()
+    .min(1)
+    .max(512)
+    .describe(`Analysis identifier returned by the \`${scanAction}\` action.`);
+
+const urlIdSchema = (analysisAction: string) =>
+  z
+    .string()
+    .min(1)
+    .max(512)
+    .describe(
+      'URL identifier to retrieve the report for, taken from `meta.url_info.id` in the ' +
+        `\`${analysisAction}\` response. Not derived by this action.`
+    );
+
 const COLLECTION_FILTER_SCHEMA = z
   .string()
   .max(2000)
@@ -79,6 +106,114 @@ export const FILE_HASH_SCHEMA = z
     'SHA-256, SHA-1, or MD5 hash identifying the file, e.g. a 64-character SHA-256 hex string'
   );
 
+export const IP_ADDRESS_SCHEMA = z
+  .union([z.ipv4(), z.ipv6()])
+  .describe('IPv4 or IPv6 address to look up, e.g. "8.8.8.8" or "2001:4860:4860::8888"');
+
+export const DOMAIN_SCHEMA = z
+  .string()
+  .max(253)
+  .regex(z.regexes.domain, { message: 'Must be a valid domain name' })
+  .describe('Domain name to look up, e.g. "example.com"');
+
+export const URL_SCHEMA = z
+  .url()
+  .max(2048)
+  .describe('URL to look up, e.g. "https://example.com/path" or "ftp://example.com/file"');
+
+export const GetIpReportInputSchema = lazySchema(() =>
+  z.object({
+    ipAddress: IP_ADDRESS_SCHEMA,
+  })
+);
+export type GetIpReportInput = z.infer<typeof GetIpReportInputSchema>;
+
+export const GetIpRelationshipInputSchema = lazySchema(() =>
+  z.object({
+    ipAddress: IP_ADDRESS_SCHEMA,
+    relationship: relationshipSchema(
+      'IP address',
+      '"communicating_files", "resolutions", or "urls"',
+      'ip-object'
+    ),
+    limit: pagingLimitSchema('related objects'),
+    cursor: CURSOR_SCHEMA,
+  })
+);
+export type GetIpRelationshipInput = z.infer<typeof GetIpRelationshipInputSchema>;
+
+export const GetDomainReportInputSchema = lazySchema(() =>
+  z.object({
+    domain: DOMAIN_SCHEMA,
+  })
+);
+export type GetDomainReportInput = z.infer<typeof GetDomainReportInputSchema>;
+
+export const GetDomainRelationshipInputSchema = lazySchema(() =>
+  z.object({
+    domain: DOMAIN_SCHEMA,
+    relationship: relationshipSchema(
+      'domain',
+      '"resolutions", "subdomains", or "communicating_files"',
+      'domains-object'
+    ),
+    limit: pagingLimitSchema('related objects'),
+    cursor: CURSOR_SCHEMA,
+  })
+);
+export type GetDomainRelationshipInput = z.infer<typeof GetDomainRelationshipInputSchema>;
+
+export const GetUrlReportInputSchema = lazySchema(() =>
+  z.object({
+    url: URL_SCHEMA,
+  })
+);
+export type GetUrlReportInput = z.infer<typeof GetUrlReportInputSchema>;
+
+export const GetUrlRelationshipInputSchema = lazySchema(() =>
+  z.object({
+    url: URL_SCHEMA,
+    relationship: relationshipSchema(
+      'URL',
+      '"downloaded_files", "contacted_domains", or "redirects_to"',
+      'url-object'
+    ),
+    limit: pagingLimitSchema('related objects'),
+    cursor: CURSOR_SCHEMA,
+  })
+);
+export type GetUrlRelationshipInput = z.infer<typeof GetUrlRelationshipInputSchema>;
+
+export const GetFileReportInputSchema = lazySchema(() =>
+  z.object({
+    fileHash: FILE_HASH_SCHEMA,
+  })
+);
+export type GetFileReportInput = z.infer<typeof GetFileReportInputSchema>;
+
+export const GetFileRelationshipInputSchema = lazySchema(() =>
+  z.object({
+    fileHash: FILE_HASH_SCHEMA,
+    relationship: relationshipSchema(
+      'file',
+      '"contacted_domains", "dropped_files", or "similar_files"',
+      'file-object'
+    ),
+    limit: pagingLimitSchema('related objects'),
+    cursor: CURSOR_SCHEMA,
+  })
+);
+export type GetFileRelationshipInput = z.infer<typeof GetFileRelationshipInputSchema>;
+
+export const GetFileBehavioursInputSchema = lazySchema(() =>
+  z.object({
+    fileHash: FILE_HASH_SCHEMA,
+    limit: pagingLimitSchema('behavior reports'),
+    cursor: CURSOR_SCHEMA,
+  })
+);
+export type GetFileBehavioursInput = z.infer<typeof GetFileBehavioursInputSchema>;
+
 export const GetFileMitreAttackTechniquesInputSchema = lazySchema(() =>
   z.object({
     fileHash: FILE_HASH_SCHEMA,
@@ -87,6 +222,91 @@ export const GetFileMitreAttackTechniquesInputSchema = lazySchema(() =>
 export type GetFileMitreAttackTechniquesInput = z.infer<
   typeof GetFileMitreAttackTechniquesInputSchema
 >;
+
+export const ScanUrlInputSchema = lazySchema(() =>
+  z.object({
+    url: URL_SCHEMA,
+  })
+);
+export type ScanUrlInput = z.infer<typeof ScanUrlInputSchema>;
+
+export const GetAnalysisInputSchema = lazySchema(() =>
+  z.object({
+    analysisId: analysisIdSchema('scanUrl'),
+  })
+);
+export type GetAnalysisInput = z.infer<typeof GetAnalysisInputSchema>;
+
+export const GetUrlScanReportInputSchema = lazySchema(() =>
+  z.object({
+    urlId: urlIdSchema('getAnalysis'),
+  })
+);
+export type GetUrlScanReportInput = z.infer<typeof GetUrlScanReportInputSchema>;
+
+export const ScanPrivateUrlInputSchema = lazySchema(() =>
+  z.object({
+    url: URL_SCHEMA,
+    userAgent: z
+      .string()
+      .max(512)
+      .optional()
+      .describe('User-Agent string to present when retrieving the URL.'),
+    sandboxes: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Comma separated list of sandboxes to detonate in, e.g. "chrome_headless_linux", ' +
+          '"cape_win", or "zenbox_windows".'
+      ),
+    retentionPeriodDays: z
+      .number()
+      .int()
+      .min(1)
+      .max(28)
+      .optional()
+      .describe(
+        'Number of days the analysis is retained. Minimum 1, maximum 28. Defaults to 1 if omitted.'
+      ),
+    storageRegion: z
+      .string()
+      .max(100)
+      .optional()
+      .describe('Region in which the analysis is stored, e.g. "US", "CA", "EU", or "GB".'),
+    interactionSandbox: z
+      .string()
+      .max(100)
+      .optional()
+      .describe(
+        'Sandbox used for interactive analysis, e.g. "cape_win". Defaults to "cape_win" if omitted.'
+      ),
+    interactionTimeout: z
+      .number()
+      .int()
+      .min(60)
+      .max(1800)
+      .optional()
+      .describe(
+        'Interactive analysis duration in seconds. Minimum 60, maximum 1800. Defaults to 60 if omitted.'
+      ),
+  })
+);
+export type ScanPrivateUrlInput = z.infer<typeof ScanPrivateUrlInputSchema>;
+
+export const GetPrivateAnalysisInputSchema = lazySchema(() =>
+  z.object({
+    analysisId: analysisIdSchema('scanPrivateUrl'),
+  })
+);
+export type GetPrivateAnalysisInput = z.infer<typeof GetPrivateAnalysisInputSchema>;
+
+export const GetPrivateUrlReportInputSchema = lazySchema(() =>
+  z.object({
+    urlId: urlIdSchema('getPrivateAnalysis'),
+  })
+);
+export type GetPrivateUrlReportInput = z.infer<typeof GetPrivateUrlReportInputSchema>;
 
 export const SearchCollectionsInputSchema = lazySchema(() =>
   z.object({
