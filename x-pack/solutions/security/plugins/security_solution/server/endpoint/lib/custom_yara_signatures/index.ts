@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useConversationContext } from './conversation_context';
-
-export const useShouldStickToBottom = () => {
-  const { shouldStickToBottom } = useConversationContext();
-  return shouldStickToBottom ?? true;
-};
+export { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
+export {
+  validateCustomYaraRule,
+  validateYaraRuleContentByteLength,
+} from './validate_custom_yara_rule';
