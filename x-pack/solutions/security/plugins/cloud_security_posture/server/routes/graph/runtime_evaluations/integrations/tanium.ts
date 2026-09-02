@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable prettier/prettier */
-
-
 import type { IntegrationEvaluations } from "../types";
 
 export const taniumEvaluations = {

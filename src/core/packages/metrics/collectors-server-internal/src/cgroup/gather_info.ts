@@ -41,7 +41,7 @@ export async function gatherInfo(): Promise<Result> {
   const lines = await readProcSelf();
 
   if (isCgroups2(lines)) {
-    // eslint-disable-next-line prettier/prettier
+    // prettier-ignore
     const [/* '0' */, /* '' */, path] = lines[0].trim().split(':');
     return {
       v2: true,
