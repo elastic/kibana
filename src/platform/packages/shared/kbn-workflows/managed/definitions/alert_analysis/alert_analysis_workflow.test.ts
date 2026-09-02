@@ -215,6 +215,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
   });
 
+  it('guards build_techniques_for_tactic foreach against tactic-only threat entries with no technique array', () => {
+    // Rules whose threat mapping has a tactic entry but no technique array (valid per schema)
+    // caused the workflow to crash with "Foreach expression resolved to undefined" because
+    // `nil | json` returns undefined in the expression evaluator. The foreach must use
+    // `| default: "[]" | json_parse` so it safely yields an empty iteration for tactic-only entries.
+    const techniquesForeachStep = findStepByName(workflow.steps, 'build_techniques_for_tactic') as {
+      foreach: string;
+    };
+    expect(techniquesForeachStep).toBeDefined();
+    expect(techniquesForeachStep.foreach).toBe(
+      '{{ foreach.item.technique | default: "[]" | json_parse }}'
+    );
+  });
+
   it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {
     const autoCloseStep = findStepByName(workflow.steps, 'check_auto_close_conditions') as {
       condition: string;
