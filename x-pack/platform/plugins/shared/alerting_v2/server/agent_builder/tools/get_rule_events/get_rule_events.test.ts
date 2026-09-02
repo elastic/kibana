@@ -120,7 +120,6 @@ describe('getRuleEventsTool', () => {
     });
 
     it('returns matching rule events', async () => {
-      get.mockResolvedValueOnce(episode);
       getEvents.mockResolvedValueOnce([eventRow]);
 
       const result = await createTool().handler(
@@ -182,14 +181,16 @@ describe('getRuleEventsTool', () => {
         agentBuilderMocks.tools.createHandlerContext()
       );
 
-      expect(result.results[0]).toEqual(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            count: 1000,
-            truncated: false,
+      expect(result).toEqual({
+        results: [
+          expect.objectContaining({
+            data: expect.objectContaining({
+              count: 1000,
+              truncated: false,
+            }),
           }),
-        })
-      );
+        ],
+      });
     });
 
     it('sets truncated and returns the page when one extra row is fetched', async () => {
@@ -205,14 +206,16 @@ describe('getRuleEventsTool', () => {
         agentBuilderMocks.tools.createHandlerContext()
       );
 
-      expect(result.results[0]).toEqual(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            count: 1000,
-            truncated: true,
+      expect(result).toEqual({
+        results: [
+          expect.objectContaining({
+            data: expect.objectContaining({
+              count: 1000,
+              truncated: true,
+            }),
           }),
-        })
-      );
+        ],
+      });
     });
 
     it('returns an empty list when the episode exists but has no events in range', async () => {
@@ -286,6 +289,24 @@ describe('getRuleEventsTool', () => {
           {
             type: ToolResultType.error,
             data: { message: 'start must be less than or equal to end' },
+          },
+        ],
+      });
+    });
+
+    it('returns an error when start or end is not a valid datetime', async () => {
+      const result = await createTool().handler(
+        { start: 'not-a-date', end: validArgs.end },
+        agentBuilderMocks.tools.createHandlerContext()
+      );
+
+      expect(get).not.toHaveBeenCalled();
+      expect(getEvents).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: 'start and end must be valid ISO 8601 datetimes' },
           },
         ],
       });

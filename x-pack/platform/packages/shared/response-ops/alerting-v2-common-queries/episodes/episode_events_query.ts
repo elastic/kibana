@@ -53,18 +53,18 @@ export const buildEpisodeEventsQuery = (
   { timeRange, status, limit }: BuildEpisodeEventsQueryOptions = {}
 ): TypedEsqlQuery<EpisodeEventRow> => {
   // prettier-ignore
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+  let query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`
     .where`type == "alert"`
     .where`episode.id == ${episodeId}`;
 
   if (timeRange) {
-    query.where`@timestamp >= ${timeRange.start}`;
-    query.where`@timestamp <= ${timeRange.end}`;
+    query = query.where`@timestamp >= ${timeRange.start}`;
+    query = query.where`@timestamp <= ${timeRange.end}`;
   }
 
   if (status !== undefined) {
-    query.where`episode.status == ${status}`;
+    query = query.where`episode.status == ${status}`;
   }
 
   // prettier-ignore

@@ -111,17 +111,33 @@ export const getRuleEventsTool = ({
         ],
       };
     }
-    if (start !== undefined && end !== undefined && Date.parse(start) > Date.parse(end)) {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message: 'start must be less than or equal to end',
+    if (start !== undefined && end !== undefined) {
+      const startMs = Date.parse(start);
+      const endMs = Date.parse(end);
+      if (Number.isNaN(startMs) || Number.isNaN(endMs)) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: 'start and end must be valid ISO 8601 datetimes',
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      }
+      if (startMs > endMs) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: 'start must be less than or equal to end',
+              },
+            },
+          ],
+        };
+      }
     }
 
     const client = getEpisodesClient({
