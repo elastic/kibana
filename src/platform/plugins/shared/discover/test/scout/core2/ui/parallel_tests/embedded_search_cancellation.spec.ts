@@ -122,6 +122,9 @@ spaceTest.describe(
             }
           )
         ).toBe(1);
+
+        // Verify cancel button disappears (no more in-flight requests)
+        await cancelButton.waitFor({ state: 'hidden' });
       }
     );
   }

@@ -103,6 +103,9 @@ spaceTest.describe(
       // Verify the in-flight request was aborted
       const failedRequest = await esqlAbortedPromise;
       expect(failedRequest.failure()).not.toBeNull();
+
+      // Verify cancel button disappears (no more in-flight requests)
+      await cancelButton.waitFor({ state: 'hidden' });
     });
   }
 );

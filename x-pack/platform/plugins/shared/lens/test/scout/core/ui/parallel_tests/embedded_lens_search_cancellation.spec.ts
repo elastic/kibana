@@ -173,6 +173,9 @@ spaceTest.describe(
         await cancelButton.click();
 
         await Promise.all(cancelRequestPromises);
+
+        // Verify cancel button disappears (no more in-flight requests)
+        await cancelButton.waitFor({ state: 'hidden' });
       }
     );
   }
