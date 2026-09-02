@@ -54,8 +54,7 @@ export const command = {
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
                           subsequent distribution build will rebuild them in production mode anyway.
-                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true. Version fingerprints are
-                          still extracted.
+                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -123,29 +122,18 @@ export const command = {
       log.info('skipping pre-built webpack bundles (--no-prebuilt)');
     }
 
-    const moonTargets = skipPrebuilt
-      ? [':extract-version-dependencies']
-      : [':extract-version-dependencies', ':build-webpack'];
-
     await Promise.all([
-      time(
-        skipPrebuilt ? 'extract version dependencies' : 'prepare webpack bundles for packages',
-        async () => {
-          log.info(
-            skipPrebuilt ? 'extract version dependencies' : 'pre-build webpack bundles'
-          );
-          await moonRun(moonTargets, {
-            pipe: !quiet,
-            quiet,
-            noCache: forceInstall,
-          });
-          log.success(
-            skipPrebuilt
-              ? 'relevant versions extracted for packages'
-              : 'relevant versions extracted for packages and shared webpack bundles built'
-          );
-        }
-      ),
+      skipPrebuilt
+        ? undefined
+        : time('prepare webpack bundles for packages', async () => {
+            log.info('pre-build webpack bundles');
+            await moonRun([':build-webpack'], {
+              pipe: !quiet,
+              quiet,
+              noCache: forceInstall,
+            });
+            log.success('shared webpack bundles built');
+          }),
       shouldInstall
         ? time('run install scripts', async () => {
             await runInstallScripts(log, { quiet });
