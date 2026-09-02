@@ -83,6 +83,7 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/rison'
   - '@kbn/content-management-utils'
+  - '@kbn/shared-ux-page-kibana-template'
 tags:
   - plugin
   - prod
