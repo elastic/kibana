@@ -36,6 +36,7 @@ import {
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
+import { getExecutionStepExecutions } from '../api/lib/get_execution_step_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
   searchStepExecutions,
@@ -43,6 +44,7 @@ import {
 } from '../api/lib/search_step_executions';
 import { searchWorkflowExecutions } from '../api/lib/search_workflow_executions';
 import type {
+  GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
   SearchStepExecutionsParams,
 } from '../api/workflows_management_api';
@@ -126,7 +128,7 @@ export class WorkflowExecutionQueryService {
   async getWorkflowExecution(
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -136,6 +138,7 @@ export class WorkflowExecutionQueryService {
       spaceId,
       includeInput: options?.includeInput,
       includeOutput: options?.includeOutput,
+      omitStepExecutions: options?.omitStepExecutions,
     });
   }
 
@@ -148,6 +151,21 @@ export class WorkflowExecutionQueryService {
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       parentExecutionId,
       spaceId,
+    });
+  }
+
+  async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<StepExecutionListResult> {
+    return getExecutionStepExecutions({
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+      logger: this.deps.logger,
+      workflowExecutionId: params.executionId,
+      spaceId,
+      page: params.page,
+      size: params.size,
     });
   }
 

@@ -15,11 +15,13 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 
 const mockGetExecution = jest.fn();
+const mockGetExecutionSteps = jest.fn();
 
 // Mock the WorkflowApi class so loadExecutionThunk uses our mock
 jest.mock('@kbn/workflows-ui', () => ({
   WorkflowApi: jest.fn().mockImplementation(() => ({
     getExecution: mockGetExecution,
+    getExecutionSteps: mockGetExecutionSteps,
   })),
 }));
 
@@ -54,6 +56,13 @@ const mockExecution: WorkflowExecutionDto = {
   yaml: 'name: Test\nsteps: []',
 };
 
+const mockStepsPage = {
+  results: mockExecution.stepExecutions,
+  total: 0,
+  page: 1,
+  size: 100,
+};
+
 describe('loadExecutionThunk', () => {
   let store: MockStore;
   let mockServices: MockServices;
@@ -63,6 +72,7 @@ describe('loadExecutionThunk', () => {
 
     store = createMockStore();
     mockServices = getMockServices(store);
+    mockGetExecutionSteps.mockResolvedValue(mockStepsPage);
   });
 
   it('should load execution successfully', async () => {
@@ -73,7 +83,9 @@ describe('loadExecutionThunk', () => {
     expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
       includeInput: false,
       includeOutput: false,
+      omitStepExecutions: true,
     });
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', { page: 1, size: 100 });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toEqual(mockExecution);
   });
@@ -97,6 +109,33 @@ describe('loadExecutionThunk', () => {
       mockExecution.yaml,
       mockExecution.workflowDefinition
     );
+  });
+
+  it('should set stepExecutionsTruncatedCount when total exceeds the returned page', async () => {
+    const pageResults = [{ id: 's1', stepId: 's1', status: ExecutionStatus.COMPLETED }];
+    mockGetExecution.mockResolvedValue(mockExecution);
+    mockGetExecutionSteps.mockResolvedValue({
+      results: pageResults,
+      total: 2,
+      page: 1,
+      size: 100,
+    });
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
+    expect(result.payload).toMatchObject({
+      stepExecutions: pageResults,
+      stepExecutionsTruncatedCount: 1,
+    });
+  });
+
+  it('should omit stepExecutionsTruncatedCount when the page is complete', async () => {
+    mockGetExecution.mockResolvedValue(mockExecution);
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
   });
 
   it('should handle HTTP error with body message', async () => {

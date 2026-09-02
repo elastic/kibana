@@ -177,6 +177,7 @@ describe('WorkflowsService (facade)', () => {
     executionQuerySpies = spyPrototype(WorkflowExecutionQueryService, [
       'getWorkflowExecution',
       'getChildWorkflowExecutions',
+      'getExecutionStepExecutions',
       'getWorkflowExecutions',
       'getWorkflowExecutionHistory',
       'getStepExecutions',
@@ -392,6 +393,10 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflowExecution('exec-1', 'default', { includeInput: true });
       await service.getChildWorkflowExecutions('parent-1', 'default');
+      await service.getExecutionStepExecutions(
+        { executionId: 'exec-1', page: 1, size: 100 },
+        'default'
+      );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
       await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
@@ -405,6 +410,10 @@ describe('WorkflowsService (facade)', () => {
       });
       expect(executionQuerySpies.getChildWorkflowExecutions).toHaveBeenCalledWith(
         'parent-1',
+        'default'
+      );
+      expect(executionQuerySpies.getExecutionStepExecutions).toHaveBeenCalledWith(
+        { executionId: 'exec-1', page: 1, size: 100 },
         'default'
       );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();

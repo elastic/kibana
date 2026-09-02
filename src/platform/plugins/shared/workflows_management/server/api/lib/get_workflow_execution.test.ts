@@ -362,6 +362,25 @@ describe('getWorkflowExecution', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
+    it('should omit step executions when omitStepExecutions is true', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+        omitStepExecutions: true,
+      });
+
+      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+      expect(mockStepDataClient.search).not.toHaveBeenCalled();
+      expect(result?.stepExecutions).toEqual([]);
+      expect(result).not.toHaveProperty('stepExecutionsTruncatedCount');
+    });
+
     it('should log a warn and rethrow when the execution document mget exceeds the response size', async () => {
       const sizeError = new errors.RequestAbortedError(
         'The content length (9000) is bigger than the maximum allowed buffer (42)'

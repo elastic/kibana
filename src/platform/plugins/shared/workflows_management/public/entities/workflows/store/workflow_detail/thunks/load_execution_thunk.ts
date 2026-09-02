@@ -34,7 +34,20 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
-      const response = await api.getExecution(id, { includeInput: false, includeOutput: false });
+      const [execution, steps] = await Promise.all([
+        api.getExecution(id, {
+          includeInput: false,
+          includeOutput: false,
+          omitStepExecutions: true,
+        }),
+        api.getExecutionSteps(id, { page: 1, size: 100 }),
+      ]);
+      const truncatedCount = steps.total - steps.results.length;
+      const response: WorkflowExecutionDto = {
+        ...execution,
+        stepExecutions: steps.results,
+        ...(truncatedCount > 0 ? { stepExecutionsTruncatedCount: truncatedCount } : {}),
+      };
       dispatch(setExecution(response));
 
       if (id !== previousExecution?.id) {

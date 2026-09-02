@@ -10,22 +10,24 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
+import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
-      path: '/api/workflows/executions/{executionId}/step/{stepExecutionId}',
+      path: '/api/workflows/executions/{executionId}/steps',
       access: 'public',
       security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
-      summary: 'Get a step execution',
-      description: 'Retrieve details of a single step execution within a workflow execution.',
+      summary: 'Get execution step executions',
+      description:
+        'Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -35,20 +37,31 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
       {
         version: API_VERSION,
         options: {
-          oasOperationObject: () => path.join(__dirname, '../examples/get_step_execution.yaml'),
+          oasOperationObject: () => path.join(__dirname, '../examples/get_execution_steps.yaml'),
         },
         validate: {
           request: {
-            params: schema.object({
-              executionId: schema.string({ meta: { description: 'Workflow execution ID.' } }),
-              stepExecutionId: schema.string({ meta: { description: 'Step execution ID.' } }),
+            params: executionIdParamSchema,
+            query: schema.object({
+              page: schema.number({
+                min: 1,
+                defaultValue: 1,
+                meta: { description: 'Page number.' },
+              }),
+              size: schema.number({
+                min: 1,
+                max: MAX_PAGE_SIZE,
+                defaultValue: 100,
+                meta: { description: 'Number of step executions per page.' },
+              }),
             }),
           },
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { executionId, stepExecutionId } = request.params;
+          const { executionId } = request.params;
+          const { page, size } = request.query;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
             omitStepExecutions: true,
@@ -57,14 +70,17 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
-          const stepExecution = await api.getStepExecution(
-            { executionId, id: stepExecutionId },
-            spaceId
-          );
-          if (!stepExecution) {
-            return response.notFound();
-          }
-          return response.ok({ body: stepExecution });
+
+          return response.ok({
+            body: await api.getExecutionStepExecutions(
+              {
+                executionId,
+                page,
+                size,
+              },
+              spaceId
+            ),
+          });
         } catch (error) {
           return handleRouteError(response, error);
         }

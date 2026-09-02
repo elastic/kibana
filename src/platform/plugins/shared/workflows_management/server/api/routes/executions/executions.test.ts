@@ -104,6 +104,7 @@ describe('Execution Routes', () => {
       cancelWorkflowExecution: jest.fn(),
       cancelAllActiveWorkflowExecutions: jest.fn(),
       getStepExecution: jest.fn(),
+      getExecutionStepExecutions: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
       resumeWorkflowExecutionExternally: jest.fn(),
       resumeWorkflowExecutionExternallyViaGet: jest.fn(),
@@ -571,6 +572,24 @@ describe('Execution Routes', () => {
       expect(result).toEqual({ type: 'ok', body: execution });
     });
 
+    it('should forward omitStepExecutions when requested', async () => {
+      const execution = { id: 'ex-1', stepExecutions: [] };
+      mockApi.getWorkflowExecution.mockResolvedValue(execution);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false, omitStepExecutions: true },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', {
+        includeInput: false,
+        includeOutput: false,
+        omitStepExecutions: true,
+      });
+    });
+
     it('should return workflow document version in the response body when present', async () => {
       const execution = { id: 'ex-1', version: 5, managed: false };
       mockApi.getWorkflowExecution.mockResolvedValue(execution);
@@ -794,6 +813,54 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/steps (get_execution_steps)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should call api.getExecutionStepExecutions with pagination', async () => {
+      const list = { results: [{ id: 'se-1' }], total: 1, page: 1, size: 50 };
+      mockApi.getExecutionStepExecutions.mockResolvedValue(list);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { page: 1, size: 50 },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', {
+        omitStepExecutions: true,
+      });
+      expect(mockApi.getExecutionStepExecutions).toHaveBeenCalledWith(
+        {
+          executionId: 'ex-1',
+          page: 1,
+          size: 50,
+        },
+        'default'
+      );
+      expect(result).toEqual({ type: 'ok', body: list });
+    });
+
+    it('should return not found when the execution does not exist', async () => {
+      mockApi.getWorkflowExecution.mockResolvedValue(undefined);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'missing' },
+        query: { page: 1, size: 100 },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.notFound).toHaveBeenCalled();
+      expect(mockApi.getExecutionStepExecutions).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'notFound' });
     });
   });
 

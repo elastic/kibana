@@ -159,6 +159,12 @@ export interface GetStepExecutionParams {
   id: string;
 }
 
+export interface GetExecutionStepExecutionsParams {
+  executionId: string;
+  page: number;
+  size: number;
+}
+
 export interface SearchStepExecutionsParams {
   workflowId: string;
   stepId?: string;
@@ -782,7 +788,7 @@ export class WorkflowsManagementApi {
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
@@ -792,6 +798,13 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
+  public async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<StepExecutionListResult> {
+    return this.workflowsService.getExecutionStepExecutions(params, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {

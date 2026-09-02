@@ -34,6 +34,7 @@ interface GetWorkflowExecutionParams {
   spaceId: string;
   includeInput?: boolean;
   includeOutput?: boolean;
+  omitStepExecutions?: boolean;
 }
 
 export const getWorkflowExecution = async ({
@@ -44,6 +45,7 @@ export const getWorkflowExecution = async ({
   spaceId,
   includeInput = false,
   includeOutput = false,
+  omitStepExecutions = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
     // Use mget by id for O(1) lookup performance instead of search
@@ -61,23 +63,27 @@ export const getWorkflowExecution = async ({
     if (!includeOutput) sourceExcludes.push('output');
 
     let stepExecutions: EsWorkflowStepExecution[] = [];
-    try {
-      stepExecutions = await getStepExecutionsByWorkflowExecution({
-        stepExecutionsDataClient,
-        workflowExecutionId,
-        stepExecutionIds: doc.stepExecutionIds?.slice(0, STEP_EXECUTIONS_MAX_COUNT),
-        sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
-      });
-    } catch (error) {
-      if (!isMaximumResponseSizeExceededError(error)) {
-        throw error;
+    if (!omitStepExecutions) {
+      try {
+        stepExecutions = await getStepExecutionsByWorkflowExecution({
+          stepExecutionsDataClient,
+          workflowExecutionId,
+          stepExecutionIds: doc.stepExecutionIds?.slice(0, STEP_EXECUTIONS_MAX_COUNT),
+          sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
+        });
+      } catch (error) {
+        if (!isMaximumResponseSizeExceededError(error)) {
+          throw error;
+        }
+        logger.warn(
+          `Failed to get workflow execution with steps: Elasticsearch response exceeded the maximum size Kibana can process`
+        );
       }
-      logger.warn(
-        `Failed to get workflow execution with steps: Elasticsearch response exceeded the maximum size Kibana can process`
-      );
     }
 
-    const truncatedCount = (doc.stepExecutionIds?.length ?? 0) - stepExecutions.length;
+    const truncatedCount = omitStepExecutions
+      ? 0
+      : (doc.stepExecutionIds?.length ?? 0) - stepExecutions.length;
 
     return transformToWorkflowExecutionDetailDto(
       workflowExecutionId,

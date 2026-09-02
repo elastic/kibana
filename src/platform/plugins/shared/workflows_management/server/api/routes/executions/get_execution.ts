@@ -52,6 +52,10 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
                 defaultValue: false,
                 meta: { description: 'Include execution output data.' },
               }),
+              omitStepExecutions: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'Omit embedded step executions from the response.' },
+              }),
             }),
           },
         },
@@ -59,11 +63,12 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { includeInput, includeOutput } = request.query;
+          const { includeInput, includeOutput, omitStepExecutions } = request.query;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
             includeInput,
             includeOutput,
+            ...(omitStepExecutions ? { omitStepExecutions: true } : {}),
           });
           if (!workflowExecution) {
             return response.notFound();
