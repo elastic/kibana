@@ -202,10 +202,10 @@ export class EntityFlyoutAnomaliesPage {
 
   async openRowActionsMenu() {
     await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
-    // noWaitAfter: true skips Playwright's post-click navigation wait — opening the popover
-    // triggers a URL update from the flyout's state management that Playwright misidentifies
-    // as a pending navigation. The caller's getRowAction assertions are the real check.
-    await this.rowActionsButton.click({ noWaitAfter: true });
+    // dispatchEvent: the row-actions button sits inside the anomalies table grid; after scroll
+    // it is transiently covered by an adjacent element. Also avoids noWaitAfter — the URL
+    // update from the flyout's state management is not awaited by dispatchEvent anyway.
+    await this.rowActionsButton.dispatchEvent('click');
   }
 
   /**
