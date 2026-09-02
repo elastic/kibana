@@ -36,14 +36,8 @@ const mockBasePath = ({
 };
 
 describe('useInboundEventsUrl', () => {
-  const originalOrigin = window.location.origin;
-
   afterEach(() => {
     jest.resetAllMocks();
-    Object.defineProperty(window, 'location', {
-      value: { origin: originalOrigin },
-      writable: true,
-    });
   });
 
   it('uses publicBaseUrl and omits the space prefix in the default space', () => {
@@ -55,9 +49,10 @@ describe('useInboundEventsUrl', () => {
 
     const { result } = renderHook(() => useInboundEventsUrl('.inboundWebhook', 'sales-ingress'));
 
-    expect(result.current).toBe(
-      'https://kibana.example.com/api/actions/events/.inboundWebhook/sales-ingress'
-    );
+    expect(result.current).toEqual({
+      url: 'https://kibana.example.com/api/actions/events/.inboundWebhook/sales-ingress',
+      isPublicBaseUrlConfigured: true,
+    });
   });
 
   it('inserts /s/{spaceId} when the current path is space-scoped', () => {
@@ -69,16 +64,13 @@ describe('useInboundEventsUrl', () => {
 
     const { result } = renderHook(() => useInboundEventsUrl('.inboundWebhook', 'sales-ingress'));
 
-    expect(result.current).toBe(
-      'https://kibana.example.com/kb/s/marketing/api/actions/events/.inboundWebhook/sales-ingress'
-    );
+    expect(result.current).toEqual({
+      url: 'https://kibana.example.com/kb/s/marketing/api/actions/events/.inboundWebhook/sales-ingress',
+      isPublicBaseUrlConfigured: true,
+    });
   });
 
-  it('falls back to window.location.origin when publicBaseUrl is missing', () => {
-    Object.defineProperty(window, 'location', {
-      value: { origin: 'http://localhost:5601' },
-      writable: true,
-    });
+  it('returns a relative path when publicBaseUrl is not set', () => {
     mockBasePath({
       get: '/',
       serverBasePath: '',
@@ -86,25 +78,23 @@ describe('useInboundEventsUrl', () => {
 
     const { result } = renderHook(() => useInboundEventsUrl('.inboundWebhook', 'sales-ingress'));
 
-    expect(result.current).toBe(
-      'http://localhost:5601/api/actions/events/.inboundWebhook/sales-ingress'
-    );
+    expect(result.current).toEqual({
+      url: '/api/actions/events/.inboundWebhook/sales-ingress',
+      isPublicBaseUrlConfigured: false,
+    });
   });
 
-  it('includes serverBasePath on the origin fallback', () => {
-    Object.defineProperty(window, 'location', {
-      value: { origin: 'http://localhost:5601' },
-      writable: true,
-    });
+  it('includes the space prefix on the relative path', () => {
     mockBasePath({
-      get: '/kb',
+      get: '/kb/s/marketing',
       serverBasePath: '/kb',
     });
 
     const { result } = renderHook(() => useInboundEventsUrl('.inboundWebhook', 'sales-ingress'));
 
-    expect(result.current).toBe(
-      'http://localhost:5601/kb/api/actions/events/.inboundWebhook/sales-ingress'
-    );
+    expect(result.current).toEqual({
+      url: '/s/marketing/api/actions/events/.inboundWebhook/sales-ingress',
+      isPublicBaseUrlConfigured: false,
+    });
   });
 });

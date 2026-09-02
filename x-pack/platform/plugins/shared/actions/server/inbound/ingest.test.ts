@@ -539,6 +539,10 @@ describe('ingestInboundEvent', () => {
     expect(res.custom).not.toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
     expectOutcome('error', 'handle_fail');
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('invalid_http_ack'),
+      expect.anything()
+    );
   });
 
   it('returns 500 when handleEvents http body is not JSON-serializable', async () => {

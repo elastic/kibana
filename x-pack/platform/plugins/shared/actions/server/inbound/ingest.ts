@@ -65,7 +65,7 @@ const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, u
 };
 
 /**
- * Orchestrates inbound connector event ingest and maps spoke HTTP acks to the caller.
+ * Orchestrates inbound connector event ingest and maps connector HTTP acks to the caller.
  */
 export async function ingestInboundEvent({
   connectorTypeId: connectorTypeIdParam,
@@ -192,7 +192,7 @@ export async function ingestInboundEvent({
         logInboundIngressOutcome(logger, {
           ...baseLog,
           outcome: 'handle_fail',
-          detail: 'invalid_spoke_http',
+          detail: 'invalid_http_ack',
         });
         return {
           status: 'error',

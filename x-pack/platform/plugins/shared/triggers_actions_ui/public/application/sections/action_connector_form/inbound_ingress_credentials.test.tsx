@@ -26,6 +26,11 @@ describe('InboundIngressCredentials', () => {
   });
 
   it('shows the webhook URL and one-time ingest token', () => {
+    Object.defineProperty(appMockRenderer.coreStart.http.basePath, 'publicBaseUrl', {
+      value: 'https://kibana.example.com',
+      configurable: true,
+    });
+
     const connector = createMockActionConnector({
       id: 'sales-ingress',
       actionTypeId: '.inboundWebhook',
@@ -36,11 +41,28 @@ describe('InboundIngressCredentials', () => {
     appMockRenderer.render(<InboundIngressCredentials connector={connector} />);
 
     expect(screen.getByTestId('inbound-ingress-webhook-url')).toHaveValue(
-      'http://localhost/api/actions/events/.inboundWebhook/sales-ingress'
+      'https://kibana.example.com/api/actions/events/.inboundWebhook/sales-ingress'
     );
+    expect(screen.queryByTestId('inbound-ingress-public-base-url-warning')).not.toBeInTheDocument();
     expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
     expect(screen.getByTestId('inbound-ingress-token-warning')).toBeInTheDocument();
     expect(screen.queryByTestId('connector-settings-label')).not.toBeInTheDocument();
+  });
+
+  it('warns and shows a relative webhook path when publicBaseUrl is not set', () => {
+    const connector = createMockActionConnector({
+      id: 'sales-ingress',
+      actionTypeId: '.inboundWebhook',
+      config: { ingestTokenHash: 'a'.repeat(64) },
+      secrets: {},
+    });
+
+    appMockRenderer.render(<InboundIngressCredentials connector={connector} />);
+
+    expect(screen.getByTestId('inbound-ingress-public-base-url-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('inbound-ingress-webhook-url')).toHaveValue(
+      '/api/actions/events/.inboundWebhook/sales-ingress'
+    );
   });
 
   it('rotates the ingest token after confirmation', async () => {

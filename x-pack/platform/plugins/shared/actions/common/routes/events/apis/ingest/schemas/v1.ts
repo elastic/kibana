@@ -48,7 +48,7 @@ export const ingestEventsRequestQuerySchema = schema.object(
 );
 
 /**
- * Opaque JSON body for the connector spoke `handleEvents` implementation.
+ * Opaque JSON body for the connector `handleEvents` implementation.
  * Shape is connector-type specific; not validated by the hub.
  */
 export const ingestEventsRequestBodySchema = schema.maybe(

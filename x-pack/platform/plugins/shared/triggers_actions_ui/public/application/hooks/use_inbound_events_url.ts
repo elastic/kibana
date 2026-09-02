@@ -13,27 +13,29 @@ import { useKibana } from '../../common/lib/kibana';
 const isUsablePublicBaseUrl = (value: string | undefined): value is string =>
   Boolean(value) && value !== '/';
 
-export const useInboundEventsUrl = (connectorTypeId: string, connectorId: string): string => {
+export interface InboundEventsUrl {
+  url: string;
+  isPublicBaseUrlConfigured: boolean;
+}
+
+export const useInboundEventsUrl = (
+  connectorTypeId: string,
+  connectorId: string
+): InboundEventsUrl => {
   const { http } = useKibana().services;
 
   return useMemo(() => {
     const { spaceId } = getSpaceIdFromPath(http.basePath.get(), http.basePath.serverBasePath);
-    const serverBasePath = http.basePath.serverBasePath;
-    const originBase =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}${
-            serverBasePath && serverBasePath !== '/' ? serverBasePath : ''
-          }`
-        : '';
-    const publicBaseUrl = isUsablePublicBaseUrl(http.basePath.publicBaseUrl)
-      ? http.basePath.publicBaseUrl
-      : originBase;
+    const isPublicBaseUrlConfigured = isUsablePublicBaseUrl(http.basePath.publicBaseUrl);
 
-    return buildInboundEventsUrl({
-      publicBaseUrl,
-      spaceId,
-      connectorTypeId,
-      connectorId,
-    });
+    return {
+      url: buildInboundEventsUrl({
+        ...(isPublicBaseUrlConfigured ? { publicBaseUrl: http.basePath.publicBaseUrl } : {}),
+        spaceId,
+        connectorTypeId,
+        connectorId,
+      }),
+      isPublicBaseUrlConfigured,
+    };
   }, [http.basePath, connectorTypeId, connectorId]);
 };

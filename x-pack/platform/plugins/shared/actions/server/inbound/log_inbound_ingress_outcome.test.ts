@@ -74,14 +74,14 @@ describe('logInboundIngressOutcome', () => {
       spaceId: 'default',
       connectorId: 'c1',
       connectorTypeId: '.myConnector',
-      detail: 'spoke failed',
+      detail: 'handler failed',
     });
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('detail=spoke failed'),
+      expect.stringContaining('detail=handler failed'),
       expect.objectContaining({
         inboundEvents: expect.objectContaining({
           outcome: 'handle_fail',
-          detail: 'spoke failed',
+          detail: 'handler failed',
         }),
       })
     );

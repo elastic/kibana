@@ -76,7 +76,10 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
   connector,
   allowRotate = false,
 }) => {
-  const webhookUrl = useInboundEventsUrl(connector.actionTypeId, connector.id);
+  const { url: webhookUrl, isPublicBaseUrlConfigured } = useInboundEventsUrl(
+    connector.actionTypeId,
+    connector.id
+  );
   const initialToken = getInboundIngestToken(connector);
   const [ingestToken, setIngestToken] = useState<string | undefined>(initialToken);
   const [showRotateConfirm, setShowRotateConfirm] = useState(false);
@@ -111,6 +114,29 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.inboundIngress.copyTokenNowDescription"
               defaultMessage="You will not be able to view it again. Store it with the webhook URL; the token authenticates inbound requests."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {!isPublicBaseUrlConfigured && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            iconType="warning"
+            data-test-subj="inbound-ingress-public-base-url-warning"
+            title={i18n.translate(
+              'xpack.triggersActionsUI.sections.inboundIngress.publicBaseUrlMissingTitle',
+              {
+                defaultMessage: 'server.publicBaseUrl is not set',
+              }
+            )}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.inboundIngress.publicBaseUrlMissingDescription"
+              defaultMessage="This webhook path is relative and may not be reachable by external services. Set server.publicBaseUrl to show an absolute URL."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />

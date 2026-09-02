@@ -84,10 +84,10 @@ const isWithinJsonByteLimit = (value: unknown, maxBytes: number): boolean => {
 
 const jsonSerializableSpokeBodySchema = z
   .unknown()
-  .refine(isJsonSerializableSpokeBody, 'Spoke HTTP body must be JSON-serializable')
+  .refine(isJsonSerializableSpokeBody, 'HTTP ack body must be JSON-serializable')
   .refine(
     (value) => isWithinJsonByteLimit(value, MAX_HANDLE_EVENTS_HTTP_BODY_BYTES),
-    `Spoke HTTP body must be at most ${MAX_HANDLE_EVENTS_HTTP_BODY_BYTES} bytes`
+    `HTTP ack body must be at most ${MAX_HANDLE_EVENTS_HTTP_BODY_BYTES} bytes`
   );
 
 const handleEventsHeadersSchema = z

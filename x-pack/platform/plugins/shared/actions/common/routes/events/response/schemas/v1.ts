@@ -20,7 +20,7 @@ export const ingestEventsResponseSchema = schema.object(
 );
 
 /**
- * Public ingest HTTP 200. v1 is a generic JSON object so a later spoke can ack
+ * Public ingest HTTP 200. v1 is a generic JSON object so a later connector can ack
  * without a new OAS version. `.inboundWebhook` handshake is `{ challenge }`.
  */
 export const ingestEventsAckResponseSchema = schema.object(
@@ -41,7 +41,7 @@ export const ingestEventsAckResponseSchema = schema.object(
     meta: {
       id: 'ingest_events_ack_response',
       description:
-        'Spoke HTTP 200 ack. `.inboundWebhook` handshake is `{ challenge }`. Other connector types may return a different JSON object.',
+        'Connector HTTP 200 ack. `.inboundWebhook` handshake is `{ challenge }`. Other connector types may return a different JSON object.',
     },
   }
 );
