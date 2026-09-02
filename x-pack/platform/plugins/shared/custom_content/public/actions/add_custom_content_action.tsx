@@ -44,6 +44,6 @@ export const getAddCustomContentAction = (): ActionDefinition<EmbeddableApiConte
   },
   getDisplayName: () =>
     i18n.translate('xpack.customContent.addPanel.displayName', {
-      defaultMessage: 'Custom panel',
+      defaultMessage: 'Custom',
     }),
 });
