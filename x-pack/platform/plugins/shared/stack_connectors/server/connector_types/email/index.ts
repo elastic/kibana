@@ -458,7 +458,9 @@ async function executor(
   // use HTTP sourced, except when the service is JSON (for testing)
   if (useTestMessage) {
     actualMessage = TEST_MESSAGE;
-    actualHTMLMessage = TEST_MESSAGE;
+    if (actualHTMLMessage != null) {
+      actualHTMLMessage = TEST_MESSAGE;
+    }
   }
 
   actualMessage = trimMessageIfRequired(
@@ -485,8 +487,7 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
-  // use TEST_MESSAGE for cloud trials and HTTP sourced, except when
-  // the service is JSON (for testing)
+  // use TEST_MESSAGE for HTTP sourced, except when the service is JSON (for testing)
   const subject =
     config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
       ? prefixTrialSubject(TEST_MESSAGE)
