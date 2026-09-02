@@ -8,10 +8,21 @@
  */
 
 import type { Rule, AST } from 'eslint';
-import * as T from '@babel/types';
+import type * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 
-import type { Importer } from '../helpers/visit_all_import_statements';
+import type { Importer, SomeNode } from '../helpers/ast';
+import {
+  isCallExpression,
+  isExportNamedDeclaration,
+  isExportSpecifier,
+  isImportCallee,
+  isImportDeclaration,
+  isImportSpecifier,
+  isObjectPattern,
+  isStringLiteral,
+  isVariableDeclaration,
+} from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
 export interface MovedExportsRule {
@@ -46,11 +57,7 @@ function getParent(node: T.Node | TSESTree.Node): T.Node | TSESTree.Node | undef
 
 function findDeclaration(node: T.Node | TSESTree.Node) {
   let cursor: T.Node | TSESTree.Node | undefined = node;
-  while (
-    cursor &&
-    !T.isVariableDeclaration(cursor) &&
-    cursor.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration
-  ) {
+  while (cursor && !isVariableDeclaration(cursor)) {
     cursor = getParent(cursor);
   }
   return cursor;
@@ -83,20 +90,13 @@ function inspectImports(
   rules: MovedExportsRule[]
 ): undefined | { importCount: number; allBadImports: BadImport[] } {
   // get import names from require() and await import() calls
-  if (
-    T.isCallExpression(importer) ||
-    importer.type === TSESTree.AST_NODE_TYPES.CallExpression ||
-    importer.type === TSESTree.AST_NODE_TYPES.ImportExpression
-  ) {
+  if (isCallExpression(importer) || importer.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
     const declaration = findDeclaration(importer);
     if (!declaration || !declaration.declarations[0]) {
       return;
     }
     const declarator = declaration.declarations[0];
-    if (
-      !T.isObjectPattern(declarator.id) &&
-      declarator.id.type !== TSESTree.AST_NODE_TYPES.ObjectPattern
-    ) {
+    if (!isObjectPattern(declarator.id)) {
       return;
     }
 
@@ -122,7 +122,7 @@ function inspectImports(
             name,
             type:
               importer.type === TSESTree.AST_NODE_TYPES.ImportExpression ||
-              T.isImport(importer.callee)
+              isImportCallee(importer.callee)
                 ? 'import expression'
                 : 'require',
             id: !local ? undefined : name === local ? name : `${name}: ${local}`,
@@ -134,33 +134,22 @@ function inspectImports(
   }
 
   // get import names from import {} and export {} from
-  if (
-    T.isImportDeclaration(importer) ||
-    importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration ||
-    T.isExportNamedDeclaration(importer) ||
-    importer.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration
-  ) {
-    const type =
-      T.isExportNamedDeclaration(importer) ||
-      importer.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration
-        ? importer.exportKind === 'type'
-          ? 'export type'
-          : 'export'
-        : (T.isImportDeclaration(importer) ||
-            importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) &&
-          importer.importKind === 'type'
-        ? 'import type'
-        : 'import';
+  if (isImportDeclaration(importer) || isExportNamedDeclaration(importer)) {
+    const type = isExportNamedDeclaration(importer)
+      ? importer.exportKind === 'type'
+        ? 'export type'
+        : 'export'
+      : importer.importKind === 'type'
+      ? 'import type'
+      : 'import';
 
+    const specifiers: SomeNode[] = importer.specifiers;
     return {
-      importCount: importer.specifiers.length,
+      importCount: specifiers.length,
       allBadImports: getBadImports(
-        importer.specifiers.flatMap((specifier): Imported | never[] => {
-          if (
-            T.isImportSpecifier(specifier) ||
-            specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier
-          ) {
-            const name = T.isStringLiteral(specifier.imported)
+        specifiers.flatMap((specifier): Imported | never[] => {
+          if (isImportSpecifier(specifier)) {
+            const name = isStringLiteral(specifier.imported)
               ? specifier.imported.value
               : specifier.imported?.type === 'Identifier'
               ? specifier.imported.name
@@ -174,11 +163,8 @@ function inspectImports(
             };
           }
 
-          if (
-            T.isExportSpecifier(specifier) ||
-            specifier.type === TSESTree.AST_NODE_TYPES.ExportSpecifier
-          ) {
-            const name = T.isStringLiteral(specifier.exported)
+          if (isExportSpecifier(specifier)) {
+            const name = isStringLiteral(specifier.exported)
               ? specifier.exported.value
               : specifier.exported?.type === 'Identifier'
               ? specifier.exported.name
@@ -241,8 +227,7 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
       importer: Importer | T.VariableDeclaration | TSESTree.VariableDeclaration
     ): AST.Range {
       if (
-        T.isCallExpression(importer) ||
-        importer.type === TSESTree.AST_NODE_TYPES.CallExpression ||
+        isCallExpression(importer) ||
         importer.type === TSESTree.AST_NODE_TYPES.ImportExpression
       ) {
         const declaration = findDeclaration(importer);

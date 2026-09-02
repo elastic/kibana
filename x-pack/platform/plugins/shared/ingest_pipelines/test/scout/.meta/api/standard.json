@@ -1,8 +1,7 @@
 {
   "sha1": "849896840c80555467ed82dc82e273523c9fb1d3",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 31,
-        "column": 34
+        "line": 25,
+        "column": 10
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 44,
-        "column": 23
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/geoip_databases.spec.ts",
-        "line": 28,
-        "column": 24
+        "line": 35,
+        "column": 10
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/geoip_databases.spec.ts",
-        "line": 106,
-        "column": 11
+        "line": 126,
+        "column": 10
       }
     },
     {
@@ -68,6 +67,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -77,8 +82,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
-        "line": 46,
-        "column": 36
+        "line": 55,
+        "column": 10
       }
     },
     {
@@ -88,6 +93,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -97,8 +108,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
-        "line": 53,
-        "column": 5
+        "line": 76,
+        "column": 10
       }
     },
     {
@@ -108,6 +119,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -117,8 +134,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
-        "line": 68,
-        "column": 7
+        "line": 92,
+        "column": 10
       }
     },
     {
@@ -128,26 +145,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
-        "line": 82,
-        "column": 7
-      }
-    },
-    {
-      "id": "fe7adb61f1a8511-f565ae36c06a3f1",
-      "title": "Ingest pipelines read and delete API returns an error for any pipelines not successfully deleted",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -158,7 +161,33 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
         "line": 108,
-        "column": 76
+        "column": 10
+      }
+    },
+    {
+      "id": "fe7adb61f1a8511-f565ae36c06a3f1",
+      "title": "Ingest pipelines read and delete API returns an error for any pipelines not successfully deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
+        "line": 136,
+        "column": 10
       }
     },
     {
@@ -168,6 +197,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -177,8 +212,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
-        "line": 28,
-        "column": 26
+        "line": 35,
+        "column": 12
       }
     },
     {
@@ -188,6 +223,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -197,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
-        "line": 40,
-        "column": 18
+        "line": 55,
+        "column": 12
       }
     },
     {
@@ -208,6 +249,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -217,8 +264,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
-        "line": 56,
-        "column": 13
+        "line": 75,
+        "column": 12
       }
     },
     {
@@ -228,6 +275,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -237,8 +290,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
-        "line": 79,
-        "column": 15
+        "line": 102,
+        "column": 12
       }
     },
     {
@@ -248,6 +301,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -257,8 +316,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
-        "line": 103,
-        "column": 25
+        "line": 126,
+        "column": 12
       }
     },
     {
@@ -268,6 +327,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -277,8 +342,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
-        "line": 38,
-        "column": 11
+        "line": 44,
+        "column": 10
       }
     },
     {
@@ -288,26 +353,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
-        "line": 46,
-        "column": 11
-      }
-    },
-    {
-      "id": "2747ec602808e75-41eaf4335e9260b",
-      "title": "Ingest pipelines API does not allow creation of an existing pipeline",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -318,7 +369,33 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
         "line": 62,
-        "column": 84
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-41eaf4335e9260b",
+      "title": "Ingest pipelines API does not allow creation of an existing pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 80,
+        "column": 10
       }
     },
     {
@@ -328,6 +405,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -337,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
-        "line": 83,
-        "column": 17
+        "line": 103,
+        "column": 10
       }
     },
     {
@@ -348,6 +431,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -357,8 +446,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
-        "line": 91,
-        "column": 8
+        "line": 117,
+        "column": 10
       }
     },
     {
@@ -368,6 +457,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -377,8 +472,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
-        "line": 118,
-        "column": 26
+        "line": 144,
+        "column": 10
       }
     },
     {
@@ -388,6 +483,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -397,8 +498,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
-        "line": 135,
-        "column": 7
+        "line": 166,
+        "column": 10
       }
     },
     {
@@ -412,7 +513,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_payload_limit.spec.ts",
         "line": 24,
-        "column": 13
+        "column": 12
       }
     },
     {
@@ -425,8 +526,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_payload_limit.spec.ts",
-        "line": 33,
-        "column": 23
+        "line": 40,
+        "column": 12
       }
     },
     {
@@ -440,7 +541,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_privileges.spec.ts",
         "line": 29,
-        "column": 82
+        "column": 12
       }
     },
     {
@@ -453,8 +554,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_privileges.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 45,
+        "column": 12
       }
     },
     {
@@ -467,8 +568,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/structure_tree.spec.ts",
-        "line": 93,
-        "column": 37
+        "line": 99,
+        "column": 10
       }
     }
   ]
