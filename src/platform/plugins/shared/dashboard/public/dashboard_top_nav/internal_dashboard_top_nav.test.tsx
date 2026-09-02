@@ -274,6 +274,7 @@ describe('Internal dashboard top nav', () => {
       api.registerChildApi({
         uuid: 'vega-panel',
         usesEsql$: new BehaviorSubject(true),
+        approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
       } as unknown as Parameters<typeof api.registerChildApi>[0]);
 
       renderWithChrome(
