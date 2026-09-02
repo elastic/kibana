@@ -12,7 +12,6 @@ import { EmbeddableConversationList } from './embeddable_conversation_list';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
-import { useConversationSearch } from '../../../hooks/use_conversation_search';
 
 jest.mock('../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
@@ -32,10 +31,6 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_conversation_search', () => ({
-  useConversationSearch: jest.fn(),
-}));
-
 // EUI useEuiTheme requires a theme provider; stub it out.
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -53,7 +48,6 @@ jest.mock('../conversation_list_item_styles', () => ({
 const mockUseConversationContext = jest.mocked(useConversationContext);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseConversationList = jest.mocked(useConversationList);
-const mockUseConversationSearch = jest.mocked(useConversationSearch);
 
 const renderList = (props: { searchValue?: string; onClose?: () => void } = {}) => {
   return render(
@@ -87,6 +81,8 @@ describe('EmbeddableConversationList', () => {
       removeAllErrors,
     } as unknown as ReturnType<typeof useStreamingContext>);
 
+    // `searchValue` defaults to '' in these tests, so `isSearching` is false and the
+    // list conversations below are what gets rendered.
     mockUseConversationList.mockReturnValue({
       conversations: [
         {
@@ -103,17 +99,11 @@ describe('EmbeddableConversationList', () => {
         },
       ],
       isLoading: false,
-    } as unknown as ReturnType<typeof useConversationList>);
-
-    // `searchValue` defaults to '' in these tests, so the list branch above is what's
-    // exercised; this stub only needs to be inert.
-    mockUseConversationSearch.mockReturnValue({
-      conversations: [],
-      isLoading: false,
+      isSearching: false,
       hasNextPage: false,
       fetchNextPage: jest.fn(),
       isFetchingNextPage: false,
-    } as unknown as ReturnType<typeof useConversationSearch>);
+    } as unknown as ReturnType<typeof useConversationList>);
   });
 
   it('calls resetAttachments and setConversationId when selecting a different conversation', () => {
