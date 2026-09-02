@@ -49,7 +49,9 @@ jest.mock(
 );
 
 jest.mock('../../../../cases/attachments/entity/components/add_to_case', () => ({
-  AddToCase: () => <div data-test-subj="eaCasesAddToCase" />,
+  AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
+    <div data-test-subj={testSubj} />
+  ),
 }));
 
 const USER_IDENTITY_FIELDS = { 'user.name': 'alice' };
