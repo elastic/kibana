@@ -241,6 +241,22 @@ describe('SourceDocumentJsonMode', () => {
       expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
       expect(screen.queryByTestId(filterForTestId('computedField'))).not.toBeInTheDocument();
     });
+
+    it('does not render filter buttons when Elasticsearch ignored the field value', () => {
+      renderCell(
+        {
+          _id: '1',
+          _index: 'test',
+          _source: { extension: 'a-very-long-extension', bytes: 100 },
+          _ignored: ['extension'],
+        },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.queryByTestId(filterForTestId('extension'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(filterOutTestId('extension'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(filterForTestId('bytes'))).toBeInTheDocument();
+    });
   });
 
   describe('in-table search counting pass', () => {
