@@ -199,8 +199,9 @@ export const describeArtifactTabPolicyDetails = (
             await pageObjects.policyArtifactsPage.openAssignFromUnassigned();
             await expect(pageObjects.policyArtifactsPage.assignConfirmButton).toBeDisabled();
             await pageObjects.policyArtifactsPage.assignArtifact(artifact.artifactName);
+            // Each artifact type uses a different toast sentence; they all include this.
             await expect(
-              page.getByText(`"${artifact.artifactName}" has been added to your artifacts list.`)
+              page.getByText(new RegExp(`"${artifact.artifactName}".*has been added`))
             ).toBeVisible();
             await pageObjects.policyArtifactsPage.waitForAssignedList();
             await expect(pageObjects.policyArtifactsPage.artifactCard).toHaveCount(1);
