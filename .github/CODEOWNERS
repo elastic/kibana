@@ -1222,7 +1222,7 @@ x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces-team
-x-pack/platform/plugins/shared/automatic_import @elastic/cloud-services
+x-pack/platform/plugins/shared/automatic_import @elastic/siem-conduit
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
@@ -1414,7 +1414,6 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elas
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
-x-pack/solutions/security/packages/kbn-sdlc-data-layer @elastic/security-solution
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
@@ -1449,7 +1448,6 @@ x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/securi
 x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/pnd @elastic/security-solution
-x-pack/solutions/security/plugins/sdlc_intel @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution

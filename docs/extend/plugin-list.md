@@ -233,7 +233,6 @@ mapped_pages:
 | [sampleDataIngest](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/sample_data_ingest/README.md) | A service for creating and managing sample data sets in Elasticsearch indices. Supports sample types and automated data ingestion. |
 | [savedObjectsTagging](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/saved_objects_tagging/README.md) | Add tagging capability to saved objects |
 | [screenshotting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/screenshotting/README.md) | This plugin provides functionality to take screenshots of the Kibana pages. It uses Chromium and Puppeteer underneath to run the browser in headless mode. |
-| [sdlcIntel](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/sdlc_intel) | WARNING: Missing or empty README. |
 | [searchAssistant](https://github.com/elastic/kibana/blob/main/x-pack/solutions/search/plugins/search_assistant/README.md) | This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch. |
 | [searchGettingStarted](https://github.com/elastic/kibana/blob/main/x-pack/solutions/search/plugins/search_getting_started) | WARNING: Missing or empty README. |
 | [searchHomepage](https://github.com/elastic/kibana/blob/main/x-pack/solutions/search/plugins/search_homepage/README.mdx) | The Search Homepage is a shared homepage for elasticsearch users. |

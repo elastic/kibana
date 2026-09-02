@@ -19,6 +19,17 @@ components:
         Commas are not allowed because tag filters are comma-separated.
         Tags describe what a dataset is about; they never affect who can see it.
 
+    Direction:
+      type: string
+      enum:
+        - maximize
+        - minimize
+        - neutral
+      description: >-
+        Metric polarity. `maximize` means a higher score is better (e.g. faithfulness,
+        accuracy). `minimize` means a lower score is better (e.g. latency, token count).
+        `neutral` means the metric is informational only and has no improvement direction.
+
     DatasetMaturity:
       type: string
       enum:
@@ -248,20 +259,19 @@ components:
           maxLength: 256
           nullable: true
         direction:
-          type: string
-          enum:
-            - maximize
-            - minimize
-            - neutral
-          description: >-
-            Whether a higher score is an improvement (`maximize`), a lower
-            score is an improvement (`minimize`), or the score cannot be
-            compared across arms at all (`neutral`).
+          $ref: '#/components/schemas/Direction'
         model:
           $ref: '#/components/schemas/Model'
+        kind:
+          type: string
+          enum:
+            - llm
+            - code
+          description: >-
+            Whether the evaluator invoked a model. Absent on documents written
+            before per-evaluator attribution was introduced.
       required:
         - name
-        - model
 
     ScoreMetadata:
       type: object
@@ -310,6 +320,11 @@ components:
           minimum: 0
           default: 0
           description: Number of unique examples evaluated in this dataset
+        evaluator_model:
+          $ref: '#/components/schemas/Model'
+          description: >-
+            Model this evaluator judged with. Absent for code evaluators, which
+            invoke no model.
         stats:
           type: object
           properties:

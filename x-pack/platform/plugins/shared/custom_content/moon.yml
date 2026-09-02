@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/search-types'
   - '@kbn/custom-content-common'
+  - '@kbn/custom-content-server'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
@@ -43,7 +44,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util'
   - '@kbn/esql-types'
-  - '@kbn/custom-content-server'
 tags:
   - plugin
   - prod

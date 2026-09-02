@@ -111,6 +111,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Custom content panels
   'custom_content_update_panel',
 
+  // Platform – Context Engine
+  `${internalNamespaces.platformContextEngine}.save_automation`,
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -312,6 +315,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Workflows
   'workflow.yaml',
   'workflow.yaml.diff',
+
+  // Platform – Context Engine
+  'platform.context_engine.ai_index',
 
   // Platform – Cases
   'case',

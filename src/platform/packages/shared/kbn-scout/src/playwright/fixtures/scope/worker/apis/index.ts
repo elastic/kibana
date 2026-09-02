@@ -18,6 +18,8 @@ import type { CoreApiService } from './core';
 import { getCoreApiHelper } from './core';
 import type { DashboardApiService } from './dashboard';
 import { getDashboardApiHelper } from './dashboard';
+import type { DiscoverApiService } from './discover';
+import { getDiscoverApiHelper } from './discover';
 import type { DataViewsApiService } from './data_views';
 import { getDataViewsApiHelper } from './data_views';
 import type { FleetApiService } from './fleet';
@@ -38,6 +40,7 @@ export interface ApiServicesFixture {
   backgroundSearch: BackgroundSearchApiService;
   cases: CasesApiService;
   dashboard: DashboardApiService;
+  discover: DiscoverApiService;
   dataViews: DataViewsApiService;
   fleet: FleetApiService;
   ml: MlApiService;
@@ -60,6 +63,7 @@ export const apiServicesFixture = apiClientFixture.extend<{}, { apiServices: Api
         backgroundSearch: getBackgroundSearchApiHelper(log, apiClient),
         cases: getCasesApiHelper(log, kbnClient),
         dashboard: getDashboardApiHelper(log, kbnClient),
+        discover: getDiscoverApiHelper(log, kbnClient),
         dataViews: getDataViewsApiHelper(log, kbnClient),
         fleet: getFleetApiHelper(log, kbnClient),
         ml: getMlApiHelper(log, kbnClient, esClient),
