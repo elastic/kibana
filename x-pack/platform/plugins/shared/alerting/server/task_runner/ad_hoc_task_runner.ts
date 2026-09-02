@@ -332,7 +332,7 @@ export class AdHocTaskRunner implements CancellableTask {
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
-      priority: TaskPriority.Low,
+      priority: TaskPriority.Maintenance,
     });
 
     if (this.shouldLogAndScheduleActionsForAlerts(ruleType)) {

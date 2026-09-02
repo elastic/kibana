@@ -166,7 +166,7 @@ describe('formatActionToEnqueue', () => {
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
         spaceId: 'default',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       })
     ).toEqual({
       id: '1',
@@ -225,7 +225,7 @@ describe('formatActionToEnqueue', () => {
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
         spaceId: 'default',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       })
     ).toEqual({
       id: '1',
