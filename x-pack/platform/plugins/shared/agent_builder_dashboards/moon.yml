@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
   - '@kbn/files-plugin'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod
