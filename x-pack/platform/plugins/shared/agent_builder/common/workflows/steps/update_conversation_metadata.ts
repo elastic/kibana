@@ -25,9 +25,20 @@ const InputSchema = z.object({
     .min(1)
     .max(CONVERSATION_ID_MAX_LENGTH),
   updates: z
-    .record(z.string(), z.unknown())
+    .record(
+      z.string().max(256),
+      z.union([
+        z.string().max(10_000),
+        z.number(),
+        z.boolean(),
+        z.array(z.string().max(2_000)).max(100),
+      ])
+    )
     .refine((val) => Object.keys(val).length > 0, {
       message: 'updates must include at least one field',
+    })
+    .refine((val) => Object.keys(val).length <= 100, {
+      message: 'updates may not have more than 100 keys',
     })
     .meta({
       description:

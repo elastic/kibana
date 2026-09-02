@@ -9,13 +9,18 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
+import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
 
 export const GetConversationMetadataStepTypeId = 'ai.conversation.metadata.read';
 
 const InputSchema = z.object({
-  conversation_id: z.string().meta({
-    description: 'The unique identifier of the conversation to read metadata from.',
-  }),
+  conversation_id: z
+    .string()
+    .min(1)
+    .max(CONVERSATION_ID_MAX_LENGTH)
+    .meta({
+      description: 'The unique identifier of the conversation to read metadata from.',
+    }),
 });
 
 const OutputSchema = z.object({
