@@ -18,13 +18,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
 const alertsSchema = z.object({
   query: z
     .string()
+    .max(4000)
     .describe('A natural language query expressing the search request for security alerts'),
-  index: z
-    .string()
-    .optional()
-    .describe(
-      "Specific alerts index or alias to search against. Leave this unset to search the current Kibana space's security alerts, which is the correct default for almost all requests. Do not pass a cross-space pattern such as `.alerts-security.alerts-*`, as it can return alerts from other spaces."
-    ),
   isCount: z
     .boolean()
     .optional()
@@ -45,22 +40,11 @@ const alertsSchema = z.object({
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
 /**
- * Checks if the given index is a security alerts index
- */
-const isAlertsIndex = (index: string): boolean => {
-  return index.includes(DEFAULT_ALERTS_INDEX) || index.startsWith('.alerts-security.alerts');
-};
-
-/**
  * Enhances the natural language query with instructions to use KEEP clause for alert searches.
  * This ensures the LLM generates ES|QL queries that filter to only essential fields.
  * Additionally, for count queries, ensures optimal count query generation.
  */
-const enhanceQueryForAlerts = (nlQuery: string, index: string, isCount?: boolean): string => {
-  if (!isAlertsIndex(index)) {
-    return nlQuery;
-  }
-
+const enhanceQueryForAlerts = (nlQuery: string, isCount?: boolean): string => {
   const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
   let instruction = ` IMPORTANT: When generating ES|QL queries, you MUST include a KEEP clause to limit results to only these essential fields: ${fieldsList}. This reduces context window usage by filtering out unnecessary nested data like DLL lists, call stacks, and memory regions. Add the KEEP clause before any LIMIT clause, or at the end if there's no LIMIT.`;
 
@@ -79,7 +63,7 @@ export const alertsTool = (
   return {
     id: SECURITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze security alerts using full-text or structured queries for finding, counting, aggregating, or summarizing alerts. When the user asks for a count (e.g., "how many alerts", "count alerts", "total number of alerts"), set the isCount parameter to true to optimize the query for count results.`,
+    description: `Search and analyze security alerts in the current Kibana space using full-text or structured queries for finding, counting, aggregating, or summarizing alerts. Always searches the current space's security alerts alias (never a cross-space pattern). When the user asks for a count (e.g., "how many alerts", "count alerts", "total number of alerts"), set the isCount parameter to true to optimize the query for count results.`,
     schema: alertsSchema,
     availability: {
       cacheMode: 'space',
@@ -88,17 +72,17 @@ export const alertsTool = (
       },
     },
     handler: async (
-      { query: nlQuery, index, isCount, time_window_hours: timeWindowHours },
+      { query: nlQuery, isCount, time_window_hours: timeWindowHours },
       { esClient, modelProvider, spaceId, events }
     ) => {
-      // Default to the current space's alerts alias. This stays scoped to the
-      // active space, unlike the cross-space `.alerts-security.alerts-*` wildcard.
-      // When the space has no alerts index, runSearchTool resolves no sources and
-      // returns a "no matching resource" result, still scoped to the space.
-      const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+      // Always use the current space's exact alerts alias. Cross-space patterns such as
+      // `.alerts-security.alerts-*` (and prefix wildcards like `-<space>*`) are not accepted
+      // because they can return alerts from other spaces. When the space has no alerts index
+      // yet, runSearchTool returns "Could not figure out which data source to use", still
+      // scoped to this space.
+      const searchIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-      // Enhance the query with KEEP clause instructions if searching alerts index
-      const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
+      const enhancedQuery = enhanceQueryForAlerts(nlQuery, isCount);
 
       // When a window is requested, bind the ES|QL ?_tstart/?_tend params to it.
       // Left undefined, runSearchTool keeps its existing default (last 24h).
