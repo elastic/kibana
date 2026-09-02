@@ -78,7 +78,8 @@
     "@kbn/presentation-util-plugin",
     "@kbn/presentation-publishing-schemas",
     "@kbn/rison",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/shared-ux-page-kibana-template"
   ],
   "exclude": ["target/**/*"]
 }
