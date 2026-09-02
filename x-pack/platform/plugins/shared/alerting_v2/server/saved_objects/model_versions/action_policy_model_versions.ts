@@ -99,6 +99,13 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
    * `{ tags, expression }`. Existing string matchers are wrapped in
    * `{ expression: oldMatcher }` so they continue to evaluate identically
    * via `PolicyMatcher.toKql()`.
+   *
+   * This reshapes an existing attribute, so it is NOT rollback-compatible: the
+   * v1/v2 `forwardCompatibility` schemas type `matcher` as a string and reject
+   * the object, meaning a node rolled back to v2 fails to read any policy that
+   * carries a matcher. Accepted while alerting v2 is in technical preview; the
+   * SO migration fixtures therefore only cover matcher-less documents, and the
+   * string → object conversion is covered by unit tests instead.
    */
   '3': {
     changes: [
