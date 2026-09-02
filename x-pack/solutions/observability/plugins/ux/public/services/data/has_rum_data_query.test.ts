@@ -9,9 +9,13 @@ import {
   hasRumDataQuery,
   hasRumDataWithServiceNameQuery,
   HAS_RUM_DATA_TIERS,
+  HAS_RUM_DATA_LOOKBACK,
 } from './has_rum_data_query';
 
 const TIER_CLAUSE = { terms: { _tier: HAS_RUM_DATA_TIERS } };
+
+const hasRangeClause = (filter: unknown[]) =>
+  filter.some((clause) => typeof clause === 'object' && clause !== null && 'range' in clause);
 
 describe('hasRumDataQuery', () => {
   it('builds an unrestricted existence query', () => {
@@ -40,6 +44,32 @@ describe('hasRumDataQuery', () => {
 
     expect(filter).not.toContainEqual(TIER_CLAUSE);
     expect(filter).toHaveLength(2);
+  });
+
+  describe('lookback window', () => {
+    it('puts the range at the top level too, so can_match can prune on @timestamp', () => {
+      const { filter } = hasRumDataQuery({
+        dataTiers: HAS_RUM_DATA_TIERS,
+        since: HAS_RUM_DATA_LOOKBACK,
+      }).query.bool;
+
+      // Date math, so the window resolves against the cluster clock rather than the browser's.
+      expect(filter).toContainEqual({ range: { '@timestamp': { gte: HAS_RUM_DATA_LOOKBACK } } });
+    });
+
+    it('leaves the range open ended, so documents ahead of the clock still match', () => {
+      const { filter } = hasRumDataQuery({ since: 'now-1d' }).query.bool;
+
+      expect(JSON.stringify(filter)).not.toContain('lte');
+    });
+
+    it('omits the range when no window is given, so the fallback stays unbounded in time', () => {
+      // Data older than the window still has to answer "has data", through the unrestricted pass.
+      expect(hasRangeClause(hasRumDataQuery().query.bool.filter)).toBe(false);
+      expect(
+        hasRangeClause(hasRumDataQuery({ dataTiers: HAS_RUM_DATA_TIERS }).query.bool.filter)
+      ).toBe(false);
+    });
   });
 });
 

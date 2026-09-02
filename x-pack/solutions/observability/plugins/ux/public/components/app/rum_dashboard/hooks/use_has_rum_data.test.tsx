@@ -24,6 +24,9 @@ const UNBOUNDED = 'UXHasRumDataUnbounded';
 const DATA_VIEW_TITLE = 'apm-*';
 const TIER_CLAUSE = { terms: { _tier: HAS_RUM_DATA_TIERS } };
 
+const hasRangeClause = (filter: unknown[]) =>
+  filter.some((clause) => typeof clause === 'object' && clause !== null && 'range' in clause);
+
 interface EsSearchResult {
   data?: unknown;
   loading: boolean;
@@ -84,6 +87,7 @@ describe('useHasRumData', () => {
     expect(result.current.loading).toBe(false);
     const tieredParams = callFor(TIERED)?.params;
     expect(tieredParams?.query.bool.filter).toContainEqual(TIER_CLAUSE);
+    expect(hasRangeClause(tieredParams?.query.bool.filter ?? [])).toBe(true);
     expect(tieredParams).not.toHaveProperty('aggs');
     expect(tieredParams?.terminate_after).toBe(1);
     // No second request: `useEsSearch` skips it while `index` is undefined.
@@ -100,6 +104,8 @@ describe('useHasRumData', () => {
     const fallback = callFor(UNBOUNDED);
     expect(fallback?.params.index).toBe(DATA_VIEW_TITLE);
     expect(fallback?.params.query.bool.filter).not.toContainEqual(TIER_CLAUSE);
+    // Unbounded in time as well as tier, so data older than the cheap pass's lookback still counts.
+    expect(hasRangeClause(fallback?.params.query.bool.filter ?? [])).toBe(false);
     expect(fallback?.params).not.toHaveProperty('aggs');
     expect(fallback?.params.terminate_after).toBe(1);
     expect(result.current.hasData).toBe(true);

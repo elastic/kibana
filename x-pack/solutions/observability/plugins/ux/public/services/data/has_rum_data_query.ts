@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
@@ -17,6 +18,14 @@ import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';
 
 export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
+
+/** Window for the cheap existence pass, day-rounded so the request body stays cacheable. */
+export const HAS_RUM_DATA_LOOKBACK = 'now-30d/d';
+
+interface HasRumDataQueryOptions {
+  dataTiers?: DataTier[];
+  since?: estypes.DateMath;
+}
 
 /**
  * Formats a response to `hasRumDataWithServiceNameQuery`. `serviceName` is read defensively because
@@ -38,7 +47,7 @@ export function formatHasRumResult<T>(
   };
 }
 
-function hasRumDataBaseQuery({ dataTiers }: { dataTiers?: DataTier[] } = {}) {
+function hasRumDataBaseQuery({ dataTiers, since }: HasRumDataQueryOptions = {}) {
   return {
     size: 0,
     query: {
@@ -47,15 +56,17 @@ function hasRumDataBaseQuery({ dataTiers }: { dataTiers?: DataTier[] } = {}) {
           { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           ...(dataTiers?.length ? [{ terms: { _tier: dataTiers } }] : []),
+          // Open ended, so documents timestamped ahead of the cluster clock still match.
+          ...(since ? [{ range: { '@timestamp': { gte: since } } }] : []),
         ],
       },
     },
   };
 }
 
-export function hasRumDataQuery({ dataTiers }: { dataTiers?: DataTier[] } = {}) {
+export function hasRumDataQuery({ dataTiers, since }: HasRumDataQueryOptions = {}) {
   return {
-    ...hasRumDataBaseQuery({ dataTiers }),
+    ...hasRumDataBaseQuery({ dataTiers, since }),
     terminate_after: 1,
     track_total_hits: 1,
   };

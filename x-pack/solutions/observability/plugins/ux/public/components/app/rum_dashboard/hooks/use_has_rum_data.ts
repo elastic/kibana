@@ -8,7 +8,11 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEffect } from 'react';
-import { hasRumDataQuery, HAS_RUM_DATA_TIERS } from '../../../../services/data/has_rum_data_query';
+import {
+  hasRumDataQuery,
+  HAS_RUM_DATA_TIERS,
+  HAS_RUM_DATA_LOOKBACK,
+} from '../../../../services/data/has_rum_data_query';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useFallbackLatch } from './use_fallback_latch';
 
@@ -26,7 +30,7 @@ export function useHasRumData() {
   } = useEsSearch(
     {
       index: dataViewTitle,
-      ...hasRumDataQuery({ dataTiers: HAS_RUM_DATA_TIERS }),
+      ...hasRumDataQuery({ dataTiers: HAS_RUM_DATA_TIERS, since: HAS_RUM_DATA_LOOKBACK }),
     },
     [dataViewTitle],
     {
@@ -38,17 +42,17 @@ export function useHasRumData() {
   const tieredFailed = !loading && tieredError !== undefined;
   const tieredIsEmpty = !loading && tiered !== undefined && tiered.hits.total.value === 0;
 
-  // Without the latch, re-issuing the tier restricted query disables the fallback mid-flight and
-  // the stale empty tiered result briefly becomes the answer — which renders the onboarding screen
-  // at a user who does have data, just on a colder tier. A failed cheap pass latches like an empty
-  // one so the unrestricted query still runs.
+  // Without the latch, re-issuing the cheap query disables the fallback mid-flight and the stale
+  // empty result briefly becomes the answer — which renders the onboarding screen at a user who does
+  // have data, just on a colder tier or older than the lookback. A failed cheap pass latches like an
+  // empty one so the unrestricted query still runs.
   const isLatched = useFallbackLatch(dataViewTitle, tieredIsEmpty || tieredFailed, tieredHasData);
   const needsFallback = tieredIsEmpty || tieredFailed || isLatched;
 
   const { data: fallback, error: fallbackError } = useEsSearch(
     {
       index: needsFallback ? dataViewTitle : undefined,
-      ...hasRumDataQuery({}),
+      ...hasRumDataQuery(),
     },
     [dataViewTitle, needsFallback],
     {
