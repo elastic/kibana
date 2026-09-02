@@ -15,6 +15,7 @@ export interface PluginContextValue {
   exploratoryView: ExploratoryViewPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   spaceId: string;
+  isDev: boolean;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);
