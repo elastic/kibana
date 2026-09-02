@@ -199,7 +199,7 @@ const UNRESOLVED_TOOLTIP = i18n.translate(
 const MORE_ACTIONS_LABEL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.tab.moreActions',
   {
-    defaultMessage: 'More actions',
+    defaultMessage: 'More attack actions',
   }
 );
 

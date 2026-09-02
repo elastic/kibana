@@ -784,7 +784,7 @@ describe('AttackTabContent', () => {
     it('renders the more actions control as an overflow icon button', () => {
       renderTab();
 
-      expect(moreActionsButton('so-1')).toHaveAttribute('aria-label', 'More actions');
+      expect(moreActionsButton('so-1')).toHaveAttribute('aria-label', 'More attack actions');
       expect(
         moreActionsButton('so-1').querySelector('[data-euiicon-type="boxesVertical"]')
       ).toBeInTheDocument();
