@@ -129,10 +129,10 @@ describe('useToolbarActions', () => {
     expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
   });
 
-  it('hides the sort selector when featureFlags is not provided by the host (safe default)', () => {
+  it('shows the sort selector when featureFlags is not provided by the host (fallback enabled)', () => {
     const { result } = renderToolbarActionsHook(undefined);
 
-    expect(findSortSelector(result.current.leftSideActions)).toBeUndefined();
+    expect(findSortSelector(result.current.leftSideActions)).toBeDefined();
   });
 
   it('shows the sort selector when the feature flag resolves to true', () => {
@@ -155,11 +155,11 @@ describe('useToolbarActions', () => {
     expect(findSortSelector(result.current.leftSideActions)).toBeUndefined();
   });
 
-  it('hides the sort selector when featureFlags is provided but the flag has no override (falls back to false)', () => {
+  it('shows the sort selector when featureFlags is provided but the flag has no override (falls back to true)', () => {
     const { result } = renderToolbarActionsHook({
       featureFlags: createFeatureFlagsMock(),
     });
 
-    expect(findSortSelector(result.current.leftSideActions)).toBeUndefined();
+    expect(findSortSelector(result.current.leftSideActions)).toBeDefined();
   });
 });

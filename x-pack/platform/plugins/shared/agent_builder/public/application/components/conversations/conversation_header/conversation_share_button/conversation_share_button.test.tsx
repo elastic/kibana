@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ConversationAccessControlMode,
@@ -153,9 +154,11 @@ const renderShareButton = ({
   });
 
   render(
-    <IntlProvider locale="en">
-      <ConversationShareButton />
-    </IntlProvider>
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <ConversationShareButton />
+      </IntlProvider>
+    </EuiThemeProvider>
   );
 };
 
