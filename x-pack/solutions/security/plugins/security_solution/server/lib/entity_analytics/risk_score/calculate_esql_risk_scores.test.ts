@@ -186,10 +186,7 @@ describe('Calculate risk scores with ESQL', () => {
       it('does not gate the fallback derivation on postAggFilter', () => {
         const { script } = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.user);
 
-        // `entity.id exists` is the postAggFilter-only arm — the post-LOOKUP-JOIN "already in the
-        // store" escape hatch. It appears in neither documentsFilter nor the namespace clauses, so
-        // its absence proves the gate was dropped. Alerts have no LOOKUP JOIN and always carry
-        // `event.kind: signal`, so gating here would strand IdP-namespace users unscored.
+        // `entity.id exists` is the postAggFilter-only arm, so its absence proves the gate was dropped.
         expect(script.source).not.toContain(`doc.containsKey('entity.id')`);
         // documentsFilter still applies.
         expect(script.source).toContain(`doc.containsKey('user.name')`);

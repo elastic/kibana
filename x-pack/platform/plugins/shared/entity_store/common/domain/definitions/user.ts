@@ -24,12 +24,7 @@ import { collectValues as collect, newestValue, oldestValue } from './field_rete
 /** Shared post-LOOKUP keep: entity already in store. */
 const entityIdExistsAfterLookup = { field: 'entity.id', exists: true } as const;
 
-/**
- * Only asset events create IdP identities. IAM lifecycle telemetry (`event.category: iam` with a
- * user/creation/deletion/group `event.type`) is emitted by host-local sources too — e.g. a System
- * `useradd` — so it is not a create path. Such events fall through to the `local` namespace, and
- * can still enrich entities that already exist via the `entity.id` branch of `postAggFilter`.
- */
+/** Only asset events create IdP identities. */
 const idpGate: Condition = { field: 'event.kind', includes: 'asset' };
 
 const localNamespaceGate: Condition = {

@@ -219,8 +219,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('builds a filter for the same doc when it is a detection alert', () => {
-      // The gate lives in documentPassesCalculatedIdentityPipelineGate, so the alert waiver
-      // reaches the DSL builder too. An alert is only ever matched against an existing entity.
+      // The waiver lives in the shared gate, so it reaches the DSL builder too.
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { id: 'user-id-42' },
         event: { module: 'o365' },

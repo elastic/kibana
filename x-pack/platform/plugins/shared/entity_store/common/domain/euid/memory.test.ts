@@ -280,13 +280,11 @@ describe('getEuidFromObject', () => {
   });
 
   describe('detection alerts and postAggFilter', () => {
-    // An okta user with no host.id: not local, and the detection engine rewrites event.kind to
-    // 'signal', so no arm of postAggFilter accepts the document on its own merits.
+    // No host.id so not local, and event.kind is 'signal', so no arm of postAggFilter accepts it.
     const oktaUser = {
       user: { email: 'alice@example.com' },
       event: { kind: 'signal', module: 'okta' },
     };
-    // Every detection alert carries the uuid of the rule that produced it.
     const asAlert = (doc: object) => ({ ...doc, 'kibana.alert.rule.uuid': 'rule-1' });
 
     it('resolves an alert on an IdP-namespace user', () => {

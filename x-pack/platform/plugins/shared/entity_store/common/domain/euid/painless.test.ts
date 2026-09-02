@@ -268,10 +268,7 @@ describe('getEuidPainlessRuntimeMapping', () => {
 });
 
 describe('getEuidPainlessEvaluation postAggFilter gate', () => {
-  // The `entity.id exists` arm is unique to postAggFilter. It is the post-LOOKUP-JOIN
-  // "already in the store" arm, and it appears nowhere in documentsFilter or the
-  // namespace clauses. `event.kind` does not work as a marker: the cloud-provider
-  // namespace clause references it too.
+  // Unique to postAggFilter. `event.kind` is no good as a marker: the cloud-provider clause uses it too.
   const postAggOnlyMarker = `doc.containsKey('entity.id')`;
 
   it('gates on postAggFilter by default', () => {
@@ -297,9 +294,7 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   it('lets a detection alert satisfy the gate', () => {
     const script = getEuidPainlessEvaluation(EntityType.enum.user);
 
-    // The rule uuid is ORed in front of postAggFilter, so Painless short-circuits and skips the
-    // whole clause for alerts. An alert can satisfy no other arm: `entity.id` needs the
-    // extraction pipeline's LOOKUP JOIN, and `event.kind` is rewritten to `signal`.
+    // ORed in front, so Painless short-circuits and skips the whole clause for alerts.
     expect(script).toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
     const markerAt = script.indexOf(`doc.containsKey('kibana.alert.rule.uuid')`);
     const postAggAt = script.indexOf(postAggOnlyMarker);
@@ -314,7 +309,7 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   });
 
   it('does not waive anything for a definition with no postAggFilter', () => {
-    // host has documentsFilter only, so there is nothing for an alert to escape.
+    // host has documentsFilter only, so there is nothing to waive.
     const script = getEuidPainlessEvaluation(EntityType.enum.host);
 
     expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
