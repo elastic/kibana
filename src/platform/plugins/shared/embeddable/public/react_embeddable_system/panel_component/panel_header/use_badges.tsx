@@ -20,7 +20,7 @@ import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 
 interface PanelBadgeExtension {
-  color: EuiBadgeProps['color'];
+  color?: EuiBadgeProps['color'];
 }
 
 export const useBadges = <
