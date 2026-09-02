@@ -21,7 +21,7 @@ const ScreenshotOverlay = () => {
       data-test-subj="prettifyDashboardScreenshotOverlay"
       role="status"
       aria-label={i18n.translate(
-        'xpack.agentBuilderDashboards.prettifyDashboard.screenshotOverlayLabel',
+        'xpack.agentBuilderDashboards.prettifyDashboard.screenshotOverlayAriaLabel',
         { defaultMessage: 'Capturing a dashboard screenshot…' }
       )}
       css={css({
