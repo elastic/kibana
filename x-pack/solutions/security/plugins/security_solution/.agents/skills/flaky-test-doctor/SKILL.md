@@ -134,6 +134,11 @@ Check [Elastic Security docs](https://www.elastic.co/docs/solutions/security) to
 
 **Do not propose a Cypress code fix** unless the test is tagged `@serverlessQA`.
 
+**Sequence:** Diagnose first (Step 4). Then implement in the destination (Scout / API / unit) or in the app.
+Do not stabilize the Cypress spec and then migrate. Cypress-specific waits do not travel to Playwright.
+
+If the root cause is an app bug, fix the app before writing Scout. If it is a Cypress-only race (stale `.within()`, missing intercept), encode the wait in the Scout rewrite — do not patch `.cy.ts` first.
+
 | Destination (Step 3) | Recommendation |
 |----------------------|----------------|
 | API / unit | Move coverage there; delete Cypress |
@@ -155,7 +160,7 @@ Check [Elastic Security docs](https://www.elastic.co/docs/solutions/security) to
 - Verify every resource has explicit cleanup (API-based, not UI-based)
 - Ensure setup handles crashed previous runs
 
-**For flakiness:** Provide root cause and why migrate / move / delete (or the `@serverlessQA` Cypress patch) addresses it.
+**For flakiness:** Fill Root Cause, then recommend migrate / move / delete. The Scout (or API) rewrite must address that cause. Do not emit a Cypress before/after unless `@serverlessQA`.
 **For bugs:** Describe the bug, affected environments, next steps — do not paper over with a Cypress wait.
 **For migration:** Read the general `cypress-to-scout-migration` skill at the repository root first, then the additive `security-cypress-to-scout-migration` skill co-located in this plugin's `.agents/skills/`.
 
@@ -248,7 +253,8 @@ When you identify a root cause or fix not documented in this skill, tell the use
 
 Open only what you need:
 
-- Common flaky patterns (Missing API Wait, Stale Elements, localStorage, useEffect timing, etc.): `references/common-flaky-patterns.md`
+- Cypress flake *symptoms* (missing API wait, stale `.within()`, localStorage, useEffect): `references/common-flaky-patterns.md`
+  Use this to classify the root cause. Do not copy its Cypress before/after into the recommendation unless `@serverlessQA`.
 - Analysis deep dive (Step 0/2/4 details: app bugs, documentation verification, element disabled diagnosis, duplicate formats, pre-proposal checklist): `references/analysis-deep-dive.md`
 - Debugging techniques and environment-specific issues (MKI, ESS, Serverless): `references/debugging-and-environment.md`
 - Team conventions, cleanup audit, and test deletion guidelines: `references/conventions-and-deletion.md`
