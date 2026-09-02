@@ -54,11 +54,11 @@ describe('schema field length limits', () => {
     ).toThrow();
   });
 
-  it('rejects a pkgVersion over 50 characters', () => {
+  it('rejects a pkgVersion over 512 characters', () => {
     expect(() =>
       GetFileRequestSchema.params.validate({
         pkgName: 'my-package',
-        pkgVersion: 'a'.repeat(51),
+        pkgVersion: 'a'.repeat(513),
         filePath: '/path/to/file',
       })
     ).toThrow();

@@ -87,9 +87,9 @@ describe('schema field length limits', () => {
     ).not.toThrow();
   });
 
-  it('rejects a policy_id over 50 characters in PostEnrollmentAPIKeyRequestSchema', () => {
+  it('rejects a policy_id over 512 characters in PostEnrollmentAPIKeyRequestSchema', () => {
     expect(() =>
-      PostEnrollmentAPIKeyRequestSchema.body.validate({ policy_id: 'a'.repeat(51) })
+      PostEnrollmentAPIKeyRequestSchema.body.validate({ policy_id: 'a'.repeat(513) })
     ).toThrow();
   });
 });

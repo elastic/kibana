@@ -40,9 +40,9 @@ describe('schema field length limits', () => {
     ).not.toThrow();
   });
 
-  it('rejects an agentPolicyId over 50 characters in GetEnrollmentSettingsRequestSchema', () => {
+  it('rejects an agentPolicyId over 512 characters in GetEnrollmentSettingsRequestSchema', () => {
     expect(() =>
-      GetEnrollmentSettingsRequestSchema.query.validate({ agentPolicyId: 'a'.repeat(51) })
+      GetEnrollmentSettingsRequestSchema.query.validate({ agentPolicyId: 'a'.repeat(513) })
     ).toThrow();
   });
 });

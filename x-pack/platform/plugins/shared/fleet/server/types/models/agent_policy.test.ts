@@ -188,8 +188,8 @@ describe('schema field length limits', () => {
     expect(() => AgentPolicyBaseSchema.description.validate('a'.repeat(10_001))).toThrow();
   });
 
-  it('rejects a data_output_id over 50 characters', () => {
-    expect(() => AgentPolicyBaseSchema.data_output_id.validate('a'.repeat(51))).toThrow();
+  it('rejects a data_output_id over 512 characters', () => {
+    expect(() => AgentPolicyBaseSchema.data_output_id.validate('a'.repeat(513))).toThrow();
   });
 });
 

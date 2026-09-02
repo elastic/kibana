@@ -41,18 +41,18 @@ describe('schema field length limits', () => {
     ).not.toThrow();
   });
 
-  it('rejects an agent ID in bulk unenroll that is over 50 characters', () => {
+  it('rejects an agent ID in bulk unenroll that is over 512 characters', () => {
     expect(() =>
       PostBulkAgentUnenrollRequestSchema.body.validate({
-        agents: ['a'.repeat(51)],
+        agents: ['a'.repeat(513)],
       })
     ).toThrow();
   });
 
-  it('rejects a policy_id in bulk reassign that is over 50 characters', () => {
+  it('rejects a policy_id in bulk reassign that is over 512 characters', () => {
     expect(() =>
       PostBulkAgentReassignRequestSchema.body.validate({
-        policy_id: 'a'.repeat(51),
+        policy_id: 'a'.repeat(513),
         agents: ['valid-id'],
       })
     ).toThrow();

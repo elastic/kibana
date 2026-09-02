@@ -9,8 +9,8 @@
 // These guard against unbounded-input DoS (CWE-770).  Adjust a limit here and the
 // change propagates to every schema that imports it.
 
-/** Identifiers: UUIDs, Saved Object IDs, short opaque tokens (≤ 36 chars for UUID4). */
-export const FLEET_SCHEMA_ID_MAX_LENGTH = 50;
+/** Identifiers: UUIDs, Saved Object IDs, preconfigured policy IDs, short opaque tokens. */
+export const FLEET_SCHEMA_ID_MAX_LENGTH = 512;
 
 /** Human-readable names: policy names, package names, integration names. */
 export const FLEET_SCHEMA_NAME_MAX_LENGTH = 255;
