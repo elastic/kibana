@@ -9,7 +9,9 @@ export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
+  shouldShowClassicObservabilityAlertsTable,
 } from './is_alerting_v2_enabled';
+
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';

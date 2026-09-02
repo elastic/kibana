@@ -154,6 +154,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
   - '@kbn/alerting-v2-utils'
+  - '@kbn/alerting-v2-constants'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-evals'
   - '@kbn/observability-agent-builder-plugin'
@@ -169,6 +170,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - plugin
   - prod

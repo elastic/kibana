@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Location } from 'history';
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
@@ -149,9 +150,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('uses a single Alerts link when alerting v2 is disabled', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
@@ -163,6 +162,95 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         icon: 'warning',
+        getIsActive: expect.any(Function),
+      })
+    );
+    expect(
+      flatAlerts?.getIsActive?.({
+        pathNameSerialized: '/app/observability/alerts/abc-123',
+        location: { pathname: '', search: '', hash: '', state: undefined } as Location,
+        prepend: (path) => path,
+      })
+    ).toBe(true);
+  });
+
+  it('opens Alerts as a flyout with notifications and operations when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+
+    expect(alertsPanel).toEqual(
+      expect.objectContaining({
+        id: 'alerting',
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+        renderAs: 'panelOpener',
+        getIsActive: expect.any(Function),
+        children: [
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              expect.objectContaining({
+                link: 'management:episodes',
+                title: 'Inbox',
+                badgeType: 'new',
+              }),
+            ],
+          },
+          {
+            title: 'Rule Management',
+            breadcrumbStatus: 'hidden',
+            children: [
+              { link: 'management:rules' },
+              { link: 'management:rule_library', badgeType: 'new' },
+            ],
+          },
+          {
+            title: 'Notifications and Suppressions',
+            breadcrumbStatus: 'hidden',
+            children: [
+              { link: 'management:action_policies', badgeType: 'new' },
+              { link: 'management:maintenanceWindows' },
+            ],
+          },
+          {
+            title: 'Operations',
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:execution_history', badgeType: 'new' }],
+          },
+        ],
+      })
+    );
+  });
+
+  it('includes Alerts V1 in the Alerts panel when showClassicAlertsTable is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.client.get = <T>(_key: string) => true as T;
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+
+    expect(alertsPanel).toEqual(
+      expect.objectContaining({
+        children: expect.arrayContaining([
+          expect.objectContaining({
+            children: expect.arrayContaining([
+              expect.objectContaining({
+                link: 'management:episodes',
+                title: 'Inbox',
+              }),
+              expect.objectContaining({
+                link: 'observability-overview:alerts',
+                title: 'Alerts V1',
+              }),
+            ]),
+          }),
+        ]),
       })
     );
   });
