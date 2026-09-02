@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject, Subject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
@@ -145,7 +145,7 @@ export function initializeFetch({
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
-  approximationApplied$: Subject<boolean | undefined>;
+  approximationApplied$: BehaviorSubject<boolean | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
@@ -301,7 +301,7 @@ export function initializeFetch({
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
-      if (Object.hasOwn(next, 'approximationApplied')) {
+      if (approximationApplied$.getValue() !== next.approximationApplied) {
         approximationApplied$.next(next.approximationApplied);
       }
     });
