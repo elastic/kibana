@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import { selectOverviewPageState } from '../../state';
+import { ShowAllSpaces } from '../monitors_page/common/show_all_spaces';
 import { CertificateSearch } from './cert_search';
 import { CertStats } from './cert_stats';
 import { CertQuickFilter } from './cert_quick_filter';
@@ -86,9 +88,14 @@ export const CertificatesPage: React.FC = () => {
   } = useCertFilters();
 
   const dispatch = useDispatch();
+  const { showFromAllSpaces } = useSelector(selectOverviewPageState);
+
+  useEffect(() => {
+    setPage((prev) => (prev.index === 0 ? prev : { ...prev, index: 0 }));
+  }, [showFromAllSpaces]);
 
   // URL-driven cluster selection — see #273622 for the planned quick filter.
-  const facets = useCertFacets(remoteNames);
+  const facets = useCertFacets(remoteNames, showFromAllSpaces);
 
   const monitorTypeOptions = useMemo(
     () => withCounts(MONITOR_TYPE_FILTER_OPTIONS, facets?.monitorTypes),
@@ -135,6 +142,7 @@ export const CertificatesPage: React.FC = () => {
     issuers,
     notValidAfter: expiringWithin,
     remoteNames,
+    showFromAllSpaces,
   });
 
   useEffect(() => {
@@ -215,6 +223,9 @@ export const CertificatesPage: React.FC = () => {
               }}
             />
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ShowAllSpaces />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

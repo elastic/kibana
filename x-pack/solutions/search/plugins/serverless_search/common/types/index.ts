@@ -29,5 +29,3 @@ export interface FetchIndexResult {
     count: number;
   };
 }
-
-export type { ConnectorStats } from './connector_stats';
