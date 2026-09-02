@@ -99,7 +99,7 @@ describe('registerGetAutonomyRoute', () => {
     await invoke(getHandler(deps.router), { watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID });
 
     expect(deps.getWatchesService).toHaveBeenCalled();
-    expect(get).toHaveBeenCalledWith(SYSTEM_SECURITY_WATCH_FLOOR_ID, 'agent-3', expect.any(Object));
+    expect(get).toHaveBeenCalledWith(expect.any(Object), SYSTEM_SECURITY_WATCH_FLOOR_ID, 'agent-3');
   });
 
   it('returns the default manual level when the watch is not installed', async () => {
